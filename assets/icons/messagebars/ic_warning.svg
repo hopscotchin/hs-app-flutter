@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns:android="http://schemas.android.com/apk/res/android" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <g clip-path="url(#_clippath_0)">
+        <path d="M1.865,20.5L12,3L22.135,20.5H1.865ZM4.45,19H19.55L12,6L4.45,19ZM12,17.808C12.229,17.808 12.421,17.73 12.575,17.576C12.73,17.421 12.808,17.229 12.808,17C12.808,16.771 12.73,16.579 12.575,16.424C12.421,16.27 12.229,16.192 12,16.192C11.771,16.192 11.579,16.27 11.425,16.424C11.27,16.579 11.192,16.771 11.192,17C11.192,17.229 11.27,17.421 11.425,17.576C11.579,17.73 11.771,17.808 12,17.808ZM11.25,15.192H12.75V10.192H11.25V15.192Z" fill="#FED543"/>
+    </g>
+    <defs id="svg-definitions">
+        <clipPath id="_clippath_0">
+            <path d="M0,0h24v24h-24z"/>
+        </clipPath>
+    </defs>
+</svg>

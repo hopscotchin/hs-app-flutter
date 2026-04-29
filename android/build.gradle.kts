@@ -5,6 +5,9 @@ allprojects {
     }
 }
 
+extra["clientId"] = "hopscotch"
+extra["hyperSDKVersion"] = "2.2.2"
+
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
         .dir("../../build")
