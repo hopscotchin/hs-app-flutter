@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../components/error_retry_widget.dart';
 import '../../../../components/loading_shimmer.dart';
 import '../../../../core/theme/colors.dart';
 import '../bloc/categories_bloc.dart';
@@ -23,34 +24,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories')),
-      body: BlocBuilder<CategoriesBloc, CategoriesState>(
-        builder: (context, state) {
-          if (state is CategoriesLoading) {
-            return LoadingShimmer.listShimmer();
-          }
-
-          if (state is CategoriesLoaded) {
-            if (state.departments.isEmpty) {
-              return const Center(child: Text('No categories available'));
-            }
-
-            return ListView.separated(
-              itemCount: state.departments.length,
-              separatorBuilder: (_, _) =>
-                  const Divider(height: 1, color: AppColors.divider),
-              itemBuilder: (context, index) {
-                final dept = state.departments[index];
-                return DepartmentItemWidget(
-                  department: dept,
-                  onTap: () => {},
-                );
-              },
-            );
-          }
-
-          return const SizedBox.shrink();
-        },
+      appBar: AppBar(title: const Text('Categories'), centerTitle: false),
+      body: ErrorRetryWidget(
+        message: "No Categories Available..!!",
+        onRetry: VoidCallbackAction.new,
       ),
     );
   }

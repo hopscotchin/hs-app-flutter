@@ -88,7 +88,7 @@ class AppTypography {
   static const TextStyle titleLarge = TextStyle(
     fontFamily: fontFamily,
     fontSize: 22,
-    fontWeight: regular,
+    fontWeight: semiBold,
     letterSpacing: 0,
     height: 1.27,
   );

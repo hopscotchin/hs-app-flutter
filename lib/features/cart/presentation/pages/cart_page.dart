@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../components/error_retry_widget.dart';
 import '../bloc/cart_bloc.dart';
 
 class CartPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: false,
         title: const Text('Bag'),
         actions: [
           IconButton(
@@ -26,14 +28,9 @@ class _CartPageState extends State<CartPage> {
           ),
         ],
       ),
-      body: BlocBuilder<CartBloc, CartState>(
-        builder: (context, state) {
-          if (state is CartLoading) {
-            return const Text("Loading Cart");
-          }
-
-          return const SizedBox.shrink();
-        },
+      body: ErrorRetryWidget(
+        message: "Uh-Oh..!! Your Cart is Empty!",
+        onRetry: () => context.read<CartBloc>().add(const LoadCart()),
       ),
       bottomNavigationBar: BlocBuilder<CartBloc, CartState>(
         builder: (context, state) {

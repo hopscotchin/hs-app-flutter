@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
+import '../../../../components/error_retry_widget.dart';
 import '../../../../components/loading_shimmer.dart';
 import '../../../../core/theme/spacing.dart';
-import '../bloc/moments_bloc.dart';
-import '../widgets/moment_card_widget.dart';
+import '../../../../core/theme/typography.dart';
 
 class MomentsPage extends StatefulWidget {
   const MomentsPage({super.key});
@@ -20,18 +20,6 @@ class _MomentsPageState extends State<MomentsPage> {
   @override
   void initState() {
     super.initState();
-    context.read<MomentsBloc>().add(LoadMoments());
-    _scrollController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      final state = context.read<MomentsBloc>().state;
-      if (state is MomentsLoaded && !state.hasReachedMax) {
-        context.read<MomentsBloc>().add(LoadMoreMoments());
-      }
-    }
   }
 
   @override
@@ -44,7 +32,8 @@ class _MomentsPageState extends State<MomentsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Moments'),
+        centerTitle: false,
+        title: const Text('Studio', style: AppTypography.titleLarge),
         actions: [
           IconButton(
             icon: const Icon(Icons.camera_alt_outlined),
@@ -52,40 +41,9 @@ class _MomentsPageState extends State<MomentsPage> {
           ),
         ],
       ),
-      body: BlocBuilder<MomentsBloc, MomentsState>(
-        builder: (context, state) {
-          if (state is MomentsLoading) {
-            return LoadingShimmer.gridShimmer();
-          }
-
-          if (state is MomentsLoaded) {
-            if (state.moments.isEmpty) {
-              return const Center(child: Text('No moments yet'));
-            }
-
-            return Padding(
-              padding: AppSpacing.paddingHorizontalMd,
-              child: MasonryGridView.count(
-                controller: _scrollController,
-                crossAxisCount: 2,
-                mainAxisSpacing: AppSpacing.xs,
-                crossAxisSpacing: AppSpacing.xs,
-                itemCount: state.moments.length,
-                itemBuilder: (context, index) {
-                  final moment = state.moments[index];
-                  return MomentCardWidget(
-                    moment: moment,
-                    onLike: () => context.read<MomentsBloc>().add(
-                      LikeMoment(momentId: moment.id),
-                    ),
-                  );
-                },
-              ),
-            );
-          }
-
-          return const SizedBox.shrink();
-        },
+      body: ErrorRetryWidget(
+        message: "Your Studio is curating with styles.!! Stay Tuned..!!",
+        onRetry: VoidCallbackAction.new,
       ),
     );
   }

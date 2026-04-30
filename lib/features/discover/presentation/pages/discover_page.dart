@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 
+import '../../../../components/error_retry_widget.dart';
 import '../../../../components/loading_shimmer.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography.dart';
@@ -31,14 +32,14 @@ class _DiscoverPageState extends State<DiscoverPage> {
         title: RepaintBoundary(
           child: SvgPicture.asset(
             ImageConstants.hsLogo,
-            height: 54,
+            height: 44,
             width: 127,
             placeholderBuilder: (_) => const SizedBox(height: 54, width: 127),
           ),
         ),
         actions: [
           Text(
-            'Hi HS !',
+            'Hi Hopscotch!',
             style: AppTypography.titleMedium.copyWith(
               color: AppColors.primary,
               fontSize: 18,
@@ -59,28 +60,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
           ),
         ],
       ),
-      body: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          if (state is HomeLoading) {
-            return LoadingShimmer.listShimmer(itemCount: 6, itemHeight: 120);
-          }
-
-          if (state is HomeLoaded) {
-            final components = state.homePage.pageComponents;
-            if (components.isEmpty) {
-              return const Center(child: Text('No content available'));
-            }
-
-            return RefreshIndicator(
-              onRefresh: () async {
-                context.read<HomeBloc>().add(RefreshHomePage());
-              },
-              child: const Center(child: Text("Hello from Discover Page")),
-            );
-          }
-
-          return const SizedBox.shrink();
-        },
+      body: ErrorRetryWidget(
+        message: "Your HomePage is loading soon..!! Stay Tuned..!!",
+        onRetry: VoidCallbackAction.new,
       ),
     );
   }

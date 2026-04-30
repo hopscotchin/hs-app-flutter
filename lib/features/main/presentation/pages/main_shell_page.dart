@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/features/cart/presentation/bloc/cart_bloc.dart';
 
 import '../../../../components/badge_icon.dart';
+import '../../../../core/constants/image_constants.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography.dart';
 
@@ -19,11 +21,11 @@ class MainShellPage extends StatelessWidget {
       extendBody: true,
       body: navigationShell,
       bottomNavigationBar: Container(
-        height: 66,
+        height: 60,
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 14),
         decoration: BoxDecoration(
           color: AppColors.container,
-          borderRadius: BorderRadius.circular(50),
+          borderRadius: BorderRadius.circular(8),
           boxShadow: const [
             BoxShadow(
               color: Color(0x1A000000),
@@ -33,31 +35,36 @@ class MainShellPage extends StatelessWidget {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
           child: Row(
             children: List.generate(5, (index) {
               final isSelected = navigationShell.currentIndex == index;
-              final icons = [
-                Icons.home_outlined,
-                Icons.category_outlined,
-                Icons.camera_alt_outlined,
-                Icons.person_outline,
-                Icons.shopping_bag_outlined,
+              const icons = [
+                ImageConstants.discover,
+                ImageConstants.categories,
+                ImageConstants.studio,
+                ImageConstants.profile,
+                ImageConstants.bag,
               ];
-              final activeIcons = [
-                Icons.home,
-                Icons.category,
-                Icons.camera_alt,
-                Icons.person,
-                Icons.shopping_bag,
-              ];
-              final labels = [
+              const labels = [
                 'Home',
                 'Categories',
-                'Moments',
-                'Account',
+                'Studio',
+                'Profile',
                 'Cart',
               ];
+              final iconColor = isSelected
+                  ? AppColors.primary
+                  : AppColors.secondaryInActive;
+              // Studio is a brand logo — preserve its original colors
+              final svgIcon = SvgPicture.asset(
+                icons[index],
+                width: 20,
+                height: 20,
+                colorFilter: index == 2
+                    ? null
+                    : ColorFilter.mode(iconColor, BlendMode.srcIn),
+              );
               return Expanded(
                 child: GestureDetector(
                   onTap: () {
@@ -68,15 +75,12 @@ class MainShellPage extends StatelessWidget {
                   },
                   behavior: HitTestBehavior.opaque,
                   child: Container(
-                    height: 49,
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xxxs,
-                    ),
+                    height: 52,
                     decoration: isSelected
                         ? BoxDecoration(
-                            color: AppColors.secondaryExtra,
-                            borderRadius: BorderRadius.circular(50),
-                          )
+                      color: AppColors.secondaryExtra,
+                      borderRadius: BorderRadius.circular(8),
+                    )
                         : null,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -84,30 +88,16 @@ class MainShellPage extends StatelessWidget {
                         //need to use bloc builder with particular value to show the count not the context.watch because it listens to the entire cart changes
                         if (index == 4)
                           BadgeIcon(
-                            icon: isSelected
-                                ? activeIcons[index]
-                                : icons[index],
-                            iconSize: 20,
                             count: 2,
-                            iconColor: isSelected
-                                ? AppColors.primary
-                                : AppColors.textSecondary,
+                            child: svgIcon,
                           )
                         else
-                          Icon(
-                            isSelected ? activeIcons[index] : icons[index],
-                            size: 20,
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.textSecondary,
-                          ),
-                        const SizedBox(height: AppSpacing.xxxs),
+                          svgIcon,
+                        const SizedBox(height: 6.0),
                         Text(
                           labels[index],
                           style: AppTypography.labelSmall.copyWith(
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.textSecondary,
+                            color: iconColor,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

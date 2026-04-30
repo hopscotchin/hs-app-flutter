@@ -9,7 +9,6 @@ import 'features/cart/presentation/bloc/cart_bloc.dart';
 import 'features/categories/presentation/bloc/categories_bloc.dart';
 import 'features/discover/presentation/bloc/home_bloc.dart';
 import 'features/main/di/injection_container.dart';
-import 'features/moments/presentation/bloc/moments_bloc.dart';
 import 'features/splash/presentation/bloc/splash_bloc.dart';
 
 class HSApp extends StatelessWidget {
@@ -24,7 +23,6 @@ class HSApp extends StatelessWidget {
         BlocProvider<SplashBloc>(create: (_) => sl<SplashBloc>()),
         BlocProvider<HomeBloc>(create: (_) => sl<HomeBloc>()),
         BlocProvider<CategoriesBloc>(create: (_) => sl<CategoriesBloc>()),
-        BlocProvider<MomentsBloc>(create: (_) => sl<MomentsBloc>()),
         BlocProvider<CartBloc>(create: (_) => sl<CartBloc>()),
       ],
       child: MaterialApp.router(

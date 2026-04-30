@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "in.hopscotch.android"
+    namespace = "in.hopscotch.android.new"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "in.hopscotch.android"
+        applicationId = "in.hopscotch.android.new"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

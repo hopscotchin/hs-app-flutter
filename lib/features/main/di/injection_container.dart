@@ -24,13 +24,6 @@ import '../../discover/data/repositories/home_repository_impl.dart';
 import '../../discover/domain/repositories/home_repository.dart';
 import '../../discover/domain/usecases/get_home_page_usecase.dart';
 import '../../discover/presentation/bloc/home_bloc.dart';
-// Moments Module
-import '../../moments/data/datasources/remote/moments_remote_datasource.dart';
-import '../../moments/data/repositories/moments_repository_impl.dart';
-import '../../moments/domain/repositories/moments_repository.dart';
-import '../../moments/domain/usecases/get_moments_usecase.dart';
-import '../../moments/domain/usecases/like_moment_usecase.dart';
-import '../../moments/presentation/bloc/moments_bloc.dart';
 import '../../splash/presentation/bloc/splash_bloc.dart';
 
 final sl = GetIt.instance;
@@ -106,21 +99,6 @@ Future<void> initDependencies() async {
   );
   sl.registerLazySingleton(() => GetDepartmentsUseCase(sl()));
   sl.registerFactory(() => CategoriesBloc(getDepartmentsUseCase: sl()));
-
-  // ============================
-  // Moments Module
-  // ============================
-  sl.registerLazySingleton<MomentsRemoteDataSource>(
-    () => MomentsRemoteDataSourceImpl(apiClient: sl()),
-  );
-  sl.registerLazySingleton<MomentsRepository>(
-    () => MomentsRepositoryImpl(remoteDataSource: sl(), networkInfo: sl()),
-  );
-  sl.registerLazySingleton(() => GetMomentsUseCase(sl()));
-  sl.registerLazySingleton(() => LikeMomentUseCase(sl()));
-  sl.registerFactory(
-    () => MomentsBloc(getMomentsUseCase: sl(), likeMomentUseCase: sl()),
-  );
 
   // ============================
   // Cart Module

@@ -2,7 +2,7 @@ name: hs_app_flutter
 description: "HS Flutter"
 publish_to: 'none'
 
-version: 11.0.0+2026031802
+version: 15.0.0+2026042901
 
 environment:
   sdk: ^3.11.0
@@ -98,6 +98,8 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/animations/
+    - assets/icons/dashboard/
+    - assets/icons/messagebars/
 
   fonts:
     - family: Satoshi
