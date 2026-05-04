@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "in.hopscotch.android.new"
+    namespace = "in.hopscotch.android.flutter"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "in.hopscotch.android.new"
+        applicationId = "in.hopscotch.android.flutter"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -31,7 +31,7 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix = ".debug"
+
         }
         release {
             // TODO: Add your own signing config for the release build.
