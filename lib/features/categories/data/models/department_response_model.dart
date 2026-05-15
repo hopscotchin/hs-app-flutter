@@ -7,11 +7,12 @@ class DepartmentResponseModel extends ActionResponse {
   const DepartmentResponseModel({required this.departments});
 
   DepartmentResponseModel.fromJson(super.json)
-      : departments = _parseDepartments(json),
-        super.fromJson();
+    : departments = _parseDepartments(json),
+      super.fromJson();
 
   static List<DepartmentModel> _parseDepartments(Map<String, dynamic> json) {
-    final rawList = json['departmentData'] as List<dynamic>? ??
+    final rawList =
+        json['departmentData'] as List<dynamic>? ??
         json['departments'] as List<dynamic>? ??
         json['data'] as List<dynamic>? ??
         [];

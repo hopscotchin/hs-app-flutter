@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hs_app_flutter/features/plp/domain/entities/page_type.dart';
 
 import '../constants/route_names.dart';
+import '../entities/message_bar_entity.dart';
+import '../../features/account/presentation/bloc/account_bloc.dart';
+import '../../features/auth/domain/entities/otp_config/otp_config_entity.dart';
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
 abstract final class AppNavigator {
   static void goToHome(BuildContext context) => context.go(RouteNames.home);
@@ -15,15 +21,85 @@ abstract final class AppNavigator {
   static void goToAccount(BuildContext context) =>
       context.go(RouteNames.account);
 
-  static void goToCart(BuildContext context) => context.go(RouteNames.cart);
+  static void goToCart(BuildContext context) =>
+      context.pushNamed(RouteNames.cart);
+
+  static void goToLogin(
+    BuildContext context, {
+    String? initialMobile,
+    List<MessageBarEntity> initialMessageBars = const [],
+    bool replace = false,
+  }) {
+    final hasData = initialMobile != null || initialMessageBars.isNotEmpty;
+    final extra = hasData
+        ? <String, dynamic>{
+            'initialMobile': initialMobile,
+            'initialMessageBars': initialMessageBars,
+          }
+        : null;
+    if (replace) {
+      context.pushReplacementNamed(RouteNames.login, extra: extra);
+    } else {
+      context.pushNamed(RouteNames.login, extra: extra);
+    }
+  }
+
+  static void goToJoinUs(BuildContext context) =>
+      context.pushNamed(RouteNames.joinUs);
+
+  /// Navigate to the OTP verification screen, sharing the existing [AuthBloc]
+  /// instance via [BlocProvider.value] so the bloc is not re-created.
+  static void goToOtpVerification(
+    BuildContext context, {
+    required AuthBloc bloc,
+    required String loginId,
+    required OtpConfigEntity otpConfig,
+    String otpReason = 'SIGN_IN',
+    bool isCheckoutFlow = false,
+  }) {
+    context.pushNamed(
+      RouteNames.otpVerification,
+      extra: <String, dynamic>{
+        'bloc': bloc,
+        'accountBloc': context.read<AccountBloc>(),
+        'loginId': loginId,
+        'otpConfig': otpConfig,
+        'otpReason': otpReason,
+        'isCheckoutFlow': isCheckoutFlow,
+      },
+    );
+  }
+
+  /// Pushes the checkout mobile-login flow (mobile entry → OTP verification).
+  /// Returns `true` if the user successfully logged in.
+  static Future<bool> showMobileLoginFlow(BuildContext context) async {
+    final accountBloc = context.read<AccountBloc>();
+    final result = await context.pushNamed<bool>(
+      RouteNames.checkoutLogin,
+      extra: <String, dynamic>{'accountBloc': accountBloc},
+    );
+    return result == true;
+  }
+
+  static void goToPlp(
+    BuildContext context, {
+    PageType pageType = PageType.plp,
+    required int plpId,
+    String? categoryName,
+    String? searchQuery,
+  }) {
+    final queryParams = <String, String>{
+      'pageType': pageType.name,
+      'plpId': plpId.toString(),
+    };
+    if (categoryName != null) queryParams['categoryName'] = categoryName;
+    if (searchQuery != null) queryParams['searchQuery'] = searchQuery;
+    context.pushNamed('plp', queryParameters: queryParams);
+  }
 
   static void goToPdp(BuildContext context, String productId) {
     context.pushNamed('pdp', pathParameters: {'productId': productId});
   }
-
-  static void goToLogin(BuildContext context) => context.pushNamed('login');
-
-  static void goToJoinUs(BuildContext context) => context.pushNamed('joinUs');
 
   static void goToLandingPage(
     BuildContext context, {

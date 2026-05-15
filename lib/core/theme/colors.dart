@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
+  // ! we will need to remove this old colors and use the below colors as per our design system
+
   // Primary Colors
   static const Color primary = Color(0xFF67218C);
   static const Color primaryLight = Color(0x1A67218C);
@@ -55,6 +57,7 @@ class AppColors {
   //Container
   static const Color container = Color(0xFFFFFFFF);
 
+  //TODO : we need to use this color palette as per our design system and remove the above colors which are not in use and not as per our design system
   // ─── Design Token Palette NEW  ─────────────────────────────────────────
 
   // Base
@@ -64,19 +67,20 @@ class AppColors {
   static const Color disabledDefault = Color(0xFFB395C4);
 
   // Brand
-  static const Color brandDefault = Color(0xFF67218C); // == primary
-  static const Color brandSecondary = Color(0xFF4C106D); // == secondary
-  static const Color brandDark = Color(0xFF3D0070);
-  static const Color brandLight = Color(0xFFF4E6F5); // == secondaryExtra
+  static const Color brandDefault = Color(0xFF67218C); // == default
+  static const Color brandPrimary = Color(0xFF4C106D); // == primary
+  static const Color brandSecondary = Color(0xFF836EF1); // == secondary
+  static const Color brandTertiary = Color(0xFFF4E6F5); // == tertiary
 
   // Neutral
-  static const Color neutral900 = Color(0xFF0A0A0A);
-  static const Color neutral700 = Color(0xFF8C8C8C);
-  static const Color neutral600 = Color(0xFFABABAB);
-  static const Color neutral500 = Color(0xFFBDBDBD);
-  static const Color neutral400 = Color(0xFFCCCCCC);
-  static const Color neutral200 = Color(0xFFE8E8E8);
-  static const Color neutral100 = Color(0xFFF2F2F2);
+  static const Color neutralBlack = Color(0xFF000000);
+  static const Color neutralGrey0 = Color(0xFFD9D9D9);
+  static const Color neutralGrey1 = Color(0xFFF6F6F6);
+  static const Color neutralGrey2 = Color(0xFFE5E5EA);
+  static const Color neutralGrey3 = Color(0xFFD1D1D6);
+  static const Color neutralGrey4 = Color(0xFFC7C7CC);
+  static const Color neutralGrey5 = Color(0xFFAEAEB2);
+  static const Color neutralGrey6 = Color(0xFF353535);
 
   // Success
   static const Color successDefault = Color(0xFF10900B); // == success
@@ -89,6 +93,10 @@ class AppColors {
   // Danger
   static const Color dangerDefault = Color(0xFFE00000); // == error
   static const Color dangerSecondary = Color(0xFFF4E6F5);
+
+  // Info
+  static const Color infoDefault = Color(0xFF3D65F7); // == info
+  static const Color infoSecondary = Color(0xFFD1E0FF);
 
   /// Light color scheme for Material 3
   static ColorScheme get lightColorScheme => const ColorScheme.light(

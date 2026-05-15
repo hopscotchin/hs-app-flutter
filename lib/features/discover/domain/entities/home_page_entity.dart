@@ -1,43 +1,29 @@
 import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../../core/network/models/action_response.dart';
+import '../../../../core/entities/message_bar_entity.dart';
 
-class HomePageEntity extends ActionResponse {
-  final String? pageName;
-  final String? pageBackgroundColor;
-  final int totalCollections;
-  final int totalSections;
-  final List<PageComponent> pageComponents;
+part 'home_page_entity.freezed.dart';
 
-  const HomePageEntity({
-    super.action,
-    super.message,
-    super.errorMsg,
-    this.pageName,
-    this.pageBackgroundColor,
-    this.totalCollections = 0,
-    this.totalSections = 0,
-    this.pageComponents = const [],
-  });
+@freezed
+abstract class HomePageEntity with _$HomePageEntity {
+  const factory HomePageEntity({
+    String? action,
+    String? popUpMessage,
+    @Default(<MessageBarEntity>[]) List<MessageBarEntity> messageBars,
+    String? pageName,
+    String? pageBackgroundColor,
+    String? headerBgImageUrl,
+    @Default(0) int totalCollections,
+    @Default(0) int totalSections,
+    @Default(<PageComponent>[]) List<PageComponent> pageComponents,
+  }) = _HomePageEntity;
+}
 
-  HomePageEntity.fromJson(
-    super.json, {
-    this.pageName,
-    this.pageBackgroundColor,
-    this.totalCollections = 0,
-    this.totalSections = 0,
-    this.pageComponents = const [],
-  }) : super.fromJson();
-
-  @override
-  List<Object?> get props => [
-        action,
-        pageName,
-        pageBackgroundColor,
-        totalCollections,
-        totalSections,
-        pageComponents,
-      ];
+extension HomePageEntityX on HomePageEntity {
+  // null action = no explicit failure signalled; treat as success
+  bool get isSuccessful =>
+      action == null || action!.toLowerCase() == 'success';
 }
 
 /// Mirrors Android's PageComponent class.
@@ -104,8 +90,14 @@ class HeroCarouselData extends Equatable {
   });
 
   @override
-  List<Object?> get props =>
-      [title, sectionName, scrollDuration, transitionType, useCase, tiles];
+  List<Object?> get props => [
+    title,
+    sectionName,
+    scrollDuration,
+    transitionType,
+    useCase,
+    tiles,
+  ];
 }
 
 class HeroTile extends Equatable {
@@ -262,8 +254,15 @@ class ProductGridItem extends Equatable {
   });
 
   @override
-  List<Object?> get props =>
-      [id, name, imageUrl, actionUrl, priceText, originalPriceText, discountText];
+  List<Object?> get props => [
+    id,
+    name,
+    imageUrl,
+    actionUrl,
+    priceText,
+    originalPriceText,
+    discountText,
+  ];
 }
 
 class LayoutInfoData extends Equatable {
@@ -379,6 +378,189 @@ class CtaData extends Equatable {
   List<Object?> get props => [text, actionUrl, tracking];
 }
 
+// ─── ShopTheLook (StyleCarousel) entities ───
+
+class ShopTheLookData extends Equatable {
+  final int? id;
+  final TitleImageData? titleImage;
+  final ShopTheLookViewConfig? viewConfig;
+  final List<ShopTheLookItem> items;
+
+  const ShopTheLookData({
+    this.id,
+    this.titleImage,
+    this.viewConfig,
+    this.items = const [],
+  });
+
+  @override
+  List<Object?> get props => [id, titleImage, viewConfig, items];
+}
+
+class ShopTheLookViewConfig extends Equatable {
+  final int? itemWidth;
+  final int? itemHeight;
+  final int? minTilesToShow;
+  final int? peepingFactor;
+
+  const ShopTheLookViewConfig({
+    this.itemWidth,
+    this.itemHeight,
+    this.minTilesToShow,
+    this.peepingFactor,
+  });
+
+  @override
+  List<Object?> get props => [
+    itemWidth,
+    itemHeight,
+    minTilesToShow,
+    peepingFactor,
+  ];
+}
+
+class ShopTheLookItem extends Equatable {
+  final int? id;
+  final List<ShopTheLookProduct> productTiles;
+  final ShopTheLookPrice? price;
+
+  const ShopTheLookItem({this.id, this.productTiles = const [], this.price});
+
+  @override
+  List<Object?> get props => [id, productTiles, price];
+}
+
+class ShopTheLookProduct extends Equatable {
+  final int? id;
+  final String? actionUri;
+  final bool? hasInv;
+  final bool? hasSizeChart;
+  final String? imageUrl;
+  final String? productName;
+  final List<ShopTheLookSku> skus;
+
+  const ShopTheLookProduct({
+    this.id,
+    this.actionUri,
+    this.hasInv,
+    this.hasSizeChart,
+    this.imageUrl,
+    this.productName,
+    this.skus = const [],
+  });
+
+  @override
+  List<Object?> get props => [
+    id,
+    actionUri,
+    hasInv,
+    hasSizeChart,
+    imageUrl,
+    productName,
+    skus,
+  ];
+}
+
+class ShopTheLookSku extends Equatable {
+  final String? skuId;
+  final String? size;
+  final int? availableQuantity;
+  final ShopTheLookPrice? price;
+
+  const ShopTheLookSku({
+    this.skuId,
+    this.size,
+    this.availableQuantity,
+    this.price,
+  });
+
+  bool get isAvailable => (availableQuantity ?? 0) > 0;
+
+  @override
+  List<Object?> get props => [skuId, size, availableQuantity, price];
+}
+
+class ShopTheLookPrice extends Equatable {
+  final String? displayValue;
+  final String? mrp;
+  final int? absoluteValue;
+  final int? absoluteMrp;
+  final String? discount;
+
+  const ShopTheLookPrice({
+    this.displayValue,
+    this.mrp,
+    this.absoluteValue,
+    this.absoluteMrp,
+    this.discount,
+  });
+
+  @override
+  List<Object?> get props => [
+    displayValue,
+    mrp,
+    absoluteValue,
+    absoluteMrp,
+    discount,
+  ];
+}
+
+class ShopTheLookSelection {
+  final int productId;
+  final String? skuId;
+
+  const ShopTheLookSelection({required this.productId, this.skuId});
+}
+
+// ─── ContinueBrowsing entities ───
+
+class ContinueBrowsingData extends Equatable {
+  final int? id;
+  final TitleImageData? heading;
+  final ContinueBrowsingViewConfig? viewConfig;
+  final List<ContinueBrowsingItem> items;
+
+  const ContinueBrowsingData({
+    this.id,
+    this.heading,
+    this.viewConfig,
+    this.items = const [],
+  });
+
+  @override
+  List<Object?> get props => [id, heading, viewConfig, items];
+}
+
+class ContinueBrowsingViewConfig extends Equatable {
+  final int? viewWidth;
+  final int? viewHeight;
+
+  const ContinueBrowsingViewConfig({this.viewWidth, this.viewHeight});
+
+  double get imageAspectRatio =>
+      (viewWidth != null && viewHeight != null && viewHeight! > 0)
+      ? viewWidth! / viewHeight!
+      : 3 / 4;
+
+  @override
+  List<Object?> get props => [viewWidth, viewHeight];
+}
+
+class ContinueBrowsingItem extends Equatable {
+  final String? heading;
+  final String? actionUri;
+  final List<String> media;
+
+  const ContinueBrowsingItem({
+    this.heading,
+    this.actionUri,
+    this.media = const [],
+  });
+
+  @override
+  List<Object?> get props => [heading, actionUri, media];
+}
+
 /// Mirrors Android's Margins model.
 /// Controls outer and inner spacing for each PageComponent.
 class ComponentMargins extends Equatable {
@@ -406,9 +588,14 @@ class ComponentMargins extends Equatable {
 
   @override
   List<Object?> get props => [
-        top, bottom, horizontal,
-        innerHorizontalMargin, innerVerticalMargin,
-        ctaTopMargin, ctaHorizontalMargin,
-        titleBottomMargin, titleHorizontalMargin,
-      ];
+    top,
+    bottom,
+    horizontal,
+    innerHorizontalMargin,
+    innerVerticalMargin,
+    ctaTopMargin,
+    ctaHorizontalMargin,
+    titleBottomMargin,
+    titleHorizontalMargin,
+  ];
 }

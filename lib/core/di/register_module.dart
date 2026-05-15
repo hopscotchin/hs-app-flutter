@@ -1,21 +1,48 @@
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../network/api_client.dart';
+import '../network/connectivity/network_info.dart';
 import '../network/network_client.dart';
+import '../services/connectivity_service.dart';
 
-/// Injectable module that exposes cross-cutting infrastructure to the DI
-/// graph. Keeps codegen'd registrations (retrofit clients, services) from
-/// having to know how to build a Dio — they just ask for one.
-///
-/// Consumed by retrofit-generated clients in feature data sources.
-/// See: CODING_GUIDELINES.md §2.5
 @module
 abstract class RegisterModule {
-  /// Returns the fully-configured [Dio] owned by the app's [NetworkClient]
-  /// (auth header, cookie, logging, and retry interceptors already wired).
-  ///
-  /// IMPORTANT: do NOT construct a new [Dio] anywhere in feature code —
-  /// always inject this one, otherwise interceptors will be bypassed.
+  @preResolve
+  Future<SharedPreferences> get sharedPreferences =>
+      SharedPreferences.getInstance();
+
+  @preResolve
+  Future<PackageInfo> get packageInfo => PackageInfo.fromPlatform();
+
+  @lazySingleton
+  DeviceInfoPlugin get deviceInfo => DeviceInfoPlugin();
+
+  @preResolve
+  Future<NetworkClient> networkClient(
+    DeviceInfoPlugin deviceInfo,
+    PackageInfo packageInfo,
+  ) async {
+    final client = NetworkClient(
+      deviceInfo: deviceInfo,
+      packageInfo: packageInfo,
+    );
+    await client.init();
+    return client;
+  }
+
   @lazySingleton
   Dio dio(NetworkClient networkClient) => networkClient.dio;
+
+  @lazySingleton
+  ApiClient apiClient(NetworkClient networkClient) => networkClient.apiClient;
+
+  @lazySingleton
+  ConnectivityService connectivityService() => ConnectivityService();
+
+  @lazySingleton
+  NetworkInfo networkInfo(ConnectivityService service) => service;
 }

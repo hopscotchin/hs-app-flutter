@@ -4,6 +4,10 @@ import 'colors.dart';
 
 /// App typography definitions
 /// Based on Material 3 type scale
+
+@Deprecated(
+  'Use AppTypographyV1 instead, going forward we will be removing this completely',
+)
 class AppTypography {
   AppTypography._();
 
@@ -88,7 +92,7 @@ class AppTypography {
   static const TextStyle titleLarge = TextStyle(
     fontFamily: fontFamily,
     fontSize: 22,
-    fontWeight: semiBold,
+    fontWeight: regular,
     letterSpacing: 0,
     height: 1.27,
   );

@@ -1,26 +1,35 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/config/environment.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/cubits/cart_count_cubit.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/network/network_client.dart';
 import '../../../../core/services/pref_manager.dart';
 import '../../data/models/app_config_response.dart';
 import '../../data/models/customer_info_response.dart';
+import '../../domain/usecases/handle_deeplink_usecase.dart';
 import 'splash_event.dart';
 import 'splash_state.dart';
 
+@injectable
 class SplashBloc extends Bloc<SplashEvent, SplashState> {
   final NetworkClient networkClient;
   final PrefManager prefManager;
+  final HandleDeeplinkUseCase handleDeeplinkUseCase;
+  final CartCountCubit cartCountCubit;
 
   SplashBloc({
     required this.networkClient,
-    required this.prefManager
+    required this.prefManager,
+    required this.handleDeeplinkUseCase,
+    required this.cartCountCubit,
   }) : super(SplashInitial()) {
     on<InitializeApp>(_onInitializeApp);
     on<SelectEnvironment>(_onSelectEnvironment);
+    on<HandleDeeplink>(_onHandleDeeplink);
   }
 
   Future<void> _onInitializeApp(
@@ -29,9 +38,11 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   ) async {
     // In debug mode, show environment selector first
     if (!kReleaseMode) {
-      emit(SplashEnvironmentSelection(
-        currentEnvironment: EnvironmentConfig.current,
-      ));
+      emit(
+        SplashEnvironmentSelection(
+          currentEnvironment: EnvironmentConfig.current,
+        ),
+      );
       return;
     }
 
@@ -70,22 +81,17 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
         await _processCustomerInfo(customerInfo);
       }
 
-      emit(SplashLoaded(
-        appConfig: appConfig,
-        customerInfo: customerInfo,
-      ));
+      emit(SplashLoaded(appConfig: appConfig, customerInfo: customerInfo));
     } catch (e) {
-      emit(SplashError(
-        message: e.toString(),
-        errorType: _getErrorType(e),
-      ));
+      emit(SplashError(message: e.toString(), errorType: _getErrorType(e)));
     }
   }
 
   Future<AppConfigResponse?> _fetchAppConfig() async {
     try {
-      final response =
-          await networkClient.apiClient.get(ApiConstants.appConfig);
+      final response = await networkClient.apiClient.get(
+        ApiConstants.appConfig,
+      );
       final json = response.data as Map<String, dynamic>;
       return AppConfigResponse.fromJson(json);
     } catch (_) {
@@ -95,8 +101,9 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
   Future<CustomerInfoResponse?> _fetchCustomerInfo() async {
     try {
-      final response =
-          await networkClient.apiClient.get(ApiConstants.customerInfo);
+      final response = await networkClient.apiClient.get(
+        ApiConstants.customerInfo,
+      );
       final json = response.data as Map<String, dynamic>;
       return CustomerInfoResponse.fromJson(json);
     } catch (_) {
@@ -128,14 +135,18 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // Remote config flags
     final remoteConfig = config.remoteConfigFlags;
     if (remoteConfig != null) {
-      await prefManager
-          .setFeatureFlagInAppUpdate(remoteConfig.featureInAppUpdateEnabled);
+      await prefManager.setFeatureFlagInAppUpdate(
+        remoteConfig.featureInAppUpdateEnabled,
+      );
       await prefManager.setFeatureFlagRatingAfterShopping(
-          remoteConfig.isRatingAfterShoppingExperienceEnabled);
-      await prefManager
-          .setFeatureFlagHomeAnalytics(remoteConfig.isHomepageAnalyticsEnabled);
-      await prefManager
-          .setFeatureFlagDeleteAccount(remoteConfig.featureEnableDeleteAccount);
+        remoteConfig.isRatingAfterShoppingExperienceEnabled,
+      );
+      await prefManager.setFeatureFlagHomeAnalytics(
+        remoteConfig.isHomepageAnalyticsEnabled,
+      );
+      await prefManager.setFeatureFlagDeleteAccount(
+        remoteConfig.featureEnableDeleteAccount,
+      );
     }
 
     // JSON blobs
@@ -158,6 +169,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   Future<void> _processCustomerInfo(CustomerInfoResponse info) async {
     await prefManager.setHasGuestData(info.hasGuestData);
     await prefManager.setCartItemQty(info.cartItemQty);
+    cartCountCubit.set(info.cartItemQty);
     await prefManager.setPhoneNumber(info.phoneNumber);
     await prefManager.setUserName(info.userName);
     await prefManager.setFirstName(info.firstName);
@@ -178,8 +190,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     }
 
     // Persist ticket to SharedPreferences and set on network layer
-    if (info.persistentTicket != null &&
-        info.persistentTicket!.isNotEmpty) {
+    if (info.persistentTicket != null && info.persistentTicket!.isNotEmpty) {
       await prefManager.setPersistentTicket(info.persistentTicket);
       networkClient.setPersistentTicket(info.persistentTicket);
     }
@@ -192,5 +203,21 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     if (error is NetworkException) return SplashErrorType.network;
     if (error is ServerException) return SplashErrorType.appConfig;
     return SplashErrorType.unknown;
+  }
+
+  Future<void> _onHandleDeeplink(
+    HandleDeeplink event,
+    Emitter<SplashState> emit,
+  ) async {
+    emit(DeeplinkProcessing(deeplink: event.deeplink));
+
+    final result = await handleDeeplinkUseCase(
+      DeeplinkParams(deeplink: event.deeplink),
+    );
+
+    result.fold(
+      (_) => emit(DeeplinkProcessed(rawDeeplink: event.deeplink)),
+      (destination) => emit(DeeplinkProcessed(rawDeeplink: event.deeplink)),
+    );
   }
 }

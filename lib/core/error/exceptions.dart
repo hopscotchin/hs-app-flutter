@@ -51,7 +51,8 @@ class UnauthorizedException extends AppException {
 
 class ForbiddenException extends AppException {
   const ForbiddenException({
-    super.message = 'Uh-oh! You don\'t have permission to access this resource.',
+    super.message =
+        'Uh-oh! You don\'t have permission to access this resource.',
     super.statusCode = 403,
   });
 }
@@ -79,7 +80,8 @@ class InternalServerException extends AppException {
 
 class ServiceUnavailableException extends AppException {
   const ServiceUnavailableException({
-    super.message = 'Uh-oh! Service is temporarily unavailable. Please try again later.',
+    super.message =
+        'Uh-oh! Service is temporarily unavailable. Please try again later.',
     super.statusCode = 503,
   });
 }
@@ -103,5 +105,7 @@ class CacheException extends AppException {
 }
 
 class NetworkException extends AppException {
-  const NetworkException({super.message = 'Uh-oh! There seems to be no internet connection.'});
+  const NetworkException({
+    super.message = 'Uh-oh! There seems to be no internet connection.',
+  });
 }

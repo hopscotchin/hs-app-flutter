@@ -1,4 +1,7 @@
+import 'package:injectable/injectable.dart';
+
 /// Analytics service for tracking app events
+@lazySingleton
 class AnalyticsService {
   static final AnalyticsService _instance = AnalyticsService._internal();
 

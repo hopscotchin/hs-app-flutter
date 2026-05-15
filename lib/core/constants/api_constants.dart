@@ -28,7 +28,6 @@ class ApiConstants {
 
   // Home/Discover
   static const String homePage = '/page/v12';
-  static const String pageCarousel = '/v4/pagecarousel';
   static const String boutiques = '/boutiques/action';
   static const String customTiles = '/customTiles/v2';
   static const String collections = '/collections/v2';
@@ -48,5 +47,48 @@ class ApiConstants {
   static const String removeFromCart = '/shopping-cart/v2';
   static const String updateCartItem = '/shopping-cart/v2';
   static const String mergeCart = '/shopping-cart/merge';
+  static const String promoCode = '/promotion/v2';
+  static const String buyNow = '/shopping-cart/instant-checkout';
+  static const String orderNow = '/checkout/buy-now/v4';
 
+  // Wishlist
+  static const String wishlist = '/wishlist';
+  static const String moveToWishlistFromCart = '/wishlist/move-to-wishlist';
+
+  // Auth — current endpoints (used with transformers)
+  static const String sendOtp = '/customer/validate-sendotp';
+  static const String verifyOtp = '/customer/v2/verifyotp-delegate';
+  static const String registerSendOtp = '/customer/signup/send/otp';
+
+  // Auth — proposed v3 endpoints (swap in when backend ships; delete transformer files)
+  static const String sendOtpV3 = '/customer/v3/auth/send-otp';
+  static const String verifyOtpV3 = '/customer/v3/auth/verify-otp';
+  static const String signupSendOtpV3 = '/customer/v3/auth/signup/send-otp';
+  static const String checkMobileV3 = '/customer/v3/auth/check-mobile';
+  static const String customerInfoV3 = '/customer/v3/info';
+
+  // Account
+  static const String myAccount = '/myaccount';
+  static const String logout = '/customer/logout';
+  static const String forgetGuestUser = '/customer/flush-data/guestuser';
+  static const String addresses = '/delivery/addresses/v2';
+
+  // PDP (Product Detail)
+  static const String productDetails = '/v2/product';
+
+  // PLP (Product Listing)
+  static const String boutiqueProducts = '/search/product/v5';
+  static const String plpProducts = '/products/v7';
+  static const String plpFilter = '/filter';
+
+  // Checkout / Payment
+  static const String placeOrder = '/checkout/v4/place-order';
+  static const String retryPlaceOrder = '/recovery/place-order';
+  static const String initPayment = '/v2/init-payment';
+  static const String paymentStatus = '/v1'; // append /{orderId}/payment-status
+  static const String paymentRetryDetail =
+      '/re-attempt/detail'; // append /{orderId}
+  static const String markOrderFail = '/checkout/order-fail';
+  static const String orderConfirmation =
+      '/v2/checkout'; // append /{orderId}/confirmation
 }

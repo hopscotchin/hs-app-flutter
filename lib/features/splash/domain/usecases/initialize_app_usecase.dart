@@ -1,9 +1,11 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import 'package:hs_app_flutter/core/error/failures.dart';
 
 import '../../../../core/usecases/usecase.dart';
 
+@lazySingleton
 class InitializeAppUseCase implements UseCase<void, NoParams> {
   @override
   Future<Either<Failure, void>> call(NoParams params) async {
@@ -14,6 +16,4 @@ class InitializeAppUseCase implements UseCase<void, NoParams> {
     // - Setup remote config
     throw UnimplementedError();
   }
-
-
 }

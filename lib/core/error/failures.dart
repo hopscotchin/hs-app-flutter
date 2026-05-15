@@ -55,7 +55,8 @@ class UnauthorizedFailure extends Failure {
 
 class ForbiddenFailure extends Failure {
   const ForbiddenFailure({
-    super.message = 'Uh-oh! You don\'t have permission to access this resource.',
+    super.message =
+        'Uh-oh! You don\'t have permission to access this resource.',
     super.statusCode = 403,
   });
 }
@@ -83,7 +84,8 @@ class InternalServerFailure extends Failure {
 
 class ServiceUnavailableFailure extends Failure {
   const ServiceUnavailableFailure({
-    super.message = 'Service is temporarily unavailable. Please try again later.',
+    super.message =
+        'Service is temporarily unavailable. Please try again later.',
     super.statusCode = 503,
   });
 }

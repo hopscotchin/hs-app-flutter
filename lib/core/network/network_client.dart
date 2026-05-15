@@ -20,11 +20,9 @@ class NetworkClient {
   final DeviceInfoPlugin _deviceInfo;
   final PackageInfo _packageInfo;
 
-  NetworkClient({
-    required DeviceInfoPlugin deviceInfo,
-    required PackageInfo packageInfo,
-  })  : _deviceInfo = deviceInfo,
-        _packageInfo = packageInfo;
+  NetworkClient({required DeviceInfoPlugin deviceInfo, required PackageInfo packageInfo})
+    : _deviceInfo = deviceInfo,
+      _packageInfo = packageInfo;
 
   Future<void> init() async {
     authHeaderInterceptor = AuthHeaderInterceptor(
@@ -48,10 +46,7 @@ class NetworkClient {
         // on GET requests. The interceptor sets it only for POST/PUT as needed.
         headers: kIsWeb
             ? {'Accept': 'application/json'}
-            : {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
+            : {'Content-Type': 'application/json', 'Accept': 'application/json'},
       ),
     );
 

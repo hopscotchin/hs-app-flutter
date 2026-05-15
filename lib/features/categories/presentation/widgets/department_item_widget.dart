@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../components/atoms/cached_image_widget.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
@@ -19,6 +20,13 @@ class DepartmentItemWidget extends StatelessWidget {
         padding: AppSpacing.listItemPadding,
         child: Row(
           children: [
+            if (department.imageUrl != null)
+              CachedImageWidget(
+                imageUrl: department.imageUrl!,
+                width: AppSpacing.thumbnailMd,
+                height: AppSpacing.thumbnailMd,
+                borderRadius: AppSpacing.borderRadiusSm,
+              ),
             AppSpacing.horizontalGapMd,
             Expanded(
               child: Text(department.label, style: AppTypography.titleSmall),

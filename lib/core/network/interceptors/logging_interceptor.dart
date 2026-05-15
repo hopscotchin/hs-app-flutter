@@ -74,7 +74,8 @@ class LoggingInterceptor extends Interceptor {
         body = data.toString();
       }
       if (body.length > _maxBodyLength) {
-        body = '${body.substring(0, _maxBodyLength)}\u2026 [truncated ${body.length} chars]';
+        body =
+            '${body.substring(0, _maxBodyLength)}\u2026 [truncated ${body.length} chars]';
       }
       developer.log('  Response:\n$body', name: 'HTTP');
     } catch (_) {

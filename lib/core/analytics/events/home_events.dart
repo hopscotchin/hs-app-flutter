@@ -20,7 +20,7 @@ class HomeBannerClickedEvent extends AnalyticsEvent {
 
   @override
   Map<String, dynamic>? get parameters => {
-        'banner_id': bannerId,
-        'banner_name': bannerName,
-      };
+    'banner_id': bannerId,
+    'banner_name': bannerName,
+  };
 }

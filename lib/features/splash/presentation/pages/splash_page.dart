@@ -65,8 +65,8 @@ class _SplashPageState extends State<SplashPage> {
         child: ElevatedButton(
           onPressed: () => context.go(RouteNames.home),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.container,
-            foregroundColor: AppColors.primary,
+            backgroundColor: AppColors.baseDefault,
+            foregroundColor: AppColors.brandDefault,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
             ),

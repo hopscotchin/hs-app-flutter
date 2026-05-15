@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:hs_app_flutter/core/constants/image_constants.dart';
 
-import '../../../../components/error_retry_widget.dart';
-import '../../../../components/loading_shimmer.dart';
-import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/typography.dart';
+import '../../../../components/atoms/error_retry_widget.dart';
+import '../../../../components/atoms/loading_shimmer.dart';
+import '../../../../components/spring/spring_tab_bar.dart';
+import '../../../../core/constants/strings/discover_strings.dart';
 import '../bloc/home_bloc.dart';
+import '../widgets/combined_header_delegate.dart';
+import '../widgets/page_component_renderer.dart';
 
 class DiscoverPage extends StatefulWidget {
   const DiscoverPage({super.key});
@@ -16,76 +16,97 @@ class DiscoverPage extends StatefulWidget {
   State<DiscoverPage> createState() => _DiscoverPageState();
 }
 
-class _DiscoverPageState extends State<DiscoverPage> {
+class _DiscoverPageState extends State<DiscoverPage>
+    with AutomaticKeepAliveClientMixin {
+  static const _kToolbarHeight = 80.0;
+  static const _kTabsHeight = 60.0;
+
+  static const _tabs = [
+    SpringTabItem(label: DiscoverStrings.tabAll),
+    SpringTabItem(label: DiscoverStrings.tabBaby),
+    SpringTabItem(label: DiscoverStrings.tabBoy),
+    SpringTabItem(label: DiscoverStrings.tabGirl),
+  ];
+
+  int _selectedTabIndex = 0;
+
   @override
   void initState() {
     super.initState();
-    context.read<HomeBloc>().add(LoadHomePage());
+    context.read<HomeBloc>().add(const LoadHomePage());
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 80,
-        centerTitle: false,
-        title: RepaintBoundary(
-          child: SvgPicture.asset(
-            ImageConstants.hsLogo,
-            height: 44,
-            width: 127,
-            placeholderBuilder: (_) => const SizedBox(height: 54, width: 127),
-          ),
-        ),
-        actions: [
-          Text(
-            'Hi Hopscotch!',
-            style: AppTypography.titleMedium.copyWith(
-              color: AppColors.primary,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: RepaintBoundary(
-              child: SvgPicture.asset(
-                ImageConstants.heart,
-                height: 24,
-                width: 24,
-                placeholderBuilder: (_) =>
-                    const SizedBox(height: 24, width: 24),
-              ),
-            ),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: ErrorRetryWidget(
-        message: "Your HomePage is loading soon..!! Stay Tuned..!!",
-        onRetry: VoidCallbackAction.new,
-      ),
-    );
-  }
-}
-
-/// Prevents [ListView.builder] from disposing children when scrolled off-screen,
-/// so images and widget state are retained.
-class _KeepAliveItem extends StatefulWidget {
-  final Widget child;
-  const _KeepAliveItem({required this.child});
-
-  @override
-  State<_KeepAliveItem> createState() => _KeepAliveItemState();
-}
-
-class _KeepAliveItemState extends State<_KeepAliveItem>
-    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return widget.child;
+
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        return Scaffold(
+          body: SafeArea(
+            child: RefreshIndicator(
+              onRefresh: () async =>
+                  context.read<HomeBloc>().add(const RefreshHomePage()),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                cacheExtent: MediaQuery.sizeOf(context).height * 2,
+                slivers: [
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: CombinedHeaderDelegate(
+                      items: _tabs,
+                      initialIndex: _selectedTabIndex,
+                      onTabSelected: (i) =>
+                          setState(() => _selectedTabIndex = i),
+                      bgImageUrl: state.homePage?.headerBgImageUrl,
+                      isImageDark: false,
+                      toolbarHeight: _kToolbarHeight,
+                      tabsHeight: _kTabsHeight,
+                    ),
+                  ),
+                  _buildContentSliver(context, state),
+                  const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildContentSliver(BuildContext context, HomeState state) {
+    if (state.isLoading) {
+      return SliverToBoxAdapter(
+        child: LoadingShimmer.listShimmer(itemCount: 6, itemHeight: 120),
+      );
+    }
+    if (state.isFailure) {
+      return SliverFillRemaining(
+        child: ErrorRetryWidget(
+          message: state.errorMessage,
+          onRetry: () => context.read<HomeBloc>().add(const LoadHomePage()),
+        ),
+      );
+    }
+    if (state.isSuccess) {
+      final components = state.homePage?.pageComponents ?? [];
+      if (components.isEmpty) {
+        return const SliverFillRemaining(
+          child: Center(child: Text(DiscoverStrings.noContentAvailable)),
+        );
+      }
+      return SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) =>
+              PageComponentRenderer(component: components[index]),
+          childCount: components.length,
+        ),
+      );
+    }
+    return const SliverToBoxAdapter(child: SizedBox.shrink());
   }
 }

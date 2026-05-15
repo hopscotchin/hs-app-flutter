@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
-import '../../../../core/theme/typography.dart';
+import '../../../../core/theme/typography/typography_v1.dart';
+import '../../../../core/theme/typography/text_style_extensions.dart';
 
 class AccountMenuItemWidget extends StatelessWidget {
-  final IconData icon;
+  final String svgAsset;
   final String title;
   final String? subtitle;
   final VoidCallback? onTap;
   final Color? iconColor;
   final Color? subtitleColor;
-  final bool showLock;
+  final String? trailingText;
 
   const AccountMenuItemWidget({
     super.key,
-    required this.icon,
+    required this.svgAsset,
     required this.title,
     this.subtitle,
     this.onTap,
     this.iconColor,
     this.subtitleColor,
-    this.showLock = false,
+    this.trailingText,
   });
 
   @override
@@ -34,40 +36,40 @@ class AccountMenuItemWidget extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: iconColor ?? AppColors.textSecondary,
-              size: AppSpacing.iconMd,
+            SvgPicture.asset(
+              svgAsset,
+              width: AppSpacing.iconSm,
+              height: AppSpacing.iconSm,
+              colorFilter: ColorFilter.mode(
+                iconColor ?? AppColors.textPrimary,
+                BlendMode.srcIn,
+              ),
             ),
             AppSpacing.horizontalGapMd,
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: AppTypography.bodyMedium),
+                  Text(title, style: AppTypographyV1.bodyLarge.textPrimary()),
                   if (subtitle != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
                         subtitle!,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: subtitleColor ?? AppColors.textTertiary,
+                        style: AppTypographyV1.labelLarge.copyWith(
+                          color: subtitleColor ?? AppColors.textPrimary,
                         ),
                       ),
                     ),
                 ],
               ),
             ),
-            if (showLock)
-              const Icon(
-                Icons.lock_outline,
-                size: AppSpacing.iconSm,
-                color: AppColors.textDisabled,
-              )
-            else
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.textTertiary,
+            if (trailingText != null)
+              Text(
+                trailingText!,
+                style: AppTypographyV1.bodyLarge.copyWith(
+                  color: subtitleColor ?? AppColors.textPrimary,
+                ),
               ),
           ],
         ),

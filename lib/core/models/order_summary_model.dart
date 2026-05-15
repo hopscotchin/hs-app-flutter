@@ -16,26 +16,25 @@ class OrderSummaryModel extends OrderSummaryEntity {
     int? itemCount,
     int? totalAmount,
   }) {
-    final totalOrderJson =
-        json['totalOrderAmount'] as Map<String, dynamic>?;
+    final totalOrderJson = json['totalOrderAmount'] as Map<String, dynamic>?;
     return OrderSummaryModel(
       sectionTitle: json['sectionTitle'] as String?,
       subText: json['subText'] as String?,
-      pricingData: (json['pricingData'] as List<dynamic>?)
-              ?.map((e) =>
-                  PricingItemModel.fromJson(e as Map<String, dynamic>))
+      pricingData:
+          (json['pricingData'] as List<dynamic>?)
+              ?.map((e) => PricingItemModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
       totalOrderAmount: totalOrderJson != null
           ? PricingItemModel.fromJson(totalOrderJson)
           : null,
-      totalAmount: totalAmount ??
+      totalAmount:
+          totalAmount ??
           json['totalAmount'] as int? ??
           json['grandTotal'] as int? ??
           json['total'] as int?,
-      itemCount: itemCount ??
-          json['itemCount'] as int? ??
-          json['totalItems'] as int?,
+      itemCount:
+          itemCount ?? json['itemCount'] as int? ?? json['totalItems'] as int?,
     );
   }
 }

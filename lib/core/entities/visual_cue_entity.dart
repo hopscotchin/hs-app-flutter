@@ -18,5 +18,12 @@ class VisualCueEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [bgColor, text, textColor, location, uiType, imageUrl];
+  List<Object?> get props => [
+    bgColor,
+    text,
+    textColor,
+    location,
+    uiType,
+    imageUrl,
+  ];
 }

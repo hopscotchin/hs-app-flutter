@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/mixins/safe_api_call.dart';
@@ -7,6 +8,7 @@ import '../../domain/entities/department_entity.dart';
 import '../../domain/repositories/categories_repository.dart';
 import '../datasources/remote/categories_remote_datasource.dart';
 
+@LazySingleton(as: CategoriesRepository)
 class CategoriesRepositoryImpl
     with SafeApiCall
     implements CategoriesRepository {
@@ -20,12 +22,9 @@ class CategoriesRepositoryImpl
 
   @override
   Future<Either<Failure, List<DepartmentEntity>>> getDepartments() {
-    return safeApiCall(
-      networkInfo,
-      () async {
-        final result = await remoteDataSource.getDepartments();
-        return result.departments;
-      },
-    );
+    return safeApiCall(networkInfo, () async {
+      final result = await remoteDataSource.getDepartments();
+      return result.departments;
+    });
   }
 }

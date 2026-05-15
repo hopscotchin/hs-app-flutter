@@ -12,7 +12,7 @@ class ConnectivityService implements NetworkInfo {
   bool _lastStatus = true;
 
   ConnectivityService({Connectivity? connectivity})
-      : _connectivity = connectivity ?? Connectivity() {
+    : _connectivity = connectivity ?? Connectivity() {
     _controller = StreamController<bool>.broadcast();
     _subscription = _connectivity.onConnectivityChanged.listen(_onChanged);
   }

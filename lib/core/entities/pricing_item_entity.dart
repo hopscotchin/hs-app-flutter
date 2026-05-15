@@ -20,6 +20,13 @@ class PricingItemEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props =>
-      [label, value, type, textColor, subText, actionTextToolTip, hasInfoIcon];
+  List<Object?> get props => [
+    label,
+    value,
+    type,
+    textColor,
+    subText,
+    actionTextToolTip,
+    hasInfoIcon,
+  ];
 }

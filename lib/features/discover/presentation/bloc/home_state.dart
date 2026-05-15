@@ -1,34 +1,19 @@
 part of 'home_bloc.dart';
 
-abstract class HomeState extends Equatable {
-  const HomeState();
+enum HomeStatus { initial, loading, success, failure }
 
-  @override
-  List<Object?> get props => [];
+@freezed
+abstract class HomeState with _$HomeState {
+  const factory HomeState({
+    @Default(HomeStatus.initial) HomeStatus status,
+    HomePageEntity? homePage,
+    @Default('') String errorMessage,
+  }) = _HomeState;
 }
 
-class HomeInitial extends HomeState {
-  const HomeInitial();
-}
-
-class HomeLoading extends HomeState {
-  const HomeLoading();
-}
-
-class HomeLoaded extends HomeState {
-  final HomePageEntity homePage;
-
-  const HomeLoaded({required this.homePage});
-
-  @override
-  List<Object?> get props => [homePage];
-}
-
-class HomeError extends HomeState {
-  final String message;
-
-  const HomeError({required this.message});
-
-  @override
-  List<Object?> get props => [message];
+extension HomeStateX on HomeState {
+  bool get isLoading => status == HomeStatus.loading;
+  bool get isSuccess => status == HomeStatus.success;
+  bool get isFailure => status == HomeStatus.failure;
+  bool get hasData => homePage != null;
 }

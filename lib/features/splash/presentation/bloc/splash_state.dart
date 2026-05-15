@@ -36,10 +36,7 @@ class SplashLoaded extends SplashState {
   final AppConfigResponse? appConfig;
   final CustomerInfoResponse? customerInfo;
 
-  const SplashLoaded({
-    this.appConfig,
-    this.customerInfo,
-  });
+  const SplashLoaded({this.appConfig, this.customerInfo});
 
   @override
   List<Object?> get props => [appConfig, customerInfo];
@@ -84,9 +81,4 @@ enum SplashLoadingStep {
   completed,
 }
 
-enum SplashErrorType {
-  network,
-  appConfig,
-  customerInfo,
-  unknown,
-}
+enum SplashErrorType { network, appConfig, customerInfo, unknown }

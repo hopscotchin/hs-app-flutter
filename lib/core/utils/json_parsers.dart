@@ -21,3 +21,10 @@ bool parseToBool(dynamic value) => switch (value) {
   final String v => v.toLowerCase() == 'true' || v == '1',
   _ => false,
 };
+
+// Converts any non-null value to its string representation.
+// Needed when the API may return a numeric id as an int or a string.
+String? parseToStringOrNull(dynamic value) {
+  if (value == null) return null;
+  return value.toString();
+}

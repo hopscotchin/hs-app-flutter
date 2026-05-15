@@ -15,6 +15,7 @@ class MessageBarEntity extends Equatable {
   final bool isCriticalMessage;
   final bool hasIcon;
   final String? icon;
+  final String? redirectLink;
 
   const MessageBarEntity({
     this.text,
@@ -31,6 +32,7 @@ class MessageBarEntity extends Equatable {
     this.isCriticalMessage = false,
     this.hasIcon = false,
     this.icon,
+    this.redirectLink,
   });
 
   /// Returns the display text, preferring [text] over [message] over [alertMessage].
@@ -38,19 +40,20 @@ class MessageBarEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        text,
-        bgColor,
-        textColor,
-        type,
-        message,
-        alertMessage,
-        messageType,
-        actionLink,
-        actionText,
-        actionTextRight,
-        actionLinkRight,
-        isCriticalMessage,
-        hasIcon,
-        icon,
-      ];
+    text,
+    bgColor,
+    textColor,
+    type,
+    message,
+    alertMessage,
+    messageType,
+    actionLink,
+    actionText,
+    actionTextRight,
+    actionLinkRight,
+    isCriticalMessage,
+    hasIcon,
+    icon,
+    redirectLink,
+  ];
 }

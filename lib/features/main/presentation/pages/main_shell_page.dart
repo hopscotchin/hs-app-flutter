@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
-import 'package:hs_app_flutter/features/cart/presentation/bloc/cart_bloc.dart';
 
 import '../../../../components/badge_icon.dart';
 import '../../../../core/constants/image_constants.dart';

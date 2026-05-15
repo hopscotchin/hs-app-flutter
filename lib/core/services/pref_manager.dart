@@ -1,7 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:injectable/injectable.dart';
 
 import '../constants/storage_keys.dart';
 
+@lazySingleton
 class PrefManager {
   final SharedPreferences _prefs;
 

@@ -18,14 +18,16 @@ class CookieInterceptor extends Interceptor {
       handler.next(options);
       return;
     }
-    HSCookieStore.getCookies().then((cookies) {
-      if (cookies.isNotEmpty) {
-        options.headers['Cookie'] = cookies.toList();
-      }
-      handler.next(options);
-    }).catchError((Object _) {
-      handler.next(options);
-    });
+    HSCookieStore.getCookies()
+        .then((cookies) {
+          if (cookies.isNotEmpty) {
+            options.headers['Cookie'] = cookies.toList();
+          }
+          handler.next(options);
+        })
+        .catchError((Object _) {
+          handler.next(options);
+        });
   }
 
   @override
@@ -48,13 +50,18 @@ class CookieInterceptor extends Interceptor {
     final setCookies = headers['set-cookie'];
     if (setCookies == null || setCookies.isEmpty) return;
 
-    HSCookieStore.setCookies(setCookies.toSet()).then((_) {
-      CookiesBasedEventsUtil.instance.handleCookiesAndSessionStartEvent();
-    }).catchError((Object e) {
-      if (kDebugMode) {
-        developer.log('Error storing cookies: $e', name: 'CookieInterceptor');
-      }
-    });
+    HSCookieStore.setCookies(setCookies.toSet())
+        .then((_) {
+          CookiesBasedEventsUtil.instance.handleCookiesAndSessionStartEvent();
+        })
+        .catchError((Object e) {
+          if (kDebugMode) {
+            developer.log(
+              'Error storing cookies: $e',
+              name: 'CookieInterceptor',
+            );
+          }
+        });
   }
 
   Future<void> clear() async {

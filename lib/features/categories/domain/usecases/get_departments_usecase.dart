@@ -3,7 +3,9 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/department_entity.dart';
 import '../repositories/categories_repository.dart';
+import 'package:injectable/injectable.dart';
 
+@lazySingleton
 class GetDepartmentsUseCase
     implements UseCase<List<DepartmentEntity>, NoParams> {
   final CategoriesRepository repository;

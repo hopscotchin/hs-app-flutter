@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
-import '../../../../core/theme/typography.dart';
+import '../../../../core/theme/typography/typography_v1.dart';
+import '../../../../core/theme/typography/text_style_extensions.dart';
 
 /// 3-column help grid: Help | Share | Rate
 class AccountHelpSectionWidget extends StatelessWidget {
@@ -14,18 +18,18 @@ class AccountHelpSectionWidget extends StatelessWidget {
       child: Row(
         children: [
           _HelpItem(
-            icon: Icons.help_outline,
-            label: 'HELP',
+            svgAsset: ImageConstants.helpIcon,
+            label: AccountStrings.help,
             onTap: () {},
           ),
           _HelpItem(
-            icon: Icons.share_outlined,
-            label: 'SHARE',
+            svgAsset: ImageConstants.shareIcon,
+            label: AccountStrings.share,
             onTap: () {},
           ),
           _HelpItem(
-            icon: Icons.star_outline,
-            label: 'RATE',
+            svgAsset: ImageConstants.sqaureStar,
+            label: AccountStrings.rate,
             onTap: () {},
           ),
         ],
@@ -35,12 +39,12 @@ class AccountHelpSectionWidget extends StatelessWidget {
 }
 
 class _HelpItem extends StatelessWidget {
-  final IconData icon;
+  final String svgAsset;
   final String label;
   final VoidCallback onTap;
 
   const _HelpItem({
-    required this.icon,
+    required this.svgAsset,
     required this.label,
     required this.onTap,
   });
@@ -56,17 +60,18 @@ class _HelpItem extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: AppSpacing.iconMd,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(height: 6),
               Text(
                 label,
-                style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.textSecondary,
-                  letterSpacing: AppTypography.letterSpacingWider,
+                style: AppTypographyV1.bodyRegular.semiBold.textPrimary(),
+              ),
+              AppSpacing.verticalGapXxs,
+              SvgPicture.asset(
+                svgAsset,
+                width: AppSpacing.iconSm,
+                height: AppSpacing.iconSm,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.textPrimary,
+                  BlendMode.srcIn,
                 ),
               ),
             ],

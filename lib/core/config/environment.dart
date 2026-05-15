@@ -2,11 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'env_config.dart';
 
-enum Environment {
-  debug,
-  debugVPN,
-  release,
-}
+enum Environment { debug, debugVPN, release }
 
 class EnvironmentConfig {
   EnvironmentConfig._();
@@ -24,7 +20,7 @@ class EnvironmentConfig {
   static String get baseUrl {
     switch (_currentEnvironment) {
       case Environment.debug:
-        if(kIsWeb) {
+        if (kIsWeb) {
           return '${EnvConfig.httpScheme}${EnvConfig.apiHostWeb}';
         }
         return '${EnvConfig.httpsScheme}${EnvConfig.apiHostQa}';
@@ -48,6 +44,7 @@ class EnvironmentConfig {
 
   static bool get isProduction => _currentEnvironment == Environment.release;
 
-  static bool get isDebug => _currentEnvironment == Environment.debug ||
-                              _currentEnvironment == Environment.debugVPN;
+  static bool get isDebug =>
+      _currentEnvironment == Environment.debug ||
+      _currentEnvironment == Environment.debugVPN;
 }

@@ -8,16 +8,17 @@ class AppSpacing {
   static const double unit = 4.0;
 
   // Spacing values
-  static const double xxxs = 2.0;   // Extra extra extra small
-  static const double xxs = 4.0;    // Extra extra small
-  static const double xs = 8.0;     // Extra small
-  static const double sm = 12.0;    // Small
-  static const double lmd = 14.0;   // Low Medium
-  static const double md = 16.0;    // Medium (default)
-  static const double lg = 24.0;    // Large
-  static const double xl = 32.0;    // Extra large
-  static const double xxl = 48.0;   // Extra extra large
-  static const double xxxl = 64.0;  // Extra extra extra large
+  static const double xxxs = 2.0; // Extra extra extra small
+  static const double xxs = 4.0; // Extra extra small
+  static const double xs = 8.0; // Extra small
+  static const double sm = 12.0; // Small
+  static const double lmd = 14.0; // Low Medium
+  static const double md = 16.0; // Medium (default)
+  static const double lgMd = 20.0; // Large Medium
+  static const double lg = 24.0; // Large
+  static const double xl = 32.0; // Extra large
+  static const double xxl = 48.0; // Extra extra large
+  static const double xxxl = 64.0; // Extra extra extra large
 
   // Padding presets
   static const EdgeInsets paddingNone = EdgeInsets.zero;
@@ -25,6 +26,7 @@ class AppSpacing {
   static const EdgeInsets paddingXs = EdgeInsets.all(xs);
   static const EdgeInsets paddingSm = EdgeInsets.all(sm);
   static const EdgeInsets paddingMd = EdgeInsets.all(md);
+  static const EdgeInsets paddingLgMd = EdgeInsets.all(lgMd);
   static const EdgeInsets paddingLg = EdgeInsets.all(lg);
   static const EdgeInsets paddingXl = EdgeInsets.all(xl);
 
@@ -49,20 +51,11 @@ class AppSpacing {
   static const EdgeInsets cardPaddingCompact = EdgeInsets.all(sm);
 
   // List item padding
-  static const EdgeInsets listItemPadding = EdgeInsets.symmetric(
-    horizontal: md,
-    vertical: sm,
-  );
+  static const EdgeInsets listItemPadding = EdgeInsets.symmetric(horizontal: md, vertical: sm);
 
   // Button padding
-  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
-    horizontal: lg,
-    vertical: sm,
-  );
-  static const EdgeInsets buttonPaddingCompact = EdgeInsets.symmetric(
-    horizontal: md,
-    vertical: xs,
-  );
+  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(horizontal: lg, vertical: sm);
+  static const EdgeInsets buttonPaddingCompact = EdgeInsets.symmetric(horizontal: md, vertical: xs);
 
   // Gap/SizedBox helpers
   static const SizedBox gapXxs = SizedBox(height: xxs, width: xxs);
@@ -78,6 +71,7 @@ class AppSpacing {
   static const SizedBox verticalGapSm = SizedBox(height: sm);
   static const SizedBox verticalGapMd = SizedBox(height: md);
   static const SizedBox verticalGapLg = SizedBox(height: lg);
+  static const SizedBox verticalGapLgMd = SizedBox(height: lgMd);
   static const SizedBox verticalGapXl = SizedBox(height: xl);
   static const SizedBox verticalGapXxl = SizedBox(height: xxl);
 

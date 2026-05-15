@@ -7,18 +7,17 @@ class ComponentDataParser {
     return ComponentMargins(
       top: (json['top'] as num?)?.toDouble() ?? 0,
       bottom: (json['bottom'] as num?)?.toDouble() ?? 0,
-      horizontal: (json['horizontal'] as num?)?.toDouble() ?? 0,
+      horizontal: (json['horizontal'] as num?)?.toDouble() ?? 16,
       innerHorizontalMargin:
-          (json['innerHorizontalMargin'] as num?)?.toDouble() ?? 0,
+          (json['innerHorizontalMargin'] as num?)?.toDouble() ?? 8,
       innerVerticalMargin:
           (json['innerVerticalMargin'] as num?)?.toDouble() ?? 0,
       ctaTopMargin: (json['ctaTopMargin'] as num?)?.toDouble() ?? 0,
       ctaHorizontalMargin:
           (json['ctaHorizontalMargin'] as num?)?.toDouble() ?? 0,
-      titleBottomMargin:
-          (json['titleBottomMargin'] as num?)?.toDouble() ?? 0,
+      titleBottomMargin: (json['titleBottomMargin'] as num?)?.toDouble() ?? 16,
       titleHorizontalMargin:
-          (json['titleHorizontalMargin'] as num?)?.toDouble() ?? 0,
+          (json['titleHorizontalMargin'] as num?)?.toDouble() ?? 16,
     );
   }
 
@@ -42,12 +41,14 @@ class ComponentDataParser {
       final imageUrl = gridItem['imageUrl'] as String? ?? '';
       if (imageUrl.isEmpty) continue;
 
-      tiles.add(HeroTile(
-        imageUrl: imageUrl,
-        actionUri: gridItem['actionUri'] as String?,
-        width: gridItem['width'] as int? ?? 960,
-        height: gridItem['height'] as int? ?? 960,
-      ));
+      tiles.add(
+        HeroTile(
+          imageUrl: imageUrl,
+          actionUri: gridItem['actionUri'] as String?,
+          width: gridItem['width'] as int? ?? 960,
+          height: gridItem['height'] as int? ?? 960,
+        ),
+      );
     }
 
     return HeroCarouselData(
@@ -72,7 +73,8 @@ class ComponentDataParser {
   }
 
   static CustomTilesData parseCustomTiles(Map<String, dynamic> json) {
-    final rawDetails = json['tile_details'] as List<dynamic>? ??
+    final rawDetails =
+        json['tile_details'] as List<dynamic>? ??
         json['tileDetails'] as List<dynamic>? ??
         [];
 
@@ -83,8 +85,8 @@ class ComponentDataParser {
         final tileJson = t as Map<String, dynamic>;
         return TileImage(
           imageUrl: tileJson['imageUrl'] as String?,
-          actionUri: tileJson['actionUri'] as String? ??
-              tileJson['action'] as String?,
+          actionUri:
+              tileJson['actionUri'] as String? ?? tileJson['action'] as String?,
           mimeType: tileJson['mimeType'] as String?,
           width: tileJson['width'] as int?,
           height: tileJson['height'] as int?,
@@ -108,7 +110,8 @@ class ComponentDataParser {
       name: json['name'] as String?,
       type: json['type'] as String?,
       pageName: json['page_name'] as String? ?? json['pageName'] as String?,
-      showName: json['show_name'] as bool? ?? json['showName'] as bool? ?? false,
+      showName:
+          json['show_name'] as bool? ?? json['showName'] as bool? ?? false,
       titleImage: titleImage,
       tileDetails: tileDetails,
     );
@@ -182,8 +185,7 @@ class ComponentDataParser {
     }
     selectedTab ??= tabs.first as Map<String, dynamic>;
 
-    final customTilesJson =
-        selectedTab['customTiles'] as Map<String, dynamic>?;
+    final customTilesJson = selectedTab['customTiles'] as Map<String, dynamic>?;
     if (customTilesJson == null) return null;
     return parseCustomTiles(customTilesJson);
   }
@@ -197,8 +199,136 @@ class ComponentDataParser {
       PageComponentType.productGrid => parseProductGrid(data),
       PageComponentType.pageCarousel => parsePageCarousel(data),
       PageComponentType.tabbedCustomTiles => parseTabbedCustomTiles(data),
+      PageComponentType.shopTheLook => parseShopTheLook(data),
+      PageComponentType.continueBrowsing => parseContinueBrowsing(data),
       _ => null,
     };
+  }
+
+  static ContinueBrowsingData parseContinueBrowsing(Map<String, dynamic> json) {
+    TitleImageData? heading;
+    if (json['heading'] is Map<String, dynamic>) {
+      final h = json['heading'] as Map<String, dynamic>;
+      heading = TitleImageData(
+        url: h['url'] as String?,
+        width: h['width'] as int?,
+        height: h['height'] as int?,
+      );
+    }
+
+    ContinueBrowsingViewConfig? viewConfig;
+    if (json['viewConfig'] is Map<String, dynamic>) {
+      final vc = json['viewConfig'] as Map<String, dynamic>;
+      viewConfig = ContinueBrowsingViewConfig(
+        viewWidth: vc['viewWidth'] as int?,
+        viewHeight: vc['viewHeight'] as int?,
+      );
+    }
+
+    final rawItems = json['items'] as List<dynamic>? ?? [];
+    final items = rawItems.map((e) {
+      final itemJson = e as Map<String, dynamic>;
+      final rawMedia = itemJson['media'] as List<dynamic>? ?? [];
+      return ContinueBrowsingItem(
+        heading: itemJson['heading'] as String?,
+        actionUri: itemJson['actionUri'] as String?,
+        media: rawMedia.whereType<String>().toList(),
+      );
+    }).toList();
+
+    return ContinueBrowsingData(
+      id: json['id'] as int?,
+      heading: heading,
+      viewConfig: viewConfig,
+      items: items,
+    );
+  }
+
+  static ShopTheLookData parseShopTheLook(Map<String, dynamic> json) {
+    TitleImageData? titleImage;
+    if (json['titleImage'] is Map<String, dynamic>) {
+      final ti = json['titleImage'] as Map<String, dynamic>;
+      titleImage = TitleImageData(
+        url: ti['url'] as String?,
+        width: ti['width'] as int?,
+        height: ti['height'] as int?,
+      );
+    }
+
+    ShopTheLookViewConfig? viewConfig;
+    if (json['viewConfig'] is Map<String, dynamic>) {
+      final vc = json['viewConfig'] as Map<String, dynamic>;
+      viewConfig = ShopTheLookViewConfig(
+        itemWidth: vc['itemWidth'] as int?,
+        itemHeight: vc['itemHeight'] as int?,
+        minTilesToShow: vc['minTilesToShow'] as int?,
+        peepingFactor: vc['peepingFactor'] as int?,
+      );
+    }
+
+    final rawItems = json['items'] as List<dynamic>? ?? [];
+    final items = rawItems.map((e) {
+      final itemJson = e as Map<String, dynamic>;
+
+      ShopTheLookPrice? itemPrice;
+      if (itemJson['price'] is Map<String, dynamic>) {
+        itemPrice = _parsePrice(itemJson['price'] as Map<String, dynamic>);
+      }
+
+      final rawTiles = itemJson['productTiles'] as List<dynamic>? ?? [];
+      final tiles = rawTiles.map((t) {
+        final tileJson = t as Map<String, dynamic>;
+
+        final rawSkus = tileJson['skus'] as List<dynamic>? ?? [];
+        final skus = rawSkus.map((s) {
+          final skuJson = s as Map<String, dynamic>;
+          ShopTheLookPrice? skuPrice;
+          if (skuJson['price'] is Map<String, dynamic>) {
+            skuPrice = _parsePrice(skuJson['price'] as Map<String, dynamic>);
+          }
+          return ShopTheLookSku(
+            skuId: skuJson['skuId'] as String?,
+            size: skuJson['size'] as String?,
+            availableQuantity: skuJson['availableQuantity'] as int?,
+            price: skuPrice,
+          );
+        }).toList();
+
+        final media = tileJson['media'] as Map<String, dynamic>?;
+        return ShopTheLookProduct(
+          id: tileJson['id'] as int?,
+          actionUri: tileJson['actionUri'] as String?,
+          hasInv: tileJson['hasInv'] as bool?,
+          hasSizeChart: tileJson['hasSizeChart'] as bool?,
+          imageUrl: media?['url'] as String?,
+          productName: tileJson['productName'] as String?,
+          skus: skus,
+        );
+      }).toList();
+
+      return ShopTheLookItem(
+        id: itemJson['id'] as int?,
+        productTiles: tiles,
+        price: itemPrice,
+      );
+    }).toList();
+
+    return ShopTheLookData(
+      id: json['id'] as int?,
+      titleImage: titleImage,
+      viewConfig: viewConfig,
+      items: items,
+    );
+  }
+
+  static ShopTheLookPrice _parsePrice(Map<String, dynamic> json) {
+    return ShopTheLookPrice(
+      displayValue: json['displayValue'] as String?,
+      mrp: json['mrp'] as String?,
+      absoluteValue: json['absoluteValue'] as int?,
+      absoluteMrp: json['absoluteMrp'] as int?,
+      discount: json['discount'] as String?,
+    );
   }
 
   static ProductGridData parseProductGrid(Map<String, dynamic> json) {
@@ -238,10 +368,10 @@ class ComponentDataParser {
         return ProductGridItem(
           id: itemJson['id']?.toString(),
           name: label1?['text'] as String? ?? itemJson['name'] as String?,
-          imageUrl: itemJson['image'] as String? ??
-              itemJson['imageUrl'] as String?,
-          actionUrl: action?['uri'] as String? ??
-              itemJson['actionUrl'] as String?,
+          imageUrl:
+              itemJson['image'] as String? ?? itemJson['imageUrl'] as String?,
+          actionUrl:
+              action?['uri'] as String? ?? itemJson['actionUrl'] as String?,
           priceText: label2?['text'] as String?,
           originalPriceText: label3?['text'] as String?,
           discountText: label4?['text'] as String?,
@@ -256,8 +386,7 @@ class ComponentDataParser {
       final ctaAction = c['action'] as Map<String, dynamic>?;
       cta = CtaData(
         text: c['title'] as String? ?? c['text'] as String?,
-        actionUrl: ctaAction?['uri'] as String? ??
-            c['actionUrl'] as String?,
+        actionUrl: ctaAction?['uri'] as String? ?? c['actionUrl'] as String?,
         tracking: c['tracking'] as String?,
       );
     }

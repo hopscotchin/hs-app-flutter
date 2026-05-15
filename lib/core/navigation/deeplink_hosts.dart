@@ -56,6 +56,10 @@ abstract final class DeeplinkHost {
   static const signUp = 'signUp';
   static const join = 'join';
 
+  // Auth (message bar / new format)
+  static const signupLink = 'signup';
+  static const signinMobileLink = 'signin-mobile';
+
   // Profile
   static const address = 'address';
   static const name = 'name';

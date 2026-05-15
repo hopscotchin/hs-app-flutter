@@ -79,17 +79,20 @@ class CookiesBasedEventsUtil {
   }
 
   Future<void> _handleCookies() async {
-    final isSessionChange = _sessionId != null &&
+    final isSessionChange =
+        _sessionId != null &&
         _sessionId!.isNotEmpty &&
         _sessionId != _startSessionId;
     _startSessionId = _sessionId;
 
-    final isUserTypeChange = _userType != null &&
+    final isUserTypeChange =
+        _userType != null &&
         _userType!.isNotEmpty &&
         _userType != _currentUserType;
     _currentUserType = _userType;
 
-    final isExperimentChanged = _experimentCookies != null &&
+    final isExperimentChanged =
+        _experimentCookies != null &&
         _experimentCookies!.isNotEmpty &&
         _experimentCookies != _previousExperimentCookies;
     _previousExperimentCookies = _experimentCookies;

@@ -25,9 +25,13 @@ extension TextStyleColorExtensions on TextStyle {
   TextStyle disabled() => copyWith(color: AppColors.disabledDefault);
 
   // ───────── NEUTRAL (optional usage) ─────────
-  TextStyle neutral900() => copyWith(color: AppColors.neutral900);
-  TextStyle neutral700() => copyWith(color: AppColors.neutral700);
-  TextStyle neutral500() => copyWith(color: AppColors.neutral500);
+  TextStyle neutralGrey0() => copyWith(color: AppColors.neutralGrey0);
+  TextStyle neutralGrey2() => copyWith(color: AppColors.neutralGrey2);
+  TextStyle neutralGrey4() => copyWith(color: AppColors.neutralGrey4);
+
+  TextStyle textPrimary() => copyWith(color: AppColors.textPrimary);
+  TextStyle textSecondary() => copyWith(color: AppColors.textSecondary);
+  TextStyle textTertiary() => copyWith(color: AppColors.textTertiary);
 }
 
 /// ─────────────────────────────────────────────
@@ -44,13 +48,10 @@ extension TextStyleBehaviorExtensions on TextStyle {
 extension TypographyX on TextStyle {
   // Weights - these can be used in combination with color extensions
   TextStyle get regular => copyWith(fontWeight: FontWeight.w400);
+  TextStyle get medium => copyWith(fontWeight: FontWeight.w500);
   TextStyle get semiBold => copyWith(fontWeight: FontWeight.w600);
   TextStyle get bold => copyWith(fontWeight: FontWeight.w700);
-  TextStyle get medium => copyWith(fontWeight: FontWeight.w500);
 }
-
-
-
 
 //USAGE EXAMPLE:
 /*

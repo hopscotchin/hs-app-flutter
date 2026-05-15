@@ -10,7 +10,8 @@ class EnvConfig {
   // API Configuration
   static String get apiHost => dotenv.env['API_HOST'] ?? 'www.hopscotch.in';
   static String get apiHostQa => dotenv.env['API_HOST_QA'] ?? 'qa.hopscotch.in';
-  static String get apiHostQaVpn => dotenv.env['API_HOST_QA_VPN'] ?? 'qa-vpn.hopscotch.in';
+  static String get apiHostQaVpn =>
+      dotenv.env['API_HOST_QA_VPN'] ?? 'qa-vpn.hopscotch.in';
   static String get apiHostWeb => dotenv.env['API_HOST_WEB'] ?? '';
   static String get httpsScheme => dotenv.env['HTTPS_SCHEME'] ?? 'https://';
   static String get httpScheme => dotenv.env['HTTP_SCHEME'] ?? 'http://';
@@ -30,9 +31,11 @@ class EnvConfig {
   // N7 Security Keys
   static String get n7HdHlKey => dotenv.env['N7_HD_HL_KEY'] ?? '';
   static String get n7SecurityKey => dotenv.env['N7_SECURITY_KEY'] ?? '';
-  static String get n7DebugMagicSecurityKey => dotenv.env['N7_DEBUG_MAGIC_SECURITY_KEY'] ?? '';
+  static String get n7DebugMagicSecurityKey =>
+      dotenv.env['N7_DEBUG_MAGIC_SECURITY_KEY'] ?? '';
 
   // Segment
   static String get segmentDebugUrl => dotenv.env['SEGMENT_DEBUG_URL'] ?? '';
-  static String get segmentReleaseUrl => dotenv.env['SEGMENT_RELEASE_URL'] ?? '';
+  static String get segmentReleaseUrl =>
+      dotenv.env['SEGMENT_RELEASE_URL'] ?? '';
 }

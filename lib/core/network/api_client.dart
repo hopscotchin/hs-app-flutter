@@ -114,7 +114,8 @@ class ApiClient {
         return await request();
       } on AppException catch (e) {
         attempt++;
-        final isRetryable = e is TimeoutException ||
+        final isRetryable =
+            e is TimeoutException ||
             (e.statusCode != null && e.statusCode! >= 500);
         if (!isRetryable || attempt > maxRetries) rethrow;
         await Future.delayed(_initialBackoff * attempt);
@@ -152,7 +153,9 @@ class ApiClient {
         return _mapStatusCode(e);
       default:
         return ServerException(
-          message: e.message ?? 'Uh-oh! Our systems are acting up. Please try again later.',
+          message:
+              e.message ??
+              'Uh-oh! Our systems are acting up. Please try again later.',
           statusCode: e.response?.statusCode,
         );
     }
@@ -164,17 +167,41 @@ class ApiClient {
     final message = data is Map ? data['message'] as String? : null;
 
     return switch (statusCode) {
-      400 => BadRequestException(message: message ?? 'Uh-oh! Our systems are acting up. Please try again later.'),
-      401 => UnauthorizedException(message: message ?? 'Uh-oh! Session expired. Please log in again.'),
-      403 => ForbiddenException(message: message ?? 'Uh-oh! You don\'t have permission to access this resource.'),
-      404 => NotFoundException(message: message ?? 'Uh-oh! The requested resource was not found.'),
-      409 => ConflictException(message: message ?? 'Uh-oh! A conflict occurred. Please try again.'),
-      500 => InternalServerException(message: message ?? 'Uh-oh! Our systems are acting up. Please try again later.'),
-      503 => ServiceUnavailableException(message: message ?? 'Uh-oh! Service is temporarily unavailable. Please try again later.'),
+      400 => BadRequestException(
+        message:
+            message ??
+            'Uh-oh! Our systems are acting up. Please try again later.',
+      ),
+      401 => UnauthorizedException(
+        message: message ?? 'Uh-oh! Session expired. Please log in again.',
+      ),
+      403 => ForbiddenException(
+        message:
+            message ??
+            'Uh-oh! You don\'t have permission to access this resource.',
+      ),
+      404 => NotFoundException(
+        message: message ?? 'Uh-oh! The requested resource was not found.',
+      ),
+      409 => ConflictException(
+        message: message ?? 'Uh-oh! A conflict occurred. Please try again.',
+      ),
+      500 => InternalServerException(
+        message:
+            message ??
+            'Uh-oh! Our systems are acting up. Please try again later.',
+      ),
+      503 => ServiceUnavailableException(
+        message:
+            message ??
+            'Uh-oh! Service is temporarily unavailable. Please try again later.',
+      ),
       _ => ServerException(
-          message: message ?? 'Uh-oh! Our systems are acting up. Please try again later.',
-          statusCode: statusCode,
-        ),
+        message:
+            message ??
+            'Uh-oh! Our systems are acting up. Please try again later.',
+        statusCode: statusCode,
+      ),
     };
   }
 }

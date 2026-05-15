@@ -26,13 +26,12 @@ class AuthHeaderInterceptor extends Interceptor {
   AuthHeaderInterceptor({
     required DeviceInfoPlugin deviceInfo,
     required PackageInfo packageInfo,
-  })  : _deviceInfo = deviceInfo,
-        _packageInfo = packageInfo;
+  }) : _deviceInfo = deviceInfo,
+       _packageInfo = packageInfo;
 
   bool get _isAndroid =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-  bool get _isIOS =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+  bool get _isIOS => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
   Future<void> init() async {
     if (_isAndroid) {

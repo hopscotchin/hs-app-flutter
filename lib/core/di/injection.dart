@@ -3,7 +3,9 @@ import 'package:injectable/injectable.dart';
 
 import 'injection.config.dart';
 
-final getIt = GetIt.instance;
+final sl = GetIt.instance;
+
+//dart run build_runner build -d
 
 @InjectableInit()
-void configureDependencies() => getIt.init();
+Future<void> configureDependencies() => Future.sync(sl.init);

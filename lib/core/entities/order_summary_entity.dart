@@ -20,6 +20,12 @@ class OrderSummaryEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props =>
-      [sectionTitle, subText, pricingData, totalOrderAmount, totalAmount, itemCount];
+  List<Object?> get props => [
+    sectionTitle,
+    subText,
+    pricingData,
+    totalOrderAmount,
+    totalAmount,
+    itemCount,
+  ];
 }

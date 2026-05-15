@@ -1,28 +1,70 @@
+import 'package:json_annotation/json_annotation.dart';
+
+import '../../../../core/entities/message_bar_entity.dart';
+import '../../../../core/models/message_bar_model.dart';
 import '../../domain/entities/home_page_entity.dart';
 import 'page_component_model.dart';
 
-class HomePageResponseModel extends HomePageEntity {
+part 'home_page_response_model.g.dart';
+
+@JsonSerializable(createToJson: false)
+class HomePageResponseModel {
   const HomePageResponseModel({
-    super.pageName,
-    super.pageBackgroundColor,
-    super.totalCollections,
-    super.totalSections,
-    super.pageComponents,
+    this.pageName,
+    this.pageBackgroundColor,
+    this.headerBgImageUrl,
+    this.totalCollections = 0,
+    this.totalSections = 0,
+    this.pageComponents = const [],
+    this.action,
+    this.popUpMessage,
+    this.messageBars = const [],
   });
 
-  HomePageResponseModel.fromJson(super.json)
-      : super.fromJson(
-          pageName: json['pageName'] as String?,
-          pageBackgroundColor: json['pageBackgroundColor'] as String?,
-          totalCollections: json['totalCollections'] as int? ?? 0,
-          totalSections: json['totalSections'] as int? ?? 0,
-          pageComponents: _parseComponents(json),
-        );
+  final String? pageName;
+  final String? pageBackgroundColor;
+  final String? headerBgImageUrl;
+  @JsonKey(defaultValue: 0)
+  final int totalCollections;
+  @JsonKey(defaultValue: 0)
+  final int totalSections;
+  @JsonKey(fromJson: _parseComponents)
+  final List<PageComponentModel> pageComponents;
+  final String? action;
+  final String? popUpMessage;
+  @JsonKey(fromJson: _parseMessageBars)
+  final List<MessageBarEntity> messageBars;
 
-  static List<PageComponent> _parseComponents(Map<String, dynamic> json) {
-    final rawComponents = json['pageComponents'] as List<dynamic>? ?? [];
-    return rawComponents
-        .map((e) => PageComponentModel.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
+  factory HomePageResponseModel.fromJson(Map<String, dynamic> json) =>
+      _$HomePageResponseModelFromJson(json);
+}
+
+List<PageComponentModel> _parseComponents(Object? json) {
+  if (json is! List) return const [];
+  return json
+      .whereType<Map<String, dynamic>>()
+      .map(PageComponentModel.fromJson)
+      .toList();
+}
+
+List<MessageBarEntity> _parseMessageBars(Object? json) {
+  if (json is! List) return const [];
+  return json
+      .whereType<Map<String, dynamic>>()
+      .map(MessageBarModel.fromJson)
+      .toList();
+}
+
+extension HomePageResponseModelX on HomePageResponseModel {
+  HomePageEntity toEntity() => HomePageEntity(
+    action: action,
+    popUpMessage: popUpMessage,
+    messageBars: messageBars,
+    pageName: pageName,
+    pageBackgroundColor: pageBackgroundColor,
+    headerBgImageUrl: headerBgImageUrl,
+    totalCollections: totalCollections,
+    totalSections: totalSections,
+    pageComponents: pageComponents.map((m) => m.toComponent()).toList(),
+  );
 }

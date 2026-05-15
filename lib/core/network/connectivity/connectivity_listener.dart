@@ -27,8 +27,9 @@ class _ConnectivityListenerState extends State<ConnectivityListener> {
   @override
   void initState() {
     super.initState();
-    _subscription =
-        widget.connectivityService.onConnectivityChanged.listen(_onChanged);
+    _subscription = widget.connectivityService.onConnectivityChanged.listen(
+      _onChanged,
+    );
   }
 
   void _onChanged(bool isConnected) {
@@ -56,9 +57,7 @@ class _ConnectivityListenerState extends State<ConnectivityListener> {
           duration: const Duration(days: 1),
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
     } else if (_wasOffline) {
@@ -81,9 +80,7 @@ class _ConnectivityListenerState extends State<ConnectivityListener> {
           duration: const Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
     }

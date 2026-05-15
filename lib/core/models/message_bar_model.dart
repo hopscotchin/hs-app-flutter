@@ -16,6 +16,7 @@ class MessageBarModel extends MessageBarEntity {
     super.isCriticalMessage,
     super.hasIcon,
     super.icon,
+    super.redirectLink,
   });
 
   factory MessageBarModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +35,7 @@ class MessageBarModel extends MessageBarEntity {
       isCriticalMessage: json['isCriticalMessage'] as bool? ?? false,
       hasIcon: json['hasIcon'] as bool? ?? false,
       icon: json['icon'] as String?,
+      redirectLink: json['redirectLink'] as String?,
     );
   }
 }

@@ -10,8 +10,6 @@ import '../../../core/network/cookies/hs_cookie_store.dart';
 import '../../../core/network/network_client.dart';
 import '../../../core/services/connectivity_service.dart';
 import '../../../core/services/pref_manager.dart';
-// Cart Module
-import '../../cart/presentation/bloc/cart_bloc.dart';
 // Categories Module
 import '../../categories/data/datasources/remote/categories_remote_datasource.dart';
 import '../../categories/data/repositories/categories_repository_impl.dart';
@@ -68,25 +66,6 @@ Future<void> initDependencies() async {
   // Analytics
   sl.registerLazySingleton(AnalyticsService.new);
 
-  // Splash Module
-  sl.registerFactory(
-    () => SplashBloc(
-      networkClient: sl(),
-      prefManager: sl()
-    ),
-  );
-
-  // ============================
-  // Discover Module
-  // ============================
-  sl.registerLazySingleton<HomeRemoteDataSource>(
-    () => HomeRemoteDataSourceImpl(apiClient: sl()),
-  );
-  sl.registerLazySingleton<HomeRepository>(
-    () => HomeRepositoryImpl(remoteDataSource: sl(), networkInfo: sl()),
-  );
-  sl.registerLazySingleton(() => GetHomePageUseCase(sl()));
-  sl.registerFactory(() => HomeBloc(getHomePageUseCase: sl()));
 
   // ============================
   // Categories Module
@@ -100,12 +79,4 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetDepartmentsUseCase(sl()));
   sl.registerFactory(() => CategoriesBloc(getDepartmentsUseCase: sl()));
 
-  // ============================
-  // Cart Module
-  // ============================
-  sl.registerFactory(
-    () => CartBloc(
-      prefManager: sl(),
-    ),
-  );
 }
