@@ -71,6 +71,8 @@
 		<string>devtools</string>
 		<string>cugext</string>
 		<string>fpupi</string>
+		<string>scapia</string>
+		<string>salaryse</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
