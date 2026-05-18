@@ -47,6 +47,7 @@ class _DiscoverPageState extends State<DiscoverPage>
       builder: (context, state) {
         return Scaffold(
           body: SafeArea(
+            bottom: false,
             child: RefreshIndicator(
               onRefresh: () async =>
                   context.read<HomeBloc>().add(const RefreshHomePage()),

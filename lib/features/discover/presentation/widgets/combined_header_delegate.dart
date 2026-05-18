@@ -42,10 +42,10 @@ class CombinedHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
+      BuildContext context,
+      double shrinkOffset,
+      bool overlapsContent,
+      ) {
     final t = (shrinkOffset / toolbarHeight).clamp(0.0, 1.0);
 
     return ClipRect(
@@ -82,18 +82,10 @@ class CombinedHeaderDelegate extends SliverPersistentHeaderDelegate {
             right: 0,
             height: tabsHeight,
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                border: const Border(
+              decoration: const BoxDecoration(
+                border: Border(
                   bottom: BorderSide(color: Color(0x08000000)),
                 ),
-                boxShadow: overlapsContent
-                    ? const [
-                        BoxShadow(
-                          color: Color(0x10000000),
-                          offset: Offset(0, 1),
-                        ),
-                      ]
-                    : const [],
               ),
               child: SpringTabBar(
                 items: items,
@@ -152,7 +144,7 @@ class _AppBarContent extends StatelessWidget {
                 width: 20,
                 colorFilter: svgFilter,
                 placeholderBuilder: (_) =>
-                    const SizedBox(height: 20, width: 20),
+                const SizedBox(height: 20, width: 20),
               ),
             ),
           ),

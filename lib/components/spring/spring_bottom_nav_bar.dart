@@ -1,7 +1,8 @@
 // lib/components/spring_bottom_nav_bar.dart
 //
 // iOS-style spring bottom navigation — interaction fidelity port.
-// Visual styling (shadow, blur, gradients) is the caller's responsibility.
+// Wraps itself in a rounded white capsule (margin, border, shadow) so it can
+// be dropped straight into a Scaffold's floatingActionButton slot.
 //
 // ── Architecture ──────────────────────────────────────────────────────────────
 //
@@ -44,6 +45,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
+import 'package:hs_app_flutter/core/theme/colors.dart';
+import 'package:hs_app_flutter/core/theme/spacing.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Spring tuning
@@ -200,9 +203,9 @@ class SpringBottomNavBar extends StatefulWidget {
     // e.g. (e) => BoxDecoration(color: Color.lerp(transparent, highlight, e))
     this.tileDecoration,
   }) : assert(
-         items.length >= 2 && items.length <= 6,
-         'SpringBottomNavBar: provide between 2 and 6 items',
-       );
+  items.length >= 2 && items.length <= 6,
+  'SpringBottomNavBar: provide between 2 and 6 items',
+  );
 
   final List<NavBarItem> items;
   final ValueChanged<int> onTabSelected;
@@ -370,51 +373,65 @@ class _SpringBottomNavBarState extends State<SpringBottomNavBar>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (ctx, constraints) {
-        _barWidth = constraints.maxWidth;
-        _controller.updateBarWidth(_barWidth);
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 18),
+      height: 64,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.baseDefault,
+        borderRadius: BorderRadius.circular(24),
+        border: BoxBorder.all(color: AppColors.neutralGrey1, width: 1),
+        boxShadow: const [
+          BoxShadow(color: Color(0x1A000000), blurRadius: 16, offset: Offset(2, 8)),
+        ],
+      ),
+      padding: const EdgeInsets.all(AppSpacing.xxs),
+      child: LayoutBuilder(
+        builder: (ctx, constraints) {
+          _barWidth = constraints.maxWidth;
+          _controller.updateBarWidth(_barWidth);
 
-        return Listener(
-          behavior: HitTestBehavior.opaque,
-          onPointerDown: _onPointerDown,
-          onPointerMove: _onPointerMove,
-          onPointerUp: _onPointerUp,
-          onPointerCancel: _onPointerCancel,
-          child: Container(
-            height: widget.height,
-            color: widget.backgroundColor,
-            // RepaintBoundary isolates the animated row into its own GPU layer
-            // so the parent (Scaffold, page body) never repaints on each tick.
-            child: RepaintBoundary(
-              child: ListenableBuilder(
-                listenable: _controller,
-                builder: (_, _) {
-                  final exps = _controller.expansions;
-                  return Row(
-                    children: [
-                      for (int i = 0; i < widget.items.length; i++)
-                        Expanded(
-                          child: SizedBox(
-                            height: widget.height,
-                            child: _NavTile(
-                              item: widget.items[i],
-                              expansion: exps[i],
-                              tileHeight: widget.height,
-                              activeColor: widget.activeColor,
-                              inactiveColor: widget.inactiveColor,
-                              tileDecoration: widget.tileDecoration,
+          return Listener(
+            behavior: HitTestBehavior.opaque,
+            onPointerDown: _onPointerDown,
+            onPointerMove: _onPointerMove,
+            onPointerUp: _onPointerUp,
+            onPointerCancel: _onPointerCancel,
+            child: Container(
+              height: widget.height,
+              color: widget.backgroundColor,
+              // RepaintBoundary isolates the animated row into its own GPU layer
+              // so the parent (Scaffold, page body) never repaints on each tick.
+              child: RepaintBoundary(
+                child: ListenableBuilder(
+                  listenable: _controller,
+                  builder: (_, _) {
+                    final exps = _controller.expansions;
+                    return Row(
+                      children: [
+                        for (int i = 0; i < widget.items.length; i++)
+                          Expanded(
+                            child: SizedBox(
+                              height: widget.height,
+                              child: _NavTile(
+                                item: widget.items[i],
+                                expansion: exps[i],
+                                tileHeight: widget.height,
+                                activeColor: widget.activeColor,
+                                inactiveColor: widget.inactiveColor,
+                                tileDecoration: widget.tileDecoration,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

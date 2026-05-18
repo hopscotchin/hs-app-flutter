@@ -197,10 +197,8 @@ class _SpringTabBarState extends State<SpringTabBar>
     _selectedIndex = idx;
     _springTo(idx.toDouble());
     HapticFeedback.selectionClick();
-    if (idx != _lastReported) {
-      _lastReported = idx;
-      widget.onTabSelected(idx);
-    }
+    _lastReported = idx;
+    widget.onTabSelected(idx);
   }
 
   void _checkCrossover() {
@@ -246,11 +244,11 @@ class _SpringTabBarState extends State<SpringTabBar>
                   : (widget.backgroundColor ?? Colors.white),
               image: widget.backgroundImageUrl != null
                   ? DecorationImage(
-                      image: CachedNetworkImageProvider(
-                        widget.backgroundImageUrl!,
-                      ),
-                      fit: BoxFit.cover,
-                    )
+                image: CachedNetworkImageProvider(
+                  widget.backgroundImageUrl!,
+                ),
+                fit: BoxFit.cover,
+              )
                   : null,
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -269,13 +267,13 @@ class _SpringTabBarState extends State<SpringTabBar>
                         child: item.buildContent != null
                             ? item.buildContent!(ctx, exp, isActive)
                             : _DefaultTab(
-                                label: item.label,
-                                expansion: exp,
-                                isActive: isActive,
-                                activeStyle: _activeStyle,
-                                inactiveStyle: _inactiveStyle,
-                                isImageDark: widget.isImageDark,
-                              ),
+                          label: item.label,
+                          expansion: exp,
+                          isActive: isActive,
+                          activeStyle: _activeStyle,
+                          inactiveStyle: _inactiveStyle,
+                          isImageDark: widget.isImageDark,
+                        ),
                       );
                     }),
                   );
