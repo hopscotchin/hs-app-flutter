@@ -1319,6 +1319,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.1.17"
+  talker_dio_logger_plus:
+    dependency: "direct main"
+    description:
+      name: talker_dio_logger_plus
+      sha256: "3bd6894aa4ffb7447c6c15d860376216e9d88ca345913c9fd22e5887cb5942e2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.5"
   talker_flutter:
     dependency: "direct main"
     description:

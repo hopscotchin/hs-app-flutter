@@ -98,6 +98,12 @@ class SpringNavController extends ChangeNotifier {
   final int itemCount;
   int _selectedIndex;
   bool _isDragging = false;
+  // Tap mode: animate only `_tapFromIndex` → `_selectedIndex`, skipping any
+  // intermediate tabs the spring sweeps through. Without this, tapping Home(0)
+  // → Account(3) makes Categories(1) and Search(2) flash on as dragFloat
+  // passes their integer positions.
+  bool _tapMode = false;
+  int _tapFromIndex = 0;
   double _barWidth = 0;
   late final AnimationController _ctrl;
   // Pre-allocated so expansions never creates a new List per animation tick.
@@ -110,12 +116,26 @@ class SpringNavController extends ChangeNotifier {
   double get dragFloat => _ctrl.value.clamp(0.0, itemCount - 1.0);
 
   /// Per-tab expansion in [0, 1].
-  /// Between adjacent tabs A and B: expansions[A] + expansions[B] = 1.
+  /// Drag mode: adjacency math — expansion[A] + expansion[B] = 1 for adjacent A,B.
+  /// Tap mode: only the from/to tabs receive expansion; intermediates stay 0.
   /// Returns the same List instance every call — callers must not hold a ref.
   List<double> get expansions {
     final v = dragFloat;
-    for (var i = 0; i < itemCount; i++) {
-      _expansionCache[i] = (1.0 - (i - v).abs()).clamp(0.0, 1.0);
+    if (_tapMode && _tapFromIndex != _selectedIndex) {
+      final from = _tapFromIndex;
+      final to = _selectedIndex;
+      final progress = ((v - from) / (to - from)).clamp(0.0, 1.0);
+      for (var i = 0; i < itemCount; i++) {
+        _expansionCache[i] = i == from
+            ? 1.0 - progress
+            : i == to
+            ? progress
+            : 0.0;
+      }
+    } else {
+      for (var i = 0; i < itemCount; i++) {
+        _expansionCache[i] = (1.0 - (i - v).abs()).clamp(0.0, 1.0);
+      }
     }
     return _expansionCache;
   }
@@ -126,6 +146,8 @@ class SpringNavController extends ChangeNotifier {
   void selectTab(int index) {
     if (_selectedIndex == index && !_isDragging) return;
     _isDragging = false;
+    _tapMode = true;
+    _tapFromIndex = _selectedIndex;
     _selectedIndex = index;
     _springTo(index.toDouble());
     HapticFeedback.selectionClick();
@@ -136,6 +158,7 @@ class SpringNavController extends ChangeNotifier {
   void dragStart(Offset local) {
     _ctrl.stop();
     _isDragging = true;
+    _tapMode = false;
     _ctrl.value = _xToFloat(local.dx);
     HapticFeedback.mediumImpact();
   }
@@ -203,9 +226,9 @@ class SpringBottomNavBar extends StatefulWidget {
     // e.g. (e) => BoxDecoration(color: Color.lerp(transparent, highlight, e))
     this.tileDecoration,
   }) : assert(
-  items.length >= 2 && items.length <= 6,
-  'SpringBottomNavBar: provide between 2 and 6 items',
-  );
+         items.length >= 2 && items.length <= 6,
+         'SpringBottomNavBar: provide between 2 and 6 items',
+       );
 
   final List<NavBarItem> items;
   final ValueChanged<int> onTabSelected;
@@ -259,7 +282,12 @@ class _SpringBottomNavBarState extends State<SpringBottomNavBar>
   @override
   void didUpdateWidget(SpringBottomNavBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialIndex != widget.initialIndex) {
+    // Only react to *external* changes — not the parent rebuild caused by our
+    // own onTabSelected callback. Without this guard, every drag crossover
+    // would echo back through the parent and call selectTab(), which sets
+    // _isDragging = false and aborts the gesture mid-drag.
+    if (oldWidget.initialIndex != widget.initialIndex &&
+        widget.initialIndex != _lastReported) {
       _controller.selectTab(widget.initialIndex);
       _lastReported = widget.initialIndex;
     }

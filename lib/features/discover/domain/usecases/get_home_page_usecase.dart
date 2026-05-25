@@ -16,14 +16,24 @@ class GetHomePageUseCase implements UseCase<HomePageEntity, GetHomePageParams> {
 
   @override
   Future<Either<Failure, HomePageEntity>> call(GetHomePageParams params) =>
-      repository.getHomePage(cancelToken: params.cancelToken);
+      repository.getHomePage(
+        pageName: params.pageName,
+        pageNo: params.pageNo,
+        cancelToken: params.cancelToken,
+      );
 }
 
 class GetHomePageParams extends Equatable {
-  const GetHomePageParams({this.cancelToken});
+  const GetHomePageParams({
+    required this.pageName,
+    this.pageNo = 1,
+    this.cancelToken,
+  });
 
+  final String pageName;
+  final int pageNo;
   final CancelToken? cancelToken;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [pageName, pageNo];
 }

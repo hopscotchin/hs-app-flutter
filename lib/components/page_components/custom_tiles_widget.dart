@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hs_app_flutter/core/theme/spacing.dart';
 
+import '../../core/constants/strings/discover_strings.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../atoms/cached_image_widget.dart';
+import '../atoms/cta_button_component.dart';
 
 class CustomTilesWidget extends StatelessWidget {
   final CustomTilesData tilesData;
@@ -12,60 +15,93 @@ class CustomTilesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool hasTitleImage = tilesData.titleImage?.url != null;
-    final List<StoreTileDetail> rows = tilesData.tileDetails
-        .where((d) => d.tileGrid.isNotEmpty)
-        .toList();
+    // Split out title-row tiles (isTitleItem=true) and content rows.
+    final List<CustomTilesTile> titleRows = <CustomTilesTile>[];
+    final List<CustomTilesTile> contentRows = <CustomTilesTile>[];
+    for (final tile in tilesData.tiles) {
+      if (tile.tileGrid.isEmpty) continue;
+      (tile.isTitleRow ? titleRows : contentRows).add(tile);
+    }
 
-    if (!hasTitleImage && rows.isEmpty) return const SizedBox.shrink();
+    final TitleImage? titleImage = tilesData.title;
+    final TileGridItem? titleRowImage =
+        titleRows.isNotEmpty ? titleRows.first.tileGrid.first : null;
+    final bool hasTitle = titleImage?.url != null || titleRowImage != null;
 
-    // Mirrors Android updateItemMargins defaults.
-    // Title margins are zeroed by Android when titleImage is null — match that.
+    if (!hasTitle && contentRows.isEmpty && tilesData.ctaButton == null) {
+      return const SizedBox.shrink();
+    }
+
     final double horizontalMargin = margins?.horizontal ?? 16;
     final double innerHorizontalMargin = margins?.innerHorizontalMargin ?? 8;
     final double innerVerticalMargin = margins?.innerVerticalMargin ?? 0;
-    final double titleHMargin = hasTitleImage
+    final double titleHMargin = hasTitle
         ? (margins?.titleHorizontalMargin ?? 16)
         : 0.0;
-    final double titleBMargin = hasTitleImage
+    final double titleBMargin = hasTitle
         ? (margins?.titleBottomMargin ?? 16)
         : 0.0;
+    // viewConfig.imageCornerRadius (defaults to 4 when not supplied by API).
+    final double imageCornerRadius =
+        tilesData.viewConfig?.imageCornerRadius ?? 4;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (hasTitleImage)
-          _buildTitleImage(context, titleHMargin, titleBMargin),
-        if (rows.isNotEmpty)
+        if (titleImage?.url != null)
+          _buildTitleFromTitleImage(titleImage!, titleHMargin, titleBMargin),
+        if (titleImage?.url == null && titleRowImage != null)
+          _buildTitleFromGridItem(
+            titleRowImage,
+            titleHMargin,
+            titleBMargin,
+          ),
+        if (contentRows.isNotEmpty)
           Padding(
             padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                for (int i = 0; i < rows.length; i++) ...[
-                  // SizedBox only between rows — not before first or after last.
+                for (int i = 0; i < contentRows.length; i++) ...[
                   if (i > 0 && innerVerticalMargin > 0)
                     SizedBox(height: innerVerticalMargin),
-                  _buildRow(context, rows[i].tileGrid, innerHorizontalMargin),
+                  _buildRow(
+                    context,
+                    contentRows[i].tileGrid,
+                    innerHorizontalMargin,
+                    imageCornerRadius,
+                  ),
                 ],
               ],
+            ),
+          ),
+        if (tilesData.ctaButton != null)
+          Padding(
+            padding: const EdgeInsets.only(
+              top: AppSpacing.sm,
+            ),
+            child: Center(
+              child: CtaButtonComponent(
+                label: tilesData.ctaButton!.label ?? DiscoverStrings.viewAll,
+                style: CtaButtonStyle.fromString(tilesData.ctaButton!.type),
+                onPressed: () => ActionUrlHandler.navigate(
+                  context,
+                  tilesData.ctaButton!.actionUri,
+                ),
+              ),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildTitleImage(
-    BuildContext context,
+  Widget _buildTitleFromTitleImage(
+    TitleImage titleImage,
     double titleHMargin,
     double titleBMargin,
   ) {
-    final TitleImageData titleImage = tilesData.titleImage!;
     final String url = titleImage.url!;
-
-    // Mirror Android: compute height from aspect ratio when dimensions are available.
-    // Falls back to intrinsic sizing (double.infinity width, no explicit height).
     final bool hasDimensions =
         (titleImage.width ?? 0) > 0 && (titleImage.height ?? 0) > 0;
 
@@ -97,38 +133,75 @@ class CustomTilesWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildTitleFromGridItem(
+    TileGridItem item,
+    double titleHMargin,
+    double titleBMargin,
+  ) {
+    final String url = item.imageUrl ?? '';
+    if (url.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(
+        left: titleHMargin,
+        right: titleHMargin,
+        bottom: titleBMargin,
+      ),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double availableWidth = constraints.maxWidth;
+          final double aspectRatio = item.aspectRatio;
+          return CachedImageWidget(
+            imageUrl: url,
+            width: availableWidth,
+            height: aspectRatio > 0 ? availableWidth / aspectRatio : null,
+            fit: BoxFit.cover,
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildRow(
     BuildContext context,
-    List<TileImage> tiles,
+    List<TileGridItem> tiles,
     double innerHorizontalMargin,
+    double imageCornerRadius,
   ) {
-    if (tiles.length == 1) return _buildTile(context, tiles.first);
+    if (tiles.length == 1) {
+      return _buildTile(context, tiles.first, imageCornerRadius);
+    }
 
     return Row(
       children: [
         for (int i = 0; i < tiles.length; i++) ...[
-          // SizedBox only between tiles — no edge padding against the outer margin.
           if (i > 0) SizedBox(width: innerHorizontalMargin),
-          Expanded(child: _buildTile(context, tiles[i])),
+          Expanded(child: _buildTile(context, tiles[i], imageCornerRadius)),
         ],
       ],
     );
   }
 
-  Widget _buildTile(BuildContext context, TileImage tile) {
-    final double aspectRatio =
-        (tile.width != null && tile.height != null && tile.height! > 0)
-        ? tile.width! / tile.height!
-        : 1.0;
+  Widget _buildTile(
+    BuildContext context,
+    TileGridItem tile,
+    double imageCornerRadius,
+  ) {
+    final Widget image = AspectRatio(
+      aspectRatio: tile.aspectRatio,
+      child: CachedImageWidget(
+        imageUrl: tile.imageUrl ?? '',
+        fit: BoxFit.cover,
+      ),
+    );
     return GestureDetector(
       onTap: () => ActionUrlHandler.navigate(context, tile.actionUri),
-      child: AspectRatio(
-        aspectRatio: aspectRatio,
-        child: CachedImageWidget(
-          imageUrl: tile.imageUrl ?? '',
-          fit: BoxFit.cover,
-        ),
-      ),
+      child: imageCornerRadius > 0
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(imageCornerRadius),
+              child: image,
+            )
+          : image,
     );
   }
 }
+

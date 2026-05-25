@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$HomePageEntity {
 
- String? get action; String? get popUpMessage; List<MessageBarEntity> get messageBars; String? get pageName; String? get pageBackgroundColor; String? get headerBgImageUrl; int get totalCollections; int get totalSections; List<PageComponent> get pageComponents;
+ String? get action; String? get popUpMessage; List<MessageBarEntity> get messageBars; PageMeta? get pageMeta; List<SortingOption> get sortingOptions; List<PageComponent> get pageComponents;
 /// Create a copy of HomePageEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $HomePageEntityCopyWith<HomePageEntity> get copyWith => _$HomePageEntityCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomePageEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.popUpMessage, popUpMessage) || other.popUpMessage == popUpMessage)&&const DeepCollectionEquality().equals(other.messageBars, messageBars)&&(identical(other.pageName, pageName) || other.pageName == pageName)&&(identical(other.pageBackgroundColor, pageBackgroundColor) || other.pageBackgroundColor == pageBackgroundColor)&&(identical(other.headerBgImageUrl, headerBgImageUrl) || other.headerBgImageUrl == headerBgImageUrl)&&(identical(other.totalCollections, totalCollections) || other.totalCollections == totalCollections)&&(identical(other.totalSections, totalSections) || other.totalSections == totalSections)&&const DeepCollectionEquality().equals(other.pageComponents, pageComponents));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomePageEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.popUpMessage, popUpMessage) || other.popUpMessage == popUpMessage)&&const DeepCollectionEquality().equals(other.messageBars, messageBars)&&(identical(other.pageMeta, pageMeta) || other.pageMeta == pageMeta)&&const DeepCollectionEquality().equals(other.sortingOptions, sortingOptions)&&const DeepCollectionEquality().equals(other.pageComponents, pageComponents));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,action,popUpMessage,const DeepCollectionEquality().hash(messageBars),pageName,pageBackgroundColor,headerBgImageUrl,totalCollections,totalSections,const DeepCollectionEquality().hash(pageComponents));
+int get hashCode => Object.hash(runtimeType,action,popUpMessage,const DeepCollectionEquality().hash(messageBars),pageMeta,const DeepCollectionEquality().hash(sortingOptions),const DeepCollectionEquality().hash(pageComponents));
 
 @override
 String toString() {
-  return 'HomePageEntity(action: $action, popUpMessage: $popUpMessage, messageBars: $messageBars, pageName: $pageName, pageBackgroundColor: $pageBackgroundColor, headerBgImageUrl: $headerBgImageUrl, totalCollections: $totalCollections, totalSections: $totalSections, pageComponents: $pageComponents)';
+  return 'HomePageEntity(action: $action, popUpMessage: $popUpMessage, messageBars: $messageBars, pageMeta: $pageMeta, sortingOptions: $sortingOptions, pageComponents: $pageComponents)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $HomePageEntityCopyWith<$Res>  {
   factory $HomePageEntityCopyWith(HomePageEntity value, $Res Function(HomePageEntity) _then) = _$HomePageEntityCopyWithImpl;
 @useResult
 $Res call({
- String? action, String? popUpMessage, List<MessageBarEntity> messageBars, String? pageName, String? pageBackgroundColor, String? headerBgImageUrl, int totalCollections, int totalSections, List<PageComponent> pageComponents
+ String? action, String? popUpMessage, List<MessageBarEntity> messageBars, PageMeta? pageMeta, List<SortingOption> sortingOptions, List<PageComponent> pageComponents
 });
 
 
@@ -62,17 +62,14 @@ class _$HomePageEntityCopyWithImpl<$Res>
 
 /// Create a copy of HomePageEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? action = freezed,Object? popUpMessage = freezed,Object? messageBars = null,Object? pageName = freezed,Object? pageBackgroundColor = freezed,Object? headerBgImageUrl = freezed,Object? totalCollections = null,Object? totalSections = null,Object? pageComponents = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? action = freezed,Object? popUpMessage = freezed,Object? messageBars = null,Object? pageMeta = freezed,Object? sortingOptions = null,Object? pageComponents = null,}) {
   return _then(_self.copyWith(
 action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as String?,popUpMessage: freezed == popUpMessage ? _self.popUpMessage : popUpMessage // ignore: cast_nullable_to_non_nullable
 as String?,messageBars: null == messageBars ? _self.messageBars : messageBars // ignore: cast_nullable_to_non_nullable
-as List<MessageBarEntity>,pageName: freezed == pageName ? _self.pageName : pageName // ignore: cast_nullable_to_non_nullable
-as String?,pageBackgroundColor: freezed == pageBackgroundColor ? _self.pageBackgroundColor : pageBackgroundColor // ignore: cast_nullable_to_non_nullable
-as String?,headerBgImageUrl: freezed == headerBgImageUrl ? _self.headerBgImageUrl : headerBgImageUrl // ignore: cast_nullable_to_non_nullable
-as String?,totalCollections: null == totalCollections ? _self.totalCollections : totalCollections // ignore: cast_nullable_to_non_nullable
-as int,totalSections: null == totalSections ? _self.totalSections : totalSections // ignore: cast_nullable_to_non_nullable
-as int,pageComponents: null == pageComponents ? _self.pageComponents : pageComponents // ignore: cast_nullable_to_non_nullable
+as List<MessageBarEntity>,pageMeta: freezed == pageMeta ? _self.pageMeta : pageMeta // ignore: cast_nullable_to_non_nullable
+as PageMeta?,sortingOptions: null == sortingOptions ? _self.sortingOptions : sortingOptions // ignore: cast_nullable_to_non_nullable
+as List<SortingOption>,pageComponents: null == pageComponents ? _self.pageComponents : pageComponents // ignore: cast_nullable_to_non_nullable
 as List<PageComponent>,
   ));
 }
@@ -158,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? action,  String? popUpMessage,  List<MessageBarEntity> messageBars,  String? pageName,  String? pageBackgroundColor,  String? headerBgImageUrl,  int totalCollections,  int totalSections,  List<PageComponent> pageComponents)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? action,  String? popUpMessage,  List<MessageBarEntity> messageBars,  PageMeta? pageMeta,  List<SortingOption> sortingOptions,  List<PageComponent> pageComponents)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HomePageEntity() when $default != null:
-return $default(_that.action,_that.popUpMessage,_that.messageBars,_that.pageName,_that.pageBackgroundColor,_that.headerBgImageUrl,_that.totalCollections,_that.totalSections,_that.pageComponents);case _:
+return $default(_that.action,_that.popUpMessage,_that.messageBars,_that.pageMeta,_that.sortingOptions,_that.pageComponents);case _:
   return orElse();
 
 }
@@ -179,10 +176,10 @@ return $default(_that.action,_that.popUpMessage,_that.messageBars,_that.pageName
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? action,  String? popUpMessage,  List<MessageBarEntity> messageBars,  String? pageName,  String? pageBackgroundColor,  String? headerBgImageUrl,  int totalCollections,  int totalSections,  List<PageComponent> pageComponents)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? action,  String? popUpMessage,  List<MessageBarEntity> messageBars,  PageMeta? pageMeta,  List<SortingOption> sortingOptions,  List<PageComponent> pageComponents)  $default,) {final _that = this;
 switch (_that) {
 case _HomePageEntity():
-return $default(_that.action,_that.popUpMessage,_that.messageBars,_that.pageName,_that.pageBackgroundColor,_that.headerBgImageUrl,_that.totalCollections,_that.totalSections,_that.pageComponents);case _:
+return $default(_that.action,_that.popUpMessage,_that.messageBars,_that.pageMeta,_that.sortingOptions,_that.pageComponents);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +196,10 @@ return $default(_that.action,_that.popUpMessage,_that.messageBars,_that.pageName
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? action,  String? popUpMessage,  List<MessageBarEntity> messageBars,  String? pageName,  String? pageBackgroundColor,  String? headerBgImageUrl,  int totalCollections,  int totalSections,  List<PageComponent> pageComponents)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? action,  String? popUpMessage,  List<MessageBarEntity> messageBars,  PageMeta? pageMeta,  List<SortingOption> sortingOptions,  List<PageComponent> pageComponents)?  $default,) {final _that = this;
 switch (_that) {
 case _HomePageEntity() when $default != null:
-return $default(_that.action,_that.popUpMessage,_that.messageBars,_that.pageName,_that.pageBackgroundColor,_that.headerBgImageUrl,_that.totalCollections,_that.totalSections,_that.pageComponents);case _:
+return $default(_that.action,_that.popUpMessage,_that.messageBars,_that.pageMeta,_that.sortingOptions,_that.pageComponents);case _:
   return null;
 
 }
@@ -214,7 +211,7 @@ return $default(_that.action,_that.popUpMessage,_that.messageBars,_that.pageName
 
 
 class _HomePageEntity implements HomePageEntity {
-  const _HomePageEntity({this.action, this.popUpMessage, final  List<MessageBarEntity> messageBars = const <MessageBarEntity>[], this.pageName, this.pageBackgroundColor, this.headerBgImageUrl, this.totalCollections = 0, this.totalSections = 0, final  List<PageComponent> pageComponents = const <PageComponent>[]}): _messageBars = messageBars,_pageComponents = pageComponents;
+  const _HomePageEntity({this.action, this.popUpMessage, final  List<MessageBarEntity> messageBars = const <MessageBarEntity>[], this.pageMeta, final  List<SortingOption> sortingOptions = const <SortingOption>[], final  List<PageComponent> pageComponents = const <PageComponent>[]}): _messageBars = messageBars,_sortingOptions = sortingOptions,_pageComponents = pageComponents;
   
 
 @override final  String? action;
@@ -226,11 +223,14 @@ class _HomePageEntity implements HomePageEntity {
   return EqualUnmodifiableListView(_messageBars);
 }
 
-@override final  String? pageName;
-@override final  String? pageBackgroundColor;
-@override final  String? headerBgImageUrl;
-@override@JsonKey() final  int totalCollections;
-@override@JsonKey() final  int totalSections;
+@override final  PageMeta? pageMeta;
+ final  List<SortingOption> _sortingOptions;
+@override@JsonKey() List<SortingOption> get sortingOptions {
+  if (_sortingOptions is EqualUnmodifiableListView) return _sortingOptions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_sortingOptions);
+}
+
  final  List<PageComponent> _pageComponents;
 @override@JsonKey() List<PageComponent> get pageComponents {
   if (_pageComponents is EqualUnmodifiableListView) return _pageComponents;
@@ -249,16 +249,16 @@ _$HomePageEntityCopyWith<_HomePageEntity> get copyWith => __$HomePageEntityCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomePageEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.popUpMessage, popUpMessage) || other.popUpMessage == popUpMessage)&&const DeepCollectionEquality().equals(other._messageBars, _messageBars)&&(identical(other.pageName, pageName) || other.pageName == pageName)&&(identical(other.pageBackgroundColor, pageBackgroundColor) || other.pageBackgroundColor == pageBackgroundColor)&&(identical(other.headerBgImageUrl, headerBgImageUrl) || other.headerBgImageUrl == headerBgImageUrl)&&(identical(other.totalCollections, totalCollections) || other.totalCollections == totalCollections)&&(identical(other.totalSections, totalSections) || other.totalSections == totalSections)&&const DeepCollectionEquality().equals(other._pageComponents, _pageComponents));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomePageEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.popUpMessage, popUpMessage) || other.popUpMessage == popUpMessage)&&const DeepCollectionEquality().equals(other._messageBars, _messageBars)&&(identical(other.pageMeta, pageMeta) || other.pageMeta == pageMeta)&&const DeepCollectionEquality().equals(other._sortingOptions, _sortingOptions)&&const DeepCollectionEquality().equals(other._pageComponents, _pageComponents));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,action,popUpMessage,const DeepCollectionEquality().hash(_messageBars),pageName,pageBackgroundColor,headerBgImageUrl,totalCollections,totalSections,const DeepCollectionEquality().hash(_pageComponents));
+int get hashCode => Object.hash(runtimeType,action,popUpMessage,const DeepCollectionEquality().hash(_messageBars),pageMeta,const DeepCollectionEquality().hash(_sortingOptions),const DeepCollectionEquality().hash(_pageComponents));
 
 @override
 String toString() {
-  return 'HomePageEntity(action: $action, popUpMessage: $popUpMessage, messageBars: $messageBars, pageName: $pageName, pageBackgroundColor: $pageBackgroundColor, headerBgImageUrl: $headerBgImageUrl, totalCollections: $totalCollections, totalSections: $totalSections, pageComponents: $pageComponents)';
+  return 'HomePageEntity(action: $action, popUpMessage: $popUpMessage, messageBars: $messageBars, pageMeta: $pageMeta, sortingOptions: $sortingOptions, pageComponents: $pageComponents)';
 }
 
 
@@ -269,7 +269,7 @@ abstract mixin class _$HomePageEntityCopyWith<$Res> implements $HomePageEntityCo
   factory _$HomePageEntityCopyWith(_HomePageEntity value, $Res Function(_HomePageEntity) _then) = __$HomePageEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String? action, String? popUpMessage, List<MessageBarEntity> messageBars, String? pageName, String? pageBackgroundColor, String? headerBgImageUrl, int totalCollections, int totalSections, List<PageComponent> pageComponents
+ String? action, String? popUpMessage, List<MessageBarEntity> messageBars, PageMeta? pageMeta, List<SortingOption> sortingOptions, List<PageComponent> pageComponents
 });
 
 
@@ -286,17 +286,14 @@ class __$HomePageEntityCopyWithImpl<$Res>
 
 /// Create a copy of HomePageEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? action = freezed,Object? popUpMessage = freezed,Object? messageBars = null,Object? pageName = freezed,Object? pageBackgroundColor = freezed,Object? headerBgImageUrl = freezed,Object? totalCollections = null,Object? totalSections = null,Object? pageComponents = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? action = freezed,Object? popUpMessage = freezed,Object? messageBars = null,Object? pageMeta = freezed,Object? sortingOptions = null,Object? pageComponents = null,}) {
   return _then(_HomePageEntity(
 action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as String?,popUpMessage: freezed == popUpMessage ? _self.popUpMessage : popUpMessage // ignore: cast_nullable_to_non_nullable
 as String?,messageBars: null == messageBars ? _self._messageBars : messageBars // ignore: cast_nullable_to_non_nullable
-as List<MessageBarEntity>,pageName: freezed == pageName ? _self.pageName : pageName // ignore: cast_nullable_to_non_nullable
-as String?,pageBackgroundColor: freezed == pageBackgroundColor ? _self.pageBackgroundColor : pageBackgroundColor // ignore: cast_nullable_to_non_nullable
-as String?,headerBgImageUrl: freezed == headerBgImageUrl ? _self.headerBgImageUrl : headerBgImageUrl // ignore: cast_nullable_to_non_nullable
-as String?,totalCollections: null == totalCollections ? _self.totalCollections : totalCollections // ignore: cast_nullable_to_non_nullable
-as int,totalSections: null == totalSections ? _self.totalSections : totalSections // ignore: cast_nullable_to_non_nullable
-as int,pageComponents: null == pageComponents ? _self._pageComponents : pageComponents // ignore: cast_nullable_to_non_nullable
+as List<MessageBarEntity>,pageMeta: freezed == pageMeta ? _self.pageMeta : pageMeta // ignore: cast_nullable_to_non_nullable
+as PageMeta?,sortingOptions: null == sortingOptions ? _self._sortingOptions : sortingOptions // ignore: cast_nullable_to_non_nullable
+as List<SortingOption>,pageComponents: null == pageComponents ? _self._pageComponents : pageComponents // ignore: cast_nullable_to_non_nullable
 as List<PageComponent>,
   ));
 }

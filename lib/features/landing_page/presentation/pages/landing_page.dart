@@ -5,7 +5,9 @@ import '../../../../components/atoms/error_retry_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/constants/strings/discover_strings.dart';
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/typography.dart';
+import '../../../../core/theme/typography/text_style_extensions.dart';
+import '../../../../core/theme/typography/typography_v1.dart';
+import '../../../discover/domain/entities/home_page_entity.dart';
 import '../../../discover/presentation/widgets/page_component_renderer.dart';
 import '../bloc/landing_page_bloc.dart';
 
@@ -20,12 +22,39 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
+  // Tight threshold: only fire after the user has scrolled through the
+  // current batch of components (pageSize=20). The bloc's hasNextPage guard
+  // makes this a no-op once the server signals there's nothing more.
+  static const double _kPaginationThreshold = 200.0;
+
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     context.read<LandingPageBloc>().add(
       LoadLandingPage(pageName: widget.pageName),
     );
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - _kPaginationThreshold) {
+      final bloc = context.read<LandingPageBloc>();
+      final state = bloc.state;
+      if (state.isSuccess && state.hasNextPage && !state.isLoadingMore) {
+        bloc.add(const LoadNextLandingPage());
+      }
+    }
   }
 
   @override
@@ -36,7 +65,7 @@ class _LandingPageState extends State<LandingPage> {
           icon: const Icon(
             Icons.arrow_back_ios_new,
             size: 20,
-            color: AppColors.textPrimary,
+            color: AppColors.neutralBlack,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -46,7 +75,7 @@ class _LandingPageState extends State<LandingPage> {
               widget.title ??
               _formatPageName(widget.pageName),
           builder: (context, title) =>
-              Text(title, style: AppTypography.titleMedium),
+              Text(title, style: AppTypographyV1.bodyLarge.semiBold),
         ),
       ),
       body: BlocBuilder<LandingPageBloc, LandingPageState>(
@@ -72,10 +101,24 @@ class _LandingPageState extends State<LandingPage> {
               );
             }
 
+            final showLoader = state.isLoadingMore;
             return ListView.builder(
+              controller: _scrollController,
               cacheExtent: MediaQuery.sizeOf(context).height * 2,
-              itemCount: components.length,
+              itemCount: components.length + (showLoader ? 1 : 0),
               itemBuilder: (context, index) {
+                if (index >= components.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  );
+                }
                 return _KeepAliveItem(
                   child: PageComponentRenderer(component: components[index]),
                 );

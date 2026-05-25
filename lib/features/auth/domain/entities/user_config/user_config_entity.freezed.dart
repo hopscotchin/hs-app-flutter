@@ -277,7 +277,7 @@ as String?,
 /// @nodoc
 mixin _$UserConfigEntity {
 
- bool get continueBrowsingEligibleVisitor; ProductImageConfigEntity? get productImageConfig;
+ ProductImageConfigEntity? get productImageConfig;
 /// Create a copy of UserConfigEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -288,16 +288,16 @@ $UserConfigEntityCopyWith<UserConfigEntity> get copyWith => _$UserConfigEntityCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserConfigEntity&&(identical(other.continueBrowsingEligibleVisitor, continueBrowsingEligibleVisitor) || other.continueBrowsingEligibleVisitor == continueBrowsingEligibleVisitor)&&(identical(other.productImageConfig, productImageConfig) || other.productImageConfig == productImageConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserConfigEntity&&(identical(other.productImageConfig, productImageConfig) || other.productImageConfig == productImageConfig));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,continueBrowsingEligibleVisitor,productImageConfig);
+int get hashCode => Object.hash(runtimeType,productImageConfig);
 
 @override
 String toString() {
-  return 'UserConfigEntity(continueBrowsingEligibleVisitor: $continueBrowsingEligibleVisitor, productImageConfig: $productImageConfig)';
+  return 'UserConfigEntity(productImageConfig: $productImageConfig)';
 }
 
 
@@ -308,7 +308,7 @@ abstract mixin class $UserConfigEntityCopyWith<$Res>  {
   factory $UserConfigEntityCopyWith(UserConfigEntity value, $Res Function(UserConfigEntity) _then) = _$UserConfigEntityCopyWithImpl;
 @useResult
 $Res call({
- bool continueBrowsingEligibleVisitor, ProductImageConfigEntity? productImageConfig
+ ProductImageConfigEntity? productImageConfig
 });
 
 
@@ -325,10 +325,9 @@ class _$UserConfigEntityCopyWithImpl<$Res>
 
 /// Create a copy of UserConfigEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? continueBrowsingEligibleVisitor = null,Object? productImageConfig = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? productImageConfig = freezed,}) {
   return _then(_self.copyWith(
-continueBrowsingEligibleVisitor: null == continueBrowsingEligibleVisitor ? _self.continueBrowsingEligibleVisitor : continueBrowsingEligibleVisitor // ignore: cast_nullable_to_non_nullable
-as bool,productImageConfig: freezed == productImageConfig ? _self.productImageConfig : productImageConfig // ignore: cast_nullable_to_non_nullable
+productImageConfig: freezed == productImageConfig ? _self.productImageConfig : productImageConfig // ignore: cast_nullable_to_non_nullable
 as ProductImageConfigEntity?,
   ));
 }
@@ -426,10 +425,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool continueBrowsingEligibleVisitor,  ProductImageConfigEntity? productImageConfig)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProductImageConfigEntity? productImageConfig)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserConfigEntity() when $default != null:
-return $default(_that.continueBrowsingEligibleVisitor,_that.productImageConfig);case _:
+return $default(_that.productImageConfig);case _:
   return orElse();
 
 }
@@ -447,10 +446,10 @@ return $default(_that.continueBrowsingEligibleVisitor,_that.productImageConfig);
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool continueBrowsingEligibleVisitor,  ProductImageConfigEntity? productImageConfig)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProductImageConfigEntity? productImageConfig)  $default,) {final _that = this;
 switch (_that) {
 case _UserConfigEntity():
-return $default(_that.continueBrowsingEligibleVisitor,_that.productImageConfig);case _:
+return $default(_that.productImageConfig);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -467,10 +466,10 @@ return $default(_that.continueBrowsingEligibleVisitor,_that.productImageConfig);
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool continueBrowsingEligibleVisitor,  ProductImageConfigEntity? productImageConfig)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProductImageConfigEntity? productImageConfig)?  $default,) {final _that = this;
 switch (_that) {
 case _UserConfigEntity() when $default != null:
-return $default(_that.continueBrowsingEligibleVisitor,_that.productImageConfig);case _:
+return $default(_that.productImageConfig);case _:
   return null;
 
 }
@@ -482,10 +481,9 @@ return $default(_that.continueBrowsingEligibleVisitor,_that.productImageConfig);
 
 
 class _UserConfigEntity implements UserConfigEntity {
-  const _UserConfigEntity({this.continueBrowsingEligibleVisitor = false, this.productImageConfig});
+  const _UserConfigEntity({this.productImageConfig});
   
 
-@override@JsonKey() final  bool continueBrowsingEligibleVisitor;
 @override final  ProductImageConfigEntity? productImageConfig;
 
 /// Create a copy of UserConfigEntity
@@ -498,16 +496,16 @@ _$UserConfigEntityCopyWith<_UserConfigEntity> get copyWith => __$UserConfigEntit
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserConfigEntity&&(identical(other.continueBrowsingEligibleVisitor, continueBrowsingEligibleVisitor) || other.continueBrowsingEligibleVisitor == continueBrowsingEligibleVisitor)&&(identical(other.productImageConfig, productImageConfig) || other.productImageConfig == productImageConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserConfigEntity&&(identical(other.productImageConfig, productImageConfig) || other.productImageConfig == productImageConfig));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,continueBrowsingEligibleVisitor,productImageConfig);
+int get hashCode => Object.hash(runtimeType,productImageConfig);
 
 @override
 String toString() {
-  return 'UserConfigEntity(continueBrowsingEligibleVisitor: $continueBrowsingEligibleVisitor, productImageConfig: $productImageConfig)';
+  return 'UserConfigEntity(productImageConfig: $productImageConfig)';
 }
 
 
@@ -518,7 +516,7 @@ abstract mixin class _$UserConfigEntityCopyWith<$Res> implements $UserConfigEnti
   factory _$UserConfigEntityCopyWith(_UserConfigEntity value, $Res Function(_UserConfigEntity) _then) = __$UserConfigEntityCopyWithImpl;
 @override @useResult
 $Res call({
- bool continueBrowsingEligibleVisitor, ProductImageConfigEntity? productImageConfig
+ ProductImageConfigEntity? productImageConfig
 });
 
 
@@ -535,10 +533,9 @@ class __$UserConfigEntityCopyWithImpl<$Res>
 
 /// Create a copy of UserConfigEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? continueBrowsingEligibleVisitor = null,Object? productImageConfig = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? productImageConfig = freezed,}) {
   return _then(_UserConfigEntity(
-continueBrowsingEligibleVisitor: null == continueBrowsingEligibleVisitor ? _self.continueBrowsingEligibleVisitor : continueBrowsingEligibleVisitor // ignore: cast_nullable_to_non_nullable
-as bool,productImageConfig: freezed == productImageConfig ? _self.productImageConfig : productImageConfig // ignore: cast_nullable_to_non_nullable
+productImageConfig: freezed == productImageConfig ? _self.productImageConfig : productImageConfig // ignore: cast_nullable_to_non_nullable
 as ProductImageConfigEntity?,
   ));
 }

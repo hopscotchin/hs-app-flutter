@@ -17,6 +17,7 @@ class ApiConstants {
   static String get httpScheme => EnvConfig.httpScheme;
   static String get httpsScheme => EnvConfig.httpsScheme;
   static const String acceptType = 'application/json';
+  static const String pageSize = '20';
 
   // Segment
   static String get segmentDebugUrl => EnvConfig.segmentDebugUrl;
@@ -27,7 +28,7 @@ class ApiConstants {
   static const String appConfig = '/v1/app-config';
 
   // Home/Discover
-  static const String homePage = '/page/v12';
+  static const String homePage = '/page/v13';
   static const String boutiques = '/boutiques/action';
   static const String customTiles = '/customTiles/v2';
   static const String collections = '/collections/v2';
@@ -55,15 +56,10 @@ class ApiConstants {
   static const String wishlist = '/wishlist';
   static const String moveToWishlistFromCart = '/wishlist/move-to-wishlist';
 
-  // Auth — current endpoints (used with transformers)
-  static const String sendOtp = '/customer/validate-sendotp';
-  static const String verifyOtp = '/customer/v2/verifyotp-delegate';
-  static const String registerSendOtp = '/customer/signup/send/otp';
-
   // Auth — proposed v3 endpoints (swap in when backend ships; delete transformer files)
-  static const String sendOtpV3 = '/customer/v3/auth/send-otp';
-  static const String verifyOtpV3 = '/customer/v3/auth/verify-otp';
-  static const String signupSendOtpV3 = '/customer/v3/auth/signup/send-otp';
+  static const String sendOtp = '/customer/v3/auth/send-otp';
+  static const String verifyOtp = '/customer/v3/auth/verify-otp';
+  static const String singUpSendOtp = '/customer/v3/auth/signup/send-otp';
   static const String checkMobileV3 = '/customer/v3/auth/check-mobile';
   static const String customerInfoV3 = '/customer/v3/info';
 
@@ -86,9 +82,7 @@ class ApiConstants {
   static const String retryPlaceOrder = '/recovery/place-order';
   static const String initPayment = '/v2/init-payment';
   static const String paymentStatus = '/v1'; // append /{orderId}/payment-status
-  static const String paymentRetryDetail =
-      '/re-attempt/detail'; // append /{orderId}
+  static const String paymentRetryDetail = '/re-attempt/detail'; // append /{orderId}
   static const String markOrderFail = '/checkout/order-fail';
-  static const String orderConfirmation =
-      '/v2/checkout'; // append /{orderId}/confirmation
+  static const String orderConfirmation = '/v2/checkout'; // append /{orderId}/confirmation
 }

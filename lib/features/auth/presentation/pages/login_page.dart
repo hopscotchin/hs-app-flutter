@@ -31,7 +31,6 @@ class _LoginPageState extends State<LoginPage> {
   final _inputController = TextEditingController();
   final _inputFocusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
-  bool _isEmailMode = false;
   late List<MessageBarEntity> _pendingMessageBars;
 
   @override
@@ -52,17 +51,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _toggleMode() {
-    setState(() {
-      _isEmailMode = !_isEmailMode;
-      _inputController.clear();
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) => _inputFocusNode.requestFocus());
-  }
-
   String get _rawMobile => _inputController.text.replaceAll(RegExp(r'\D'), '');
-
-  String get _loginId => _isEmailMode ? _inputController.text.trim() : _rawMobile;
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
           AppNavigator.goToOtpVerification(
             context,
             bloc: context.read<AuthBloc>(),
-            loginId: _loginId,
+            loginId: _rawMobile,
             otpConfig: state.otpConfig!,
             otpReason: 'SIGN_IN',
           );
@@ -89,27 +78,20 @@ class _LoginPageState extends State<LoginPage> {
             destination.navigate(context);
           }
 
-          final headerLeading = _isEmailMode
-              ? IconButton(
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  onPressed: _toggleMode,
-                  icon: SvgPicture.asset(ImageConstants.arrowBack),
-                )
-              : IconButton(
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: SvgPicture.asset(ImageConstants.arrowBack),
-                );
-
           return SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 AuthScreenHeader(
                   title: AuthStrings.signInTitle,
-                  leading: SizedBox(child: headerLeading),
+                  leading: SizedBox(
+                    child: IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: SvgPicture.asset(ImageConstants.arrowBack),
+                    ),
+                  ),
                 ),
                 Builder(
                   builder: (_) {
@@ -142,10 +124,9 @@ class _LoginPageState extends State<LoginPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           AppSpacing.verticalGapLg,
-                          _isEmailMode ? _buildEmailField() : _buildMobileField(),
+                          _buildMobileField(),
                           AppSpacing.verticalGapLg,
                           AuthPrimaryButton(
-                            key: ValueKey("signin_send_otp_button"),
                             label: AuthStrings.sendOtp,
                             isLoading: isLoading,
                             onPressed: _onSendOtp,
@@ -168,7 +149,6 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildMobileField() {
     return OutlinedTextField(
-      key: ValueKey("signin_mobile_text_field"),
       controller: _inputController,
       focusNode: _inputFocusNode,
       labelText: AuthStrings.mobileNumberTitle,
@@ -190,28 +170,10 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildEmailField() {
-    return OutlinedTextField(
-      controller: _inputController,
-      focusNode: _inputFocusNode,
-      labelText: AuthStrings.emailLabel,
-      keyboardType: TextInputType.emailAddress,
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return AuthStrings.validateEmail;
-        }
-        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$').hasMatch(value.trim())) {
-          return AuthStrings.validateEmailFormat;
-        }
-        return null;
-      },
-    );
-  }
-
   void _onSendOtp() {
     if (_formKey.currentState!.validate()) {
       setState(() => _pendingMessageBars = const []);
-      context.read<AuthBloc>().add(SendOtp(loginId: _loginId));
+      context.read<AuthBloc>().add(SendOtp(loginId: _rawMobile));
     }
   }
 }

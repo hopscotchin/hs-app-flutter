@@ -13,8 +13,6 @@ abstract class ProductImageConfigEntity with _$ProductImageConfigEntity {
 
 @freezed
 abstract class UserConfigEntity with _$UserConfigEntity {
-  const factory UserConfigEntity({
-    @Default(false) bool continueBrowsingEligibleVisitor,
-    ProductImageConfigEntity? productImageConfig,
-  }) = _UserConfigEntity;
+  const factory UserConfigEntity({ProductImageConfigEntity? productImageConfig}) =
+      _UserConfigEntity;
 }

@@ -39,7 +39,7 @@ class _HomeRemoteDataSource implements HomeRemoteDataSource {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/page/v12',
+            '/page/v13',
             queryParameters: queryParameters,
             data: _data,
             cancelToken: cancelToken,

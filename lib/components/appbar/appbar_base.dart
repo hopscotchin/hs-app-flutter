@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hs_app_flutter/core/theme/colors.dart';
+import 'package:hs_app_flutter/core/theme/spacing.dart';
 
-abstract class AppBarBase extends StatelessWidget
-    implements PreferredSizeWidget {
+abstract class AppBarBase extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final Widget? center;
   final List<Widget>? actions;
@@ -9,6 +10,7 @@ abstract class AppBarBase extends StatelessWidget
   final Color? backgroundColor;
   final EdgeInsetsGeometry? padding;
   final double height;
+  final bool hasDivider;
 
   const AppBarBase({
     super.key,
@@ -17,7 +19,8 @@ abstract class AppBarBase extends StatelessWidget
     this.actions,
     this.backgroundColor,
     this.padding,
-    this.height = kToolbarHeight,
+    this.height = AppSpacing.appBarHeight,
+    this.hasDivider = false
   });
 
   @override
@@ -30,29 +33,36 @@ abstract class AppBarBase extends StatelessWidget
       color: backgroundColor ?? Colors.white,
       child: SafeArea(
         bottom: false,
-        child: Padding(
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: 16),
-          child: SizedBox(
-            height: height,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (leading != null) ...[leading!, const SizedBox(width: 8)],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: padding ?? AppSpacing.paddingHorizontalMd,
+              child: SizedBox(
+                height: hasDivider ? height - 1: height,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (leading != null) ...[leading!, AppSpacing.horizontalGapXs],
 
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: center ?? const SizedBox.shrink(),
-                  ),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: center ?? const SizedBox.shrink(),
+                      ),
+                    ),
+
+                    if (actions != null && actions!.isNotEmpty) ...[
+                      AppSpacing.horizontalGapXs,
+                      Row(mainAxisSize: MainAxisSize.min, children: actions!),
+                    ],
+                  ],
                 ),
-
-                if (actions != null && actions!.isNotEmpty) ...[
-                  const SizedBox(width: 8),
-                  Row(mainAxisSize: MainAxisSize.min, children: actions!),
-                ],
-              ],
+              ),
             ),
-          ),
+            if (hasDivider)
+              const Divider(height: 1, color: AppColors.divider),
+          ],
         ),
       ),
     );

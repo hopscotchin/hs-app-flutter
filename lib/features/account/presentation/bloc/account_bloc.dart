@@ -20,12 +20,7 @@ class AccountBloc extends BaseBloc<AccountEvent, AccountState> {
   final PrefManager _prefs;
 
   AccountBloc(this._getAccount, this._forgetGuestUser, this._prefs)
-    : super(
-        AccountState(
-          status: AccountStatus.success,
-          account: _localAccount(_prefs),
-        ),
-      ) {
+    : super(AccountState(status: AccountStatus.success, account: _localAccount(_prefs))) {
     on<LoadAccount>(_onLoad);
     on<RefreshFromLocal>(_onRefreshLocal);
     on<ForgetGuestUser>(_onForgetGuestUser);
@@ -66,36 +61,34 @@ class AccountBloc extends BaseBloc<AccountEvent, AccountState> {
     emit(state.copyWith(account: _localAccount(_prefs)));
   }
 
-  Future<void> _onForgetGuestUser(
-    ForgetGuestUser event,
-    Emitter<AccountState> emit,
-  ) async {
+  Future<void> _onForgetGuestUser(ForgetGuestUser event, Emitter<AccountState> emit) async {
     final current = state;
     emit(current.copyWith(isForgetting: true, forgetError: null));
     final token = swapCancelToken();
-    final result = await _forgetGuestUser(
-      ForgetGuestUserParams(cancelToken: token),
-    );
+    final result = await _forgetGuestUser(ForgetGuestUserParams(cancelToken: token));
     result.fold(
-      (failure) {
-        if (failure is RequestCancelledFailure) return;
+      (error) {
+        if (error is RequestCancelledFailure) return;
+        emit(current.copyWith(isForgetting: false, forgetError: error.message));
+      },
+      (success) {
+        _clearGuestUserData();
         emit(
           current.copyWith(
             isForgetting: false,
-            forgetError: failure.message,
+            forgetCompleted: true,
+            account: current.account.copyWith(hasGuestData: false),
           ),
         );
       },
-      (_) => emit(
-        current.copyWith(isForgetting: false, forgetCompleted: true),
-      ),
     );
   }
 
-  void _onClearForgetSignal(
-    ClearForgetSignal event,
-    Emitter<AccountState> emit,
-  ) {
+  Future<void> _clearGuestUserData() async {
+    await _prefs.setHasGuestData(false);
+  }
+
+  void _onClearForgetSignal(ClearForgetSignal event, Emitter<AccountState> emit) {
     emit(state.copyWith(forgetError: null, forgetCompleted: false));
   }
 }

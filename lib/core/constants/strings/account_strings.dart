@@ -34,8 +34,7 @@ class AccountStrings {
   static const String share = 'Share';
   static const String rate = 'Rate';
   static const String appVerison = 'App verison';
-  static const String confirmDeleteTitle = 'Delete data?';
+  static const String confirmDeleteTitle = 'Remove saved details?';
   static const String confirmDeleteGuest =
-      'All your saved details on this device will be erased. This cannot be undone.';
-  static const String forget = 'Forget';
+      'Your order, bag items and all saved details will be removed from this device.';
 }

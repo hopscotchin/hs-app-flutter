@@ -7,6 +7,7 @@ abstract class HomeState with _$HomeState {
   const factory HomeState({
     @Default(HomeStatus.initial) HomeStatus status,
     HomePageEntity? homePage,
+    @Default(false) bool isLoadingMore,
     @Default('') String errorMessage,
   }) = _HomeState;
 }
@@ -16,4 +17,5 @@ extension HomeStateX on HomeState {
   bool get isSuccess => status == HomeStatus.success;
   bool get isFailure => status == HomeStatus.failure;
   bool get hasData => homePage != null;
+  bool get hasNextPage => homePage?.hasNextPage ?? false;
 }

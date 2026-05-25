@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/mixins/safe_api_call.dart';
 import '../../../../core/network/connectivity/network_info.dart';
@@ -19,13 +20,15 @@ class HomeRepositoryImpl with SafeApiCall implements HomeRepository {
 
   @override
   Future<Either<Failure, HomePageEntity>> getHomePage({
+    required String pageName,
+    int pageNo = 1,
     CancelToken? cancelToken,
   }) =>
       safeApiCall(_networkInfo, () async {
         final response = await _api.getPage(
-          pageName: 'discover',
-          pageSize: '20',
-          pageNo: '1',
+          pageName: pageName,
+          pageSize: ApiConstants.pageSize,
+          pageNo: pageNo.toString(),
           cancelToken: cancelToken,
         );
         return response.toEntity();

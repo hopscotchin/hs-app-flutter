@@ -31,15 +31,7 @@ class AuthRoute {
         );
       },
     ),
-    GoRoute(
-      path: RouteNames.joinUs,
-      name: RouteNames.joinUs,
-      parentNavigatorKey: rootKey,
-      builder: (context, _) => BlocProvider(
-        create: (_) => sl<AuthBloc>(),
-        child: const JoinUsPage(),
-      ),
-    ),
+
     GoRoute(
       path: RouteNames.otpVerification,
       name: RouteNames.otpVerification,

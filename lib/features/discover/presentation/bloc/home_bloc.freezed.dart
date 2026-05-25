@@ -55,12 +55,13 @@ extension HomeEventPatterns on HomeEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoadHomePage value)?  load,TResult Function( RefreshHomePage value)?  refresh,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoadHomePage value)?  load,TResult Function( RefreshHomePage value)?  refresh,TResult Function( LoadNextHomePage value)?  loadNext,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case LoadHomePage() when load != null:
 return load(_that);case RefreshHomePage() when refresh != null:
-return refresh(_that);case _:
+return refresh(_that);case LoadNextHomePage() when loadNext != null:
+return loadNext(_that);case _:
   return orElse();
 
 }
@@ -78,12 +79,13 @@ return refresh(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoadHomePage value)  load,required TResult Function( RefreshHomePage value)  refresh,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoadHomePage value)  load,required TResult Function( RefreshHomePage value)  refresh,required TResult Function( LoadNextHomePage value)  loadNext,}){
 final _that = this;
 switch (_that) {
 case LoadHomePage():
 return load(_that);case RefreshHomePage():
-return refresh(_that);}
+return refresh(_that);case LoadNextHomePage():
+return loadNext(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -97,12 +99,13 @@ return refresh(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoadHomePage value)?  load,TResult? Function( RefreshHomePage value)?  refresh,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoadHomePage value)?  load,TResult? Function( RefreshHomePage value)?  refresh,TResult? Function( LoadNextHomePage value)?  loadNext,}){
 final _that = this;
 switch (_that) {
 case LoadHomePage() when load != null:
 return load(_that);case RefreshHomePage() when refresh != null:
-return refresh(_that);case _:
+return refresh(_that);case LoadNextHomePage() when loadNext != null:
+return loadNext(_that);case _:
   return null;
 
 }
@@ -119,11 +122,12 @@ return refresh(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  load,TResult Function()?  refresh,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? pageName)?  load,TResult Function()?  refresh,TResult Function()?  loadNext,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LoadHomePage() when load != null:
-return load();case RefreshHomePage() when refresh != null:
-return refresh();case _:
+return load(_that.pageName);case RefreshHomePage() when refresh != null:
+return refresh();case LoadNextHomePage() when loadNext != null:
+return loadNext();case _:
   return orElse();
 
 }
@@ -141,11 +145,12 @@ return refresh();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  load,required TResult Function()  refresh,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? pageName)  load,required TResult Function()  refresh,required TResult Function()  loadNext,}) {final _that = this;
 switch (_that) {
 case LoadHomePage():
-return load();case RefreshHomePage():
-return refresh();}
+return load(_that.pageName);case RefreshHomePage():
+return refresh();case LoadNextHomePage():
+return loadNext();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -159,11 +164,12 @@ return refresh();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  load,TResult? Function()?  refresh,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? pageName)?  load,TResult? Function()?  refresh,TResult? Function()?  loadNext,}) {final _that = this;
 switch (_that) {
 case LoadHomePage() when load != null:
-return load();case RefreshHomePage() when refresh != null:
-return refresh();case _:
+return load(_that.pageName);case RefreshHomePage() when refresh != null:
+return refresh();case LoadNextHomePage() when loadNext != null:
+return loadNext();case _:
   return null;
 
 }
@@ -175,33 +181,67 @@ return refresh();case _:
 
 
 class LoadHomePage implements HomeEvent {
-  const LoadHomePage();
+  const LoadHomePage({this.pageName});
   
 
+ final  String? pageName;
 
-
+/// Create a copy of HomeEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$LoadHomePageCopyWith<LoadHomePage> get copyWith => _$LoadHomePageCopyWithImpl<LoadHomePage>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadHomePage);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadHomePage&&(identical(other.pageName, pageName) || other.pageName == pageName));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,pageName);
 
 @override
 String toString() {
-  return 'HomeEvent.load()';
+  return 'HomeEvent.load(pageName: $pageName)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class $LoadHomePageCopyWith<$Res> implements $HomeEventCopyWith<$Res> {
+  factory $LoadHomePageCopyWith(LoadHomePage value, $Res Function(LoadHomePage) _then) = _$LoadHomePageCopyWithImpl;
+@useResult
+$Res call({
+ String? pageName
+});
 
 
+
+
+}
+/// @nodoc
+class _$LoadHomePageCopyWithImpl<$Res>
+    implements $LoadHomePageCopyWith<$Res> {
+  _$LoadHomePageCopyWithImpl(this._self, this._then);
+
+  final LoadHomePage _self;
+  final $Res Function(LoadHomePage) _then;
+
+/// Create a copy of HomeEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? pageName = freezed,}) {
+  return _then(LoadHomePage(
+pageName: freezed == pageName ? _self.pageName : pageName // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
 
 /// @nodoc
 
@@ -236,9 +276,41 @@ String toString() {
 
 
 /// @nodoc
+
+
+class LoadNextHomePage implements HomeEvent {
+  const LoadNextHomePage();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadNextHomePage);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'HomeEvent.loadNext()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
 mixin _$HomeState {
 
- HomeStatus get status; HomePageEntity? get homePage; String get errorMessage;
+ HomeStatus get status; HomePageEntity? get homePage; bool get isLoadingMore; String get errorMessage;
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -249,16 +321,16 @@ $HomeStateCopyWith<HomeState> get copyWith => _$HomeStateCopyWithImpl<HomeState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeState&&(identical(other.status, status) || other.status == status)&&(identical(other.homePage, homePage) || other.homePage == homePage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeState&&(identical(other.status, status) || other.status == status)&&(identical(other.homePage, homePage) || other.homePage == homePage)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,homePage,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,homePage,isLoadingMore,errorMessage);
 
 @override
 String toString() {
-  return 'HomeState(status: $status, homePage: $homePage, errorMessage: $errorMessage)';
+  return 'HomeState(status: $status, homePage: $homePage, isLoadingMore: $isLoadingMore, errorMessage: $errorMessage)';
 }
 
 
@@ -269,7 +341,7 @@ abstract mixin class $HomeStateCopyWith<$Res>  {
   factory $HomeStateCopyWith(HomeState value, $Res Function(HomeState) _then) = _$HomeStateCopyWithImpl;
 @useResult
 $Res call({
- HomeStatus status, HomePageEntity? homePage, String errorMessage
+ HomeStatus status, HomePageEntity? homePage, bool isLoadingMore, String errorMessage
 });
 
 
@@ -286,11 +358,12 @@ class _$HomeStateCopyWithImpl<$Res>
 
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? homePage = freezed,Object? errorMessage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? homePage = freezed,Object? isLoadingMore = null,Object? errorMessage = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as HomeStatus,homePage: freezed == homePage ? _self.homePage : homePage // ignore: cast_nullable_to_non_nullable
-as HomePageEntity?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as HomePageEntity?,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMore // ignore: cast_nullable_to_non_nullable
+as bool,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -388,10 +461,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( HomeStatus status,  HomePageEntity? homePage,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( HomeStatus status,  HomePageEntity? homePage,  bool isLoadingMore,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HomeState() when $default != null:
-return $default(_that.status,_that.homePage,_that.errorMessage);case _:
+return $default(_that.status,_that.homePage,_that.isLoadingMore,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -409,10 +482,10 @@ return $default(_that.status,_that.homePage,_that.errorMessage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( HomeStatus status,  HomePageEntity? homePage,  String errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( HomeStatus status,  HomePageEntity? homePage,  bool isLoadingMore,  String errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _HomeState():
-return $default(_that.status,_that.homePage,_that.errorMessage);case _:
+return $default(_that.status,_that.homePage,_that.isLoadingMore,_that.errorMessage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -429,10 +502,10 @@ return $default(_that.status,_that.homePage,_that.errorMessage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( HomeStatus status,  HomePageEntity? homePage,  String errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( HomeStatus status,  HomePageEntity? homePage,  bool isLoadingMore,  String errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _HomeState() when $default != null:
-return $default(_that.status,_that.homePage,_that.errorMessage);case _:
+return $default(_that.status,_that.homePage,_that.isLoadingMore,_that.errorMessage);case _:
   return null;
 
 }
@@ -444,11 +517,12 @@ return $default(_that.status,_that.homePage,_that.errorMessage);case _:
 
 
 class _HomeState implements HomeState {
-  const _HomeState({this.status = HomeStatus.initial, this.homePage, this.errorMessage = ''});
+  const _HomeState({this.status = HomeStatus.initial, this.homePage, this.isLoadingMore = false, this.errorMessage = ''});
   
 
 @override@JsonKey() final  HomeStatus status;
 @override final  HomePageEntity? homePage;
+@override@JsonKey() final  bool isLoadingMore;
 @override@JsonKey() final  String errorMessage;
 
 /// Create a copy of HomeState
@@ -461,16 +535,16 @@ _$HomeStateCopyWith<_HomeState> get copyWith => __$HomeStateCopyWithImpl<_HomeSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomeState&&(identical(other.status, status) || other.status == status)&&(identical(other.homePage, homePage) || other.homePage == homePage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomeState&&(identical(other.status, status) || other.status == status)&&(identical(other.homePage, homePage) || other.homePage == homePage)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,homePage,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,homePage,isLoadingMore,errorMessage);
 
 @override
 String toString() {
-  return 'HomeState(status: $status, homePage: $homePage, errorMessage: $errorMessage)';
+  return 'HomeState(status: $status, homePage: $homePage, isLoadingMore: $isLoadingMore, errorMessage: $errorMessage)';
 }
 
 
@@ -481,7 +555,7 @@ abstract mixin class _$HomeStateCopyWith<$Res> implements $HomeStateCopyWith<$Re
   factory _$HomeStateCopyWith(_HomeState value, $Res Function(_HomeState) _then) = __$HomeStateCopyWithImpl;
 @override @useResult
 $Res call({
- HomeStatus status, HomePageEntity? homePage, String errorMessage
+ HomeStatus status, HomePageEntity? homePage, bool isLoadingMore, String errorMessage
 });
 
 
@@ -498,11 +572,12 @@ class __$HomeStateCopyWithImpl<$Res>
 
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? homePage = freezed,Object? errorMessage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? homePage = freezed,Object? isLoadingMore = null,Object? errorMessage = null,}) {
   return _then(_HomeState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as HomeStatus,homePage: freezed == homePage ? _self.homePage : homePage // ignore: cast_nullable_to_non_nullable
-as HomePageEntity?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as HomePageEntity?,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMore // ignore: cast_nullable_to_non_nullable
+as bool,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

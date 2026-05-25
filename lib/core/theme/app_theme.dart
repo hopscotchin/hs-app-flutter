@@ -8,6 +8,19 @@ import 'typography.dart';
 class AppTheme {
   AppTheme._();
 
+  /// Default app-wide system UI overlay (status + navigation bars).
+  /// White background with dark icons. Used by main.dart at startup and by
+  /// the AppBar theme so AppBars don't revert the nav bar to black.
+  /// Screens that need a different style (e.g. Splash) override locally
+  /// via [AnnotatedRegion].
+  static const SystemUiOverlayStyle systemUiLight = SystemUiOverlayStyle(
+    statusBarColor: Colors.white,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+    systemNavigationBarColor: Colors.white,
+    systemNavigationBarIconBrightness: Brightness.dark,
+  );
+
   /// Light theme
   static ThemeData get lightTheme {
     return ThemeData(
@@ -26,7 +39,7 @@ class AppTheme {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.baseDefault,
         foregroundColor: AppColors.neutralBlack,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        systemOverlayStyle: systemUiLight,
         titleTextStyle: AppTypography.titleLarge.copyWith(
           color: AppColors.neutralBlack,
         ),

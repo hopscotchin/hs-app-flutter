@@ -15,6 +15,7 @@ class CustomAppbar extends AppBarBase {
     super.backgroundColor,
     super.padding,
     super.height,
+    super.hasDivider
   }) : super(
          leading: _resolveLeading(
            leading: leading,

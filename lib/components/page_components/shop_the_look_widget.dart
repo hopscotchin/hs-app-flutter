@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../core/constants/strings/discover_strings.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/colors.dart';
-import '../../core/theme/typography.dart';
+import '../../core/theme/typography/text_style_extensions.dart';
+import '../../core/theme/typography/typography_v1.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../atoms/cached_image_widget.dart';
 import 'shop_the_look_bottom_sheet.dart';
@@ -22,7 +23,7 @@ class ShopTheLookWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<ShopTheLookItem> items = data.items;
+    final List<ShopTheLookTile> items = data.tiles;
     if (items.isEmpty) return const SizedBox.shrink();
 
     final double screenWidth = MediaQuery.sizeOf(context).width;
@@ -31,10 +32,10 @@ class ShopTheLookWidget extends StatelessWidget {
     // titleMargins zeroed when titleImage is null — match that.
     final double horizontalMargin = margins?.horizontal ?? 16;
     final double innerHorizontalMargin = margins?.innerHorizontalMargin ?? 8;
-    final double titleBMargin = data.titleImage != null
+    final double titleBMargin = data.title != null
         ? (margins?.titleBottomMargin ?? 0)
         : 0.0;
-    final double titleHMargin = data.titleImage != null
+    final double titleHMargin = data.title != null
         ? (margins?.titleHorizontalMargin ?? 16)
         : 0.0;
 
@@ -86,7 +87,7 @@ class ShopTheLookWidget extends StatelessWidget {
       ),
     );
 
-    if (data.titleImage?.url == null) return carousel;
+    if (data.title?.url == null) return carousel;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +100,7 @@ class ShopTheLookWidget extends StatelessWidget {
             bottom: titleBMargin,
           ),
           child: CachedImageWidget(
-            imageUrl: data.titleImage!.url!,
+            imageUrl: data.title!.url!,
             width: double.infinity,
             fit: BoxFit.cover,
           ),
@@ -109,11 +110,12 @@ class ShopTheLookWidget extends StatelessWidget {
     );
   }
 
-  void _showBottomSheet(BuildContext context, ShopTheLookItem item) {
+  void _showBottomSheet(BuildContext context, ShopTheLookTile item) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      useRootNavigator: true,
+      backgroundColor: AppColors.transparent,
       builder: (_) =>
           ShopTheLookBottomSheet(item: item, onAddToCart: onAddToCart),
     );
@@ -121,7 +123,7 @@ class ShopTheLookWidget extends StatelessWidget {
 }
 
 class _ShopTheLookCard extends StatelessWidget {
-  final ShopTheLookItem item;
+  final ShopTheLookTile item;
   final double tileWidth;
   final void Function(ShopTheLookProduct) onProductTap;
   final VoidCallback onAddToCart;
@@ -141,9 +143,9 @@ class _ShopTheLookCard extends StatelessWidget {
     return Container(
       width: tileWidth,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.baseDefault,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.divider),
       ),
       padding: const EdgeInsets.all(8),
       child: Column(
@@ -212,14 +214,13 @@ class _ShopTheLookCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.grey,
+                  color: AppColors.neutralGrey5,
                   borderRadius: BorderRadius.circular(2),
                 ),
                 child: Text(
                   DiscoverStrings.outOfStock,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: Colors.white,
-                    fontSize: 8,
+                  style: AppTypographyV1.caption.semiBold.copyWith(
+                    color: AppColors.baseDefault,
                   ),
                 ),
               ),
@@ -243,10 +244,7 @@ class _ShopTheLookCard extends StatelessWidget {
               children: [
                 Text(
                   DiscoverStrings.totalPriceForItems(4),
-                  style: AppTypography.bodySmall.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
+                  style: AppTypographyV1.bodySmall.semiBold,
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -254,19 +252,16 @@ class _ShopTheLookCard extends StatelessWidget {
                     if (price?.displayValue != null)
                       Text(
                         price!.displayValue!,
-                        style: AppTypography.labelMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTypographyV1.labelLarge.bold,
                       ),
                     if (price?.mrp != null) ...[
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
                           price!.mrp!,
-                          style: AppTypography.bodySmall.copyWith(
-                            decoration: TextDecoration.lineThrough,
-                            color: AppColors.textTertiary,
-                          ),
+                          style: AppTypographyV1.labelLarge.regular
+                              .textTertiary()
+                              .strikeThrough(),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -277,9 +272,7 @@ class _ShopTheLookCard extends StatelessWidget {
                       Flexible(
                         child: Text(
                           '(${price.discount})',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.success,
-                          ),
+                          style: AppTypographyV1.labelLarge.regular.success(),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -295,14 +288,12 @@ class _ShopTheLookCard extends StatelessWidget {
           child: OutlinedButton(
             onPressed: onAddToCart,
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.primary),
-              foregroundColor: AppColors.primary,
+              side: const BorderSide(color: AppColors.brandDefault),
+              foregroundColor: AppColors.brandDefault,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              textStyle: AppTypography.labelSmall.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              textStyle: AppTypographyV1.labelMedium.bold,
             ),
             child: const Text(DiscoverStrings.addToBag),
           ),

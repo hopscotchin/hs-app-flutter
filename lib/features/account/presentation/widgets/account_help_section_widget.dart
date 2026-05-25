@@ -13,27 +13,24 @@ class AccountHelpSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-      child: Row(
-        children: [
-          _HelpItem(
-            svgAsset: ImageConstants.helpIcon,
-            label: AccountStrings.help,
-            onTap: () {},
-          ),
-          _HelpItem(
-            svgAsset: ImageConstants.shareIcon,
-            label: AccountStrings.share,
-            onTap: () {},
-          ),
-          _HelpItem(
-            svgAsset: ImageConstants.sqaureStar,
-            label: AccountStrings.rate,
-            onTap: () {},
-          ),
-        ],
-      ),
+    return Row(
+      children: [
+        _HelpItem(
+          svgAsset: ImageConstants.helpIcon,
+          label: AccountStrings.help,
+          onTap: () {},
+        ),
+        _HelpItem(
+          svgAsset: ImageConstants.shareIcon,
+          label: AccountStrings.share,
+          onTap: () {},
+        ),
+        _HelpItem(
+          svgAsset: ImageConstants.sqaureStar,
+          label: AccountStrings.rate,
+          onTap: () {},
+        ),
+      ],
     );
   }
 }
@@ -56,7 +53,7 @@ class _HelpItem extends StatelessWidget {
         onTap: onTap,
         borderRadius: AppSpacing.borderRadiusSm,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          padding: AppSpacing.paddingVerticalLg,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -64,7 +61,7 @@ class _HelpItem extends StatelessWidget {
                 label,
                 style: AppTypographyV1.bodyRegular.semiBold.textPrimary(),
               ),
-              AppSpacing.verticalGapXxs,
+              AppSpacing.verticalGapXs,
               SvgPicture.asset(
                 svgAsset,
                 width: AppSpacing.iconSm,

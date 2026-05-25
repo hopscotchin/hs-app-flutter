@@ -4,12 +4,13 @@ import '../../core/constants/strings/discover_strings.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
-import '../../core/theme/typography.dart';
+import '../../core/theme/typography/text_style_extensions.dart';
+import '../../core/theme/typography/typography_v1.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../atoms/cached_image_widget.dart';
 
 class ShopTheLookBottomSheet extends StatefulWidget {
-  final ShopTheLookItem item;
+  final ShopTheLookTile item;
   final void Function(List<ShopTheLookSelection>)? onAddToCart;
 
   const ShopTheLookBottomSheet({
@@ -136,7 +137,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
     return Container(
       height: screenHeight * 0.58,
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.baseDefault,
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: Column(
@@ -171,7 +172,10 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
             constraints: const BoxConstraints(),
           ),
           const SizedBox(width: 8),
-          const Text(DiscoverStrings.selectSize, style: AppTypography.titleMedium),
+          Text(
+            DiscoverStrings.selectSize,
+            style: AppTypographyV1.bodyLarge.semiBold,
+          ),
         ],
       ),
     );
@@ -224,12 +228,12 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: isSelected
-                                  ? AppColors.primary
-                                  : Colors.white,
+                                  ? AppColors.brandDefault
+                                  : AppColors.baseDefault,
                               border: Border.all(
                                 color: isSelected
-                                    ? AppColors.primary
-                                    : AppColors.border,
+                                    ? AppColors.brandDefault
+                                    : AppColors.divider,
                                 width: 1.5,
                               ),
                             ),
@@ -237,7 +241,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                                 ? const Icon(
                                     Icons.check,
                                     size: 14,
-                                    color: Colors.white,
+                                    color: AppColors.baseDefault,
                                   )
                                 : null,
                           ),
@@ -256,10 +260,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                     if (product.productName != null)
                       Text(
                         product.productName!,
-                        style: AppTypography.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
+                        style: AppTypographyV1.bodyRegular.semiBold,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -271,14 +272,13 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.grey,
+                          color: AppColors.neutralGrey5,
                           borderRadius: BorderRadius.circular(2),
                         ),
                         child: Text(
                           DiscoverStrings.outOfStock,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: Colors.white,
-                            fontSize: 9,
+                          style: AppTypographyV1.labelSmall.copyWith(
+                            color: AppColors.baseDefault,
                           ),
                         ),
                       ),
@@ -295,9 +295,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                           ),
                           child: Text(
                             DiscoverStrings.viewDetails,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.primary,
-                            ),
+                            style: AppTypographyV1.labelLarge.regular.brand(),
                           ),
                         ),
                         if (product.hasSizeChart == true) ...[
@@ -309,9 +307,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                             ),
                             child: Text(
                               DiscoverStrings.sizeChart,
-                              style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.primary,
-                              ),
+                              style: AppTypographyV1.labelLarge.regular.brand(),
                             ),
                           ),
                         ],
@@ -377,21 +373,21 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
     Color borderColor;
 
     if (isSingleSize) {
-      bgColor = AppColors.primary;
-      textColor = Colors.white;
-      borderColor = AppColors.primary;
+      bgColor = AppColors.brandDefault;
+      textColor = AppColors.baseDefault;
+      borderColor = AppColors.brandDefault;
     } else if (isOos) {
-      bgColor = Colors.grey.shade100;
-      textColor = Colors.grey.shade400;
-      borderColor = Colors.grey.shade300;
+      bgColor = AppColors.neutralGrey1;
+      textColor = AppColors.neutralGrey4;
+      borderColor = AppColors.neutralGrey3;
     } else if (isSelected) {
-      bgColor = AppColors.primaryLight;
+      bgColor = AppColors.brandDefault.withValues(alpha: 0.1);
       textColor = AppColors.neutralBlack;
-      borderColor = AppColors.primary;
+      borderColor = AppColors.brandDefault;
     } else {
-      bgColor = Colors.white;
+      bgColor = AppColors.baseDefault;
       textColor = AppColors.neutralBlack;
-      borderColor = AppColors.border;
+      borderColor = AppColors.divider;
     }
 
     return GestureDetector(
@@ -405,7 +401,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
         ),
         child: Text(
           sku.size ?? '',
-          style: AppTypography.labelSmall.copyWith(
+          style: AppTypographyV1.labelMedium.semiBold.copyWith(
             color: textColor,
             decoration: isOos ? TextDecoration.lineThrough : null,
           ),
@@ -427,7 +423,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppColors.baseDefault,
           border: Border(top: BorderSide(color: AppColors.divider)),
         ),
         child: Row(
@@ -439,9 +435,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                 children: [
                   Text(
                     DiscoverStrings.totalPriceForItems(itemCount),
-                    style: AppTypography.bodySmall.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTypographyV1.labelLarge.semiBold,
                   ),
                   AppSpacing.verticalGapXxs,
                   Row(
@@ -449,27 +443,22 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                       if (totalPrice > 0)
                         Text(
                           '₹$totalPrice',
-                          style: AppTypography.labelMedium.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: AppTypographyV1.labelLarge.bold,
                         ),
                       if (totalMrp > 0 && totalMrp != totalPrice) ...[
                         const SizedBox(width: 8),
                         Text(
                           '₹$totalMrp',
-                          style: AppTypography.bodySmall.copyWith(
-                            decoration: TextDecoration.lineThrough,
-                            color: AppColors.textTertiary,
-                          ),
+                          style: AppTypographyV1.labelLarge.regular
+                              .textTertiary()
+                              .strikeThrough(),
                         ),
                       ],
                       if (discountPercent > 0) ...[
                         const SizedBox(width: 8),
                         Text(
                           '($discountPercent% off)',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.success,
-                          ),
+                          style: AppTypographyV1.labelLarge.regular.success(),
                         ),
                       ],
                     ],
@@ -481,15 +470,13 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
             FilledButton(
               onPressed: hasSelection ? _onAddToCart : null,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                disabledBackgroundColor: AppColors.border,
+                backgroundColor: AppColors.brandDefault,
+                disabledBackgroundColor: AppColors.divider,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 12,
                 ),
-                textStyle: AppTypography.labelMedium.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                textStyle: AppTypographyV1.labelLarge.bold,
               ),
               child: const Text(DiscoverStrings.addToBag),
             ),

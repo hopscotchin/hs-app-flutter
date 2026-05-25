@@ -34,7 +34,9 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
   static const double _defaultInnerHorizontalMargin = 12.0;
 
   List<HeroTile> get _tiles => widget.heroData.tiles;
-  int get _durationMs => widget.heroData.scrollDuration ?? 3000;
+  int get _durationMs => widget.heroData.viewConfig?.scrollDuration ?? 3000;
+  double get _cornerRadius =>
+      widget.heroData.viewConfig?.imageCornerRadius ?? 4;
 
   @override
   bool get wantKeepAlive => true;
@@ -126,12 +128,11 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
 
     final int activeDot = _currentPage % tiles.length;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          height: tileHeight,
-          child: NotificationListener<ScrollNotification>(
+    return SizedBox(
+      height: tileHeight,
+      child: Stack(
+        children: [
+          NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification notification) {
               // Pause auto-scroll while the user is swiping; restart when settled.
               if (notification is ScrollStartNotification) _cancelTimer();
@@ -151,7 +152,7 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
                     onTap: () =>
                         ActionUrlHandler.navigate(context, tile.actionUri),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(_cornerRadius),
                       child: CachedImageWidget(
                         imageUrl: tile.imageUrl,
                         width: double.infinity,
@@ -164,31 +165,38 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
               },
             ),
           ),
-        ),
-        if (tiles.length > 1) _buildIndicator(tiles.length, activeDot),
-      ],
+          if (tiles.length > 1)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 30,
+              child: IgnorePointer(
+                child: _buildIndicator(tiles.length, activeDot),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
   Widget _buildIndicator(int count, int activeDot) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(count, (int index) {
-          final bool isActive = index == activeDot;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            width: isActive ? 28 : 8,
-            height: 6,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(3),
-              color: isActive ? AppColors.neutralBlack : AppColors.textDisabled,
-            ),
-          );
-        }),
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(count, (int index) {
+        final bool isActive = index == activeDot;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          width: isActive ? 45 : 8,
+          height: 6,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(3),
+            color: isActive
+                ? AppColors.baseDefault
+                : AppColors.baseDefault.withValues(alpha: 0.5),
+          ),
+        );
+      }),
     );
   }
 }

@@ -55,12 +55,13 @@ extension LandingPageEventPatterns on LandingPageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoadLandingPage value)?  load,TResult Function( RefreshLandingPage value)?  refresh,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoadLandingPage value)?  load,TResult Function( RefreshLandingPage value)?  refresh,TResult Function( LoadNextLandingPage value)?  loadNext,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case LoadLandingPage() when load != null:
 return load(_that);case RefreshLandingPage() when refresh != null:
-return refresh(_that);case _:
+return refresh(_that);case LoadNextLandingPage() when loadNext != null:
+return loadNext(_that);case _:
   return orElse();
 
 }
@@ -78,12 +79,13 @@ return refresh(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoadLandingPage value)  load,required TResult Function( RefreshLandingPage value)  refresh,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoadLandingPage value)  load,required TResult Function( RefreshLandingPage value)  refresh,required TResult Function( LoadNextLandingPage value)  loadNext,}){
 final _that = this;
 switch (_that) {
 case LoadLandingPage():
 return load(_that);case RefreshLandingPage():
-return refresh(_that);}
+return refresh(_that);case LoadNextLandingPage():
+return loadNext(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -97,12 +99,13 @@ return refresh(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoadLandingPage value)?  load,TResult? Function( RefreshLandingPage value)?  refresh,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoadLandingPage value)?  load,TResult? Function( RefreshLandingPage value)?  refresh,TResult? Function( LoadNextLandingPage value)?  loadNext,}){
 final _that = this;
 switch (_that) {
 case LoadLandingPage() when load != null:
 return load(_that);case RefreshLandingPage() when refresh != null:
-return refresh(_that);case _:
+return refresh(_that);case LoadNextLandingPage() when loadNext != null:
+return loadNext(_that);case _:
   return null;
 
 }
@@ -119,11 +122,12 @@ return refresh(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String pageName)?  load,TResult Function()?  refresh,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String pageName)?  load,TResult Function()?  refresh,TResult Function()?  loadNext,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LoadLandingPage() when load != null:
 return load(_that.pageName);case RefreshLandingPage() when refresh != null:
-return refresh();case _:
+return refresh();case LoadNextLandingPage() when loadNext != null:
+return loadNext();case _:
   return orElse();
 
 }
@@ -141,11 +145,12 @@ return refresh();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String pageName)  load,required TResult Function()  refresh,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String pageName)  load,required TResult Function()  refresh,required TResult Function()  loadNext,}) {final _that = this;
 switch (_that) {
 case LoadLandingPage():
 return load(_that.pageName);case RefreshLandingPage():
-return refresh();}
+return refresh();case LoadNextLandingPage():
+return loadNext();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -159,11 +164,12 @@ return refresh();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String pageName)?  load,TResult? Function()?  refresh,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String pageName)?  load,TResult? Function()?  refresh,TResult? Function()?  loadNext,}) {final _that = this;
 switch (_that) {
 case LoadLandingPage() when load != null:
 return load(_that.pageName);case RefreshLandingPage() when refresh != null:
-return refresh();case _:
+return refresh();case LoadNextLandingPage() when loadNext != null:
+return loadNext();case _:
   return null;
 
 }
@@ -270,9 +276,41 @@ String toString() {
 
 
 /// @nodoc
+
+
+class LoadNextLandingPage implements LandingPageEvent {
+  const LoadNextLandingPage();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadNextLandingPage);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'LandingPageEvent.loadNext()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
 mixin _$LandingPageState {
 
- LandingPageStatus get status; HomePageEntity? get homePage; String get errorMessage;
+ LandingPageStatus get status; HomePageEntity? get homePage; bool get isLoadingMore; String get errorMessage;
 /// Create a copy of LandingPageState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -283,16 +321,16 @@ $LandingPageStateCopyWith<LandingPageState> get copyWith => _$LandingPageStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LandingPageState&&(identical(other.status, status) || other.status == status)&&(identical(other.homePage, homePage) || other.homePage == homePage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LandingPageState&&(identical(other.status, status) || other.status == status)&&(identical(other.homePage, homePage) || other.homePage == homePage)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,homePage,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,homePage,isLoadingMore,errorMessage);
 
 @override
 String toString() {
-  return 'LandingPageState(status: $status, homePage: $homePage, errorMessage: $errorMessage)';
+  return 'LandingPageState(status: $status, homePage: $homePage, isLoadingMore: $isLoadingMore, errorMessage: $errorMessage)';
 }
 
 
@@ -303,7 +341,7 @@ abstract mixin class $LandingPageStateCopyWith<$Res>  {
   factory $LandingPageStateCopyWith(LandingPageState value, $Res Function(LandingPageState) _then) = _$LandingPageStateCopyWithImpl;
 @useResult
 $Res call({
- LandingPageStatus status, HomePageEntity? homePage, String errorMessage
+ LandingPageStatus status, HomePageEntity? homePage, bool isLoadingMore, String errorMessage
 });
 
 
@@ -320,11 +358,12 @@ class _$LandingPageStateCopyWithImpl<$Res>
 
 /// Create a copy of LandingPageState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? homePage = freezed,Object? errorMessage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? homePage = freezed,Object? isLoadingMore = null,Object? errorMessage = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as LandingPageStatus,homePage: freezed == homePage ? _self.homePage : homePage // ignore: cast_nullable_to_non_nullable
-as HomePageEntity?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as HomePageEntity?,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMore // ignore: cast_nullable_to_non_nullable
+as bool,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -422,10 +461,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( LandingPageStatus status,  HomePageEntity? homePage,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( LandingPageStatus status,  HomePageEntity? homePage,  bool isLoadingMore,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LandingPageState() when $default != null:
-return $default(_that.status,_that.homePage,_that.errorMessage);case _:
+return $default(_that.status,_that.homePage,_that.isLoadingMore,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -443,10 +482,10 @@ return $default(_that.status,_that.homePage,_that.errorMessage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( LandingPageStatus status,  HomePageEntity? homePage,  String errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( LandingPageStatus status,  HomePageEntity? homePage,  bool isLoadingMore,  String errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _LandingPageState():
-return $default(_that.status,_that.homePage,_that.errorMessage);case _:
+return $default(_that.status,_that.homePage,_that.isLoadingMore,_that.errorMessage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -463,10 +502,10 @@ return $default(_that.status,_that.homePage,_that.errorMessage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( LandingPageStatus status,  HomePageEntity? homePage,  String errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( LandingPageStatus status,  HomePageEntity? homePage,  bool isLoadingMore,  String errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _LandingPageState() when $default != null:
-return $default(_that.status,_that.homePage,_that.errorMessage);case _:
+return $default(_that.status,_that.homePage,_that.isLoadingMore,_that.errorMessage);case _:
   return null;
 
 }
@@ -478,11 +517,12 @@ return $default(_that.status,_that.homePage,_that.errorMessage);case _:
 
 
 class _LandingPageState implements LandingPageState {
-  const _LandingPageState({this.status = LandingPageStatus.initial, this.homePage, this.errorMessage = ''});
+  const _LandingPageState({this.status = LandingPageStatus.initial, this.homePage, this.isLoadingMore = false, this.errorMessage = ''});
   
 
 @override@JsonKey() final  LandingPageStatus status;
 @override final  HomePageEntity? homePage;
+@override@JsonKey() final  bool isLoadingMore;
 @override@JsonKey() final  String errorMessage;
 
 /// Create a copy of LandingPageState
@@ -495,16 +535,16 @@ _$LandingPageStateCopyWith<_LandingPageState> get copyWith => __$LandingPageStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LandingPageState&&(identical(other.status, status) || other.status == status)&&(identical(other.homePage, homePage) || other.homePage == homePage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LandingPageState&&(identical(other.status, status) || other.status == status)&&(identical(other.homePage, homePage) || other.homePage == homePage)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,homePage,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,homePage,isLoadingMore,errorMessage);
 
 @override
 String toString() {
-  return 'LandingPageState(status: $status, homePage: $homePage, errorMessage: $errorMessage)';
+  return 'LandingPageState(status: $status, homePage: $homePage, isLoadingMore: $isLoadingMore, errorMessage: $errorMessage)';
 }
 
 
@@ -515,7 +555,7 @@ abstract mixin class _$LandingPageStateCopyWith<$Res> implements $LandingPageSta
   factory _$LandingPageStateCopyWith(_LandingPageState value, $Res Function(_LandingPageState) _then) = __$LandingPageStateCopyWithImpl;
 @override @useResult
 $Res call({
- LandingPageStatus status, HomePageEntity? homePage, String errorMessage
+ LandingPageStatus status, HomePageEntity? homePage, bool isLoadingMore, String errorMessage
 });
 
 
@@ -532,11 +572,12 @@ class __$LandingPageStateCopyWithImpl<$Res>
 
 /// Create a copy of LandingPageState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? homePage = freezed,Object? errorMessage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? homePage = freezed,Object? isLoadingMore = null,Object? errorMessage = null,}) {
   return _then(_LandingPageState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as LandingPageStatus,homePage: freezed == homePage ? _self.homePage : homePage // ignore: cast_nullable_to_non_nullable
-as HomePageEntity?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as HomePageEntity?,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMore // ignore: cast_nullable_to_non_nullable
+as bool,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

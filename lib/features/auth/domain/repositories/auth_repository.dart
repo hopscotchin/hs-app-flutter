@@ -15,7 +15,7 @@ abstract class AuthRepository {
 
   Future<Either<Failure, VerifyOtpResponseEntity>> verifyOtp({
     required String loginId,
-    required String otp,
+    required String otpCode,
     required String otpReason,
     CancelToken? cancelToken,
   });

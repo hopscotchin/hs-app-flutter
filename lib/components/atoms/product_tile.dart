@@ -5,7 +5,6 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/theme/typography.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
-import '../../features/plp/domain/entities/listing_product_entity.dart';
 import 'cached_image_widget.dart';
 
 class ProductTile extends StatelessWidget {
@@ -53,55 +52,36 @@ class ProductTile extends StatelessWidget {
     this.onWishlistTap,
   });
 
-  factory ProductTile.fromListingProduct(
-    ListingProductEntity product, {
+  factory ProductTile.fromGridItem(
+    HomepageProduct product, {
     Key? key,
     VoidCallback? onTap,
     VoidCallback? onWishlistTap,
-  }) {
-    // Merge single visualCue into visualCues list if not already present
-    final allCues = <VisualCueEntity>[...product.visualCues];
-    if (product.visualCue != null && !allCues.contains(product.visualCue)) {
-      allCues.add(product.visualCue!);
-    }
-
-    return ProductTile(
-      key: key,
-      imageUrl: product.mediumImg,
-      brandName: product.brandName,
-      productName: product.name,
-      retailPrice: product.retailPrice,
-      regularPrice: product.regularPrice,
-      discountPercent: product.discount,
-      visualCues: allCues,
-      colorHexCodes: product.colourHexCodes,
-      isSoldOut: product.isSoldOut,
-      isWishlisted: product.isWishlisted,
-      showWishlistIcon: true,
-      showProductInfo: true,
-      imageAspectRatio: 5 / 7,
-      onTap: onTap,
-      onWishlistTap: onWishlistTap,
-    );
-  }
-
-  factory ProductTile.fromGridItem(
-    ProductGridItem item, {
-    Key? key,
-    VoidCallback? onTap,
     bool showProductInfo = true,
   }) {
+    final price = product.price;
+    final sellingPrice = price?.sellingPrice;
+    final mrp = price?.mrp;
+    final priceText = sellingPrice != null ? '₹$sellingPrice' : null;
+    final originalPriceText = (price?.hasDiscount ?? false) && mrp != null
+        ? '₹$mrp'
+        : null;
     return ProductTile(
       key: key,
-      imageUrl: item.imageUrl,
-      productName: item.name,
-      priceText: item.priceText,
-      originalPriceText: item.originalPriceText,
-      discountText: item.discountText,
-      showWishlistIcon: false,
+      imageUrl: product.primaryImageUrl,
+      brandName: product.brandName,
+      productName: product.name,
+      priceText: priceText,
+      originalPriceText: originalPriceText,
+      discountText: price?.discountLabel,
+      visualCues: product.visualCues,
+      isSoldOut: product.soldOut,
+      isWishlisted: product.isWishlisted,
+      showWishlistIcon: product.canWishlist,
       showProductInfo: showProductInfo,
       imageAspectRatio: 0.75,
       onTap: onTap,
+      onWishlistTap: onWishlistTap,
     );
   }
 

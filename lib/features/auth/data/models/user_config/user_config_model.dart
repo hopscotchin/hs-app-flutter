@@ -7,12 +7,8 @@ part 'user_config_model.g.dart';
 
 @JsonSerializable(createToJson: false)
 class UserConfigModel {
-  const UserConfigModel({
-    this.continueBrowsingEligibleVisitor = false,
-    this.productImageConfig,
-  });
+  const UserConfigModel({this.productImageConfig});
 
-  final bool continueBrowsingEligibleVisitor;
   final ProductImageConfigModel? productImageConfig;
 
   factory UserConfigModel.fromJson(Map<String, dynamic> json) =>
@@ -20,8 +16,6 @@ class UserConfigModel {
 }
 
 extension UserConfigModelX on UserConfigModel {
-  UserConfigEntity toEntity() => UserConfigEntity(
-    continueBrowsingEligibleVisitor: continueBrowsingEligibleVisitor,
-    productImageConfig: productImageConfig?.toEntity(),
-  );
+  UserConfigEntity toEntity() =>
+      UserConfigEntity(productImageConfig: productImageConfig?.toEntity());
 }

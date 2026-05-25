@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hs_app_flutter/components/appbar/custom_appbar.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
-import 'package:hs_app_flutter/core/widgets/app_dialog.dart';
+import 'package:hs_app_flutter/core/widgets/app_bottom_sheet.dart';
 import 'package:hs_app_flutter/core/constants/strings/login_redirects.dart';
 import 'package:hs_app_flutter/core/entities/message_bar_entity.dart';
 import 'package:hs_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -27,18 +28,13 @@ class AccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        scrolledUnderElevation: 0.5,
-        elevation: 0,
-        titleSpacing: 16,
-        centerTitle: false,
-        title: Text(AccountStrings.accounts, style: AppTypographyV1.titleMedium.bold.textPrimary()),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1, color: AppColors.divider),
+      backgroundColor: AppColors.baseDefault,
+      appBar: CustomAppbar(
+        showBackButton: false,
+        hasDivider: true,
+        center: Text(
+          AccountStrings.accounts,
+          style: AppTypographyV1.titleMedium.bold.textPrimary(),
         ),
       ),
       body: MultiBlocListener(
@@ -112,9 +108,17 @@ class _AccountContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AppSpacing.verticalGapMd,
-          AccountHeaderWidget(account: account),
-          const Divider(height: 1, color: AppColors.divider),
-          AppSpacing.verticalGapMd,
+          AccountHeaderWidget(
+            account: account,
+            onForgetMe: () => _showForgetDialog(context),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: AppSpacing.md),
+            child: Divider(height: 1, color: AppColors.divider),
+          ),
+          !isLoggedIn
+            ? AppSpacing.verticalGapXl
+            : AppSpacing.verticalGapMd,
 
           AccountMenuItemWidget(
             svgAsset: ImageConstants.ordersItemIcon,
@@ -239,17 +243,15 @@ class _AccountContent extends StatelessWidget {
                     ],
                   ),
           ),
-
+          AppSpacing.verticalGapXs,
           const Divider(height: 1, color: AppColors.divider),
           const AccountHelpSectionWidget(),
           AccountFooterWidget(
             isLoggedIn: isLoggedIn,
-            hasGuestData: account.hasGuestData,
             onSignIn: () => AppNavigator.goToLogin(context),
             onSignOut: () => context.read<AuthBloc>().add(const AuthEvent.signOut()),
-            onForgetMe: () => _showForgetDialog(context),
           ),
-          const SizedBox(height: 80),
+          const SizedBox(height: 100),
         ],
       ),
     );
@@ -257,17 +259,17 @@ class _AccountContent extends StatelessWidget {
 
   Future<void> _showForgetDialog(BuildContext context) async {
     final bloc = context.read<AccountBloc>();
-    final confirmed = await AppDialog.show<bool>(
+    final confirmed = await AppBottomSheet.show<bool>(
       context,
       title: AccountStrings.confirmDeleteTitle,
       description: AccountStrings.confirmDeleteGuest,
-      secondaryAction: AppDialogAction(
+      secondaryAction: AppBottomSheetAction(
         label: CommonStrings.cancel,
         onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
       ),
-      primaryAction: AppDialogAction(
-        label: AccountStrings.forget,
-        style: AppDialogButtonStyle.filled,
+      primaryAction: AppBottomSheetAction(
+        label: CommonStrings.remove,
+        style: AppBottomSheetButtonStyle.filled,
         onPressed: () => Navigator.of(context, rootNavigator: true).pop(true),
       ),
     );

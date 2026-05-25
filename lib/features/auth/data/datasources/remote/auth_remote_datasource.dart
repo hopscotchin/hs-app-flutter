@@ -3,8 +3,10 @@ import 'package:injectable/injectable.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../../../../../core/constants/api_constants.dart';
-import '../../models/login_model.dart';
 import '../../models/logout/logout_model.dart';
+import '../../models/send_otp_response/send_otp_response_model.dart';
+import '../../models/signup_otp_response/signup_otp_response_model.dart';
+import '../../models/verify_otp_response/verify_otp_response_model.dart';
 
 part 'auth_remote_datasource.g.dart';
 
@@ -15,19 +17,19 @@ abstract class AuthRemoteDatasource {
   factory AuthRemoteDatasource(Dio dio) = _AuthRemoteDatasource;
 
   @POST(ApiConstants.sendOtp)
-  Future<LoginModel> sendOtp({
+  Future<SendOtpResponseModel> sendOtp({
     @Body() required Map<String, dynamic> body,
     @CancelRequest() CancelToken? cancelToken,
   });
 
   @POST(ApiConstants.verifyOtp)
-  Future<LoginModel> verifyOtp({
+  Future<VerifyOtpResponseModel> verifyOtp({
     @Body() required Map<String, dynamic> body,
     @CancelRequest() CancelToken? cancelToken,
   });
 
-  @POST(ApiConstants.registerSendOtp)
-  Future<LoginModel> register({
+  @POST(ApiConstants.singUpSendOtp)
+  Future<SignupOtpResponseModel> register({
     @Body() required Map<String, dynamic> body,
     @CancelRequest() CancelToken? cancelToken,
   });

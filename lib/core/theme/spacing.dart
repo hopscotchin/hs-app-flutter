@@ -41,6 +41,7 @@ class AppSpacing {
   static const EdgeInsets paddingVerticalSm = EdgeInsets.symmetric(vertical: sm);
   static const EdgeInsets paddingVerticalMd = EdgeInsets.symmetric(vertical: md);
   static const EdgeInsets paddingVerticalLg = EdgeInsets.symmetric(vertical: lg);
+  static const EdgeInsets paddingVerticalLgMd = EdgeInsets.symmetric(vertical: lgMd);
 
   // Screen padding (standard page padding)
   static const EdgeInsets screenPadding = EdgeInsets.all(md);

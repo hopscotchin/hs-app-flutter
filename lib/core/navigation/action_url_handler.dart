@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../features/plp/domain/entities/page_type.dart';
 import 'deeplink_hosts.dart';
 import 'nav_destination.dart';
 
@@ -93,30 +92,6 @@ class ActionUrlHandler {
             ? LandingPageDestination(pageName: id)
             : const HomeDestination();
 
-      // ── Boutique ──
-      case _Route.boutique || DeeplinkHost.boutiquesListing:
-        return PlpDestination(pageType: PageType.boutique, plpId: _id(id));
-
-      // ── PLP (listing) ──
-      case _Route.products || DeeplinkHost.productsListing:
-        return PlpDestination(pageType: PageType.plp, plpId: _id(id));
-
-      // ── PDP ──
-      case _Route.product || DeeplinkHost.productPage:
-        return id.isNotEmpty
-            ? PdpDestination(productId: id)
-            : const HomeDestination();
-
-      // ── Search ──
-      case _Route.search || DeeplinkHost.searchPage:
-        final q = params['q'] ?? params['keyword'] ?? '';
-        return q.isNotEmpty
-            ? PlpDestination(
-                pageType: PageType.search,
-                plpId: 0,
-                searchQuery: q,
-              )
-            : const HomeDestination();
 
       // ── Cart ──
       case _Route.cart || DeeplinkHost.shoppingCart || DeeplinkHost.cartMerge:
@@ -231,57 +206,6 @@ class ActionUrlHandler {
         return pageName.isNotEmpty
             ? LandingPageDestination(pageName: pageName)
             : const HomeDestination();
-
-      // ── PLP (boutique): /products, /boutique, /collection(s) ──
-      case _Route.products || _Route.boutique || 'collection' || 'collections':
-        final id = segments.length >= 2
-            ? _id(segments[1])
-            : _id(params['id'] ?? params['salePlanId']);
-        return PlpDestination(pageType: PageType.boutique, plpId: id);
-
-      // ── PDP: /product/<pid> ──
-      case _Route.product:
-        final pid = segments.length >= 2 ? segments[1] : (params['id'] ?? '');
-        return pid.isNotEmpty
-            ? PdpDestination(productId: pid)
-            : const HomeDestination();
-
-      // ── Search: /search, /productsearch, /productssearch ──
-      case _Route.search:
-        // /search/product?id=<categoryId> → PLP
-        if (segments.length >= 2 && segments[1] == _Route.product) {
-          return PlpDestination(
-            pageType: PageType.plp,
-            plpId: _id(params['id'] ?? params['categoryId']),
-          );
-        }
-        final q = params['keyword'] ?? params['q'] ?? '';
-        return q.isNotEmpty
-            ? PlpDestination(
-                pageType: PageType.search,
-                plpId: 0,
-                searchQuery: q,
-              )
-            : const HomeDestination();
-
-      case 'productsearch' || 'productssearch':
-        final q = params['keyword'] ?? params['q'] ?? '';
-        return PlpDestination(
-          pageType: PageType.search,
-          plpId: 0,
-          searchQuery: q,
-        );
-
-      // ── Shop-by: /shop-by/category/<name> ──
-      case 'shop-by':
-        if (segments.length >= 3 && segments[1].toLowerCase() == 'category') {
-          return PlpDestination(
-            pageType: PageType.search,
-            plpId: 0,
-            searchQuery: segments[2].replaceAll('-', ' '),
-          );
-        }
-        return const HomeDestination();
 
       // ── Cart: /cart, /shoppingcart, /checkout ──
       case _Route.cart || 'shoppingcart' || 'shopping-cart' || 'checkout':

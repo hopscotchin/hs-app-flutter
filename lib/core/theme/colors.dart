@@ -8,6 +8,7 @@ class AppColors {
   // ! we will need to remove this old colors and use the below colors as per our design system
 
   // Primary Colors
+  //Deprecated From
   static const Color primary = Color(0xFF67218C);
   static const Color primaryLight = Color(0x1A67218C);
   static const Color primaryDark = Color(0xFF3700B3);
@@ -44,7 +45,7 @@ class AppColors {
   static const Color textDisabled = Color(0x42000000);
 
   // Divider & Border Colors
-  static const Color divider = Color(0xFFE0E0E0);
+
   static const Color border = Color(0xFFDDDDDD);
 
   // Overlay Colors
@@ -56,6 +57,8 @@ class AppColors {
 
   //Container
   static const Color container = Color(0xFFFFFFFF);
+
+  //Deprecated To
 
   //TODO : we need to use this color palette as per our design system and remove the above colors which are not in use and not as per our design system
   // ─── Design Token Palette NEW  ─────────────────────────────────────────
@@ -97,6 +100,9 @@ class AppColors {
   // Info
   static const Color infoDefault = Color(0xFF3D65F7); // == info
   static const Color infoSecondary = Color(0xFFD1E0FF);
+
+  //Divider
+  static const Color divider = Color(0xFFE0E0E0);
 
   /// Light color scheme for Material 3
   static ColorScheme get lightColorScheme => const ColorScheme.light(

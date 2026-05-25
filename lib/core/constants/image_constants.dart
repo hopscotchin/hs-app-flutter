@@ -1,11 +1,11 @@
 class ImageConstants {
   ImageConstants._();
 
-  static const String splashAnimation =
-      'assets/animations/splash_animation.gif';
+  static const String splashAnimation = 'assets/animations/splash_animation.gif';
   static const String hsLogo = 'assets/images/hslogo.svg';
   static const String heart = 'assets/images/heart.svg';
   static const String arrowBack = 'assets/icons/arrow_back.svg';
+  static const String accountMobileIcon = 'assets/icons/account_mobile.svg';
 
   //Dashboard Icons
   static const String discover = 'assets/icons/dashboard/discover.svg';

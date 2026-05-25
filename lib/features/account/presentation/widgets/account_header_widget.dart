@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/auth_strings.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
@@ -12,12 +14,15 @@ import '../../domain/entities/account_entity.dart';
 
 class AccountHeaderWidget extends StatelessWidget {
   final AccountEntity account;
+  final VoidCallback? onForgetMe;
 
-  const AccountHeaderWidget({super.key, required this.account});
+  const AccountHeaderWidget({super.key, required this.account, this.onForgetMe});
 
   @override
   Widget build(BuildContext context) {
-    return account.isLoggedIn ? _SignedInHeader(account: account) : const _SignedOutHeader();
+    return account.isLoggedIn
+        ? _SignedInHeader(account: account)
+        : _SignedOutHeader(account: account, onForgetMe: onForgetMe);
   }
 }
 
@@ -52,29 +57,26 @@ class _SignedInHeader extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                AppSpacing.verticalGapSm,
+                AppSpacing.verticalGapMd,
                 _buildContactRow(),
               ],
             ),
           ),
           AppSpacing.horizontalGapMd,
           // Right: Profile image
-          GestureDetector(
-            onTap: () {},
-            child: CircleAvatar(
-              radius: 24,
-              backgroundColor: AppColors.primary,
-              child: account.avatarUrl != null && account.avatarUrl!.isNotEmpty
-                  ? ClipOval(
-                      child: CachedImageWidget(imageUrl: account.avatarUrl!, width: 48, height: 48),
-                    )
-                  : Text(
-                      _initials,
-                      style: AppTypographyV1.titleMedium.semiBold.copyWith(
-                        color: AppColors.onPrimary,
-                      ),
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: AppColors.primary,
+            child: account.avatarUrl != null && account.avatarUrl!.isNotEmpty
+                ? ClipOval(
+                    child: CachedImageWidget(imageUrl: account.avatarUrl!, width: 48, height: 48),
+                  )
+                : Text(
+                    _initials,
+                    style: AppTypographyV1.titleMedium.semiBold.copyWith(
+                      color: AppColors.onPrimary,
                     ),
-            ),
+                  ),
           ),
         ],
       ),
@@ -91,16 +93,19 @@ class _SignedInHeader extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(
-          hasPhone ? Icons.phone_android : Icons.alternate_email,
-          size: AppSpacing.iconXs,
-          color: AppColors.textSecondary,
+        SvgPicture.asset(
+          ImageConstants.accountMobileIcon,
+          width: AppSpacing.iconXs,
+          height: AppSpacing.iconXs,
+          colorFilter: const ColorFilter.mode(AppColors.neutralGrey5, BlendMode.srcIn),
         ),
-        const SizedBox(width: 4),
+        AppSpacing.horizontalGapSm,
         Flexible(
           child: Text(
             hasPhone ? _formattedPhone : account.email!,
-            style: AppTypographyV1.labelLarge.textSecondary(),
+            style: AppTypographyV1.labelLarge.medium.copyWith(
+              color: AppColors.neutralGrey5
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -130,34 +135,37 @@ class _SignedInHeader extends StatelessWidget {
 /// Header shown when user is NOT logged in.
 /// "Hey there!" greeting, sign-in message, SIGN IN button, Join us link.
 class _SignedOutHeader extends StatelessWidget {
-  const _SignedOutHeader();
+  final AccountEntity account;
+  final VoidCallback? onForgetMe;
+
+  const _SignedOutHeader({required this.account, this.onForgetMe});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
-        AppSpacing.sm,
+        AppSpacing.lg,
         AppSpacing.md,
-        AppSpacing.sm,
+        AppSpacing.md,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(AccountStrings.heyThere, style: AppTypographyV1.bodyLarge.bold.textPrimary()),
-          AppSpacing.verticalGapXs,
+          AppSpacing.verticalGapSm,
           Text(
             AccountStrings.signOutHeaderSubTitle,
-            style: AppTypographyV1.bodyRegular.textPrimary(),
+            style: AppTypographyV1.labelLarge.regular.textPrimary(),
           ),
-          AppSpacing.verticalGapMd,
+          AppSpacing.verticalGapLgMd,
           SizedBox(
             width: double.infinity,
-            height: AppSpacing.buttonHeightLg,
-            child: ElevatedButton(
+            height: AppSpacing.xxl,
+            child: TextButton(
               onPressed: () => AppNavigator.goToLogin(context),
-              style: ElevatedButton.styleFrom(
+              style: TextButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
                 shape: const RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusXs),
@@ -166,17 +174,47 @@ class _SignedOutHeader extends StatelessWidget {
               child: const Text(AccountStrings.signIn),
             ),
           ),
-          AppSpacing.verticalGapSm,
+          if (account.hasGuestData) ...[
+            AppSpacing.verticalGapSm,
+            SizedBox(
+              width: double.infinity,
+              height: AppSpacing.xxl,
+              child: OutlinedButton(
+                onPressed: onForgetMe,
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.primary),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: AppSpacing.borderRadiusXs,
+                  ),
+                  foregroundColor: AppColors.primary,
+                  textStyle: AppTypographyV1.bodyRegular.semiBold,
+                  backgroundColor: AppColors.container,
+                ),
+                child: Text(
+                  AccountStrings.forgetMe,
+                  style: AppTypographyV1.bodyLarge.bold.brand(),
+                ),
+              ),
+            ),
+            AppSpacing.verticalGapSm,
+            Center(
+              child: Text(
+                AccountStrings.eraseMessage,
+                style: AppTypographyV1.labelMedium.regular.textPrimary(),
+              ),
+            ),
+          ],
+          AppSpacing.verticalGapLgMd,
           Center(
             child: GestureDetector(
               onTap: () => AppNavigator.goToJoinUs(context),
               child: Text.rich(
                 TextSpan(
                   text: AccountStrings.newToHopscotch,
-                  style: AppTypographyV1.labelMedium.textPrimary(),
+                  style: AppTypographyV1.labelMedium.regular.textPrimary(),
                   children: [
                     TextSpan(
-                      text: AuthStrings.joinUs,
+                      text: AuthStrings.joinUs.toUpperCase(),
                       style: AppTypographyV1.labelMedium.bold.brand(),
                     ),
                   ],

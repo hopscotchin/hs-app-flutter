@@ -7,6 +7,7 @@ abstract class LandingPageState with _$LandingPageState {
   const factory LandingPageState({
     @Default(LandingPageStatus.initial) LandingPageStatus status,
     HomePageEntity? homePage,
+    @Default(false) bool isLoadingMore,
     @Default('') String errorMessage,
   }) = _LandingPageState;
 }
@@ -16,4 +17,5 @@ extension LandingPageStateX on LandingPageState {
   bool get isSuccess => status == LandingPageStatus.success;
   bool get isFailure => status == LandingPageStatus.failure;
   bool get hasData => homePage != null;
+  bool get hasNextPage => homePage?.hasNextPage ?? false;
 }

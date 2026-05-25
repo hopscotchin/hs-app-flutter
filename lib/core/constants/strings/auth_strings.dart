@@ -31,6 +31,8 @@ class AuthStrings {
   static const String enterOtpSentToNumber = 'Enter the OTP send to your number';
   static const String change = 'CHANGE?';
   static const String resendOtpIn = 'Resend OTP in';
+  static const String signInReason = 'SIGN_IN';
+  static const String signUpReason = 'SIGN_UP';
 
   // Hints & helper text
   static const String verifyNumberHint = 'Verify your number to create your account';

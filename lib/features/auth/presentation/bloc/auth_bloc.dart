@@ -66,7 +66,7 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
     final result = await _verifyOtp(
       VerifyOtpParams(
         loginId: event.loginId,
-        otp: event.otp,
+        otpCode: event.otp,
         otpReason: event.otpReason,
         cancelToken: token,
       ),
@@ -105,11 +105,13 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
       final bars = failure is ApiFailure ? failure.messageBars : <MessageBarEntity>[];
       final redirectLink = bars.map((b) => b.redirectLink).nonNulls.firstOrNull;
       if (redirectLink != null) {
-        emit(AuthState(
-          status: AuthStatus.redirectLinkFound,
-          redirectLink: redirectLink,
-          messageBars: bars,
-        ));
+        emit(
+          AuthState(
+            status: AuthStatus.redirectLinkFound,
+            redirectLink: redirectLink,
+            messageBars: bars,
+          ),
+        );
         return;
       }
       emit(AuthState(status: AuthStatus.error, errorMessage: failure.message, messageBars: bars));

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/entities/message_bar_entity.dart';
+import '../../../../core/entities/visual_cue_entity.dart';
 
 part 'home_page_entity.freezed.dart';
 
@@ -11,11 +12,8 @@ abstract class HomePageEntity with _$HomePageEntity {
     String? action,
     String? popUpMessage,
     @Default(<MessageBarEntity>[]) List<MessageBarEntity> messageBars,
-    String? pageName,
-    String? pageBackgroundColor,
-    String? headerBgImageUrl,
-    @Default(0) int totalCollections,
-    @Default(0) int totalSections,
+    PageMeta? pageMeta,
+    @Default(<SortingOption>[]) List<SortingOption> sortingOptions,
     @Default(<PageComponent>[]) List<PageComponent> pageComponents,
   }) = _HomePageEntity;
 }
@@ -24,20 +22,59 @@ extension HomePageEntityX on HomePageEntity {
   // null action = no explicit failure signalled; treat as success
   bool get isSuccessful =>
       action == null || action!.toLowerCase() == 'success';
+
+  String? get pageName => pageMeta?.pageName;
+  String? get headerImageUrl => pageMeta?.headerImageUrl;
+  bool get isDarkHeader => pageMeta?.isDarkHeader ?? false;
+  int get totalCollections => pageMeta?.totalCollections ?? 0;
+  bool get hasNextPage => pageMeta?.hasNextPage ?? false;
 }
 
-/// Mirrors Android's PageComponent class.
-/// Each component has a `type` and a generic `data` object
-/// that is parsed differently based on the type.
+/// Top-level page metadata (v13 `pageMeta`).
+class PageMeta extends Equatable {
+  final String? pageName;
+  final int totalCollections;
+  final bool hasNextPage;
+  final String? headerImageUrl;
+  final bool isDarkHeader;
+
+  const PageMeta({
+    this.pageName,
+    this.totalCollections = 0,
+    this.hasNextPage = false,
+    this.headerImageUrl,
+    this.isDarkHeader = false,
+  });
+
+  @override
+  List<Object?> get props => [
+    pageName,
+    totalCollections,
+    hasNextPage,
+    headerImageUrl,
+    isDarkHeader,
+  ];
+}
+
+/// Top-level `sortingOptions` entries — drive the tab strip on Discover.
+class SortingOption extends Equatable {
+  final String label;
+  final String id;
+
+  const SortingOption({required this.label, required this.id});
+
+  @override
+  List<Object?> get props => [label, id];
+}
+
+/// Each `pageComponents[]` entry: a `type` + a `data` block plus shared
+/// `margins` / `position` fields. The typed payload is pre-parsed into
+/// [parsedData] so build-time has no JSON cost.
 class PageComponent extends Equatable {
   final String type;
   final int position;
   final Map<String, dynamic>? data;
-
-  /// Pre-parsed typed data to avoid repeated JSON parsing during builds.
   final Object? parsedData;
-
-  /// Margins from the API controlling outer and inner spacing.
   final ComponentMargins? margins;
 
   const PageComponent({
@@ -52,217 +89,386 @@ class PageComponent extends Equatable {
   List<Object?> get props => [type, position, data, margins];
 }
 
-/// Type constants matching Android's PageComponent.TYPE_* constants
+/// `type` constants from the v13 API.
 class PageComponentType {
   static const String hero = 'Hero';
-  static const String collection = 'Collection';
   static const String customTiles = 'CustomTiles';
   static const String pageCarousel = 'PageCarousel';
   static const String tabbedCustomTiles = 'TABBED_CUSTOM_TILES';
-  static const String tabbedDecorationFinder = 'TABBED_DECORATION_FINDER';
   static const String productGrid = 'PRODUCT_GRID';
-  static const String productGridRow = 'PRODUCT_GRID_ROW';
   static const String ctaButton = 'CTA_BUTTON';
-  static const String testimonial = 'TESTIMONIALS';
-  static const String continueBrowsing = 'CONTINUE_BROWSING';
-  static const String childrenManager = 'CHILDREN_MANAGER';
   static const String shopTheLook = 'SHOP_THE_LOOK';
-  static const String webContent = 'WEB_CONTENT';
 }
 
-// ─── Parsed data models extracted from the `data` field ───
+// ─── Shared building blocks ───
 
-class HeroCarouselData extends Equatable {
-  final String? title;
-  final String? sectionName;
-  final int? scrollDuration;
-  final String? transitionType;
-  final String? useCase;
-  final List<HeroTile> tiles;
-
-  const HeroCarouselData({
-    this.title,
-    this.sectionName,
-    this.scrollDuration,
-    this.transitionType,
-    this.useCase,
-    this.tiles = const [],
-  });
-
-  @override
-  List<Object?> get props => [
-    title,
-    sectionName,
-    scrollDuration,
-    transitionType,
-    useCase,
-    tiles,
-  ];
-}
-
-class HeroTile extends Equatable {
-  final String imageUrl;
-  final String? actionUri;
-  final int width;
-  final int height;
-
-  const HeroTile({
-    required this.imageUrl,
-    this.actionUri,
-    this.width = 960,
-    this.height = 960,
-  });
-
-  double get aspectRatio => width / height;
-
-  @override
-  List<Object?> get props => [imageUrl, actionUri, width, height];
-}
-
-class CollectionData extends Equatable {
-  final String? id;
-  final String? name;
-  final String? imageUrl;
-  final String? actionUrl;
-  final bool? showInBoutiqueSetting;
-  final String? pageId;
-
-  const CollectionData({
-    this.id,
-    this.name,
-    this.imageUrl,
-    this.actionUrl,
-    this.showInBoutiqueSetting,
-    this.pageId,
-  });
-
-  @override
-  List<Object?> get props => [id, name, imageUrl, actionUrl];
-}
-
-class CustomTilesData extends Equatable {
-  final int? id;
-  final String? name;
-  final String? type;
-  final String? pageName;
-  final bool showName;
-  final TitleImageData? titleImage;
-  final List<StoreTileDetail> tileDetails;
-
-  const CustomTilesData({
-    this.id,
-    this.name,
-    this.type,
-    this.pageName,
-    this.showName = false,
-    this.titleImage,
-    this.tileDetails = const [],
-  });
-
-  @override
-  List<Object?> get props => [id, name, type, pageName, tileDetails];
-}
-
-class TitleImageData extends Equatable {
+/// `title` block — image-as-section-header used by most components.
+class TitleImage extends Equatable {
   final String? url;
   final int? width;
   final int? height;
 
-  const TitleImageData({this.url, this.width, this.height});
+  const TitleImage({this.url, this.width, this.height});
 
   @override
   List<Object?> get props => [url, width, height];
 }
 
-class StoreTileDetail extends Equatable {
-  final List<TileImage> tileGrid;
+/// `ctaButton` block — explore/view-all button on ProductGrid, CustomTiles, etc.
+class CtaButton extends Equatable {
+  final String? label;
+  final String? actionType;
+  final String? actionUri;
+  final String? type;
 
-  const StoreTileDetail({this.tileGrid = const []});
+  const CtaButton({this.label, this.actionType, this.actionUri, this.type});
 
   @override
-  List<Object?> get props => [tileGrid];
+  List<Object?> get props => [label, actionType, actionUri, type];
 }
 
-class TileImage extends Equatable {
+/// Single tile inside a `tileGrid` array (used by Hero and CustomTiles).
+class TileGridItem extends Equatable {
   final String? imageUrl;
   final String? actionUri;
+  final String? actionUriWeb;
   final String? mimeType;
   final int? width;
   final int? height;
+  final String? actionType;
+  final String? actionValue;
+  final String? appImageUrl;
+  final bool isTitleItem;
 
-  const TileImage({
+  const TileGridItem({
     this.imageUrl,
     this.actionUri,
+    this.actionUriWeb,
     this.mimeType,
     this.width,
     this.height,
+    this.actionType,
+    this.actionValue,
+    this.appImageUrl,
+    this.isTitleItem = false,
   });
 
+  double get aspectRatio =>
+      (width != null && height != null && height! > 0)
+      ? width! / height!
+      : 1.0;
+
   @override
-  List<Object?> get props => [imageUrl, actionUri, mimeType, width, height];
+  List<Object?> get props => [
+    imageUrl,
+    actionUri,
+    mimeType,
+    width,
+    height,
+    actionType,
+    isTitleItem,
+  ];
 }
 
-class ProductGridData extends Equatable {
-  final String? id;
+/// Product shape shared by `PageCarousel.tiles[].product` and `PRODUCT_GRID.tiles[]`.
+class HomepageProduct extends Equatable {
+  final int? id;
   final String? name;
-  final String? pageName;
-  final TitleImageData? title;
-  final LayoutInfoData? layoutInfo;
-  final List<ProductGridRowData> rows;
-  final CtaData? cta;
+  final List<String> imageUrls;
+  final String? brandName;
+  final HomepageProductPrice? price;
+  final bool isWishlisted;
+  final bool soldOut;
+  final bool canWishlist;
+  final String? colorVariants;
+  final String? actionUri;
+  final List<VisualCueEntity> visualCues;
 
-  const ProductGridData({
+  const HomepageProduct({
     this.id,
     this.name,
-    this.pageName,
-    this.title,
-    this.layoutInfo,
-    this.rows = const [],
-    this.cta,
+    this.imageUrls = const [],
+    this.brandName,
+    this.price,
+    this.isWishlisted = false,
+    this.soldOut = false,
+    this.canWishlist = false,
+    this.colorVariants,
+    this.actionUri,
+    this.visualCues = const [],
   });
 
-  @override
-  List<Object?> get props => [id, name, pageName, title, layoutInfo, rows, cta];
-}
-
-class ProductGridRowData extends Equatable {
-  final List<ProductGridItem> items;
-
-  const ProductGridRowData({this.items = const []});
-
-  @override
-  List<Object?> get props => [items];
-}
-
-class ProductGridItem extends Equatable {
-  final String? id;
-  final String? name;
-  final String? imageUrl;
-  final String? actionUrl;
-  final String? priceText;
-  final String? originalPriceText;
-  final String? discountText;
-
-  const ProductGridItem({
-    this.id,
-    this.name,
-    this.imageUrl,
-    this.actionUrl,
-    this.priceText,
-    this.originalPriceText,
-    this.discountText,
-  });
+  String? get primaryImageUrl => imageUrls.isNotEmpty ? imageUrls.first : null;
 
   @override
   List<Object?> get props => [
     id,
     name,
-    imageUrl,
-    actionUrl,
-    priceText,
-    originalPriceText,
-    discountText,
+    imageUrls,
+    brandName,
+    price,
+    isWishlisted,
+    soldOut,
+    canWishlist,
+    colorVariants,
+    actionUri,
+    visualCues,
   ];
+}
+
+class HomepageProductPrice extends Equatable {
+  final String? sellingPrice;
+  final String? mrp;
+  final String? discountLabel;
+
+  const HomepageProductPrice({this.sellingPrice, this.mrp, this.discountLabel});
+
+  bool get hasDiscount =>
+      discountLabel != null && discountLabel!.trim().isNotEmpty;
+
+  @override
+  List<Object?> get props => [sellingPrice, mrp, discountLabel];
+}
+
+// ─── PageCarousel ───
+
+class PageCarouselData extends Equatable {
+  final PageCarouselViewConfig? viewConfig;
+  final TitleImage? title;
+  final List<PageCarouselTile> tiles;
+
+  const PageCarouselData({this.viewConfig, this.title, this.tiles = const []});
+
+  double get parsedAspectRatio {
+    final w = viewConfig?.tileWidth;
+    final h = viewConfig?.tileHeight;
+    if (w != null && h != null && h > 0) return w / h;
+    return 1.0;
+  }
+
+  @override
+  List<Object?> get props => [viewConfig, title, tiles];
+}
+
+class PageCarouselViewConfig extends Equatable {
+  final int? tileWidth;
+  final int? tileHeight;
+  final int? minTilesToShow;
+  final bool navigation;
+  final bool snapping;
+  final bool showPageIndicators;
+  final int peepingFactor;
+  final double imageCornerRadius;
+
+  const PageCarouselViewConfig({
+    this.tileWidth,
+    this.tileHeight,
+    this.minTilesToShow,
+    this.navigation = false,
+    this.snapping = false,
+    this.showPageIndicators = false,
+    this.peepingFactor = 0,
+    this.imageCornerRadius = 0,
+  });
+
+  @override
+  List<Object?> get props => [
+    tileWidth,
+    tileHeight,
+    minTilesToShow,
+    navigation,
+    snapping,
+    showPageIndicators,
+    peepingFactor,
+    imageCornerRadius,
+  ];
+}
+
+class PageCarouselTile extends Equatable {
+  final int? id;
+  final String? imageUrl;
+  final String? actionUri;
+  final String? mimeType;
+  final String? sort;
+  final HomepageProduct? product;
+
+  const PageCarouselTile({
+    this.id,
+    this.imageUrl,
+    this.actionUri,
+    this.mimeType,
+    this.sort,
+    this.product,
+  });
+
+  @override
+  List<Object?> get props => [id, imageUrl, actionUri, mimeType, sort, product];
+}
+
+// ─── Hero ───
+
+class HeroCarouselData extends Equatable {
+  final HeroViewConfig? viewConfig;
+  final List<HeroTile> tiles;
+
+  const HeroCarouselData({this.viewConfig, this.tiles = const []});
+
+  @override
+  List<Object?> get props => [viewConfig, tiles];
+}
+
+class HeroViewConfig extends Equatable {
+  final String? title;
+  final int? position;
+  final String? transitionType;
+  final double imageCornerRadius;
+  final int? scrollDuration;
+
+  const HeroViewConfig({
+    this.title,
+    this.position,
+    this.transitionType,
+    this.imageCornerRadius = 0,
+    this.scrollDuration,
+  });
+
+  @override
+  List<Object?> get props => [
+    title,
+    position,
+    transitionType,
+    imageCornerRadius,
+    scrollDuration,
+  ];
+}
+
+/// v13 Hero tile: holds metadata + `tile_details[].tileGrid[]`.
+/// Each tile renders as a single image (first non-empty grid entry).
+class HeroTile extends Equatable {
+  final int? id;
+  final String? name;
+  final String? type;
+  final String? pageName;
+  final int? position;
+  final List<HeroTileDetail> tileDetails;
+
+  const HeroTile({
+    this.id,
+    this.name,
+    this.type,
+    this.pageName,
+    this.position,
+    this.tileDetails = const [],
+  });
+
+  TileGridItem? get firstImage {
+    for (final detail in tileDetails) {
+      for (final item in detail.tileGrid) {
+        if ((item.imageUrl ?? '').isNotEmpty) return item;
+      }
+    }
+    return null;
+  }
+
+  String get imageUrl => firstImage?.imageUrl ?? '';
+  String? get actionUri => firstImage?.actionUri;
+  int get width => firstImage?.width ?? 960;
+  int get height => firstImage?.height ?? 960;
+  double get aspectRatio => height > 0 ? width / height : 1.0;
+
+  @override
+  List<Object?> get props => [id, name, type, pageName, position, tileDetails];
+}
+
+class HeroTileDetail extends Equatable {
+  final int? tileDetailId;
+  final List<TileGridItem> tileGrid;
+
+  const HeroTileDetail({this.tileDetailId, this.tileGrid = const []});
+
+  @override
+  List<Object?> get props => [tileDetailId, tileGrid];
+}
+
+// ─── CustomTiles ───
+
+class CustomTilesData extends Equatable {
+  final CustomTilesViewConfig? viewConfig;
+  final CtaButton? ctaButton;
+  final TitleImage? title;
+  final List<CustomTilesTile> tiles;
+
+  const CustomTilesData({
+    this.viewConfig,
+    this.ctaButton,
+    this.title,
+    this.tiles = const [],
+  });
+
+  @override
+  List<Object?> get props => [viewConfig, ctaButton, title, tiles];
+}
+
+class CustomTilesViewConfig extends Equatable {
+  final String? name;
+  final String? type;
+  final String? pageName;
+  final double imageCornerRadius;
+
+  const CustomTilesViewConfig({
+    this.name,
+    this.type,
+    this.pageName,
+    this.imageCornerRadius = 4,
+  });
+
+  @override
+  List<Object?> get props => [name, type, pageName, imageCornerRadius];
+}
+
+/// CustomTiles entry — a tileGrid row plus the original tile_detail_id.
+class CustomTilesTile extends Equatable {
+  final int? tileDetailId;
+  final List<TileGridItem> tileGrid;
+
+  const CustomTilesTile({this.tileDetailId, this.tileGrid = const []});
+
+  bool get isTitleRow =>
+      tileGrid.isNotEmpty && tileGrid.every((t) => t.isTitleItem);
+
+  @override
+  List<Object?> get props => [tileDetailId, tileGrid];
+}
+
+// ─── ProductGrid ───
+
+class ProductGridData extends Equatable {
+  final ProductGridViewConfig? viewConfig;
+  final CtaButton? ctaButton;
+  final TitleImage? title;
+  final LayoutInfoData? layoutInfo;
+  final List<HomepageProduct> tiles;
+
+  const ProductGridData({
+    this.viewConfig,
+    this.ctaButton,
+    this.title,
+    this.layoutInfo,
+    this.tiles = const [],
+  });
+
+  @override
+  List<Object?> get props => [viewConfig, ctaButton, title, layoutInfo, tiles];
+}
+
+class ProductGridViewConfig extends Equatable {
+  final String? name;
+  final String? useCase;
+
+  const ProductGridViewConfig({this.name, this.useCase});
+
+  @override
+  List<Object?> get props => [name, useCase];
 }
 
 class LayoutInfoData extends Equatable {
@@ -275,126 +481,23 @@ class LayoutInfoData extends Equatable {
   List<Object?> get props => [columns, showProductInfo];
 }
 
-class PageCarouselData extends Equatable {
-  final int? id;
-  final String? type;
-  final String? title;
-  final String? sectionName;
-  final int? tileWidth;
-  final int? tileHeight;
-  final String? itemAspectRatio;
-  final int? minTilesToShow;
-  final bool showPageIndicators;
-  final bool snapBehaviour;
-  final TitleImageData? titleImage;
-  final String? tracking;
-  final List<PageCarouselTile> tiles;
-  final Map<String, dynamic>? queryParams;
-  final String? useCase;
-  final int? peepingFactor;
-
-  const PageCarouselData({
-    this.id,
-    this.type,
-    this.title,
-    this.sectionName,
-    this.tileWidth,
-    this.tileHeight,
-    this.itemAspectRatio,
-    this.minTilesToShow,
-    this.showPageIndicators = false,
-    this.snapBehaviour = false,
-    this.titleImage,
-    this.tracking,
-    this.tiles = const [],
-    this.queryParams,
-    this.useCase,
-    this.peepingFactor,
-  });
-
-  double get parsedAspectRatio {
-    if (itemAspectRatio != null && itemAspectRatio!.contains(':')) {
-      final parts = itemAspectRatio!.split(':');
-      final w = double.tryParse(parts[0]) ?? 1;
-      final h = double.tryParse(parts[1]) ?? 1;
-      if (h > 0) return w / h;
-    }
-    if (tileWidth != null && tileHeight != null && tileHeight! > 0) {
-      return tileWidth! / tileHeight!;
-    }
-    return 1.0;
-  }
-
-  @override
-  List<Object?> get props => [id, type, title, sectionName, tiles];
-}
-
-class PageCarouselTile extends Equatable {
-  final int? id;
-  final String? imageUrl;
-  final String? actionUrl;
-  final String? mimeType;
-  final String? collectionName;
-  final PageCarouselProduct? product;
-
-  const PageCarouselTile({
-    this.id,
-    this.imageUrl,
-    this.actionUrl,
-    this.mimeType,
-    this.collectionName,
-    this.product,
-  });
-
-  @override
-  List<Object?> get props => [id, imageUrl, actionUrl];
-}
-
-class PageCarouselProduct extends Equatable {
-  final String? name;
-  final int discount;
-  final double regularPrice;
-  final double retailPrice;
-
-  const PageCarouselProduct({
-    this.name,
-    this.discount = 0,
-    this.regularPrice = 0,
-    this.retailPrice = 0,
-  });
-
-  @override
-  List<Object?> get props => [name, discount, regularPrice, retailPrice];
-}
-
-class CtaData extends Equatable {
-  final String? text;
-  final String? actionUrl;
-  final String? tracking;
-
-  const CtaData({this.text, this.actionUrl, this.tracking});
-
-  @override
-  List<Object?> get props => [text, actionUrl, tracking];
-}
-
-// ─── ShopTheLook (StyleCarousel) entities ───
+// ─── ShopTheLook ───
 
 class ShopTheLookData extends Equatable {
   final int? id;
-  final TitleImageData? titleImage;
+  final TitleImage? title;
   final ShopTheLookViewConfig? viewConfig;
-  final List<ShopTheLookItem> items;
+  final List<ShopTheLookTile> tiles;
 
   const ShopTheLookData({
     this.id,
-    this.titleImage,
+    this.title,
     this.viewConfig,
-    this.items = const [],
+    this.tiles = const [],
   });
 
   @override
-  List<Object?> get props => [id, titleImage, viewConfig, items];
+  List<Object?> get props => [id, title, viewConfig, tiles];
 }
 
 class ShopTheLookViewConfig extends Equatable {
@@ -419,12 +522,12 @@ class ShopTheLookViewConfig extends Equatable {
   ];
 }
 
-class ShopTheLookItem extends Equatable {
+class ShopTheLookTile extends Equatable {
   final int? id;
   final List<ShopTheLookProduct> productTiles;
   final ShopTheLookPrice? price;
 
-  const ShopTheLookItem({this.id, this.productTiles = const [], this.price});
+  const ShopTheLookTile({this.id, this.productTiles = const [], this.price});
 
   @override
   List<Object?> get props => [id, productTiles, price];
@@ -433,6 +536,7 @@ class ShopTheLookItem extends Equatable {
 class ShopTheLookProduct extends Equatable {
   final int? id;
   final String? actionUri;
+  final String? actionUriWeb;
   final bool? hasInv;
   final bool? hasSizeChart;
   final String? imageUrl;
@@ -442,6 +546,7 @@ class ShopTheLookProduct extends Equatable {
   const ShopTheLookProduct({
     this.id,
     this.actionUri,
+    this.actionUriWeb,
     this.hasInv,
     this.hasSizeChart,
     this.imageUrl,
@@ -453,6 +558,7 @@ class ShopTheLookProduct extends Equatable {
   List<Object?> get props => [
     id,
     actionUri,
+    actionUriWeb,
     hasInv,
     hasSizeChart,
     imageUrl,
@@ -512,57 +618,8 @@ class ShopTheLookSelection {
   const ShopTheLookSelection({required this.productId, this.skuId});
 }
 
-// ─── ContinueBrowsing entities ───
 
-class ContinueBrowsingData extends Equatable {
-  final int? id;
-  final TitleImageData? heading;
-  final ContinueBrowsingViewConfig? viewConfig;
-  final List<ContinueBrowsingItem> items;
-
-  const ContinueBrowsingData({
-    this.id,
-    this.heading,
-    this.viewConfig,
-    this.items = const [],
-  });
-
-  @override
-  List<Object?> get props => [id, heading, viewConfig, items];
-}
-
-class ContinueBrowsingViewConfig extends Equatable {
-  final int? viewWidth;
-  final int? viewHeight;
-
-  const ContinueBrowsingViewConfig({this.viewWidth, this.viewHeight});
-
-  double get imageAspectRatio =>
-      (viewWidth != null && viewHeight != null && viewHeight! > 0)
-      ? viewWidth! / viewHeight!
-      : 3 / 4;
-
-  @override
-  List<Object?> get props => [viewWidth, viewHeight];
-}
-
-class ContinueBrowsingItem extends Equatable {
-  final String? heading;
-  final String? actionUri;
-  final List<String> media;
-
-  const ContinueBrowsingItem({
-    this.heading,
-    this.actionUri,
-    this.media = const [],
-  });
-
-  @override
-  List<Object?> get props => [heading, actionUri, media];
-}
-
-/// Mirrors Android's Margins model.
-/// Controls outer and inner spacing for each PageComponent.
+/// Mirrors Android's Margins model. Controls outer/inner spacing per component.
 class ComponentMargins extends Equatable {
   final double top;
   final double bottom;

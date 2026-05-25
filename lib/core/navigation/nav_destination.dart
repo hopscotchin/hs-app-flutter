@@ -3,49 +3,12 @@ import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/entities/message_bar_entity.dart';
-import '../../features/plp/domain/entities/page_type.dart';
 
 /// Base class for navigation destinations.
 sealed class NavDestination {
   const NavDestination();
 
   void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra});
-}
-
-class PlpDestination extends NavDestination {
-  final PageType pageType;
-  final int plpId;
-  final String? categoryName;
-  final String? searchQuery;
-
-  const PlpDestination({
-    required this.pageType,
-    required this.plpId,
-    this.categoryName,
-    this.searchQuery,
-  });
-
-  @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
-    AppNavigator.goToPlp(
-      context,
-      pageType: pageType,
-      plpId: plpId,
-      categoryName: title ?? categoryName,
-      searchQuery: searchQuery,
-    );
-  }
-}
-
-class PdpDestination extends NavDestination {
-  final String productId;
-
-  const PdpDestination({required this.productId});
-
-  @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
-    AppNavigator.goToPdp(context, productId);
-  }
 }
 
 class HomeDestination extends NavDestination {

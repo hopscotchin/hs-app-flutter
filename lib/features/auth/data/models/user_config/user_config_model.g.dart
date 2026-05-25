@@ -8,8 +8,6 @@ part of 'user_config_model.dart';
 
 UserConfigModel _$UserConfigModelFromJson(Map<String, dynamic> json) =>
     UserConfigModel(
-      continueBrowsingEligibleVisitor:
-          json['continueBrowsingEligibleVisitor'] as bool? ?? false,
       productImageConfig: json['productImageConfig'] == null
           ? null
           : ProductImageConfigModel.fromJson(

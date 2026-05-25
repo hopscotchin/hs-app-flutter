@@ -1,21 +1,25 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
-import '../../core/theme/typography.dart';
+import '../../core/theme/typography/text_style_extensions.dart';
+import '../../core/theme/typography/typography_v1.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../atoms/cached_image_widget.dart';
 
-class PageCarouselWidget extends StatefulWidget {
-  final PageCarouselData carouselData;
-  final ComponentMargins? margins;
+typedef _LineState = ({double progress, double fraction});
 
+class PageCarouselWidget extends StatefulWidget {
   const PageCarouselWidget({
     super.key,
     required this.carouselData,
     this.margins,
   });
+
+  final PageCarouselData carouselData;
+  final ComponentMargins? margins;
 
   @override
   State<PageCarouselWidget> createState() => _PageCarouselWidgetState();
@@ -23,11 +27,28 @@ class PageCarouselWidget extends StatefulWidget {
 
 class _PageCarouselWidgetState extends State<PageCarouselWidget>
     with AutomaticKeepAliveClientMixin {
+  // Snapping PageView is forward-bounded (so the first paint has no leftward
+  // peep) but the budget is large enough to feel infinite in normal use.
+  static const int _forwardCycleBudget = 1000;
+
+  // Defaults match the JSON contract's typical values; ?? falls back here.
+  static const double _defaultHorizontalMargin = 16;
+  static const double _defaultInnerHorizontalMargin = 8;
+  static const double _defaultTitleHorizontalMargin = 16;
+
+  // Vertical space reserved under each tile for brand + name + price.
+  static const double _productInfoHeight = 68;
+  static const double _productInfoHeightNarrow = 84;
+  static const double _narrowScreenThreshold = 370;
+
+  static const _initialLineState = (progress: 0.0, fraction: 0.3);
+
+  final ScrollController _listController = ScrollController();
+  final ValueNotifier<_LineState> _lineState = ValueNotifier(_initialLineState);
+
   PageController? _pageController;
   int _currentPage = 0;
-  late bool _hasProducts;
-
-  static const _leftScrollBudget = 100;
+  late final bool _hasProducts;
 
   @override
   bool get wantKeepAlive => true;
@@ -38,12 +59,35 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     _hasProducts = widget.carouselData.tiles.any(
       (tile) => tile.product != null,
     );
+    _listController.addListener(_onListScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _onListScroll();
+    });
   }
 
   @override
   void dispose() {
+    _listController
+      ..removeListener(_onListScroll)
+      ..dispose();
     _pageController?.dispose();
+    _lineState.dispose();
     super.dispose();
+  }
+
+  void _onListScroll() {
+    if (!_listController.hasClients) return;
+    final pos = _listController.position;
+    if (pos.maxScrollExtent <= 0) {
+      _lineState.value = const (progress: 0.0, fraction: 1.0);
+      return;
+    }
+    final progress = (pos.pixels / pos.maxScrollExtent).clamp(0.0, 1.0);
+    final total = pos.viewportDimension + pos.maxScrollExtent;
+    final fraction = total > 0
+        ? (pos.viewportDimension / total).clamp(0.15, 1.0)
+        : 1.0;
+    _lineState.value = (progress: progress, fraction: fraction);
   }
 
   @override
@@ -54,26 +98,28 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     if (tiles.isEmpty) return const SizedBox.shrink();
 
     final data = widget.carouselData;
+    final viewConfig = data.viewConfig;
     final screenWidth = MediaQuery.sizeOf(context).width;
 
-    // Resolve margins once — mirrors Android updateItemMargins non-null defaults
-    final double horizontalMargin = widget.margins?.horizontal ?? 16;
-    final double innerHorizontalMargin =
-        widget.margins?.innerHorizontalMargin ?? 8;
-    final double titleBottomMargin = widget.margins?.titleBottomMargin ?? 0;
-    final double titleHorizontalMargin =
-        widget.margins?.titleHorizontalMargin ?? 16;
+    final horizontalMargin =
+        widget.margins?.horizontal ?? _defaultHorizontalMargin;
+    final innerHorizontalMargin =
+        widget.margins?.innerHorizontalMargin ?? _defaultInnerHorizontalMargin;
+    final titleBottomMargin = widget.margins?.titleBottomMargin ?? 0;
+    final titleHorizontalMargin =
+        widget.margins?.titleHorizontalMargin ?? _defaultTitleHorizontalMargin;
 
-    final int minTilesToShow = data.minTilesToShow ?? 1;
-    final int peepingFactor = data.peepingFactor ?? 0;
-    final bool isFullWidth = minTilesToShow == 1 && peepingFactor == 0;
-    final bool hasSnapping = minTilesToShow == 1 && data.snapBehaviour;
+    final minTilesToShow = viewConfig?.minTilesToShow ?? 1;
+    final peepingFactor = viewConfig?.peepingFactor ?? 0;
+    final isFullWidth = minTilesToShow == 1 && peepingFactor == 0;
+    final hasSnapping = viewConfig?.snapping ?? false;
+    final showIndicators = viewConfig?.showPageIndicators ?? false;
+    final imageCornerRadius = viewConfig?.imageCornerRadius ?? 0;
 
-    // Mirror Android's calculateCarouselHeight() formula
-    // One-sided horizontal margin when peeking, two-sided otherwise.
+    // Mirrors Android calculateCarouselHeight().
     final double availableWidth;
     if (isFullWidth) {
-      availableWidth = screenWidth - (horizontalMargin * 2);
+      availableWidth = screenWidth - horizontalMargin * 2;
     } else {
       availableWidth =
           screenWidth -
@@ -83,35 +129,41 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
               : (minTilesToShow - 1) * innerHorizontalMargin);
     }
 
-    final double tileWidth = isFullWidth
+    final tileWidth = isFullWidth
         ? availableWidth
         : availableWidth * 100 / (minTilesToShow * 100 + peepingFactor);
+    final aspectRatio = data.parsedAspectRatio;
+    final tileHeight = aspectRatio > 0 ? tileWidth / aspectRatio : tileWidth;
 
-    final double aspectRatio = data.parsedAspectRatio;
-    final double tileHeight = aspectRatio > 0
-        ? tileWidth / aspectRatio
-        : tileWidth;
-
-    // Mirror Android productInfoHeight: 70dp on narrow screens (≤370), 44dp otherwise
-    final double productInfoHeight = _hasProducts
-        ? (screenWidth <= 370 ? 70.0 : 44.0)
+    final productInfoHeight = _hasProducts
+        ? (screenWidth <= _narrowScreenThreshold
+              ? _productInfoHeightNarrow
+              : _productInfoHeight)
         : 0.0;
-    final double carouselHeight = tileHeight + productInfoHeight;
+    final carouselHeight = tileHeight + productInfoHeight;
+
+    // Shifts the snapping PageView right so the first tile lands at
+    // `horizontalMargin`. Inner per-tile padding covers the remaining offset.
+    // Clamped to >= 0 — full-bleed configs can otherwise produce a negative
+    // Padding and trip the framework assertion.
+    final double leadingShift = (isFullWidth || !hasSnapping)
+        ? 0.0
+        : (horizontalMargin - innerHorizontalMargin / 2).clamp(
+            0.0,
+            double.infinity,
+          );
 
     if (hasSnapping && _pageController == null) {
-      final double slotWidth = isFullWidth
+      final slotWidth = isFullWidth
           ? screenWidth
           : tileWidth + innerHorizontalMargin;
-      final double viewportFraction = slotWidth / screenWidth;
-      final int initialPage = tiles.length * _leftScrollBudget;
       _pageController = PageController(
-        viewportFraction: viewportFraction,
-        initialPage: initialPage,
+        viewportFraction: slotWidth / (screenWidth - leadingShift),
       );
-      _currentPage = initialPage;
+      _currentPage = 0;
     }
 
-    final Widget carousel = hasSnapping
+    final carousel = hasSnapping
         ? _buildSnappingCarousel(
             tiles: tiles,
             tileWidth: tileWidth,
@@ -120,7 +172,9 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
             horizontalMargin: horizontalMargin,
             innerHorizontalMargin: innerHorizontalMargin,
             isFullWidth: isFullWidth,
-            showIndicators: data.showPageIndicators,
+            showIndicators: showIndicators,
+            imageCornerRadius: imageCornerRadius,
+            leadingShift: leadingShift,
           )
         : _buildScrollableCarousel(
             tiles: tiles,
@@ -130,10 +184,12 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
             horizontalMargin: horizontalMargin,
             innerHorizontalMargin: innerHorizontalMargin,
             isFullWidth: isFullWidth,
-            showIndicators: data.showPageIndicators,
+            showIndicators: showIndicators,
+            imageCornerRadius: imageCornerRadius,
           );
 
-    if (data.titleImage?.url == null) return carousel;
+    final titleUrl = data.title?.url;
+    if (titleUrl == null) return carousel;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,7 +202,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
             bottom: titleBottomMargin,
           ),
           child: CachedImageWidget(
-            imageUrl: data.titleImage!.url!,
+            imageUrl: titleUrl,
             width: double.infinity,
             fit: BoxFit.cover,
           ),
@@ -165,55 +221,57 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     required double innerHorizontalMargin,
     required bool isFullWidth,
     required bool showIndicators,
+    required double imageCornerRadius,
+    required double leadingShift,
   }) {
-    final int tileCount = tiles.length;
+    final tileCount = tiles.length;
+    final tilePadding = isFullWidth
+        ? horizontalMargin
+        : innerHorizontalMargin / 2;
 
-    final Widget pageView = SizedBox(
+    final pageView = SizedBox(
       height: carouselHeight,
-      child: PageView.builder(
-        controller: _pageController!,
-        itemCount: null,
-        onPageChanged: (int page) => setState(() => _currentPage = page),
-        itemBuilder: (BuildContext context, int index) {
-          final PageCarouselTile tile = tiles[index % tileCount];
-          final Widget tileWidget = _buildTile(tile, tileWidth, tileHeight);
-          // Full-width: symmetric margin matches Android's setPadding(hM, 0, hM, 0).
-          // Peeping: right-only gap matches Android's HorizontalSpacingDecoration.
-          //          padEnds:true (Flutter default) centres the current page so both
-          //          the left and right adjacent tiles peek symmetrically.
-          return isFullWidth
-              ? Padding(
-                  padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
-                  child: tileWidget,
-                )
-              : Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: innerHorizontalMargin / 2,
-                  ),
-                  child: tileWidget,
-                );
-        },
+      child: Padding(
+        padding: EdgeInsets.only(left: leadingShift),
+        child: PageView.builder(
+          controller: _pageController!,
+          padEnds: false,
+          itemCount: tileCount * _forwardCycleBudget,
+          onPageChanged: (page) => setState(() => _currentPage = page),
+          itemBuilder: (_, index) => Padding(
+            padding: EdgeInsets.symmetric(horizontal: tilePadding),
+            child: _buildTile(
+              tiles[index % tileCount],
+              tileWidth,
+              tileHeight,
+              imageCornerRadius,
+            ),
+          ),
+        ),
       ),
     );
 
     if (!showIndicators || tileCount <= 1) return pageView;
+    final activeIndex = _currentPage % tileCount;
 
-    // Full-width: dots overlay inside the image (white, mirrors Android binding.indicator)
-    // Peeping:    dots bar below the carousel (primary, mirrors Android binding.indicatorDefault)
-    return isFullWidth
-        ? Stack(
-            alignment: Alignment.bottomCenter,
-            children: [pageView, _buildDotIndicators(tileCount)],
-          )
-        : Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [pageView, _buildScrollIndicator(tileCount)],
-          );
+    if (isFullWidth) {
+      return Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          pageView,
+          _DotIndicators(activeIndex: activeIndex, count: tileCount),
+        ],
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        pageView,
+        _PageLineIndicator(activeIndex: activeIndex, count: tileCount),
+      ],
+    );
   }
 
-  // ListView-based scrollable carousel.
-  // innerHorizontalMargin is passed explicitly so both the geometry formula
-  // and the separator use the exact same value.
   Widget _buildScrollableCarousel({
     required List<PageCarouselTile> tiles,
     required double tileWidth,
@@ -223,95 +281,35 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     required double innerHorizontalMargin,
     required bool isFullWidth,
     required bool showIndicators,
+    required double imageCornerRadius,
   }) {
-    final Widget tileList = SizedBox(
+    final tileList = SizedBox(
       height: carouselHeight,
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
-          if (notification is ScrollUpdateNotification &&
-              innerHorizontalMargin > 0) {
-            final double tileStep = tileWidth + innerHorizontalMargin;
-            final int newPage = (notification.metrics.pixels / tileStep)
-                .round()
-                .clamp(0, tiles.length - 1);
-            if (newPage != _currentPage) setState(() => _currentPage = newPage);
-          }
-          return false;
-        },
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
-          itemCount: tiles.length,
-          separatorBuilder: (_, _) => SizedBox(width: innerHorizontalMargin),
-          itemBuilder: (BuildContext context, int index) =>
-              _buildTile(tiles[index], tileWidth, tileHeight),
-        ),
+      child: ListView.separated(
+        controller: _listController,
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
+        itemCount: tiles.length,
+        separatorBuilder: (_, _) => SizedBox(width: innerHorizontalMargin),
+        itemBuilder: (_, i) =>
+            _buildTile(tiles[i], tileWidth, tileHeight, imageCornerRadius),
       ),
     );
 
     if (!showIndicators || tiles.length <= 1) return tileList;
 
-    return isFullWidth
-        ? Stack(
-            alignment: Alignment.bottomCenter,
-            children: [tileList, _buildDotIndicators(tiles.length)],
-          )
-        : Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [tileList, _buildScrollIndicator(tiles.length)],
-          );
-  }
-
-  // Animated dot strip overlaid at the bottom — used for full-width snapping carousels
-  Widget _buildDotIndicators(int tileCount) {
-    final int activeDot = _currentPage % tileCount;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(tileCount, (int index) {
-          final bool isActive = index == activeDot;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            width: isActive ? 24 : 8,
-            height: 6,
-            decoration: BoxDecoration(
-              color: isActive
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(3),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  // 40dp position dots below the list — mirrors Android's indicatorDefault
-  Widget _buildScrollIndicator(int tileCount) {
-    final int activeDot = _currentPage % tileCount;
-    return SizedBox(
-      height: 40,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(tileCount, (int index) {
-          final bool isActive = index == activeDot;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            width: isActive ? 6 : 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: isActive
-                  ? AppColors.neutralBlack
-                  : AppColors.neutralBlack.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(3),
-            ),
-          );
-        }),
-      ),
+    if (isFullWidth) {
+      return Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          tileList,
+          _DotIndicators(activeIndex: 0, count: tiles.length),
+        ],
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [tileList, _ScrollLineIndicator(state: _lineState)],
     );
   }
 
@@ -319,78 +317,258 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     PageCarouselTile tile,
     double tileWidth,
     double tileHeight,
+    double cornerRadius,
   ) {
-    return GestureDetector(
-      onTap: () => ActionUrlHandler.navigate(
-        context,
-        tile.actionUrl,
-        title: tile.collectionName,
+    final product = tile.product;
+    final tapUri = tile.actionUri ?? product?.actionUri;
+    final image = SizedBox(
+      height: tileHeight,
+      width: tileWidth,
+      child: CachedImageWidget(
+        imageUrl: tile.imageUrl ?? product?.primaryImageUrl ?? '',
+        fit: BoxFit.cover,
       ),
+    );
+
+    return GestureDetector(
+      onTap: () => ActionUrlHandler.navigate(context, tapUri),
       child: SizedBox(
         width: tileWidth,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              height: tileHeight,
-              width: tileWidth,
-              child: CachedImageWidget(
-                imageUrl: tile.imageUrl ?? '',
-                fit: BoxFit.cover,
-              ),
-            ),
-            if (tile.product != null) _buildProductInfo(tile.product!),
+            if (cornerRadius > 0)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(cornerRadius),
+                child: image,
+              )
+            else
+              image,
+            if (product != null) _ProductInfo(product: product),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildProductInfo(PageCarouselProduct product) {
+// ─── Indicators ──────────────────────────────────────────────────────────────
+
+class _DotIndicators extends StatelessWidget {
+  const _DotIndicators({required this.activeIndex, required this.count});
+
+  final int activeIndex;
+  final int count;
+
+  static const _dotDuration = Duration(milliseconds: 200);
+  static const _dotMargin = EdgeInsets.symmetric(horizontal: 3);
+  static const _padding = EdgeInsets.only(bottom: 10);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: _padding,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(count, (i) {
+          final isActive = i == activeIndex;
+          return AnimatedContainer(
+            duration: _dotDuration,
+            margin: _dotMargin,
+            width: isActive ? 45 : 8,
+            height: 6,
+            decoration: BoxDecoration(
+              color: isActive
+                  ? AppColors.baseDefault
+                  : AppColors.baseDefault.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+/// Free-scroll variant: the notifier confines rebuilds to the bar itself, so
+/// the carousel above never rebuilds during a swipe.
+class _ScrollLineIndicator extends StatelessWidget {
+  const _ScrollLineIndicator({required this.state});
+
+  final ValueListenable<_LineState> state;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<_LineState>(
+      valueListenable: state,
+      builder: (_, value, _) => _LineBar(
+        progress: value.progress,
+        fraction: value.fraction,
+        animate: false,
+      ),
+    );
+  }
+}
+
+/// Snapping variant: page jumps are discrete, so we tween between values.
+class _PageLineIndicator extends StatelessWidget {
+  const _PageLineIndicator({required this.activeIndex, required this.count});
+
+  final int activeIndex;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    if (count <= 1) return const SizedBox.shrink();
+    return _LineBar(
+      progress: activeIndex / (count - 1),
+      fraction: (1.0 / count).clamp(0.15, 1.0),
+      animate: true,
+    );
+  }
+}
+
+class _LineBar extends StatelessWidget {
+  const _LineBar({
+    required this.progress,
+    required this.fraction,
+    required this.animate,
+  });
+
+  final double progress;
+  final double fraction;
+  final bool animate;
+
+  static const double _trackWidth = 250;
+  static const double _trackHeight = 3;
+  static const _radius = BorderRadius.all(Radius.circular(_trackHeight / 2));
+  static const _padding = EdgeInsets.symmetric(vertical: 14);
+  static const _animDuration = Duration(milliseconds: 200);
+  static const _trackDecoration = BoxDecoration(
+    color: AppColors.neutralGrey0,
+    borderRadius: _radius,
+  );
+  static const _thumbDecoration = BoxDecoration(
+    color: AppColors.neutralBlack,
+    borderRadius: _radius,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final thumbWidth = _trackWidth * fraction;
+    final left = progress.clamp(0.0, 1.0) * (_trackWidth - thumbWidth);
+    final thumb = SizedBox(
+      width: thumbWidth,
+      height: _trackHeight,
+      child: const DecoratedBox(decoration: _thumbDecoration),
+    );
+
+    return Padding(
+      padding: _padding,
+      child: Center(
+        child: SizedBox(
+          width: _trackWidth,
+          height: _trackHeight,
+          child: Stack(
+            children: [
+              const Positioned.fill(
+                child: DecoratedBox(decoration: _trackDecoration),
+              ),
+              if (animate)
+                AnimatedPositioned(
+                  duration: _animDuration,
+                  curve: Curves.easeOut,
+                  left: left,
+                  top: 0,
+                  bottom: 0,
+                  child: thumb,
+                )
+              else
+                Positioned(left: left, top: 0, bottom: 0, child: thumb),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Tile product info ───────────────────────────────────────────────────────
+
+class _ProductInfo extends StatelessWidget {
+  const _ProductInfo({required this.product});
+
+  final HomepageProduct product;
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = product.brandName;
+    final name = product.name;
+    final price = product.price;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(height: 4),
-        if (product.name != null)
+        if (brand != null && brand.isNotEmpty)
           Text(
-            product.name!,
-            style: AppTypography.bodySmall,
+            brand,
+            style: AppTypographyV1.labelMedium.semiBold.textSecondary(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-        Row(
-          children: [
-            if (product.retailPrice > 0)
-              Text(
-                '₹${product.retailPrice.toStringAsFixed(0)}',
-                style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            if (product.regularPrice > 0 &&
-                product.regularPrice != product.retailPrice) ...[
-              AppSpacing.horizontalGapXxs,
-              Text(
-                '₹${product.regularPrice.toStringAsFixed(0)}',
-                style: AppTypography.bodySmall.copyWith(
-                  decoration: TextDecoration.lineThrough,
-                  color: AppColors.textTertiary,
-                ),
-              ),
-            ],
-            if (product.discount > 5) ...[
-              AppSpacing.horizontalGapXxs,
-              Text(
-                '${product.discount}% off',
-                style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.success,
-                ),
-              ),
-            ],
-          ],
-        ),
+        if (name != null && name.isNotEmpty)
+          Text(
+            name,
+            style: AppTypographyV1.labelLarge.regular,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        if (price != null) _PriceRow(price: price),
+      ],
+    );
+  }
+}
+
+class _PriceRow extends StatelessWidget {
+  const _PriceRow({required this.price});
+
+  final HomepageProductPrice price;
+
+  @override
+  Widget build(BuildContext context) {
+    final selling = price.sellingPrice;
+    final mrp = price.mrp;
+    final discount = price.discountLabel;
+    final hasDiscount = price.hasDiscount;
+    final showMrp = hasDiscount && mrp != null && mrp.isNotEmpty;
+    final showDiscount = hasDiscount && discount != null;
+
+    return Row(
+      children: [
+        if (selling != null && selling.isNotEmpty)
+          Text(
+            '₹$selling',
+            style: AppTypographyV1.labelLarge.semiBold.textPrimary(),
+          ),
+        if (showMrp) ...[
+          AppSpacing.horizontalGapXxs,
+          Text(
+            '₹$mrp',
+            style: AppTypographyV1.labelLarge.regular
+                .textTertiary()
+                .strikeThrough(),
+          ),
+        ],
+        if (showDiscount) ...[
+          AppSpacing.horizontalGapXxs,
+          Text(
+            discount,
+            style: AppTypographyV1.labelMedium.semiBold.success(),
+          ),
+        ],
       ],
     );
   }

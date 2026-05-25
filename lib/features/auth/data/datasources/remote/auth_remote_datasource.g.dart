@@ -20,7 +20,7 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<LoginModel> sendOtp({
+  Future<SendOtpResponseModel> sendOtp({
     required Map<String, dynamic> body,
     CancelToken? cancelToken,
   }) async {
@@ -30,11 +30,11 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body);
-    final _options = _setStreamType<LoginModel>(
+    final _options = _setStreamType<SendOtpResponseModel>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/customer/validate-sendotp',
+            '/customer/v3/auth/send-otp',
             queryParameters: queryParameters,
             data: _data,
             cancelToken: cancelToken,
@@ -42,9 +42,9 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late LoginModel _value;
+    late SendOtpResponseModel _value;
     try {
-      _value = LoginModel.fromJson(_result.data!);
+      _value = SendOtpResponseModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -53,7 +53,7 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
   }
 
   @override
-  Future<LoginModel> verifyOtp({
+  Future<VerifyOtpResponseModel> verifyOtp({
     required Map<String, dynamic> body,
     CancelToken? cancelToken,
   }) async {
@@ -63,11 +63,11 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body);
-    final _options = _setStreamType<LoginModel>(
+    final _options = _setStreamType<VerifyOtpResponseModel>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/customer/v2/verifyotp-delegate',
+            '/customer/v3/auth/verify-otp',
             queryParameters: queryParameters,
             data: _data,
             cancelToken: cancelToken,
@@ -75,9 +75,9 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late LoginModel _value;
+    late VerifyOtpResponseModel _value;
     try {
-      _value = LoginModel.fromJson(_result.data!);
+      _value = VerifyOtpResponseModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -86,7 +86,7 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
   }
 
   @override
-  Future<LoginModel> register({
+  Future<SignupOtpResponseModel> register({
     required Map<String, dynamic> body,
     CancelToken? cancelToken,
   }) async {
@@ -96,11 +96,11 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body);
-    final _options = _setStreamType<LoginModel>(
+    final _options = _setStreamType<SignupOtpResponseModel>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/customer/signup/send/otp',
+            '/customer/v3/auth/signup/send-otp',
             queryParameters: queryParameters,
             data: _data,
             cancelToken: cancelToken,
@@ -108,9 +108,9 @@ class _AuthRemoteDatasource implements AuthRemoteDatasource {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late LoginModel _value;
+    late SignupOtpResponseModel _value;
     try {
-      _value = LoginModel.fromJson(_result.data!);
+      _value = SignupOtpResponseModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

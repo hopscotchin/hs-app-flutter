@@ -1,6 +1,8 @@
 class DiscoverStrings {
   DiscoverStrings._();
 
+  static const String defaultPageName = 'discover';
+
   // ─── Discover page ───────────────────────────────────────────────────────────
   static const String discoverTitle = 'Discover';
   static const String noContentAvailable = 'No content available';

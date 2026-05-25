@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hs_app_flutter/core/theme/spacing.dart';
 
 import '../theme/colors.dart';
 import '../theme/typography/text_style_extensions.dart';
@@ -61,7 +62,7 @@ class AppDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.symmetric(horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,

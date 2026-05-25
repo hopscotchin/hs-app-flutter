@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/core/di/injection.dart';
 import 'package:hs_app_flutter/core/router/app_router.dart';
+import 'package:talker_dio_logger_plus/talker_dio_logger_plus.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 class TalkerFloatingButton extends StatefulWidget {
@@ -45,11 +46,28 @@ class _TalkerFloatingButtonState extends State<TalkerFloatingButton> {
                 });
               },
               onPanEnd: (_) => setState(() => _isDragging = false),
-              onTap: () => AppRouter.navigatorKey.currentState?.push(
-                MaterialPageRoute<void>(
-                  builder: (_) => TalkerScreen(talker: sl<Talker>()),
-                ),
-              ),
+              onTap: () {
+                final talker = sl<Talker>();
+                const theme = TalkerScreenTheme();
+                AppRouter.navigatorKey.currentState?.push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => TalkerScreen(
+                      talker: talker,
+                      theme: theme,
+                      itemsBuilder: (context, data) {
+                        if (isAdvancedHttpLog(data)) {
+                          return HttpLogCard(data: data, expanded: true);
+                        }
+                        return TalkerDataCard(
+                          data: data,
+                          backgroundColor: theme.cardColor,
+                          color: data.getFlutterColor(theme),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
 
               child: AnimatedScale(
                 scale: _isDragging ? 1.15 : 1.0,
@@ -70,11 +88,7 @@ class _TalkerFloatingButtonState extends State<TalkerFloatingButton> {
                         ),
                       ],
                     ),
-                    child: const Icon(
-                      Icons.bug_report_rounded,
-                      color: Colors.white,
-                      size: 26,
-                    ),
+                    child: const Icon(Icons.bug_report_rounded, color: Colors.white, size: 26),
                   ),
                 ),
               ),

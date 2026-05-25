@@ -5,10 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../components/atoms/dots_loader.dart';
-import '../widgets/auth_otp_slot_row.dart';
-import '../widgets/auth_screen_header.dart';
-import '../widgets/otp_waiting_indicator.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
@@ -18,8 +14,12 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 import '../../../account/presentation/bloc/account_bloc.dart';
+import '../../../discover/presentation/bloc/home_bloc.dart';
 import '../../domain/entities/otp_config/otp_config_entity.dart';
 import '../bloc/auth_bloc.dart';
+import '../widgets/auth_otp_slot_row.dart';
+import '../widgets/auth_screen_header.dart';
+import '../widgets/otp_waiting_indicator.dart';
 
 class OtpVerificationPage extends StatefulWidget {
   final String loginId;
@@ -97,6 +97,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
 
             context.read<AccountBloc>().add(const RefreshFromLocal());
             context.read<AccountBloc>().add(const LoadAccount());
+            context.read<HomeBloc>().add(const RefreshHomePage());
 
             if (widget.isCheckoutFlow) {
               context.pop(true);
@@ -186,7 +187,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                                  child: AuthOtpSlotRow(length: _otpLength, filledCount: _otp.length),
+                                  child: AuthOtpSlotRow(
+                                    length: _otpLength,
+                                    filledCount: _otp.length,
+                                  ),
                                 ),
                                 Positioned.fill(
                                   child: Opacity(

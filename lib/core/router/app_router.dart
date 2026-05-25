@@ -6,8 +6,6 @@ import 'package:hs_app_flutter/core/router/navigation_observer.dart';
 import 'package:hs_app_flutter/core/router/shell_route.dart';
 import 'package:hs_app_flutter/features/auth/presentation/auth_route.dart';
 import 'package:hs_app_flutter/features/landing_page/presentation/landing_page_route.dart';
-import 'package:hs_app_flutter/features/orders/presentation/orders_route.dart';
-import 'package:hs_app_flutter/features/plp/presentation/plp_route.dart';
 import 'package:hs_app_flutter/features/splash/presentation/splash_route.dart';
 
 import '../constants/route_names.dart';
@@ -34,10 +32,13 @@ class AppRouter {
       SplashRoute.getRoute(),
       shellRoute,
       ...AuthRoute.getRoutes(_rootNavigatorKey),
+      // CartRoute.getRoute(_rootNavigatorKey),
       // PlpRoute.getRoute(_rootNavigatorKey),
+      // PdpRoute.getRoute(_rootNavigatorKey),
       WebViewRoute.getRoute(_rootNavigatorKey),
       LandingPageRoute.getRoute(_rootNavigatorKey),
-      OrdersRoute.getRoute(_rootNavigatorKey),
+      // OrdersRoute.getRoute(_rootNavigatorKey),
+      // ...CheckoutRoute.getRoutes(_rootNavigatorKey),
     ],
     errorBuilder: (context, state) =>
         Scaffold(body: Center(child: Text('Page not found: ${state.uri}'))),

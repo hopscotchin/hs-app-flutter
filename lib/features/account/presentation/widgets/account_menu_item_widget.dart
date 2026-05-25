@@ -36,13 +36,19 @@ class AccountMenuItemWidget extends StatelessWidget {
         ),
         child: Row(
           children: [
-            SvgPicture.asset(
-              svgAsset,
+            SizedBox(
               width: AppSpacing.iconSm,
               height: AppSpacing.iconSm,
-              colorFilter: ColorFilter.mode(
-                iconColor ?? AppColors.textPrimary,
-                BlendMode.srcIn,
+              child: Center(
+                child: SvgPicture.asset(
+                  svgAsset,
+                  width: AppSpacing.iconSm,
+                  height: AppSpacing.iconSm,
+                  colorFilter: ColorFilter.mode(
+                    iconColor ?? AppColors.textPrimary,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
             ),
             AppSpacing.horizontalGapMd,
@@ -50,13 +56,13 @@ class AccountMenuItemWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: AppTypographyV1.bodyLarge.textPrimary()),
+                  Text(title, style: AppTypographyV1.bodyLarge.regular.textPrimary()),
                   if (subtitle != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 2),
+                      padding: const EdgeInsets.only(top: 12),
                       child: Text(
                         subtitle!,
-                        style: AppTypographyV1.labelLarge.copyWith(
+                        style: AppTypographyV1.labelLarge.regular.copyWith(
                           color: subtitleColor ?? AppColors.textPrimary,
                         ),
                       ),
@@ -67,7 +73,7 @@ class AccountMenuItemWidget extends StatelessWidget {
             if (trailingText != null)
               Text(
                 trailingText!,
-                style: AppTypographyV1.bodyLarge.copyWith(
+                style: AppTypographyV1.bodyLarge.regular.copyWith(
                   color: subtitleColor ?? AppColors.textPrimary,
                 ),
               ),

@@ -77,38 +77,8 @@ import 'package:hs_app_flutter/features/discover/domain/usecases/get_home_page_u
     as _i325;
 import 'package:hs_app_flutter/features/discover/presentation/bloc/home_bloc.dart'
     as _i626;
-import 'package:hs_app_flutter/features/landing_page/data/repositories/landing_page_repository_impl.dart'
-    as _i874;
-import 'package:hs_app_flutter/features/landing_page/domain/repositories/landing_page_repository.dart'
-    as _i887;
-import 'package:hs_app_flutter/features/landing_page/domain/usecases/get_landing_page_usecase.dart'
-    as _i1009;
 import 'package:hs_app_flutter/features/landing_page/presentation/bloc/landing_page_bloc.dart'
     as _i206;
-import 'package:hs_app_flutter/features/orders/data/datasources/remote/orders_api.dart'
-    as _i940;
-import 'package:hs_app_flutter/features/orders/data/repositories/orders_repository_impl.dart'
-    as _i92;
-import 'package:hs_app_flutter/features/orders/domain/repositories/orders_repository.dart'
-    as _i460;
-import 'package:hs_app_flutter/features/orders/domain/usecases/get_orders_page_usecase.dart'
-    as _i834;
-import 'package:hs_app_flutter/features/orders/presentation/bloc/orders_bloc.dart'
-    as _i500;
-import 'package:hs_app_flutter/features/plp/data/datasources/remote/plp_remote_datasource.dart'
-    as _i252;
-import 'package:hs_app_flutter/features/plp/data/repositories/plp_repository_impl.dart'
-    as _i491;
-import 'package:hs_app_flutter/features/plp/domain/repositories/plp_repository.dart'
-    as _i760;
-import 'package:hs_app_flutter/features/plp/domain/usecases/get_filter_data_usecase.dart'
-    as _i804;
-import 'package:hs_app_flutter/features/plp/domain/usecases/get_listing_data_usecase.dart'
-    as _i1013;
-import 'package:hs_app_flutter/features/plp/presentation/bloc/filter_bloc.dart'
-    as _i113;
-import 'package:hs_app_flutter/features/plp/presentation/bloc/plp_bloc.dart'
-    as _i643;
 import 'package:hs_app_flutter/features/splash/domain/usecases/handle_deeplink_usecase.dart'
     as _i806;
 import 'package:hs_app_flutter/features/splash/domain/usecases/initialize_app_usecase.dart'
@@ -183,22 +153,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i184.HomeRemoteDataSource>(
       () => _i184.HomeRemoteDataSource(gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i940.OrdersApi>(() => _i940.OrdersApi(gh<_i361.Dio>()));
-    gh.lazySingleton<_i460.OrdersRepository>(
-      () => _i92.OrdersRepositoryImpl(
-        gh<_i940.OrdersApi>(),
-        gh<_i351.NetworkInfo>(),
-      ),
-    );
-    gh.lazySingleton<_i252.PlpRemoteDataSource>(
-      () => _i252.PlpRemoteDataSourceImpl(apiClient: gh<_i930.ApiClient>()),
-    );
-    gh.lazySingleton<_i887.LandingPageRepository>(
-      () => _i874.LandingPageRepositoryImpl(
-        gh<_i184.HomeRemoteDataSource>(),
-        gh<_i351.NetworkInfo>(),
-      ),
-    );
     gh.lazySingleton<_i1014.HomeRepository>(
       () => _i298.HomeRepositoryImpl(
         gh<_i184.HomeRemoteDataSource>(),
@@ -236,23 +190,11 @@ extension GetItInjectableX on _i174.GetIt {
         cartCountCubit: gh<_i884.CartCountCubit>(),
       ),
     );
-    gh.lazySingleton<_i760.PlpRepository>(
-      () => _i491.PlpRepositoryImpl(
-        remoteDataSource: gh<_i252.PlpRemoteDataSource>(),
-        networkInfo: gh<_i351.NetworkInfo>(),
-      ),
-    );
-    gh.lazySingleton<_i1009.GetLandingPageUseCase>(
-      () => _i1009.GetLandingPageUseCase(gh<_i887.LandingPageRepository>()),
-    );
     gh.lazySingleton<_i532.AccountRepository>(
       () => _i197.AccountRepositoryImpl(
         gh<_i1020.AccountRemoteDataSource>(),
         gh<_i351.NetworkInfo>(),
       ),
-    );
-    gh.lazySingleton<_i834.GetOrdersPageUseCase>(
-      () => _i834.GetOrdersPageUseCase(gh<_i460.OrdersRepository>()),
     );
     gh.lazySingleton<_i387.LogoutUseCase>(
       () => _i387.LogoutUseCase(gh<_i476.AuthRepository>()),
@@ -269,22 +211,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i325.GetHomePageUseCase>(
       () => _i325.GetHomePageUseCase(gh<_i1014.HomeRepository>()),
     );
-    gh.lazySingleton<_i804.GetFilterDataUseCase>(
-      () => _i804.GetFilterDataUseCase(gh<_i760.PlpRepository>()),
-    );
-    gh.lazySingleton<_i1013.GetListingDataUseCase>(
-      () => _i1013.GetListingDataUseCase(gh<_i760.PlpRepository>()),
-    );
     gh.lazySingleton<_i765.GetDepartmentsUseCase>(
       () => _i765.GetDepartmentsUseCase(gh<_i816.CategoriesRepository>()),
-    );
-    gh.factory<_i643.PlpBloc>(
-      () => _i643.PlpBloc(
-        getListingDataUseCase: gh<_i1013.GetListingDataUseCase>(),
-      ),
-    );
-    gh.factory<_i500.OrdersBloc>(
-      () => _i500.OrdersBloc(gh<_i834.GetOrdersPageUseCase>()),
     );
     gh.lazySingleton<_i72.ForgetGuestUserUseCase>(
       () => _i72.ForgetGuestUserUseCase(gh<_i532.AccountRepository>()),
@@ -302,16 +230,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i387.LogoutUseCase>(),
       ),
     );
-    gh.factory<_i206.LandingPageBloc>(
-      () => _i206.LandingPageBloc(gh<_i1009.GetLandingPageUseCase>()),
-    );
     gh.factory<_i626.HomeBloc>(
       () => _i626.HomeBloc(gh<_i325.GetHomePageUseCase>()),
     );
-    gh.factory<_i113.FilterBloc>(
-      () => _i113.FilterBloc(
-        getFilterDataUseCase: gh<_i804.GetFilterDataUseCase>(),
-      ),
+    gh.factory<_i206.LandingPageBloc>(
+      () => _i206.LandingPageBloc(gh<_i325.GetHomePageUseCase>()),
     );
     gh.factory<_i620.CategoriesBloc>(
       () => _i620.CategoriesBloc(

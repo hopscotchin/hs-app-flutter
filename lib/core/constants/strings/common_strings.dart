@@ -19,6 +19,7 @@ class CommonStrings {
   static const String goBack = 'Go back';
   static const String check = 'CHECK';
   static const String clearAll = 'Clear All';
+  static const String remove = 'Remove';
 
   // Navigation / Tabs
   static const String home = 'Home';
