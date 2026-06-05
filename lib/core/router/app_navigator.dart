@@ -6,6 +6,7 @@ import 'package:hs_app_flutter/features/address/domain/entities/manage_address_a
 import 'package:hs_app_flutter/features/address/presentation/widgets/address_item_card.dart';
 
 import '../constants/strings/auth_strings.dart';
+import '../constants/strings/login_redirects.dart';
 import '../constants/route_names.dart';
 import '../entities/message_bar_entity.dart';
 import '../../features/account/presentation/bloc/account_bloc.dart';
@@ -13,6 +14,12 @@ import '../../features/auth/domain/entities/otp_config/otp_config_entity.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
 abstract final class AppNavigator {
+  static bool _isRouteInStack(BuildContext context, String routeName) {
+    final matches =
+        GoRouter.of(context).routerDelegate.currentConfiguration.matches;
+    return matches.whereType<RouteMatch>().any((m) => m.route.name == routeName);
+  }
+
   static void goToHome(BuildContext context) => context.go(RouteNames.home);
 
   static void goToCategories(BuildContext context) => context.go(RouteNames.categories);
@@ -24,37 +31,54 @@ abstract final class AppNavigator {
   static void goToCart(BuildContext context) => context.pushNamed(RouteNames.cart);
 
   static void goToLogin(
-    BuildContext context, {
-    String? initialMobile,
-    List<MessageBarEntity> initialMessageBars = const [],
-    bool replace = false,
-  }) {
-    final hasData = initialMobile != null || initialMessageBars.isNotEmpty;
+      BuildContext context, {
+        String? initialMobile,
+        List<MessageBarEntity> initialMessageBars = const [],
+        String? redirectType,
+      }) {
+    if (_isRouteInStack(context, RouteNames.login)) {
+      context.pop();
+      return;
+    }
+    final hasData =
+        initialMobile != null || initialMessageBars.isNotEmpty || redirectType != null;
     final extra = hasData
         ? <String, dynamic>{
-            'initialMobile': initialMobile,
-            'initialMessageBars': initialMessageBars,
-          }
-        : null;
-    if (replace) {
-      context.pushReplacementNamed(RouteNames.login, extra: extra);
-    } else {
-      context.pushNamed(RouteNames.login, extra: extra);
+      'initialMobile': initialMobile,
+      'initialMessageBars': initialMessageBars,
+      'redirectType': redirectType,
     }
+        : null;
+    context.pushNamed(RouteNames.login, extra: extra);
   }
 
-  static void goToJoinUs(BuildContext context) => context.pushNamed(RouteNames.joinUs);
+  static void goToJoinUs(
+      BuildContext context, {
+        String? initialMobile,
+        String? redirectType,
+      }) {
+    if (_isRouteInStack(context, RouteNames.joinUs)) {
+      context.pop();
+      return;
+    }
+    final hasData = initialMobile != null || redirectType != null;
+    final extra = hasData
+        ? <String, dynamic>{'initialMobile': initialMobile, 'redirectType': redirectType}
+        : null;
+    context.pushNamed(RouteNames.joinUs, extra: extra);
+  }
 
   /// Navigate to the OTP verification screen, sharing the existing [AuthBloc]
   /// instance via [BlocProvider.value] so the bloc is not re-created.
   static void goToOtpVerification(
-    BuildContext context, {
-    required AuthBloc bloc,
-    required String loginId,
-    required OtpConfigEntity otpConfig,
-    String otpReason = AuthStrings.signInReason,
-    bool isCheckoutFlow = false,
-  }) {
+      BuildContext context, {
+        required AuthBloc bloc,
+        required String loginId,
+        required OtpConfigEntity otpConfig,
+        String otpReason = AuthStrings.signInReason,
+        bool isCheckoutFlow = false,
+        String? redirectType,
+      }) {
     context.pushNamed(
       RouteNames.otpVerification,
       extra: <String, dynamic>{
@@ -64,8 +88,44 @@ abstract final class AppNavigator {
         'otpConfig': otpConfig,
         'otpReason': otpReason,
         'isCheckoutFlow': isCheckoutFlow,
+        'redirectType': redirectType,
       },
     );
+  }
+
+  // Maps each redirect-type key to the screen to open after login.
+  // Add an entry here when a new destination screen is implemented —
+  // no other code needs to change.
+  static final _redirectNavMap = <String, void Function(BuildContext)>{
+    LoginRedirects.typeOrders: goToOrders,
+    LoginRedirects.typeAddresses: goToAddresses,
+  };
+
+  /// Navigate to the appropriate screen after a successful login based on [redirectType].
+  ///
+  /// Pops all auth routes (login, join-us, otp) from the stack first so that
+  /// pressing back from the destination never re-enters the auth flow.
+  static void redirectAfterLogin(BuildContext context, String? redirectType) {
+    _clearAuthStack(context);
+    final navigate = _redirectNavMap[redirectType] ?? goToAccount;
+    navigate(context);
+  }
+
+  static void _clearAuthStack(BuildContext context) {
+    const authRoutes = {
+      RouteNames.login,
+      RouteNames.joinUs,
+      RouteNames.otpVerification,
+    };
+    final matches =
+        GoRouter.of(context).routerDelegate.currentConfiguration.matches;
+    final authCount = matches
+        .whereType<RouteMatch>()
+        .where((m) => authRoutes.contains(m.route.name))
+        .length;
+    for (var i = 0; i < authCount; i++) {
+      context.pop();
+    }
   }
 
   /// Pushes the checkout mobile-login flow (mobile entry → OTP verification).

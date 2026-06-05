@@ -107,11 +107,17 @@ class LandingPageDestination extends NavDestination {
 }
 
 class JoinUsDestination extends NavDestination {
-  const JoinUsDestination();
+  const JoinUsDestination({this.mobile});
+
+  final String? mobile;
 
   @override
   void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
-    AppNavigator.goToJoinUs(context);
+    AppNavigator.goToJoinUs(
+      context,
+      initialMobile: mobile,
+      redirectType: extra?['redirectType'] as String?,
+    );
   }
 }
 

@@ -1,4 +1,40 @@
 abstract final class LoginRedirects {
+  // ── Redirect type keys (mirrors Android's LoginActivity.RedirectTypes) ───
+  static const typeCart = 'REDIRECT_CART';
+  static const typeAddToCart = 'REDIRECT_ADD_TO_CART';
+  static const typeOrders = 'REDIRECT_ORDERS';
+  static const typeWishlistScreen = 'REDIRECT_WISHLIST_SCREEN';
+  static const typeAddToWishlist = 'REDIRECT_ADD_TO_WISHLIST';
+  static const typeReminder = 'REDIRECT_REMINDER';
+  static const typeFav = 'REDIRECT_FAV';
+  static const typeFavBrands = 'REDIRECT_FAV_BRANDS';
+  static const typeCards = 'REDIRECT_CARDS';
+  static const typeKids = 'REDIRECT_KIDS';
+  static const typeWishlistItem = 'REDIRECT_WISHLIST_ITEM';
+  static const typeWishlist = 'REDIRECT_WISHLIST';
+  static const typeMomentLike = 'REDIRECT_MOMENT_LIKE';
+  static const typeMomentUpload = 'REDIRECT_MOMENT_UPLOAD';
+  static const typeRecent = 'REDIRECT_RECENT';
+  static const typeVerifyMobile = 'REDIRECT_VERIFY_MOBILE';
+  static const typeMomentDislike = 'REDIRECT_MOMENT_DISLIKE';
+  static const typeAccountSettings = 'REDIRECT_ACCOUNT_SETTINGS';
+  static const typeProfileImage = 'REDIRECT_PROFILE_IMAGE';
+  static const typeAddresses = 'REDIRECT_ADDRESSES';
+  static const typeProductReminder = 'REDIRECT_PRODUCT_REMINDER';
+  static const typeCredits = 'REDIRECT_CREDITS';
+  static const typePromo = 'REDIRECT_PROMO';
+  static const typeOrderCancel = 'REDIRECT_ORDER_CANCEL';
+  static const typeOrderReturn = 'REDIRECT_ORDER_RETURN';
+  static const typeOrderCancelSignIn = 'REDIRECT_ORDER_CANCEL_SIGN_IN';
+  static const typeOrderReturnSignIn = 'REDIRECT_ORDER_RETURN_SIGN_IN';
+  static const typeExchangeReturnSignIn = 'REDIRECT_EXCHANGE_RETURN_SIGN_IN';
+  static const typeProductRatings = 'REDIRECT_PRODUCT_RATINGS';
+  static const typeWishlistScreenFromAccount = 'REDIRECT_WISHLIST_SCREEN_FROM_ACCOUNT';
+  static const typeAddToWishlistFromPlp = 'REDIRECT_ADD_TO_WISHLIST_FROM_PLP';
+  static const typeGoToWishlist = 'REDIRECT_GO_TO_WISHLIST';
+  static const typeProfileDetails = 'REDIRECT_PROFILE_DETAILS';
+
+  // ── Display messages ─────────────────────────────────────────────────────
   static const redirectCart = 'Sign in to view your cart';
   static const redirectAddToCart = 'Sign in to add this product to your cart';
   static const redirectOrders = 'Sign in to see all your orders';
@@ -39,38 +75,38 @@ abstract final class LoginRedirects {
   }
 
   static const Map<String, String> _map = {
-    'REDIRECT_CART': redirectCart,
-    'REDIRECT_ADD_TO_CART': redirectAddToCart,
-    'REDIRECT_ORDERS': redirectOrders,
-    'REDIRECT_WISHLIST_SCREEN': redirectWishlistScreen,
-    'REDIRECT_ADD_TO_WISHLIST': redirectAddToWishlist,
-    'REDIRECT_REMINDER': redirectReminder,
-    'REDIRECT_FAV': redirectFav,
-    'REDIRECT_FAV_BRANDS': redirectFavBrands,
-    'REDIRECT_CARDS': redirectCards,
-    'REDIRECT_KIDS': redirectKids,
-    'REDIRECT_WISHLIST_ITEM': redirectWishlistItem,
-    'REDIRECT_WISHLIST': redirectWishlist,
-    'REDIRECT_MOMENT_LIKE': redirectMomentLike,
-    'REDIRECT_MOMENT_UPLOAD': redirectMomentUpload,
-    'REDIRECT_RECENT': redirectRecent,
-    'REDIRECT_VERIFY_MOBILE': redirectVerifyMobile,
-    'REDIRECT_MOMENT_DISLIKE': redirectMomentDislike,
-    'REDIRECT_ACCOUNT_SETTINGS': redirectAccountSettings,
-    'REDIRECT_PROFILE_IMAGE': redirectProfileImage,
-    'REDIRECT_ADDRESSES': redirectAddresses,
-    'REDIRECT_PRODUCT_REMINDER': redirectProductReminder,
-    'REDIRECT_CREDITS': redirectCredits,
-    'REDIRECT_PROMO': redirectPromo,
-    'REDIRECT_ORDER_CANCEL': redirectOrderCancel,
-    'REDIRECT_ORDER_RETURN': redirectOrderReturn,
-    'REDIRECT_ORDER_CANCEL_SIGN_IN': redirectOrderCancelSignIn,
-    'REDIRECT_ORDER_RETURN_SIGN_IN': redirectOrderReturnSignIn,
-    'REDIRECT_EXCHANGE_RETURN_SIGN_IN': redirectExchangeReturnSignIn,
-    'REDIRECT_PRODUCT_RATINGS': redirectProductRatings,
-    'REDIRECT_WISHLIST_SCREEN_FROM_ACCOUNT': redirectWishlistScreenFromAccount,
-    'REDIRECT_ADD_TO_WISHLIST_FROM_PLP': redirectAddToWishlistFromPlp,
-    'REDIRECT_GO_TO_WISHLIST': redirectGoToWishlist,
-    'REDIRECT_PROFILE_DETAILS': redirectProfileDetails,
+    typeCart: redirectCart,
+    typeAddToCart: redirectAddToCart,
+    typeOrders: redirectOrders,
+    typeWishlistScreen: redirectWishlistScreen,
+    typeAddToWishlist: redirectAddToWishlist,
+    typeReminder: redirectReminder,
+    typeFav: redirectFav,
+    typeFavBrands: redirectFavBrands,
+    typeCards: redirectCards,
+    typeKids: redirectKids,
+    typeWishlistItem: redirectWishlistItem,
+    typeWishlist: redirectWishlist,
+    typeMomentLike: redirectMomentLike,
+    typeMomentUpload: redirectMomentUpload,
+    typeRecent: redirectRecent,
+    typeVerifyMobile: redirectVerifyMobile,
+    typeMomentDislike: redirectMomentDislike,
+    typeAccountSettings: redirectAccountSettings,
+    typeProfileImage: redirectProfileImage,
+    typeAddresses: redirectAddresses,
+    typeProductReminder: redirectProductReminder,
+    typeCredits: redirectCredits,
+    typePromo: redirectPromo,
+    typeOrderCancel: redirectOrderCancel,
+    typeOrderReturn: redirectOrderReturn,
+    typeOrderCancelSignIn: redirectOrderCancelSignIn,
+    typeOrderReturnSignIn: redirectOrderReturnSignIn,
+    typeExchangeReturnSignIn: redirectExchangeReturnSignIn,
+    typeProductRatings: redirectProductRatings,
+    typeWishlistScreenFromAccount: redirectWishlistScreenFromAccount,
+    typeAddToWishlistFromPlp: redirectAddToWishlistFromPlp,
+    typeGoToWishlist: redirectGoToWishlist,
+    typeProfileDetails: redirectProfileDetails,
   };
 }

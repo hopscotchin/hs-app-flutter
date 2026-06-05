@@ -44,11 +44,9 @@ class AddressItemCard extends StatelessWidget {
 
     final detailStyle = isDisabled
         ? AppTypographyV1.labelLarge.medium.neutralGrey4().copyWith(
-          height: 1.2,
-          leadingDistribution: TextLeadingDistribution.even
-        )
+            leadingDistribution: TextLeadingDistribution.even,
+          )
         : AppTypographyV1.labelLarge.medium.textSecondary().copyWith(
-          height: 1.2,
             leadingDistribution: TextLeadingDistribution.even,
           );
 
@@ -56,11 +54,19 @@ class AddressItemCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(address.name, style: nameStyle),
-        AppSpacing.verticalGapSm,
-        Text(address.displayAddress, style: detailStyle),
-        AppSpacing.verticalGapSm,
-        Text(address.allMobiles, style: detailStyle),
-        if (isDisabled) ...[AppSpacing.verticalGapSm, const _NonServiceableChip()],
+        const SizedBox(height: 10),
+
+        RichText(
+          text: TextSpan(
+            text: address.displayAddress,
+            style: detailStyle.copyWith(height: 1.3),
+            children: [
+              TextSpan(text: '\n${address.allMobiles}', style: detailStyle.copyWith(height: 2)),
+            ],
+          ),
+        ),
+
+        if (isDisabled) ...[const SizedBox(height: 10), const _NonServiceableChip()],
         // if (canSetDefault) ...[
         //   AppSpacing.verticalGapSm,
         //   _SetDefaultToggle(
@@ -69,7 +75,7 @@ class AddressItemCard extends StatelessWidget {
         //   ),
         // ],
         if (!isSelectable) ...[
-          AppSpacing.verticalGapSm,
+          const SizedBox(height: 7),
           Row(
             children: [
               _ActionLabel(label: AddressStrings.edit, onTap: onEdit),

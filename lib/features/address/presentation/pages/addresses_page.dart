@@ -39,13 +39,9 @@ class _AddressesPageState extends State<AddressesPage> {
       _selectedId = null;
       return;
     }
-    final stillExists =
-        _selectedId != null && items.any((a) => a.id == _selectedId);
+    final stillExists = _selectedId != null && items.any((a) => a.id == _selectedId);
     if (stillExists) return;
-    final primary = items.firstWhere(
-      (a) => a.isDefault,
-      orElse: () => items.first,
-    );
+    final primary = items.firstWhere((a) => a.isDefault, orElse: () => items.first);
     _selectedId = primary.id;
   }
 
@@ -84,21 +80,15 @@ class _AddressesPageState extends State<AddressesPage> {
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(SnackBar(content: Text(state.selectError!)));
-                  context
-                      .read<AddressBloc>()
-                      .add(const ClearSelectFeedback());
+                  context.read<AddressBloc>().add(const ClearSelectFeedback());
                   return;
                 }
                 if (state.selectSucceeded) {
-                  context
-                      .read<AddressBloc>()
-                      .add(const ClearSelectFeedback());
+                  context.read<AddressBloc>().add(const ClearSelectFeedback());
                   if (_isCheckout) {
                     Navigator.of(context).pop();
                   } else {
-                    context
-                        .read<AddressBloc>()
-                        .add(const RefreshAddresses());
+                    context.read<AddressBloc>().add(const RefreshAddresses());
                   }
                 }
               },
@@ -110,18 +100,13 @@ class _AddressesPageState extends State<AddressesPage> {
                 child: BlocBuilder<AddressBloc, AddressState>(
                   builder: (context, state) {
                     if (state.status == AddressStatus.loading) {
-                      return LoadingShimmer.listShimmer(
-                        itemCount: 6,
-                        itemHeight: 140,
-                      );
+                      return LoadingShimmer.listShimmer(itemCount: 6, itemHeight: 140);
                     }
 
                     if (state.status == AddressStatus.error) {
                       return ErrorRetryWidget(
                         message: state.errorMessage!,
-                        onRetry: () => context.read<AddressBloc>().add(
-                          const LoadAddresses(),
-                        ),
+                        onRetry: () => context.read<AddressBloc>().add(const LoadAddresses()),
                       );
                     }
 
@@ -130,92 +115,74 @@ class _AddressesPageState extends State<AddressesPage> {
                         return Center(
                           child: Text(
                             AddressStrings.noSavedAddresses,
-                            style: AppTypographyV1.bodyLarge.regular
-                                .textSecondary(),
+                            style: AppTypographyV1.bodyLarge.regular.textSecondary(),
                           ),
                         );
                       }
 
                       _ensureSelection(state.items);
 
-                      final defaultAddress = state.items
-                          .where((a) => a.isDefault)
-                          .toList();
-                      final otherAddresses = state.items
-                          .where((a) => !a.isDefault)
-                          .toList();
+                      final defaultAddress = state.items.where((a) => a.isDefault).toList();
+                      final otherAddresses = state.items.where((a) => !a.isDefault).toList();
 
                       // In selection modes the radio sits left of the name, so
                       // align the divider start with the name (skip radio + gap)
                       // instead of from the card edge.
-                      final dividerIndent =
-                          widget.mode == AddressListMode.normal
+                      final dividerIndent = widget.mode == AddressListMode.normal
                           ? 16.0
                           : 16.0 + 20.0 + AppSpacing.sm;
 
                       return ListView(
                         children: [
-                            if (defaultAddress.isNotEmpty) ...[
-                              const _SectionHeading(
-                                label: AddressStrings.defaultAddressHeading,
+                          if (defaultAddress.isNotEmpty) ...[
+                            const _SectionHeading(label: AddressStrings.defaultAddressHeading),
+                            for (final address in defaultAddress) ...[
+                              AddressItemCard(
+                                address: address,
+                                mode: widget.mode,
+                                isSelected: address.id == _selectedId,
+                                isSettingDefault: state.selectingId == address.id,
+                                onSelect: () => setState(() => _selectedId = address.id),
+                                onSetDefault: _onSetDefault(address),
+                                onEdit: () => _onEdit(context, address),
+                                onRemove: () => _confirmRemove(context, address),
                               ),
-                              for (final address in defaultAddress) ...[
-                                AddressItemCard(
-                                  address: address,
-                                  mode: widget.mode,
-                                  isSelected: address.id == _selectedId,
-                                  isSettingDefault:
-                                      state.selectingId == address.id,
-                                  onSelect: () =>
-                                      setState(() => _selectedId = address.id),
-                                  onSetDefault: _onSetDefault(address),
-                                  onEdit: () => _onEdit(context, address),
-                                  onRemove: () => _confirmRemove(context, address),
-                                ),
-                                if (otherAddresses.isEmpty)
-                                  Divider(
-                                    height: 1,
-                                    color: AppColors.dividerLight,
-                                    indent: dividerIndent,
-                                    endIndent: 16,
-                                  ),
-                              ],
-                            ],
-                            if (otherAddresses.isNotEmpty) ...[
-                              const _SectionHeading(
-                                label: AddressStrings.otherAddressHeading,
-                                topSpacing: AppSpacing.xs,
-                              ),
-                              for (var i = 0; i < otherAddresses.length; i++) ...[
-                                AddressItemCard(
-                                  address: otherAddresses[i],
-                                  mode: widget.mode,
-                                  isSelected:
-                                      otherAddresses[i].id == _selectedId,
-                                  isSettingDefault: state.selectingId ==
-                                      otherAddresses[i].id,
-                                  onSelect: () => setState(
-                                    () => _selectedId = otherAddresses[i].id,
-                                  ),
-                                  onSetDefault:
-                                      _onSetDefault(otherAddresses[i]),
-                                  onEdit: () =>
-                                      _onEdit(context, otherAddresses[i]),
-                                  onRemove: () =>
-                                      _confirmRemove(context, otherAddresses[i]),
-                                ),
+                              if (otherAddresses.isEmpty)
                                 Divider(
                                   height: 1,
                                   color: AppColors.dividerLight,
                                   indent: dividerIndent,
                                   endIndent: 16,
                                 ),
-                                if (i != otherAddresses.length - 1)
-                                  AppSpacing.verticalGapLgMd,
-                              ],
                             ],
                           ],
-                        );
+                          if (otherAddresses.isNotEmpty) ...[
+                            const _SectionHeading(
+                              label: AddressStrings.otherAddressHeading,
+                              topSpacing: AppSpacing.xs,
+                            ),
+                            for (var i = 0; i < otherAddresses.length; i++) ...[
+                              AddressItemCard(
+                                address: otherAddresses[i],
+                                mode: widget.mode,
+                                isSelected: otherAddresses[i].id == _selectedId,
+                                isSettingDefault: state.selectingId == otherAddresses[i].id,
+                                onSelect: () => setState(() => _selectedId = otherAddresses[i].id),
+                                onSetDefault: _onSetDefault(otherAddresses[i]),
+                                onEdit: () => _onEdit(context, otherAddresses[i]),
+                                onRemove: () => _confirmRemove(context, otherAddresses[i]),
+                              ),
+                              Divider(
+                                height: 1,
+                                color: AppColors.dividerLight,
+                                indent: dividerIndent,
+                                endIndent: 16,
+                              ),
+                              if (i != otherAddresses.length - 1) AppSpacing.verticalGapLgMd,
+                            ],
+                          ],
+                        ],
+                      );
                     }
 
                     return const SizedBox.shrink();
@@ -224,12 +191,10 @@ class _AddressesPageState extends State<AddressesPage> {
               ),
               if (_isCheckout)
                 BlocBuilder<AddressBloc, AddressState>(
-                  buildWhen: (prev, curr) =>
-                      prev.selectingId != curr.selectingId,
+                  buildWhen: (prev, curr) => prev.selectingId != curr.selectingId,
                   builder: (context, state) => _CheckoutBottomBar(
                     onAddNewAddress: _onAddNewAddress,
-                    onContinue:
-                        state.selectingId != null ? null : _onContinue,
+                    onContinue: state.selectingId != null ? null : _onContinue,
                     isSubmitting: state.selectingId != null,
                   ),
                 )
@@ -268,8 +233,7 @@ class _AddressesPageState extends State<AddressesPage> {
 
   VoidCallback _onSetDefault(AddressEntity address) {
     if (widget.mode == AddressListMode.normal) {
-      return () =>
-          context.read<AddressBloc>().add(SelectAddress(address.id));
+      return () => context.read<AddressBloc>().add(SelectAddress(address.id));
     }
     return () => setState(() => _selectedId = address.id);
   }
@@ -293,24 +257,19 @@ class _AddressesPageState extends State<AddressesPage> {
     }
   }
 
-  Future<void> _confirmRemove(
-    BuildContext context,
-    AddressEntity address,
-  ) async {
+  Future<void> _confirmRemove(BuildContext context, AddressEntity address) async {
     final bloc = context.read<AddressBloc>();
     final confirmed = await AppBottomSheet.show<bool>(
       context,
       description: AddressStrings.confirmDeletePrompt,
       secondaryAction: AppBottomSheetAction(
         label: CommonStrings.confirm,
-        onPressed: () =>
-            Navigator.of(context, rootNavigator: true).pop(true),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(true),
       ),
       primaryAction: AppBottomSheetAction(
         label: CommonStrings.cancel,
         style: AppBottomSheetButtonStyle.filled,
-        onPressed: () =>
-            Navigator.of(context, rootNavigator: true).pop(false),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
       ),
     );
 
@@ -333,18 +292,9 @@ class _SectionHeading extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            label,
-            style: AppTypographyV1.labelLarge.bold.textPrimary()
-          ),
+          Text(label, style: AppTypographyV1.labelLarge.bold.textPrimary()),
           AppSpacing.horizontalGapXs,
-          const Expanded(
-            child: Divider(
-              height: 1,
-              thickness: 1,
-              color: AppColors.dividerDark,
-            ),
-          ),
+          const Expanded(child: Divider(height: 1, thickness: 1, color: AppColors.dividerDark)),
         ],
       ),
     );
@@ -362,10 +312,7 @@ class _AddNewAddressButton extends StatelessWidget {
       padding: Platform.isIOS ? const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 0) : const EdgeInsets.all(AppSpacing.md),
       child: SizedBox(
         width: double.infinity,
-        child: _PrimaryButton(
-          label: AddressStrings.addNewAddress,
-          onPressed: onPressed,
-        ),
+        child: _PrimaryButton(label: AddressStrings.addNewAddress, onPressed: onPressed),
       ),
     );
   }
@@ -409,11 +356,7 @@ class _CheckoutBottomBar extends StatelessWidget {
 }
 
 class _PrimaryButton extends StatelessWidget {
-  const _PrimaryButton({
-    required this.label,
-    required this.onPressed,
-    this.isLoading = false,
-  });
+  const _PrimaryButton({required this.label, required this.onPressed, this.isLoading = false});
 
   final String label;
   final VoidCallback? onPressed;
@@ -427,9 +370,7 @@ class _PrimaryButton extends StatelessWidget {
         foregroundColor: AppColors.onPrimary,
         disabledBackgroundColor: AppColors.secondaryInActive,
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
       onPressed: onPressed,
       child: isLoading
@@ -459,17 +400,10 @@ class _SecondaryButton extends StatelessWidget {
         foregroundColor: AppColors.primary,
         backgroundColor: AppColors.brandTertiary,
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
       onPressed: onPressed,
-      child: Text(
-        label,
-        style: AppTypographyV1.bodyLarge.bold.copyWith(
-          color: AppColors.primary,
-        ),
-      ),
+      child: Text(label, style: AppTypographyV1.bodyLarge.bold.copyWith(color: AppColors.primary)),
     );
   }
 }

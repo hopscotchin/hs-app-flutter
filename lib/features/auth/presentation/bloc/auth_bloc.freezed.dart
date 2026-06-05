@@ -131,7 +131,7 @@ return signOut(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String loginId,  String otpReason,  String? pathUri)?  sendOtp,TResult Function( String loginId,  String otp,  String otpReason)?  verifyOtp,TResult Function( String displayName,  String email,  String mobile)?  register,TResult Function( String mobile)?  checkMobile,TResult Function()?  reset,TResult Function()?  signOut,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String loginId,  String otpReason,  String? pathUri)?  sendOtp,TResult Function( String loginId,  String otp,  String otpReason)?  verifyOtp,TResult Function( String displayName,  String email,  String mobile)?  register,TResult Function( String mobile)?  checkMobile,TResult Function()?  reset,TResult Function( void Function()? onSuccess)?  signOut,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case SendOtp() when sendOtp != null:
 return sendOtp(_that.loginId,_that.otpReason,_that.pathUri);case VerifyOtp() when verifyOtp != null:
@@ -139,7 +139,7 @@ return verifyOtp(_that.loginId,_that.otp,_that.otpReason);case Register() when r
 return register(_that.displayName,_that.email,_that.mobile);case CheckMobile() when checkMobile != null:
 return checkMobile(_that.mobile);case ResetAuth() when reset != null:
 return reset();case AuthSignOut() when signOut != null:
-return signOut();case _:
+return signOut(_that.onSuccess);case _:
   return orElse();
 
 }
@@ -157,7 +157,7 @@ return signOut();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String loginId,  String otpReason,  String? pathUri)  sendOtp,required TResult Function( String loginId,  String otp,  String otpReason)  verifyOtp,required TResult Function( String displayName,  String email,  String mobile)  register,required TResult Function( String mobile)  checkMobile,required TResult Function()  reset,required TResult Function()  signOut,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String loginId,  String otpReason,  String? pathUri)  sendOtp,required TResult Function( String loginId,  String otp,  String otpReason)  verifyOtp,required TResult Function( String displayName,  String email,  String mobile)  register,required TResult Function( String mobile)  checkMobile,required TResult Function()  reset,required TResult Function( void Function()? onSuccess)  signOut,}) {final _that = this;
 switch (_that) {
 case SendOtp():
 return sendOtp(_that.loginId,_that.otpReason,_that.pathUri);case VerifyOtp():
@@ -165,7 +165,7 @@ return verifyOtp(_that.loginId,_that.otp,_that.otpReason);case Register():
 return register(_that.displayName,_that.email,_that.mobile);case CheckMobile():
 return checkMobile(_that.mobile);case ResetAuth():
 return reset();case AuthSignOut():
-return signOut();}
+return signOut(_that.onSuccess);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -179,7 +179,7 @@ return signOut();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String loginId,  String otpReason,  String? pathUri)?  sendOtp,TResult? Function( String loginId,  String otp,  String otpReason)?  verifyOtp,TResult? Function( String displayName,  String email,  String mobile)?  register,TResult? Function( String mobile)?  checkMobile,TResult? Function()?  reset,TResult? Function()?  signOut,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String loginId,  String otpReason,  String? pathUri)?  sendOtp,TResult? Function( String loginId,  String otp,  String otpReason)?  verifyOtp,TResult? Function( String displayName,  String email,  String mobile)?  register,TResult? Function( String mobile)?  checkMobile,TResult? Function()?  reset,TResult? Function( void Function()? onSuccess)?  signOut,}) {final _that = this;
 switch (_that) {
 case SendOtp() when sendOtp != null:
 return sendOtp(_that.loginId,_that.otpReason,_that.pathUri);case VerifyOtp() when verifyOtp != null:
@@ -187,7 +187,7 @@ return verifyOtp(_that.loginId,_that.otp,_that.otpReason);case Register() when r
 return register(_that.displayName,_that.email,_that.mobile);case CheckMobile() when checkMobile != null:
 return checkMobile(_that.mobile);case ResetAuth() when reset != null:
 return reset();case AuthSignOut() when signOut != null:
-return signOut();case _:
+return signOut(_that.onSuccess);case _:
   return null;
 
 }
@@ -507,33 +507,67 @@ String toString() {
 
 
 class AuthSignOut implements AuthEvent {
-  const AuthSignOut();
+  const AuthSignOut({this.onSuccess});
   
 
+ final  void Function()? onSuccess;
 
-
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$AuthSignOutCopyWith<AuthSignOut> get copyWith => _$AuthSignOutCopyWithImpl<AuthSignOut>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthSignOut);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthSignOut&&(identical(other.onSuccess, onSuccess) || other.onSuccess == onSuccess));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,onSuccess);
 
 @override
 String toString() {
-  return 'AuthEvent.signOut()';
+  return 'AuthEvent.signOut(onSuccess: $onSuccess)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class $AuthSignOutCopyWith<$Res> implements $AuthEventCopyWith<$Res> {
+  factory $AuthSignOutCopyWith(AuthSignOut value, $Res Function(AuthSignOut) _then) = _$AuthSignOutCopyWithImpl;
+@useResult
+$Res call({
+ void Function()? onSuccess
+});
 
 
+
+
+}
+/// @nodoc
+class _$AuthSignOutCopyWithImpl<$Res>
+    implements $AuthSignOutCopyWith<$Res> {
+  _$AuthSignOutCopyWithImpl(this._self, this._then);
+
+  final AuthSignOut _self;
+  final $Res Function(AuthSignOut) _then;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? onSuccess = freezed,}) {
+  return _then(AuthSignOut(
+onSuccess: freezed == onSuccess ? _self.onSuccess : onSuccess // ignore: cast_nullable_to_non_nullable
+as void Function()?,
+  ));
+}
+
+
+}
 
 /// @nodoc
 mixin _$AuthState {

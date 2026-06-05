@@ -8,6 +8,7 @@ import '../../../../components/atoms/filled_text_field.dart' show MobileNumberFo
 import '../../../../components/atoms/outlined_text_field.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
+import '../widgets/auth_footer_link_row.dart';
 import '../widgets/auth_primary_button.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/entities/message_bar_entity.dart';
@@ -24,11 +25,13 @@ class LoginPage extends StatefulWidget {
     this.initialMobile,
     this.initialMessageBars = const [],
     this.isCheckoutFlow = false,
+    this.redirectType,
   });
 
   final String? initialMobile;
   final List<MessageBarEntity> initialMessageBars;
   final bool isCheckoutFlow;
+  final String? redirectType;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -124,6 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                   loginId: _rawMobile,
                   otpConfig: state.otpConfig!,
                   otpReason: AuthStrings.signInReason,
+                  redirectType: widget.redirectType,
                 );
               },
               child: _buildBody(),
@@ -139,7 +143,7 @@ class _LoginPageState extends State<LoginPage> {
         void onMessageAction(String? link, MessageBarEntity bar) {
           final destination = ActionUrlHandler.parse(link ?? '');
           if (destination == null || destination is LoginDestination) return;
-          destination.navigate(context);
+          destination.navigate(context, extra: {'redirectType': widget.redirectType});
         }
 
         return SafeArea(
@@ -183,7 +187,6 @@ class _LoginPageState extends State<LoginPage> {
                           isLoading: isLoading,
                           onPressed: _onSendOtp,
                         ),
-                        AppSpacing.verticalGapMd,
 
                         AppSpacing.verticalGapXl,
                       ],

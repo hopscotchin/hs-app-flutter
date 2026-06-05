@@ -55,14 +55,15 @@ extension AccountEventPatterns on AccountEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoadAccount value)?  load,TResult Function( RefreshFromLocal value)?  refreshFromLocal,TResult Function( ForgetGuestUser value)?  forgetGuestUser,TResult Function( ClearForgetSignal value)?  clearForgetSignal,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoadAccount value)?  load,TResult Function( RefreshFromLocal value)?  refreshFromLocal,TResult Function( ForgetGuestUser value)?  forgetGuestUser,TResult Function( ClearForgetSignal value)?  clearForgetSignal,TResult Function( PrefetchAddresses value)?  prefetchAddresses,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case LoadAccount() when load != null:
 return load(_that);case RefreshFromLocal() when refreshFromLocal != null:
 return refreshFromLocal(_that);case ForgetGuestUser() when forgetGuestUser != null:
 return forgetGuestUser(_that);case ClearForgetSignal() when clearForgetSignal != null:
-return clearForgetSignal(_that);case _:
+return clearForgetSignal(_that);case PrefetchAddresses() when prefetchAddresses != null:
+return prefetchAddresses(_that);case _:
   return orElse();
 
 }
@@ -80,14 +81,15 @@ return clearForgetSignal(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoadAccount value)  load,required TResult Function( RefreshFromLocal value)  refreshFromLocal,required TResult Function( ForgetGuestUser value)  forgetGuestUser,required TResult Function( ClearForgetSignal value)  clearForgetSignal,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoadAccount value)  load,required TResult Function( RefreshFromLocal value)  refreshFromLocal,required TResult Function( ForgetGuestUser value)  forgetGuestUser,required TResult Function( ClearForgetSignal value)  clearForgetSignal,required TResult Function( PrefetchAddresses value)  prefetchAddresses,}){
 final _that = this;
 switch (_that) {
 case LoadAccount():
 return load(_that);case RefreshFromLocal():
 return refreshFromLocal(_that);case ForgetGuestUser():
 return forgetGuestUser(_that);case ClearForgetSignal():
-return clearForgetSignal(_that);}
+return clearForgetSignal(_that);case PrefetchAddresses():
+return prefetchAddresses(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -101,14 +103,15 @@ return clearForgetSignal(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoadAccount value)?  load,TResult? Function( RefreshFromLocal value)?  refreshFromLocal,TResult? Function( ForgetGuestUser value)?  forgetGuestUser,TResult? Function( ClearForgetSignal value)?  clearForgetSignal,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoadAccount value)?  load,TResult? Function( RefreshFromLocal value)?  refreshFromLocal,TResult? Function( ForgetGuestUser value)?  forgetGuestUser,TResult? Function( ClearForgetSignal value)?  clearForgetSignal,TResult? Function( PrefetchAddresses value)?  prefetchAddresses,}){
 final _that = this;
 switch (_that) {
 case LoadAccount() when load != null:
 return load(_that);case RefreshFromLocal() when refreshFromLocal != null:
 return refreshFromLocal(_that);case ForgetGuestUser() when forgetGuestUser != null:
 return forgetGuestUser(_that);case ClearForgetSignal() when clearForgetSignal != null:
-return clearForgetSignal(_that);case _:
+return clearForgetSignal(_that);case PrefetchAddresses() when prefetchAddresses != null:
+return prefetchAddresses(_that);case _:
   return null;
 
 }
@@ -125,13 +128,14 @@ return clearForgetSignal(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  load,TResult Function()?  refreshFromLocal,TResult Function()?  forgetGuestUser,TResult Function()?  clearForgetSignal,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  load,TResult Function()?  refreshFromLocal,TResult Function()?  forgetGuestUser,TResult Function()?  clearForgetSignal,TResult Function()?  prefetchAddresses,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LoadAccount() when load != null:
 return load();case RefreshFromLocal() when refreshFromLocal != null:
 return refreshFromLocal();case ForgetGuestUser() when forgetGuestUser != null:
 return forgetGuestUser();case ClearForgetSignal() when clearForgetSignal != null:
-return clearForgetSignal();case _:
+return clearForgetSignal();case PrefetchAddresses() when prefetchAddresses != null:
+return prefetchAddresses();case _:
   return orElse();
 
 }
@@ -149,13 +153,14 @@ return clearForgetSignal();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  load,required TResult Function()  refreshFromLocal,required TResult Function()  forgetGuestUser,required TResult Function()  clearForgetSignal,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  load,required TResult Function()  refreshFromLocal,required TResult Function()  forgetGuestUser,required TResult Function()  clearForgetSignal,required TResult Function()  prefetchAddresses,}) {final _that = this;
 switch (_that) {
 case LoadAccount():
 return load();case RefreshFromLocal():
 return refreshFromLocal();case ForgetGuestUser():
 return forgetGuestUser();case ClearForgetSignal():
-return clearForgetSignal();}
+return clearForgetSignal();case PrefetchAddresses():
+return prefetchAddresses();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -169,13 +174,14 @@ return clearForgetSignal();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  load,TResult? Function()?  refreshFromLocal,TResult? Function()?  forgetGuestUser,TResult? Function()?  clearForgetSignal,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  load,TResult? Function()?  refreshFromLocal,TResult? Function()?  forgetGuestUser,TResult? Function()?  clearForgetSignal,TResult? Function()?  prefetchAddresses,}) {final _that = this;
 switch (_that) {
 case LoadAccount() when load != null:
 return load();case RefreshFromLocal() when refreshFromLocal != null:
 return refreshFromLocal();case ForgetGuestUser() when forgetGuestUser != null:
 return forgetGuestUser();case ClearForgetSignal() when clearForgetSignal != null:
-return clearForgetSignal();case _:
+return clearForgetSignal();case PrefetchAddresses() when prefetchAddresses != null:
+return prefetchAddresses();case _:
   return null;
 
 }
@@ -303,6 +309,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'AccountEvent.clearForgetSignal()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class PrefetchAddresses implements AccountEvent {
+  const PrefetchAddresses();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PrefetchAddresses);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AccountEvent.prefetchAddresses()';
 }
 
 

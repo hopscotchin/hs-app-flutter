@@ -7,9 +7,8 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/error/failures.dart';
-import '../../../address/data/managers/address_cache_manager.dart';
-import '../../../address/domain/usecases/get_addresses_usecase.dart';
 import '../../../../core/services/push_notification_service.dart';
+import '../../../account/presentation/bloc/account_bloc.dart';
 import '../../domain/entities/check_mobile_response/check_mobile_response_entity.dart';
 import '../../domain/entities/otp_config/otp_config_entity.dart';
 import '../../domain/entities/verfiy_otp_response/verify_otp_response_entity.dart';
@@ -36,8 +35,7 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
     this._clearSession,
     this._logout,
     this._pushNotificationService,
-    this._getAddresses,
-    this._addressCache,
+    this._accountBloc,
   ) : super(const AuthState()) {
     on<CheckMobile>(_onCheckMobile);
     on<SendOtp>(_onSendOtp);
@@ -55,8 +53,7 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
   final ClearSessionUseCase _clearSession;
   final LogoutUseCase _logout;
   final PushNotificationService _pushNotificationService;
-  final GetAddressesUseCase _getAddresses;
-  final AddressCacheManager _addressCache;
+  final AccountBloc _accountBloc;
 
   Future<void> _onCheckMobile(CheckMobile event, Emitter<AuthState> emit) async {
     emit(const AuthState(status: AuthStatus.loading));
@@ -64,21 +61,16 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
     final result = await _checkMobile.call(
       CheckMobileParams(mobile: event.mobile, cancelToken: token),
     );
-    result.fold(
-      (failure) {
-        if (failure is RequestCancelledFailure) return;
-        emit(
-          AuthState(
-            status: AuthStatus.error,
-            errorMessage: failure.message,
-            messageBars: failure is ApiFailure ? failure.messageBars : [],
-          ),
-        );
-      },
-      (entity) => emit(
-        AuthState(status: AuthStatus.mobileChecked, checkMobileResult: entity),
-      ),
-    );
+    result.fold((failure) {
+      if (failure is RequestCancelledFailure) return;
+      emit(
+        AuthState(
+          status: AuthStatus.error,
+          errorMessage: failure.message,
+          messageBars: failure is ApiFailure ? failure.messageBars : [],
+        ),
+      );
+    }, (entity) => emit(AuthState(status: AuthStatus.mobileChecked, checkMobileResult: entity)));
   }
 
   Future<void> _onSendOtp(SendOtp event, Emitter<AuthState> emit) async {
@@ -92,16 +84,25 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
         cancelToken: token,
       ),
     );
-    result.fold((failure) {
-      if (failure is RequestCancelledFailure) return;
-      emit(
+    result.fold(
+      (failure) {
+        if (failure is RequestCancelledFailure) return;
+        emit(
+          AuthState(
+            status: AuthStatus.error,
+            errorMessage: failure.message,
+            messageBars: failure is ApiFailure ? failure.messageBars : [],
+          ),
+        );
+      },
+      (entity) => emit(
         AuthState(
-          status: AuthStatus.error,
-          errorMessage: failure.message,
-          messageBars: failure is ApiFailure ? failure.messageBars : [],
+          status: AuthStatus.otpSent,
+          otpConfig: entity.otp,
+          messageBars: entity.messageBars,
         ),
-      );
-    }, (entity) => emit(AuthState(status: AuthStatus.otpSent, otpConfig: entity.otp, messageBars: entity.messageBars)));
+      ),
+    );
   }
 
   Future<void> _onVerifyOtp(VerifyOtp event, Emitter<AuthState> emit) async {
@@ -129,17 +130,9 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
       (entity) async {
         await _persistSession.call(entity);
         unawaited(_pushNotificationService.reRegister());
-        unawaited(_prefetchAddresses());
+        _accountBloc.add(const PrefetchAddresses());
         emit(AuthState(status: AuthStatus.success, verifyOtpResult: entity));
       },
-    );
-  }
-
-  Future<void> _prefetchAddresses() async {
-    final result = await _getAddresses(const GetAddressesParams());
-    await result.fold(
-      (_) async {},
-      (list) => _addressCache.setAll(list.rawItems),
     );
   }
 
@@ -189,6 +182,7 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
         await _clearSession.call();
         unawaited(_pushNotificationService.reRegister());
         emit(const AuthState(status: AuthStatus.signedOut));
+        event.onSuccess?.call();
       },
     );
   }

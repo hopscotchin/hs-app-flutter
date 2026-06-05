@@ -26,6 +26,7 @@ class AuthRoute {
             initialMobile: extra?['initialMobile'] as String?,
             initialMessageBars:
                 extra?['initialMessageBars'] as List<MessageBarEntity>? ?? const [],
+            redirectType: extra?['redirectType'] as String?,
           ),
         );
       },
@@ -34,10 +35,16 @@ class AuthRoute {
       path: RouteNames.joinUs,
       name: RouteNames.joinUs,
       parentNavigatorKey: rootKey,
-      builder: (context, _) => BlocProvider(
-        create: (_) => sl<AuthBloc>(),
-        child: const JoinUsPage(),
-      ),
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        return BlocProvider(
+          create: (_) => sl<AuthBloc>(),
+          child: JoinUsPage(
+            initialMobile: extra?['initialMobile'] as String?,
+            redirectType: extra?['redirectType'] as String?,
+          ),
+        );
+      },
     ),
     GoRoute(
       path: RouteNames.otpVerification,
@@ -52,6 +59,7 @@ class AuthRoute {
             otpConfig: extra['otpConfig'] as OtpConfigEntity,
             otpReason: extra['otpReason'] as String? ?? 'SIGN_IN',
             isCheckoutFlow: extra['isCheckoutFlow'] as bool? ?? false,
+            redirectType: extra['redirectType'] as String?,
           ),
         );
       },

@@ -24,5 +24,5 @@ sealed class AuthEvent with _$AuthEvent {
 
   const factory AuthEvent.reset() = ResetAuth;
 
-  const factory AuthEvent.signOut() = AuthSignOut;
+  const factory AuthEvent.signOut({void Function()? onSuccess}) = AuthSignOut;
 }

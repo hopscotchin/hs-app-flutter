@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
 import 'package:hs_app_flutter/components/appbar/hs_appbar.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
+import 'package:hs_app_flutter/core/constants/strings/login_redirects.dart';
+import 'package:hs_app_flutter/core/entities/message_bar_entity.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
-import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
-import 'package:hs_app_flutter/core/constants/strings/login_redirects.dart';
-import 'package:hs_app_flutter/core/entities/message_bar_entity.dart';
 import 'package:hs_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:hs_app_flutter/features/discover/presentation/bloc/home_bloc.dart';
 
 import '../../../../core/theme/colors.dart';
-
 import '../../domain/entities/account_entity.dart';
 import '../bloc/account_bloc.dart';
 import '../widgets/account_footer_widget.dart';
@@ -106,150 +106,171 @@ class _AccountContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   AppSpacing.verticalGapMd,
-          AccountHeaderWidget(account: account, onForgetMe: () => _showForgetDialog(context)),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 0, horizontal: AppSpacing.md),
-            child: Divider(height: 1, color: AppColors.dividerLight),
-          ),
-          !isLoggedIn ? AppSpacing.verticalGapXl : AppSpacing.verticalGapMd,
+                  AccountHeaderWidget(
+                    account: account,
+                    onForgetMe: () => _showForgetDialog(context),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 0, horizontal: AppSpacing.md),
+                    child: Divider(height: 1, color: AppColors.dividerLight),
+                  ),
+                  !isLoggedIn ? AppSpacing.verticalGapXl : AppSpacing.verticalGapMd,
 
-          AccountMenuItemWidget(
-            svgAsset: ImageConstants.ordersItemIcon,
-            title: AccountStrings.orders,
-            subtitle: isLoggedIn ? null : AccountStrings.ordersSubtitle,
-            onTap: () => isLoggedIn
-                ? AppNavigator.goToOrders(context)
-                : AppNavigator.goToLogin(
-                    context,
-                    initialMessageBars: [
-                      const MessageBarEntity(
-                        text: LoginRedirects.redirectOrders,
-                        type: 'info',
-                        hasIcon: true,
-                      ),
-                    ],
+                  AccountMenuItemWidget(
+                    svgAsset: ImageConstants.ordersItemIcon,
+                    title: AccountStrings.orders,
+                    subtitle: isLoggedIn ? null : AccountStrings.ordersSubtitle,
+                    onTap: () => isLoggedIn
+                        ? AppNavigator.goToOrders(context)
+                        : AppNavigator.goToLogin(
+                            context,
+                            redirectType: LoginRedirects.typeOrders,
+                            initialMessageBars: [
+                              const MessageBarEntity(
+                                text: LoginRedirects.redirectOrders,
+                                type: 'info',
+                                hasIcon: true,
+                              ),
+                            ],
+                          ),
                   ),
-          ),
-          AccountMenuItemWidget(
-            svgAsset: ImageConstants.wishlistItemIcon,
-            title: AccountStrings.wishlist,
-            subtitle: isLoggedIn ? null : AccountStrings.wishlistSubtitle,
-            onTap: () => isLoggedIn
-                ? AppNavigator.goToHome(context)
-                : AppNavigator.goToLogin(
-                    context,
-                    initialMessageBars: [
-                      const MessageBarEntity(
-                        text: LoginRedirects.redirectWishlistScreenFromAccount,
-                        type: 'info',
-                        hasIcon: true,
-                      ),
-                    ],
+                  AccountMenuItemWidget(
+                    svgAsset: ImageConstants.wishlistItemIcon,
+                    title: AccountStrings.wishlist,
+                    subtitle: isLoggedIn ? null : AccountStrings.wishlistSubtitle,
+                    onTap: () => isLoggedIn
+                        ? AppNavigator.goToHome(context)
+                        : AppNavigator.goToLogin(
+                            context,
+                            redirectType: LoginRedirects.typeWishlistScreenFromAccount,
+                            initialMessageBars: [
+                              const MessageBarEntity(
+                                text: LoginRedirects.redirectWishlistScreenFromAccount,
+                                type: 'info',
+                                hasIcon: true,
+                              ),
+                            ],
+                          ),
                   ),
-          ),
-          AccountMenuItemWidget(
-            svgAsset: ImageConstants.profileDetailsItemIcon,
-            title: AccountStrings.profileDetails,
-            subtitle: isLoggedIn ? null : AccountStrings.profileDetailsSubtitle,
-            onTap: () => isLoggedIn
-                ? AppNavigator.goToHome(context)
-                : AppNavigator.goToLogin(
-                    context,
-                    initialMessageBars: [
-                      const MessageBarEntity(
-                        text: LoginRedirects.redirectProfileDetails,
-                        type: 'info',
-                        hasIcon: true,
-                      ),
-                    ],
+                  AccountMenuItemWidget(
+                    svgAsset: ImageConstants.profileDetailsItemIcon,
+                    title: AccountStrings.profileDetails,
+                    subtitle: isLoggedIn ? null : AccountStrings.profileDetailsSubtitle,
+                    onTap: () => isLoggedIn
+                        ? AppNavigator.goToHome(context)
+                        : AppNavigator.goToLogin(
+                            context,
+                            redirectType: LoginRedirects.typeAccountSettings,
+                            initialMessageBars: [
+                              const MessageBarEntity(
+                                text: LoginRedirects.redirectProfileDetails,
+                                type: 'info',
+                                hasIcon: true,
+                              ),
+                            ],
+                          ),
                   ),
-          ),
-          AccountMenuItemWidget(
-            svgAsset: ImageConstants.addressItemIcon,
-            title: AccountStrings.savedAddresses,
-            subtitle: isLoggedIn ? null : AccountStrings.savedAddressesSubtitle,
-            onTap: () => isLoggedIn
-                ? AppNavigator.goToAddresses(context)
-                : AppNavigator.goToLogin(
-                    context,
-                    initialMessageBars: [
-                      const MessageBarEntity(
-                        text: LoginRedirects.redirectAddresses,
-                        type: 'info',
-                        hasIcon: true,
-                      ),
-                    ],
+                  AccountMenuItemWidget(
+                    svgAsset: ImageConstants.addressItemIcon,
+                    title: AccountStrings.savedAddresses,
+                    subtitle: isLoggedIn ? null : AccountStrings.savedAddressesSubtitle,
+                    onTap: () => isLoggedIn
+                        ? AppNavigator.goToAddresses(context)
+                        : AppNavigator.goToLogin(
+                            context,
+                            redirectType: LoginRedirects.typeAddresses,
+                            initialMessageBars: [
+                              const MessageBarEntity(
+                                text: LoginRedirects.redirectAddresses,
+                                type: 'info',
+                                hasIcon: true,
+                              ),
+                            ],
+                          ),
                   ),
-          ),
-          AccountMenuItemWidget(
-            svgAsset: ImageConstants.cardsItemIcon,
-            title: AccountStrings.manageCards,
-            subtitle: isLoggedIn ? null : AccountStrings.manageCardsSubtitle,
-            onTap: () => isLoggedIn
-                ? AppNavigator.goToHome(context)
-                : AppNavigator.goToLogin(
-                    context,
-                    initialMessageBars: [
-                      const MessageBarEntity(
-                        text: LoginRedirects.redirectCards,
-                        type: 'info',
-                        hasIcon: true,
-                      ),
-                    ],
+                  AccountMenuItemWidget(
+                    svgAsset: ImageConstants.cardsItemIcon,
+                    title: AccountStrings.manageCards,
+                    subtitle: isLoggedIn ? null : AccountStrings.manageCardsSubtitle,
+                    onTap: () => isLoggedIn
+                        ? AppNavigator.goToHome(context)
+                        : AppNavigator.goToLogin(
+                            context,
+                            redirectType: LoginRedirects.typeCards,
+                            initialMessageBars: [
+                              const MessageBarEntity(
+                                text: LoginRedirects.redirectCards,
+                                type: 'info',
+                                hasIcon: true,
+                              ),
+                            ],
+                          ),
                   ),
-          ),
-          AccountMenuItemWidget(
-            svgAsset: ImageConstants.creditsItemIcon,
-            title: AccountStrings.creditsMenu,
-            subtitle: isLoggedIn ? null : AccountStrings.checkCreditBalance,
-            subtitleColor: isLoggedIn ? AppColors.success : AppColors.textPrimary,
-            trailingText: isLoggedIn && account.credit != null
-                ? '₹ ${account.credit!.toStringAsFixed(0)}'
-                : null,
-            onTap: () => isLoggedIn
-                ? AppNavigator.goToHome(context)
-                : AppNavigator.goToLogin(
-                    context,
-                    initialMessageBars: [
-                      const MessageBarEntity(
-                        text: LoginRedirects.redirectCredits,
-                        type: 'info',
-                        hasIcon: true,
-                      ),
-                    ],
+                  AccountMenuItemWidget(
+                    svgAsset: ImageConstants.creditsItemIcon,
+                    title: AccountStrings.creditsMenu,
+                    subtitle: isLoggedIn ? null : AccountStrings.checkCreditBalance,
+                    subtitleColor: isLoggedIn ? AppColors.success : AppColors.textPrimary,
+                    trailingText: isLoggedIn && account.credit != null
+                        ? '₹ ${account.credit!.toStringAsFixed(0)}'
+                        : null,
+                    onTap: () => isLoggedIn
+                        ? AppNavigator.goToHome(context)
+                        : AppNavigator.goToLogin(
+                            context,
+                            redirectType: LoginRedirects.typeCredits,
+                            initialMessageBars: [
+                              const MessageBarEntity(
+                                text: LoginRedirects.redirectCredits,
+                                type: 'info',
+                                hasIcon: true,
+                              ),
+                            ],
+                          ),
                   ),
-          ),
-          AccountMenuItemWidget(
-            svgAsset: ImageConstants.kidsItemIcon,
-            title: AccountStrings.myKids,
-            subtitle: isLoggedIn ? null : AccountStrings.myKidsSubtitle,
-            onTap: () => isLoggedIn
-                ? AppNavigator.goToHome(context)
-                : AppNavigator.goToLogin(
-                    context,
-                    initialMessageBars: [
-                      const MessageBarEntity(
-                        text: LoginRedirects.redirectKids,
-                        type: 'info',
-                        hasIcon: true,
-                      ),
-                    ],
+                  AccountMenuItemWidget(
+                    svgAsset: ImageConstants.kidsItemIcon,
+                    title: AccountStrings.myKids,
+                    subtitle: isLoggedIn ? null : AccountStrings.myKidsSubtitle,
+                    onTap: () => isLoggedIn
+                        ? AppNavigator.goToHome(context)
+                        : AppNavigator.goToLogin(
+                            context,
+                            redirectType: LoginRedirects.typeKids,
+                            initialMessageBars: [
+                              const MessageBarEntity(
+                                text: LoginRedirects.redirectKids,
+                                type: 'info',
+                                hasIcon: true,
+                              ),
+                            ],
+                          ),
                   ),
-          ),
-          AppSpacing.verticalGapXs,
-          const Divider(height: 1, color: AppColors.dividerLight, indent: AppSpacing.md, endIndent: AppSpacing.md),
+                  AppSpacing.verticalGapXs,
+                  const Divider(
+                    height: 1,
+                    color: AppColors.dividerLight,
+                    indent: AppSpacing.md,
+                    endIndent: AppSpacing.md,
+                  ),
                   const AccountHelpSectionWidget(),
                   AccountFooterWidget(
                     isLoggedIn: isLoggedIn,
                     onSignIn: () => AppNavigator.goToLogin(context),
-                    onSignOut: () =>
-                        context.read<AuthBloc>().add(const AuthEvent.signOut()),
+                    onSignOut: () {
+                      final homeBloc = context.read<HomeBloc>();
+                      context.read<AuthBloc>().add(
+                        AuthEvent.signOut(
+                          onSuccess: () {
+                            homeBloc.add(const RefreshHomePage());
+                          },
+                        ),
+                      );
+                    },
                   ),
                   // Fills leftover viewport below the footer with the footer's
                   // grey so no white gap shows when content is short (logged in).
-                  const Expanded(
-                    child: ColoredBox(color: AppColors.neutralGrey6),
-                  ),
+                  const Expanded(child: ColoredBox(color: AppColors.neutralGrey6)),
                   // White gap kept at the very bottom above the nav bar.
                   const SizedBox(height: 80),
                 ],

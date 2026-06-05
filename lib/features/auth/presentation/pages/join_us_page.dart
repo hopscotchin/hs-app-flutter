@@ -17,7 +17,10 @@ import '../../../../core/theme/spacing.dart';
 import '../bloc/auth_bloc.dart';
 
 class JoinUsPage extends StatefulWidget {
-  const JoinUsPage({super.key});
+  final String? initialMobile;
+  final String? redirectType;
+
+  const JoinUsPage({super.key, this.initialMobile, this.redirectType});
 
   @override
   State<JoinUsPage> createState() => _JoinUsPageState();
@@ -33,6 +36,10 @@ class _JoinUsPageState extends State<JoinUsPage> {
   @override
   void initState() {
     super.initState();
+    final mobile = widget.initialMobile;
+    if (mobile != null && mobile.length == 10) {
+      _mobileController.text = '${mobile.substring(0, 5)} ${mobile.substring(5)}';
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) => _nameFocusNode.requestFocus());
   }
 
@@ -73,6 +80,7 @@ class _JoinUsPageState extends State<JoinUsPage> {
               loginId: _rawMobile,
               otpConfig: state.otpConfig!,
               otpReason: 'SIGN_UP',
+              redirectType: widget.redirectType,
             );
           } else if (state.isRedirectLinkFound) {
             ActionUrlHandler.navigate(
@@ -91,10 +99,7 @@ class _JoinUsPageState extends State<JoinUsPage> {
                 if (state.isError && state.messageBars.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: MessageBarsWidget(
-                      messageBars: state.messageBars,
-                      cardStyle: true,
-                    ),
+                    child: MessageBarsWidget(messageBars: state.messageBars, cardStyle: true),
                   ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -144,6 +149,7 @@ class _JoinUsPageState extends State<JoinUsPage> {
                             labelText: AuthStrings.mobileNumberTitle,
                             keyboardType: TextInputType.phone,
                             maxLength: 11,
+                            prefixText: '+91 ',
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                               const MobileNumberFormatter(),
@@ -174,7 +180,10 @@ class _JoinUsPageState extends State<JoinUsPage> {
                           AuthFooterLinkRow(
                             promptText: AuthStrings.haveAccount,
                             actionLabel: AuthStrings.signIn,
-                            onActionTap: () => AppNavigator.goToLogin(context, replace: true),
+                            onActionTap: () => AppNavigator.goToLogin(
+                              context,
+                              initialMobile: _rawMobile.length == 10 ? _rawMobile : null,
+                            ),
                           ),
                           AppSpacing.verticalGapLg,
                         ],

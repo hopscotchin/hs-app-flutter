@@ -5,6 +5,8 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/services/pref_manager.dart';
+import '../../../address/data/managers/address_cache_manager.dart';
+import '../../../address/domain/usecases/get_addresses_usecase.dart';
 import '../../domain/entities/account_entity.dart';
 import '../../domain/usecases/forget_guest_user_usecase.dart';
 import '../../domain/usecases/get_account_usecase.dart';
@@ -18,13 +20,21 @@ class AccountBloc extends BaseBloc<AccountEvent, AccountState> {
   final GetAccountUseCase _getAccount;
   final ForgetGuestUserUseCase _forgetGuestUser;
   final PrefManager _prefs;
+  final GetAddressesUseCase _getAddresses;
+  final AddressCacheManager _addressCache;
 
-  AccountBloc(this._getAccount, this._forgetGuestUser, this._prefs)
-    : super(AccountState(status: AccountStatus.success, account: _localAccount(_prefs))) {
+  AccountBloc(
+    this._getAccount,
+    this._forgetGuestUser,
+    this._prefs,
+    this._getAddresses,
+    this._addressCache,
+  ) : super(AccountState(status: AccountStatus.success, account: _localAccount(_prefs))) {
     on<LoadAccount>(_onLoad);
     on<RefreshFromLocal>(_onRefreshLocal);
     on<ForgetGuestUser>(_onForgetGuestUser);
     on<ClearForgetSignal>(_onClearForgetSignal);
+    on<PrefetchAddresses>(_onPrefetchAddresses);
   }
 
   static AccountEntity _localAccount(PrefManager p) => AccountEntity(
@@ -90,5 +100,13 @@ class AccountBloc extends BaseBloc<AccountEvent, AccountState> {
 
   void _onClearForgetSignal(ClearForgetSignal event, Emitter<AccountState> emit) {
     emit(state.copyWith(forgetError: null, forgetCompleted: false));
+  }
+
+  Future<void> _onPrefetchAddresses(PrefetchAddresses event, Emitter<AccountState> emit) async {
+    final result = await _getAddresses(const GetAddressesParams());
+    await result.fold(
+      (_) async {},
+      (list) => _addressCache.setAll(list.rawItems),
+    );
   }
 }

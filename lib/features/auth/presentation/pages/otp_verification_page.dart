@@ -28,6 +28,7 @@ class OtpVerificationPage extends StatefulWidget {
   final OtpConfigEntity otpConfig;
   final String otpReason;
   final bool isCheckoutFlow;
+  final String? redirectType;
 
   const OtpVerificationPage({
     super.key,
@@ -35,6 +36,7 @@ class OtpVerificationPage extends StatefulWidget {
     required this.otpConfig,
     this.otpReason = 'SIGN_IN',
     this.isCheckoutFlow = false,
+    this.redirectType,
   });
 
   @override
@@ -121,7 +123,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
             if (widget.isCheckoutFlow) {
               context.pop(true);
             } else {
-              AppNavigator.goToAccount(context);
+              AppNavigator.redirectAfterLogin(context, widget.redirectType);
             }
           } else if (state.isError) {
             _otpController.clear();

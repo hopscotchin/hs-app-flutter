@@ -359,16 +359,11 @@ extension GetItInjectableX on _i174.GetIt {
         getDepartmentsUseCase: gh<_i765.GetDepartmentsUseCase>(),
       ),
     );
-    gh.factory<_i419.AuthBloc>(
-      () => _i419.AuthBloc(
-        gh<_i766.CheckMobileUseCase>(),
-        gh<_i788.SendOtpUseCase>(),
-        gh<_i410.VerifyOtpUseCase>(),
-        gh<_i903.RegisterUseCase>(),
-        gh<_i842.PersistSessionUseCase>(),
-        gh<_i550.ClearSessionUseCase>(),
-        gh<_i387.LogoutUseCase>(),
-        gh<_i1061.PushNotificationService>(),
+    gh.factory<_i18.AccountBloc>(
+      () => _i18.AccountBloc(
+        gh<_i79.GetAccountUseCase>(),
+        gh<_i72.ForgetGuestUserUseCase>(),
+        gh<_i818.PrefManager>(),
         gh<_i637.GetAddressesUseCase>(),
         gh<_i1013.AddressCacheManager>(),
       ),
@@ -384,11 +379,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i637.GetAddressesUseCase>(),
       ),
     );
-    gh.factory<_i18.AccountBloc>(
-      () => _i18.AccountBloc(
-        gh<_i79.GetAccountUseCase>(),
-        gh<_i72.ForgetGuestUserUseCase>(),
-        gh<_i818.PrefManager>(),
+    gh.factory<_i419.AuthBloc>(
+      () => _i419.AuthBloc(
+        gh<_i766.CheckMobileUseCase>(),
+        gh<_i788.SendOtpUseCase>(),
+        gh<_i410.VerifyOtpUseCase>(),
+        gh<_i903.RegisterUseCase>(),
+        gh<_i842.PersistSessionUseCase>(),
+        gh<_i550.ClearSessionUseCase>(),
+        gh<_i387.LogoutUseCase>(),
+        gh<_i1061.PushNotificationService>(),
+        gh<_i18.AccountBloc>(),
       ),
     );
     return this;
