@@ -3,7 +3,7 @@ class AccountStrings {
 
   static const String accounts = 'Accounts';
   static const String hey = 'Hey';
-  static const String heyThere = 'Hey there!';
+  static const String heyThere = 'Hey There!';
   static const String signOutHeaderSubTitle =
       'Sign in or join to do a lot more with your Hopscotch account';
   static const String newToHopscotch = 'New to Hopscotch?  ';
@@ -33,7 +33,7 @@ class AccountStrings {
   static const String help = 'Help';
   static const String share = 'Share';
   static const String rate = 'Rate';
-  static const String appVerison = 'App verison';
+  static const String appVersion = 'App version';
   static const String confirmDeleteTitle = 'Remove saved details?';
   static const String confirmDeleteGuest =
       'Your order, bag items and all saved details will be removed from this device.';

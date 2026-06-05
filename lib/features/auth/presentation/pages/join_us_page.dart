@@ -6,7 +6,7 @@ import '../../../../components/atoms/filled_text_field.dart' show MobileNumberFo
 import '../widgets/auth_footer_link_row.dart';
 import '../../../../components/atoms/outlined_text_field.dart';
 import '../widgets/auth_primary_button.dart';
-import '../widgets/auth_screen_header.dart';
+import '../../../../components/appbar/hs_appbar.dart';
 import '../widgets/auth_terms_disclaimer.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
@@ -46,11 +46,20 @@ class _JoinUsPageState extends State<JoinUsPage> {
   }
 
   String get _rawMobile => _mobileController.text.replaceAll(RegExp(r'\D'), '');
+  bool _showErrors = false;
+
+  void _onFieldChanged(String _) {
+    if (_showErrors) {
+      _showErrors = false;
+      _formKey.currentState?.validate();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.baseDefault,
+      appBar: HsAppbar(title: AuthStrings.joinUs, onLeadingTap: () => Navigator.of(context).pop()),
       body: BlocConsumer<AuthBloc, AuthState>(
         listenWhen: (prev, curr) =>
             (curr.isOtpSent && !prev.isOtpSent) ||
@@ -79,17 +88,12 @@ class _JoinUsPageState extends State<JoinUsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                AuthScreenHeader(
-                  title: AuthStrings.joinUs,
-                  onLeadingTap: () => Navigator.of(context).pop(),
-                ),
                 if (state.isError && state.messageBars.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: MessageBarsWidget(
                       messageBars: state.messageBars,
                       cardStyle: true,
-                      style: MessageBarsStyle.compact(),
                     ),
                   ),
                 Expanded(
@@ -106,7 +110,9 @@ class _JoinUsPageState extends State<JoinUsPage> {
                             focusNode: _nameFocusNode,
                             labelText: AuthStrings.fullName,
                             keyboardType: TextInputType.name,
+                            onChanged: _onFieldChanged,
                             validator: (value) {
+                              if (!_showErrors) return null;
                               if (value == null || value.trim().isEmpty) {
                                 return AuthStrings.validateFullName;
                               }
@@ -118,7 +124,9 @@ class _JoinUsPageState extends State<JoinUsPage> {
                             controller: _emailController,
                             labelText: AuthStrings.emailAddress,
                             keyboardType: TextInputType.emailAddress,
+                            onChanged: _onFieldChanged,
                             validator: (value) {
+                              if (!_showErrors) return null;
                               if (value == null || value.trim().isEmpty) {
                                 return AuthStrings.validateEmail;
                               }
@@ -137,11 +145,13 @@ class _JoinUsPageState extends State<JoinUsPage> {
                             keyboardType: TextInputType.phone,
                             maxLength: 11,
                             inputFormatters: [
-                              FilteringTextInputFormatter.allow(RegExp(r'[\d ]')),
-                              MobileNumberFormatter(),
+                              FilteringTextInputFormatter.digitsOnly,
+                              const MobileNumberFormatter(),
                             ],
                             helperText: AuthStrings.verifyNumberHint,
+                            onChanged: _onFieldChanged,
                             validator: (value) {
+                              if (!_showErrors) return null;
                               final digits = (value ?? '').replaceAll(RegExp(r'\D'), '');
                               if (digits.isEmpty) {
                                 return AuthStrings.validateMobile;
@@ -181,6 +191,7 @@ class _JoinUsPageState extends State<JoinUsPage> {
   }
 
   void _onSendOtp() {
+    _showErrors = true;
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
         Register(

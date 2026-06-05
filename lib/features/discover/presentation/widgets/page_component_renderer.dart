@@ -4,8 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../components/page_components/custom_tiles_widget.dart';
 import '../../../../components/page_components/hero_carousel_widget.dart';
 import '../../../../components/page_components/page_carousel_widget.dart';
+import '../../../../components/page_components/product_grid_widget.dart';
+import '../../../../components/page_components/shop_the_look_widget.dart';
 import '../../data/models/component_models.dart';
 import '../../domain/entities/home_page_entity.dart';
+import '../../../../core/cubits/shop_the_look_cubit.dart';
 
 class PageComponentRenderer extends StatelessWidget {
   final PageComponent component;
@@ -22,7 +25,12 @@ class PageComponentRenderer extends StatelessWidget {
     final child = switch (component.type) {
       PageComponentType.hero => _buildHero(parsed, margins),
       PageComponentType.customTiles => _buildCustomTiles(parsed, margins),
+      PageComponentType.productGrid => _buildProductGrid(parsed, margins),
       PageComponentType.pageCarousel => _buildPageCarousel(parsed, margins),
+      PageComponentType.tabbedCustomTiles => _buildTabbedCustomTiles(
+        parsed,
+        margins,
+      ),
       _ => const SizedBox.shrink(),
     };
 
@@ -54,6 +62,16 @@ class PageComponentRenderer extends StatelessWidget {
     return CustomTilesWidget(tilesData: data, margins: margins);
   }
 
+  Widget _buildProductGrid(Object? parsed, ComponentMargins? margins) {
+    final data = parsed is ProductGridData
+        ? parsed
+        : component.data != null
+        ? ComponentDataParser.parseProductGrid(component.data!)
+        : null;
+    if (data == null) return const SizedBox.shrink();
+    return ProductGridWidget(gridData: data, margins: margins);
+  }
+
   Widget _buildPageCarousel(Object? parsed, ComponentMargins? margins) {
     final data = parsed is PageCarouselData
         ? parsed
@@ -62,5 +80,34 @@ class PageComponentRenderer extends StatelessWidget {
         : null;
     if (data == null) return const SizedBox.shrink();
     return PageCarouselWidget(carouselData: data, margins: margins);
+  }
+
+  Widget _buildTabbedCustomTiles(Object? parsed, ComponentMargins? margins) {
+    final data = parsed is CustomTilesData
+        ? parsed
+        : component.data != null
+        ? ComponentDataParser.parseTabbedCustomTiles(component.data!)
+        : null;
+    if (data == null) return const SizedBox.shrink();
+    return CustomTilesWidget(tilesData: data, margins: margins);
+  }
+
+  Widget _buildShopTheLook(
+    BuildContext context,
+    Object? parsed,
+    ComponentMargins? margins,
+  ) {
+    final data = parsed is ShopTheLookData
+        ? parsed
+        : component.data != null
+        ? ComponentDataParser.parseShopTheLook(component.data!)
+        : null;
+    if (data == null) return const SizedBox.shrink();
+    return ShopTheLookWidget(
+      data: data,
+      margins: margins,
+      onAddToCart: (selections) =>
+          context.read<ShopTheLookCubit>().addToCart(selections),
+    );
   }
 }

@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hs_app_flutter/components/appbar/custom_appbar.dart';
+import 'package:hs_app_flutter/components/appbar/hs_appbar.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
-import 'package:hs_app_flutter/core/widgets/app_bottom_sheet.dart';
+import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
 import 'package:hs_app_flutter/core/constants/strings/login_redirects.dart';
 import 'package:hs_app_flutter/core/entities/message_bar_entity.dart';
 import 'package:hs_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/typography/typography_v1.dart';
-import '../../../../core/theme/typography/text_style_extensions.dart';
+
 import '../../domain/entities/account_entity.dart';
 import '../bloc/account_bloc.dart';
 import '../widgets/account_footer_widget.dart';
@@ -29,14 +28,7 @@ class AccountPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.baseDefault,
-      appBar: CustomAppbar(
-        showBackButton: false,
-        hasDivider: true,
-        center: Text(
-          AccountStrings.accounts,
-          style: AppTypographyV1.titleMedium.bold.textPrimary(),
-        ),
-      ),
+      appBar: HsAppbar.titleOnly(title: AccountStrings.accounts),
       body: MultiBlocListener(
         listeners: [
           BlocListener<AccountBloc, AccountState>(
@@ -58,6 +50,7 @@ class AccountPage extends StatelessWidget {
             listener: (context, state) {
               if (state.isSignedOut) {
                 context.read<AccountBloc>().add(const AccountEvent.refreshFromLocal());
+                AppNavigator.goToHome(context);
               } else if (state.isError) {
                 context.showSnack(state.errorMessage, status: SnackStatus.error);
               }
@@ -103,22 +96,22 @@ class _AccountContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLoggedIn = account.isLoggedIn;
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          AppSpacing.verticalGapMd,
-          AccountHeaderWidget(
-            account: account,
-            onForgetMe: () => _showForgetDialog(context),
-          ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AppSpacing.verticalGapMd,
+          AccountHeaderWidget(account: account, onForgetMe: () => _showForgetDialog(context)),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 0, horizontal: AppSpacing.md),
-            child: Divider(height: 1, color: AppColors.divider),
+            child: Divider(height: 1, color: AppColors.dividerLight),
           ),
-          !isLoggedIn
-            ? AppSpacing.verticalGapXl
-            : AppSpacing.verticalGapMd,
+          !isLoggedIn ? AppSpacing.verticalGapXl : AppSpacing.verticalGapMd,
 
           AccountMenuItemWidget(
             svgAsset: ImageConstants.ordersItemIcon,
@@ -176,7 +169,7 @@ class _AccountContent extends StatelessWidget {
             title: AccountStrings.savedAddresses,
             subtitle: isLoggedIn ? null : AccountStrings.savedAddressesSubtitle,
             onTap: () => isLoggedIn
-                ? AppNavigator.goToHome(context)
+                ? AppNavigator.goToAddresses(context)
                 : AppNavigator.goToLogin(
                     context,
                     initialMessageBars: [
@@ -244,16 +237,27 @@ class _AccountContent extends StatelessWidget {
                   ),
           ),
           AppSpacing.verticalGapXs,
-          const Divider(height: 1, color: AppColors.divider),
-          const AccountHelpSectionWidget(),
-          AccountFooterWidget(
-            isLoggedIn: isLoggedIn,
-            onSignIn: () => AppNavigator.goToLogin(context),
-            onSignOut: () => context.read<AuthBloc>().add(const AuthEvent.signOut()),
+          const Divider(height: 1, color: AppColors.dividerLight, indent: AppSpacing.md, endIndent: AppSpacing.md),
+                  const AccountHelpSectionWidget(),
+                  AccountFooterWidget(
+                    isLoggedIn: isLoggedIn,
+                    onSignIn: () => AppNavigator.goToLogin(context),
+                    onSignOut: () =>
+                        context.read<AuthBloc>().add(const AuthEvent.signOut()),
+                  ),
+                  // Fills leftover viewport below the footer with the footer's
+                  // grey so no white gap shows when content is short (logged in).
+                  const Expanded(
+                    child: ColoredBox(color: AppColors.neutralGrey6),
+                  ),
+                  // White gap kept at the very bottom above the nav bar.
+                  const SizedBox(height: 80),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 100),
-        ],
-      ),
+        );
+      },
     );
   }
 

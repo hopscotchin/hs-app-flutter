@@ -29,7 +29,7 @@ class AuthFooterLinkRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Divider(height: 1, color: AppColors.divider),
+        const Divider(height: 1, color: AppColors.dividerLight),
         const SizedBox(height: 24),
         Wrap(
           alignment: WrapAlignment.center,

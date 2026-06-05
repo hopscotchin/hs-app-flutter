@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/navigation/action_url_handler.dart';
@@ -20,7 +21,11 @@ class HeroCarouselWidget extends StatefulWidget {
 class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   PageController? _controller;
-  int _currentPage = 0;
+
+  /// Notifier-backed page index so swipes / auto-scroll only rebuild the
+  /// dot indicator — not the PageView, the layout math, or the auto-scroll
+  /// timer wiring. Big win when the discover scroll view is repainting.
+  final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
   Timer? _timer;
 
   // Left-scroll budget — same pattern as PageCarouselWidget.
@@ -53,6 +58,7 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
     WidgetsBinding.instance.removeObserver(this);
     _cancelTimer();
     _controller?.dispose();
+    _currentPage.dispose();
     super.dispose();
   }
 
@@ -74,7 +80,7 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
       if (!mounted || _controller == null) return;
       // Always animate forward — no backward jump needed since itemCount is infinite.
       _controller!.animateToPage(
-        _currentPage + 1,
+        _currentPage.value + 1,
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
       );
@@ -111,7 +117,7 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
         viewportFraction: viewportFraction.clamp(0.1, 1.0),
         initialPage: initialPage,
       );
-      _currentPage = initialPage;
+      _currentPage.value = initialPage;
     }
 
     final double tileWidth = screenWidth * viewportFraction;
@@ -126,77 +132,103 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
         ? innerHorizontalMargin / 2
         : 0.0;
 
-    final int activeDot = _currentPage % tiles.length;
-
     return SizedBox(
       height: tileHeight,
-      child: Stack(
-        children: [
-          NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification notification) {
-              // Pause auto-scroll while the user is swiping; restart when settled.
-              if (notification is ScrollStartNotification) _cancelTimer();
-              if (notification is ScrollEndNotification) _startAutoScroll();
-              return false;
-            },
-            child: PageView.builder(
-              controller: _controller!,
-              itemCount: null,
-              onPageChanged: (int index) =>
-                  setState(() => _currentPage = index),
-              itemBuilder: (BuildContext context, int index) {
-                final HeroTile tile = tiles[index % tiles.length];
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: tilePadding),
-                  child: GestureDetector(
-                    onTap: () =>
-                        ActionUrlHandler.navigate(context, tile.actionUri),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(_cornerRadius),
-                      child: CachedImageWidget(
-                        imageUrl: tile.imageUrl,
-                        width: double.infinity,
-                        height: tileHeight,
-                        fit: BoxFit.cover,
+      // Isolate the carousel's repaints (swipes, auto-scroll, image fades)
+      // from the parent CustomScrollView so a hero ticking through pages
+      // doesn't re-rasterise the whole homepage.
+      child: RepaintBoundary(
+        child: Stack(
+          children: [
+            NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification notification) {
+                // Pause auto-scroll while the user is swiping; restart when settled.
+                if (notification is ScrollStartNotification) _cancelTimer();
+                if (notification is ScrollEndNotification) _startAutoScroll();
+                return false;
+              },
+              child: PageView.builder(
+                controller: _controller!,
+                itemCount: null,
+                onPageChanged: (int index) => _currentPage.value = index,
+                itemBuilder: (BuildContext context, int index) {
+                  final HeroTile tile = tiles[index % tiles.length];
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: tilePadding),
+                    child: GestureDetector(
+                      onTap: () =>
+                          ActionUrlHandler.navigate(context, tile.actionUri),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(_cornerRadius),
+                        child: CachedImageWidget(
+                          imageUrl: tile.imageUrl,
+                          width: double.infinity,
+                          height: tileHeight,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-          if (tiles.length > 1)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 30,
-              child: IgnorePointer(
-                child: _buildIndicator(tiles.length, activeDot),
+                  );
+                },
               ),
             ),
-        ],
+            if (tiles.length > 1)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 30,
+                child: IgnorePointer(
+                  child: _DotIndicator(
+                    count: tiles.length,
+                    currentPage: _currentPage,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildIndicator(int count, int activeDot) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(count, (int index) {
-        final bool isActive = index == activeDot;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.symmetric(horizontal: 3),
-          width: isActive ? 45 : 8,
-          height: 6,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(3),
-            color: isActive
-                ? AppColors.baseDefault
-                : AppColors.baseDefault.withValues(alpha: 0.5),
-          ),
+/// Listens to the carousel's page-index notifier and rebuilds only itself
+/// when the active dot changes — the PageView, the parent Stack, and the
+/// surrounding scroll view all stay put.
+class _DotIndicator extends StatelessWidget {
+  const _DotIndicator({required this.count, required this.currentPage});
+
+  final int count;
+  final ValueListenable<int> currentPage;
+
+  static const _duration = Duration(milliseconds: 200);
+  static const _margin = EdgeInsets.symmetric(horizontal: 3);
+  static final _borderRadius = BorderRadius.circular(3);
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: currentPage,
+      builder: (_, page, _) {
+        final activeDot = page % count;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(count, (int index) {
+            final bool isActive = index == activeDot;
+            return AnimatedContainer(
+              duration: _duration,
+              margin: _margin,
+              width: isActive ? 45 : 8,
+              height: 6,
+              decoration: BoxDecoration(
+                borderRadius: _borderRadius,
+                color: isActive
+                    ? AppColors.baseDefault
+                    : AppColors.baseDefault.withValues(alpha: 0.5),
+              ),
+            );
+          }),
         );
-      }),
+      },
     );
   }
 }

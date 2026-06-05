@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
-import 'package:hs_app_flutter/core/constants/route_names.dart';
+import 'package:hs_app_flutter/core/di/injection.dart';
+import 'package:hs_app_flutter/core/router/app_navigator.dart';
+import 'package:hs_app_flutter/core/services/pref_manager.dart';
 
 import '../../../../core/config/environment.dart';
+import '../../../../core/cubits/cart_count_cubit.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../bloc/splash_bloc.dart';
@@ -22,11 +24,13 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    context.read<SplashBloc>().add(InitializeApp());
+    context.read<SplashBloc>().add(const InitializeApp());
   }
 
   @override
   Widget build(BuildContext context) {
+    final hasSeenEnterStore = sl<PrefManager>().isStoreButtonClicked ?? false;
+
     return Scaffold(
       backgroundColor: AppColors.secondary,
       body: SafeArea(
@@ -35,13 +39,8 @@ class _SplashPageState extends State<SplashPage> {
           builder: (context, state) {
             return Column(
               children: [
-                Expanded(
-                  child: Center(
-                    child: Image.asset(ImageConstants.splashAnimation),
-                  ),
-                ),
-                if (state is SplashLoaded) _buildEnterStoreButton(),
-                if (state is SplashError) _buildErrorView(state),
+                Expanded(child: Center(child: Image.asset(ImageConstants.splashAnimation))),
+                if (state.isLoaded && !hasSeenEnterStore) _buildEnterStoreButton(),
               ],
             );
           },
@@ -51,8 +50,23 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   void _onStateChange(BuildContext context, SplashState state) {
-    if (state is SplashEnvironmentSelection) {
-      _showEnvironmentSelector(context, state.currentEnvironment);
+    if (state.isEnvironmentSelection) {
+      _showEnvironmentSelector(context, state.pendingEnvironment!);
+      return;
+    }
+    if (state.isError) {
+      AppNavigator.goToHome(context);
+    }
+
+    if (!state.isLoaded) return;
+
+    final prefs = sl<PrefManager>();
+    context.read<CartCountCubit>().set(state.customerInfo?.cartItemCount ?? 0);
+
+    final isLoggedIn = state.customerInfo?.isLoggedIn ?? prefs.isLoggedIn;
+    final hasSeenEnterStore = prefs.isStoreButtonClicked ?? false;
+    if (isLoggedIn || hasSeenEnterStore) {
+      AppNavigator.goToHome(context);
     }
   }
 
@@ -63,13 +77,15 @@ class _SplashPageState extends State<SplashPage> {
         width: double.infinity,
         height: 50,
         child: ElevatedButton(
-          onPressed: () => context.go(RouteNames.home),
+          onPressed: () async {
+            await sl<PrefManager>().setHasStoreButtonClicked(true);
+            if (!mounted) return;
+            AppNavigator.goToHome(context);
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.baseDefault,
             foregroundColor: AppColors.brandDefault,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
             elevation: 0,
           ),
           child: Row(
@@ -77,17 +93,10 @@ class _SplashPageState extends State<SplashPage> {
             children: [
               Text(
                 'ENTER THE STORE',
-                style: AppTypography.labelLarge.copyWith(
-                  color: AppColors.primary,
-                  fontSize: 16,
-                ),
+                style: AppTypography.labelLarge.copyWith(color: AppColors.primary, fontSize: 16),
               ),
               const SizedBox(width: 8),
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: Icon(Icons.arrow_circle_right_outlined),
-              ),
+              const SizedBox(width: 24, height: 24, child: Icon(Icons.arrow_circle_right_outlined)),
             ],
           ),
         ),
@@ -95,22 +104,16 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 
-  Widget _buildErrorView(SplashError state) {
+  Widget _buildErrorView(SplashState state) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            state.message,
-            style: AppTypography.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
+          Text(state.errorMessage, style: AppTypography.bodyMedium, textAlign: TextAlign.center),
           const SizedBox(height: 12),
           TextButton(
-            onPressed: () {
-              context.read<SplashBloc>().add(InitializeApp());
-            },
+            onPressed: () => context.read<SplashBloc>().add(const InitializeApp()),
             child: const Text('Retry'),
           ),
         ],
@@ -127,19 +130,14 @@ class _SplashPageState extends State<SplashPage> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        title: const Text(
-          'Select Environment',
-          style: AppTypography.titleMedium,
-        ),
+        title: const Text('Select Environment', style: AppTypography.titleMedium),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: Environment.values.map((env) {
             final isSelected = currentEnvironment == env;
             return ListTile(
               title: Text(_environmentLabel(env)),
-              trailing: isSelected
-                  ? const Icon(Icons.check, color: AppColors.primary)
-                  : null,
+              trailing: isSelected ? const Icon(Icons.check, color: AppColors.primary) : null,
               onTap: () => Navigator.of(dialogContext).pop(env),
             );
           }).toList(),
@@ -148,18 +146,15 @@ class _SplashPageState extends State<SplashPage> {
     );
 
     if (selected != null && mounted) {
-      bloc.add(SelectEnvironment(environment: selected));
+      bloc.add(SelectEnvironment(selected));
     }
   }
 
   String _environmentLabel(Environment env) {
-    switch (env) {
-      case Environment.debug:
-        return 'Debug';
-      case Environment.debugVPN:
-        return 'Debug VPN';
-      case Environment.release:
-        return 'Release';
-    }
+    return switch (env) {
+      Environment.debug => 'Debug',
+      Environment.debugVPN => 'Debug VPN',
+      Environment.release => 'Release',
+    };
   }
 }

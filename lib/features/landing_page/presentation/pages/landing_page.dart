@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../components/atoms/error_retry_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/constants/strings/discover_strings.dart';
+import '../../../../core/cubits/cart_count_cubit.dart';
+import '../../../../core/cubits/shop_the_look_cubit.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';

@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
+import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
@@ -18,7 +21,6 @@ import '../../../discover/presentation/bloc/home_bloc.dart';
 import '../../domain/entities/otp_config/otp_config_entity.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/auth_otp_slot_row.dart';
-import '../widgets/auth_screen_header.dart';
 import '../widgets/otp_waiting_indicator.dart';
 
 class OtpVerificationPage extends StatefulWidget {
@@ -43,6 +45,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
   late int _otpLength;
   late int _remainingSeconds;
   Timer? _timer;
+  StreamSubscription<String?>? _smsSubscription;
 
   final _otpController = TextEditingController();
   final _otpFocusNode = FocusNode();
@@ -53,9 +56,22 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
     _otpLength = widget.otpConfig.length;
     _remainingSeconds = widget.otpConfig.timerSeconds;
     _startTimer();
+    if (Platform.isAndroid) _startSmsListener();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _otpFocusNode.requestFocus();
     });
+  }
+
+  Future<void> _startSmsListener() async {
+    await SmsAutoFill().listenForCode(smsCodeRegexPattern: '\\d{$_otpLength}');
+    _smsSubscription = SmsAutoFill().code.listen(_onSmsCode);
+  }
+
+  void _onSmsCode(String? code) {
+    if (code == null || code.length != _otpLength || !mounted) return;
+    _otpController.text = code;
+    setState(() {});
+    _onVerify();
   }
 
   void _startTimer() {
@@ -71,6 +87,8 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
   @override
   void dispose() {
     _timer?.cancel();
+    _smsSubscription?.cancel();
+    if (Platform.isAndroid) SmsAutoFill().unregisterListener();
     _otpController.dispose();
     _otpFocusNode.dispose();
     super.dispose();
@@ -90,6 +108,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.baseDefault,
+      appBar: HsAppbar(title: AuthStrings.verifyMobile, onLeadingTap: () => context.pop()),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state.isSuccess) {
@@ -102,7 +121,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
             if (widget.isCheckoutFlow) {
               context.pop(true);
             } else {
-              AppNavigator.goToHome(context);
+              AppNavigator.goToAccount(context);
             }
           } else if (state.isError) {
             _otpController.clear();
@@ -112,9 +131,6 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
               _remainingSeconds = state.otpConfig!.timerSeconds;
             });
             _startTimer();
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text(AuthStrings.otpResentSuccess)));
           }
         },
         child: BlocBuilder<AuthBloc, AuthState>(
@@ -124,18 +140,15 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  AuthScreenHeader(
-                    title: AuthStrings.verifyMobile,
-                    onLeadingTap: () => context.pop(),
-                  ),
-                  if (state.isError && state.messageBars.isNotEmpty)
+                  if (state.isError && state.otpMessageBars.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: MessageBarsWidget(
-                        messageBars: state.messageBars,
-                        cardStyle: true,
-                        style: MessageBarsStyle.compact(),
-                      ),
+                      child: MessageBarsWidget(messageBars: state.otpMessageBars, cardStyle: true),
+                    )
+                  else if (state.isOtpSent && state.messageBars.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      child: MessageBarsWidget(messageBars: state.messageBars, cardStyle: true),
                     ),
                   Expanded(
                     child: SingleChildScrollView(
@@ -187,10 +200,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                                  child: AuthOtpSlotRow(
-                                    length: _otpLength,
-                                    filledCount: _otp.length,
-                                  ),
+                                  child: AuthOtpSlotRow(length: _otpLength, otp: _otp),
                                 ),
                                 Positioned.fill(
                                   child: Opacity(
@@ -199,6 +209,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
                                       controller: _otpController,
                                       focusNode: _otpFocusNode,
                                       keyboardType: TextInputType.number,
+                                      autofillHints: const [AutofillHints.oneTimeCode],
                                       maxLength: _otpLength,
                                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                       decoration: const InputDecoration(

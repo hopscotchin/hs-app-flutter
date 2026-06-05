@@ -49,7 +49,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
               padding: const EdgeInsets.only(bottom: 80),
               itemCount: state.departments.length,
               separatorBuilder: (_, _) =>
-                  const Divider(height: 1, color: AppColors.divider),
+                  const Divider(height: 1, color: AppColors.dividerLight),
               itemBuilder: (context, index) {
                 final dept = state.departments[index];
                 return DepartmentItemWidget(

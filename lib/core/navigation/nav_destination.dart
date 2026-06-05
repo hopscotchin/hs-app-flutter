@@ -11,6 +11,17 @@ sealed class NavDestination {
   void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra});
 }
 
+class PdpDestination extends NavDestination {
+  final String productId;
+
+  const PdpDestination({required this.productId});
+
+  @override
+  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+    AppNavigator.goToPdp(context, productId);
+  }
+}
+
 class HomeDestination extends NavDestination {
   const HomeDestination();
 

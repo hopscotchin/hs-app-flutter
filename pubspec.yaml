@@ -2,7 +2,7 @@ name: hs_app_flutter
 description: "HS Flutter"
 publish_to: "none"
 
-version: 14.0.0+2026052201
+version: 14.1.0+2026060501
 
 environment:
   sdk: ^3.11.0
@@ -54,6 +54,7 @@ dependencies:
   # Firebase
   firebase_core: ^4.7.0
   firebase_crashlytics: ^5.2.0
+  firebase_messaging: ^16.2.2
 
   # Network Connectivity
   connectivity_plus: ^7.1.1
@@ -64,13 +65,16 @@ dependencies:
   #Juspay HyperSDK
   hypersdkflutter: ^4.0.55
 
+  # SMS OTP autofill (Android: SMS User Consent API; iOS: native autofillHints)
+  sms_autofill: ^2.3.3
+
   freezed_annotation: ^3.1.0
   json_annotation: ^4.11.0
 
   logger:
     ^2.7.0
 
-    # HTTP Inspector (debug mode only — gated with kDebugMode at runtime)
+  # HTTP Inspector (debug mode only — gated with kDebugMode at runtime)
   talker_flutter: ^5.1.16
   talker_dio_logger: ^5.1.16
   talker_bloc_logger: ^5.1.17

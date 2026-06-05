@@ -15,5 +15,6 @@ abstract class UserInfoEntity with _$UserInfoEntity {
     String? userName,
     String? mobileStatus,
     @Default(0) int cartItemCount,
+    String? profileImage,
   }) = _UserInfoEntity;
 }

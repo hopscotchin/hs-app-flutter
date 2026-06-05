@@ -18,4 +18,6 @@ abstract final class RouteNames {
   static const String landingPage = '/landing-page';
   static const String orderConfirmation = '/order-confirmation';
   static const String orders = '/orders';
+  static const String addresses = '/addresses';
+  static const String addAddress = 'add';
 }

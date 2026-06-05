@@ -13,15 +13,25 @@ UserInfoModel _$UserInfoModelFromJson(Map<String, dynamic> json) =>
       lastName: json['lastName'] as String?,
       email: json['email'] as String?,
       mobile: json['mobile'] as String?,
-      isLoggedIn: json['isLoggedIn'] == null
-          ? false
-          : parseToBool(json['isLoggedIn']),
-      isNewUser: json['isNewUser'] == null
-          ? false
-          : parseToBool(json['isNewUser']),
+      isLoggedIn: json['isLoggedIn'] as bool? ?? false,
+      isNewUser: json['isNewUser'] as bool? ?? false,
       userName: json['userName'] as String?,
       mobileStatus: json['mobileStatus'] as String?,
-      cartItemCount: json['cartItemCount'] == null
-          ? 0
-          : parseToInt(json['cartItemCount']),
+      cartItemCount: (json['cartItemCount'] as num?)?.toInt() ?? 0,
+      profileImage: json['profileImage'] as String?,
     );
+
+Map<String, dynamic> _$UserInfoModelToJson(UserInfoModel instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+      'firstName': instance.firstName,
+      'lastName': instance.lastName,
+      'email': instance.email,
+      'mobile': instance.mobile,
+      'isLoggedIn': instance.isLoggedIn,
+      'isNewUser': instance.isNewUser,
+      'userName': instance.userName,
+      'mobileStatus': instance.mobileStatus,
+      'cartItemCount': instance.cartItemCount,
+      'profileImage': instance.profileImage,
+    };

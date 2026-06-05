@@ -80,6 +80,7 @@ class AppSpacing {
   static const SizedBox horizontalGapXxs = SizedBox(width: xxs);
   static const SizedBox horizontalGapXs = SizedBox(width: xs);
   static const SizedBox horizontalGapSm = SizedBox(width: sm);
+  static const SizedBox horizontalGapLMd = SizedBox(width: lmd);
   static const SizedBox horizontalGapMd = SizedBox(width: md);
   static const SizedBox horizontalGapLg = SizedBox(width: lg);
   static const SizedBox horizontalGapXl = SizedBox(width: xl);

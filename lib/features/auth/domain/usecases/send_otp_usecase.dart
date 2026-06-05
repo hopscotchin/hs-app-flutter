@@ -19,6 +19,7 @@ class SendOtpUseCase implements UseCase<SendOtpResponseEntity, SendOtpParams> {
       _repository.sendOtp(
         loginId: params.loginId,
         otpReason: params.otpReason,
+        pathUri: params.pathUri,
         cancelToken: params.cancelToken,
       );
 }
@@ -27,14 +28,16 @@ class SendOtpParams extends Equatable {
   const SendOtpParams({
     required this.loginId,
     this.otpReason = 'SIGN_IN',
+    this.pathUri,
     this.cancelToken,
   });
 
   final String loginId;
   final String otpReason;
+  final String? pathUri;
   final CancelToken? cancelToken;
 
   @override
-  List<Object?> get props => [loginId, otpReason];
+  List<Object?> get props => [loginId, otpReason, pathUri];
   // cancelToken intentionally excluded — not a semantic field
 }

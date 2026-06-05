@@ -5,6 +5,7 @@ class CommonStrings {
   static const String appName = 'Hopscotch';
   static const String retry = 'Retry';
   static const String cancel = 'Cancel';
+  static const String confirm = 'Confirm';
   static const String ok = 'OK';
   static const String done = 'Done';
   static const String apply = 'APPLY';

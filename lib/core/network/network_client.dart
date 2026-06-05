@@ -5,9 +5,11 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../config/environment.dart';
 import '../constants/api_constants.dart';
+import '../services/pref_manager.dart';
 import 'api_client.dart';
 import 'cookies/hs_cookie_store.dart';
 import 'interceptors/auth_header_interceptor.dart';
+import 'interceptors/auto_login_interceptor.dart';
 import 'interceptors/cookie_interceptor.dart';
 import 'interceptors/logging_interceptor.dart';
 
@@ -16,6 +18,7 @@ class NetworkClient {
   late final ApiClient apiClient;
   late final AuthHeaderInterceptor authHeaderInterceptor;
   late final CookieInterceptor cookieInterceptor;
+  late final AutoLoginInterceptor _autoLoginInterceptor;
 
   final DeviceInfoPlugin _deviceInfo;
   final PackageInfo _packageInfo;
@@ -50,8 +53,14 @@ class NetworkClient {
       ),
     );
 
+    _autoLoginInterceptor = AutoLoginInterceptor(
+      mainDio: dio,
+      authHeaderInterceptor: authHeaderInterceptor,
+    );
+
     dio.interceptors.add(authHeaderInterceptor);
     dio.interceptors.add(cookieInterceptor);
+    dio.interceptors.add(_autoLoginInterceptor);
     if (kDebugMode) {
       dio.interceptors.add(LoggingInterceptor());
     }
@@ -62,6 +71,11 @@ class NetworkClient {
   void onEnvironmentChanged() {
     dio.options.baseUrl = EnvironmentConfig.baseUrl;
     HSCookieStore.setHost(EnvironmentConfig.baseUrl);
+    _autoLoginInterceptor.updateBaseUrl(EnvironmentConfig.baseUrl);
+  }
+
+  void bindPrefManager(PrefManager prefManager) {
+    _autoLoginInterceptor.bindPrefManager(prefManager);
   }
 
   void setPersistentTicket(String? ticket) {

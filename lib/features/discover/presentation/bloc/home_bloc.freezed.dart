@@ -122,11 +122,11 @@ return loadNext(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? pageName)?  load,TResult Function()?  refresh,TResult Function()?  loadNext,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? pageName)?  load,TResult Function( void Function()? onComplete)?  refresh,TResult Function()?  loadNext,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LoadHomePage() when load != null:
 return load(_that.pageName);case RefreshHomePage() when refresh != null:
-return refresh();case LoadNextHomePage() when loadNext != null:
+return refresh(_that.onComplete);case LoadNextHomePage() when loadNext != null:
 return loadNext();case _:
   return orElse();
 
@@ -145,11 +145,11 @@ return loadNext();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? pageName)  load,required TResult Function()  refresh,required TResult Function()  loadNext,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? pageName)  load,required TResult Function( void Function()? onComplete)  refresh,required TResult Function()  loadNext,}) {final _that = this;
 switch (_that) {
 case LoadHomePage():
 return load(_that.pageName);case RefreshHomePage():
-return refresh();case LoadNextHomePage():
+return refresh(_that.onComplete);case LoadNextHomePage():
 return loadNext();}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -164,11 +164,11 @@ return loadNext();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? pageName)?  load,TResult? Function()?  refresh,TResult? Function()?  loadNext,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? pageName)?  load,TResult? Function( void Function()? onComplete)?  refresh,TResult? Function()?  loadNext,}) {final _that = this;
 switch (_that) {
 case LoadHomePage() when load != null:
 return load(_that.pageName);case RefreshHomePage() when refresh != null:
-return refresh();case LoadNextHomePage() when loadNext != null:
+return refresh(_that.onComplete);case LoadNextHomePage() when loadNext != null:
 return loadNext();case _:
   return null;
 
@@ -247,33 +247,67 @@ as String?,
 
 
 class RefreshHomePage implements HomeEvent {
-  const RefreshHomePage();
+  const RefreshHomePage({this.onComplete});
   
 
+ final  void Function()? onComplete;
 
-
+/// Create a copy of HomeEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RefreshHomePageCopyWith<RefreshHomePage> get copyWith => _$RefreshHomePageCopyWithImpl<RefreshHomePage>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RefreshHomePage);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RefreshHomePage&&(identical(other.onComplete, onComplete) || other.onComplete == onComplete));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,onComplete);
 
 @override
 String toString() {
-  return 'HomeEvent.refresh()';
+  return 'HomeEvent.refresh(onComplete: $onComplete)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class $RefreshHomePageCopyWith<$Res> implements $HomeEventCopyWith<$Res> {
+  factory $RefreshHomePageCopyWith(RefreshHomePage value, $Res Function(RefreshHomePage) _then) = _$RefreshHomePageCopyWithImpl;
+@useResult
+$Res call({
+ void Function()? onComplete
+});
 
 
+
+
+}
+/// @nodoc
+class _$RefreshHomePageCopyWithImpl<$Res>
+    implements $RefreshHomePageCopyWith<$Res> {
+  _$RefreshHomePageCopyWithImpl(this._self, this._then);
+
+  final RefreshHomePage _self;
+  final $Res Function(RefreshHomePage) _then;
+
+/// Create a copy of HomeEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? onComplete = freezed,}) {
+  return _then(RefreshHomePage(
+onComplete: freezed == onComplete ? _self.onComplete : onComplete // ignore: cast_nullable_to_non_nullable
+as void Function()?,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

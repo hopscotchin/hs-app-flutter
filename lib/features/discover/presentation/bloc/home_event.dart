@@ -7,7 +7,8 @@ sealed class HomeEvent with _$HomeEvent {
   const factory HomeEvent.load({String? pageName}) = LoadHomePage;
 
   /// Pull-to-refresh — reloads page 1 with the current pageName.
-  const factory HomeEvent.refresh() = RefreshHomePage;
+
+  const factory HomeEvent.refresh({void Function()? onComplete}) = RefreshHomePage;
 
   /// Append the next page when [HomePageEntity.hasNextPage] is true.
   const factory HomeEvent.loadNext() = LoadNextHomePage;

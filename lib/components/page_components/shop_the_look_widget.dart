@@ -145,7 +145,7 @@ class _ShopTheLookCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.baseDefault,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: AppColors.dividerLight),
       ),
       padding: const EdgeInsets.all(8),
       child: Column(
@@ -169,7 +169,7 @@ class _ShopTheLookCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          const Divider(height: 1, thickness: 1, color: AppColors.divider),
+          const Divider(height: 1, thickness: 1, color: AppColors.dividerLight),
           _buildPriceSection(),
         ],
       ),

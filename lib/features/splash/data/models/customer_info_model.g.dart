@@ -23,5 +23,7 @@ CustomerInfoModel _$CustomerInfoModelFromJson(Map<String, dynamic> json) =>
           ? false
           : parseToBool(json['hasGuestData']),
       childCohorts: json['childCohorts'] as Map<String, dynamic>?,
+      user: _userFromJson(json['user']),
+      auth: _authFromJson(json['auth']),
       userConfig: _userConfigFromJson(json['userConfig']),
     );

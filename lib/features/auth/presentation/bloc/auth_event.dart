@@ -5,6 +5,7 @@ sealed class AuthEvent with _$AuthEvent {
   const factory AuthEvent.sendOtp({
     required String loginId,
     @Default('SIGN_IN') String otpReason,
+    String? pathUri,
   }) = SendOtp;
 
   const factory AuthEvent.verifyOtp({
@@ -18,6 +19,8 @@ sealed class AuthEvent with _$AuthEvent {
     required String email,
     required String mobile,
   }) = Register;
+
+  const factory AuthEvent.checkMobile({required String mobile}) = CheckMobile;
 
   const factory AuthEvent.reset() = ResetAuth;
 

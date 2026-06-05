@@ -35,7 +35,7 @@ class PriceSummaryWidget extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         color: AppColors.container,
-        border: Border(top: BorderSide(color: AppColors.divider)),
+        border: Border(top: BorderSide(color: AppColors.dividerLight)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +62,7 @@ class PriceSummaryWidget extends StatelessWidget {
           if (summary.pricingData.isNotEmpty) ...[
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
-              child: Divider(color: AppColors.divider, height: 1),
+              child: Divider(color: AppColors.dividerLight, height: 1),
             ),
           ],
           if (total != null)

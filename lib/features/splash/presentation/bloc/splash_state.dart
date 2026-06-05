@@ -1,84 +1,38 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/config/environment.dart';
-import '../../data/models/app_config_response.dart';
-import '../../data/models/customer_info_response.dart';
+import '../../domain/entities/customer_info_entity.dart';
 
-abstract class SplashState extends Equatable {
-  const SplashState();
+part 'splash_state.freezed.dart';
 
-  @override
-  List<Object?> get props => [];
+enum SplashStatus {
+  initial,
+  environmentSelection,
+  loading,
+  loaded,
+  error,
+  deeplinkProcessed,
 }
 
-class SplashInitial extends SplashState {}
+enum SplashLoadingStep { starting, fetchingConfig, fetchingCustomerInfo }
 
-/// Waiting for the user to pick an environment (debug only).
-class SplashEnvironmentSelection extends SplashState {
-  final Environment currentEnvironment;
+enum SplashErrorType { network, appConfig, unknown }
 
-  const SplashEnvironmentSelection({required this.currentEnvironment});
-
-  @override
-  List<Object?> get props => [currentEnvironment];
+@freezed
+abstract class SplashState with _$SplashState {
+  const factory SplashState({
+    @Default(SplashStatus.initial) SplashStatus status,
+    @Default(SplashLoadingStep.starting) SplashLoadingStep loadingStep,
+    Environment? pendingEnvironment,
+    CustomerInfoEntity? customerInfo,
+    @Default('') String errorMessage,
+    @Default(SplashErrorType.unknown) SplashErrorType errorType,
+    String? processedDeeplink,
+  }) = _SplashState;
 }
 
-class SplashLoading extends SplashState {
-  final SplashLoadingStep step;
-
-  const SplashLoading({this.step = SplashLoadingStep.starting});
-
-  @override
-  List<Object?> get props => [step];
+extension SplashStateX on SplashState {
+  bool get isLoaded => status == SplashStatus.loaded;
+  bool get isError => status == SplashStatus.error;
+  bool get isEnvironmentSelection => status == SplashStatus.environmentSelection;
 }
-
-class SplashLoaded extends SplashState {
-  final AppConfigResponse? appConfig;
-  final CustomerInfoResponse? customerInfo;
-
-  const SplashLoaded({this.appConfig, this.customerInfo});
-
-  @override
-  List<Object?> get props => [appConfig, customerInfo];
-}
-
-class SplashError extends SplashState {
-  final String message;
-  final SplashErrorType errorType;
-
-  const SplashError({
-    required this.message,
-    this.errorType = SplashErrorType.unknown,
-  });
-
-  @override
-  List<Object?> get props => [message, errorType];
-}
-
-class DeeplinkProcessing extends SplashState {
-  final String deeplink;
-
-  const DeeplinkProcessing({required this.deeplink});
-
-  @override
-  List<Object?> get props => [deeplink];
-}
-
-class DeeplinkProcessed extends SplashState {
-  final String rawDeeplink;
-
-  const DeeplinkProcessed({required this.rawDeeplink});
-
-  @override
-  List<Object?> get props => [rawDeeplink];
-}
-
-// Enums
-enum SplashLoadingStep {
-  starting,
-  fetchingAppConfig,
-  fetchingCustomerInfo,
-  completed,
-}
-
-enum SplashErrorType { network, appConfig, customerInfo, unknown }

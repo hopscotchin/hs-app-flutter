@@ -1,30 +1,12 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/config/environment.dart';
 
-abstract class SplashEvent extends Equatable {
-  const SplashEvent();
+part 'splash_event.freezed.dart';
 
-  @override
-  List<Object?> get props => [];
-}
-
-class InitializeApp extends SplashEvent {}
-
-class SelectEnvironment extends SplashEvent {
-  final Environment environment;
-
-  const SelectEnvironment({required this.environment});
-
-  @override
-  List<Object?> get props => [environment];
-}
-
-class HandleDeeplink extends SplashEvent {
-  final String deeplink;
-
-  const HandleDeeplink({required this.deeplink});
-
-  @override
-  List<Object?> get props => [deeplink];
+@freezed
+sealed class SplashEvent with _$SplashEvent {
+  const factory SplashEvent.initializeApp() = InitializeApp;
+  const factory SplashEvent.selectEnvironment(Environment environment) = SelectEnvironment;
+  const factory SplashEvent.handleDeeplink(String deeplink) = HandleDeeplink;
 }

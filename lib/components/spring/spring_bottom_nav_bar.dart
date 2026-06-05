@@ -58,6 +58,11 @@ import 'package:hs_app_flutter/core/theme/spacing.dart';
 // target integer and briefly giving the next tab a positive expansion.
 const _kSpring = SpringDescription(mass: 1.0, stiffness: 500.0, damping: 50.0);
 
+// Visual gap between adjacent tab tiles. Tap math still treats the bar as
+// equal slots — small enough (vs. tile width) that the slight skew is
+// imperceptible at touch granularity.
+const double _kTileSpacing = 30.0;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Data model
 // ─────────────────────────────────────────────────────────────────────────────
@@ -402,15 +407,22 @@ class _SpringBottomNavBarState extends State<SpringBottomNavBar>
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 18),
-      height: 64,
+      margin: const EdgeInsets.symmetric(horizontal: 13),
+      height: widget.height,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.baseDefault,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: BoxBorder.all(color: AppColors.neutralGrey1, width: 1),
+        // Figma: dy 25, stdDeviation 18.85, ~2% black. The big blur with the
+        // near-transparent colour gives the bar a soft, lifted feel without a
+        // visible drop shadow.
         boxShadow: const [
-          BoxShadow(color: Color(0x1A000000), blurRadius: 16, offset: Offset(2, 8)),
+          BoxShadow(
+            color: Color(0x05000000),
+            blurRadius: 37.7,
+            offset: Offset(0, 25),
+          ),
         ],
       ),
       padding: const EdgeInsets.all(AppSpacing.xxs),
@@ -425,30 +437,26 @@ class _SpringBottomNavBarState extends State<SpringBottomNavBar>
             onPointerMove: _onPointerMove,
             onPointerUp: _onPointerUp,
             onPointerCancel: _onPointerCancel,
-            child: Container(
-              height: widget.height,
-              color: widget.backgroundColor,
-              // RepaintBoundary isolates the animated row into its own GPU layer
-              // so the parent (Scaffold, page body) never repaints on each tick.
-              child: RepaintBoundary(
+            // RepaintBoundary isolates the animated row into its own GPU layer
+            // so the parent (Scaffold, page body) never repaints on each tick.
+            child: RepaintBoundary(
+              child: ColoredBox(
+                color: widget.backgroundColor,
                 child: ListenableBuilder(
                   listenable: _controller,
                   builder: (_, _) {
                     final exps = _controller.expansions;
                     return Row(
+                      spacing: _kTileSpacing,
                       children: [
                         for (int i = 0; i < widget.items.length; i++)
                           Expanded(
-                            child: SizedBox(
-                              height: widget.height,
-                              child: _NavTile(
-                                item: widget.items[i],
-                                expansion: exps[i],
-                                tileHeight: widget.height,
-                                activeColor: widget.activeColor,
-                                inactiveColor: widget.inactiveColor,
-                                tileDecoration: widget.tileDecoration,
-                              ),
+                            child: _NavTile(
+                              item: widget.items[i],
+                              expansion: exps[i],
+                              activeColor: widget.activeColor,
+                              inactiveColor: widget.inactiveColor,
+                              tileDecoration: widget.tileDecoration,
                             ),
                           ),
                       ],
@@ -474,20 +482,22 @@ class _SpringBottomNavBarState extends State<SpringBottomNavBar>
 const _kNavLabelBase = TextStyle(
   fontSize: 10,
   fontWeight: FontWeight.w600,
-  letterSpacing: 0.5,
+  letterSpacing: 0.2,
   height: 1.0,
 );
 
 /// Pure function of [expansion] ∈ [0, 1]. No local state, no controllers.
 ///
 /// Animation decisions:
-///   color        — lerp(inactive → active): continuous, no threshold snap.
-///   icon content — caller-supplied via buildIcon; color + isActive passed in.
+///   icon color — fixed (inactiveColor). The Figma design keeps the icon
+///                lavender in both states; only the label switches purple.
+///   label color — lerp(inactive → active): continuous, no threshold snap.
+///   pill        — fills the whole tile; the tile width itself (set by the
+///                 outer Row spacing) defines the capsule's footprint.
 class _NavTile extends StatelessWidget {
   const _NavTile({
     required this.item,
     required this.expansion,
-    required this.tileHeight,
     required this.activeColor,
     required this.inactiveColor,
     this.tileDecoration,
@@ -495,33 +505,31 @@ class _NavTile extends StatelessWidget {
 
   final NavBarItem item;
   final double expansion;
-  final double tileHeight;
   final Color activeColor;
   final Color inactiveColor;
   final BoxDecoration? Function(double expansion)? tileDecoration;
 
   @override
   Widget build(BuildContext context) {
-    final color = Color.lerp(inactiveColor, activeColor, expansion)!;
+    final labelColor = Color.lerp(inactiveColor, activeColor, expansion)!;
 
-    return SizedBox(
-      height: tileHeight,
-      child: Container(
-        decoration: tileDecoration?.call(expansion),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            item.buildIcon(context, color, expansion >= 0.5),
-            const SizedBox(height: 8),
-            Text(
-              item.label,
-              style: _kNavLabelBase.copyWith(color: color),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+    return Container(
+      decoration: tileDecoration?.call(expansion),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          item.buildIcon(context, inactiveColor, expansion >= 0.5),
+          const SizedBox(height: 8),
+          Text(
+            item.label,
+            style: _kNavLabelBase.copyWith(color: labelColor),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

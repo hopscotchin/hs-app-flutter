@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserInfoEntity {
 
- String? get userId; String? get firstName; String? get lastName; String? get email; String? get mobile; bool get isLoggedIn; bool get isNewUser; String? get userName; String? get mobileStatus; int get cartItemCount;
+ String? get userId; String? get firstName; String? get lastName; String? get email; String? get mobile; bool get isLoggedIn; bool get isNewUser; String? get userName; String? get mobileStatus; int get cartItemCount; String? get profileImage;
 /// Create a copy of UserInfoEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $UserInfoEntityCopyWith<UserInfoEntity> get copyWith => _$UserInfoEntityCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserInfoEntity&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.email, email) || other.email == email)&&(identical(other.mobile, mobile) || other.mobile == mobile)&&(identical(other.isLoggedIn, isLoggedIn) || other.isLoggedIn == isLoggedIn)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.mobileStatus, mobileStatus) || other.mobileStatus == mobileStatus)&&(identical(other.cartItemCount, cartItemCount) || other.cartItemCount == cartItemCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserInfoEntity&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.email, email) || other.email == email)&&(identical(other.mobile, mobile) || other.mobile == mobile)&&(identical(other.isLoggedIn, isLoggedIn) || other.isLoggedIn == isLoggedIn)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.mobileStatus, mobileStatus) || other.mobileStatus == mobileStatus)&&(identical(other.cartItemCount, cartItemCount) || other.cartItemCount == cartItemCount)&&(identical(other.profileImage, profileImage) || other.profileImage == profileImage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,userId,firstName,lastName,email,mobile,isLoggedIn,isNewUser,userName,mobileStatus,cartItemCount);
+int get hashCode => Object.hash(runtimeType,userId,firstName,lastName,email,mobile,isLoggedIn,isNewUser,userName,mobileStatus,cartItemCount,profileImage);
 
 @override
 String toString() {
-  return 'UserInfoEntity(userId: $userId, firstName: $firstName, lastName: $lastName, email: $email, mobile: $mobile, isLoggedIn: $isLoggedIn, isNewUser: $isNewUser, userName: $userName, mobileStatus: $mobileStatus, cartItemCount: $cartItemCount)';
+  return 'UserInfoEntity(userId: $userId, firstName: $firstName, lastName: $lastName, email: $email, mobile: $mobile, isLoggedIn: $isLoggedIn, isNewUser: $isNewUser, userName: $userName, mobileStatus: $mobileStatus, cartItemCount: $cartItemCount, profileImage: $profileImage)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $UserInfoEntityCopyWith<$Res>  {
   factory $UserInfoEntityCopyWith(UserInfoEntity value, $Res Function(UserInfoEntity) _then) = _$UserInfoEntityCopyWithImpl;
 @useResult
 $Res call({
- String? userId, String? firstName, String? lastName, String? email, String? mobile, bool isLoggedIn, bool isNewUser, String? userName, String? mobileStatus, int cartItemCount
+ String? userId, String? firstName, String? lastName, String? email, String? mobile, bool isLoggedIn, bool isNewUser, String? userName, String? mobileStatus, int cartItemCount, String? profileImage
 });
 
 
@@ -62,7 +62,7 @@ class _$UserInfoEntityCopyWithImpl<$Res>
 
 /// Create a copy of UserInfoEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userId = freezed,Object? firstName = freezed,Object? lastName = freezed,Object? email = freezed,Object? mobile = freezed,Object? isLoggedIn = null,Object? isNewUser = null,Object? userName = freezed,Object? mobileStatus = freezed,Object? cartItemCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? userId = freezed,Object? firstName = freezed,Object? lastName = freezed,Object? email = freezed,Object? mobile = freezed,Object? isLoggedIn = null,Object? isNewUser = null,Object? userName = freezed,Object? mobileStatus = freezed,Object? cartItemCount = null,Object? profileImage = freezed,}) {
   return _then(_self.copyWith(
 userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String?,firstName: freezed == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
@@ -74,7 +74,8 @@ as bool,isNewUser: null == isNewUser ? _self.isNewUser : isNewUser // ignore: ca
 as bool,userName: freezed == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
 as String?,mobileStatus: freezed == mobileStatus ? _self.mobileStatus : mobileStatus // ignore: cast_nullable_to_non_nullable
 as String?,cartItemCount: null == cartItemCount ? _self.cartItemCount : cartItemCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,profileImage: freezed == profileImage ? _self.profileImage : profileImage // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -159,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? userId,  String? firstName,  String? lastName,  String? email,  String? mobile,  bool isLoggedIn,  bool isNewUser,  String? userName,  String? mobileStatus,  int cartItemCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? userId,  String? firstName,  String? lastName,  String? email,  String? mobile,  bool isLoggedIn,  bool isNewUser,  String? userName,  String? mobileStatus,  int cartItemCount,  String? profileImage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserInfoEntity() when $default != null:
-return $default(_that.userId,_that.firstName,_that.lastName,_that.email,_that.mobile,_that.isLoggedIn,_that.isNewUser,_that.userName,_that.mobileStatus,_that.cartItemCount);case _:
+return $default(_that.userId,_that.firstName,_that.lastName,_that.email,_that.mobile,_that.isLoggedIn,_that.isNewUser,_that.userName,_that.mobileStatus,_that.cartItemCount,_that.profileImage);case _:
   return orElse();
 
 }
@@ -180,10 +181,10 @@ return $default(_that.userId,_that.firstName,_that.lastName,_that.email,_that.mo
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? userId,  String? firstName,  String? lastName,  String? email,  String? mobile,  bool isLoggedIn,  bool isNewUser,  String? userName,  String? mobileStatus,  int cartItemCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? userId,  String? firstName,  String? lastName,  String? email,  String? mobile,  bool isLoggedIn,  bool isNewUser,  String? userName,  String? mobileStatus,  int cartItemCount,  String? profileImage)  $default,) {final _that = this;
 switch (_that) {
 case _UserInfoEntity():
-return $default(_that.userId,_that.firstName,_that.lastName,_that.email,_that.mobile,_that.isLoggedIn,_that.isNewUser,_that.userName,_that.mobileStatus,_that.cartItemCount);case _:
+return $default(_that.userId,_that.firstName,_that.lastName,_that.email,_that.mobile,_that.isLoggedIn,_that.isNewUser,_that.userName,_that.mobileStatus,_that.cartItemCount,_that.profileImage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +201,10 @@ return $default(_that.userId,_that.firstName,_that.lastName,_that.email,_that.mo
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? userId,  String? firstName,  String? lastName,  String? email,  String? mobile,  bool isLoggedIn,  bool isNewUser,  String? userName,  String? mobileStatus,  int cartItemCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? userId,  String? firstName,  String? lastName,  String? email,  String? mobile,  bool isLoggedIn,  bool isNewUser,  String? userName,  String? mobileStatus,  int cartItemCount,  String? profileImage)?  $default,) {final _that = this;
 switch (_that) {
 case _UserInfoEntity() when $default != null:
-return $default(_that.userId,_that.firstName,_that.lastName,_that.email,_that.mobile,_that.isLoggedIn,_that.isNewUser,_that.userName,_that.mobileStatus,_that.cartItemCount);case _:
+return $default(_that.userId,_that.firstName,_that.lastName,_that.email,_that.mobile,_that.isLoggedIn,_that.isNewUser,_that.userName,_that.mobileStatus,_that.cartItemCount,_that.profileImage);case _:
   return null;
 
 }
@@ -215,7 +216,7 @@ return $default(_that.userId,_that.firstName,_that.lastName,_that.email,_that.mo
 
 
 class _UserInfoEntity implements UserInfoEntity {
-  const _UserInfoEntity({this.userId, this.firstName, this.lastName, this.email, this.mobile, this.isLoggedIn = false, this.isNewUser = false, this.userName, this.mobileStatus, this.cartItemCount = 0});
+  const _UserInfoEntity({this.userId, this.firstName, this.lastName, this.email, this.mobile, this.isLoggedIn = false, this.isNewUser = false, this.userName, this.mobileStatus, this.cartItemCount = 0, this.profileImage});
   
 
 @override final  String? userId;
@@ -228,6 +229,7 @@ class _UserInfoEntity implements UserInfoEntity {
 @override final  String? userName;
 @override final  String? mobileStatus;
 @override@JsonKey() final  int cartItemCount;
+@override final  String? profileImage;
 
 /// Create a copy of UserInfoEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -239,16 +241,16 @@ _$UserInfoEntityCopyWith<_UserInfoEntity> get copyWith => __$UserInfoEntityCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserInfoEntity&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.email, email) || other.email == email)&&(identical(other.mobile, mobile) || other.mobile == mobile)&&(identical(other.isLoggedIn, isLoggedIn) || other.isLoggedIn == isLoggedIn)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.mobileStatus, mobileStatus) || other.mobileStatus == mobileStatus)&&(identical(other.cartItemCount, cartItemCount) || other.cartItemCount == cartItemCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserInfoEntity&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.email, email) || other.email == email)&&(identical(other.mobile, mobile) || other.mobile == mobile)&&(identical(other.isLoggedIn, isLoggedIn) || other.isLoggedIn == isLoggedIn)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.mobileStatus, mobileStatus) || other.mobileStatus == mobileStatus)&&(identical(other.cartItemCount, cartItemCount) || other.cartItemCount == cartItemCount)&&(identical(other.profileImage, profileImage) || other.profileImage == profileImage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,userId,firstName,lastName,email,mobile,isLoggedIn,isNewUser,userName,mobileStatus,cartItemCount);
+int get hashCode => Object.hash(runtimeType,userId,firstName,lastName,email,mobile,isLoggedIn,isNewUser,userName,mobileStatus,cartItemCount,profileImage);
 
 @override
 String toString() {
-  return 'UserInfoEntity(userId: $userId, firstName: $firstName, lastName: $lastName, email: $email, mobile: $mobile, isLoggedIn: $isLoggedIn, isNewUser: $isNewUser, userName: $userName, mobileStatus: $mobileStatus, cartItemCount: $cartItemCount)';
+  return 'UserInfoEntity(userId: $userId, firstName: $firstName, lastName: $lastName, email: $email, mobile: $mobile, isLoggedIn: $isLoggedIn, isNewUser: $isNewUser, userName: $userName, mobileStatus: $mobileStatus, cartItemCount: $cartItemCount, profileImage: $profileImage)';
 }
 
 
@@ -259,7 +261,7 @@ abstract mixin class _$UserInfoEntityCopyWith<$Res> implements $UserInfoEntityCo
   factory _$UserInfoEntityCopyWith(_UserInfoEntity value, $Res Function(_UserInfoEntity) _then) = __$UserInfoEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String? userId, String? firstName, String? lastName, String? email, String? mobile, bool isLoggedIn, bool isNewUser, String? userName, String? mobileStatus, int cartItemCount
+ String? userId, String? firstName, String? lastName, String? email, String? mobile, bool isLoggedIn, bool isNewUser, String? userName, String? mobileStatus, int cartItemCount, String? profileImage
 });
 
 
@@ -276,7 +278,7 @@ class __$UserInfoEntityCopyWithImpl<$Res>
 
 /// Create a copy of UserInfoEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userId = freezed,Object? firstName = freezed,Object? lastName = freezed,Object? email = freezed,Object? mobile = freezed,Object? isLoggedIn = null,Object? isNewUser = null,Object? userName = freezed,Object? mobileStatus = freezed,Object? cartItemCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? userId = freezed,Object? firstName = freezed,Object? lastName = freezed,Object? email = freezed,Object? mobile = freezed,Object? isLoggedIn = null,Object? isNewUser = null,Object? userName = freezed,Object? mobileStatus = freezed,Object? cartItemCount = null,Object? profileImage = freezed,}) {
   return _then(_UserInfoEntity(
 userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String?,firstName: freezed == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
@@ -288,7 +290,8 @@ as bool,isNewUser: null == isNewUser ? _self.isNewUser : isNewUser // ignore: ca
 as bool,userName: freezed == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
 as String?,mobileStatus: freezed == mobileStatus ? _self.mobileStatus : mobileStatus // ignore: cast_nullable_to_non_nullable
 as String?,cartItemCount: null == cartItemCount ? _self.cartItemCount : cartItemCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,profileImage: freezed == profileImage ? _self.profileImage : profileImage // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -12,272 +12,9 @@ part of 'user_config_entity.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$ProductImageConfigEntity {
-
- String? get aspectRatio; String? get imageLayout; String? get transformation;
-/// Create a copy of ProductImageConfigEntity
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ProductImageConfigEntityCopyWith<ProductImageConfigEntity> get copyWith => _$ProductImageConfigEntityCopyWithImpl<ProductImageConfigEntity>(this as ProductImageConfigEntity, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductImageConfigEntity&&(identical(other.aspectRatio, aspectRatio) || other.aspectRatio == aspectRatio)&&(identical(other.imageLayout, imageLayout) || other.imageLayout == imageLayout)&&(identical(other.transformation, transformation) || other.transformation == transformation));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,aspectRatio,imageLayout,transformation);
-
-@override
-String toString() {
-  return 'ProductImageConfigEntity(aspectRatio: $aspectRatio, imageLayout: $imageLayout, transformation: $transformation)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $ProductImageConfigEntityCopyWith<$Res>  {
-  factory $ProductImageConfigEntityCopyWith(ProductImageConfigEntity value, $Res Function(ProductImageConfigEntity) _then) = _$ProductImageConfigEntityCopyWithImpl;
-@useResult
-$Res call({
- String? aspectRatio, String? imageLayout, String? transformation
-});
-
-
-
-
-}
-/// @nodoc
-class _$ProductImageConfigEntityCopyWithImpl<$Res>
-    implements $ProductImageConfigEntityCopyWith<$Res> {
-  _$ProductImageConfigEntityCopyWithImpl(this._self, this._then);
-
-  final ProductImageConfigEntity _self;
-  final $Res Function(ProductImageConfigEntity) _then;
-
-/// Create a copy of ProductImageConfigEntity
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? aspectRatio = freezed,Object? imageLayout = freezed,Object? transformation = freezed,}) {
-  return _then(_self.copyWith(
-aspectRatio: freezed == aspectRatio ? _self.aspectRatio : aspectRatio // ignore: cast_nullable_to_non_nullable
-as String?,imageLayout: freezed == imageLayout ? _self.imageLayout : imageLayout // ignore: cast_nullable_to_non_nullable
-as String?,transformation: freezed == transformation ? _self.transformation : transformation // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
-}
-
-}
-
-
-/// Adds pattern-matching-related methods to [ProductImageConfigEntity].
-extension ProductImageConfigEntityPatterns on ProductImageConfigEntity {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ProductImageConfigEntity value)?  $default,{required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _ProductImageConfigEntity() when $default != null:
-return $default(_that);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ProductImageConfigEntity value)  $default,){
-final _that = this;
-switch (_that) {
-case _ProductImageConfigEntity():
-return $default(_that);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ProductImageConfigEntity value)?  $default,){
-final _that = this;
-switch (_that) {
-case _ProductImageConfigEntity() when $default != null:
-return $default(_that);case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? aspectRatio,  String? imageLayout,  String? transformation)?  $default,{required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _ProductImageConfigEntity() when $default != null:
-return $default(_that.aspectRatio,_that.imageLayout,_that.transformation);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? aspectRatio,  String? imageLayout,  String? transformation)  $default,) {final _that = this;
-switch (_that) {
-case _ProductImageConfigEntity():
-return $default(_that.aspectRatio,_that.imageLayout,_that.transformation);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? aspectRatio,  String? imageLayout,  String? transformation)?  $default,) {final _that = this;
-switch (_that) {
-case _ProductImageConfigEntity() when $default != null:
-return $default(_that.aspectRatio,_that.imageLayout,_that.transformation);case _:
-  return null;
-
-}
-}
-
-}
-
-/// @nodoc
-
-
-class _ProductImageConfigEntity implements ProductImageConfigEntity {
-  const _ProductImageConfigEntity({this.aspectRatio, this.imageLayout, this.transformation});
-  
-
-@override final  String? aspectRatio;
-@override final  String? imageLayout;
-@override final  String? transformation;
-
-/// Create a copy of ProductImageConfigEntity
-/// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$ProductImageConfigEntityCopyWith<_ProductImageConfigEntity> get copyWith => __$ProductImageConfigEntityCopyWithImpl<_ProductImageConfigEntity>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductImageConfigEntity&&(identical(other.aspectRatio, aspectRatio) || other.aspectRatio == aspectRatio)&&(identical(other.imageLayout, imageLayout) || other.imageLayout == imageLayout)&&(identical(other.transformation, transformation) || other.transformation == transformation));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,aspectRatio,imageLayout,transformation);
-
-@override
-String toString() {
-  return 'ProductImageConfigEntity(aspectRatio: $aspectRatio, imageLayout: $imageLayout, transformation: $transformation)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$ProductImageConfigEntityCopyWith<$Res> implements $ProductImageConfigEntityCopyWith<$Res> {
-  factory _$ProductImageConfigEntityCopyWith(_ProductImageConfigEntity value, $Res Function(_ProductImageConfigEntity) _then) = __$ProductImageConfigEntityCopyWithImpl;
-@override @useResult
-$Res call({
- String? aspectRatio, String? imageLayout, String? transformation
-});
-
-
-
-
-}
-/// @nodoc
-class __$ProductImageConfigEntityCopyWithImpl<$Res>
-    implements _$ProductImageConfigEntityCopyWith<$Res> {
-  __$ProductImageConfigEntityCopyWithImpl(this._self, this._then);
-
-  final _ProductImageConfigEntity _self;
-  final $Res Function(_ProductImageConfigEntity) _then;
-
-/// Create a copy of ProductImageConfigEntity
-/// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? aspectRatio = freezed,Object? imageLayout = freezed,Object? transformation = freezed,}) {
-  return _then(_ProductImageConfigEntity(
-aspectRatio: freezed == aspectRatio ? _self.aspectRatio : aspectRatio // ignore: cast_nullable_to_non_nullable
-as String?,imageLayout: freezed == imageLayout ? _self.imageLayout : imageLayout // ignore: cast_nullable_to_non_nullable
-as String?,transformation: freezed == transformation ? _self.transformation : transformation // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
-}
-
-
-}
-
-/// @nodoc
 mixin _$UserConfigEntity {
 
- ProductImageConfigEntity? get productImageConfig;
+ bool get continueBrowsingEligibleVisitor;
 /// Create a copy of UserConfigEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -288,16 +25,16 @@ $UserConfigEntityCopyWith<UserConfigEntity> get copyWith => _$UserConfigEntityCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserConfigEntity&&(identical(other.productImageConfig, productImageConfig) || other.productImageConfig == productImageConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserConfigEntity&&(identical(other.continueBrowsingEligibleVisitor, continueBrowsingEligibleVisitor) || other.continueBrowsingEligibleVisitor == continueBrowsingEligibleVisitor));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,productImageConfig);
+int get hashCode => Object.hash(runtimeType,continueBrowsingEligibleVisitor);
 
 @override
 String toString() {
-  return 'UserConfigEntity(productImageConfig: $productImageConfig)';
+  return 'UserConfigEntity(continueBrowsingEligibleVisitor: $continueBrowsingEligibleVisitor)';
 }
 
 
@@ -308,11 +45,11 @@ abstract mixin class $UserConfigEntityCopyWith<$Res>  {
   factory $UserConfigEntityCopyWith(UserConfigEntity value, $Res Function(UserConfigEntity) _then) = _$UserConfigEntityCopyWithImpl;
 @useResult
 $Res call({
- ProductImageConfigEntity? productImageConfig
+ bool continueBrowsingEligibleVisitor
 });
 
 
-$ProductImageConfigEntityCopyWith<$Res>? get productImageConfig;
+
 
 }
 /// @nodoc
@@ -325,25 +62,13 @@ class _$UserConfigEntityCopyWithImpl<$Res>
 
 /// Create a copy of UserConfigEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? productImageConfig = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? continueBrowsingEligibleVisitor = null,}) {
   return _then(_self.copyWith(
-productImageConfig: freezed == productImageConfig ? _self.productImageConfig : productImageConfig // ignore: cast_nullable_to_non_nullable
-as ProductImageConfigEntity?,
+continueBrowsingEligibleVisitor: null == continueBrowsingEligibleVisitor ? _self.continueBrowsingEligibleVisitor : continueBrowsingEligibleVisitor // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
-/// Create a copy of UserConfigEntity
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$ProductImageConfigEntityCopyWith<$Res>? get productImageConfig {
-    if (_self.productImageConfig == null) {
-    return null;
-  }
 
-  return $ProductImageConfigEntityCopyWith<$Res>(_self.productImageConfig!, (value) {
-    return _then(_self.copyWith(productImageConfig: value));
-  });
-}
 }
 
 
@@ -425,10 +150,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProductImageConfigEntity? productImageConfig)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool continueBrowsingEligibleVisitor)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserConfigEntity() when $default != null:
-return $default(_that.productImageConfig);case _:
+return $default(_that.continueBrowsingEligibleVisitor);case _:
   return orElse();
 
 }
@@ -446,10 +171,10 @@ return $default(_that.productImageConfig);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProductImageConfigEntity? productImageConfig)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool continueBrowsingEligibleVisitor)  $default,) {final _that = this;
 switch (_that) {
 case _UserConfigEntity():
-return $default(_that.productImageConfig);case _:
+return $default(_that.continueBrowsingEligibleVisitor);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -466,10 +191,10 @@ return $default(_that.productImageConfig);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProductImageConfigEntity? productImageConfig)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool continueBrowsingEligibleVisitor)?  $default,) {final _that = this;
 switch (_that) {
 case _UserConfigEntity() when $default != null:
-return $default(_that.productImageConfig);case _:
+return $default(_that.continueBrowsingEligibleVisitor);case _:
   return null;
 
 }
@@ -481,10 +206,10 @@ return $default(_that.productImageConfig);case _:
 
 
 class _UserConfigEntity implements UserConfigEntity {
-  const _UserConfigEntity({this.productImageConfig});
+  const _UserConfigEntity({this.continueBrowsingEligibleVisitor = false});
   
 
-@override final  ProductImageConfigEntity? productImageConfig;
+@override@JsonKey() final  bool continueBrowsingEligibleVisitor;
 
 /// Create a copy of UserConfigEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -496,16 +221,16 @@ _$UserConfigEntityCopyWith<_UserConfigEntity> get copyWith => __$UserConfigEntit
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserConfigEntity&&(identical(other.productImageConfig, productImageConfig) || other.productImageConfig == productImageConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserConfigEntity&&(identical(other.continueBrowsingEligibleVisitor, continueBrowsingEligibleVisitor) || other.continueBrowsingEligibleVisitor == continueBrowsingEligibleVisitor));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,productImageConfig);
+int get hashCode => Object.hash(runtimeType,continueBrowsingEligibleVisitor);
 
 @override
 String toString() {
-  return 'UserConfigEntity(productImageConfig: $productImageConfig)';
+  return 'UserConfigEntity(continueBrowsingEligibleVisitor: $continueBrowsingEligibleVisitor)';
 }
 
 
@@ -516,11 +241,11 @@ abstract mixin class _$UserConfigEntityCopyWith<$Res> implements $UserConfigEnti
   factory _$UserConfigEntityCopyWith(_UserConfigEntity value, $Res Function(_UserConfigEntity) _then) = __$UserConfigEntityCopyWithImpl;
 @override @useResult
 $Res call({
- ProductImageConfigEntity? productImageConfig
+ bool continueBrowsingEligibleVisitor
 });
 
 
-@override $ProductImageConfigEntityCopyWith<$Res>? get productImageConfig;
+
 
 }
 /// @nodoc
@@ -533,26 +258,14 @@ class __$UserConfigEntityCopyWithImpl<$Res>
 
 /// Create a copy of UserConfigEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? productImageConfig = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? continueBrowsingEligibleVisitor = null,}) {
   return _then(_UserConfigEntity(
-productImageConfig: freezed == productImageConfig ? _self.productImageConfig : productImageConfig // ignore: cast_nullable_to_non_nullable
-as ProductImageConfigEntity?,
+continueBrowsingEligibleVisitor: null == continueBrowsingEligibleVisitor ? _self.continueBrowsingEligibleVisitor : continueBrowsingEligibleVisitor // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
-/// Create a copy of UserConfigEntity
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$ProductImageConfigEntityCopyWith<$Res>? get productImageConfig {
-    if (_self.productImageConfig == null) {
-    return null;
-  }
 
-  return $ProductImageConfigEntityCopyWith<$Res>(_self.productImageConfig!, (value) {
-    return _then(_self.copyWith(productImageConfig: value));
-  });
-}
 }
 
 // dart format on

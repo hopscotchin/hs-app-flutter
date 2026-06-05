@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -9,60 +8,11 @@ import '../../core/theme/typography.dart';
 import '../../core/theme/typography/text_style_extensions.dart';
 import '../../core/theme/typography/typography_v1.dart';
 
-/// Controls the visual density and typography of [MessageBarsWidget].
-///
-/// Use [MessageBarsStyle.standard] for the default full-width style and
-/// [MessageBarsStyle.compact] for tighter padding and smaller typography.
-class MessageBarsStyle {
-  final EdgeInsets contentPadding;
-  final double iconSize;
-  final double iconSpacing;
+// ─── Compact style constants ─────────────────────────────────────────────────
 
-  /// Base text style for the message body — color is applied per-bar at render time.
-  final TextStyle messageStyle;
-
-  /// Fully resolved text style for the action link, including color.
-  final TextStyle actionStyle;
-
-  /// When true, the action link is rendered below the message (stacked).
-  /// When false, it is inlined as a span within the message.
-  final bool stackedAction;
-
-  /// Override background color for error-type bars. Null uses the default.
-  final Color? errorBgColor;
-
-  MessageBarsStyle({
-    required this.contentPadding,
-    required this.iconSize,
-    required this.iconSpacing,
-    required this.messageStyle,
-    required this.actionStyle,
-    required this.stackedAction,
-    this.errorBgColor,
-  });
-
-  static MessageBarsStyle standard() => MessageBarsStyle(
-    contentPadding: const EdgeInsets.all(16),
-    iconSize: 18,
-    iconSpacing: 16,
-    messageStyle: AppTypography.bodyMedium,
-    actionStyle: AppTypography.bodyMedium.copyWith(
-      color: AppColors.secondary,
-      fontWeight: AppTypography.semiBold,
-    ),
-    stackedAction: false,
-  );
-
-  static MessageBarsStyle compact() => MessageBarsStyle(
-    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-    iconSize: 20,
-    iconSpacing: 12,
-    messageStyle: AppTypographyV1.labelMedium.regular,
-    actionStyle: AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.brandSecondary),
-    stackedAction: true,
-    errorBgColor: AppColors.brandTertiary,
-  );
-}
+const _kContentPadding = EdgeInsets.symmetric(horizontal: 12, vertical: 16);
+const _kIconSize = 20.0;
+const _kIconSpacing = 12.0;
 
 /// Callback when an action link is tapped on a message bar.
 /// [actionLink] is the link string, [messageBar] is the source entity.
@@ -72,30 +22,24 @@ typedef MessageBarActionCallback = void Function(String? actionLink, MessageBarE
 class MessageBarsWidget extends StatelessWidget {
   final List<MessageBarEntity> messageBars;
 
-  /// When true, renders bars as cards with margin and rounded corners.
+  /// When true, renders bars as cards with rounded corners.
   /// When false (default), renders as full-width strips.
   final bool cardStyle;
 
   /// Optional callback when an action link is tapped.
   final MessageBarActionCallback? onAction;
 
-  /// Visual style controlling padding, typography, and colors.
-  /// Defaults to [MessageBarsStyle.standard] when null.
-  final MessageBarsStyle? style;
-
   const MessageBarsWidget({
     super.key,
     required this.messageBars,
     this.cardStyle = false,
     this.onAction,
-    this.style,
   });
 
   @override
   Widget build(BuildContext context) {
     if (messageBars.isEmpty) return const SizedBox.shrink();
 
-    final resolvedStyle = style ?? MessageBarsStyle.standard();
     return Column(
       children: messageBars
           .where((bar) {
@@ -106,7 +50,6 @@ class MessageBarsWidget extends StatelessWidget {
             (bar) => _MessageBarItem(
               bar: bar,
               cardStyle: cardStyle,
-              style: resolvedStyle,
               onAction: onAction,
             ),
           )
@@ -132,12 +75,9 @@ _MessageBarType _resolveType(MessageBarEntity bar) {
 
 // ─── Type-specific defaults ──────────────────────────────────────────────────
 
-Color _defaultBgColor(_MessageBarType type, MessageBarsStyle style) {
-  if (style.errorBgColor != null && type == _MessageBarType.error) {
-    return style.errorBgColor!;
-  }
+Color _defaultBgColor(_MessageBarType type) {
   return switch (type) {
-    _MessageBarType.error => AppColors.onError,
+    _MessageBarType.error => AppColors.brandTertiary,
     _MessageBarType.info => AppColors.onInfo,
     _MessageBarType.success => AppColors.onSuccess,
     _MessageBarType.warning => AppColors.onWarning,
@@ -162,13 +102,11 @@ String? _typeIconAsset(_MessageBarType type) {
 class _MessageBarItem extends StatefulWidget {
   final MessageBarEntity bar;
   final bool cardStyle;
-  final MessageBarsStyle style;
   final MessageBarActionCallback? onAction;
 
   const _MessageBarItem({
     required this.bar,
     required this.cardStyle,
-    required this.style,
     this.onAction,
   });
 
@@ -194,17 +132,19 @@ class _MessageBarItemState extends State<_MessageBarItem> {
     final type = _resolveType(bar);
 
     // Resolve colors — API-provided values override type defaults.
-    final bgColor = _parseColor(bar.bgColor) ?? _defaultBgColor(type, widget.style);
+    final bgColor = _parseColor(bar.bgColor) ?? _defaultBgColor(type);
     final textColor = _parseColor(bar.textColor) ?? AppColors.neutralBlack;
 
-    // Resolve icon visibility — type-specific bars always show their asset;
-    // custom bars only show when the entity provides a network icon.
-    final showIcon = type == _MessageBarType.custom ? _isNotEmpty(bar.icon) : true;
+    // Resolve icon visibility — typed bars always show their icon; custom bars
+    // gate on the hasIcon flag and require a network icon to be present.
+    final showIcon = type == _MessageBarType.custom
+        ? (bar.hasIcon && _isNotEmpty(bar.icon))
+        : true;
 
     final hasTwoButtons = _isNotEmpty(bar.actionText) && _isNotEmpty(bar.actionTextRight);
 
     final content = Padding(
-      padding: widget.style.contentPadding,
+      padding: _kContentPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -214,7 +154,7 @@ class _MessageBarItemState extends State<_MessageBarItem> {
             children: [
               if (showIcon) ...[
                 _buildIcon(bar, type, textColor),
-                SizedBox(width: widget.style.iconSpacing),
+                const SizedBox(width: _kIconSpacing),
               ],
               Expanded(
                 child: hasTwoButtons
@@ -233,7 +173,6 @@ class _MessageBarItemState extends State<_MessageBarItem> {
     if (widget.cardStyle) {
       return Container(
         width: double.infinity,
-        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
         decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(4)),
         child: content,
       );
@@ -248,20 +187,19 @@ class _MessageBarItemState extends State<_MessageBarItem> {
     if (type == _MessageBarType.custom) {
       return Image.network(
         bar.icon!,
-        width: widget.style.iconSize,
-        height: widget.style.iconSize,
+        width: _kIconSize,
+        height: _kIconSize,
         errorBuilder: (_, _, _) =>
-            Icon(Icons.info_outline, size: widget.style.iconSize, color: tintColor),
+            Icon(Icons.info_outline, size: _kIconSize, color: tintColor),
       );
     }
 
-    final size = widget.style.iconSize;
     return Padding(
       padding: const EdgeInsets.only(top: 1),
       child: SvgPicture.asset(
         _typeIconAsset(type)!,
-        width: size,
-        height: size,
+        width: _kIconSize,
+        height: _kIconSize,
       ),
     );
   }
@@ -269,46 +207,31 @@ class _MessageBarItemState extends State<_MessageBarItem> {
   // ─── Message text ────────────────────────────────────────────────────────
 
   TextStyle _messageTextStyle(Color textColor) =>
-      widget.style.messageStyle.copyWith(color: textColor);
+      AppTypographyV1.labelMedium.regular.copyWith(color: textColor);
+
+  TextStyle get _actionTextStyle =>
+      AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.brandSecondary);
 
   Widget _buildPlainMessage(MessageBarEntity bar, Color textColor) {
     return Text(bar.displayText!, style: _messageTextStyle(textColor));
   }
 
-  /// Message with optional inline action text appended (Android spannable style).
+  /// Message with optional action text stacked below.
   Widget _buildMessageWithInlineAction(MessageBarEntity bar, Color textColor) {
     if (!_isNotEmpty(bar.actionText)) {
       return _buildPlainMessage(bar, textColor);
     }
 
-    final actionStyle = widget.style.actionStyle;
-
-    if (widget.style.stackedAction) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(bar.displayText!, style: _messageTextStyle(textColor)),
-          const SizedBox(height: 4),
-          GestureDetector(
-            onTap: () => _handleAction(bar.actionLink),
-            child: Text(bar.actionText!, style: actionStyle),
-          ),
-        ],
-      );
-    }
-
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: bar.displayText!, style: _messageTextStyle(textColor)),
-          const TextSpan(text: ' '),
-          TextSpan(
-            text: bar.actionText!,
-            style: actionStyle,
-            recognizer: TapGestureRecognizer()..onTap = () => _handleAction(bar.actionLink),
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(bar.displayText!, style: _messageTextStyle(textColor)),
+        const SizedBox(height: 4),
+        GestureDetector(
+          onTap: () => _handleAction(bar.actionLink),
+          child: Text(bar.actionText!, style: _actionTextStyle),
+        ),
+      ],
     );
   }
 

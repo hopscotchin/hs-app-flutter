@@ -92,6 +92,11 @@ class ActionUrlHandler {
             ? LandingPageDestination(pageName: id)
             : const HomeDestination();
 
+      // ── PDP ──
+      case _Route.product || DeeplinkHost.productPage:
+        return id.isNotEmpty
+            ? PdpDestination(productId: id)
+            : const HomeDestination();
 
       // ── Cart ──
       case _Route.cart || DeeplinkHost.shoppingCart || DeeplinkHost.cartMerge:
@@ -207,6 +212,13 @@ class ActionUrlHandler {
             ? LandingPageDestination(pageName: pageName)
             : const HomeDestination();
 
+      // ── PDP: /product/<pid> ──
+      case _Route.product:
+        final pid = segments.length >= 2 ? segments[1] : (params['id'] ?? '');
+        return pid.isNotEmpty
+            ? PdpDestination(productId: pid)
+            : const HomeDestination();
+
       // ── Cart: /cart, /shoppingcart, /checkout ──
       case _Route.cart || 'shoppingcart' || 'shopping-cart' || 'checkout':
         return const CartDestination();
@@ -276,10 +288,7 @@ class ActionUrlHandler {
 abstract final class _Route {
   static const discover = 'discover';
   static const home = 'home';
-  static const products = 'products';
   static const product = 'product';
-  static const boutique = 'boutique';
-  static const search = 'search';
   static const cart = 'cart';
   static const categories = 'categories';
   static const moments = 'moments';

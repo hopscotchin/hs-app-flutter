@@ -8,8 +8,8 @@ import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import '../../../../components/atoms/cached_image_widget.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
-import '../../../../core/theme/typography/typography_v1.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
+import '../../../../core/theme/typography/typography_v1.dart';
 import '../../domain/entities/account_entity.dart';
 
 class AccountHeaderWidget extends StatelessWidget {
@@ -38,7 +38,7 @@ class _SignedInHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
-        AppSpacing.lg,
+        AppSpacing.lgMd,
         AppSpacing.md,
         AppSpacing.md,
       ),
@@ -64,19 +64,30 @@ class _SignedInHeader extends StatelessWidget {
           ),
           AppSpacing.horizontalGapMd,
           // Right: Profile image
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: AppColors.primary,
-            child: account.avatarUrl != null && account.avatarUrl!.isNotEmpty
-                ? ClipOval(
-                    child: CachedImageWidget(imageUrl: account.avatarUrl!, width: 48, height: 48),
-                  )
-                : Text(
-                    _initials,
-                    style: AppTypographyV1.titleMedium.semiBold.copyWith(
-                      color: AppColors.onPrimary,
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: account.avatarUrl != null && account.avatarUrl!.isNotEmpty
+                  ? Border.all(color: AppColors.borderSecondary)
+                  : null,
+            ),
+            child: CircleAvatar(
+              radius: 24,
+              backgroundColor: AppColors.primary,
+              child: account.avatarUrl != null && account.avatarUrl!.isNotEmpty
+                  ? CachedImageWidget(
+                      imageUrl: account.avatarUrl!,
+                      width: 48,
+                      height: 48,
+                      borderRadius: BorderRadius.circular(24),
+                    )
+                  : Text(
+                      _initials,
+                      style: AppTypographyV1.titleMedium.semiBold.copyWith(
+                        color: AppColors.onPrimary,
+                      ),
                     ),
-                  ),
+            ),
           ),
         ],
       ),
@@ -103,9 +114,7 @@ class _SignedInHeader extends StatelessWidget {
         Flexible(
           child: Text(
             hasPhone ? _formattedPhone : account.email!,
-            style: AppTypographyV1.labelLarge.medium.copyWith(
-              color: AppColors.neutralGrey5
-            ),
+            style: AppTypographyV1.labelLarge.medium.copyWith(color: AppColors.neutralGrey5),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -145,7 +154,7 @@ class _SignedOutHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
-        AppSpacing.lg,
+        AppSpacing.lgMd,
         AppSpacing.md,
         AppSpacing.md,
       ),
@@ -183,17 +192,12 @@ class _SignedOutHeader extends StatelessWidget {
                 onPressed: onForgetMe,
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: AppColors.primary),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: AppSpacing.borderRadiusXs,
-                  ),
+                  shape: const RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusXs),
                   foregroundColor: AppColors.primary,
                   textStyle: AppTypographyV1.bodyRegular.semiBold,
                   backgroundColor: AppColors.container,
                 ),
-                child: Text(
-                  AccountStrings.forgetMe,
-                  style: AppTypographyV1.bodyLarge.bold.brand(),
-                ),
+                child: Text(AccountStrings.forgetMe, style: AppTypographyV1.bodyLarge.bold.brand()),
               ),
             ),
             AppSpacing.verticalGapSm,

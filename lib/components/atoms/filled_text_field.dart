@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/theme/typography.dart';
+import '../../core/utils/group_digits_input_formatter.dart';
 
 class FilledTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -79,24 +80,18 @@ class FilledTextField extends StatelessWidget {
 }
 
 /// Formats digits as "XXXXX XXXXX" while typing.
-class MobileNumberFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
-    if (digits.length > 10) {
-      return oldValue;
-    }
+/// 10-digit mobile grouped as `12345 67890`.
+///
+/// Thin alias over [GroupDigitsInputFormatter] — single grouping
+/// implementation across mobile and pincode fields.
+class MobileNumberFormatter extends GroupDigitsInputFormatter {
+  const MobileNumberFormatter() : super(groupSize: 5, maxDigits: 10);
+}
 
-    final buffer = StringBuffer();
-    for (int i = 0; i < digits.length; i++) {
-      if (i == 5) buffer.write(' ');
-      buffer.write(digits[i]);
-    }
-    final formatted = buffer.toString();
-
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
-    );
-  }
+/// 6-digit pincode grouped as `123 456`.
+///
+/// Thin alias over [GroupDigitsInputFormatter] — single grouping
+/// implementation across mobile and pincode fields.
+class PincodeFormatter extends GroupDigitsInputFormatter {
+  const PincodeFormatter() : super(groupSize: 3, maxDigits: 6);
 }

@@ -28,11 +28,12 @@ class AuthStrings {
 
   // OTP screen
   static const String waitingForOtp = 'Waiting for OTP';
-  static const String enterOtpSentToNumber = 'Enter the OTP send to your number';
+  static const String enterOtpSentToNumber = 'Enter the OTP sent to your number';
   static const String change = 'CHANGE?';
   static const String resendOtpIn = 'Resend OTP in';
   static const String signInReason = 'SIGN_IN';
   static const String signUpReason = 'SIGN_UP';
+  static const String getAddressReason = 'GET_ADDRESS';
 
   // Hints & helper text
   static const String verifyNumberHint = 'Verify your number to create your account';
@@ -69,4 +70,6 @@ class AuthStrings {
   static const String validateEmailFormat = 'Please enter a valid email address';
   static const String validateMobile = 'Please enter your mobile number';
   static const String validateMobileFormat = 'Please enter a valid 10-digit mobile number';
+  static const String enterValidMobileNumber =
+      "Check if you've entered a 10 digit Indian mobile number";
 }

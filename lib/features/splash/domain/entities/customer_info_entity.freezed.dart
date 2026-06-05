@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CustomerInfoEntity {
 
- String? get actionURI; String? get actionText; int get cartItemCount; bool get isNewUser; bool get isLoggedIn; bool get hasGuestData; Map<String, dynamic>? get childCohorts; UserConfigEntity? get userConfig;
+ String? get actionURI; String? get actionText; int get cartItemCount; bool get isNewUser; bool get isLoggedIn; bool get hasGuestData; Map<String, dynamic>? get childCohorts; UserInfoEntity? get user; AuthCredentialsEntity? get auth; UserConfigEntity? get userConfig;
 /// Create a copy of CustomerInfoEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $CustomerInfoEntityCopyWith<CustomerInfoEntity> get copyWith => _$CustomerInfoEn
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CustomerInfoEntity&&(identical(other.actionURI, actionURI) || other.actionURI == actionURI)&&(identical(other.actionText, actionText) || other.actionText == actionText)&&(identical(other.cartItemCount, cartItemCount) || other.cartItemCount == cartItemCount)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.isLoggedIn, isLoggedIn) || other.isLoggedIn == isLoggedIn)&&(identical(other.hasGuestData, hasGuestData) || other.hasGuestData == hasGuestData)&&const DeepCollectionEquality().equals(other.childCohorts, childCohorts)&&(identical(other.userConfig, userConfig) || other.userConfig == userConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CustomerInfoEntity&&(identical(other.actionURI, actionURI) || other.actionURI == actionURI)&&(identical(other.actionText, actionText) || other.actionText == actionText)&&(identical(other.cartItemCount, cartItemCount) || other.cartItemCount == cartItemCount)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.isLoggedIn, isLoggedIn) || other.isLoggedIn == isLoggedIn)&&(identical(other.hasGuestData, hasGuestData) || other.hasGuestData == hasGuestData)&&const DeepCollectionEquality().equals(other.childCohorts, childCohorts)&&(identical(other.user, user) || other.user == user)&&(identical(other.auth, auth) || other.auth == auth)&&(identical(other.userConfig, userConfig) || other.userConfig == userConfig));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,actionURI,actionText,cartItemCount,isNewUser,isLoggedIn,hasGuestData,const DeepCollectionEquality().hash(childCohorts),userConfig);
+int get hashCode => Object.hash(runtimeType,actionURI,actionText,cartItemCount,isNewUser,isLoggedIn,hasGuestData,const DeepCollectionEquality().hash(childCohorts),user,auth,userConfig);
 
 @override
 String toString() {
-  return 'CustomerInfoEntity(actionURI: $actionURI, actionText: $actionText, cartItemCount: $cartItemCount, isNewUser: $isNewUser, isLoggedIn: $isLoggedIn, hasGuestData: $hasGuestData, childCohorts: $childCohorts, userConfig: $userConfig)';
+  return 'CustomerInfoEntity(actionURI: $actionURI, actionText: $actionText, cartItemCount: $cartItemCount, isNewUser: $isNewUser, isLoggedIn: $isLoggedIn, hasGuestData: $hasGuestData, childCohorts: $childCohorts, user: $user, auth: $auth, userConfig: $userConfig)';
 }
 
 
@@ -45,11 +45,11 @@ abstract mixin class $CustomerInfoEntityCopyWith<$Res>  {
   factory $CustomerInfoEntityCopyWith(CustomerInfoEntity value, $Res Function(CustomerInfoEntity) _then) = _$CustomerInfoEntityCopyWithImpl;
 @useResult
 $Res call({
- String? actionURI, String? actionText, int cartItemCount, bool isNewUser, bool isLoggedIn, bool hasGuestData, Map<String, dynamic>? childCohorts, UserConfigEntity? userConfig
+ String? actionURI, String? actionText, int cartItemCount, bool isNewUser, bool isLoggedIn, bool hasGuestData, Map<String, dynamic>? childCohorts, UserInfoEntity? user, AuthCredentialsEntity? auth, UserConfigEntity? userConfig
 });
 
 
-$UserConfigEntityCopyWith<$Res>? get userConfig;
+$UserInfoEntityCopyWith<$Res>? get user;$AuthCredentialsEntityCopyWith<$Res>? get auth;$UserConfigEntityCopyWith<$Res>? get userConfig;
 
 }
 /// @nodoc
@@ -62,7 +62,7 @@ class _$CustomerInfoEntityCopyWithImpl<$Res>
 
 /// Create a copy of CustomerInfoEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? actionURI = freezed,Object? actionText = freezed,Object? cartItemCount = null,Object? isNewUser = null,Object? isLoggedIn = null,Object? hasGuestData = null,Object? childCohorts = freezed,Object? userConfig = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? actionURI = freezed,Object? actionText = freezed,Object? cartItemCount = null,Object? isNewUser = null,Object? isLoggedIn = null,Object? hasGuestData = null,Object? childCohorts = freezed,Object? user = freezed,Object? auth = freezed,Object? userConfig = freezed,}) {
   return _then(_self.copyWith(
 actionURI: freezed == actionURI ? _self.actionURI : actionURI // ignore: cast_nullable_to_non_nullable
 as String?,actionText: freezed == actionText ? _self.actionText : actionText // ignore: cast_nullable_to_non_nullable
@@ -71,11 +71,37 @@ as int,isNewUser: null == isNewUser ? _self.isNewUser : isNewUser // ignore: cas
 as bool,isLoggedIn: null == isLoggedIn ? _self.isLoggedIn : isLoggedIn // ignore: cast_nullable_to_non_nullable
 as bool,hasGuestData: null == hasGuestData ? _self.hasGuestData : hasGuestData // ignore: cast_nullable_to_non_nullable
 as bool,childCohorts: freezed == childCohorts ? _self.childCohorts : childCohorts // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,userConfig: freezed == userConfig ? _self.userConfig : userConfig // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as UserInfoEntity?,auth: freezed == auth ? _self.auth : auth // ignore: cast_nullable_to_non_nullable
+as AuthCredentialsEntity?,userConfig: freezed == userConfig ? _self.userConfig : userConfig // ignore: cast_nullable_to_non_nullable
 as UserConfigEntity?,
   ));
 }
 /// Create a copy of CustomerInfoEntity
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserInfoEntityCopyWith<$Res>? get user {
+    if (_self.user == null) {
+    return null;
+  }
+
+  return $UserInfoEntityCopyWith<$Res>(_self.user!, (value) {
+    return _then(_self.copyWith(user: value));
+  });
+}/// Create a copy of CustomerInfoEntity
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AuthCredentialsEntityCopyWith<$Res>? get auth {
+    if (_self.auth == null) {
+    return null;
+  }
+
+  return $AuthCredentialsEntityCopyWith<$Res>(_self.auth!, (value) {
+    return _then(_self.copyWith(auth: value));
+  });
+}/// Create a copy of CustomerInfoEntity
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
@@ -169,10 +195,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? actionURI,  String? actionText,  int cartItemCount,  bool isNewUser,  bool isLoggedIn,  bool hasGuestData,  Map<String, dynamic>? childCohorts,  UserConfigEntity? userConfig)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? actionURI,  String? actionText,  int cartItemCount,  bool isNewUser,  bool isLoggedIn,  bool hasGuestData,  Map<String, dynamic>? childCohorts,  UserInfoEntity? user,  AuthCredentialsEntity? auth,  UserConfigEntity? userConfig)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CustomerInfoEntity() when $default != null:
-return $default(_that.actionURI,_that.actionText,_that.cartItemCount,_that.isNewUser,_that.isLoggedIn,_that.hasGuestData,_that.childCohorts,_that.userConfig);case _:
+return $default(_that.actionURI,_that.actionText,_that.cartItemCount,_that.isNewUser,_that.isLoggedIn,_that.hasGuestData,_that.childCohorts,_that.user,_that.auth,_that.userConfig);case _:
   return orElse();
 
 }
@@ -190,10 +216,10 @@ return $default(_that.actionURI,_that.actionText,_that.cartItemCount,_that.isNew
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? actionURI,  String? actionText,  int cartItemCount,  bool isNewUser,  bool isLoggedIn,  bool hasGuestData,  Map<String, dynamic>? childCohorts,  UserConfigEntity? userConfig)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? actionURI,  String? actionText,  int cartItemCount,  bool isNewUser,  bool isLoggedIn,  bool hasGuestData,  Map<String, dynamic>? childCohorts,  UserInfoEntity? user,  AuthCredentialsEntity? auth,  UserConfigEntity? userConfig)  $default,) {final _that = this;
 switch (_that) {
 case _CustomerInfoEntity():
-return $default(_that.actionURI,_that.actionText,_that.cartItemCount,_that.isNewUser,_that.isLoggedIn,_that.hasGuestData,_that.childCohorts,_that.userConfig);case _:
+return $default(_that.actionURI,_that.actionText,_that.cartItemCount,_that.isNewUser,_that.isLoggedIn,_that.hasGuestData,_that.childCohorts,_that.user,_that.auth,_that.userConfig);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +236,10 @@ return $default(_that.actionURI,_that.actionText,_that.cartItemCount,_that.isNew
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? actionURI,  String? actionText,  int cartItemCount,  bool isNewUser,  bool isLoggedIn,  bool hasGuestData,  Map<String, dynamic>? childCohorts,  UserConfigEntity? userConfig)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? actionURI,  String? actionText,  int cartItemCount,  bool isNewUser,  bool isLoggedIn,  bool hasGuestData,  Map<String, dynamic>? childCohorts,  UserInfoEntity? user,  AuthCredentialsEntity? auth,  UserConfigEntity? userConfig)?  $default,) {final _that = this;
 switch (_that) {
 case _CustomerInfoEntity() when $default != null:
-return $default(_that.actionURI,_that.actionText,_that.cartItemCount,_that.isNewUser,_that.isLoggedIn,_that.hasGuestData,_that.childCohorts,_that.userConfig);case _:
+return $default(_that.actionURI,_that.actionText,_that.cartItemCount,_that.isNewUser,_that.isLoggedIn,_that.hasGuestData,_that.childCohorts,_that.user,_that.auth,_that.userConfig);case _:
   return null;
 
 }
@@ -225,7 +251,7 @@ return $default(_that.actionURI,_that.actionText,_that.cartItemCount,_that.isNew
 
 
 class _CustomerInfoEntity implements CustomerInfoEntity {
-  const _CustomerInfoEntity({this.actionURI, this.actionText, this.cartItemCount = 0, this.isNewUser = false, this.isLoggedIn = false, this.hasGuestData = false, final  Map<String, dynamic>? childCohorts, this.userConfig}): _childCohorts = childCohorts;
+  const _CustomerInfoEntity({this.actionURI, this.actionText, this.cartItemCount = 0, this.isNewUser = false, this.isLoggedIn = false, this.hasGuestData = false, final  Map<String, dynamic>? childCohorts, this.user, this.auth, this.userConfig}): _childCohorts = childCohorts;
   
 
 @override final  String? actionURI;
@@ -243,6 +269,8 @@ class _CustomerInfoEntity implements CustomerInfoEntity {
   return EqualUnmodifiableMapView(value);
 }
 
+@override final  UserInfoEntity? user;
+@override final  AuthCredentialsEntity? auth;
 @override final  UserConfigEntity? userConfig;
 
 /// Create a copy of CustomerInfoEntity
@@ -255,16 +283,16 @@ _$CustomerInfoEntityCopyWith<_CustomerInfoEntity> get copyWith => __$CustomerInf
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CustomerInfoEntity&&(identical(other.actionURI, actionURI) || other.actionURI == actionURI)&&(identical(other.actionText, actionText) || other.actionText == actionText)&&(identical(other.cartItemCount, cartItemCount) || other.cartItemCount == cartItemCount)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.isLoggedIn, isLoggedIn) || other.isLoggedIn == isLoggedIn)&&(identical(other.hasGuestData, hasGuestData) || other.hasGuestData == hasGuestData)&&const DeepCollectionEquality().equals(other._childCohorts, _childCohorts)&&(identical(other.userConfig, userConfig) || other.userConfig == userConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CustomerInfoEntity&&(identical(other.actionURI, actionURI) || other.actionURI == actionURI)&&(identical(other.actionText, actionText) || other.actionText == actionText)&&(identical(other.cartItemCount, cartItemCount) || other.cartItemCount == cartItemCount)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser)&&(identical(other.isLoggedIn, isLoggedIn) || other.isLoggedIn == isLoggedIn)&&(identical(other.hasGuestData, hasGuestData) || other.hasGuestData == hasGuestData)&&const DeepCollectionEquality().equals(other._childCohorts, _childCohorts)&&(identical(other.user, user) || other.user == user)&&(identical(other.auth, auth) || other.auth == auth)&&(identical(other.userConfig, userConfig) || other.userConfig == userConfig));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,actionURI,actionText,cartItemCount,isNewUser,isLoggedIn,hasGuestData,const DeepCollectionEquality().hash(_childCohorts),userConfig);
+int get hashCode => Object.hash(runtimeType,actionURI,actionText,cartItemCount,isNewUser,isLoggedIn,hasGuestData,const DeepCollectionEquality().hash(_childCohorts),user,auth,userConfig);
 
 @override
 String toString() {
-  return 'CustomerInfoEntity(actionURI: $actionURI, actionText: $actionText, cartItemCount: $cartItemCount, isNewUser: $isNewUser, isLoggedIn: $isLoggedIn, hasGuestData: $hasGuestData, childCohorts: $childCohorts, userConfig: $userConfig)';
+  return 'CustomerInfoEntity(actionURI: $actionURI, actionText: $actionText, cartItemCount: $cartItemCount, isNewUser: $isNewUser, isLoggedIn: $isLoggedIn, hasGuestData: $hasGuestData, childCohorts: $childCohorts, user: $user, auth: $auth, userConfig: $userConfig)';
 }
 
 
@@ -275,11 +303,11 @@ abstract mixin class _$CustomerInfoEntityCopyWith<$Res> implements $CustomerInfo
   factory _$CustomerInfoEntityCopyWith(_CustomerInfoEntity value, $Res Function(_CustomerInfoEntity) _then) = __$CustomerInfoEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String? actionURI, String? actionText, int cartItemCount, bool isNewUser, bool isLoggedIn, bool hasGuestData, Map<String, dynamic>? childCohorts, UserConfigEntity? userConfig
+ String? actionURI, String? actionText, int cartItemCount, bool isNewUser, bool isLoggedIn, bool hasGuestData, Map<String, dynamic>? childCohorts, UserInfoEntity? user, AuthCredentialsEntity? auth, UserConfigEntity? userConfig
 });
 
 
-@override $UserConfigEntityCopyWith<$Res>? get userConfig;
+@override $UserInfoEntityCopyWith<$Res>? get user;@override $AuthCredentialsEntityCopyWith<$Res>? get auth;@override $UserConfigEntityCopyWith<$Res>? get userConfig;
 
 }
 /// @nodoc
@@ -292,7 +320,7 @@ class __$CustomerInfoEntityCopyWithImpl<$Res>
 
 /// Create a copy of CustomerInfoEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? actionURI = freezed,Object? actionText = freezed,Object? cartItemCount = null,Object? isNewUser = null,Object? isLoggedIn = null,Object? hasGuestData = null,Object? childCohorts = freezed,Object? userConfig = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? actionURI = freezed,Object? actionText = freezed,Object? cartItemCount = null,Object? isNewUser = null,Object? isLoggedIn = null,Object? hasGuestData = null,Object? childCohorts = freezed,Object? user = freezed,Object? auth = freezed,Object? userConfig = freezed,}) {
   return _then(_CustomerInfoEntity(
 actionURI: freezed == actionURI ? _self.actionURI : actionURI // ignore: cast_nullable_to_non_nullable
 as String?,actionText: freezed == actionText ? _self.actionText : actionText // ignore: cast_nullable_to_non_nullable
@@ -301,12 +329,38 @@ as int,isNewUser: null == isNewUser ? _self.isNewUser : isNewUser // ignore: cas
 as bool,isLoggedIn: null == isLoggedIn ? _self.isLoggedIn : isLoggedIn // ignore: cast_nullable_to_non_nullable
 as bool,hasGuestData: null == hasGuestData ? _self.hasGuestData : hasGuestData // ignore: cast_nullable_to_non_nullable
 as bool,childCohorts: freezed == childCohorts ? _self._childCohorts : childCohorts // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,userConfig: freezed == userConfig ? _self.userConfig : userConfig // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as UserInfoEntity?,auth: freezed == auth ? _self.auth : auth // ignore: cast_nullable_to_non_nullable
+as AuthCredentialsEntity?,userConfig: freezed == userConfig ? _self.userConfig : userConfig // ignore: cast_nullable_to_non_nullable
 as UserConfigEntity?,
   ));
 }
 
 /// Create a copy of CustomerInfoEntity
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserInfoEntityCopyWith<$Res>? get user {
+    if (_self.user == null) {
+    return null;
+  }
+
+  return $UserInfoEntityCopyWith<$Res>(_self.user!, (value) {
+    return _then(_self.copyWith(user: value));
+  });
+}/// Create a copy of CustomerInfoEntity
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AuthCredentialsEntityCopyWith<$Res>? get auth {
+    if (_self.auth == null) {
+    return null;
+  }
+
+  return $AuthCredentialsEntityCopyWith<$Res>(_self.auth!, (value) {
+    return _then(_self.copyWith(auth: value));
+  });
+}/// Create a copy of CustomerInfoEntity
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')

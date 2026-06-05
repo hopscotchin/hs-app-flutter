@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../../../../../core/constants/api_constants.dart';
+import '../../models/check_mobile_response/check_mobile_response_model.dart';
 import '../../models/logout/logout_model.dart';
 import '../../models/send_otp_response/send_otp_response_model.dart';
 import '../../models/signup_otp_response/signup_otp_response_model.dart';
@@ -22,6 +23,13 @@ abstract class AuthRemoteDatasource {
     @CancelRequest() CancelToken? cancelToken,
   });
 
+  @POST('/{path}')
+  Future<SendOtpResponseModel> sendOtpViaPath({
+    @Path('path') required String path,
+    @Body() required Map<String, dynamic> body,
+    @CancelRequest() CancelToken? cancelToken,
+  });
+
   @POST(ApiConstants.verifyOtp)
   Future<VerifyOtpResponseModel> verifyOtp({
     @Body() required Map<String, dynamic> body,
@@ -30,6 +38,12 @@ abstract class AuthRemoteDatasource {
 
   @POST(ApiConstants.singUpSendOtp)
   Future<SignupOtpResponseModel> register({
+    @Body() required Map<String, dynamic> body,
+    @CancelRequest() CancelToken? cancelToken,
+  });
+
+  @POST(ApiConstants.checkMobile)
+  Future<CheckMobileResponseModel> checkMobile({
     @Body() required Map<String, dynamic> body,
     @CancelRequest() CancelToken? cancelToken,
   });

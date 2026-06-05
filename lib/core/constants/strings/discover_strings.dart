@@ -46,4 +46,6 @@ class DiscoverStrings {
 
   static String hiGreeting(String? name) =>
       'Hi ${name ?? greetingFallback} !';
+
+  static const String backButtonHit = 'Press Back again to exit';
 }

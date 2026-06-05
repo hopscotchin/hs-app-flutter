@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 
 import '../entities/message_bar_entity.dart';
 import '../error/exceptions.dart';
@@ -48,6 +49,11 @@ mixin SafeApiCall {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } on AppException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.cancel) {
+        return const Left(RequestCancelledFailure());
+      }
+      return const Left(UnknownFailure());
     } catch (_) {
       return const Left(UnknownFailure());
     }

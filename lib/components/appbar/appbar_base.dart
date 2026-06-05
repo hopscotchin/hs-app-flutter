@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/core/theme/colors.dart';
-import 'package:hs_app_flutter/core/theme/spacing.dart';
 
 abstract class AppBarBase extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
@@ -9,8 +8,16 @@ abstract class AppBarBase extends StatelessWidget implements PreferredSizeWidget
 
   final Color? backgroundColor;
   final EdgeInsetsGeometry? padding;
-  final double height;
-  final bool hasDivider;
+
+  /// Constrains the inner Row to this height. Pass `null` to let the Row size
+  /// itself naturally (needed when vertical padding is added, e.g. auth style).
+  final double? height;
+
+  final bool showBottomBorder;
+  final Color? borderColor;
+
+  /// Gap between the leading widget and the center content.
+  final double leadingGap;
 
   const AppBarBase({
     super.key,
@@ -19,52 +26,54 @@ abstract class AppBarBase extends StatelessWidget implements PreferredSizeWidget
     this.actions,
     this.backgroundColor,
     this.padding,
-    this.height = AppSpacing.appBarHeight,
-    this.hasDivider = false
+    this.height = kToolbarHeight,
+    this.showBottomBorder = false,
+    this.borderColor,
+    this.leadingGap = 8,
   });
 
   @override
-  Size get preferredSize => Size.fromHeight(height);
+  Size get preferredSize => Size.fromHeight(height ?? kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      // ✅ important (ripple, elevation support later)
+    final Widget row = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (leading != null) ...[leading!, SizedBox(width: leadingGap)],
+
+        Expanded(
+          child: Align(alignment: Alignment.centerLeft, child: center ?? const SizedBox.shrink()),
+        ),
+
+        if (actions != null && actions!.isNotEmpty) ...[
+          const SizedBox(width: 8),
+          Row(mainAxisSize: MainAxisSize.min, children: actions!),
+        ],
+      ],
+    );
+
+    Widget content = Material(
       color: backgroundColor ?? Colors.white,
       child: SafeArea(
         bottom: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: padding ?? AppSpacing.paddingHorizontalMd,
-              child: SizedBox(
-                height: hasDivider ? height - 1: height,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (leading != null) ...[leading!, AppSpacing.horizontalGapXs],
-
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: center ?? const SizedBox.shrink(),
-                      ),
-                    ),
-
-                    if (actions != null && actions!.isNotEmpty) ...[
-                      AppSpacing.horizontalGapXs,
-                      Row(mainAxisSize: MainAxisSize.min, children: actions!),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            if (hasDivider)
-              const Divider(height: 1, color: AppColors.divider),
-          ],
+        child: Padding(
+          padding: padding ?? const EdgeInsets.symmetric(horizontal: 16),
+          child: height != null ? SizedBox(height: height, child: row) : row,
         ),
       ),
     );
+
+    if (showBottomBorder) {
+      content = DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: borderColor ?? AppColors.dividerLight, width: 1)),
+        ),
+        position: DecorationPosition.foreground,
+        child: content,
+      );
+    }
+
+    return content;
   }
 }

@@ -36,9 +36,11 @@ class HSApp extends StatelessWidget {
         scaffoldMessengerKey: scaffoldMessengerKey,
         routerConfig: AppRouter.router,
         builder: (context, child) {
-          return ConnectivityListener(
-            connectivityService: sl<ConnectivityService>(),
-            child: child ?? const SizedBox.shrink(),
+          return TalkerFloatingButton(
+            child: ConnectivityListener(
+              connectivityService: sl<ConnectivityService>(),
+              child: child ?? const SizedBox.shrink(),
+            ),
           );
         },
       ),

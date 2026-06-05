@@ -60,6 +60,8 @@ class AuthHeaderInterceptor extends Interceptor {
     _installId = _uuid.v4();
   }
 
+  String? get persistentTicket => _persistentTicket;
+
   void setPersistentTicket(String? ticket) => _persistentTicket = ticket;
 
   void setN7HdToken(String? token) => _n7HdToken = token;

@@ -5,7 +5,7 @@ import '../../../domain/entities/user_info/user_info_entity.dart';
 
 part 'user_info_model.g.dart';
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class UserInfoModel {
   const UserInfoModel({
     this.userId,
@@ -18,31 +18,41 @@ class UserInfoModel {
     this.userName,
     this.mobileStatus,
     this.cartItemCount = 0,
+    this.profileImage,
   });
 
   @JsonKey(fromJson: parseToStringOrNull)
   final String? userId;
-  @JsonKey(defaultValue: null)
   final String? firstName;
-  @JsonKey(defaultValue: null)
   final String? lastName;
-  @JsonKey(defaultValue: null)
   final String? email;
-  @JsonKey(defaultValue: null)
   final String? mobile;
-  @JsonKey(fromJson: parseToBool, defaultValue: false)
+  @JsonKey(defaultValue: false)
   final bool isLoggedIn;
-  @JsonKey(fromJson: parseToBool, defaultValue: false)
+  @JsonKey(defaultValue: false)
   final bool isNewUser;
-  @JsonKey(defaultValue: null)
   final String? userName;
-  @JsonKey(defaultValue: null)
   final String? mobileStatus;
-  @JsonKey(fromJson: parseToInt, defaultValue: 0)
+  @JsonKey(defaultValue: 0)
   final int cartItemCount;
+  final String? profileImage;
 
-  factory UserInfoModel.fromJson(Map<String, dynamic> json) =>
-      _$UserInfoModelFromJson(json);
+  factory UserInfoModel.fromJson(Map<String, dynamic> json) => _$UserInfoModelFromJson(json);
+  Map<String, dynamic> toJson() => _$UserInfoModelToJson(this);
+
+  factory UserInfoModel.fromEntity(UserInfoEntity entity) => UserInfoModel(
+    userId: entity.userId,
+    firstName: entity.firstName,
+    lastName: entity.lastName,
+    email: entity.email,
+    mobile: entity.mobile,
+    isLoggedIn: entity.isLoggedIn,
+    isNewUser: entity.isNewUser,
+    userName: entity.userName,
+    mobileStatus: entity.mobileStatus,
+    cartItemCount: entity.cartItemCount,
+    profileImage: entity.profileImage,
+  );
 }
 
 extension UserInfoModelX on UserInfoModel {
@@ -57,5 +67,6 @@ extension UserInfoModelX on UserInfoModel {
     userName: userName,
     mobileStatus: mobileStatus,
     cartItemCount: cartItemCount,
+    profileImage: profileImage,
   );
 }

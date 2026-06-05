@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hs_app_flutter/core/config/environment.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
-import 'package:hs_app_flutter/core/constants/strings/auth_strings.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -52,10 +51,10 @@ class AccountFooterWidget extends StatelessWidget {
                         borderRadius: AppSpacing.borderRadiusXs,
                       ),
                       foregroundColor: AppColors.primary,
-                      textStyle: AppTypographyV1.bodyRegular.semiBold,
+                      textStyle: AppTypographyV1.bodyLarge.bold,
                       backgroundColor: AppColors.container,
                     ),
-                    child: const Text(AuthStrings.signOut),
+                    child: const Text(AccountStrings.signOut),
                   ),
                 ),
               ),
@@ -72,22 +71,26 @@ class AccountFooterWidget extends StatelessWidget {
                 ),
                 // Version text
                 Expanded(
-                  child: Center(
-                    child: FutureBuilder<PackageInfo>(
-                      future: PackageInfo.fromPlatform(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return const SizedBox.shrink();
-                        final info = snapshot.data!;
-                        final versionText = EnvironmentConfig.isDebug
-                            ? '${AccountStrings.appVerison} ${info.version} ${info.buildNumber}'
-                            : '${AccountStrings.appVerison} ${info.version}';
-                        return Text(
-                          versionText,
-                          style: AppTypographyV1.bodyLarge.regular.copyWith(
-                            color: AppColors.neutralGrey0,
-                          ),
-                        );
-                      },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                    child: Center(
+                      child: FutureBuilder<PackageInfo>(
+                        future: PackageInfo.fromPlatform(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) return const SizedBox.shrink();
+                          final info = snapshot.data!;
+                          final versionText = EnvironmentConfig.isDebug
+                              ? '${AccountStrings.appVersion} ${info.version} ${info.buildNumber}'
+                              : '${AccountStrings.appVersion} ${info.version}';
+                          return Text(
+                            versionText,
+                            textAlign: TextAlign.center,
+                            style: AppTypographyV1.bodySmall.medium.copyWith(
+                              color: AppColors.neutralGrey0,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -96,7 +99,7 @@ class AccountFooterWidget extends StatelessWidget {
                   onTap: onLegal ?? () {},
                   child: Text(
                     AccountStrings.legal,
-                    style: AppTypographyV1.bodyLarge.bold.copyWith(
+                    style: AppTypographyV1.bodySmall.medium.copyWith(
                       color: AppColors.neutralGrey0,
                       letterSpacing: 1.0,
                     ),

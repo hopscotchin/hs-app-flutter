@@ -10,11 +10,13 @@ import 'package:talker_dio_logger_plus/talker_dio_logger_plus.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 import 'core/config/env_config.dart';
+import 'core/config/environment.dart';
 import 'core/di/injection.dart';
 import 'core/network/cookies/cookies_based_events_util.dart';
 import 'core/network/cookies/hs_cookie_store.dart';
 import 'core/network/network_client.dart';
 import 'core/services/pref_manager.dart';
+import 'core/services/push_notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'hs_app.dart';
 
@@ -25,6 +27,12 @@ void main() async {
   // debugPaintBaselinesEnabled = true;
 
   SystemChrome.setSystemUIOverlayStyle(AppTheme.systemUiLight);
+
+  // Lock app to portrait orientation on all platforms.
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   await Future.wait([
     EnvConfig.load(),
@@ -57,6 +65,11 @@ Future<void> _runPostInitBootstrapping() async {
   final prefManager = sl<PrefManager>();
   final networkClient = sl<NetworkClient>();
 
+  // Restore the environment the user last selected so subsequent API calls
+  // hit the same backend they were logged into. Must run before any other
+  // bootstrapping that touches Dio (cookie host, persistent ticket).
+  _restoreSelectedEnvironment(prefManager, networkClient);
+
   // Initialize cookie/session helpers with DI-managed PrefManager.
   HSCookieStore.init(prefManager);
   CookiesBasedEventsUtil.instance.init(prefManager);
@@ -66,6 +79,11 @@ Future<void> _runPostInitBootstrapping() async {
   if (savedTicket != null && savedTicket.isNotEmpty) {
     networkClient.setPersistentTicket(savedTicket);
   }
+
+  // Wire PrefManager into AutoLoginInterceptor so it can persist refreshed tickets.
+  networkClient.bindPrefManager(prefManager);
+
+  await sl<PushNotificationService>().initialize();
   // HTTP Inspector — debug builds only. Opened via the floating button overlay.
   if (kDebugMode) {
     final talker = TalkerFlutter.init();
@@ -101,5 +119,21 @@ Future<void> _runPostInitBootstrapping() async {
         // },
       ),
     );
+  }
+}
+
+void _restoreSelectedEnvironment(
+  PrefManager prefManager,
+  NetworkClient networkClient,
+) {
+  final name = prefManager.selectedEnvironment;
+  if (name == null || name.isEmpty) return;
+  for (final env in Environment.values) {
+    if (env.name == name) {
+      if (env == EnvironmentConfig.current) return;
+      EnvironmentConfig.setEnvironment(env);
+      networkClient.onEnvironmentChanged();
+      return;
+    }
   }
 }

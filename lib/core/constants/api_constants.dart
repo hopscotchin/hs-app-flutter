@@ -24,7 +24,7 @@ class ApiConstants {
   static String get segmentReleaseUrl => EnvConfig.segmentReleaseUrl;
 
   // API Endpoints - Core
-  static const String customerInfo = '/customer/v2/info';
+  static const String customerInfo = '/customer/v3/info';
   static const String appConfig = '/v1/app-config';
 
   // Home/Discover
@@ -60,14 +60,32 @@ class ApiConstants {
   static const String sendOtp = '/customer/v3/auth/send-otp';
   static const String verifyOtp = '/customer/v3/auth/verify-otp';
   static const String singUpSendOtp = '/customer/v3/auth/signup/send-otp';
-  static const String checkMobileV3 = '/customer/v3/auth/check-mobile';
-  static const String customerInfoV3 = '/customer/v3/info';
+  static const String checkMobile = '/customer/v3/auth/check-mobile';
+
+  // Device
+  static const String registerDevice = '/my/register';
+
+  // Auto login
+  static const String autoLogin = '/customer/login/auto';
 
   // Account
   static const String myAccount = '/myaccount';
   static const String logout = '/customer/logout';
   static const String forgetGuestUser = '/customer/flush-data/guestuser';
-  static const String addresses = '/delivery/addresses/v2';
+
+  // Address Management
+  static const String addresses = '/delivery/addresses/v3';
+  static const String customerAddresses = '/customer/v2/addresses';
+  static const String createAddress = '/customer/v3/saveAddress';
+  static const String createAddressCart = '/delivery/v3/saveAddress';
+  static const String updateAddress = '/customer/v3/updateAddress/{addressId}';
+  static const String deleteAddress = '/customer/deleteAddress/{addressId}';
+  static const String checkPincode = '/delivery/pincode/v3/serviceability/{pincode}';
+  static const String checkPincodeExchange = '/delivery/pincode/v3/availability/{pincode}';
+  static const String selectAddress = '/delivery/selectAddress/{addressId}';
+
+  // Pincode (delivery serviceability bottom sheet)
+  static const String deliveryPincode = '/delivery/pincode/{pincode}';
 
   // PDP (Product Detail)
   static const String productDetails = '/v2/product';

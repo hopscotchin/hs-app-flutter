@@ -55,13 +55,14 @@ extension AuthEventPatterns on AuthEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SendOtp value)?  sendOtp,TResult Function( VerifyOtp value)?  verifyOtp,TResult Function( Register value)?  register,TResult Function( ResetAuth value)?  reset,TResult Function( AuthSignOut value)?  signOut,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SendOtp value)?  sendOtp,TResult Function( VerifyOtp value)?  verifyOtp,TResult Function( Register value)?  register,TResult Function( CheckMobile value)?  checkMobile,TResult Function( ResetAuth value)?  reset,TResult Function( AuthSignOut value)?  signOut,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case SendOtp() when sendOtp != null:
 return sendOtp(_that);case VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that);case Register() when register != null:
-return register(_that);case ResetAuth() when reset != null:
+return register(_that);case CheckMobile() when checkMobile != null:
+return checkMobile(_that);case ResetAuth() when reset != null:
 return reset(_that);case AuthSignOut() when signOut != null:
 return signOut(_that);case _:
   return orElse();
@@ -81,13 +82,14 @@ return signOut(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SendOtp value)  sendOtp,required TResult Function( VerifyOtp value)  verifyOtp,required TResult Function( Register value)  register,required TResult Function( ResetAuth value)  reset,required TResult Function( AuthSignOut value)  signOut,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SendOtp value)  sendOtp,required TResult Function( VerifyOtp value)  verifyOtp,required TResult Function( Register value)  register,required TResult Function( CheckMobile value)  checkMobile,required TResult Function( ResetAuth value)  reset,required TResult Function( AuthSignOut value)  signOut,}){
 final _that = this;
 switch (_that) {
 case SendOtp():
 return sendOtp(_that);case VerifyOtp():
 return verifyOtp(_that);case Register():
-return register(_that);case ResetAuth():
+return register(_that);case CheckMobile():
+return checkMobile(_that);case ResetAuth():
 return reset(_that);case AuthSignOut():
 return signOut(_that);}
 }
@@ -103,13 +105,14 @@ return signOut(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SendOtp value)?  sendOtp,TResult? Function( VerifyOtp value)?  verifyOtp,TResult? Function( Register value)?  register,TResult? Function( ResetAuth value)?  reset,TResult? Function( AuthSignOut value)?  signOut,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SendOtp value)?  sendOtp,TResult? Function( VerifyOtp value)?  verifyOtp,TResult? Function( Register value)?  register,TResult? Function( CheckMobile value)?  checkMobile,TResult? Function( ResetAuth value)?  reset,TResult? Function( AuthSignOut value)?  signOut,}){
 final _that = this;
 switch (_that) {
 case SendOtp() when sendOtp != null:
 return sendOtp(_that);case VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that);case Register() when register != null:
-return register(_that);case ResetAuth() when reset != null:
+return register(_that);case CheckMobile() when checkMobile != null:
+return checkMobile(_that);case ResetAuth() when reset != null:
 return reset(_that);case AuthSignOut() when signOut != null:
 return signOut(_that);case _:
   return null;
@@ -128,12 +131,13 @@ return signOut(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String loginId,  String otpReason)?  sendOtp,TResult Function( String loginId,  String otp,  String otpReason)?  verifyOtp,TResult Function( String displayName,  String email,  String mobile)?  register,TResult Function()?  reset,TResult Function()?  signOut,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String loginId,  String otpReason,  String? pathUri)?  sendOtp,TResult Function( String loginId,  String otp,  String otpReason)?  verifyOtp,TResult Function( String displayName,  String email,  String mobile)?  register,TResult Function( String mobile)?  checkMobile,TResult Function()?  reset,TResult Function()?  signOut,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case SendOtp() when sendOtp != null:
-return sendOtp(_that.loginId,_that.otpReason);case VerifyOtp() when verifyOtp != null:
+return sendOtp(_that.loginId,_that.otpReason,_that.pathUri);case VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that.loginId,_that.otp,_that.otpReason);case Register() when register != null:
-return register(_that.displayName,_that.email,_that.mobile);case ResetAuth() when reset != null:
+return register(_that.displayName,_that.email,_that.mobile);case CheckMobile() when checkMobile != null:
+return checkMobile(_that.mobile);case ResetAuth() when reset != null:
 return reset();case AuthSignOut() when signOut != null:
 return signOut();case _:
   return orElse();
@@ -153,12 +157,13 @@ return signOut();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String loginId,  String otpReason)  sendOtp,required TResult Function( String loginId,  String otp,  String otpReason)  verifyOtp,required TResult Function( String displayName,  String email,  String mobile)  register,required TResult Function()  reset,required TResult Function()  signOut,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String loginId,  String otpReason,  String? pathUri)  sendOtp,required TResult Function( String loginId,  String otp,  String otpReason)  verifyOtp,required TResult Function( String displayName,  String email,  String mobile)  register,required TResult Function( String mobile)  checkMobile,required TResult Function()  reset,required TResult Function()  signOut,}) {final _that = this;
 switch (_that) {
 case SendOtp():
-return sendOtp(_that.loginId,_that.otpReason);case VerifyOtp():
+return sendOtp(_that.loginId,_that.otpReason,_that.pathUri);case VerifyOtp():
 return verifyOtp(_that.loginId,_that.otp,_that.otpReason);case Register():
-return register(_that.displayName,_that.email,_that.mobile);case ResetAuth():
+return register(_that.displayName,_that.email,_that.mobile);case CheckMobile():
+return checkMobile(_that.mobile);case ResetAuth():
 return reset();case AuthSignOut():
 return signOut();}
 }
@@ -174,12 +179,13 @@ return signOut();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String loginId,  String otpReason)?  sendOtp,TResult? Function( String loginId,  String otp,  String otpReason)?  verifyOtp,TResult? Function( String displayName,  String email,  String mobile)?  register,TResult? Function()?  reset,TResult? Function()?  signOut,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String loginId,  String otpReason,  String? pathUri)?  sendOtp,TResult? Function( String loginId,  String otp,  String otpReason)?  verifyOtp,TResult? Function( String displayName,  String email,  String mobile)?  register,TResult? Function( String mobile)?  checkMobile,TResult? Function()?  reset,TResult? Function()?  signOut,}) {final _that = this;
 switch (_that) {
 case SendOtp() when sendOtp != null:
-return sendOtp(_that.loginId,_that.otpReason);case VerifyOtp() when verifyOtp != null:
+return sendOtp(_that.loginId,_that.otpReason,_that.pathUri);case VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that.loginId,_that.otp,_that.otpReason);case Register() when register != null:
-return register(_that.displayName,_that.email,_that.mobile);case ResetAuth() when reset != null:
+return register(_that.displayName,_that.email,_that.mobile);case CheckMobile() when checkMobile != null:
+return checkMobile(_that.mobile);case ResetAuth() when reset != null:
 return reset();case AuthSignOut() when signOut != null:
 return signOut();case _:
   return null;
@@ -193,11 +199,12 @@ return signOut();case _:
 
 
 class SendOtp implements AuthEvent {
-  const SendOtp({required this.loginId, this.otpReason = 'SIGN_IN'});
+  const SendOtp({required this.loginId, this.otpReason = 'SIGN_IN', this.pathUri});
   
 
  final  String loginId;
 @JsonKey() final  String otpReason;
+ final  String? pathUri;
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -209,16 +216,16 @@ $SendOtpCopyWith<SendOtp> get copyWith => _$SendOtpCopyWithImpl<SendOtp>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SendOtp&&(identical(other.loginId, loginId) || other.loginId == loginId)&&(identical(other.otpReason, otpReason) || other.otpReason == otpReason));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SendOtp&&(identical(other.loginId, loginId) || other.loginId == loginId)&&(identical(other.otpReason, otpReason) || other.otpReason == otpReason)&&(identical(other.pathUri, pathUri) || other.pathUri == pathUri));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loginId,otpReason);
+int get hashCode => Object.hash(runtimeType,loginId,otpReason,pathUri);
 
 @override
 String toString() {
-  return 'AuthEvent.sendOtp(loginId: $loginId, otpReason: $otpReason)';
+  return 'AuthEvent.sendOtp(loginId: $loginId, otpReason: $otpReason, pathUri: $pathUri)';
 }
 
 
@@ -229,7 +236,7 @@ abstract mixin class $SendOtpCopyWith<$Res> implements $AuthEventCopyWith<$Res> 
   factory $SendOtpCopyWith(SendOtp value, $Res Function(SendOtp) _then) = _$SendOtpCopyWithImpl;
 @useResult
 $Res call({
- String loginId, String otpReason
+ String loginId, String otpReason, String? pathUri
 });
 
 
@@ -246,11 +253,12 @@ class _$SendOtpCopyWithImpl<$Res>
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? loginId = null,Object? otpReason = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? loginId = null,Object? otpReason = null,Object? pathUri = freezed,}) {
   return _then(SendOtp(
 loginId: null == loginId ? _self.loginId : loginId // ignore: cast_nullable_to_non_nullable
 as String,otpReason: null == otpReason ? _self.otpReason : otpReason // ignore: cast_nullable_to_non_nullable
-as String,
+as String,pathUri: freezed == pathUri ? _self.pathUri : pathUri // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -400,6 +408,72 @@ as String,
 /// @nodoc
 
 
+class CheckMobile implements AuthEvent {
+  const CheckMobile({required this.mobile});
+  
+
+ final  String mobile;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CheckMobileCopyWith<CheckMobile> get copyWith => _$CheckMobileCopyWithImpl<CheckMobile>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CheckMobile&&(identical(other.mobile, mobile) || other.mobile == mobile));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,mobile);
+
+@override
+String toString() {
+  return 'AuthEvent.checkMobile(mobile: $mobile)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CheckMobileCopyWith<$Res> implements $AuthEventCopyWith<$Res> {
+  factory $CheckMobileCopyWith(CheckMobile value, $Res Function(CheckMobile) _then) = _$CheckMobileCopyWithImpl;
+@useResult
+$Res call({
+ String mobile
+});
+
+
+
+
+}
+/// @nodoc
+class _$CheckMobileCopyWithImpl<$Res>
+    implements $CheckMobileCopyWith<$Res> {
+  _$CheckMobileCopyWithImpl(this._self, this._then);
+
+  final CheckMobile _self;
+  final $Res Function(CheckMobile) _then;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? mobile = null,}) {
+  return _then(CheckMobile(
+mobile: null == mobile ? _self.mobile : mobile // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
 class ResetAuth implements AuthEvent {
   const ResetAuth();
   
@@ -464,7 +538,7 @@ String toString() {
 /// @nodoc
 mixin _$AuthState {
 
- AuthStatus get status; OtpConfigEntity? get otpConfig; VerifyOtpResponseEntity? get verifyOtpResult; String get errorMessage; List<MessageBarEntity> get messageBars; String? get redirectLink;
+ AuthStatus get status; OtpConfigEntity? get otpConfig; VerifyOtpResponseEntity? get verifyOtpResult; CheckMobileResponseEntity? get checkMobileResult; String get errorMessage; List<MessageBarEntity> get messageBars; List<MessageBarEntity> get otpMessageBars; String? get redirectLink;
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -475,16 +549,16 @@ $AuthStateCopyWith<AuthState> get copyWith => _$AuthStateCopyWithImpl<AuthState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.otpConfig, otpConfig) || other.otpConfig == otpConfig)&&(identical(other.verifyOtpResult, verifyOtpResult) || other.verifyOtpResult == verifyOtpResult)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&const DeepCollectionEquality().equals(other.messageBars, messageBars)&&(identical(other.redirectLink, redirectLink) || other.redirectLink == redirectLink));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.otpConfig, otpConfig) || other.otpConfig == otpConfig)&&(identical(other.verifyOtpResult, verifyOtpResult) || other.verifyOtpResult == verifyOtpResult)&&(identical(other.checkMobileResult, checkMobileResult) || other.checkMobileResult == checkMobileResult)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&const DeepCollectionEquality().equals(other.messageBars, messageBars)&&const DeepCollectionEquality().equals(other.otpMessageBars, otpMessageBars)&&(identical(other.redirectLink, redirectLink) || other.redirectLink == redirectLink));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,otpConfig,verifyOtpResult,errorMessage,const DeepCollectionEquality().hash(messageBars),redirectLink);
+int get hashCode => Object.hash(runtimeType,status,otpConfig,verifyOtpResult,checkMobileResult,errorMessage,const DeepCollectionEquality().hash(messageBars),const DeepCollectionEquality().hash(otpMessageBars),redirectLink);
 
 @override
 String toString() {
-  return 'AuthState(status: $status, otpConfig: $otpConfig, verifyOtpResult: $verifyOtpResult, errorMessage: $errorMessage, messageBars: $messageBars, redirectLink: $redirectLink)';
+  return 'AuthState(status: $status, otpConfig: $otpConfig, verifyOtpResult: $verifyOtpResult, checkMobileResult: $checkMobileResult, errorMessage: $errorMessage, messageBars: $messageBars, otpMessageBars: $otpMessageBars, redirectLink: $redirectLink)';
 }
 
 
@@ -495,11 +569,11 @@ abstract mixin class $AuthStateCopyWith<$Res>  {
   factory $AuthStateCopyWith(AuthState value, $Res Function(AuthState) _then) = _$AuthStateCopyWithImpl;
 @useResult
 $Res call({
- AuthStatus status, OtpConfigEntity? otpConfig, VerifyOtpResponseEntity? verifyOtpResult, String errorMessage, List<MessageBarEntity> messageBars, String? redirectLink
+ AuthStatus status, OtpConfigEntity? otpConfig, VerifyOtpResponseEntity? verifyOtpResult, CheckMobileResponseEntity? checkMobileResult, String errorMessage, List<MessageBarEntity> messageBars, List<MessageBarEntity> otpMessageBars, String? redirectLink
 });
 
 
-$OtpConfigEntityCopyWith<$Res>? get otpConfig;$VerifyOtpResponseEntityCopyWith<$Res>? get verifyOtpResult;
+$OtpConfigEntityCopyWith<$Res>? get otpConfig;$VerifyOtpResponseEntityCopyWith<$Res>? get verifyOtpResult;$CheckMobileResponseEntityCopyWith<$Res>? get checkMobileResult;
 
 }
 /// @nodoc
@@ -512,13 +586,15 @@ class _$AuthStateCopyWithImpl<$Res>
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? otpConfig = freezed,Object? verifyOtpResult = freezed,Object? errorMessage = null,Object? messageBars = null,Object? redirectLink = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? otpConfig = freezed,Object? verifyOtpResult = freezed,Object? checkMobileResult = freezed,Object? errorMessage = null,Object? messageBars = null,Object? otpMessageBars = null,Object? redirectLink = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AuthStatus,otpConfig: freezed == otpConfig ? _self.otpConfig : otpConfig // ignore: cast_nullable_to_non_nullable
 as OtpConfigEntity?,verifyOtpResult: freezed == verifyOtpResult ? _self.verifyOtpResult : verifyOtpResult // ignore: cast_nullable_to_non_nullable
-as VerifyOtpResponseEntity?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as VerifyOtpResponseEntity?,checkMobileResult: freezed == checkMobileResult ? _self.checkMobileResult : checkMobileResult // ignore: cast_nullable_to_non_nullable
+as CheckMobileResponseEntity?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,messageBars: null == messageBars ? _self.messageBars : messageBars // ignore: cast_nullable_to_non_nullable
+as List<MessageBarEntity>,otpMessageBars: null == otpMessageBars ? _self.otpMessageBars : otpMessageBars // ignore: cast_nullable_to_non_nullable
 as List<MessageBarEntity>,redirectLink: freezed == redirectLink ? _self.redirectLink : redirectLink // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -546,6 +622,18 @@ $VerifyOtpResponseEntityCopyWith<$Res>? get verifyOtpResult {
 
   return $VerifyOtpResponseEntityCopyWith<$Res>(_self.verifyOtpResult!, (value) {
     return _then(_self.copyWith(verifyOtpResult: value));
+  });
+}/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CheckMobileResponseEntityCopyWith<$Res>? get checkMobileResult {
+    if (_self.checkMobileResult == null) {
+    return null;
+  }
+
+  return $CheckMobileResponseEntityCopyWith<$Res>(_self.checkMobileResult!, (value) {
+    return _then(_self.copyWith(checkMobileResult: value));
   });
 }
 }
@@ -629,10 +717,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AuthStatus status,  OtpConfigEntity? otpConfig,  VerifyOtpResponseEntity? verifyOtpResult,  String errorMessage,  List<MessageBarEntity> messageBars,  String? redirectLink)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AuthStatus status,  OtpConfigEntity? otpConfig,  VerifyOtpResponseEntity? verifyOtpResult,  CheckMobileResponseEntity? checkMobileResult,  String errorMessage,  List<MessageBarEntity> messageBars,  List<MessageBarEntity> otpMessageBars,  String? redirectLink)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuthState() when $default != null:
-return $default(_that.status,_that.otpConfig,_that.verifyOtpResult,_that.errorMessage,_that.messageBars,_that.redirectLink);case _:
+return $default(_that.status,_that.otpConfig,_that.verifyOtpResult,_that.checkMobileResult,_that.errorMessage,_that.messageBars,_that.otpMessageBars,_that.redirectLink);case _:
   return orElse();
 
 }
@@ -650,10 +738,10 @@ return $default(_that.status,_that.otpConfig,_that.verifyOtpResult,_that.errorMe
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AuthStatus status,  OtpConfigEntity? otpConfig,  VerifyOtpResponseEntity? verifyOtpResult,  String errorMessage,  List<MessageBarEntity> messageBars,  String? redirectLink)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AuthStatus status,  OtpConfigEntity? otpConfig,  VerifyOtpResponseEntity? verifyOtpResult,  CheckMobileResponseEntity? checkMobileResult,  String errorMessage,  List<MessageBarEntity> messageBars,  List<MessageBarEntity> otpMessageBars,  String? redirectLink)  $default,) {final _that = this;
 switch (_that) {
 case _AuthState():
-return $default(_that.status,_that.otpConfig,_that.verifyOtpResult,_that.errorMessage,_that.messageBars,_that.redirectLink);case _:
+return $default(_that.status,_that.otpConfig,_that.verifyOtpResult,_that.checkMobileResult,_that.errorMessage,_that.messageBars,_that.otpMessageBars,_that.redirectLink);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -670,10 +758,10 @@ return $default(_that.status,_that.otpConfig,_that.verifyOtpResult,_that.errorMe
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AuthStatus status,  OtpConfigEntity? otpConfig,  VerifyOtpResponseEntity? verifyOtpResult,  String errorMessage,  List<MessageBarEntity> messageBars,  String? redirectLink)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AuthStatus status,  OtpConfigEntity? otpConfig,  VerifyOtpResponseEntity? verifyOtpResult,  CheckMobileResponseEntity? checkMobileResult,  String errorMessage,  List<MessageBarEntity> messageBars,  List<MessageBarEntity> otpMessageBars,  String? redirectLink)?  $default,) {final _that = this;
 switch (_that) {
 case _AuthState() when $default != null:
-return $default(_that.status,_that.otpConfig,_that.verifyOtpResult,_that.errorMessage,_that.messageBars,_that.redirectLink);case _:
+return $default(_that.status,_that.otpConfig,_that.verifyOtpResult,_that.checkMobileResult,_that.errorMessage,_that.messageBars,_that.otpMessageBars,_that.redirectLink);case _:
   return null;
 
 }
@@ -685,18 +773,26 @@ return $default(_that.status,_that.otpConfig,_that.verifyOtpResult,_that.errorMe
 
 
 class _AuthState implements AuthState {
-  const _AuthState({this.status = AuthStatus.initial, this.otpConfig, this.verifyOtpResult, this.errorMessage = '', final  List<MessageBarEntity> messageBars = const <MessageBarEntity>[], this.redirectLink}): _messageBars = messageBars;
+  const _AuthState({this.status = AuthStatus.initial, this.otpConfig, this.verifyOtpResult, this.checkMobileResult, this.errorMessage = '', final  List<MessageBarEntity> messageBars = const <MessageBarEntity>[], final  List<MessageBarEntity> otpMessageBars = const <MessageBarEntity>[], this.redirectLink}): _messageBars = messageBars,_otpMessageBars = otpMessageBars;
   
 
 @override@JsonKey() final  AuthStatus status;
 @override final  OtpConfigEntity? otpConfig;
 @override final  VerifyOtpResponseEntity? verifyOtpResult;
+@override final  CheckMobileResponseEntity? checkMobileResult;
 @override@JsonKey() final  String errorMessage;
  final  List<MessageBarEntity> _messageBars;
 @override@JsonKey() List<MessageBarEntity> get messageBars {
   if (_messageBars is EqualUnmodifiableListView) return _messageBars;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_messageBars);
+}
+
+ final  List<MessageBarEntity> _otpMessageBars;
+@override@JsonKey() List<MessageBarEntity> get otpMessageBars {
+  if (_otpMessageBars is EqualUnmodifiableListView) return _otpMessageBars;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_otpMessageBars);
 }
 
 @override final  String? redirectLink;
@@ -711,16 +807,16 @@ _$AuthStateCopyWith<_AuthState> get copyWith => __$AuthStateCopyWithImpl<_AuthSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.otpConfig, otpConfig) || other.otpConfig == otpConfig)&&(identical(other.verifyOtpResult, verifyOtpResult) || other.verifyOtpResult == verifyOtpResult)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&const DeepCollectionEquality().equals(other._messageBars, _messageBars)&&(identical(other.redirectLink, redirectLink) || other.redirectLink == redirectLink));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.otpConfig, otpConfig) || other.otpConfig == otpConfig)&&(identical(other.verifyOtpResult, verifyOtpResult) || other.verifyOtpResult == verifyOtpResult)&&(identical(other.checkMobileResult, checkMobileResult) || other.checkMobileResult == checkMobileResult)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&const DeepCollectionEquality().equals(other._messageBars, _messageBars)&&const DeepCollectionEquality().equals(other._otpMessageBars, _otpMessageBars)&&(identical(other.redirectLink, redirectLink) || other.redirectLink == redirectLink));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,otpConfig,verifyOtpResult,errorMessage,const DeepCollectionEquality().hash(_messageBars),redirectLink);
+int get hashCode => Object.hash(runtimeType,status,otpConfig,verifyOtpResult,checkMobileResult,errorMessage,const DeepCollectionEquality().hash(_messageBars),const DeepCollectionEquality().hash(_otpMessageBars),redirectLink);
 
 @override
 String toString() {
-  return 'AuthState(status: $status, otpConfig: $otpConfig, verifyOtpResult: $verifyOtpResult, errorMessage: $errorMessage, messageBars: $messageBars, redirectLink: $redirectLink)';
+  return 'AuthState(status: $status, otpConfig: $otpConfig, verifyOtpResult: $verifyOtpResult, checkMobileResult: $checkMobileResult, errorMessage: $errorMessage, messageBars: $messageBars, otpMessageBars: $otpMessageBars, redirectLink: $redirectLink)';
 }
 
 
@@ -731,11 +827,11 @@ abstract mixin class _$AuthStateCopyWith<$Res> implements $AuthStateCopyWith<$Re
   factory _$AuthStateCopyWith(_AuthState value, $Res Function(_AuthState) _then) = __$AuthStateCopyWithImpl;
 @override @useResult
 $Res call({
- AuthStatus status, OtpConfigEntity? otpConfig, VerifyOtpResponseEntity? verifyOtpResult, String errorMessage, List<MessageBarEntity> messageBars, String? redirectLink
+ AuthStatus status, OtpConfigEntity? otpConfig, VerifyOtpResponseEntity? verifyOtpResult, CheckMobileResponseEntity? checkMobileResult, String errorMessage, List<MessageBarEntity> messageBars, List<MessageBarEntity> otpMessageBars, String? redirectLink
 });
 
 
-@override $OtpConfigEntityCopyWith<$Res>? get otpConfig;@override $VerifyOtpResponseEntityCopyWith<$Res>? get verifyOtpResult;
+@override $OtpConfigEntityCopyWith<$Res>? get otpConfig;@override $VerifyOtpResponseEntityCopyWith<$Res>? get verifyOtpResult;@override $CheckMobileResponseEntityCopyWith<$Res>? get checkMobileResult;
 
 }
 /// @nodoc
@@ -748,13 +844,15 @@ class __$AuthStateCopyWithImpl<$Res>
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? otpConfig = freezed,Object? verifyOtpResult = freezed,Object? errorMessage = null,Object? messageBars = null,Object? redirectLink = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? otpConfig = freezed,Object? verifyOtpResult = freezed,Object? checkMobileResult = freezed,Object? errorMessage = null,Object? messageBars = null,Object? otpMessageBars = null,Object? redirectLink = freezed,}) {
   return _then(_AuthState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AuthStatus,otpConfig: freezed == otpConfig ? _self.otpConfig : otpConfig // ignore: cast_nullable_to_non_nullable
 as OtpConfigEntity?,verifyOtpResult: freezed == verifyOtpResult ? _self.verifyOtpResult : verifyOtpResult // ignore: cast_nullable_to_non_nullable
-as VerifyOtpResponseEntity?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as VerifyOtpResponseEntity?,checkMobileResult: freezed == checkMobileResult ? _self.checkMobileResult : checkMobileResult // ignore: cast_nullable_to_non_nullable
+as CheckMobileResponseEntity?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,messageBars: null == messageBars ? _self._messageBars : messageBars // ignore: cast_nullable_to_non_nullable
+as List<MessageBarEntity>,otpMessageBars: null == otpMessageBars ? _self._otpMessageBars : otpMessageBars // ignore: cast_nullable_to_non_nullable
 as List<MessageBarEntity>,redirectLink: freezed == redirectLink ? _self.redirectLink : redirectLink // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -783,6 +881,18 @@ $VerifyOtpResponseEntityCopyWith<$Res>? get verifyOtpResult {
 
   return $VerifyOtpResponseEntityCopyWith<$Res>(_self.verifyOtpResult!, (value) {
     return _then(_self.copyWith(verifyOtpResult: value));
+  });
+}/// Create a copy of AuthState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CheckMobileResponseEntityCopyWith<$Res>? get checkMobileResult {
+    if (_self.checkMobileResult == null) {
+    return null;
+  }
+
+  return $CheckMobileResponseEntityCopyWith<$Res>(_self.checkMobileResult!, (value) {
+    return _then(_self.copyWith(checkMobileResult: value));
   });
 }
 }

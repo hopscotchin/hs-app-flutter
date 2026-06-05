@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hs_app_flutter/features/address/domain/entities/address_entity.dart';
+import 'package:hs_app_flutter/features/address/domain/entities/manage_address_args.dart';
+import 'package:hs_app_flutter/features/address/presentation/widgets/address_item_card.dart';
 
 import '../constants/strings/auth_strings.dart';
 import '../constants/route_names.dart';
@@ -91,4 +94,36 @@ abstract final class AppNavigator {
   }
 
   static void goToOrders(BuildContext context) => context.pushNamed('orders');
+
+  static void goToAddresses(
+      BuildContext context, {
+        AddressListMode mode = AddressListMode.normal,
+      }) => context.pushNamed(
+    'addresses',
+    extra: <String, dynamic>{'mode': mode},
+  );
+
+  /// Push the add/edit address screen.
+  ///
+  /// Pass [address] to enter edit mode, set [flow] to switch between
+  /// account, cart, exchange, or return flows.
+  /// Returns the resulting [ManageAddressResult] (success) or `null` (cancel).
+  static Future<ManageAddressResult?> goToAddAddress(
+      BuildContext context, {
+        ManageAddressFlow flow = ManageAddressFlow.account,
+        String? fromScreen,
+        AddressEntity? address,
+        bool popUpStyle = false,
+      }) {
+    final args = ManageAddressArgs(
+      flow: flow,
+      fromScreen: fromScreen,
+      address: address,
+      popUpStyle: popUpStyle,
+    );
+    return context.pushNamed<ManageAddressResult>(
+      'addAddress',
+      extra: <String, dynamic>{'args': args},
+    );
+  }
 }

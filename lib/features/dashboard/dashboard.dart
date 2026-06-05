@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -11,6 +12,7 @@ import 'package:hs_app_flutter/features/account/presentation/bloc/account_bloc.d
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/colors.dart';
+import '../../core/constants/strings/discover_strings.dart';
 
 class DashboardPage extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -23,10 +25,20 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage>
     with WidgetsBindingObserver {
-  static const double _navHeight = 60;
-  static const double _navTileRadius = 22;
+  static const double _navHeight = 64;
+  static const double _navTileRadius = 18;
   static const double _navIconSize = 18;
   static const double _bottomInsetFallback = 16;
+
+  /// Window within which a second back press exits the app.
+  static const Duration _kBackPressInterval = Duration(milliseconds: 6000);
+
+  /// How long the "press back again to exit" snackbar is visible. The
+  /// confirmation window outlives the snackbar — same as Android's
+  /// TOAST_SHORT vs BACK_PRESS_INTERVAL split.
+  static const Duration _kBackSnackDuration = Duration(seconds: 2);
+  static const int _kDiscoverNavIndex = 0;
+  static const Offset _kHiddenOffset = Offset(0, 1.4);
 
   // Pre-built once: `BorderRadius.circular` allocates per call; the spring
   // animation pumps `tileDecoration` every frame. Hoisting to a const avoids
@@ -46,6 +58,10 @@ class _DashboardPageState extends State<DashboardPage>
   ];
 
   late int _navIndex;
+  final ValueNotifier<bool> _navVisible = ValueNotifier<bool>(true);
+
+  int _backPressCount = 2;
+  DateTime? _lastBackPressedAt;
 
   @override
   void initState() {
@@ -69,6 +85,7 @@ class _DashboardPageState extends State<DashboardPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _navVisible.dispose();
     super.dispose();
   }
 
@@ -102,26 +119,82 @@ class _DashboardPageState extends State<DashboardPage>
         : MediaQuery.viewPaddingOf(context).bottom;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.systemUiLight,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        resizeToAvoidBottomInset: false,
-        extendBody: true,
-        bottomNavigationBar: Padding(
-          padding: EdgeInsets.only(bottom: bottomInset),
-          child: SpringBottomNavBar(
-            items: _navItems,
-            initialIndex: _navIndex,
-            height: _navHeight,
-            backgroundColor: Colors.transparent,
-            activeColor: AppColors.brandDefault,
-            inactiveColor: AppColors.secondaryInActive,
-            tileDecoration: _tileDecoration,
-            onTabSelected: _onTabSelected,
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _handleBackPress();
+        },
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          resizeToAvoidBottomInset: false,
+          extendBody: true,
+          bottomNavigationBar: ValueListenableBuilder<bool>(
+            valueListenable: _navVisible,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: bottomInset),
+              child: SpringBottomNavBar(
+                items: _navItems,
+                initialIndex: _navIndex,
+                height: _navHeight,
+                backgroundColor: Colors.transparent,
+                activeColor: AppColors.brandDefault,
+                inactiveColor: AppColors.secondaryInActive,
+                tileDecoration: _tileDecoration,
+                onTabSelected: _onTabSelected,
+              ),
+            ),
+            builder: (_, visible, child) => AnimatedSlide(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeInOut,
+              offset: visible ? Offset.zero : _kHiddenOffset,
+              child: child,
+            ),
+          ),
+          body: NotificationListener<UserScrollNotification>(
+            onNotification: _onUserScroll,
+            child: widget.navigationShell,
           ),
         ),
-        body: widget.navigationShell,
       ),
     );
+  }
+
+  bool _onUserScroll(UserScrollNotification n) {
+    if (_navIndex != _kDiscoverNavIndex) return false;
+    // Ignore horizontal scrollables (carousels) — they shouldn't drive
+    // the vertical nav-bar slide.
+    if (n.metrics.axis != Axis.vertical) return false;
+    if (n.direction == ScrollDirection.reverse && _navVisible.value) {
+      _navVisible.value = false;
+    } else if (n.direction == ScrollDirection.forward && !_navVisible.value) {
+      _navVisible.value = true;
+    }
+    return false;
+  }
+
+  void _handleBackPress() {
+    final now = DateTime.now();
+    if (_lastBackPressedAt != null &&
+        now.difference(_lastBackPressedAt!) > _kBackPressInterval) {
+      _backPressCount = 2;
+    }
+
+    if (_backPressCount >= 2) {
+      _lastBackPressedAt = now;
+      _backPressCount--;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text(DiscoverStrings.backButtonHit),
+            duration: _kBackSnackDuration,
+          ),
+        );
+      return;
+    }
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    SystemNavigator.pop();
   }
 
   NavBarItem _navItem(String asset, String label) => NavBarItem(
@@ -146,6 +219,9 @@ class _DashboardPageState extends State<DashboardPage>
 
   void _onTabSelected(int navIndex) {
     setState(() => _navIndex = navIndex);
+    // Reset bar visibility through the notifier so the AnimatedSlide rebuild
+    // is isolated from the Dashboard tree rebuild driven by the setState.
+    _navVisible.value = true;
     _onTabResume(context, navIndex);
     final branchIndex = _navToBranchIndex(navIndex);
     widget.navigationShell.goBranch(

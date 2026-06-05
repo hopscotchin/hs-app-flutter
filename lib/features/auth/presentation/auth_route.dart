@@ -11,7 +11,6 @@ import 'bloc/auth_bloc.dart';
 import 'pages/join_us_page.dart';
 import 'pages/login_page.dart';
 import 'pages/otp_verification_page.dart';
-import 'widgets/mobile_login_bottom_sheet.dart';
 
 class AuthRoute {
   static List<GoRoute> getRoutes(GlobalKey<NavigatorState> rootKey) => [
@@ -31,7 +30,15 @@ class AuthRoute {
         );
       },
     ),
-
+    GoRoute(
+      path: RouteNames.joinUs,
+      name: RouteNames.joinUs,
+      parentNavigatorKey: rootKey,
+      builder: (context, _) => BlocProvider(
+        create: (_) => sl<AuthBloc>(),
+        child: const JoinUsPage(),
+      ),
+    ),
     GoRoute(
       path: RouteNames.otpVerification,
       name: RouteNames.otpVerification,
@@ -60,7 +67,7 @@ class AuthRoute {
             BlocProvider(create: (_) => sl<AuthBloc>()),
             BlocProvider.value(value: extra['accountBloc'] as AccountBloc),
           ],
-          child: const MobileLoginPage(),
+          child: const LoginPage(isCheckoutFlow: true),
         );
       },
     ),

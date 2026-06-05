@@ -1,27 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/atoms/filled_text_field.dart' show MobileNumberFormatter;
 import '../../../../components/atoms/outlined_text_field.dart';
+import '../../../../core/constants/route_names.dart';
+import '../../../../core/constants/strings/auth_strings.dart';
 import '../widgets/auth_primary_button.dart';
-import '../widgets/auth_screen_header.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/entities/message_bar_entity.dart';
-import '../../../../core/constants/image_constants.dart';
 import '../../../../core/navigation/action_url_handler.dart';
 import '../../../../core/router/app_navigator.dart';
-import '../../../../core/constants/strings/auth_strings.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../account/presentation/bloc/account_bloc.dart';
 import '../bloc/auth_bloc.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key, this.initialMobile, this.initialMessageBars = const []});
+  const LoginPage({
+    super.key,
+    this.initialMobile,
+    this.initialMessageBars = const [],
+    this.isCheckoutFlow = false,
+  });
 
   final String? initialMobile;
   final List<MessageBarEntity> initialMessageBars;
+  final bool isCheckoutFlow;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -32,6 +39,15 @@ class _LoginPageState extends State<LoginPage> {
   final _inputFocusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
   late List<MessageBarEntity> _pendingMessageBars;
+  String _checkoutOtpReason = AuthStrings.getAddressReason;
+  bool _showErrors = false;
+
+  void _onFieldChanged(String _) {
+    if (_showErrors) {
+      _showErrors = false;
+      _formKey.currentState?.validate();
+    }
+  }
 
   @override
   void initState() {
@@ -57,93 +73,128 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.baseDefault,
-      body: BlocConsumer<AuthBloc, AuthState>(
-        listenWhen: (prev, curr) => curr.isOtpSent && !prev.isOtpSent,
-        listener: (context, state) {
-          if (!ModalRoute.of(context)!.isCurrent) return;
-          AppNavigator.goToOtpVerification(
-            context,
-            bloc: context.read<AuthBloc>(),
-            loginId: _rawMobile,
-            otpConfig: state.otpConfig!,
-            otpReason: 'SIGN_IN',
-          );
-        },
-        builder: (context, state) {
-          final isLoading = state.isLoading;
-
-          void onMessageAction(String? link, MessageBarEntity bar) {
-            final destination = ActionUrlHandler.parse(link ?? '');
-            if (destination == null || destination is LoginDestination) return;
-            destination.navigate(context);
-          }
-
-          return SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AuthScreenHeader(
-                  title: AuthStrings.signInTitle,
-                  leading: SizedBox(
-                    child: IconButton(
-                      visualDensity: VisualDensity.compact,
-                      padding: EdgeInsets.zero,
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: SvgPicture.asset(ImageConstants.arrowBack),
+      appBar: HsAppbar(
+        title: AuthStrings.signInTitle,
+        onLeadingTap: () => Navigator.of(context).pop(),
+      ),
+      body: widget.isCheckoutFlow
+          ? BlocListener<AuthBloc, AuthState>(
+              listenWhen: (prev, curr) =>
+                  (curr.isMobileChecked && !prev.isMobileChecked) ||
+                  (curr.isOtpSent && !prev.isOtpSent),
+              listener: (context, state) {
+                if (state.isMobileChecked) {
+                  _checkoutOtpReason =
+                      state.checkMobileResult?.otpReason ?? AuthStrings.getAddressReason;
+                  context.read<AuthBloc>().add(
+                    AuthEvent.sendOtp(
+                      loginId: _rawMobile,
+                      otpReason: _checkoutOtpReason,
+                      pathUri: state.checkMobileResult?.pathUri,
                     ),
-                  ),
-                ),
-                Builder(
-                  builder: (_) {
-                    final bars = state.isError
-                        ? state.messageBars
-                        : (!state.isLoading ? _pendingMessageBars : const <MessageBarEntity>[]);
-                    if (bars.isEmpty) return const SizedBox.shrink();
-                    return Column(
+                  );
+                  return;
+                }
+                if (!ModalRoute.of(context)!.isCurrent) return;
+                context
+                    .pushNamed<bool>(
+                      RouteNames.otpVerification,
+                      extra: <String, dynamic>{
+                        'bloc': context.read<AuthBloc>(),
+                        'accountBloc': context.read<AccountBloc>(),
+                        'loginId': _rawMobile,
+                        'otpConfig': state.otpConfig!,
+                        'otpReason': _checkoutOtpReason,
+                        'isCheckoutFlow': true,
+                      },
+                    )
+                    .then((success) {
+                      if (success == true && context.mounted) context.pop(true);
+                    });
+              },
+              child: _buildBody(),
+            )
+          : BlocListener<AuthBloc, AuthState>(
+              listenWhen: (prev, curr) => curr.isOtpSent && !prev.isOtpSent,
+              listener: (context, state) {
+                if (!ModalRoute.of(context)!.isCurrent) return;
+                AppNavigator.goToOtpVerification(
+                  context,
+                  bloc: context.read<AuthBloc>(),
+                  loginId: _rawMobile,
+                  otpConfig: state.otpConfig!,
+                  otpReason: AuthStrings.signInReason,
+                );
+              },
+              child: _buildBody(),
+            ),
+    );
+  }
+
+  Widget _buildBody() {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        final isLoading = state.isLoading;
+
+        void onMessageAction(String? link, MessageBarEntity bar) {
+          final destination = ActionUrlHandler.parse(link ?? '');
+          if (destination == null || destination is LoginDestination) return;
+          destination.navigate(context);
+        }
+
+        return SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Builder(
+                builder: (_) {
+                  final bars = state.isError
+                      ? state.messageBars
+                      : (!state.isLoading ? _pendingMessageBars : const <MessageBarEntity>[]);
+                  if (bars.isEmpty) return const SizedBox.shrink();
+                  return Column(
+                    children: [
+                      AppSpacing.verticalGapLg,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: MessageBarsWidget(
+                          messageBars: bars,
+                          cardStyle: true,
+                          onAction: onMessageAction,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: AppSpacing.screenPaddingHorizontal,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         AppSpacing.verticalGapLg,
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: MessageBarsWidget(
-                            messageBars: bars,
-                            cardStyle: true,
-                            style: MessageBarsStyle.compact(),
-                            onAction: onMessageAction,
-                          ),
+                        _buildMobileField(),
+                        AppSpacing.verticalGapLg,
+                        AuthPrimaryButton(
+                          label: AuthStrings.sendOtp,
+                          isLoading: isLoading,
+                          onPressed: _onSendOtp,
                         ),
-                      ],
-                    );
-                  },
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: AppSpacing.screenPaddingHorizontal,
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          AppSpacing.verticalGapLg,
-                          _buildMobileField(),
-                          AppSpacing.verticalGapLg,
-                          AuthPrimaryButton(
-                            label: AuthStrings.sendOtp,
-                            isLoading: isLoading,
-                            onPressed: _onSendOtp,
-                          ),
-                          AppSpacing.verticalGapMd,
+                        AppSpacing.verticalGapMd,
 
-                          AppSpacing.verticalGapXl,
-                        ],
-                      ),
+                        AppSpacing.verticalGapXl,
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
-          );
-        },
-      ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -155,15 +206,14 @@ class _LoginPageState extends State<LoginPage> {
       keyboardType: TextInputType.phone,
       maxLength: 11,
       prefixText: '+91 ',
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[\d ]')),
-        MobileNumberFormatter(),
-      ],
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly, const MobileNumberFormatter()],
+      onChanged: _onFieldChanged,
       validator: (value) {
+        if (!_showErrors) return null;
         final digits = (value ?? '').replaceAll(RegExp(r'\D'), '');
-        if (digits.isEmpty) return AuthStrings.validateMobile;
+        if (digits.isEmpty) return AuthStrings.enterValidMobileNumber;
         if (digits.length != 10) {
-          return AuthStrings.validateMobileFormat;
+          return AuthStrings.enterValidMobileNumber;
         }
         return null;
       },
@@ -171,9 +221,16 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onSendOtp() {
+    _showErrors = true;
     if (_formKey.currentState!.validate()) {
       setState(() => _pendingMessageBars = const []);
-      context.read<AuthBloc>().add(SendOtp(loginId: _rawMobile));
+      if (widget.isCheckoutFlow) {
+        context.read<AuthBloc>().add(AuthEvent.checkMobile(mobile: _rawMobile));
+      } else {
+        context.read<AuthBloc>().add(
+          AuthEvent.sendOtp(loginId: _rawMobile, otpReason: AuthStrings.signInReason),
+        );
+      }
     }
   }
 }

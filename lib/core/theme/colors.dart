@@ -47,6 +47,7 @@ class AppColors {
   // Divider & Border Colors
 
   static const Color border = Color(0xFFDDDDDD);
+  static const Color borderSecondary = Color(0x1A6D59D7);
 
   // Overlay Colors
   static const Color overlay = Color(0x80000000);
@@ -102,7 +103,8 @@ class AppColors {
   static const Color infoSecondary = Color(0xFFD1E0FF);
 
   //Divider
-  static const Color divider = Color(0xFFE0E0E0);
+  static const Color dividerLight = Color(0x0D000000);
+  static const Color dividerDark = AppColors.neutralGrey4;
 
   /// Light color scheme for Material 3
   static ColorScheme get lightColorScheme => const ColorScheme.light(

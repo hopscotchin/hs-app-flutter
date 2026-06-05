@@ -143,7 +143,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
       child: Column(
         children: [
           _buildHeader(context),
-          const Divider(height: 1, thickness: 1, color: AppColors.divider),
+          const Divider(height: 1, thickness: 1, color: AppColors.dividerLight),
           Expanded(
             child: ListView.builder(
               itemCount: widget.item.productTiles.length,
@@ -233,7 +233,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                               border: Border.all(
                                 color: isSelected
                                     ? AppColors.brandDefault
-                                    : AppColors.divider,
+                                    : AppColors.dividerLight,
                                 width: 1.5,
                               ),
                             ),
@@ -320,7 +320,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
           ),
         ),
         if (!isLast)
-          const Divider(height: 1, thickness: 1, color: AppColors.divider),
+          const Divider(height: 1, thickness: 1, color: AppColors.dividerLight),
       ],
     );
   }
@@ -387,7 +387,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
     } else {
       bgColor = AppColors.baseDefault;
       textColor = AppColors.neutralBlack;
-      borderColor = AppColors.divider;
+      borderColor = AppColors.dividerLight;
     }
 
     return GestureDetector(
@@ -424,7 +424,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         decoration: const BoxDecoration(
           color: AppColors.baseDefault,
-          border: Border(top: BorderSide(color: AppColors.divider)),
+          border: Border(top: BorderSide(color: AppColors.dividerLight)),
         ),
         child: Row(
           children: [
@@ -471,7 +471,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
               onPressed: hasSelection ? _onAddToCart : null,
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brandDefault,
-                disabledBackgroundColor: AppColors.divider,
+                disabledBackgroundColor: AppColors.dividerLight,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 12,

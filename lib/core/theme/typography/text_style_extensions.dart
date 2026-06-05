@@ -28,6 +28,7 @@ extension TextStyleColorExtensions on TextStyle {
   TextStyle neutralGrey0() => copyWith(color: AppColors.neutralGrey0);
   TextStyle neutralGrey2() => copyWith(color: AppColors.neutralGrey2);
   TextStyle neutralGrey4() => copyWith(color: AppColors.neutralGrey4);
+  TextStyle neutralGrey6() => copyWith(color: AppColors.neutralGrey6);
 
   TextStyle textPrimary() => copyWith(color: AppColors.neutralBlack);
   TextStyle textSecondary() => copyWith(color: AppColors.neutralGrey5);

@@ -47,7 +47,10 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   final ValueNotifier<_LineState> _lineState = ValueNotifier(_initialLineState);
 
   PageController? _pageController;
-  int _currentPage = 0;
+
+  /// Notifier-backed page index so swipes only rebuild the indicator,
+  /// not the snapping PageView and its layout math above.
+  final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
   late final bool _hasProducts;
 
   @override
@@ -72,6 +75,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
       ..dispose();
     _pageController?.dispose();
     _lineState.dispose();
+    _currentPage.dispose();
     super.dispose();
   }
 
@@ -160,7 +164,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
       _pageController = PageController(
         viewportFraction: slotWidth / (screenWidth - leadingShift),
       );
-      _currentPage = 0;
+      _currentPage.value = 0;
     }
 
     final carousel = hasSnapping
@@ -233,18 +237,22 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
       height: carouselHeight,
       child: Padding(
         padding: EdgeInsets.only(left: leadingShift),
-        child: PageView.builder(
-          controller: _pageController!,
-          padEnds: false,
-          itemCount: tileCount * _forwardCycleBudget,
-          onPageChanged: (page) => setState(() => _currentPage = page),
-          itemBuilder: (_, index) => Padding(
-            padding: EdgeInsets.symmetric(horizontal: tilePadding),
-            child: _buildTile(
-              tiles[index % tileCount],
-              tileWidth,
-              tileHeight,
-              imageCornerRadius,
+        // Isolate carousel paints (swipes, image fades) from the parent
+        // discover scrollview so a swipe doesn't re-rasterise the page.
+        child: RepaintBoundary(
+          child: PageView.builder(
+            controller: _pageController!,
+            padEnds: false,
+            itemCount: tileCount * _forwardCycleBudget,
+            onPageChanged: (page) => _currentPage.value = page,
+            itemBuilder: (_, index) => Padding(
+              padding: EdgeInsets.symmetric(horizontal: tilePadding),
+              child: _buildTile(
+                tiles[index % tileCount],
+                tileWidth,
+                tileHeight,
+                imageCornerRadius,
+              ),
             ),
           ),
         ),
@@ -252,14 +260,13 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     );
 
     if (!showIndicators || tileCount <= 1) return pageView;
-    final activeIndex = _currentPage % tileCount;
 
     if (isFullWidth) {
       return Stack(
         alignment: Alignment.bottomCenter,
         children: [
           pageView,
-          _DotIndicators(activeIndex: activeIndex, count: tileCount),
+          _DotIndicators(currentPage: _currentPage, count: tileCount),
         ],
       );
     }
@@ -267,7 +274,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
       mainAxisSize: MainAxisSize.min,
       children: [
         pageView,
-        _PageLineIndicator(activeIndex: activeIndex, count: tileCount),
+        _PageLineIndicator(currentPage: _currentPage, count: tileCount),
       ],
     );
   }
@@ -285,16 +292,21 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   }) {
     final tileList = SizedBox(
       height: carouselHeight,
-      child: ListView.separated(
-        controller: _listController,
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
-        itemCount: tiles.length,
-        separatorBuilder: (_, _) => SizedBox(width: innerHorizontalMargin),
-        itemBuilder: (_, i) =>
-            _buildTile(tiles[i], tileWidth, tileHeight, imageCornerRadius),
+      child: RepaintBoundary(
+        child: ListView.separated(
+          controller: _listController,
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
+          itemCount: tiles.length,
+          separatorBuilder: (_, _) => SizedBox(width: innerHorizontalMargin),
+          itemBuilder: (_, i) =>
+              _buildTile(tiles[i], tileWidth, tileHeight, imageCornerRadius),
+        ),
       ),
     );
+
+    // The horizontal ListView is unindexed by snapping, so the full-width dot
+    // indicator just shows the first tile (pre-existing behaviour).
 
     if (!showIndicators || tiles.length <= 1) return tileList;
 
@@ -303,7 +315,10 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
         alignment: Alignment.bottomCenter,
         children: [
           tileList,
-          _DotIndicators(activeIndex: 0, count: tiles.length),
+          // Scrollable variant has no snapping page index — _currentPage stays
+          // at 0 and the indicator just highlights the first dot. Pre-existing
+          // behaviour.
+          _DotIndicators(currentPage: _currentPage, count: tiles.length),
         ],
       );
     }
@@ -356,9 +371,11 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
 // ─── Indicators ──────────────────────────────────────────────────────────────
 
 class _DotIndicators extends StatelessWidget {
-  const _DotIndicators({required this.activeIndex, required this.count});
+  const _DotIndicators({required this.currentPage, required this.count});
 
-  final int activeIndex;
+  /// Notifier so a page change rebuilds only this indicator, not the
+  /// PageView or the surrounding carousel.
+  final ValueListenable<int> currentPage;
   final int count;
 
   static const _dotDuration = Duration(milliseconds: 200);
@@ -367,27 +384,33 @@ class _DotIndicators extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: _padding,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(count, (i) {
-          final isActive = i == activeIndex;
-          return AnimatedContainer(
-            duration: _dotDuration,
-            margin: _dotMargin,
-            width: isActive ? 45 : 8,
-            height: 6,
-            decoration: BoxDecoration(
-              color: isActive
-                  ? AppColors.baseDefault
-                  : AppColors.baseDefault.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(3),
-            ),
-          );
-        }),
-      ),
+    return ValueListenableBuilder<int>(
+      valueListenable: currentPage,
+      builder: (_, page, _) {
+        final activeIndex = page % count;
+        return Padding(
+          padding: _padding,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(count, (i) {
+              final isActive = i == activeIndex;
+              return AnimatedContainer(
+                duration: _dotDuration,
+                margin: _dotMargin,
+                width: isActive ? 45 : 8,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? AppColors.baseDefault
+                      : AppColors.baseDefault.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              );
+            }),
+          ),
+        );
+      },
     );
   }
 }
@@ -414,18 +437,25 @@ class _ScrollLineIndicator extends StatelessWidget {
 
 /// Snapping variant: page jumps are discrete, so we tween between values.
 class _PageLineIndicator extends StatelessWidget {
-  const _PageLineIndicator({required this.activeIndex, required this.count});
+  const _PageLineIndicator({required this.currentPage, required this.count});
 
-  final int activeIndex;
+  final ValueListenable<int> currentPage;
   final int count;
 
   @override
   Widget build(BuildContext context) {
     if (count <= 1) return const SizedBox.shrink();
-    return _LineBar(
-      progress: activeIndex / (count - 1),
-      fraction: (1.0 / count).clamp(0.15, 1.0),
-      animate: true,
+    final fraction = (1.0 / count).clamp(0.15, 1.0);
+    return ValueListenableBuilder<int>(
+      valueListenable: currentPage,
+      builder: (_, page, _) {
+        final activeIndex = page % count;
+        return _LineBar(
+          progress: activeIndex / (count - 1),
+          fraction: fraction,
+          animate: true,
+        );
+      },
     );
   }
 }

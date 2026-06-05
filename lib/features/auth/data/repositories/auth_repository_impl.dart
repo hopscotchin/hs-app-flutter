@@ -5,11 +5,13 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/mixins/safe_api_call.dart';
 import '../../../../core/network/connectivity/network_info.dart';
+import '../../domain/entities/check_mobile_response/check_mobile_response_entity.dart';
 import '../../domain/entities/send_otp_response/send_otp_response_entity.dart';
 import '../../domain/entities/signup_otp_response/signup_otp_response_entity.dart';
 import '../../domain/entities/verfiy_otp_response/verify_otp_response_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/remote/auth_remote_datasource.dart';
+import '../models/check_mobile_response/check_mobile_response_model.dart';
 import '../models/send_otp_response/send_otp_response_model.dart';
 import '../models/signup_otp_response/signup_otp_response_model.dart';
 import '../models/verify_otp_response/verify_otp_response_model.dart';
@@ -22,15 +24,29 @@ class AuthRepositoryImpl with SafeApiCall implements AuthRepository {
   final NetworkInfo _networkInfo;
 
   @override
+  Future<Either<Failure, CheckMobileResponseEntity>> checkMobile({
+    required String mobile,
+    CancelToken? cancelToken,
+  }) =>
+      safeApiCall(_networkInfo, () async {
+        final response = await _api.checkMobile(
+          body: {'mobile': mobile},
+          cancelToken: cancelToken,
+        );
+        return response.toEntity();
+      });
+
+  @override
   Future<Either<Failure, SendOtpResponseEntity>> sendOtp({
     required String loginId,
     required String otpReason,
+    String? pathUri,
     CancelToken? cancelToken,
   }) => safeApiCall(_networkInfo, () async {
-    final response = await _api.sendOtp(
-      body: {'loginId': loginId, 'otpReason': otpReason},
-      cancelToken: cancelToken,
-    );
+    final body = {'loginId': loginId, 'otpReason': otpReason};
+    final response = pathUri != null
+        ? await _api.sendOtpViaPath(path: pathUri, body: body, cancelToken: cancelToken)
+        : await _api.sendOtp(body: body, cancelToken: cancelToken);
     return response.toEntity();
   });
 
