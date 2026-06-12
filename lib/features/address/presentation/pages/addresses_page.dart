@@ -106,7 +106,7 @@ class _AddressesPageState extends State<AddressesPage> {
                     if (state.status == AddressStatus.error) {
                       return ErrorRetryWidget(
                         message: state.errorMessage!,
-                        onRetry: () => context.read<AddressBloc>().add(const LoadAddresses()),
+                        onRetry: () => context.read<AddressBloc>().add(LoadAddresses(source: state.source)),
                       );
                     }
 

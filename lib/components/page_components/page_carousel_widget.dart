@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/colors.dart';
-import '../../core/theme/spacing.dart';
-import '../../core/theme/typography/text_style_extensions.dart';
-import '../../core/theme/typography/typography_v1.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../atoms/cached_image_widget.dart';
+import '../atoms/custom_image.dart';
+import '../atoms/product_tile.dart';
 
 typedef _LineState = ({double progress, double fraction});
 
@@ -336,11 +335,24 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   ) {
     final product = tile.product;
     final tapUri = tile.actionUri ?? product?.actionUri;
+
+    if (product != null) {
+      return SizedBox(
+        width: tileWidth,
+        child: ProductTile.fromHomepageProduct(
+          product,
+          imageUrl: tile.imageUrl ?? product.primaryImageUrl,
+          imageAspectRatio: tileHeight > 0 ? tileWidth / tileHeight : null,
+          onTap: () => ActionUrlHandler.navigate(context, tapUri),
+        ),
+      );
+    }
+
     final image = SizedBox(
       height: tileHeight,
       width: tileWidth,
-      child: CachedImageWidget(
-        imageUrl: tile.imageUrl ?? product?.primaryImageUrl ?? '',
+      child: CustomImage(
+        path: tile.imageUrl ?? '',
         fit: BoxFit.cover,
       ),
     );
@@ -349,20 +361,12 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
       onTap: () => ActionUrlHandler.navigate(context, tapUri),
       child: SizedBox(
         width: tileWidth,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (cornerRadius > 0)
-              ClipRRect(
+        child: cornerRadius > 0
+            ? ClipRRect(
                 borderRadius: BorderRadius.circular(cornerRadius),
                 child: image,
               )
-            else
-              image,
-            if (product != null) _ProductInfo(product: product),
-          ],
-        ),
+            : image,
       ),
     );
   }
@@ -525,81 +529,3 @@ class _LineBar extends StatelessWidget {
   }
 }
 
-// ─── Tile product info ───────────────────────────────────────────────────────
-
-class _ProductInfo extends StatelessWidget {
-  const _ProductInfo({required this.product});
-
-  final HomepageProduct product;
-
-  @override
-  Widget build(BuildContext context) {
-    final brand = product.brandName;
-    final name = product.name;
-    final price = product.price;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: 4),
-        if (brand != null && brand.isNotEmpty)
-          Text(
-            brand,
-            style: AppTypographyV1.labelMedium.semiBold.textSecondary(),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        if (name != null && name.isNotEmpty)
-          Text(
-            name,
-            style: AppTypographyV1.labelLarge.regular,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        if (price != null) _PriceRow(price: price),
-      ],
-    );
-  }
-}
-
-class _PriceRow extends StatelessWidget {
-  const _PriceRow({required this.price});
-
-  final HomepageProductPrice price;
-
-  @override
-  Widget build(BuildContext context) {
-    final selling = price.sellingPrice;
-    final mrp = price.mrp;
-    final discount = price.discountLabel;
-    final hasDiscount = price.hasDiscount;
-    final showMrp = hasDiscount && mrp != null && mrp.isNotEmpty;
-    final showDiscount = hasDiscount && discount != null;
-
-    return Row(
-      children: [
-        if (selling != null && selling.isNotEmpty)
-          Text(
-            '₹$selling',
-            style: AppTypographyV1.labelLarge.semiBold.textPrimary(),
-          ),
-        if (showMrp) ...[
-          AppSpacing.horizontalGapXxs,
-          Text(
-            '₹$mrp',
-            style: AppTypographyV1.labelLarge.regular
-                .textTertiary()
-                .strikeThrough(),
-          ),
-        ],
-        if (showDiscount) ...[
-          AppSpacing.horizontalGapXxs,
-          Text(
-            discount,
-            style: AppTypographyV1.labelMedium.semiBold.success(),
-          ),
-        ],
-      ],
-    );
-  }
-}

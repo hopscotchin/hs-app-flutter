@@ -262,11 +262,17 @@ class ManageAddressBloc
       messages[ManageAddressField.mobile] = AddressStrings.errorInvalidMobile;
     }
 
-    final pincodeOk = AddressValidators.validatePincode(state.pincodeDigits);
+    final pincodeFormatOk = AddressValidators.validatePincode(
+      state.pincodeDigits,
+    );
+    final existingPincodeError = state.errors[ManageAddressField.pincode] == true;
+    final pincodeOk = pincodeFormatOk && !existingPincodeError;
     errors[ManageAddressField.pincode] = !pincodeOk;
     if (!pincodeOk) {
-      messages[ManageAddressField.pincode] =
-          AddressStrings.errorInvalidPincode;
+      messages[ManageAddressField.pincode] = !pincodeFormatOk
+          ? AddressStrings.errorInvalidPincode
+          : (state.errorMessages[ManageAddressField.pincode] ??
+                AddressStrings.errorInvalidPincode);
     }
 
     checkBasic(ManageAddressField.city, AddressStrings.errorCity);

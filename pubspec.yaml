@@ -2,7 +2,7 @@ name: hs_app_flutter
 description: "HS Flutter"
 publish_to: "none"
 
-version: 14.1.0+2026060501
+version: 14.2.0+2026061201
 
 environment:
   sdk: ^3.11.0

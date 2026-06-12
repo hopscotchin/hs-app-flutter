@@ -64,6 +64,8 @@ class AppColors {
   //TODO : we need to use this color palette as per our design system and remove the above colors which are not in use and not as per our design system
   // ─── Design Token Palette NEW  ─────────────────────────────────────────
 
+  static const Color whiteColor = Colors.white;
+
   // Base
   static const Color baseDefault = Color(0xFFFFFFFF);
 
@@ -102,6 +104,8 @@ class AppColors {
   static const Color infoDefault = Color(0xFF3D65F7); // == info
   static const Color infoSecondary = Color(0xFFD1E0FF);
 
+  //link
+  static const Color linkDefault = Color(0xFF6D59D7);
   //Divider
   static const Color dividerLight = Color(0x0D000000);
   static const Color dividerDark = AppColors.neutralGrey4;

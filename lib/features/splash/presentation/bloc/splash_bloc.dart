@@ -11,6 +11,7 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/services/pref_manager.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../../address/data/managers/address_cache_manager.dart';
+import '../../../address/domain/entities/address_source.dart';
 import '../../../address/domain/usecases/get_addresses_usecase.dart';
 import '../../domain/entities/customer_info_entity.dart';
 import '../../domain/usecases/get_app_config_usecase.dart';
@@ -113,7 +114,9 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
   }
 
   Future<void> _prefetchAddresses() async {
-    final result = await _getAddresses.call(const GetAddressesParams());
+    final result = await _getAddresses.call(
+      const GetAddressesParams(source: AddressSource.delivery),
+    );
     await result.fold(
       (_) async {
         // Silent: addresses prefetch must not block or fail splash.

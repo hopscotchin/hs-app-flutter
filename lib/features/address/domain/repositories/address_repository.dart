@@ -4,11 +4,13 @@ import 'package:dio/dio.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/address_input.dart';
 import '../entities/address_mutation_result_entity.dart';
+import '../entities/address_source.dart';
 import '../entities/addresses_list_entity.dart';
 import '../entities/pincode_info_entity.dart';
 
 abstract class AddressRepository {
   Future<Either<Failure, AddressesListEntity>> getAddresses({
+    AddressSource source = AddressSource.delivery,
     CancelToken? cancelToken,
   });
 

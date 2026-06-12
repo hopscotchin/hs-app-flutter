@@ -24,7 +24,7 @@ class AddressStrings {
   static const String city = 'City';
   static const String state = 'State';
   static const String pincode = 'Pincode';
-  static const String flatHouse = 'Flat / House no. / Building / Apartment';
+  static const String flatHouse = 'Flat / House No. / Building / Apartment';
   static const String streetArea = 'Street, Area';
   static const String landmark = 'Landmark';
   static const String markItOnMap = 'Mark It On Map';

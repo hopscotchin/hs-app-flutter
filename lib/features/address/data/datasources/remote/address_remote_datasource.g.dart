@@ -20,7 +20,7 @@ class _AddressRemoteDatasource implements AddressRemoteDatasource {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<AddressesResponseModel> getAddresses({
+  Future<AddressesResponseModel> getCustomerAddresses({
     CancelToken? cancelToken,
   }) async {
     final _extra = <String, dynamic>{};
@@ -33,6 +33,37 @@ class _AddressRemoteDatasource implements AddressRemoteDatasource {
           .compose(
             _dio.options,
             '/customer/v2/addresses',
+            queryParameters: queryParameters,
+            data: _data,
+            cancelToken: cancelToken,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late AddressesResponseModel _value;
+    try {
+      _value = AddressesResponseModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<AddressesResponseModel> getDeliveryAddresses({
+    CancelToken? cancelToken,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<AddressesResponseModel>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/delivery/addresses/v3',
             queryParameters: queryParameters,
             data: _data,
             cancelToken: cancelToken,

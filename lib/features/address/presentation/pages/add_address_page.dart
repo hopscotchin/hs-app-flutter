@@ -80,14 +80,12 @@ class _AddAddressPageState extends State<AddAddressPage> {
       description: AddressStrings.leaveDialogMessage,
       secondaryAction: AppBottomSheetAction(
         label: AddressStrings.leaveDiscard,
-        onPressed: () =>
-            Navigator.of(context, rootNavigator: true).pop(true),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(true),
       ),
       primaryAction: AppBottomSheetAction(
         label: AddressStrings.leaveStay,
         style: AppBottomSheetButtonStyle.filled,
-        onPressed: () =>
-            Navigator.of(context, rootNavigator: true).pop(false),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
       ),
     );
     return result ?? false;
@@ -120,8 +118,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
           prev.values != curr.values,
       listener: (context, state) {
         _syncControllers(state);
-        final willPopWithMessage =
-            state.status == ManageAddressStatus.success;
+        final willPopWithMessage = state.status == ManageAddressStatus.success;
         if (!willPopWithMessage &&
             state.toastMessage != null &&
             state.toastMessage!.isNotEmpty) {
@@ -140,34 +137,39 @@ class _AddAddressPageState extends State<AddAddressPage> {
             final allow = await _confirmDiscardIfDirty(context);
             if (allow && context.mounted) Navigator.of(context).pop();
           },
-          child: Scaffold(
-            backgroundColor: AppColors.baseDefault,
-            appBar: HsAppbar(
-              title: _title(state),
-              onLeadingTap: () async {
-                final allow = await _confirmDiscardIfDirty(context);
-                if (allow && context.mounted) Navigator.of(context).pop();
-              },
-            ),
-            body: SafeArea(
-              top: false,
-              child: Column(
-                children: [
-                  Expanded(child: _Form(controllers: _controllers, state: state)),
-                  _BottomActions(
-                    saveLabel: _saveCta(state),
-                    submitting: state.status == ManageAddressStatus.submitting,
-                    onCancel: () async {
-                      final allow = await _confirmDiscardIfDirty(context);
-                      if (allow && context.mounted) {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    onSave: () => context.read<ManageAddressBloc>().add(
-                      const ManageAddressSubmitted(),
+          child: GestureDetector(
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: Scaffold(
+              backgroundColor: AppColors.baseDefault,
+              appBar: HsAppbar(
+                title: _title(state),
+                onLeadingTap: () async {
+                  final allow = await _confirmDiscardIfDirty(context);
+                  if (allow && context.mounted) Navigator.of(context).pop();
+                },
+              ),
+              body: SafeArea(
+                top: false,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: _Form(controllers: _controllers, state: state),
                     ),
-                  ),
-                ],
+                    _BottomActions(
+                      saveLabel: _saveCta(state),
+                      submitting: state.status == ManageAddressStatus.submitting,
+                      onCancel: () async {
+                        final allow = await _confirmDiscardIfDirty(context);
+                        if (allow && context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      onSave: () => context.read<ManageAddressBloc>().add(
+                        const ManageAddressSubmitted(),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -198,27 +200,31 @@ class _Form extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: AppSpacing.screenPadding,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       children: [
         if (state.messageBar != null) ...[
-          MessageBarsWidget(
-            messageBars: [state.messageBar!],
-            cardStyle: true,
-          ),
+          MessageBarsWidget(messageBars: [state.messageBar!], cardStyle: true),
           AppSpacing.verticalGapMd,
         ],
         OutlinedTextField(
           controller: controllers[ManageAddressField.name]!,
+          onTapOutside: (_) {},
           labelText: AddressStrings.name,
           autocorrect: false,
+          textInputAction: TextInputAction.next,
           onChanged: (v) => _emit(context, ManageAddressField.name, v),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z ]')),
+          ],
           errorText: _errorFor(ManageAddressField.name),
         ),
         AppSpacing.verticalGapMd,
         OutlinedTextField(
           controller: controllers[ManageAddressField.mobile]!,
+          onTapOutside: (_) {},
           labelText: AddressStrings.mobile,
           keyboardType: TextInputType.phone,
+          textInputAction: TextInputAction.next,
           prefixText: '+91 ',
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
@@ -232,42 +238,42 @@ class _Form extends StatelessWidget {
           icon: Icons.info_outline,
           tooltip: AddressStrings.tooltipAlternativeMobile,
           child: OutlinedTextField(
-            controller:
-                controllers[ManageAddressField.alternateMobile]!,
+            controller: controllers[ManageAddressField.alternateMobile]!,
+            onTapOutside: (_) {},
             labelText: AddressStrings.alternativeMobile,
             required: false,
             keyboardType: TextInputType.phone,
+            textInputAction: TextInputAction.next,
             prefixText: '+91 ',
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
               const MobileNumberFormatter(),
             ],
-            onChanged: (v) => _emit(
-              context,
-              ManageAddressField.alternateMobile,
-              v,
-            ),
+            onChanged: (v) =>
+                _emit(context, ManageAddressField.alternateMobile, v),
             errorText: _errorFor(ManageAddressField.alternateMobile),
           ),
         ),
         AppSpacing.verticalGapMd,
         OutlinedTextField(
           controller: controllers[ManageAddressField.pincode]!,
+          onTapOutside: (_) {},
           labelText: AddressStrings.pincode,
           keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.next,
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
-            const PincodeFormatter()
+            const PincodeFormatter(),
           ],
           onChanged: (v) => _emit(context, ManageAddressField.pincode, v),
           errorText: _errorFor(ManageAddressField.pincode),
-          suffix: state.pincodeChecking
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : null,
+          suffix: SizedBox(
+            width: 16,
+            height: 16,
+            child: state.pincodeChecking
+                ? const CircularProgressIndicator(strokeWidth: 2)
+                : null,
+          ),
         ),
         AppSpacing.verticalGapMd,
         Row(
@@ -297,6 +303,7 @@ class _Form extends StatelessWidget {
         AppSpacing.verticalGapMd,
         OutlinedTextField(
           controller: controllers[ManageAddressField.address1]!,
+          onTapOutside: (_) {},
           labelText: AddressStrings.flatHouse,
           keyboardType: TextInputType.multiline,
           autocorrect: false,
@@ -308,21 +315,23 @@ class _Form extends StatelessWidget {
         AppSpacing.verticalGapMd,
         OutlinedTextField(
           controller: controllers[ManageAddressField.streetAddress]!,
+          onTapOutside: (_) {},
           labelText: AddressStrings.streetArea,
           keyboardType: TextInputType.multiline,
           autocorrect: false,
           minLines: 1,
           maxLines: null,
-          onChanged: (v) =>
-              _emit(context, ManageAddressField.streetAddress, v),
+          onChanged: (v) => _emit(context, ManageAddressField.streetAddress, v),
           errorText: _errorFor(ManageAddressField.streetAddress),
         ),
         AppSpacing.verticalGapMd,
         OutlinedTextField(
           controller: controllers[ManageAddressField.landmark]!,
+          onTapOutside: (_) {},
           labelText: AddressStrings.landmark,
           required: false,
           autocorrect: false,
+          textInputAction: TextInputAction.done,
           onChanged: (v) => _emit(context, ManageAddressField.landmark, v),
         ),
         AppSpacing.verticalGapMd,
@@ -364,9 +373,7 @@ class _FieldWithTrailingIcon extends StatelessWidget {
             margin: const EdgeInsets.only(right: AppSpacing.sm),
             decoration: const ShapeDecoration(
               color: AppColors.neutralGrey6,
-              shape: _TooltipShape(
-                arrowRightInset: 20
-              ),
+              shape: _TooltipShape(arrowRightInset: 20),
             ),
             child: Icon(
               icon,
@@ -489,10 +496,7 @@ class _MarkOnMapRow extends StatelessWidget {
 }
 
 class _DefaultAddressCheckbox extends StatefulWidget {
-  const _DefaultAddressCheckbox({
-    required this.value,
-    required this.onChanged,
-  });
+  const _DefaultAddressCheckbox({required this.value, required this.onChanged});
 
   final bool value;
   final ValueChanged<bool?> onChanged;
@@ -536,51 +540,54 @@ class _DefaultAddressCheckboxState extends State<_DefaultAddressCheckbox> {
   @override
   Widget build(BuildContext context) {
     final value = widget.value;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onTap: _handleTap,
-          behavior: HitTestBehavior.opaque,
-          child: SizedBox(
-            key: _checkboxKey,
-            width: 18,
-            height: 18,
-            child: Ink(
-              decoration: BoxDecoration(
-                color: value ? AppColors.secondary : AppColors.neutralGrey2,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(
+    return Material(
+      type: MaterialType.transparency,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: _handleTap,
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              key: _checkboxKey,
+              width: 18,
+              height: 18,
+              child: Ink(
+                decoration: BoxDecoration(
                   color: value ? AppColors.secondary : AppColors.neutralGrey2,
-                  width: 2,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: value ? AppColors.secondary : AppColors.neutralGrey2,
+                    width: 2,
+                  ),
                 ),
-              ),
-              child: value
-                  ? const Padding(
-                      padding: EdgeInsets.all(1.5),
-                      child: FittedBox(
-                        child: Icon(
-                          Icons.check,
-                          color: AppColors.baseDefault,
+                child: value
+                    ? const Padding(
+                        padding: EdgeInsets.all(1.5),
+                        child: FittedBox(
+                          child: Icon(
+                            Icons.check,
+                            color: AppColors.baseDefault,
+                          ),
                         ),
-                      ),
-                    )
-                  : null,
+                      )
+                    : null,
+              ),
             ),
           ),
-        ),
-        AppSpacing.horizontalGapXs,
-        GestureDetector(
-          onTap: _handleTap,
-          behavior: HitTestBehavior.opaque,
-          child: Text(
-            AddressStrings.makeDefault,
-            style: AppTypographyV1.bodyRegular.medium.copyWith(
-              color: AppColors.neutralBlack,
+          AppSpacing.horizontalGapXs,
+          GestureDetector(
+            onTap: _handleTap,
+            behavior: HitTestBehavior.opaque,
+            child: Text(
+              AddressStrings.makeDefault,
+              style: AppTypographyV1.bodyRegular.medium.copyWith(
+                color: AppColors.neutralBlack,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -601,54 +608,65 @@ class _BottomActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: Platform.isIOS ? const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 0) : const EdgeInsets.all(AppSpacing.md),
+      padding: Platform.isIOS
+          ? const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.md,
+              0,
+            )
+          : const EdgeInsets.all(AppSpacing.md),
       child: Row(
         children: [
           Expanded(
-            child: TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                backgroundColor: AppColors.brandTertiary,
-                padding: AppSpacing.paddingVerticalMd,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
+            child: SizedBox(
+              height: 48,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  backgroundColor: AppColors.brandTertiary,
+                  padding: AppSpacing.paddingVerticalMd,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
-              ),
-              onPressed: submitting ? null : onCancel,
-              child: Text(
-                AddressStrings.cancel,
-                style: AppTypographyV1.bodyLarge.bold.copyWith(
-                  color: AppColors.primary,
+                onPressed: submitting ? null : onCancel,
+                child: Text(
+                  AddressStrings.cancel,
+                  style: AppTypographyV1.bodyLarge.bold.copyWith(
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-                padding: AppSpacing.paddingVerticalMd,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
+            child: SizedBox(
+              height: 48,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.onPrimary,
+                  padding: AppSpacing.paddingVerticalMd,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
+                onPressed: submitting ? null : onSave,
+                child: submitting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.onPrimary,
+                          ),
+                        ),
+                      )
+                    : Text(saveLabel, style: AppTypographyV1.bodyLarge.bold),
               ),
-              onPressed: submitting ? null : onSave,
-              child: submitting
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(AppColors.onPrimary),
-                      ),
-                    )
-                  : Text(
-                      saveLabel,
-                      style: AppTypographyV1.bodyLarge.bold,
-                    ),
             ),
           ),
         ],

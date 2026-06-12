@@ -177,6 +177,8 @@ class _JoinUsPageState extends State<JoinUsPage> {
                           AppSpacing.verticalGapXl,
                           const Center(child: AuthTermsDisclaimer()),
                           AppSpacing.verticalGapLg,
+                          const Divider(height: 1, color: AppColors.dividerLight),
+                          AppSpacing.verticalGapLg,
                           AuthFooterLinkRow(
                             promptText: AuthStrings.haveAccount,
                             actionLabel: AuthStrings.signIn,

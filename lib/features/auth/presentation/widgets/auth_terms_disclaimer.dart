@@ -17,17 +17,11 @@ class AuthTermsDisclaimer extends StatelessWidget {
   final VoidCallback? onTermsTap;
   final VoidCallback? onPrivacyTap;
 
-  static final _base = AppTypographyV1.labelMedium.regular.copyWith(
-    color: AppColors.neutralBlack,
-  );
-  static final _link = AppTypographyV1.labelMedium.bold.copyWith(
-    color: AppColors.secondary,
-  );
+  static final _base = AppTypographyV1.labelMedium.regular.copyWith(color: AppColors.neutralBlack);
+  static final _link = AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.secondary);
 
   void _openTerms() => launchUrl(
-    Uri.parse(
-      '${EnvironmentConfig.baseUrl}/${AuthStrings.termsPath}${AuthStrings.legalUrlParams}',
-    ),
+    Uri.parse('${EnvironmentConfig.baseUrl}/${AuthStrings.termsPath}${AuthStrings.legalUrlParams}'),
     mode: LaunchMode.inAppBrowserView,
   );
 
@@ -42,6 +36,8 @@ class AuthTermsDisclaimer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
+      runAlignment: WrapAlignment.center,
+      alignment: WrapAlignment.center,
       spacing: 4,
       runSpacing: 4,
       children: [

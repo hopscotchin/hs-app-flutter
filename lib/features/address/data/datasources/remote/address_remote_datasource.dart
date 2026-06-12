@@ -16,8 +16,15 @@ abstract class AddressRemoteDatasource {
   @factoryMethod
   factory AddressRemoteDatasource(Dio dio) = _AddressRemoteDatasource;
 
+  /// `/customer/v2/addresses`.
   @GET(ApiConstants.customerAddresses)
-  Future<AddressesResponseModel> getAddresses({
+  Future<AddressesResponseModel> getCustomerAddresses({
+    @CancelRequest() CancelToken? cancelToken,
+  });
+
+  /// `/delivery/addresses/v3`.
+  @GET(ApiConstants.addresses)
+  Future<AddressesResponseModel> getDeliveryAddresses({
     @CancelRequest() CancelToken? cancelToken,
   });
 

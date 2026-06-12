@@ -17,32 +17,26 @@ class AuthFooterLinkRow extends StatelessWidget {
   final String actionLabel;
   final VoidCallback onActionTap;
 
-  static final _promptStyle = AppTypographyV1.labelMedium.regular.copyWith(
-    color: AppColors.neutralBlack,
-  );
-  static final _actionStyle = AppTypographyV1.labelMedium.bold.copyWith(
-    color: AppColors.secondary,
-  );
+  static final _promptStyle = AppTypographyV1.labelMedium.regular.textPrimary();
+  static final _actionStyle = AppTypographyV1.labelMedium.bold.brand();
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Divider(height: 1, color: AppColors.dividerLight),
-        const SizedBox(height: 24),
-        Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 4,
-          runSpacing: 4,
-          children: [
-            Text(promptText, style: _promptStyle),
-            GestureDetector(
-              onTap: onActionTap,
-              child: Text(actionLabel, style: _actionStyle),
-            ),
-          ],
+        GestureDetector(
+          onTap: onActionTap,
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
+            runSpacing: 4,
+            children: [
+              Text(promptText, style: _promptStyle),
+              Text(actionLabel, style: _actionStyle),
+            ],
+          ),
         ),
       ],
     );

@@ -3,18 +3,26 @@ class ImageConstants {
 
   static const String splashAnimation = 'assets/animations/splash_animation.gif';
   static const String hsLogo = 'assets/images/hslogo.svg';
-  static const String heart = 'assets/images/heart.svg';
+  //PLP
   static const String arrowBack = 'assets/icons/arrow_back.svg';
+  static const String filter = 'assets/icons/filter.svg';
+
+  static const String sortBy = 'assets/icons/sortby.svg';
+  static const String addWishlist = 'assets/icons/wishlist_add.svg';
+  static const String heart = 'assets/icons/heart.svg';
+  static const String filterClose = 'assets/icons/filter_close.svg';
+  static const String wishlistAdded = 'assets/icons/wishlisted_icon.svg';
   static const String accountMobileIcon = 'assets/icons/account_mobile.svg';
+  static const String locationIcon = 'assets/icons/location.svg';
 
   //Dashboard Icons
   static const String discover = 'assets/icons/dashboard/discover.svg';
   static const String categories = 'assets/icons/dashboard/categories.svg';
   static const String studio = 'assets/icons/dashboard/studio.svg';
   static const String profile = 'assets/icons/dashboard/profile.svg';
-  static const String search = 'assets/icons/dashboard/search.svg';
   static const String bag = 'assets/icons/dashboard/bag.svg';
   static const String hsFullLogoWhite = 'assets/icons/white_name_logo.svg';
+  static const String search = 'assets/icons/dashboard/search.svg';
 
   // Menu Items
   static const String ordersItemIcon = 'assets/icons/account_orders.svg';

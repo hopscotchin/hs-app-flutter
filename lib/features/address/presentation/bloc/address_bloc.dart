@@ -7,6 +7,7 @@ import '../../../../core/base/base_bloc.dart';
 import '../../../../core/error/failures.dart';
 import '../../data/managers/address_cache_manager.dart';
 import '../../domain/entities/address_entity.dart';
+import '../../domain/entities/address_source.dart';
 import '../../domain/entities/addresses_list_entity.dart';
 import '../../domain/usecases/delete_address_usecase.dart';
 import '../../domain/usecases/get_addresses_usecase.dart';
@@ -41,10 +42,12 @@ class AddressBloc extends BaseBloc<AddressEvent, AddressState> {
     LoadAddresses event,
     Emitter<AddressState> emit,
   ) async {
-    emit(const AddressState(status: AddressStatus.loading));
+    emit(AddressState(status: AddressStatus.loading, source: event.source));
     final token = swapCancelToken();
 
-    final result = await _getAddresses(GetAddressesParams(cancelToken: token));
+    final result = await _getAddresses(
+      GetAddressesParams(source: event.source, cancelToken: token),
+    );
 
     result.fold(
       (failure) {
@@ -52,13 +55,20 @@ class AddressBloc extends BaseBloc<AddressEvent, AddressState> {
         emit(
           AddressState(
             status: AddressStatus.error,
+            source: event.source,
             errorMessage: failure.message,
           ),
         );
       },
       (list) {
         _cache.setAll(list.rawItems);
-        emit(AddressState(status: AddressStatus.success, addresses: list));
+        emit(
+          AddressState(
+            status: AddressStatus.success,
+            source: event.source,
+            addresses: list,
+          ),
+        );
       },
     );
   }
@@ -67,7 +77,7 @@ class AddressBloc extends BaseBloc<AddressEvent, AddressState> {
     RefreshAddresses event,
     Emitter<AddressState> emit,
   ) async {
-    add(const LoadAddresses());
+    add(LoadAddresses(source: state.source));
   }
 
   Future<void> _onDeleteAddress(
@@ -97,7 +107,7 @@ class AddressBloc extends BaseBloc<AddressEvent, AddressState> {
             deleteSuccessMessage: popUpMessage,
           ),
         );
-        add(const LoadAddresses());
+        add(LoadAddresses(source: current.source));
       },
     );
   }

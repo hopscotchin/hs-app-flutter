@@ -131,10 +131,10 @@ return clearSelectFeedback(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  load,TResult Function()?  refresh,TResult Function( int addressId)?  delete,TResult Function()?  clearDeleteFeedback,TResult Function( int addressId)?  select,TResult Function()?  clearSelectFeedback,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( AddressSource source)?  load,TResult Function()?  refresh,TResult Function( int addressId)?  delete,TResult Function()?  clearDeleteFeedback,TResult Function( int addressId)?  select,TResult Function()?  clearSelectFeedback,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LoadAddresses() when load != null:
-return load();case RefreshAddresses() when refresh != null:
+return load(_that.source);case RefreshAddresses() when refresh != null:
 return refresh();case DeleteAddress() when delete != null:
 return delete(_that.addressId);case ClearDeleteFeedback() when clearDeleteFeedback != null:
 return clearDeleteFeedback();case SelectAddress() when select != null:
@@ -157,10 +157,10 @@ return clearSelectFeedback();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  load,required TResult Function()  refresh,required TResult Function( int addressId)  delete,required TResult Function()  clearDeleteFeedback,required TResult Function( int addressId)  select,required TResult Function()  clearSelectFeedback,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( AddressSource source)  load,required TResult Function()  refresh,required TResult Function( int addressId)  delete,required TResult Function()  clearDeleteFeedback,required TResult Function( int addressId)  select,required TResult Function()  clearSelectFeedback,}) {final _that = this;
 switch (_that) {
 case LoadAddresses():
-return load();case RefreshAddresses():
+return load(_that.source);case RefreshAddresses():
 return refresh();case DeleteAddress():
 return delete(_that.addressId);case ClearDeleteFeedback():
 return clearDeleteFeedback();case SelectAddress():
@@ -179,10 +179,10 @@ return clearSelectFeedback();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  load,TResult? Function()?  refresh,TResult? Function( int addressId)?  delete,TResult? Function()?  clearDeleteFeedback,TResult? Function( int addressId)?  select,TResult? Function()?  clearSelectFeedback,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( AddressSource source)?  load,TResult? Function()?  refresh,TResult? Function( int addressId)?  delete,TResult? Function()?  clearDeleteFeedback,TResult? Function( int addressId)?  select,TResult? Function()?  clearSelectFeedback,}) {final _that = this;
 switch (_that) {
 case LoadAddresses() when load != null:
-return load();case RefreshAddresses() when refresh != null:
+return load(_that.source);case RefreshAddresses() when refresh != null:
 return refresh();case DeleteAddress() when delete != null:
 return delete(_that.addressId);case ClearDeleteFeedback() when clearDeleteFeedback != null:
 return clearDeleteFeedback();case SelectAddress() when select != null:
@@ -199,33 +199,67 @@ return clearSelectFeedback();case _:
 
 
 class LoadAddresses implements AddressEvent {
-  const LoadAddresses();
+  const LoadAddresses({this.source = AddressSource.customer});
   
 
+@JsonKey() final  AddressSource source;
 
-
+/// Create a copy of AddressEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$LoadAddressesCopyWith<LoadAddresses> get copyWith => _$LoadAddressesCopyWithImpl<LoadAddresses>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadAddresses);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadAddresses&&(identical(other.source, source) || other.source == source));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,source);
 
 @override
 String toString() {
-  return 'AddressEvent.load()';
+  return 'AddressEvent.load(source: $source)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class $LoadAddressesCopyWith<$Res> implements $AddressEventCopyWith<$Res> {
+  factory $LoadAddressesCopyWith(LoadAddresses value, $Res Function(LoadAddresses) _then) = _$LoadAddressesCopyWithImpl;
+@useResult
+$Res call({
+ AddressSource source
+});
 
 
+
+
+}
+/// @nodoc
+class _$LoadAddressesCopyWithImpl<$Res>
+    implements $LoadAddressesCopyWith<$Res> {
+  _$LoadAddressesCopyWithImpl(this._self, this._then);
+
+  final LoadAddresses _self;
+  final $Res Function(LoadAddresses) _then;
+
+/// Create a copy of AddressEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? source = null,}) {
+  return _then(LoadAddresses(
+source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
+as AddressSource,
+  ));
+}
+
+
+}
 
 /// @nodoc
 
@@ -458,7 +492,7 @@ String toString() {
 /// @nodoc
 mixin _$AddressState {
 
- AddressStatus get status; AddressesListEntity? get addresses; String? get errorMessage; int? get deletingId; String? get deleteSuccessMessage; String? get deleteError; int? get selectingId; bool get selectSucceeded; String? get selectError;
+ AddressStatus get status; AddressSource get source; AddressesListEntity? get addresses; String? get errorMessage; int? get deletingId; String? get deleteSuccessMessage; String? get deleteError; int? get selectingId; bool get selectSucceeded; String? get selectError;
 /// Create a copy of AddressState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -469,16 +503,16 @@ $AddressStateCopyWith<AddressState> get copyWith => _$AddressStateCopyWithImpl<A
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AddressState&&(identical(other.status, status) || other.status == status)&&(identical(other.addresses, addresses) || other.addresses == addresses)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.deletingId, deletingId) || other.deletingId == deletingId)&&(identical(other.deleteSuccessMessage, deleteSuccessMessage) || other.deleteSuccessMessage == deleteSuccessMessage)&&(identical(other.deleteError, deleteError) || other.deleteError == deleteError)&&(identical(other.selectingId, selectingId) || other.selectingId == selectingId)&&(identical(other.selectSucceeded, selectSucceeded) || other.selectSucceeded == selectSucceeded)&&(identical(other.selectError, selectError) || other.selectError == selectError));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AddressState&&(identical(other.status, status) || other.status == status)&&(identical(other.source, source) || other.source == source)&&(identical(other.addresses, addresses) || other.addresses == addresses)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.deletingId, deletingId) || other.deletingId == deletingId)&&(identical(other.deleteSuccessMessage, deleteSuccessMessage) || other.deleteSuccessMessage == deleteSuccessMessage)&&(identical(other.deleteError, deleteError) || other.deleteError == deleteError)&&(identical(other.selectingId, selectingId) || other.selectingId == selectingId)&&(identical(other.selectSucceeded, selectSucceeded) || other.selectSucceeded == selectSucceeded)&&(identical(other.selectError, selectError) || other.selectError == selectError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,addresses,errorMessage,deletingId,deleteSuccessMessage,deleteError,selectingId,selectSucceeded,selectError);
+int get hashCode => Object.hash(runtimeType,status,source,addresses,errorMessage,deletingId,deleteSuccessMessage,deleteError,selectingId,selectSucceeded,selectError);
 
 @override
 String toString() {
-  return 'AddressState(status: $status, addresses: $addresses, errorMessage: $errorMessage, deletingId: $deletingId, deleteSuccessMessage: $deleteSuccessMessage, deleteError: $deleteError, selectingId: $selectingId, selectSucceeded: $selectSucceeded, selectError: $selectError)';
+  return 'AddressState(status: $status, source: $source, addresses: $addresses, errorMessage: $errorMessage, deletingId: $deletingId, deleteSuccessMessage: $deleteSuccessMessage, deleteError: $deleteError, selectingId: $selectingId, selectSucceeded: $selectSucceeded, selectError: $selectError)';
 }
 
 
@@ -489,7 +523,7 @@ abstract mixin class $AddressStateCopyWith<$Res>  {
   factory $AddressStateCopyWith(AddressState value, $Res Function(AddressState) _then) = _$AddressStateCopyWithImpl;
 @useResult
 $Res call({
- AddressStatus status, AddressesListEntity? addresses, String? errorMessage, int? deletingId, String? deleteSuccessMessage, String? deleteError, int? selectingId, bool selectSucceeded, String? selectError
+ AddressStatus status, AddressSource source, AddressesListEntity? addresses, String? errorMessage, int? deletingId, String? deleteSuccessMessage, String? deleteError, int? selectingId, bool selectSucceeded, String? selectError
 });
 
 
@@ -506,10 +540,11 @@ class _$AddressStateCopyWithImpl<$Res>
 
 /// Create a copy of AddressState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? addresses = freezed,Object? errorMessage = freezed,Object? deletingId = freezed,Object? deleteSuccessMessage = freezed,Object? deleteError = freezed,Object? selectingId = freezed,Object? selectSucceeded = null,Object? selectError = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? source = null,Object? addresses = freezed,Object? errorMessage = freezed,Object? deletingId = freezed,Object? deleteSuccessMessage = freezed,Object? deleteError = freezed,Object? selectingId = freezed,Object? selectSucceeded = null,Object? selectError = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as AddressStatus,addresses: freezed == addresses ? _self.addresses : addresses // ignore: cast_nullable_to_non_nullable
+as AddressStatus,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
+as AddressSource,addresses: freezed == addresses ? _self.addresses : addresses // ignore: cast_nullable_to_non_nullable
 as AddressesListEntity?,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,deletingId: freezed == deletingId ? _self.deletingId : deletingId // ignore: cast_nullable_to_non_nullable
 as int?,deleteSuccessMessage: freezed == deleteSuccessMessage ? _self.deleteSuccessMessage : deleteSuccessMessage // ignore: cast_nullable_to_non_nullable
@@ -614,10 +649,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AddressStatus status,  AddressesListEntity? addresses,  String? errorMessage,  int? deletingId,  String? deleteSuccessMessage,  String? deleteError,  int? selectingId,  bool selectSucceeded,  String? selectError)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AddressStatus status,  AddressSource source,  AddressesListEntity? addresses,  String? errorMessage,  int? deletingId,  String? deleteSuccessMessage,  String? deleteError,  int? selectingId,  bool selectSucceeded,  String? selectError)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AddressState() when $default != null:
-return $default(_that.status,_that.addresses,_that.errorMessage,_that.deletingId,_that.deleteSuccessMessage,_that.deleteError,_that.selectingId,_that.selectSucceeded,_that.selectError);case _:
+return $default(_that.status,_that.source,_that.addresses,_that.errorMessage,_that.deletingId,_that.deleteSuccessMessage,_that.deleteError,_that.selectingId,_that.selectSucceeded,_that.selectError);case _:
   return orElse();
 
 }
@@ -635,10 +670,10 @@ return $default(_that.status,_that.addresses,_that.errorMessage,_that.deletingId
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AddressStatus status,  AddressesListEntity? addresses,  String? errorMessage,  int? deletingId,  String? deleteSuccessMessage,  String? deleteError,  int? selectingId,  bool selectSucceeded,  String? selectError)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AddressStatus status,  AddressSource source,  AddressesListEntity? addresses,  String? errorMessage,  int? deletingId,  String? deleteSuccessMessage,  String? deleteError,  int? selectingId,  bool selectSucceeded,  String? selectError)  $default,) {final _that = this;
 switch (_that) {
 case _AddressState():
-return $default(_that.status,_that.addresses,_that.errorMessage,_that.deletingId,_that.deleteSuccessMessage,_that.deleteError,_that.selectingId,_that.selectSucceeded,_that.selectError);case _:
+return $default(_that.status,_that.source,_that.addresses,_that.errorMessage,_that.deletingId,_that.deleteSuccessMessage,_that.deleteError,_that.selectingId,_that.selectSucceeded,_that.selectError);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -655,10 +690,10 @@ return $default(_that.status,_that.addresses,_that.errorMessage,_that.deletingId
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AddressStatus status,  AddressesListEntity? addresses,  String? errorMessage,  int? deletingId,  String? deleteSuccessMessage,  String? deleteError,  int? selectingId,  bool selectSucceeded,  String? selectError)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AddressStatus status,  AddressSource source,  AddressesListEntity? addresses,  String? errorMessage,  int? deletingId,  String? deleteSuccessMessage,  String? deleteError,  int? selectingId,  bool selectSucceeded,  String? selectError)?  $default,) {final _that = this;
 switch (_that) {
 case _AddressState() when $default != null:
-return $default(_that.status,_that.addresses,_that.errorMessage,_that.deletingId,_that.deleteSuccessMessage,_that.deleteError,_that.selectingId,_that.selectSucceeded,_that.selectError);case _:
+return $default(_that.status,_that.source,_that.addresses,_that.errorMessage,_that.deletingId,_that.deleteSuccessMessage,_that.deleteError,_that.selectingId,_that.selectSucceeded,_that.selectError);case _:
   return null;
 
 }
@@ -670,10 +705,11 @@ return $default(_that.status,_that.addresses,_that.errorMessage,_that.deletingId
 
 
 class _AddressState implements AddressState {
-  const _AddressState({this.status = AddressStatus.initial, this.addresses, this.errorMessage, this.deletingId, this.deleteSuccessMessage, this.deleteError, this.selectingId, this.selectSucceeded = false, this.selectError});
+  const _AddressState({this.status = AddressStatus.initial, this.source = AddressSource.customer, this.addresses, this.errorMessage, this.deletingId, this.deleteSuccessMessage, this.deleteError, this.selectingId, this.selectSucceeded = false, this.selectError});
   
 
 @override@JsonKey() final  AddressStatus status;
+@override@JsonKey() final  AddressSource source;
 @override final  AddressesListEntity? addresses;
 @override final  String? errorMessage;
 @override final  int? deletingId;
@@ -693,16 +729,16 @@ _$AddressStateCopyWith<_AddressState> get copyWith => __$AddressStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AddressState&&(identical(other.status, status) || other.status == status)&&(identical(other.addresses, addresses) || other.addresses == addresses)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.deletingId, deletingId) || other.deletingId == deletingId)&&(identical(other.deleteSuccessMessage, deleteSuccessMessage) || other.deleteSuccessMessage == deleteSuccessMessage)&&(identical(other.deleteError, deleteError) || other.deleteError == deleteError)&&(identical(other.selectingId, selectingId) || other.selectingId == selectingId)&&(identical(other.selectSucceeded, selectSucceeded) || other.selectSucceeded == selectSucceeded)&&(identical(other.selectError, selectError) || other.selectError == selectError));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AddressState&&(identical(other.status, status) || other.status == status)&&(identical(other.source, source) || other.source == source)&&(identical(other.addresses, addresses) || other.addresses == addresses)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.deletingId, deletingId) || other.deletingId == deletingId)&&(identical(other.deleteSuccessMessage, deleteSuccessMessage) || other.deleteSuccessMessage == deleteSuccessMessage)&&(identical(other.deleteError, deleteError) || other.deleteError == deleteError)&&(identical(other.selectingId, selectingId) || other.selectingId == selectingId)&&(identical(other.selectSucceeded, selectSucceeded) || other.selectSucceeded == selectSucceeded)&&(identical(other.selectError, selectError) || other.selectError == selectError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,addresses,errorMessage,deletingId,deleteSuccessMessage,deleteError,selectingId,selectSucceeded,selectError);
+int get hashCode => Object.hash(runtimeType,status,source,addresses,errorMessage,deletingId,deleteSuccessMessage,deleteError,selectingId,selectSucceeded,selectError);
 
 @override
 String toString() {
-  return 'AddressState(status: $status, addresses: $addresses, errorMessage: $errorMessage, deletingId: $deletingId, deleteSuccessMessage: $deleteSuccessMessage, deleteError: $deleteError, selectingId: $selectingId, selectSucceeded: $selectSucceeded, selectError: $selectError)';
+  return 'AddressState(status: $status, source: $source, addresses: $addresses, errorMessage: $errorMessage, deletingId: $deletingId, deleteSuccessMessage: $deleteSuccessMessage, deleteError: $deleteError, selectingId: $selectingId, selectSucceeded: $selectSucceeded, selectError: $selectError)';
 }
 
 
@@ -713,7 +749,7 @@ abstract mixin class _$AddressStateCopyWith<$Res> implements $AddressStateCopyWi
   factory _$AddressStateCopyWith(_AddressState value, $Res Function(_AddressState) _then) = __$AddressStateCopyWithImpl;
 @override @useResult
 $Res call({
- AddressStatus status, AddressesListEntity? addresses, String? errorMessage, int? deletingId, String? deleteSuccessMessage, String? deleteError, int? selectingId, bool selectSucceeded, String? selectError
+ AddressStatus status, AddressSource source, AddressesListEntity? addresses, String? errorMessage, int? deletingId, String? deleteSuccessMessage, String? deleteError, int? selectingId, bool selectSucceeded, String? selectError
 });
 
 
@@ -730,10 +766,11 @@ class __$AddressStateCopyWithImpl<$Res>
 
 /// Create a copy of AddressState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? addresses = freezed,Object? errorMessage = freezed,Object? deletingId = freezed,Object? deleteSuccessMessage = freezed,Object? deleteError = freezed,Object? selectingId = freezed,Object? selectSucceeded = null,Object? selectError = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? source = null,Object? addresses = freezed,Object? errorMessage = freezed,Object? deletingId = freezed,Object? deleteSuccessMessage = freezed,Object? deleteError = freezed,Object? selectingId = freezed,Object? selectSucceeded = null,Object? selectError = freezed,}) {
   return _then(_AddressState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as AddressStatus,addresses: freezed == addresses ? _self.addresses : addresses // ignore: cast_nullable_to_non_nullable
+as AddressStatus,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
+as AddressSource,addresses: freezed == addresses ? _self.addresses : addresses // ignore: cast_nullable_to_non_nullable
 as AddressesListEntity?,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,deletingId: freezed == deletingId ? _self.deletingId : deletingId // ignore: cast_nullable_to_non_nullable
 as int?,deleteSuccessMessage: freezed == deleteSuccessMessage ? _self.deleteSuccessMessage : deleteSuccessMessage // ignore: cast_nullable_to_non_nullable

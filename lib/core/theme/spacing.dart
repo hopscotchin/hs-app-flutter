@@ -11,9 +11,11 @@ class AppSpacing {
   static const double xxxs = 2.0; // Extra extra extra small
   static const double xxs = 4.0; // Extra extra small
   static const double xs = 8.0; // Extra small
+  static const double xsm = 10.0; // Extra Small Medium
   static const double sm = 12.0; // Small
   static const double lmd = 14.0; // Low Medium
   static const double md = 16.0; // Medium (default)
+  static const double mdLg = 20.0; // Medium-Large (between md and lg)
   static const double lgMd = 20.0; // Large Medium
   static const double lg = 24.0; // Large
   static const double xl = 32.0; // Extra large
@@ -69,6 +71,7 @@ class AppSpacing {
   // Vertical gaps
   static const SizedBox verticalGapXxs = SizedBox(height: xxs);
   static const SizedBox verticalGapXs = SizedBox(height: xs);
+  static const SizedBox verticalGapXsm = SizedBox(height: xsm);
   static const SizedBox verticalGapSm = SizedBox(height: sm);
   static const SizedBox verticalGapMd = SizedBox(height: md);
   static const SizedBox verticalGapLg = SizedBox(height: lg);
@@ -86,6 +89,7 @@ class AppSpacing {
   static const SizedBox horizontalGapXl = SizedBox(width: xl);
 
   // Border radius
+  static const double radiusXxs = 2.0;
   static const double radiusXs = 4.0;
   static const double radiusSm = 8.0;
   static const double radiusMd = 12.0;
@@ -93,6 +97,7 @@ class AppSpacing {
   static const double radiusXl = 24.0;
   static const double radiusFull = 999.0;
 
+  static const BorderRadius borderRadiusXxs = BorderRadius.all(Radius.circular(radiusXxs));
   static const BorderRadius borderRadiusXs = BorderRadius.all(Radius.circular(radiusXs));
   static const BorderRadius borderRadiusSm = BorderRadius.all(Radius.circular(radiusSm));
   static const BorderRadius borderRadiusMd = BorderRadius.all(Radius.circular(radiusMd));
@@ -117,8 +122,10 @@ class AppSpacing {
   static const double avatarXxl = 96.0;
 
   // Button heights
+  static const double buttonHeightXs = 28.0;
   static const double buttonHeightSm = 32.0;
   static const double buttonHeightMd = 44.0;
+  static const double buttonHeightBase = 48.0;
   static const double buttonHeightLg = 52.0;
 
   // Input field height

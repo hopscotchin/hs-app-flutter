@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../constants/default_error_messages.dart';
 import '../entities/message_bar_entity.dart';
 
 sealed class Failure extends Equatable {
@@ -20,20 +21,20 @@ class ServerFailure extends Failure {
 
 class TimeoutFailure extends Failure {
   const TimeoutFailure({
-    super.message = 'Uh-oh! Connection timed out. Please try again.',
+    super.message = DefaultErrorMessages.timeout,
     super.statusCode,
   });
 }
 
 class ConnectionFailure extends Failure {
   const ConnectionFailure({
-    super.message = 'Uh-oh! There seems to be no internet connection.',
+    super.message = DefaultErrorMessages.connection,
   });
 }
 
 class RequestCancelledFailure extends Failure {
   const RequestCancelledFailure({
-    super.message = 'Uh-oh! Request was cancelled.',
+    super.message = DefaultErrorMessages.requestCancelled,
   });
 }
 
@@ -41,51 +42,49 @@ class RequestCancelledFailure extends Failure {
 
 class BadRequestFailure extends Failure {
   const BadRequestFailure({
-    super.message = 'Invalid request. Please try again.',
+    super.message = DefaultErrorMessages.badRequest,
     super.statusCode = 400,
   });
 }
 
 class UnauthorizedFailure extends Failure {
   const UnauthorizedFailure({
-    super.message = 'Uh-oh! Session expired. Please log in again.',
+    super.message = DefaultErrorMessages.unauthorized,
     super.statusCode = 401,
   });
 }
 
 class ForbiddenFailure extends Failure {
   const ForbiddenFailure({
-    super.message =
-        'Uh-oh! You don\'t have permission to access this resource.',
+    super.message = DefaultErrorMessages.forbidden,
     super.statusCode = 403,
   });
 }
 
 class NotFoundFailure extends Failure {
   const NotFoundFailure({
-    super.message = 'Uh-oh! The requested resource was not found.',
+    super.message = DefaultErrorMessages.notFound,
     super.statusCode = 404,
   });
 }
 
 class ConflictFailure extends Failure {
   const ConflictFailure({
-    super.message = 'Uh-oh! A conflict occurred. Please try again.',
+    super.message = DefaultErrorMessages.conflict,
     super.statusCode = 409,
   });
 }
 
 class InternalServerFailure extends Failure {
   const InternalServerFailure({
-    super.message = 'Something went wrong on our end. Please try again later.',
+    super.message = DefaultErrorMessages.internalServer,
     super.statusCode = 500,
   });
 }
 
 class ServiceUnavailableFailure extends Failure {
   const ServiceUnavailableFailure({
-    super.message =
-        'Service is temporarily unavailable. Please try again later.',
+    super.message = DefaultErrorMessages.serviceUnavailable,
     super.statusCode = 503,
   });
 }
@@ -96,7 +95,7 @@ class ApiFailure extends Failure {
   final List<MessageBarEntity> messageBars;
 
   const ApiFailure({
-    super.message = 'Request failed. Please try again.',
+    super.message = DefaultErrorMessages.api,
     super.statusCode,
     this.messageBars = const [],
   });
@@ -112,7 +111,7 @@ class CacheFailure extends Failure {
 }
 
 class NetworkFailure extends Failure {
-  const NetworkFailure({super.message = 'No internet connection.'});
+  const NetworkFailure({super.message = DefaultErrorMessages.network});
 }
 
 class ValidationFailure extends Failure {
@@ -120,5 +119,5 @@ class ValidationFailure extends Failure {
 }
 
 class UnknownFailure extends Failure {
-  const UnknownFailure({super.message = 'An unknown error occurred.'});
+  const UnknownFailure({super.message = DefaultErrorMessages.unknown});
 }

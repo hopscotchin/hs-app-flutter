@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/strings/discover_strings.dart';
 import '../../core/navigation/action_url_handler.dart';
+import '../../core/theme/spacing.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../atoms/cached_image_widget.dart';
 import '../atoms/cta_button_component.dart';
@@ -17,16 +18,14 @@ class ProductGridWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (gridData.tiles.isEmpty) return const SizedBox.shrink();
 
-    final columns = gridData.layoutInfo?.columns ?? 2;
-    final horizontalMargin = margins?.horizontal ?? 16;
-    final innerHMargin = margins?.innerHorizontalMargin ?? 0;
-    final innerVMargin = margins?.innerVerticalMargin ?? 8;
     final titleHMargin = margins?.titleHorizontalMargin ?? 0;
     final titleBMargin = margins?.titleBottomMargin ?? 0;
     final ctaTop = margins?.ctaTopMargin ?? 0;
     final ctaHMargin = margins?.ctaHorizontalMargin ?? 0;
 
-    final rows = _chunk(gridData.tiles, columns);
+    final tiles = gridData.tiles;
+    final columns = gridData.layoutInfo?.columns ?? 2;
+    final rowCount = (tiles.length / columns).ceil();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,18 +43,14 @@ class ProductGridWidget extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
-          child: Column(
-            children: [
-              for (final row in rows)
-                Padding(
-                  padding: EdgeInsets.only(bottom: innerVMargin),
-                  child: _buildProductRow(context, row, columns, innerHMargin),
-                ),
-            ],
+        for (int row = 0; row < rowCount; row++)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.sm,
+            ),
+            child: _buildProductRow(context, tiles, row * columns, columns),
           ),
-        ),
         if (gridData.ctaButton != null)
           Padding(
             padding: EdgeInsets.only(
@@ -69,47 +64,30 @@ class ProductGridWidget extends StatelessWidget {
     );
   }
 
-  List<List<HomepageProduct>> _chunk(
-    List<HomepageProduct> items,
-    int columns,
-  ) {
-    if (columns <= 0) return [items];
-    final out = <List<HomepageProduct>>[];
-    for (int i = 0; i < items.length; i += columns) {
-      out.add(
-        items.sublist(i, i + columns > items.length ? items.length : i + columns),
-      );
-    }
-    return out;
-  }
-
   Widget _buildProductRow(
     BuildContext context,
-    List<HomepageProduct> row,
+    List<HomepageProduct> tiles,
+    int startIndex,
     int columns,
-    double gap,
   ) {
-    if (row.isEmpty) return const SizedBox.shrink();
-
     return Row(
-      children: List.generate(columns, (index) {
-        if (index >= row.length) {
-          return const Expanded(child: SizedBox.shrink());
-        }
-        final item = row[index];
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(left: index > 0 ? gap : 0),
-            child: _buildProductCard(context, item),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < columns; i++) ...[
+          if (i > 0) const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: startIndex + i < tiles.length
+                ? _buildProductCard(context, tiles[startIndex + i])
+                : const SizedBox.shrink(),
           ),
-        );
-      }),
+        ],
+      ],
     );
   }
 
   Widget _buildProductCard(BuildContext context, HomepageProduct item) {
     final showInfo = gridData.layoutInfo?.showProductInfo ?? true;
-    return ProductTile.fromGridItem(
+    return ProductTile.fromHomepageProduct(
       item,
       showProductInfo: showInfo,
       onTap: () =>

@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 
+import '../constants/default_error_messages.dart';
 import '../entities/message_bar_entity.dart';
 import '../error/exceptions.dart';
 import '../error/failures.dart';
@@ -53,7 +54,7 @@ mixin SafeApiCall {
       if (e.type == DioExceptionType.cancel) {
         return const Left(RequestCancelledFailure());
       }
-      return const Left(UnknownFailure());
+      return Left(UnknownFailure(message: e.message ?? DefaultErrorMessages.unknown));
     } catch (_) {
       return const Left(UnknownFailure());
     }

@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:hs_app_flutter/components/atoms/custom_chip_widget.dart';
+import 'package:hs_app_flutter/components/atoms/custom_image.dart';
+import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
+import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
+import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
 
 import '../../core/entities/visual_cue_entity.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
-import '../../core/theme/typography.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import 'cached_image_widget.dart';
 
@@ -22,13 +27,16 @@ class ProductTile extends StatelessWidget {
   // Shared:
   final List<VisualCueEntity> visualCues;
   final List<String> colorHexCodes;
+  final String? colorVariantsLabel;
   final bool isSoldOut;
   final bool isWishlisted;
   final bool showWishlistIcon;
   final bool showProductInfo;
-  final double imageAspectRatio;
+  final bool isCPT;
+  final double? imageAspectRatio;
   final VoidCallback? onTap;
   final VoidCallback? onWishlistTap;
+  final bool? hasCPT;
 
   const ProductTile({
     super.key,
@@ -43,46 +51,56 @@ class ProductTile extends StatelessWidget {
     this.discountPercent,
     this.visualCues = const [],
     this.colorHexCodes = const [],
+    this.colorVariantsLabel,
     this.isSoldOut = false,
     this.isWishlisted = false,
     this.showWishlistIcon = false,
     this.showProductInfo = true,
-    this.imageAspectRatio = 5 / 7,
+    this.isCPT = false,
+    this.imageAspectRatio,
     this.onTap,
     this.onWishlistTap,
+    this.hasCPT = false,
   });
 
-  factory ProductTile.fromGridItem(
+  factory ProductTile.fromHomepageProduct(
     HomepageProduct product, {
     Key? key,
     VoidCallback? onTap,
     VoidCallback? onWishlistTap,
     bool showProductInfo = true,
+    double? imageAspectRatio,
+    String? imageUrl,
   }) {
     final price = product.price;
     final sellingPrice = price?.sellingPrice;
     final mrp = price?.mrp;
     final priceText = sellingPrice != null ? '₹$sellingPrice' : null;
-    final originalPriceText = (price?.hasDiscount ?? false) && mrp != null
-        ? '₹$mrp'
-        : null;
+    final originalPriceText = (price?.hasDiscount ?? false) && mrp != null ? '₹$mrp' : null;
     return ProductTile(
       key: key,
-      imageUrl: product.primaryImageUrl,
+      imageUrl: imageUrl ?? product.primaryImageUrl,
       brandName: product.brandName,
       productName: product.name,
       priceText: priceText,
       originalPriceText: originalPriceText,
       discountText: price?.discountLabel,
       visualCues: product.visualCues,
+      colorVariantsLabel: product.colorVariants,
       isSoldOut: product.soldOut,
       isWishlisted: product.isWishlisted,
       showWishlistIcon: product.canWishlist,
       showProductInfo: showProductInfo,
-      imageAspectRatio: 0.75,
+      imageAspectRatio: imageAspectRatio,
       onTap: onTap,
       onWishlistTap: onWishlistTap,
     );
+  }
+
+  /// Transformer-supplied label wins; falls back to hex-code count for legacy data.
+  String? get _resolvedColorLabel {
+    if (colorVariantsLabel != null) return colorVariantsLabel;
+    return colorHexCodes.length > 1 ? '+${colorHexCodes.length} Colors' : null;
   }
 
   bool get _hasDiscount {
@@ -114,89 +132,106 @@ class ProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const double kDefaultAspectRatio = 5 / 7;
+    final effectiveRatio = imageAspectRatio ?? kDefaultAspectRatio;
+
+    if (isCPT) {
+      return GestureDetector(
+        onTap: onTap,
+        child: AspectRatio(
+          aspectRatio: effectiveRatio,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
+            child: CachedImageWidget(imageUrl: imageUrl ?? '', fit: BoxFit.cover),
+          ),
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildImage(),
+          _buildImage(effectiveRatio),
           if (showProductInfo) ...[
-            AppSpacing.verticalGapXs,
-            if (brandName != null && brandName!.isNotEmpty) _buildBrandName(),
-            if (productName != null) _buildProductName(),
-            if (_resolvedPriceText.isNotEmpty) ...[AppSpacing.verticalGapXxs, _buildPriceRow()],
-            if (colorHexCodes.length > 1) ...[AppSpacing.verticalGapXxs, _buildColorDots()],
+            AppSpacing.verticalGapXsm,
+            if (productName.isNotNullOrEmpty) _buildBrandName(),
+            if (_resolvedPriceText.isNotEmpty) ...[AppSpacing.verticalGapXs, _buildPriceRow()],
+            if (_resolvedColorLabel != null || (hasCPT ?? false)) ...[
+              AppSpacing.verticalGapXsm,
+              Text(
+                _resolvedColorLabel ?? '',
+                style: AppTypographyV1.labelMedium.regular.copyWith(
+                  color: Colors.black.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
           ],
         ],
       ),
     );
   }
 
-  Widget _buildImage() {
+  Widget _buildImage(double aspectRatio) {
     return AspectRatio(
-      aspectRatio: imageAspectRatio,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          CachedImageWidget(imageUrl: imageUrl ?? '', fit: BoxFit.cover),
-          if (isSoldOut) _buildSoldOutOverlay(),
-          ...visualCues
-              .where((cue) => cue.text != null && cue.text!.isNotEmpty)
-              .map(_buildVisualCueOverlay),
-          if (showWishlistIcon) _buildWishlistIcon(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSoldOutOverlay() {
-    return Container(
-      color: Colors.white.withValues(alpha: 0.7),
-      child: Center(
-        child: Text(
-          'SOLD OUT',
-          style: AppTypography.labelLarge.copyWith(color: AppColors.textSecondary),
+      aspectRatio: aspectRatio,
+      child: LayoutBuilder(
+        builder: (context, constraints) => Stack(
+          fit: StackFit.expand,
+          children: [
+            CachedImageWidget(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
+              imageUrl: imageUrl ?? '',
+              fit: BoxFit.cover,
+              width: constraints.maxWidth,
+            ),
+            if (isSoldOut) ColoredBox(color: AppColors.whiteColor.withValues(alpha: 0.5)),
+            ...visualCues
+                .where((cue) => (cue.text.isNotNullOrEmpty || cue.imageUrl.isNotNullOrEmpty))
+                .map(_buildVisualCueOverlay),
+            if (showWishlistIcon) _buildWishlistIcon(),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildVisualCueOverlay(VisualCueEntity cue) {
-    final bgColor = _parseColor(cue.bgColor) ?? AppColors.primary;
-    final txtColor = _parseColor(cue.textColor) ?? Colors.white;
+    final bgColor = cue.bgColor.toColor ?? AppColors.neutralGrey2;
+    final txtColor = cue.textColor.toColor ?? AppColors.textPrimary;
 
-    final badge = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(2)),
-      child: Text(
-        cue.text!,
-        style: AppTypography.labelSmall.copyWith(color: txtColor, fontSize: 10),
-      ),
-    );
+    final badge = cue.imageUrl.isNotNullOrEmpty
+        ? CustomImage(path: cue.imageUrl!, height: 15, width: 64)
+        : CustomChipWidget(
+            text: (cue.text ?? ''),
+            backgroundColor: bgColor,
+            borderColor: isSoldOut ? bgColor : txtColor,
+            borderRadius: 4,
+            textStyle: AppTypographyV1.labelMedium.medium.copyWith(color: txtColor),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+          );
 
-    return switch (cue.location?.toLowerCase()) {
-      'topright' => Positioned(top: 6, right: 6, child: badge),
-      'bottomleft' => Positioned(bottom: 6, left: 6, child: badge),
-      'bottomright' => Positioned(bottom: 6, right: 6, child: badge),
-      _ => Positioned(top: 6, left: 6, child: badge), // TopLeft / default
-    };
+    return Positioned(bottom: AppSpacing.xs, left: 6, child: badge);
+    // switch (cue.location?.toLowerCase()) {
+    //   'topright' => Positioned(top: 6, right: AppSpacing.xs, child: badge),
+    //   'bottomleft' => Positioned(bottom: AppSpacing.xs, left: 6, child: badge),
+    //   'bottomright' => Positioned(bottom: 6, right: AppSpacing.xs, child: badge),
+    //   _ => Positioned(bottom: AppSpacing.xs, left: 6, child: badge),
+    // };
   }
 
   Widget _buildWishlistIcon() {
     return Positioned(
-      bottom: AppSpacing.xs,
-      right: AppSpacing.xs,
-      child: GestureDetector(
-        onTap: onWishlistTap,
-        child: Container(
-          padding: AppSpacing.paddingXxs,
-          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-          child: Icon(
-            isWishlisted ? Icons.favorite : Icons.favorite_border,
-            size: AppSpacing.iconSm,
-            color: isWishlisted ? AppColors.error : AppColors.textTertiary,
-          ),
+      top: AppSpacing.xxs,
+      right: AppSpacing.xxs,
+      child: IconButton(
+        icon: CustomImage(
+          path: isWishlisted ? ImageConstants.wishlistAdded : ImageConstants.addWishlist,
+          height: 16,
+          width: 16,
         ),
+        onPressed: onWishlistTap,
       ),
     );
   }
@@ -205,20 +240,8 @@ class ProductTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
       child: Text(
-        brandName!,
-        style: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
-
-  Widget _buildProductName() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-      child: Text(
-        productName!,
-        style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
+        productName ?? '',
+        style: AppTypographyV1.labelLarge.regular.textPrimary(),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -228,73 +251,27 @@ class ProductTile extends StatelessWidget {
   Widget _buildPriceRow() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-      child: Row(
-        children: [
-          Text(
-            _resolvedPriceText,
-            style: AppTypography.labelMedium.copyWith(color: AppColors.textPrimary),
-          ),
-          if (_resolvedOriginalPriceText != null) ...[
-            AppSpacing.horizontalGapXxs,
-            Text(
-              _resolvedOriginalPriceText!,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textTertiary,
-                decoration: TextDecoration.lineThrough,
+      child: RichText(
+        text: TextSpan(
+          text: '$_resolvedPriceText\t',
+          style: AppTypographyV1.bodySmall.bold.textPrimary(),
+          children: [
+            if (_resolvedOriginalPriceText != null) ...[
+              TextSpan(
+                text: '$_resolvedOriginalPriceText',
+                style: AppTypographyV1.labelMedium.regular.neutralGrey5().strikeThrough(),
               ),
-            ),
+            ],
+
+            if (_resolvedDiscountText != null) ...[
+              TextSpan(
+                text: '\t\t$_resolvedDiscountText',
+                style: AppTypographyV1.labelMedium.regular.brandSecondary(),
+              ),
+            ],
           ],
-          if (_resolvedDiscountText != null) ...[
-            AppSpacing.horizontalGapXxs,
-            Text(
-              _resolvedDiscountText!,
-              style: AppTypography.labelSmall.copyWith(color: AppColors.success),
-            ),
-          ],
-        ],
+        ),
       ),
     );
-  }
-
-  Widget _buildColorDots() {
-    final colors = colorHexCodes;
-    const maxShow = 4;
-    final remaining = colors.length - maxShow;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-      child: Row(
-        children: [
-          ...colors
-              .take(maxShow)
-              .map(
-                (hex) => Container(
-                  width: 12,
-                  height: 12,
-                  margin: const EdgeInsets.only(right: 4),
-                  decoration: BoxDecoration(
-                    color: _parseColor(hex),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.border, width: 0.5),
-                  ),
-                ),
-              ),
-          if (remaining > 0)
-            Text(
-              '+$remaining',
-              style: AppTypography.labelSmall.copyWith(color: AppColors.textTertiary),
-            ),
-        ],
-      ),
-    );
-  }
-
-  static Color? _parseColor(String? colorStr) {
-    if (colorStr == null || colorStr.isEmpty) return null;
-    try {
-      final hex = colorStr.replaceFirst('#', '');
-      return Color(int.parse('FF$hex', radix: 16));
-    } catch (_) {
-      return null;
-    }
   }
 }

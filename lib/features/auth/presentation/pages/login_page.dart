@@ -189,6 +189,16 @@ class _LoginPageState extends State<LoginPage> {
                         ),
 
                         AppSpacing.verticalGapXl,
+                        AuthFooterLinkRow(
+                          promptText: AuthStrings.newToHopscotch,
+                          actionLabel: AuthStrings.joinUs.toUpperCase(),
+                          onActionTap: () => AppNavigator.goToJoinUs(
+                            context,
+                            initialMobile: _rawMobile.length == 10 ? _rawMobile : null,
+                            redirectType: widget.redirectType,
+                          ),
+                        ),
+                        AppSpacing.verticalGapLg,
                       ],
                     ),
                   ),

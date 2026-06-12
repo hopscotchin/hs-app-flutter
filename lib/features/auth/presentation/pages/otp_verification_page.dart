@@ -60,12 +60,15 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
     _startTimer();
     if (Platform.isAndroid) _startSmsListener();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _otpFocusNode.requestFocus();
+      if (_otpController.text.isEmpty) {
+        _otpFocusNode.requestFocus();
+      }
     });
   }
 
   Future<void> _startSmsListener() async {
     await SmsAutoFill().listenForCode(smsCodeRegexPattern: '\\d{$_otpLength}');
+    if (!mounted) return;
     _smsSubscription = SmsAutoFill().code.listen(_onSmsCode);
   }
 
@@ -261,7 +264,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
   }
 
   void _onVerify() {
-    if (_otp.length == _otpLength) {
+    if (_otp.length == _otpLength && !context.read<AuthBloc>().state.isLoading) {
       context.read<AuthBloc>().add(
         VerifyOtp(loginId: widget.loginId, otp: _otp, otpReason: widget.otpReason),
       );

@@ -6,6 +6,7 @@ enum AddressStatus { initial, loading, success, error }
 abstract class AddressState with _$AddressState {
   const factory AddressState({
     @Default(AddressStatus.initial) AddressStatus status,
+    @Default(AddressSource.customer) AddressSource source,
     AddressesListEntity? addresses,
     String? errorMessage,
     int? deletingId,

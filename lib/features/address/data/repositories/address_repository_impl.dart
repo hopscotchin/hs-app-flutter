@@ -7,6 +7,7 @@ import '../../../../core/mixins/safe_api_call.dart';
 import '../../../../core/network/connectivity/network_info.dart';
 import '../../domain/entities/address_input.dart';
 import '../../domain/entities/address_mutation_result_entity.dart';
+import '../../domain/entities/address_source.dart';
 import '../../domain/entities/addresses_list_entity.dart';
 import '../../domain/entities/pincode_info_entity.dart';
 import '../../domain/repositories/address_repository.dart';
@@ -24,12 +25,18 @@ class AddressRepositoryImpl with SafeApiCall implements AddressRepository {
 
   @override
   Future<Either<Failure, AddressesListEntity>> getAddresses({
+    AddressSource source = AddressSource.delivery,
     CancelToken? cancelToken,
   }) {
     return safeApiCall(_networkInfo, () async {
-      final response = await _remoteDatasource.getAddresses(
-        cancelToken: cancelToken,
-      );
+      final response = switch (source) {
+        AddressSource.delivery => await _remoteDatasource.getDeliveryAddresses(
+            cancelToken: cancelToken,
+          ),
+        AddressSource.customer => await _remoteDatasource.getCustomerAddresses(
+            cancelToken: cancelToken,
+          ),
+      };
       return response.toEntity();
     });
   }

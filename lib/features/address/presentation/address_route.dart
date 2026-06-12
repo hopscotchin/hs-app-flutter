@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/route_names.dart';
 import '../../../core/di/injection.dart';
+import '../domain/entities/address_source.dart';
 import '../domain/entities/manage_address_args.dart';
 import 'bloc/address_bloc.dart';
 import 'bloc/manage_address_bloc.dart';
@@ -20,8 +21,13 @@ class AddressRoute {
       final extra = state.extra as Map<String, dynamic>?;
       final mode =
           extra?['mode'] as AddressListMode? ?? AddressListMode.normal;
+      // Account list (normal) + checkout list → /customer/v2/addresses.
+      // Cart list → /delivery/addresses/v3.
+      final source = mode == AddressListMode.cart
+          ? AddressSource.delivery
+          : AddressSource.customer;
       return BlocProvider(
-        create: (_) => sl<AddressBloc>()..add(const LoadAddresses()),
+        create: (_) => sl<AddressBloc>()..add(LoadAddresses(source: source)),
         child: AddressesPage(mode: mode),
       );
     },
