@@ -14,7 +14,7 @@ import '../../features/auth/domain/entities/otp_config/otp_config_entity.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
 abstract final class AppNavigator {
-  static bool _isRouteInStack(BuildContext context, String routeName) {
+   static bool _isRouteInStack(BuildContext context, String routeName) {
     final matches =
         GoRouter.of(context).routerDelegate.currentConfiguration.matches;
     return matches.whereType<RouteMatch>().any((m) => m.route.name == routeName);
@@ -31,11 +31,11 @@ abstract final class AppNavigator {
   static void goToCart(BuildContext context) => context.pushNamed(RouteNames.cart);
 
   static void goToLogin(
-      BuildContext context, {
-        String? initialMobile,
-        List<MessageBarEntity> initialMessageBars = const [],
-        String? redirectType,
-      }) {
+    BuildContext context, {
+    String? initialMobile,
+    List<MessageBarEntity> initialMessageBars = const [],
+    String? redirectType,
+  }) {
     if (_isRouteInStack(context, RouteNames.login)) {
       context.pop();
       return;
@@ -44,19 +44,19 @@ abstract final class AppNavigator {
         initialMobile != null || initialMessageBars.isNotEmpty || redirectType != null;
     final extra = hasData
         ? <String, dynamic>{
-      'initialMobile': initialMobile,
-      'initialMessageBars': initialMessageBars,
-      'redirectType': redirectType,
-    }
+            'initialMobile': initialMobile,
+            'initialMessageBars': initialMessageBars,
+            'redirectType': redirectType,
+          }
         : null;
     context.pushNamed(RouteNames.login, extra: extra);
   }
 
   static void goToJoinUs(
-      BuildContext context, {
-        String? initialMobile,
-        String? redirectType,
-      }) {
+    BuildContext context, {
+    String? initialMobile,
+    String? redirectType,
+  }) {
     if (_isRouteInStack(context, RouteNames.joinUs)) {
       context.pop();
       return;
@@ -71,14 +71,14 @@ abstract final class AppNavigator {
   /// Navigate to the OTP verification screen, sharing the existing [AuthBloc]
   /// instance via [BlocProvider.value] so the bloc is not re-created.
   static void goToOtpVerification(
-      BuildContext context, {
-        required AuthBloc bloc,
-        required String loginId,
-        required OtpConfigEntity otpConfig,
-        String otpReason = AuthStrings.signInReason,
-        bool isCheckoutFlow = false,
-        String? redirectType,
-      }) {
+    BuildContext context, {
+    required AuthBloc bloc,
+    required String loginId,
+    required OtpConfigEntity otpConfig,
+    String otpReason = AuthStrings.signInReason,
+    bool isCheckoutFlow = false,
+    String? redirectType,
+  }) {
     context.pushNamed(
       RouteNames.otpVerification,
       extra: <String, dynamic>{

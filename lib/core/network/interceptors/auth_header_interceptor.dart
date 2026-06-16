@@ -104,6 +104,7 @@ class AuthHeaderInterceptor extends Interceptor {
       'funnel_tile': '',
       'section': '',
       'subsection': '',
+      'x-app-framework': 'flutter',
     };
 
     if (_persistentTicket != null && _persistentTicket!.isNotEmpty) {
@@ -140,6 +141,7 @@ class AuthHeaderInterceptor extends Interceptor {
       'Accept': 'application/json',
       'device-type': _deviceId ?? '',
       'X-Request-ID': _uuid.v4(),
+      'x-app-framework': 'flutter',
     };
 
     if (_userAgent != null) {
