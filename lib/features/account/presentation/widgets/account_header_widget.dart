@@ -10,6 +10,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
+import '../../../auth/presentation/widgets/auth_footer_link_row.dart';
 import '../../domain/entities/account_entity.dart';
 
 class AccountHeaderWidget extends StatelessWidget {
@@ -99,7 +100,7 @@ class _SignedInHeader extends StatelessWidget {
     final hasEmail = account.email != null && account.email!.isNotEmpty;
 
     if (!hasPhone && !hasEmail) {
-      return Text(AuthStrings.doMoreWithAccount, style: AppTypographyV1.labelLarge.textSecondary());
+      return Text(AuthStrings.doMoreWithAccount, style: AppTypographyV1.labelLarge.textSeconday());
     }
 
     return Row(
@@ -209,22 +210,10 @@ class _SignedOutHeader extends StatelessWidget {
             ),
           ],
           AppSpacing.verticalGapLgMd,
-          Center(
-            child: GestureDetector(
-              onTap: () => AppNavigator.goToJoinUs(context),
-              child: Text.rich(
-                TextSpan(
-                  text: AccountStrings.newToHopscotch,
-                  style: AppTypographyV1.labelMedium.regular.textPrimary(),
-                  children: [
-                    TextSpan(
-                      text: AuthStrings.joinUs.toUpperCase(),
-                      style: AppTypographyV1.labelMedium.bold.brand(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          AuthFooterLinkRow(
+            promptText: AuthStrings.newToHopscotch,
+            actionLabel: AuthStrings.joinUs.toUpperCase(),
+            onActionTap: () => AppNavigator.goToJoinUs(context),
           ),
         ],
       ),

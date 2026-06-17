@@ -59,9 +59,9 @@ class OutlinedTextField extends StatefulWidget {
   final bool readOnly;
   final ValueChanged<String>? onChanged;
   final VoidCallback? onTap;
-  final TapRegionCallback? onTapOutside;
   final Widget? suffix;
   final Widget? suffixIcon;
+  final Function(PointerDownEvent)? onTapOutside;
 
   @override
   State<OutlinedTextField> createState() => _OutlinedTextFieldState();
@@ -158,9 +158,7 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
           readOnly: widget.readOnly,
           onChanged: widget.onChanged,
           onTap: widget.onTap,
-          onTapOutside:
-              widget.onTapOutside ??
-              (_) => FocusManager.instance.primaryFocus?.unfocus(),
+          onTapOutside: widget.onTapOutside ?? (_) => FocusManager.instance.primaryFocus?.unfocus(),
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
           obscureText: widget.obscureText,
@@ -170,6 +168,7 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
           maxLines: widget.maxLines,
           inputFormatters: widget.inputFormatters,
           style: _inputStyle,
+
           decoration: InputDecoration(
             counterText: '',
             isDense: true,
@@ -196,9 +195,7 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
                   if (widget.required)
                     TextSpan(
                       text: ' *',
-                      style: labelStyle.copyWith(
-                        color: AppColors.dangerDefault,
-                      ),
+                      style: labelStyle.copyWith(color: AppColors.dangerDefault),
                     ),
                 ],
               ),
@@ -222,17 +219,13 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
                   return error;
                 },
         ),
-        if (!hasError &&
-            widget.helperText != null &&
-            widget.helperText!.isNotEmpty) ...[
+        if (!hasError && widget.helperText != null && widget.helperText!.isNotEmpty) ...[
           AppSpacing.verticalGapXs,
           Padding(
             padding: const EdgeInsets.only(left: AppSpacing.md),
             child: Text(
               widget.helperText!,
-              style: AppTypographyV1.labelMedium.regular.copyWith(
-                color: AppColors.neutralBlack,
-              ),
+              style: AppTypographyV1.labelMedium.regular.copyWith(color: AppColors.neutralBlack),
             ),
           ),
         ],

@@ -361,12 +361,15 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
       onTap: () => ActionUrlHandler.navigate(context, tapUri),
       child: SizedBox(
         width: tileWidth,
-        child: cornerRadius > 0
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(cornerRadius),
-                child: image,
-              )
-            : image,
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: cornerRadius > 0
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(cornerRadius),
+                  child: image,
+                )
+              : image,
+        ),
       ),
     );
   }

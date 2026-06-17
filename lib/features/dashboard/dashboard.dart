@@ -23,8 +23,7 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage>
-    with WidgetsBindingObserver {
+class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserver {
   static const double _navHeight = 64;
   static const double _navTileRadius = 18;
   static const double _navIconSize = 18;
@@ -43,9 +42,7 @@ class _DashboardPageState extends State<DashboardPage>
   // Pre-built once: `BorderRadius.circular` allocates per call; the spring
   // animation pumps `tileDecoration` every frame. Hoisting to a const avoids
   // an allocation per nav-bar tile per frame.
-  static const BorderRadius _tileBorderRadius = BorderRadius.all(
-    Radius.circular(_navTileRadius),
-  );
+  static const BorderRadius _tileBorderRadius = BorderRadius.all(Radius.circular(_navTileRadius));
 
   // Nav-bar items never change after construction — build the list once
   // (lazy on first access) instead of allocating four NavBarItem + four

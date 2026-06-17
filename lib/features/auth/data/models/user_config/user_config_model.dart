@@ -11,8 +11,7 @@ class UserConfigModel {
   @JsonKey(defaultValue: false)
   final bool continueBrowsingEligibleVisitor;
 
-  factory UserConfigModel.fromJson(Map<String, dynamic> json) =>
-      _$UserConfigModelFromJson(json);
+  factory UserConfigModel.fromJson(Map<String, dynamic> json) => _$UserConfigModelFromJson(json);
 }
 
 extension UserConfigModelX on UserConfigModel {

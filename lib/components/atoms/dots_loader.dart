@@ -2,38 +2,73 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/colors.dart';
 
-/// Animated bouncing dots — grey dots that scale up/down in sequence. Defaults to 6 dots.
-class DotsLoader extends StatelessWidget {
-  final AnimationController controller;
-  final int dotCount;
+class DotsLoader extends StatefulWidget {
+  const DotsLoader({
+    super.key,
+    this.controller,
+    this.dotSize = 14.0,
+    this.color = AppColors.textSecondary,
+    this.spacing = 4.0,
+  });
 
-  const DotsLoader({super.key, required this.controller, this.dotCount = 6});
+  final AnimationController? controller;
+
+  final double dotSize;
+
+  final Color color;
+
+  final double spacing;
+
+  @override
+  State<DotsLoader> createState() => _DotsLoaderState();
+}
+
+class _DotsLoaderState extends State<DotsLoader> with SingleTickerProviderStateMixin {
+  late final AnimationController _ownController;
+  late final bool _ownsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _ownsController = widget.controller == null;
+    if (_ownsController) {
+      _ownController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 1200),
+      )..repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_ownsController) _ownController.dispose();
+    super.dispose();
+  }
+
+  AnimationController get _controller => widget.controller ?? _ownController;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: controller,
+      animation: _controller,
       builder: (context, _) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(dotCount, (i) {
-            final offset = i * (1.0 / dotCount);
-            final progress = ((controller.value + offset) % 1.0);
-            final scale = 0.4 + 0.4 * _bounce(progress);
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (i) {
+            final progress = ((_controller.value + i * 0.2) % 1.0);
+            final scale = 0.6 + 0.4 * _bounce(progress);
             final opacity = 0.3 + 0.7 * _bounce(progress);
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: EdgeInsets.symmetric(horizontal: widget.spacing),
               child: Transform.scale(
                 scale: scale,
                 child: Opacity(
                   opacity: opacity,
                   child: Container(
-                    width: 14,
-                    height: 14,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.textSecondary,
-                    ),
+                    width: widget.dotSize,
+                    height: widget.dotSize,
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: widget.color),
                   ),
                 ),
               ),

@@ -109,50 +109,72 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
   Widget build(BuildContext context) {
     super.build(context);
 
-    return BlocBuilder<HomeBloc, HomeState>(
-      // Skip rebuilds for pure-pagination flips (isLoadingMore true ↔ false).
-      // The spinner sliver below has its own BlocSelector that handles
-      // them locally — rebuilding the whole scroll view for a 24×24 spinner
-      // was the biggest pagination jank source.
-      buildWhen: (prev, curr) =>
-          prev.status != curr.status ||
-          !identical(prev.homePage, curr.homePage) ||
-          prev.errorMessage != curr.errorMessage,
-      builder: (context, state) {
-        _syncSortOptions(state.homePage?.sortingOptions);
-        return Scaffold(
-          body: SafeArea(
-            bottom: false,
-            child: RefreshIndicator(
-              onRefresh: _handleRefresh,
-              child: CustomScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                cacheExtent: _kCacheExtent,
-                slivers: [
-                  SliverPersistentHeader(
-                    pinned: true,
-                    floating: true,
-                    delegate: CombinedHeaderDelegate(
-                      labels: _labels,
-                      selectedIndex: _selectedTabIndex,
-                      onTabSelected: _onTabSelected,
-                      onTabTapped: _scrollTabsToTop,
-                      bgImageUrl: state.homePage?.headerImageUrl,
-                      isImageDark: state.homePage?.isDarkHeader ?? false,
-                      toolbarHeight: _kToolbarHeight,
-                      tabsHeight: _kTabsHeight,
+    return BlocListener<ShopTheLookCubit, ShopTheLookCartState>(
+      listenWhen: (prev, curr) =>
+          prev.status == ShopTheLookCartStatus.loading &&
+          curr.status != ShopTheLookCartStatus.loading,
+      listener: (context, state) {
+        if (state.status == ShopTheLookCartStatus.success) {
+          if (state.cartItemQty != null) {
+            context.read<CartCountCubit>().set(state.cartItemQty!);
+          }
+
+          context.showSnack(
+            DiscoverStrings.itemsAddedToBag(state.addedCount),
+            status: SnackStatus.success,
+          );
+        } else if (state.status == ShopTheLookCartStatus.failure) {
+          context.showSnack(
+            state.errorMessage ?? DiscoverStrings.failedToAddItemsToBag,
+            status: SnackStatus.error,
+          );
+        }
+      },
+      child: BlocBuilder<HomeBloc, HomeState>(
+        // Skip rebuilds for pure-pagination flips (isLoadingMore true ↔ false).
+        // The spinner sliver below has its own BlocSelector that handles
+        // them locally — rebuilding the whole scroll view for a 24×24 spinner
+        // was the biggest pagination jank source.
+        buildWhen: (prev, curr) =>
+            prev.status != curr.status ||
+            !identical(prev.homePage, curr.homePage) ||
+            prev.errorMessage != curr.errorMessage,
+        builder: (context, state) {
+          _syncSortOptions(state.homePage?.sortingOptions);
+          return Scaffold(
+            body: SafeArea(
+              bottom: false,
+              child: RefreshIndicator(
+                onRefresh: _handleRefresh,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  cacheExtent: _kCacheExtent,
+                  slivers: [
+                    SliverPersistentHeader(
+                      pinned: true,
+                      floating: true,
+                      delegate: CombinedHeaderDelegate(
+                        labels: _labels,
+                        selectedIndex: _selectedTabIndex,
+                        onTabSelected: _onTabSelected,
+                        onTabTapped: _scrollTabsToTop,
+                        bgImageUrl: state.homePage?.headerImageUrl,
+                        isImageDark: state.homePage?.isDarkHeader ?? false,
+                        toolbarHeight: _kToolbarHeight,
+                        tabsHeight: _kTabsHeight,
+                      ),
                     ),
-                  ),
-                  _buildContentSliver(context, state),
-                  const LoadingMoreSliver(),
-                  const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
-                ],
+                    _buildContentSliver(context, state),
+                    const LoadingMoreSliver(),
+                    const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 

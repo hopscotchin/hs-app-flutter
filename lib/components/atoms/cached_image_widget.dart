@@ -56,6 +56,5 @@ class CachedImageWidget extends StatelessWidget {
     return image;
   }
 
-  Widget _placeholder() =>
-      Container(width: width, height: height, color: Colors.grey[200]);
+  Widget _placeholder() => Container(width: width, height: height, color: Colors.grey[200]);
 }

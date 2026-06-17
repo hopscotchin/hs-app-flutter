@@ -115,6 +115,60 @@ import 'package:hs_app_flutter/features/discover/presentation/bloc/home_bloc.dar
     as _i626;
 import 'package:hs_app_flutter/features/landing_page/presentation/bloc/landing_page_bloc.dart'
     as _i206;
+import 'package:hs_app_flutter/features/pdp/data/datasources/remote/pdp_remote_datasource.dart'
+    as _i976;
+import 'package:hs_app_flutter/features/pdp/data/repositories/product_detail_repository_impl.dart'
+    as _i598;
+import 'package:hs_app_flutter/features/pdp/domain/repositories/product_detail_repository.dart'
+    as _i707;
+import 'package:hs_app_flutter/features/pdp/domain/usecases/add_to_cart_usecase.dart'
+    as _i1037;
+import 'package:hs_app_flutter/features/pdp/domain/usecases/add_to_wishlist_usecase.dart'
+    as _i789;
+import 'package:hs_app_flutter/features/pdp/domain/usecases/get_product_details_usecase.dart'
+    as _i59;
+import 'package:hs_app_flutter/features/pdp/domain/usecases/remove_from_wishlist_usecase.dart'
+    as _i308;
+import 'package:hs_app_flutter/features/pdp/domain/usecases/verify_pincode_usecase.dart'
+    as _i197;
+import 'package:hs_app_flutter/features/pdp/presentation/bloc/pdp_bloc.dart'
+    as _i309;
+import 'package:hs_app_flutter/features/pincode/data/datasources/remote/pincode_remote_datasource.dart'
+    as _i538;
+import 'package:hs_app_flutter/features/pincode/data/repositories/pincode_repository_impl.dart'
+    as _i68;
+import 'package:hs_app_flutter/features/pincode/domain/repositories/pincode_repository.dart'
+    as _i799;
+import 'package:hs_app_flutter/features/pincode/domain/usecases/check_delivery_pincode_usecase.dart'
+    as _i297;
+import 'package:hs_app_flutter/features/pincode/presentation/bloc/pincode_sheet_bloc.dart'
+    as _i487;
+import 'package:hs_app_flutter/features/plp/data/datasources/remote/plp_api.dart'
+    as _i13;
+import 'package:hs_app_flutter/features/plp/data/repositories/plp_repository_impl.dart'
+    as _i491;
+import 'package:hs_app_flutter/features/plp/domain/repositories/plp_repository.dart'
+    as _i760;
+import 'package:hs_app_flutter/features/plp/domain/usecases/check_pincode_usecase.dart'
+    as _i283;
+import 'package:hs_app_flutter/features/plp/domain/usecases/get_filter_data_usecase.dart'
+    as _i804;
+import 'package:hs_app_flutter/features/plp/domain/usecases/get_listing_data_usecase.dart'
+    as _i1013;
+import 'package:hs_app_flutter/features/plp/presentation/bloc/filter_bloc.dart'
+    as _i113;
+import 'package:hs_app_flutter/features/plp/presentation/bloc/plp_bloc.dart'
+    as _i643;
+import 'package:hs_app_flutter/features/search/data/datasources/remote/search_api.dart'
+    as _i1058;
+import 'package:hs_app_flutter/features/search/data/repositories/search_repository_impl.dart'
+    as _i525;
+import 'package:hs_app_flutter/features/search/domain/repositories/search_repository.dart'
+    as _i283;
+import 'package:hs_app_flutter/features/search/domain/usecases/get_search_suggestions_usecase.dart'
+    as _i938;
+import 'package:hs_app_flutter/features/search/presentation/bloc/search_bloc.dart'
+    as _i724;
 import 'package:hs_app_flutter/features/splash/data/datasources/remote/splash_remote_datasource.dart'
     as _i748;
 import 'package:hs_app_flutter/features/splash/data/repositories/splash_repository_impl.dart'
@@ -213,6 +267,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i184.HomeRemoteDataSource>(
       () => _i184.HomeRemoteDataSource(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i538.PincodeRemoteDatasource>(
+      () => _i538.PincodeRemoteDatasource(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i13.PlpApi>(() => _i13.PlpApi(gh<_i361.Dio>()));
+    gh.lazySingleton<_i1058.SearchApi>(() => _i1058.SearchApi(gh<_i361.Dio>()));
     gh.lazySingleton<_i748.SplashRemoteDatasource>(
       () => _i748.SplashRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -228,9 +287,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i351.NetworkInfo>(),
       ),
     );
+    gh.lazySingleton<_i976.PdpRemoteDataSource>(
+      () => _i976.PdpRemoteDataSourceImpl(apiClient: gh<_i930.ApiClient>()),
+    );
     gh.lazySingleton<_i730.CategoriesRemoteDataSource>(
       () => _i730.CategoriesRemoteDataSourceImpl(
         apiClient: gh<_i930.ApiClient>(),
+      ),
+    );
+    gh.lazySingleton<_i799.PincodeRepository>(
+      () => _i68.PincodeRepositoryImpl(
+        gh<_i538.PincodeRemoteDatasource>(),
+        gh<_i351.NetworkInfo>(),
       ),
     );
     gh.lazySingleton<_i816.CategoriesRepository>(
@@ -259,6 +327,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i351.NetworkInfo>(),
       ),
     );
+    gh.lazySingleton<_i297.CheckDeliveryPincodeUseCase>(
+      () => _i297.CheckDeliveryPincodeUseCase(gh<_i799.PincodeRepository>()),
+    );
+    gh.lazySingleton<_i707.ProductDetailRepository>(
+      () => _i598.ProductDetailRepositoryImpl(
+        remoteDataSource: gh<_i976.PdpRemoteDataSource>(),
+        networkInfo: gh<_i351.NetworkInfo>(),
+      ),
+    );
     gh.lazySingleton<_i427.CheckPincodeUseCase>(
       () => _i427.CheckPincodeUseCase(gh<_i241.AddressRepository>()),
     );
@@ -283,11 +360,27 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i351.NetworkInfo>(),
       ),
     );
+    gh.factory<_i487.PincodeSheetBloc>(
+      () => _i487.PincodeSheetBloc(
+        gh<_i297.CheckDeliveryPincodeUseCase>(),
+        gh<_i551.SelectAddressUseCase>(),
+        gh<_i1013.AddressCacheManager>(),
+      ),
+    );
     gh.lazySingleton<_i532.AccountRepository>(
       () => _i197.AccountRepositoryImpl(
         gh<_i1020.AccountRemoteDataSource>(),
         gh<_i351.NetworkInfo>(),
       ),
+    );
+    gh.lazySingleton<_i283.SearchRepository>(
+      () => _i525.SearchRepositoryImpl(
+        gh<_i1058.SearchApi>(),
+        gh<_i351.NetworkInfo>(),
+      ),
+    );
+    gh.lazySingleton<_i938.GetSearchSuggestionsUseCase>(
+      () => _i938.GetSearchSuggestionsUseCase(gh<_i283.SearchRepository>()),
     );
     gh.lazySingleton<_i766.CheckMobileUseCase>(
       () => _i766.CheckMobileUseCase(gh<_i476.AuthRepository>()),
@@ -307,8 +400,33 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i325.GetHomePageUseCase>(
       () => _i325.GetHomePageUseCase(gh<_i1014.HomeRepository>()),
     );
+    gh.lazySingleton<_i760.PlpRepository>(
+      () => _i491.PlpRepositoryImpl(gh<_i13.PlpApi>(), gh<_i351.NetworkInfo>()),
+    );
+    gh.lazySingleton<_i804.GetFilterDataUseCase>(
+      () => _i804.GetFilterDataUseCase(gh<_i760.PlpRepository>()),
+    );
+    gh.lazySingleton<_i1013.GetListingDataUseCase>(
+      () => _i1013.GetListingDataUseCase(gh<_i760.PlpRepository>()),
+    );
     gh.lazySingleton<_i765.GetDepartmentsUseCase>(
       () => _i765.GetDepartmentsUseCase(gh<_i816.CategoriesRepository>()),
+    );
+    gh.lazySingleton<_i1037.AddToCartUseCase>(
+      () => _i1037.AddToCartUseCase(gh<_i707.ProductDetailRepository>()),
+    );
+    gh.lazySingleton<_i789.AddToWishlistUseCase>(
+      () => _i789.AddToWishlistUseCase(gh<_i707.ProductDetailRepository>()),
+    );
+    gh.lazySingleton<_i59.GetProductDetailsUseCase>(
+      () => _i59.GetProductDetailsUseCase(gh<_i707.ProductDetailRepository>()),
+    );
+    gh.lazySingleton<_i308.RemoveFromWishlistUseCase>(
+      () =>
+          _i308.RemoveFromWishlistUseCase(gh<_i707.ProductDetailRepository>()),
+    );
+    gh.lazySingleton<_i197.VerifyPincodeUseCase>(
+      () => _i197.VerifyPincodeUseCase(gh<_i707.ProductDetailRepository>()),
     );
     gh.lazySingleton<_i705.GetAppConfigUseCase>(
       () => _i705.GetAppConfigUseCase(gh<_i68.SplashRepository>()),
@@ -324,6 +442,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1013.AddressCacheManager>(),
       ),
     );
+    gh.factory<_i724.SearchBloc>(
+      () => _i724.SearchBloc(gh<_i938.GetSearchSuggestionsUseCase>()),
+    );
     gh.lazySingleton<_i407.RegisterDeviceUseCase>(
       () => _i407.RegisterDeviceUseCase(gh<_i357.DeviceRepository>()),
     );
@@ -337,6 +458,16 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1061.PushNotificationService(
         gh<_i407.RegisterDeviceUseCase>(),
         gh<_i818.PrefManager>(),
+      ),
+    );
+    gh.factory<_i309.PdpBloc>(
+      () => _i309.PdpBloc(
+        getProductDetailsUseCase: gh<_i59.GetProductDetailsUseCase>(),
+        addToCartUseCase: gh<_i1037.AddToCartUseCase>(),
+        addToWishlistUseCase: gh<_i789.AddToWishlistUseCase>(),
+        removeFromWishlistUseCase: gh<_i308.RemoveFromWishlistUseCase>(),
+        verifyPincodeUseCase: gh<_i197.VerifyPincodeUseCase>(),
+        cartCountCubit: gh<_i884.CartCountCubit>(),
       ),
     );
     gh.factory<_i531.ManageAddressBloc>(
@@ -368,6 +499,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1013.AddressCacheManager>(),
       ),
     );
+    gh.lazySingleton<_i283.CheckPincodeUseCase>(
+      () => _i283.CheckPincodeUseCase(gh<_i760.PlpRepository>()),
+    );
     gh.factory<_i975.SplashBloc>(
       () => _i975.SplashBloc(
         gh<_i705.GetAppConfigUseCase>(),
@@ -377,6 +511,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i818.PrefManager>(),
         gh<_i1013.AddressCacheManager>(),
         gh<_i637.GetAddressesUseCase>(),
+      ),
+    );
+    gh.factory<_i643.PlpBloc>(
+      () => _i643.PlpBloc(
+        getListingDataUseCase: gh<_i1013.GetListingDataUseCase>(),
+        addToWishlistUseCase: gh<_i789.AddToWishlistUseCase>(),
+        removeFromWishlistUseCase: gh<_i308.RemoveFromWishlistUseCase>(),
       ),
     );
     gh.factory<_i419.AuthBloc>(
@@ -390,6 +531,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i387.LogoutUseCase>(),
         gh<_i1061.PushNotificationService>(),
         gh<_i18.AccountBloc>(),
+      ),
+    );
+    gh.factory<_i113.FilterBloc>(
+      () => _i113.FilterBloc(
+        getFilterDataUseCase: gh<_i804.GetFilterDataUseCase>(),
+        checkPincodeUseCase: gh<_i283.CheckPincodeUseCase>(),
       ),
     );
     return this;

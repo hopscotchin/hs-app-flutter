@@ -91,9 +91,13 @@ class ApiConstants {
   static const String productDetails = '/v2/product';
 
   // PLP (Product Listing)
-  static const String boutiqueProducts = '/search/product/v5';
-  static const String plpProducts = '/products/v7';
-  static const String plpFilter = '/filter';
+  static const String boutiqueProducts = '/search/product/v6';
+  static const String plpProducts = '/products/v8';
+  static const String plpFilter = '/v2/filter';
+  static const String pincodeCheck = '/products/pincode';
+
+  // Search
+  static const String searchAutoSuggest = '/search/autoSuggest';
 
   // Checkout / Payment
   static const String placeOrder = '/checkout/v4/place-order';

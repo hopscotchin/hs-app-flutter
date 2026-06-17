@@ -8,7 +8,7 @@ class CommonStrings {
   static const String confirm = 'Confirm';
   static const String ok = 'OK';
   static const String done = 'Done';
-  static const String apply = 'APPLY';
+  static const String apply = 'Apply';
   static const String close = 'Close';
   static const String search = 'Search';
   static const String loading = 'Loading...';
@@ -20,6 +20,7 @@ class CommonStrings {
   static const String goBack = 'Go back';
   static const String check = 'CHECK';
   static const String clearAll = 'Clear All';
+  static const String reset = 'Reset';
   static const String remove = 'Remove';
 
   // Navigation / Tabs

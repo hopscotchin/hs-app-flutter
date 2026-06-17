@@ -54,9 +54,36 @@ mixin SafeApiCall {
       if (e.type == DioExceptionType.cancel) {
         return const Left(RequestCancelledFailure());
       }
+      if (e.type == DioExceptionType.badResponse) {
+        return Left(_failureFromResponse(e.response));
+      }
       return Left(UnknownFailure(message: e.message ?? DefaultErrorMessages.unknown));
     } catch (_) {
       return const Left(UnknownFailure());
     }
+  }
+
+  /// Extracts the server's `message` field from the response body and maps
+  /// the HTTP status code to the appropriate [Failure] subtype.
+  Failure _failureFromResponse(Response? response) {
+    final statusCode = response?.statusCode;
+    final data = response?.data;
+    final serverMessage = data is Map ? data['message'] as String? : null;
+
+    return switch (statusCode) {
+      400 => BadRequestFailure(message: serverMessage ?? DefaultErrorMessages.badRequest),
+      401 => UnauthorizedFailure(message: serverMessage ?? DefaultErrorMessages.unauthorized),
+      403 => ForbiddenFailure(message: serverMessage ?? DefaultErrorMessages.forbidden),
+      404 => NotFoundFailure(message: serverMessage ?? DefaultErrorMessages.notFound),
+      409 => ConflictFailure(message: serverMessage ?? DefaultErrorMessages.conflict),
+      500 => InternalServerFailure(message: serverMessage ?? DefaultErrorMessages.internalServer),
+      503 => ServiceUnavailableFailure(
+          message: serverMessage ?? DefaultErrorMessages.serviceUnavailable,
+        ),
+      _ => ServerFailure(
+          message: serverMessage ?? DefaultErrorMessages.unknown,
+          statusCode: statusCode,
+        ),
+    };
   }
 }

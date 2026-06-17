@@ -2,7 +2,7 @@ name: hs_app_flutter
 description: "HS Flutter"
 publish_to: "none"
 
-version: 14.2.0+2026061201
+version: 14.3.0+2026061801
 
 environment:
   sdk: ^3.11.0
@@ -53,7 +53,7 @@ dependencies:
 
   # Firebase
   firebase_core: ^4.7.0
-  firebase_crashlytics: ^5.2.0
+  firebase_crashlytics: ^5.2.2
   firebase_messaging: ^16.2.2
 
   # Network Connectivity
@@ -70,6 +70,8 @@ dependencies:
 
   freezed_annotation: ^3.1.0
   json_annotation: ^4.11.0
+
+  html: ^0.15.5
 
   logger:
     ^2.7.0

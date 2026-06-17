@@ -12,7 +12,7 @@ class VisualCueModel extends VisualCueEntity {
 
   factory VisualCueModel.fromJson(Map<String, dynamic> json) {
     return VisualCueModel(
-      bgColor: json['bgColor'] as String?,
+      bgColor: json['backgroundColor'] as String?,
       text: json['text'] as String?,
       textColor: json['textColor'] as String?,
       location: json['location'] as String?,

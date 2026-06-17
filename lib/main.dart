@@ -3,9 +3,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:talker_bloc_logger/talker_bloc_logger_observer.dart';
-import 'package:talker_bloc_logger/talker_bloc_logger_settings.dart';
 import 'package:talker_dio_logger_plus/talker_dio_logger_plus.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -103,29 +100,27 @@ Future<void> _runPostInitBootstrapping() async {
       ),
     );
     sl.registerSingleton<Talker>(talker);
-    Bloc.observer = TalkerBlocObserver(
-      talker: talker,
-      settings: const TalkerBlocLoggerSettings(
-        printCreations: true,
-        printClosings: true,
-        printStateFullData: false,
-        // this helps in logging the full event/state data, but can be very verbose and may cause performance issues in large apps, so use with caution
+    // Bloc.observer = TalkerBlocObserver(
+    //   talker: talker,
+    //   settings: const TalkerBlocLoggerSettings(
+    //     printCreations: true,
+    //     printClosings: true,
+    //     printStateFullData: false,
 
-        // transitionFilter: (bloc, transition) {
-        //   print(
-        //     'Bloc transition: ${bloc.runtimeType} ${transition.event}${transition.nextState} ${transition.currentState}',
-        //   );
-        //   return true;
-        // },
-      ),
-    );
+    // this helps in logging the full event/state data, but can be very verbose and may cause performance issues in large apps, so use with caution
+
+    // transitionFilter: (bloc, transition) {
+    //   print(
+    //     'Bloc transition: ${bloc.runtimeType} ${transition.event}${transition.nextState} ${transition.currentState}',
+    //   );
+    //   return true;
+    // },
+    // ),
+    // );
   }
 }
 
-void _restoreSelectedEnvironment(
-  PrefManager prefManager,
-  NetworkClient networkClient,
-) {
+void _restoreSelectedEnvironment(PrefManager prefManager, NetworkClient networkClient) {
   final name = prefManager.selectedEnvironment;
   if (name == null || name.isEmpty) return;
   for (final env in Environment.values) {

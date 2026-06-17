@@ -4,19 +4,19 @@ import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/address_entity.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/manage_address_args.dart';
 import 'package:hs_app_flutter/features/address/presentation/widgets/address_item_card.dart';
+import 'package:hs_app_flutter/features/plp/domain/entities/page_type.dart';
 
-import '../constants/strings/auth_strings.dart';
-import '../constants/strings/login_redirects.dart';
-import '../constants/route_names.dart';
-import '../entities/message_bar_entity.dart';
 import '../../features/account/presentation/bloc/account_bloc.dart';
 import '../../features/auth/domain/entities/otp_config/otp_config_entity.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../constants/route_names.dart';
+import '../constants/strings/auth_strings.dart';
+import '../constants/strings/login_redirects.dart';
+import '../entities/message_bar_entity.dart';
 
 abstract final class AppNavigator {
-   static bool _isRouteInStack(BuildContext context, String routeName) {
-    final matches =
-        GoRouter.of(context).routerDelegate.currentConfiguration.matches;
+  static bool _isRouteInStack(BuildContext context, String routeName) {
+    final matches = GoRouter.of(context).routerDelegate.currentConfiguration.matches;
     return matches.whereType<RouteMatch>().any((m) => m.route.name == routeName);
   }
 
@@ -40,8 +40,7 @@ abstract final class AppNavigator {
       context.pop();
       return;
     }
-    final hasData =
-        initialMobile != null || initialMessageBars.isNotEmpty || redirectType != null;
+    final hasData = initialMobile != null || initialMessageBars.isNotEmpty || redirectType != null;
     final extra = hasData
         ? <String, dynamic>{
             'initialMobile': initialMobile,
@@ -52,11 +51,7 @@ abstract final class AppNavigator {
     context.pushNamed(RouteNames.login, extra: extra);
   }
 
-  static void goToJoinUs(
-    BuildContext context, {
-    String? initialMobile,
-    String? redirectType,
-  }) {
+  static void goToJoinUs(BuildContext context, {String? initialMobile, String? redirectType}) {
     if (_isRouteInStack(context, RouteNames.joinUs)) {
       context.pop();
       return;
@@ -112,13 +107,8 @@ abstract final class AppNavigator {
   }
 
   static void _clearAuthStack(BuildContext context) {
-    const authRoutes = {
-      RouteNames.login,
-      RouteNames.joinUs,
-      RouteNames.otpVerification,
-    };
-    final matches =
-        GoRouter.of(context).routerDelegate.currentConfiguration.matches;
+    const authRoutes = {RouteNames.login, RouteNames.joinUs, RouteNames.otpVerification};
+    final matches = GoRouter.of(context).routerDelegate.currentConfiguration.matches;
     final authCount = matches
         .whereType<RouteMatch>()
         .where((m) => authRoutes.contains(m.route.name))
@@ -139,6 +129,21 @@ abstract final class AppNavigator {
     return result == true;
   }
 
+  static void goToPlp(
+    BuildContext context, {
+    PageType pageType = PageType.plp,
+    required int plpId,
+    String? categoryName,
+    String? searchQuery,
+    String? rawSearchParams,
+  }) {
+    final queryParams = <String, String>{'pageType': pageType.name, 'plpId': plpId.toString()};
+    if (categoryName != null) queryParams['categoryName'] = categoryName;
+    if (searchQuery != null) queryParams['searchQuery'] = searchQuery;
+    if (rawSearchParams != null) queryParams['rawSearchParams'] = rawSearchParams;
+    context.pushNamed('plp', queryParameters: queryParams);
+  }
+
   static void goToPdp(BuildContext context, String productId) {
     context.pushNamed('pdp', pathParameters: {'productId': productId});
   }
@@ -155,13 +160,11 @@ abstract final class AppNavigator {
 
   static void goToOrders(BuildContext context) => context.pushNamed('orders');
 
+  static void goToSearch(BuildContext context) => context.pushNamed('search');
   static void goToAddresses(
-      BuildContext context, {
-        AddressListMode mode = AddressListMode.normal,
-      }) => context.pushNamed(
-    'addresses',
-    extra: <String, dynamic>{'mode': mode},
-  );
+    BuildContext context, {
+    AddressListMode mode = AddressListMode.normal,
+  }) => context.pushNamed('addresses', extra: <String, dynamic>{'mode': mode});
 
   /// Push the add/edit address screen.
   ///
@@ -169,12 +172,12 @@ abstract final class AppNavigator {
   /// account, cart, exchange, or return flows.
   /// Returns the resulting [ManageAddressResult] (success) or `null` (cancel).
   static Future<ManageAddressResult?> goToAddAddress(
-      BuildContext context, {
-        ManageAddressFlow flow = ManageAddressFlow.account,
-        String? fromScreen,
-        AddressEntity? address,
-        bool popUpStyle = false,
-      }) {
+    BuildContext context, {
+    ManageAddressFlow flow = ManageAddressFlow.account,
+    String? fromScreen,
+    AddressEntity? address,
+    bool popUpStyle = false,
+  }) {
     final args = ManageAddressArgs(
       flow: flow,
       fromScreen: fromScreen,

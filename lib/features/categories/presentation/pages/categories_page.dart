@@ -54,7 +54,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 final dept = state.departments[index];
                 return DepartmentItemWidget(
                   department: dept,
-                  onTap: () => {},
+                  onTap: () => AppNavigator.goToPlp(
+                    context,
+                    plpId: int.tryParse(dept.id) ?? 0,
+                    categoryName: dept.label,
+                  ),
                 );
               },
             );

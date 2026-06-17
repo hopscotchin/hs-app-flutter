@@ -6,6 +6,7 @@ import '../../../../core/base/base_bloc.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/services/pref_manager.dart';
 import '../../../address/data/managers/address_cache_manager.dart';
+import '../../../address/domain/entities/address_source.dart';
 import '../../../address/domain/usecases/get_addresses_usecase.dart';
 import '../../domain/entities/account_entity.dart';
 import '../../domain/usecases/forget_guest_user_usecase.dart';
@@ -103,7 +104,9 @@ class AccountBloc extends BaseBloc<AccountEvent, AccountState> {
   }
 
   Future<void> _onPrefetchAddresses(PrefetchAddresses event, Emitter<AccountState> emit) async {
-    final result = await _getAddresses(const GetAddressesParams());
+    final result = await _getAddresses(
+      const GetAddressesParams(source: AddressSource.delivery),
+    );
     await result.fold(
       (_) async {},
       (list) => _addressCache.setAll(list.rawItems),

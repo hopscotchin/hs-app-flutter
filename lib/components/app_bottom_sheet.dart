@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 
 import '../core/theme/colors.dart';
@@ -85,29 +86,13 @@ class AppBottomSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: AppSpacing.lg,
-                height: AppSpacing.xxxs,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            AppSpacing.verticalGapLg,
-            if (title != null) ...[
-              Text(
-                title!,
-                style: AppTypographyV1.titleSmall.bold.textPrimary(),
-              ),
+            if (title.isNotNullOrEmpty) ...[
+              Text(title!, style: AppTypographyV1.titleSmall.bold.textPrimary()),
               AppSpacing.verticalGapMd,
             ],
             Text(
               description,
-              style: AppTypographyV1.bodyRegular.regular.textPrimary().copyWith(
-                height: 1.5
-              ),
+              style: AppTypographyV1.bodyRegular.regular.textPrimary().copyWith(height: 1.5),
             ),
             const SizedBox(height: 28),
             if (hasSecondary)
@@ -141,9 +126,7 @@ class _SheetButton extends StatelessWidget {
     final textStyle = AppTypographyV1.bodyLarge.bold.copyWith(
       color: isFilled ? Colors.white : AppColors.primary,
     );
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
-    );
+    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusXs));
     const padding = EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.sm);
 
     if (isFilled) {

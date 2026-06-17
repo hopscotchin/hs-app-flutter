@@ -11,7 +11,7 @@ class ImageConstants {
   static const String addWishlist = 'assets/icons/wishlist_add.svg';
   static const String heart = 'assets/icons/heart.svg';
   static const String filterClose = 'assets/icons/filter_close.svg';
-  static const String wishlistAdded = 'assets/icons/wishlisted_icon.svg';
+  static const String wishlistAdded = 'assets/icons/whishlisted_icon.svg';
   static const String accountMobileIcon = 'assets/icons/account_mobile.svg';
   static const String locationIcon = 'assets/icons/location.svg';
 

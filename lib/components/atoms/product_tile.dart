@@ -10,6 +10,7 @@ import '../../core/entities/visual_cue_entity.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
+import '../../features/plp/domain/entities/listing_product_entity.dart';
 import 'cached_image_widget.dart';
 
 class ProductTile extends StatelessWidget {
@@ -63,6 +64,36 @@ class ProductTile extends StatelessWidget {
     this.hasCPT = false,
   });
 
+  factory ProductTile.fromListingProduct(
+    ListingProductEntity product, {
+    Key? key,
+    VoidCallback? onTap,
+    VoidCallback? onWishlistTap,
+    bool? hasCPT,
+    double? imageAspectRatio,
+  }) {
+    return ProductTile(
+      key: key,
+      imageUrl: product.displayImage,
+      brandName: product.brandName,
+      productName: product.name,
+      priceText: product.price?.sellingPrice,
+      originalPriceText: product.price?.mrp,
+      discountText: product.price?.discountLabel,
+      visualCues: product.visualCues,
+      colorVariantsLabel: product.colorVariants,
+      isSoldOut: product.isSoldOut,
+      isWishlisted: product.isWishlisted,
+      showWishlistIcon: true,
+      showProductInfo: true,
+      isCPT: product.isCPT,
+      onTap: onTap,
+      onWishlistTap: onWishlistTap,
+      hasCPT: hasCPT,
+      imageAspectRatio: imageAspectRatio,
+    );
+  }
+
   factory ProductTile.fromHomepageProduct(
     HomepageProduct product, {
     Key? key,
@@ -91,7 +122,7 @@ class ProductTile extends StatelessWidget {
       isWishlisted: product.isWishlisted,
       showWishlistIcon: product.canWishlist,
       showProductInfo: showProductInfo,
-      imageAspectRatio: imageAspectRatio,
+      imageAspectRatio: 5 / 7,
       onTap: onTap,
       onWishlistTap: onWishlistTap,
     );
@@ -212,7 +243,7 @@ class ProductTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
           );
 
-    return Positioned(bottom: AppSpacing.xs, left: 6, child: badge);
+    return Positioned(bottom: AppSpacing.xs, left: AppSpacing.xs, child: badge);
     // switch (cue.location?.toLowerCase()) {
     //   'topright' => Positioned(top: 6, right: AppSpacing.xs, child: badge),
     //   'bottomleft' => Positioned(bottom: AppSpacing.xs, left: 6, child: badge),
@@ -231,7 +262,9 @@ class ProductTile extends StatelessWidget {
           height: 16,
           width: 16,
         ),
-        onPressed: onWishlistTap,
+        onPressed: () {
+          //onWishlistTap
+        },
       ),
     );
   }
@@ -257,6 +290,7 @@ class ProductTile extends StatelessWidget {
           style: AppTypographyV1.bodySmall.bold.textPrimary(),
           children: [
             if (_resolvedOriginalPriceText != null) ...[
+              const WidgetSpan(child: SizedBox(width: 2)),
               TextSpan(
                 text: '$_resolvedOriginalPriceText',
                 style: AppTypographyV1.labelMedium.regular.neutralGrey5().strikeThrough(),

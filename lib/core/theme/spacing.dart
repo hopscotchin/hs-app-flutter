@@ -15,8 +15,7 @@ class AppSpacing {
   static const double sm = 12.0; // Small
   static const double lmd = 14.0; // Low Medium
   static const double md = 16.0; // Medium (default)
-  static const double mdLg = 20.0; // Medium-Large (between md and lg)
-  static const double lgMd = 20.0; // Large Medium
+  static const double lgMd = 20.0; // Medium-Large (between md and lg)
   static const double lg = 24.0; // Large
   static const double xl = 32.0; // Extra large
   static const double xxl = 48.0; // Extra extra large
