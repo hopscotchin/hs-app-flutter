@@ -1,43 +1,47 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/colors.dart';
-import '../../core/theme/typography.dart';
 
 class BadgeIcon extends StatelessWidget {
-  final Widget child;
+  final dynamic icon;
   final int count;
+  final Color? iconColor;
+  final double iconSize;
+  final Color badgeColor;
+  final Color badgeTextColor;
+  final VoidCallback? onTap;
+  final EdgeInsetsGeometry padding;
 
-  const BadgeIcon({super.key, required this.child, this.count = 0});
+  const BadgeIcon({
+    super.key,
+    this.count = 0,
+    this.icon,
+    this.iconColor,
+    this.iconSize = 24,
+    this.badgeColor = AppColors.brandDefault,
+    this.badgeTextColor = Colors.white,
+    this.onTap,
+    this.padding = const EdgeInsets.all(5.0),
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        child,
-        if (count > 0)
-          Positioned(
-            right: -6,
-            top: -4,
-            child: Container(
-              padding: const EdgeInsets.all(2),
-              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  count > 99 ? '99+' : '$count',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: Colors.white,
-                    fontSize: 9,
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ],
+    final displayText = count > 99 ? '99+' : '$count';
+    final hasMoreCount = count > 99;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: padding,
+        child: Badge(
+          isLabelVisible: count > 0,
+          offset: Offset(hasMoreCount ? 2 : 6, -8),
+          backgroundColor: badgeColor,
+          label: Text(displayText, style: TextStyle(fontSize: 10, color: badgeTextColor)),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+          child: icon is IconData ? Icon(icon, size: iconSize, color: iconColor) : icon,
+        ),
+      ),
     );
   }
 }

@@ -9,162 +9,93 @@ import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
 import '../../core/entities/visual_cue_entity.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
-import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../../features/plp/domain/entities/listing_product_entity.dart';
+import '../../features/plp/domain/entities/product_price_entity.dart';
 import 'cached_image_widget.dart';
+
+/// Default tile aspect ratio (image-only). Cards in 2-col grids and carousels
+/// fall back to this when no aspect ratio is supplied.
+const double _kDefaultAspectRatio = 5 / 7;
 
 class ProductTile extends StatelessWidget {
   final String? imageUrl;
-  final String? brandName;
   final String? productName;
-  // Pre-rendered text mode (homepage):
   final String? priceText;
   final String? originalPriceText;
   final String? discountText;
-  // Structured mode (PLP):
-  final double? retailPrice;
-  final double? regularPrice;
-  final int? discountPercent;
-  // Shared:
   final List<VisualCueEntity> visualCues;
-  final List<String> colorHexCodes;
   final String? colorVariantsLabel;
   final bool isSoldOut;
   final bool isWishlisted;
   final bool showWishlistIcon;
   final bool showProductInfo;
   final bool isCPT;
+  final bool hasCPT;
   final double? imageAspectRatio;
   final VoidCallback? onTap;
   final VoidCallback? onWishlistTap;
-  final bool? hasCPT;
 
   const ProductTile({
     super.key,
     this.imageUrl,
-    this.brandName,
     this.productName,
     this.priceText,
     this.originalPriceText,
     this.discountText,
-    this.retailPrice,
-    this.regularPrice,
-    this.discountPercent,
     this.visualCues = const [],
-    this.colorHexCodes = const [],
     this.colorVariantsLabel,
     this.isSoldOut = false,
     this.isWishlisted = false,
     this.showWishlistIcon = false,
     this.showProductInfo = true,
     this.isCPT = false,
+    this.hasCPT = false,
     this.imageAspectRatio,
     this.onTap,
     this.onWishlistTap,
-    this.hasCPT = false,
   });
 
-  factory ProductTile.fromListingProduct(
+  /// Build a tile from the unified [ListingProductEntity] — the shape used by
+  /// PLP records, PageCarousel tiles, and PRODUCT_GRID tiles.
+  factory ProductTile.fromProduct(
     ListingProductEntity product, {
     Key? key,
     VoidCallback? onTap,
     VoidCallback? onWishlistTap,
-    bool? hasCPT,
-    double? imageAspectRatio,
-  }) {
-    return ProductTile(
-      key: key,
-      imageUrl: product.displayImage,
-      brandName: product.brandName,
-      productName: product.name,
-      priceText: product.price?.sellingPrice,
-      originalPriceText: product.price?.mrp,
-      discountText: product.price?.discountLabel,
-      visualCues: product.visualCues,
-      colorVariantsLabel: product.colorVariants,
-      isSoldOut: product.isSoldOut,
-      isWishlisted: product.isWishlisted,
-      showWishlistIcon: true,
-      showProductInfo: true,
-      isCPT: product.isCPT,
-      onTap: onTap,
-      onWishlistTap: onWishlistTap,
-      hasCPT: hasCPT,
-      imageAspectRatio: imageAspectRatio,
-    );
-  }
-
-  factory ProductTile.fromHomepageProduct(
-    HomepageProduct product, {
-    Key? key,
-    VoidCallback? onTap,
-    VoidCallback? onWishlistTap,
     bool showProductInfo = true,
+    bool hasCPT = false,
     double? imageAspectRatio,
     String? imageUrl,
   }) {
     final price = product.price;
-    final sellingPrice = price?.sellingPrice;
-    final mrp = price?.mrp;
-    final priceText = sellingPrice != null ? '₹$sellingPrice' : null;
-    final originalPriceText = (price?.hasDiscount ?? false) && mrp != null ? '₹$mrp' : null;
+    final hasDiscount = price?.hasDiscount ?? false;
     return ProductTile(
       key: key,
-      imageUrl: imageUrl ?? product.primaryImageUrl,
-      brandName: product.brandName,
+      imageUrl: imageUrl ?? product.displayImage,
       productName: product.name,
-      priceText: priceText,
-      originalPriceText: originalPriceText,
+      priceText: price?.sellingPrice,
+      originalPriceText: hasDiscount ? price?.mrp : null,
       discountText: price?.discountLabel,
       visualCues: product.visualCues,
       colorVariantsLabel: product.colorVariants,
-      isSoldOut: product.soldOut,
+      isSoldOut: product.isSoldOut,
       isWishlisted: product.isWishlisted,
       showWishlistIcon: product.canWishlist,
       showProductInfo: showProductInfo,
-      imageAspectRatio: 5 / 7,
+      isCPT: product.isCPT,
+      hasCPT: hasCPT,
+      imageAspectRatio: imageAspectRatio,
       onTap: onTap,
       onWishlistTap: onWishlistTap,
     );
   }
 
-  /// Transformer-supplied label wins; falls back to hex-code count for legacy data.
-  String? get _resolvedColorLabel {
-    if (colorVariantsLabel != null) return colorVariantsLabel;
-    return colorHexCodes.length > 1 ? '+${colorHexCodes.length} Colors' : null;
-  }
-
-  bool get _hasDiscount {
-    if (discountText != null) return true;
-    return discountPercent != null && discountPercent! > 5;
-  }
-
-  String get _resolvedPriceText {
-    if (priceText != null) return priceText!;
-    if (retailPrice != null) return '\u20B9${retailPrice!.toInt()}';
-    return '';
-  }
-
-  String? get _resolvedOriginalPriceText {
-    if (originalPriceText != null) return originalPriceText;
-    if (_hasDiscount && regularPrice != null) {
-      return '\u20B9${regularPrice!.toInt()}';
-    }
-    return null;
-  }
-
-  String? get _resolvedDiscountText {
-    if (discountText != null) return discountText;
-    if (_hasDiscount && discountPercent != null) {
-      return '(${discountPercent!}% off)';
-    }
-    return null;
-  }
+  /// Transformer-supplied label wins; falls back to null when nothing's given.
+  String? get _resolvedColorLabel => colorVariantsLabel;
 
   @override
   Widget build(BuildContext context) {
-    const double kDefaultAspectRatio = 5 / 7;
-    final effectiveRatio = imageAspectRatio ?? kDefaultAspectRatio;
+    final effectiveRatio = imageAspectRatio ?? _kDefaultAspectRatio;
 
     if (isCPT) {
       return GestureDetector(
@@ -188,8 +119,11 @@ class ProductTile extends StatelessWidget {
           if (showProductInfo) ...[
             AppSpacing.verticalGapXsm,
             if (productName.isNotNullOrEmpty) _buildBrandName(),
-            if (_resolvedPriceText.isNotEmpty) ...[AppSpacing.verticalGapXs, _buildPriceRow()],
-            if (_resolvedColorLabel != null || (hasCPT ?? false)) ...[
+            if ((priceText ?? '').isNotEmpty) ...[
+              AppSpacing.verticalGapXs,
+              _buildPriceRow(),
+            ],
+            if (_resolvedColorLabel != null || hasCPT) ...[
               AppSpacing.verticalGapXsm,
               Text(
                 _resolvedColorLabel ?? '',
@@ -237,19 +171,13 @@ class ProductTile extends StatelessWidget {
         : CustomChipWidget(
             text: (cue.text ?? ''),
             backgroundColor: bgColor,
-            borderColor: isSoldOut ? bgColor : txtColor,
+            borderColor: bgColor,
             borderRadius: 4,
             textStyle: AppTypographyV1.labelMedium.medium.copyWith(color: txtColor),
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
           );
 
     return Positioned(bottom: AppSpacing.xs, left: AppSpacing.xs, child: badge);
-    // switch (cue.location?.toLowerCase()) {
-    //   'topright' => Positioned(top: 6, right: AppSpacing.xs, child: badge),
-    //   'bottomleft' => Positioned(bottom: AppSpacing.xs, left: 6, child: badge),
-    //   'bottomright' => Positioned(bottom: 6, right: AppSpacing.xs, child: badge),
-    //   _ => Positioned(bottom: AppSpacing.xs, left: 6, child: badge),
-    // };
   }
 
   Widget _buildWishlistIcon() {
@@ -262,9 +190,7 @@ class ProductTile extends StatelessWidget {
           height: 16,
           width: 16,
         ),
-        onPressed: () {
-          //onWishlistTap
-        },
+        onPressed: onWishlistTap,
       ),
     );
   }
@@ -284,22 +210,26 @@ class ProductTile extends StatelessWidget {
   Widget _buildPriceRow() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+      // Single-line + clip — longer mrp strings like "MRP:₹2,665" would
+      // otherwise wrap and blow the carousel's fixed product-info reserve.
       child: RichText(
+        maxLines: 1,
+        overflow: TextOverflow.clip,
+        softWrap: false,
         text: TextSpan(
-          text: '$_resolvedPriceText\t',
+          text: '${priceText!}\t',
           style: AppTypographyV1.bodySmall.bold.textPrimary(),
           children: [
-            if (_resolvedOriginalPriceText != null) ...[
+            if (originalPriceText != null) ...[
               const WidgetSpan(child: SizedBox(width: 2)),
               TextSpan(
-                text: '$_resolvedOriginalPriceText',
+                text: originalPriceText,
                 style: AppTypographyV1.labelMedium.regular.neutralGrey5().strikeThrough(),
               ),
             ],
-
-            if (_resolvedDiscountText != null) ...[
+            if (discountText != null) ...[
               TextSpan(
-                text: '\t\t$_resolvedDiscountText',
+                text: '\t\t$discountText',
                 style: AppTypographyV1.labelMedium.regular.brandSecondary(),
               ),
             ],

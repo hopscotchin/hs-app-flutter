@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/entities/message_bar_entity.dart';
-import '../../../../core/entities/visual_cue_entity.dart';
+import '../../../plp/domain/entities/listing_product_entity.dart';
 
 part 'home_page_entity.freezed.dart';
 
@@ -170,66 +170,6 @@ class TileGridItem extends Equatable {
   ];
 }
 
-/// Product shape shared by `PageCarousel.tiles[].product` and `PRODUCT_GRID.tiles[]`.
-class HomepageProduct extends Equatable {
-  final int? id;
-  final String? name;
-  final List<String> imageUrls;
-  final String? brandName;
-  final HomepageProductPrice? price;
-  final bool isWishlisted;
-  final bool soldOut;
-  final bool canWishlist;
-  final String? colorVariants;
-  final String? actionUri;
-  final List<VisualCueEntity> visualCues;
-
-  const HomepageProduct({
-    this.id,
-    this.name,
-    this.imageUrls = const [],
-    this.brandName,
-    this.price,
-    this.isWishlisted = false,
-    this.soldOut = false,
-    this.canWishlist = false,
-    this.colorVariants,
-    this.actionUri,
-    this.visualCues = const [],
-  });
-
-  String? get primaryImageUrl => imageUrls.isNotEmpty ? imageUrls.first : null;
-
-  @override
-  List<Object?> get props => [
-    id,
-    name,
-    imageUrls,
-    brandName,
-    price,
-    isWishlisted,
-    soldOut,
-    canWishlist,
-    colorVariants,
-    actionUri,
-    visualCues,
-  ];
-}
-
-class HomepageProductPrice extends Equatable {
-  final String? sellingPrice;
-  final String? mrp;
-  final String? discountLabel;
-
-  const HomepageProductPrice({this.sellingPrice, this.mrp, this.discountLabel});
-
-  bool get hasDiscount =>
-      discountLabel != null && discountLabel!.trim().isNotEmpty;
-
-  @override
-  List<Object?> get props => [sellingPrice, mrp, discountLabel];
-}
-
 // ─── PageCarousel ───
 
 class PageCarouselData extends Equatable {
@@ -290,7 +230,7 @@ class PageCarouselTile extends Equatable {
   final String? actionUri;
   final String? mimeType;
   final String? sort;
-  final HomepageProduct? product;
+  final ListingProductEntity? product;
 
   const PageCarouselTile({
     this.id,
@@ -447,7 +387,7 @@ class ProductGridData extends Equatable {
   final CtaButton? ctaButton;
   final TitleImage? title;
   final LayoutInfoData? layoutInfo;
-  final List<HomepageProduct> tiles;
+  final List<ListingProductEntity> tiles;
 
   const ProductGridData({
     this.viewConfig,

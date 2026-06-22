@@ -67,6 +67,7 @@ class ListingProductModel {
     final cue = (visualCue == null || visualCue!.isEmpty)
         ? null
         : VisualCueModel.fromJson(visualCue!);
+    final cues = cue == null ? const <VisualCueEntity>[] : <VisualCueEntity>[cue];
 
     return ListingProductEntity(
       id: id,
@@ -83,7 +84,7 @@ class ListingProductModel {
       price: priceInfo?.toEntity(),
       colorVariants: _normalizeColorVariantsLabel(colorVariants),
       actionUri: actionUri,
-      visualCues: cue == null ? const <VisualCueEntity>[] : <VisualCueEntity>[cue],
+      visualCues: cues,
       trackingMeta: trackingMeta,
     );
   }

@@ -4,6 +4,7 @@ import '../../core/constants/strings/discover_strings.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/spacing.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
+import '../../features/plp/domain/entities/listing_product_entity.dart';
 import '../atoms/cached_image_widget.dart';
 import '../atoms/cta_button_component.dart';
 import '../atoms/product_tile.dart';
@@ -66,7 +67,7 @@ class ProductGridWidget extends StatelessWidget {
 
   Widget _buildProductRow(
     BuildContext context,
-    List<HomepageProduct> tiles,
+    List<ListingProductEntity> tiles,
     int startIndex,
     int columns,
   ) {
@@ -85,9 +86,9 @@ class ProductGridWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard(BuildContext context, HomepageProduct item) {
+  Widget _buildProductCard(BuildContext context, ListingProductEntity item) {
     final showInfo = gridData.layoutInfo?.showProductInfo ?? true;
-    return ProductTile.fromHomepageProduct(
+    return ProductTile.fromProduct(
       item,
       showProductInfo: showInfo,
       onTap: () =>

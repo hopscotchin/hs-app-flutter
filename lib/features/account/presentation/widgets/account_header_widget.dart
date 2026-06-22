@@ -5,6 +5,8 @@ import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/auth_strings.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
+import '../../../../components/buttons/app_button_named.dart';
+
 import '../../../../components/atoms/cached_image_widget.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -143,7 +145,6 @@ class _SignedInHeader extends StatelessWidget {
 }
 
 /// Header shown when user is NOT logged in.
-/// "Hey there!" greeting, sign-in message, SIGN IN button, Join us link.
 class _SignedOutHeader extends StatelessWidget {
   final AccountEntity account;
   final VoidCallback? onForgetMe;
@@ -170,36 +171,17 @@ class _SignedOutHeader extends StatelessWidget {
             style: AppTypographyV1.labelLarge.regular.textPrimary(),
           ),
           AppSpacing.verticalGapLgMd,
-          SizedBox(
-            width: double.infinity,
-            height: AppSpacing.xxl,
-            child: TextButton(
-              onPressed: () => AppNavigator.goToLogin(context),
-              style: TextButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-                shape: const RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusXs),
-                textStyle: AppTypographyV1.bodyLarge.bold,
-              ),
-              child: const Text(AccountStrings.signIn),
-            ),
+          PrimaryButton.defaultType(
+            text: AccountStrings.signIn,
+            isFullWidth: true,
+            onTap: () => AppNavigator.goToLogin(context),
           ),
           if (account.hasGuestData) ...[
             AppSpacing.verticalGapSm,
-            SizedBox(
-              width: double.infinity,
-              height: AppSpacing.xxl,
-              child: OutlinedButton(
-                onPressed: onForgetMe,
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.primary),
-                  shape: const RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusXs),
-                  foregroundColor: AppColors.primary,
-                  textStyle: AppTypographyV1.bodyRegular.semiBold,
-                  backgroundColor: AppColors.container,
-                ),
-                child: Text(AccountStrings.forgetMe, style: AppTypographyV1.bodyLarge.bold.brand()),
-              ),
+            SecondaryButton.defaultType(
+              text: AccountStrings.forgetMe,
+              isFullWidth: true,
+              onTap: onForgetMe,
             ),
             AppSpacing.verticalGapSm,
             Center(

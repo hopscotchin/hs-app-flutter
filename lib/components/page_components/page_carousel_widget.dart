@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/colors.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
+import '../../features/plp/domain/entities/listing_product_entity.dart';
 import '../atoms/cached_image_widget.dart';
 import '../atoms/custom_image.dart';
 import '../atoms/product_tile.dart';
@@ -36,8 +37,12 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   static const double _defaultTitleHorizontalMargin = 16;
 
   // Vertical space reserved under each tile for brand + name + price.
-  static const double _productInfoHeight = 68;
-  static const double _productInfoHeightNarrow = 84;
+  // Sized to fit Satoshi labelLarge (12pt) + bodySmall (13pt) at default
+  // font metrics plus the AppSpacing gaps between them. The previous 68/84
+  // values overflowed by ~9px on devices where the font's intrinsic line
+  // height is on the taller side.
+  static const double _productInfoHeight = 80;
+  static const double _productInfoHeightNarrow = 96;
   static const double _narrowScreenThreshold = 370;
 
   static const _initialLineState = (progress: 0.0, fraction: 0.3);
@@ -339,9 +344,9 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     if (product != null) {
       return SizedBox(
         width: tileWidth,
-        child: ProductTile.fromHomepageProduct(
+        child: ProductTile.fromProduct(
           product,
-          imageUrl: tile.imageUrl ?? product.primaryImageUrl,
+          imageUrl: tile.imageUrl ?? product.displayImage,
           imageAspectRatio: tileHeight > 0 ? tileWidth / tileHeight : null,
           onTap: () => ActionUrlHandler.navigate(context, tapUri),
         ),

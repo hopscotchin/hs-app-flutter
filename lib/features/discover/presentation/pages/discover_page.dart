@@ -86,6 +86,13 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     }
   }
 
+  void _scrollToTopOnReload() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+      _scrollController.jumpTo(0);
+    });
+  }
+
   void _onTabSelected(int index) {
     if (index == _selectedTabIndex) return;
     setState(() => _selectedTabIndex = index);
@@ -109,27 +116,39 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
   Widget build(BuildContext context) {
     super.build(context);
 
-    return BlocListener<ShopTheLookCubit, ShopTheLookCartState>(
-      listenWhen: (prev, curr) =>
-          prev.status == ShopTheLookCartStatus.loading &&
-          curr.status != ShopTheLookCartStatus.loading,
-      listener: (context, state) {
-        if (state.status == ShopTheLookCartStatus.success) {
-          if (state.cartItemQty != null) {
-            context.read<CartCountCubit>().set(state.cartItemQty!);
-          }
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ShopTheLookCubit, ShopTheLookCartState>(
+          listenWhen: (prev, curr) =>
+              prev.status == ShopTheLookCartStatus.loading &&
+              curr.status != ShopTheLookCartStatus.loading,
+          listener: (context, state) {
+            if (state.status == ShopTheLookCartStatus.success) {
+              if (state.cartItemQty != null) {
+                context.read<CartCountCubit>().set(state.cartItemQty!);
+              }
 
-          context.showSnack(
-            DiscoverStrings.itemsAddedToBag(state.addedCount),
-            status: SnackStatus.success,
-          );
-        } else if (state.status == ShopTheLookCartStatus.failure) {
-          context.showSnack(
-            state.errorMessage ?? DiscoverStrings.failedToAddItemsToBag,
-            status: SnackStatus.error,
-          );
-        }
-      },
+              context.showSnack(
+                DiscoverStrings.itemsAddedToBag(state.addedCount),
+                status: SnackStatus.success,
+              );
+            } else if (state.status == ShopTheLookCartStatus.failure) {
+              context.showSnack(
+                state.errorMessage ?? DiscoverStrings.failedToAddItemsToBag,
+                status: SnackStatus.error,
+              );
+            }
+          },
+        ),
+        // Any full reload (pull-to-refresh / login / unlock / logout) routes
+        // through HomeStatus.loading; pagination only flips isLoadingMore. So
+        // this single transition covers every refresh trigger.
+        BlocListener<HomeBloc, HomeState>(
+          listenWhen: (prev, curr) =>
+              prev.status != HomeStatus.loading && curr.status == HomeStatus.loading,
+          listener: (context, _) => _scrollToTopOnReload(),
+        ),
+      ],
       child: BlocBuilder<HomeBloc, HomeState>(
         // Skip rebuilds for pure-pagination flips (isLoadingMore true ↔ false).
         // The spinner sliver below has its own BlocSelector that handles

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/colors.dart';
 
-/// Borderless iOS-style toggle. Thumb overflows the track vertically.
-///
 /// Defaults: track 36x18, thumb 20x20.
 class AppToggleSwitch extends StatelessWidget {
   const AppToggleSwitch({

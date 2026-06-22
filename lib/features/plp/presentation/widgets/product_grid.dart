@@ -34,7 +34,7 @@ class ProductGrid extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: ProductTile.fromListingProduct(
+                    child: ProductTile.fromProduct(
                       products[leftIndex],
                       onTap: () => AppNavigator.goToPdp(
                         context,
@@ -45,7 +45,7 @@ class ProductGrid extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: rightIndex < products.length
-                        ? ProductTile.fromListingProduct(
+                        ? ProductTile.fromProduct(
                             products[rightIndex],
                             onTap: () => AppNavigator.goToPdp(
                               context,

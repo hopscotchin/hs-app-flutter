@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
 import 'package:hs_app_flutter/components/atoms/filled_text_field.dart';
+import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
+import 'package:hs_app_flutter/components/buttons/button_enums.dart';
+import 'package:hs_app_flutter/components/form/app_checkbox.dart';
 
 import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/atoms/outlined_text_field.dart';
@@ -335,10 +338,13 @@ class _Form extends StatelessWidget {
           onChanged: (v) => _emit(context, ManageAddressField.landmark, v),
         ),
         AppSpacing.verticalGapMd,
-        _DefaultAddressCheckbox(
-          value: state.isDefault,
+        AppCheckbox.labeled(
+          isSelected: state.isDefault,
+          label: AddressStrings.makeDefault,
+          checkBoxSelectedColor: AppColors.secondary,
+          checkColor: AppColors.baseDefault,
           onChanged: (v) => context.read<ManageAddressBloc>().add(
-            ManageAddressDefaultToggled(v ?? false),
+            ManageAddressDefaultToggled(v),
           ),
         ),
       ],
@@ -495,103 +501,6 @@ class _MarkOnMapRow extends StatelessWidget {
   }
 }
 
-class _DefaultAddressCheckbox extends StatefulWidget {
-  const _DefaultAddressCheckbox({required this.value, required this.onChanged});
-
-  final bool value;
-  final ValueChanged<bool?> onChanged;
-
-  @override
-  State<_DefaultAddressCheckbox> createState() =>
-      _DefaultAddressCheckboxState();
-}
-
-class _DefaultAddressCheckboxState extends State<_DefaultAddressCheckbox> {
-  final GlobalKey _checkboxKey = GlobalKey();
-
-  void _handleTap() {
-    widget.onChanged(!widget.value);
-    _rippleOnCheckbox();
-  }
-
-  // Paint an ink ripple centred on the checkbox regardless of where the tap
-  // landed (checkbox or label). Contained + clipped to a rounded square rect so
-  // the splash stays a square hugging the checkbox.
-  void _rippleOnCheckbox() {
-    final context = _checkboxKey.currentContext;
-    if (context == null) return;
-    final box = context.findRenderObject() as RenderBox?;
-    final controller = Material.maybeOf(context);
-    if (box == null || controller == null) return;
-    final rect = (Offset.zero & box.size).inflate(1);
-    InkRipple(
-      controller: controller,
-      referenceBox: box,
-      position: rect.center,
-      rectCallback: () => rect,
-      borderRadius: BorderRadius.circular(4),
-      color: AppColors.secondary.withValues(alpha: 0.24),
-      containedInkWell: true,
-      radius: 14,
-      textDirection: Directionality.of(context),
-    ).confirm();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final value = widget.value;
-    return Material(
-      type: MaterialType.transparency,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          GestureDetector(
-            onTap: _handleTap,
-            behavior: HitTestBehavior.opaque,
-            child: SizedBox(
-              key: _checkboxKey,
-              width: 18,
-              height: 18,
-              child: Ink(
-                decoration: BoxDecoration(
-                  color: value ? AppColors.secondary : AppColors.neutralGrey2,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(
-                    color: value ? AppColors.secondary : AppColors.neutralGrey2,
-                    width: 2,
-                  ),
-                ),
-                child: value
-                    ? const Padding(
-                        padding: EdgeInsets.all(1.5),
-                        child: FittedBox(
-                          child: Icon(
-                            Icons.check,
-                            color: AppColors.baseDefault,
-                          ),
-                        ),
-                      )
-                    : null,
-              ),
-            ),
-          ),
-          AppSpacing.horizontalGapXs,
-          GestureDetector(
-            onTap: _handleTap,
-            behavior: HitTestBehavior.opaque,
-            child: Text(
-              AddressStrings.makeDefault,
-              style: AppTypographyV1.bodyRegular.medium.copyWith(
-                color: AppColors.neutralBlack,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _BottomActions extends StatelessWidget {
   const _BottomActions({
     required this.saveLabel,
@@ -619,54 +528,20 @@ class _BottomActions extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SizedBox(
-              height: 48,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  backgroundColor: AppColors.brandTertiary,
-                  padding: AppSpacing.paddingVerticalMd,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                onPressed: submitting ? null : onCancel,
-                child: Text(
-                  AddressStrings.cancel,
-                  style: AppTypographyV1.bodyLarge.bold.copyWith(
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
+            child: TertiaryButton.defaultType(
+              text: AddressStrings.cancel,
+              isFullWidth: true,
+              state: submitting ? ButtonState.disabled : ButtonState.enabled,
+              onTap: onCancel,
             ),
           ),
-          const SizedBox(width: 8),
+          AppSpacing.horizontalGapXs,
           Expanded(
-            child: SizedBox(
-              height: 48,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.onPrimary,
-                  padding: AppSpacing.paddingVerticalMd,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                onPressed: submitting ? null : onSave,
-                child: submitting
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.onPrimary,
-                          ),
-                        ),
-                      )
-                    : Text(saveLabel, style: AppTypographyV1.bodyLarge.bold),
-              ),
+            child: PrimaryButton.defaultType(
+              text: saveLabel,
+              isFullWidth: true,
+              state: submitting ? ButtonState.loading : ButtonState.enabled,
+              onTap: onSave,
             ),
           ),
         ],

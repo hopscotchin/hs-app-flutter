@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
+import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
+import 'package:hs_app_flutter/components/buttons/button_enums.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 
@@ -213,9 +215,6 @@ class _AddressesPageState extends State<AddressesPage> {
       flow: _isCheckout ? ManageAddressFlow.cart : ManageAddressFlow.account,
     );
     if (result == null || !mounted) return;
-    // Cart flow already selects the new address for the order (see
-    // ManageAddressBloc._selectForCart). Pop straight back to the checkout
-    // bottom sheet instead of staying on the listing.
     if (_isCheckout && result.address != null) {
       Navigator.of(context).pop();
       return;
@@ -312,7 +311,7 @@ class _AddNewAddressButton extends StatelessWidget {
       padding: Platform.isIOS ? const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 0) : const EdgeInsets.all(AppSpacing.md),
       child: SizedBox(
         width: double.infinity,
-        child: _PrimaryButton(label: AddressStrings.addNewAddress, onPressed: onPressed),
+        child: PrimaryButton.defaultType(text: AddressStrings.addNewAddress, onTap: onPressed),
       ),
     );
   }
@@ -336,74 +335,20 @@ class _CheckoutBottomBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _SecondaryButton(
-              label: AddressStrings.addNewAddress,
-              onPressed: isSubmitting ? null : onAddNewAddress,
-            ),
+            child: SecondaryButton.defaultType(
+              text: AddressStrings.addNewAddress,
+              onTap: isSubmitting ? null : onAddNewAddress),
           ),
-          const SizedBox(width: 8),
+          AppSpacing.horizontalGapXs,
           Expanded(
-            child: _PrimaryButton(
-              label: AddressStrings.continueLabel,
-              onPressed: onContinue,
-              isLoading: isSubmitting,
+            child: PrimaryButton.defaultType(
+              text: AddressStrings.continueLabel,
+              onTap: onContinue,
+              state: isSubmitting ? ButtonState.loading : ButtonState.enabled,
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _PrimaryButton extends StatelessWidget {
-  const _PrimaryButton({required this.label, required this.onPressed, this.isLoading = false});
-
-  final String label;
-  final VoidCallback? onPressed;
-  final bool isLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      style: TextButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        disabledBackgroundColor: AppColors.secondaryInActive,
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      ),
-      onPressed: onPressed,
-      child: isLoading
-          ? const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation(AppColors.onPrimary),
-              ),
-            )
-          : Text(label, style: AppTypographyV1.bodyLarge.semiBold),
-    );
-  }
-}
-
-class _SecondaryButton extends StatelessWidget {
-  const _SecondaryButton({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        backgroundColor: AppColors.brandTertiary,
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      ),
-      onPressed: onPressed,
-      child: Text(label, style: AppTypographyV1.bodyLarge.bold.copyWith(color: AppColors.primary)),
     );
   }
 }

@@ -1,5 +1,5 @@
-import '../../../../core/entities/visual_cue_entity.dart';
-import '../../../../core/models/visual_cue_model.dart';
+import '../../../plp/data/models/listing_product_model.dart';
+import '../../../plp/domain/entities/listing_product_entity.dart';
 import '../../domain/entities/home_page_entity.dart';
 
 /// Parses the `data` field of a PageComponent based on its `type`.
@@ -69,52 +69,13 @@ class ComponentDataParser {
         .toList();
   }
 
-  static List<VisualCueEntity> _parseVisualCues(Object? json) {
-    if (json is! List) return const [];
-    return json
-        .whereType<Map<String, dynamic>>()
-        .map((e) {
-          return VisualCueModel(
-            uiType: e['uiType'] as String?,
-            location: e['location'] as String?,
-            text: e['text'] as String?,
-            textColor: e['textColor'] as String?,
-            bgColor:
-                e['backgroundColor'] as String? ?? e['bgColor'] as String?,
-            imageUrl: e['imageUrl'] as String?,
-          );
-        })
-        .toList();
-  }
-
-  static HomepageProductPrice? _parseHomepagePrice(Object? json) {
+  /// Parses the unified product shape (id/name/brandName/priceInfo/wishlistInfo/
+  /// media/trackingMeta/visualCues) used by PageCarousel tiles and PRODUCT_GRID
+  /// tiles. Delegates to [ListingProductModel] so PLP and Discover stay aligned.
+  static ListingProductEntity? _parseHomepageProduct(Object? json) {
     if (json is! Map<String, dynamic>) return null;
-    return HomepageProductPrice(
-      sellingPrice: json['sellingPrice']?.toString(),
-      mrp: json['mrp']?.toString(),
-      discountLabel: json['discountLabel'] as String?,
-    );
-  }
-
-  static HomepageProduct? _parseHomepageProduct(Object? json) {
-    if (json is! Map<String, dynamic>) return null;
-    final rawImageUrls = json['imageUrls'];
-    final imageUrls = rawImageUrls is List
-        ? rawImageUrls.whereType<String>().toList()
-        : const <String>[];
-    return HomepageProduct(
-      id: (json['id'] as num?)?.toInt(),
-      name: json['name'] as String?,
-      imageUrls: imageUrls,
-      brandName: json['brandName'] as String?,
-      price: _parseHomepagePrice(json['price']),
-      isWishlisted: json['isWishlisted'] as bool? ?? false,
-      soldOut: json['soldOut'] as bool? ?? false,
-      canWishlist: json['canWishlist'] as bool? ?? false,
-      colorVariants: json['colorVariants'] as String?,
-      actionUri: json['actionUri'] as String?,
-      visualCues: _parseVisualCues(json['visualCues']),
-    );
+    if (json['id'] == null || json['name'] == null) return null;
+    return ListingProductModel.fromJson(json).toEntity();
   }
 
   // ─── Hero ───
@@ -293,7 +254,7 @@ class ComponentDataParser {
     final tiles = rawTiles
         .whereType<Map<String, dynamic>>()
         .map(_parseHomepageProduct)
-        .whereType<HomepageProduct>()
+        .whereType<ListingProductEntity>()
         .toList();
 
     return ProductGridData(

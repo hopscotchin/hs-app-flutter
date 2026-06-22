@@ -34,9 +34,9 @@ class PlpProductSliver extends StatelessWidget {
   }
 
   Widget _tile(BuildContext context, ListingProductEntity product, bool hasCPT) {
-    return ProductTile.fromListingProduct(
-      hasCPT: hasCPT,
+    return ProductTile.fromProduct(
       product,
+      hasCPT: hasCPT,
       onTap: () {
         if (product.isCPT) {
           ActionUrlHandler.navigate(context, product.actionUri, title: product.name);

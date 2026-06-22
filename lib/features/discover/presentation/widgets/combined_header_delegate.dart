@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/cubits/cart_count_cubit.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 
 import '../../../../components/atoms/badge_icon.dart';
 import '../../../../components/atoms/cached_image_widget.dart';
-import '../../../../core/cubits/cart_count_cubit.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
@@ -233,7 +233,7 @@ class _AppBarContent extends StatelessWidget {
             onTap: () => AppNavigator.goToCart(context),
             child: BadgeIcon(
               count: context.watch<CartCountCubit>().state,
-              child: SvgPicture.asset(
+              icon: SvgPicture.asset(
                 ImageConstants.bag,
                 height: 20,
                 width: 20,

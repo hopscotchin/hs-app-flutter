@@ -68,8 +68,6 @@ class AppBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasSecondary = secondaryAction != null;
     final safeBottom = MediaQuery.of(context).padding.bottom;
-    // Android: add md above the system bar/gesture pill (additive).
-    // iOS: absorb md into the home-indicator inset to avoid double spacing.
     final bottomPadding = Platform.isAndroid
         ? AppSpacing.md
         : (AppSpacing.md - safeBottom).clamp(0.0, AppSpacing.md);

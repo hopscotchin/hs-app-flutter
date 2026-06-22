@@ -29,5 +29,5 @@ abstract class ListingProductEntity with _$ListingProductEntity {
 
 extension ListingProductEntityX on ListingProductEntity {
   String? get displayImage => imageUrls.isNotEmpty ? imageUrls.first : null;
-  bool get isSoldOut => soldOut || quantity == 0;
+  bool get isSoldOut => soldOut;
 }

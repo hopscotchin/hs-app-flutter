@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:hs_app_flutter/components/atoms/badge_icon.dart';
 import 'package:hs_app_flutter/components/atoms/circular_icon_button.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
@@ -102,34 +101,25 @@ class _StandardSliverAppBar extends StatelessWidget {
       elevation: 0,
       toolbarHeight: 60,
       actions: [
-        IconButton(
-          visualDensity: VisualDensity.compact,
+        BadgeIcon(
+          iconSize: 18,
           icon: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
-          onPressed: () {
-            //AppNavigator.goToSearch(context),
-          },
+          onTap: () => AppNavigator.goToSearch(context),
         ),
-        GestureDetector(
-          child: IconButton(
-            visualDensity: VisualDensity.compact,
-            icon: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
-            onPressed: () {
-              //AppNavigator.goToSearch(context),
-            },
-          ),
+        BadgeIcon(
+          iconSize: 18,
+          icon: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
+          count: 0,
+          onTap: () {},
+          iconColor: AppColors.textPrimary,
         ),
         const SizedBox(width: 3),
-        GestureDetector(
+        BadgeIcon(
+          iconSize: 18,
+          icon: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
+          count: context.watch<CartCountCubit>().state,
           onTap: () => AppNavigator.goToCart(context),
-          child: BadgeIcon(
-            count: context.watch<CartCountCubit>().state,
-            child: SvgPicture.asset(
-              ImageConstants.bag,
-              height: 20,
-              width: 20,
-              placeholderBuilder: (_) => const SizedBox(height: 20, width: 20),
-            ),
-          ),
+          iconColor: AppColors.textPrimary,
         ),
       ],
       actionsPadding: const EdgeInsets.only(right: 12),
@@ -337,9 +327,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                 ),
 
                 CircleIconButton(
-                  onTap: () {
-                    //AppNavigator.goToSearch(context),
-                  },
+                  onTap: () => AppNavigator.goToSearch(context),
                   child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
                 ),
 
@@ -353,9 +341,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                 const SizedBox(width: 8),
 
                 CircleIconButton(
-                  onTap: () {
-                    //AppNavigator.goToCart(context);
-                  },
+                  onTap: () => AppNavigator.goToCart(context),
                   child: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
                 ),
                 const SizedBox(width: 12),

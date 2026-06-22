@@ -4,6 +4,8 @@ import 'package:hs_app_flutter/core/config/environment.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../../../../components/buttons/app_button.dart';
+import '../../../../components/buttons/button_enums.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
@@ -40,23 +42,13 @@ class AccountFooterWidget extends StatelessWidget {
             if (isLoggedIn)
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton(
-                    onPressed: onSignOut ?? () {},
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: AppSpacing.borderRadiusXs,
-                      ),
-                      foregroundColor: AppColors.primary,
-                      textStyle: AppTypographyV1.bodyLarge.bold,
-                      backgroundColor: AppColors.container,
-                    ),
-                    child: const Text(AccountStrings.signOut),
-                  ),
+                child: AppButton(
+                  text: AccountStrings.signOut,
+                  variant: ButtonVariant.secondary,
+                  isFullWidth: true,
+                  onTap: onSignOut,
                 ),
+
               ),
             Row(
               children: [
