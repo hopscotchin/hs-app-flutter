@@ -50,10 +50,15 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   final ScrollController _listController = ScrollController();
   final ValueNotifier<_LineState> _lineState = ValueNotifier(_initialLineState);
 
-  PageController? _pageController;
+  final ScrollController _snapController = ScrollController();
+
+  /// Current per-tile stride (tileWidth + innerHorizontalMargin), refreshed
+  /// from `build()` so `_onSnapScroll` can map scroll pixels → tile index
+  /// without recomputing layout.
+  double _snapItemStride = 0.0;
 
   /// Notifier-backed page index so swipes only rebuild the indicator,
-  /// not the snapping PageView and its layout math above.
+  /// not the snapping list and its layout math above.
   final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
   late final bool _hasProducts;
 
@@ -64,9 +69,10 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   void initState() {
     super.initState();
     _hasProducts = widget.carouselData.tiles.any(
-      (tile) => tile.product != null,
+          (tile) => tile.product != null,
     );
     _listController.addListener(_onListScroll);
+    _snapController.addListener(_onSnapScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _onListScroll();
     });
@@ -77,7 +83,9 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     _listController
       ..removeListener(_onListScroll)
       ..dispose();
-    _pageController?.dispose();
+    _snapController
+      ..removeListener(_onSnapScroll)
+      ..dispose();
     _lineState.dispose();
     _currentPage.dispose();
     super.dispose();
@@ -96,6 +104,27 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
         ? (pos.viewportDimension / total).clamp(0.15, 1.0)
         : 1.0;
     _lineState.value = (progress: progress, fraction: fraction);
+  }
+
+  void _onSnapScroll() {
+    if (!_snapController.hasClients) return;
+    if (_snapItemStride <= 0) return;
+    final pos = _snapController.position;
+    final tileCount = widget.carouselData.tiles.length;
+    if (tileCount == 0) return;
+
+    int rounded;
+    if (_hasProducts &&
+        pos.maxScrollExtent > 0 &&
+        pos.pixels >= pos.maxScrollExtent - 0.5) {
+      rounded = tileCount - 1;
+    } else {
+      rounded = (pos.pixels / _snapItemStride).round();
+    }
+
+    if (rounded != _currentPage.value) {
+      _currentPage.value = rounded;
+    }
   }
 
   @override
@@ -131,10 +160,10 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     } else {
       availableWidth =
           screenWidth -
-          (peepingFactor > 0 ? horizontalMargin : horizontalMargin * 2) -
-          (minTilesToShow == 1
-              ? (peepingFactor > 0 ? innerHorizontalMargin : 0)
-              : (minTilesToShow - 1) * innerHorizontalMargin);
+              (peepingFactor > 0 ? horizontalMargin : horizontalMargin * 2) -
+              (minTilesToShow == 1
+                  ? (peepingFactor > 0 ? innerHorizontalMargin : 0)
+                  : (minTilesToShow - 1) * innerHorizontalMargin);
     }
 
     final tileWidth = isFullWidth
@@ -145,56 +174,40 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
 
     final productInfoHeight = _hasProducts
         ? (screenWidth <= _narrowScreenThreshold
-              ? _productInfoHeightNarrow
-              : _productInfoHeight)
+        ? _productInfoHeightNarrow
+        : _productInfoHeight)
         : 0.0;
     final carouselHeight = tileHeight + productInfoHeight;
 
-    // Shifts the snapping PageView right so the first tile lands at
-    // `horizontalMargin`. Inner per-tile padding covers the remaining offset.
-    // Clamped to >= 0 — full-bleed configs can otherwise produce a negative
-    // Padding and trip the framework assertion.
-    final double leadingShift = (isFullWidth || !hasSnapping)
-        ? 0.0
-        : (horizontalMargin - innerHorizontalMargin / 2).clamp(
-            0.0,
-            double.infinity,
-          );
-
-    if (hasSnapping && _pageController == null) {
-      final slotWidth = isFullWidth
-          ? screenWidth
-          : tileWidth + innerHorizontalMargin;
-      _pageController = PageController(
-        viewportFraction: slotWidth / (screenWidth - leadingShift),
-      );
-      _currentPage.value = 0;
+    if (hasSnapping) {
+      _snapItemStride =
+      isFullWidth ? screenWidth : tileWidth + innerHorizontalMargin;
     }
 
     final carousel = hasSnapping
         ? _buildSnappingCarousel(
-            tiles: tiles,
-            tileWidth: tileWidth,
-            tileHeight: tileHeight,
-            carouselHeight: carouselHeight,
-            horizontalMargin: horizontalMargin,
-            innerHorizontalMargin: innerHorizontalMargin,
-            isFullWidth: isFullWidth,
-            showIndicators: showIndicators,
-            imageCornerRadius: imageCornerRadius,
-            leadingShift: leadingShift,
-          )
+      tiles: tiles,
+      tileWidth: tileWidth,
+      tileHeight: tileHeight,
+      carouselHeight: carouselHeight,
+      horizontalMargin: horizontalMargin,
+      innerHorizontalMargin: innerHorizontalMargin,
+      isFullWidth: isFullWidth,
+      showIndicators: showIndicators,
+      imageCornerRadius: imageCornerRadius,
+      screenWidth: screenWidth,
+    )
         : _buildScrollableCarousel(
-            tiles: tiles,
-            tileWidth: tileWidth,
-            tileHeight: tileHeight,
-            carouselHeight: carouselHeight,
-            horizontalMargin: horizontalMargin,
-            innerHorizontalMargin: innerHorizontalMargin,
-            isFullWidth: isFullWidth,
-            showIndicators: showIndicators,
-            imageCornerRadius: imageCornerRadius,
-          );
+      tiles: tiles,
+      tileWidth: tileWidth,
+      tileHeight: tileHeight,
+      carouselHeight: carouselHeight,
+      horizontalMargin: horizontalMargin,
+      innerHorizontalMargin: innerHorizontalMargin,
+      isFullWidth: isFullWidth,
+      showIndicators: showIndicators,
+      imageCornerRadius: imageCornerRadius,
+    );
 
     final titleUrl = data.title?.url;
     if (titleUrl == null) return carousel;
@@ -230,46 +243,67 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     required bool isFullWidth,
     required bool showIndicators,
     required double imageCornerRadius,
-    required double leadingShift,
+    required double screenWidth,
   }) {
     final tileCount = tiles.length;
-    final tilePadding = isFullWidth
-        ? horizontalMargin
-        : innerHorizontalMargin / 2;
+    final itemStride = _snapItemStride;
 
-    final pageView = SizedBox(
+    // Bounded for product carousels; large multiplier for banner-only so
+    // they still feel infinite.
+    final effectiveCount =
+    _hasProducts ? tileCount : tileCount * _forwardCycleBudget;
+
+    // Pre-compute whether the content actually overflows the viewport (only
+    // meaningful for bounded product carousels — cycling banners always do).
+    // Used to suppress the indicator when there's no scope to scroll.
+    final contentExtent = horizontalMargin * 2 +
+        tileCount * tileWidth +
+        (tileCount > 0 ? (tileCount - 1) * innerHorizontalMargin : 0);
+    final hasScrollScope = _hasProducts
+        ? contentExtent > screenWidth + 0.5
+        : true;
+
+    // Trailing list-padding = horizontalMargin minus the inner-margin baked
+    // into each item, so after the last tile the gap to the screen edge is
+    // still horizontalMargin.
+    final trailingListPadding =
+    (horizontalMargin - innerHorizontalMargin).clamp(0.0, double.infinity);
+
+    final snappingList = SizedBox(
       height: carouselHeight,
-      child: Padding(
-        padding: EdgeInsets.only(left: leadingShift),
-        // Isolate carousel paints (swipes, image fades) from the parent
-        // discover scrollview so a swipe doesn't re-rasterise the page.
-        child: RepaintBoundary(
-          child: PageView.builder(
-            controller: _pageController!,
-            padEnds: false,
-            itemCount: tileCount * _forwardCycleBudget,
-            onPageChanged: (page) => _currentPage.value = page,
-            itemBuilder: (_, index) => Padding(
-              padding: EdgeInsets.symmetric(horizontal: tilePadding),
-              child: _buildTile(
-                tiles[index % tileCount],
-                tileWidth,
-                tileHeight,
-                imageCornerRadius,
-              ),
+      child: RepaintBoundary(
+        child: ListView.builder(
+          controller: _snapController,
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.only(
+            left: horizontalMargin,
+            right: trailingListPadding,
+          ),
+          physics: _SnapScrollPhysics(itemStride: itemStride),
+          itemExtent: itemStride,
+          itemCount: effectiveCount,
+          itemBuilder: (_, index) => Padding(
+            padding: EdgeInsets.only(right: innerHorizontalMargin),
+            child: _buildTile(
+              tiles[index % tileCount],
+              tileWidth,
+              tileHeight,
+              imageCornerRadius,
             ),
           ),
         ),
       ),
     );
 
-    if (!showIndicators || tileCount <= 1) return pageView;
+    if (!showIndicators || tileCount <= 1 || !hasScrollScope) {
+      return snappingList;
+    }
 
     if (isFullWidth) {
       return Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          pageView,
+          snappingList,
           _DotIndicators(currentPage: _currentPage, count: tileCount),
         ],
       );
@@ -277,7 +311,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        pageView,
+        snappingList,
         _PageLineIndicator(currentPage: _currentPage, count: tileCount),
       ],
     );
@@ -333,11 +367,11 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   }
 
   Widget _buildTile(
-    PageCarouselTile tile,
-    double tileWidth,
-    double tileHeight,
-    double cornerRadius,
-  ) {
+      PageCarouselTile tile,
+      double tileWidth,
+      double tileHeight,
+      double cornerRadius,
+      ) {
     final product = tile.product;
     final tapUri = tile.actionUri ?? product?.actionUri;
 
@@ -370,9 +404,9 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
           alignment: Alignment.topCenter,
           child: cornerRadius > 0
               ? ClipRRect(
-                  borderRadius: BorderRadius.circular(cornerRadius),
-                  child: image,
-                )
+            borderRadius: BorderRadius.circular(cornerRadius),
+            child: image,
+          )
               : image,
         ),
       ),
@@ -394,6 +428,19 @@ class _DotIndicators extends StatelessWidget {
   static const _dotMargin = EdgeInsets.symmetric(horizontal: 3);
   static const _padding = EdgeInsets.only(bottom: 10);
 
+  // Decorations hoisted to single allocations — `AnimatedContainer` swaps
+  // references and tweens between them, so we don't pay per-build BoxDeco /
+  // BorderRadius / Color.withValues allocations per dot per page change.
+  static const _borderRadius = BorderRadius.all(Radius.circular(3));
+  static const _activeDecoration = BoxDecoration(
+    color: AppColors.baseDefault,
+    borderRadius: _borderRadius,
+  );
+  static final _inactiveDecoration = BoxDecoration(
+    color: AppColors.baseDefault.withValues(alpha: 0.5),
+    borderRadius: _borderRadius,
+  );
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
@@ -412,12 +459,8 @@ class _DotIndicators extends StatelessWidget {
                 margin: _dotMargin,
                 width: isActive ? 45 : 8,
                 height: 6,
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? AppColors.baseDefault
-                      : AppColors.baseDefault.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(3),
-                ),
+                decoration:
+                isActive ? _activeDecoration : _inactiveDecoration,
               );
             }),
           ),
@@ -535,5 +578,78 @@ class _LineBar extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SnapScrollPhysics extends ScrollPhysics {
+  final double itemStride;
+
+  const _SnapScrollPhysics({required this.itemStride, super.parent});
+
+  @override
+  _SnapScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _SnapScrollPhysics(
+      itemStride: itemStride,
+      parent: buildParent(ancestor),
+    );
+  }
+
+  double _getTargetPixels(
+      ScrollMetrics position,
+      Tolerance tolerance,
+      double velocity,
+      ) {
+    final pixels = position.pixels;
+    final maxExtent = position.maxScrollExtent;
+    if (itemStride <= 0 || maxExtent <= 0) return pixels;
+
+    double page = pixels / itemStride;
+    if (velocity < -tolerance.velocity) {
+      page = page.floorToDouble();
+    } else if (velocity > tolerance.velocity) {
+      page = page.ceilToDouble();
+    } else {
+      page = page.roundToDouble();
+    }
+    double target = page * itemStride;
+
+    // The last reachable snap is `maxExtent` itself (last tile aligned to
+    // the trailing padding). If the page snap would overshoot maxExtent,
+    // or the user has scrolled past the second-to-last page boundary AND
+    // is closer to maxExtent than to the page snap, prefer maxExtent.
+    if (target > maxExtent) {
+      target = maxExtent;
+    } else if (pixels > maxExtent - itemStride &&
+        (maxExtent - pixels).abs() < (target - pixels).abs()) {
+      target = maxExtent;
+    }
+
+    return target.clamp(0.0, maxExtent);
+  }
+
+  @override
+  Simulation? createBallisticSimulation(
+      ScrollMetrics position,
+      double velocity,
+      ) {
+    // Defer to default physics at the edges — let the parent handle the
+    // overscroll glow / bounce without injecting our own simulation.
+    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final tolerance = toleranceFor(position);
+    final target = _getTargetPixels(position, tolerance, velocity);
+    if (target == position.pixels) return null;
+    return ScrollSpringSimulation(
+      spring,
+      position.pixels,
+      target,
+      velocity,
+      tolerance: tolerance,
+    );
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
 }
 

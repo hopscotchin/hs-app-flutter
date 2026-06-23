@@ -34,7 +34,7 @@ class AppRouter {
       SplashRoute.getRoute(),
       shellRoute,
       ...AuthRoute.getRoutes(_rootNavigatorKey),
-      PlpRoute.getRoute(_rootNavigatorKey),
+      // PlpRoute.getRoute(_rootNavigatorKey),
       WebViewRoute.getRoute(_rootNavigatorKey),
       LandingPageRoute.getRoute(_rootNavigatorKey),
       AddressRoute.getRoute(_rootNavigatorKey),
