@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../components/atoms/error_retry_widget.dart';
+import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/constants/strings/discover_strings.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
@@ -115,9 +115,9 @@ class _LandingPageState extends State<LandingPage> {
             }
 
             if (state.isFailure) {
-              return ErrorRetryWidget(
-                message: state.errorMessage,
-                onRetry: () => context.read<LandingPageBloc>().add(
+              return EmptyStateWidget(
+                type: EmptyStateType.serverError,
+                onButtonTap: () => context.read<LandingPageBloc>().add(
                   LoadLandingPage(pageName: widget.pageName),
                 ),
               );
@@ -126,8 +126,11 @@ class _LandingPageState extends State<LandingPage> {
             if (state.isSuccess) {
               final components = state.homePage?.pageComponents ?? [];
               if (components.isEmpty) {
-                return const Center(
-                  child: Text(DiscoverStrings.noContentAvailable),
+                return EmptyStateWidget(
+                  type: EmptyStateType.discover,
+                  onButtonTap: () => context.read<LandingPageBloc>().add(
+                    LoadLandingPage(pageName: widget.pageName),
+                  ),
                 );
               }
 

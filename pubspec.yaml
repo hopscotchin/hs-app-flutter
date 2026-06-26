@@ -2,7 +2,7 @@ name: hs_app_flutter
 description: "HS Flutter"
 publish_to: "none"
 
-version: 14.2.0+2026062301
+version: 14.3.0+2026062601
 
 environment:
   sdk: ^3.11.0
@@ -59,8 +59,10 @@ dependencies:
   # Network Connectivity
   connectivity_plus: ^7.1.1
   url_launcher: ^6.3.2
+  share_plus: ^13.1.0
   flutter_svg: ^2.2.4
   webview_flutter: ^4.13.1
+  webview_flutter_android: ^4.10.13
 
   #Juspay HyperSDK
   hypersdkflutter: ^4.0.55
@@ -76,7 +78,7 @@ dependencies:
   logger:
     ^2.7.0
 
-  # HTTP Inspector (debug mode only — gated with kDebugMode at runtime)
+    # HTTP Inspector (debug mode only — gated with kDebugMode at runtime)
   talker_flutter: ^5.1.16
   talker_dio_logger: ^5.1.16
   talker_bloc_logger: ^5.1.17
@@ -114,6 +116,7 @@ flutter:
     - assets/icons/
     - assets/icons/dashboard/
     - assets/icons/messagebars/
+    - assets/icons/legal/
     - assets/animations/
 
   fonts:

@@ -8,6 +8,6 @@ part of 'media_item_model.dart';
 
 MediaItemModel _$MediaItemModelFromJson(Map<String, dynamic> json) =>
     MediaItemModel(
-      mimeType: json['mimeType'] as String?,
-      url: json['url'] as String?,
+      mimeType: parseToStringOrNull(json['mimeType']),
+      url: parseToStringOrNull(json['url']),
     );

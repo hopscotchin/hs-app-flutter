@@ -8,9 +8,9 @@ part of 'product_price_model.dart';
 
 ProductPriceModel _$ProductPriceModelFromJson(Map<String, dynamic> json) =>
     ProductPriceModel(
-      sellingPrice: json['sellingPrice'] as String?,
-      mrp: json['mrp'] as String?,
-      discount: json['discount'] as String?,
-      absoluteValue: json['absoluteValue'] as num?,
-      callout: json['callout'] as String?,
+      sellingPrice: parseToStringOrNull(json['sellingPrice']),
+      mrp: parseToStringOrNull(json['mrp']),
+      discount: parseToStringOrNull(json['discount']),
+      absoluteValue: parseToNumOrNull(json['absoluteValue']),
+      callout: parseToStringOrNull(json['callout']),
     );

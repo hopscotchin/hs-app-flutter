@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
+import '../../../../core/navigation/app_share_launcher.dart';
+import '../../../../core/navigation/help_center_launcher.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
@@ -18,17 +20,17 @@ class AccountHelpSectionWidget extends StatelessWidget {
         _HelpItem(
           svgAsset: ImageConstants.helpIcon,
           label: AccountStrings.help,
-          onTap: () {},
+          onTap: () => HelpCenterLauncher.openHelpCenter(context),
         ),
-        _HelpItem(
+        const _HelpItem(
           svgAsset: ImageConstants.shareIcon,
           label: AccountStrings.share,
-          onTap: () {},
+          onTap: AppShareLauncher.shareApp,
         ),
-        _HelpItem(
+        const _HelpItem(
           svgAsset: ImageConstants.sqaureStar,
           label: AccountStrings.rate,
-          onTap: () {},
+          onTap: AppShareLauncher.rateApp,
         ),
       ],
     );
@@ -61,7 +63,7 @@ class _HelpItem extends StatelessWidget {
                 label,
                 style: AppTypographyV1.bodyRegular.semiBold.textPrimary(),
               ),
-              AppSpacing.verticalGapXs,
+              const SizedBox(height: 6),
               SvgPicture.asset(
                 svgAsset,
                 width: AppSpacing.iconSm,

@@ -83,4 +83,13 @@ class AuthRepositoryImpl with SafeApiCall implements AuthRepository {
       safeApiCall(_networkInfo, () async {
         await _api.logout(cancelToken: cancelToken);
       });
+
+  @override
+  Future<Either<Failure, String>> generateLoginTicket({
+    CancelToken? cancelToken,
+  }) =>
+      safeApiCall(_networkInfo, () async {
+        final response = await _api.generateLoginTicket(cancelToken: cancelToken);
+        return response.loginTicket;
+      });
 }

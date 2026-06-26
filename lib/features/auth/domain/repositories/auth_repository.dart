@@ -35,4 +35,11 @@ abstract class AuthRepository {
   });
 
   Future<Either<Failure, void>> logout({CancelToken? cancelToken});
+
+  /// Generates a short-lived web SSO login ticket for the current session.
+  /// The ticket is appended to web URLs so the in-app WebView opens already
+  /// authenticated.
+  Future<Either<Failure, String>> generateLoginTicket({
+    CancelToken? cancelToken,
+  });
 }

@@ -5,8 +5,6 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/error/failures.dart';
-import '../../../pdp/domain/usecases/add_to_wishlist_usecase.dart';
-import '../../../pdp/domain/usecases/remove_from_wishlist_usecase.dart';
 import '../../domain/entities/banner_entity.dart';
 import '../../domain/entities/floating_filter_entity.dart';
 import '../../domain/entities/listing_data_entity.dart';
@@ -26,17 +24,12 @@ part 'plp_state.dart';
 @injectable
 class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
   final GetListingDataUseCase getListingDataUseCase;
-  final AddToWishlistUseCase addToWishlistUseCase;
-  final RemoveFromWishlistUseCase removeFromWishlistUseCase;
   final PlpQueryBuilder _queryBuilder = PlpQueryBuilder();
 
   final Map<int, FloatingFilterSectionEntity> _floatingSectionsByPosition = {};
+  PlpState? _lastLoaded;
 
-  PlpBloc({
-    required this.getListingDataUseCase,
-    required this.addToWishlistUseCase,
-    required this.removeFromWishlistUseCase,
-  }) : super(const PlpState()) {
+  PlpBloc({required this.getListingDataUseCase}) : super(const PlpState()) {
     on<LoadPlpData>(_onLoadPlpData);
     on<LoadMorePlpData>(_onLoadMorePlpData);
     on<ApplyFilter>(_onApplyFilter);
@@ -45,7 +38,6 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
     on<ClearAllFilters>(_onClearAllFilters);
     on<ApplySort>(_onApplySort);
     on<ApplyFloatingFilter>(_onApplyFloatingFilter);
-    on<ToggleWishlistOnProduct>(_onToggleWishlist);
   }
 
   Future<void> _onLoadPlpData(LoadPlpData event, Emitter<PlpState> emit) async {
@@ -56,6 +48,7 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
       rawSearchParams: event.rawSearchParams,
       initialFilters: event.initialFilters,
     );
+    _lastLoaded = null;
     emit(const PlpState(status: PlpStatus.loading));
     await _fetchAndEmit(emit);
   }
@@ -72,7 +65,7 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
 
   Future<void> _onApplyFilter(ApplyFilter event, Emitter<PlpState> emit) async {
     _queryBuilder.filterParams[event.key] = event.value;
-    _queryBuilder.filterParams['isFromRefineFilter'] = 'true';
+    _queryBuilder.isFromRefineFilter = true;
     _queryBuilder.currentPage = 0;
     emit(const PlpState(status: PlpStatus.loading));
     await _fetchAndEmit(emit);
@@ -81,7 +74,7 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
   Future<void> _onApplyMultipleFilters(ApplyMultipleFilters event, Emitter<PlpState> emit) async {
     _queryBuilder.filterParams.clear();
     _queryBuilder.filterParams.addAll(event.filters);
-    _queryBuilder.filterParams['isFromRefineFilter'] = 'true';
+    _queryBuilder.isFromRefineFilter = true;
     _queryBuilder.currentPage = 0;
     emit(const PlpState(status: PlpStatus.loading));
     await _fetchAndEmit(emit);
@@ -108,7 +101,7 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
       _queryBuilder.filterParams.remove(key);
     }
 
-    _queryBuilder.filterParams['isFromRefineFilter'] = 'true';
+    _queryBuilder.isFromRefineFilter = true;
     _queryBuilder.currentPage = 0;
     emit(const PlpState(status: PlpStatus.loading));
     await _fetchAndEmit(emit);
@@ -122,6 +115,9 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
   }
 
   Future<void> _onApplySort(ApplySort event, Emitter<PlpState> emit) async {
+    // Set the chosen sort before firing; the response echoes this orderRule
+    // back, so the seed in _fetchAndEmit re-confirms it (mirrors Android's
+    // searchRule = sortOption.orderRule → searchRule = response.orderRule).
     _queryBuilder.orderRule = event.orderRule;
     _queryBuilder.currentPage = 0;
     emit(const PlpState(status: PlpStatus.loading));
@@ -129,141 +125,72 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
   }
 
   Future<void> _onApplyFloatingFilter(ApplyFloatingFilter event, Emitter<PlpState> emit) async {
+    _reseedFilterParamsFromSelectedFilters(state.plpFilter?.selectedFilters ?? const []);
+
     if (event.value.isEmpty) {
       _queryBuilder.filterParams.remove(event.key);
     } else {
       _queryBuilder.filterParams[event.key] = event.value;
+
+      _queryBuilder.filterParams.addAll(
+        _treeAncestorParams(event.key, event.value.split(',').toSet()),
+      );
     }
-    _queryBuilder.filterParams['isFromRefineFilter'] = 'true';
+    _queryBuilder.isFromRefineFilter = true;
     _queryBuilder.currentPage = 0;
     emit(const PlpState(status: PlpStatus.loading));
     await _fetchAndEmit(emit);
   }
 
-  Future<void> _onToggleWishlist(ToggleWishlistOnProduct event, Emitter<PlpState> emit) async {
-    final productId = event.product.id;
-    final index = state.products.indexWhere((p) => p.id == productId);
-    if (index < 0) return;
-
-    final original = state.products[index];
-    final removing = original.isWishlisted && original.wishlistId != null;
-
-    final optimistic = removing
-        ? original.copyWith(isWishlisted: false, wishlistId: null)
-        : original.copyWith(isWishlisted: true, wishlistId: null);
-    _emitUpdatedProduct(emit, index: index, updated: optimistic);
-
-    if (removing) {
-      final result = await removeFromWishlistUseCase(
-        RemoveFromWishlistParams(wishlistId: original.wishlistId!),
-      );
-      result.fold((failure) {
-        if (failure is RequestCancelledFailure) return;
-        _revertProduct(emit, productId: productId, restored: original);
-        _emitWishlistFeedback(emit, message: "Couldn't remove from wishlist", isError: true);
-      }, (_) => _emitWishlistFeedback(emit, message: 'Removed from wishlist', isError: false));
-    } else {
-      final priceInt = _parsePriceToInt(original.price?.sellingPrice);
-      final result = await addToWishlistUseCase(
-        AddToWishlistParams(productId: productId.toString(), price: priceInt),
-      );
-      result.fold(
-        (failure) {
-          if (failure is RequestCancelledFailure) return;
-          _revertProduct(emit, productId: productId, restored: original);
-          _emitWishlistFeedback(emit, message: "Couldn't add to wishlist", isError: true);
-        },
-        (response) {
-          _patchWishlistId(emit, productId: productId, wishlistId: response.wishlistItemId);
-          _emitWishlistFeedback(emit, message: 'Added to wishlist', isError: false);
-        },
-      );
+  Map<String, String> _treeAncestorParams(String key, Set<String> values) {
+    final result = <String, String>{};
+    if (values.isEmpty) return result;
+    final sections = state.plpFilter?.filterSections ?? const [];
+    for (final section in sections) {
+      if ((section.uiType?.toLowerCase() ?? '') != 'tree' || section.filterList.isEmpty) {
+        continue;
+      }
+      for (final category in section.filterList.first.filters) {
+        final catKey = category.filterKey ?? '';
+        final catVal = category.filterValue ?? '';
+        for (final sub in category.filters) {
+          final subKey = sub.filterKey ?? '';
+          final subVal = sub.filterValue ?? '';
+          // Selected node is a subCategory → its parent is the category.
+          if (subKey == key && values.contains(subVal)) {
+            if (catKey.isNotEmpty && catVal.isNotEmpty) result[catKey] = catVal;
+          }
+          // Selected node is a productClass → parents are subCategory + category.
+          for (final productClass in sub.filters) {
+            if ((productClass.filterKey ?? '') == key &&
+                values.contains(productClass.filterValue ?? '')) {
+              if (catKey.isNotEmpty && catVal.isNotEmpty) result[catKey] = catVal;
+              if (subKey.isNotEmpty && subVal.isNotEmpty) result[subKey] = subVal;
+            }
+          }
+        }
+      }
     }
+    return result;
   }
 
-  void _revertProduct(
-    Emitter<PlpState> emit, {
-    required int productId,
-    required ListingProductEntity restored,
-  }) {
-    final i = state.products.indexWhere((p) => p.id == productId);
-    if (i < 0) return;
-    _emitUpdatedProduct(emit, index: i, updated: restored);
-  }
-
-  void _patchWishlistId(
-    Emitter<PlpState> emit, {
-    required int productId,
-    required String? wishlistId,
-  }) {
-    final i = state.products.indexWhere((p) => p.id == productId);
-    if (i < 0) return;
-    final p = state.products[i];
-    if (!p.isWishlisted) return;
-    _emitUpdatedProduct(
-      emit,
-      index: i,
-      updated: p.copyWith(wishlistId: wishlistId),
-    );
-  }
-
-  void _emitWishlistFeedback(
-    Emitter<PlpState> emit, {
-    required String message,
-    required bool isError,
-  }) {
-    emit(
-      state.copyWith(
-        wishlistFeedbackTick: state.wishlistFeedbackTick + 1,
-        wishlistFeedbackMessage: message,
-        wishlistFeedbackIsError: isError,
-      ),
-    );
-  }
-
-  void _emitUpdatedProduct(
-    Emitter<PlpState> emit, {
-    required int index,
-    required ListingProductEntity updated,
-    String? feedbackMessage,
-  }) {
-    final current = state;
-    final newProducts = List<ListingProductEntity>.from(current.products)..[index] = updated;
-
-    final newListItems = current.listItems.map<PlpListItem>((item) {
-      if (item is ProductRowItem) {
-        final leftMatch = item.left.id == updated.id;
-        final rightMatch = item.right?.id == updated.id;
-        if (!leftMatch && !rightMatch) return item;
-        return ProductRowItem(
-          left: leftMatch ? updated : item.left,
-          right: rightMatch ? updated : item.right,
-        );
-      }
-      if (item is ProductXLItem && item.product.id == updated.id) {
-        return ProductXLItem(product: updated);
-      }
-      return item;
-    }).toList();
-
-    emit(
-      current.copyWith(
-        products: newProducts,
-        listItems: newListItems,
-
-        wishlistFeedbackTick: feedbackMessage != null
-            ? current.wishlistFeedbackTick + 1
-            : current.wishlistFeedbackTick,
-        wishlistFeedbackMessage: feedbackMessage ?? current.wishlistFeedbackMessage,
-        wishlistFeedbackIsError: feedbackMessage != null ? false : current.wishlistFeedbackIsError,
-      ),
-    );
-  }
-
-  int _parsePriceToInt(String? raw) {
-    if (raw == null || raw.isEmpty) return 0;
-    final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
-    return int.tryParse(digits) ?? 0;
+  /// Rebuilds [PlpQueryBuilder.filterParams] from the backend's authoritative
+  /// `selectedFilters`, keyed by `filterKey` with the `filterValue` (never the
+  /// display label). Keeps [PlpState.appliedFilters] in sync with server truth
+  /// so the filter sheet and filter page show server-preselected filters as
+  /// selected. No-ops on an empty list so it never wipes in-flight params.
+  void _reseedFilterParamsFromSelectedFilters(List<SelectedFilterEntity> selected) {
+    if (selected.isEmpty) return;
+    final reseeded = <String, String>{};
+    for (final sf in selected) {
+      final key = sf.filterKey;
+      final value = sf.filterValue;
+      if (key == null || key.isEmpty || value == null || value.isEmpty) continue;
+      reseeded[key] = reseeded.containsKey(key) ? '${reseeded[key]},$value' : value;
+    }
+    _queryBuilder.filterParams
+      ..clear()
+      ..addAll(reseeded);
   }
 
   Future<void> _fetchAndEmit(
@@ -287,16 +214,41 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
         if (isLoadMore) {
           _queryBuilder.prevPage();
           emit(paginationBase!.copyWith(isLoadingMore: false));
+        } else if (_lastLoaded != null && _lastLoaded!.products.isNotEmpty) {
+          emit(_lastLoaded!);
         } else {
-          emit(state.copyWith(status: PlpStatus.error, errorMessage: failure.message));
-        }
-      },
-      (data) {
-        if (data.records.isEmpty && !isLoadMore) {
           emit(
             state.copyWith(
               status: PlpStatus.empty,
               appliedFilters: Map.from(_queryBuilder.filterParams),
+              errorMessage: failure.message,
+            ),
+          );
+        }
+      },
+      (data) {
+        // Mirror the backend's authoritative selection into filterParams (by
+        // filterKey/filterValue, never the label) so a fresh load with
+        // server-preselected filters shows them selected in the filter sheet and
+        // filter page. Skipped for pagination — it carries the same selection.
+        if (!isLoadMore) {
+          _reseedFilterParamsFromSelectedFilters(data.filters?.selectedFilters ?? const []);
+        }
+        if (data.records.isEmpty && !isLoadMore) {
+          // Carry the filter payload (sections + selectedFilters) and orderRule
+          // into the empty state so the applied-filter chips and the filter bar
+          // stay visible — the user can then loosen/remove filters to recover
+          // results instead of hitting a dead end.
+          _queryBuilder.orderRule = data.effectiveOrderRule;
+          emit(
+            PlpState(
+              status: PlpStatus.empty,
+              plpFilter: data.filters,
+              appliedFilters: Map.from(_queryBuilder.filterParams),
+              currentOrderRule: _queryBuilder.orderRule,
+              banners: data.banners,
+              screenName: data.screenName,
+              screenSubtitle: data.screenSubtitle,
             ),
           );
           return;
@@ -306,19 +258,23 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
           final base = paginationBase!;
           final products = [...base.products, ...data.records];
           _accumulateFloatingSections(data.floatingFilter?.sections);
-          emit(
-            base.copyWith(
-              isLoadingMore: false,
-              products: products,
-              listItems: _buildListItems(products, _orderedFloatingSections),
-              totalRecords: data.totalRecords,
-              currentPage: _queryBuilder.currentPage,
-              hasMore: data.hasMorePages,
-            ),
+          final loaded = base.copyWith(
+            isLoadingMore: false,
+            products: products,
+            listItems: _buildListItems(products, _orderedFloatingSections),
+            totalRecords: data.totalRecords,
+            currentPage: _queryBuilder.currentPage,
+            hasMore: data.hasMorePages,
           );
+          _lastLoaded = loaded;
+          emit(loaded);
         } else {
-          // Seed orderRule from the API response so subsequent requests
-          _queryBuilder.orderRule = data.pageMeta?.orderRule;
+          // Seed orderRule from the response (root-level for v6/v8, like
+          // Android's searchRule = response.orderRule) so pagination,
+          // filter-apply, and the /v2/filter refresh echo it back instead of
+          // dropping to -1. A user-chosen sort survives because the backend
+          // echoes the applied orderRule, so re-seeding re-confirms it.
+          _queryBuilder.orderRule = data.effectiveOrderRule;
 
           // Fresh load (page 1 / filter / sort) — reset the cross-page
           // floating-filter accumulator and seed it with this page's sections.
@@ -326,24 +282,24 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
           _accumulateFloatingSections(data.floatingFilter?.sections);
 
           final products = data.records;
-          emit(
-            PlpState(
-              status: PlpStatus.loaded,
-              products: products,
-              listItems: _buildListItems(products, _orderedFloatingSections),
-              totalRecords: data.totalRecords,
-              currentPage: _queryBuilder.currentPage,
-              hasMore: data.hasMorePages,
-              plpFilter: data.filters,
-              banners: data.banners,
-              appliedFilters: Map.from(_queryBuilder.filterParams),
-              screenName: data.screenName,
-              screenSubtitle: data.screenSubtitle,
-              queryCorrection: data.queryCorrection,
-              currentOrderRule: _queryBuilder.orderRule,
-              messageBars: data.messageBars,
-            ),
+          final loaded = PlpState(
+            status: PlpStatus.loaded,
+            products: products,
+            listItems: _buildListItems(products, _orderedFloatingSections),
+            totalRecords: data.totalRecords,
+            currentPage: _queryBuilder.currentPage,
+            hasMore: data.hasMorePages,
+            plpFilter: data.filters,
+            banners: data.banners,
+            appliedFilters: Map.from(_queryBuilder.filterParams),
+            screenName: data.screenName,
+            screenSubtitle: data.screenSubtitle,
+            queryCorrection: data.queryCorrection,
+            currentOrderRule: _queryBuilder.orderRule,
+            messageBars: data.messageBars,
           );
+          _lastLoaded = loaded;
+          emit(loaded);
         }
       },
     );

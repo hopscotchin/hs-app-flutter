@@ -74,7 +74,7 @@ class _StandardSliverAppBar extends StatelessWidget {
         icon: const CustomImage(path: ImageConstants.arrowBack, height: 16),
         onPressed: () => Navigator.of(context).pop(),
       ),
-      titleSpacing: 5,
+      titleSpacing: 2,
       primary: true,
       title: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -145,9 +145,18 @@ class PlpSliverHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Pass the status-bar/notch height into the delegate so its collapsed
+    // height accounts for it — otherwise on devices with a tall status bar the
+    // header can't shrink enough to hide the banner and "sticks" partway.
+    final topPadding = MediaQuery.paddingOf(context).top;
     return SliverPersistentHeader(
       pinned: true,
-      delegate: _PlpHeaderDelegate(title: title, subtitle: subtitle, banner: banner),
+      delegate: _PlpHeaderDelegate(
+        title: title,
+        subtitle: subtitle,
+        banner: banner,
+        topPadding: topPadding,
+      ),
     );
   }
 }
@@ -156,22 +165,32 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String title;
   final String subtitle;
   final BannerEntity? banner;
+  final double topPadding;
 
-  const _PlpHeaderDelegate({required this.title, required this.subtitle, required this.banner});
+  const _PlpHeaderDelegate({
+    required this.title,
+    required this.subtitle,
+    required this.banner,
+    required this.topPadding,
+  });
 
   static const double _toolbarHeight = kToolbarHeight;
   static const double _expandedHeight = 300;
 
+  // Collapsed height is just the status-bar/notch strip — the toolbar (back +
+  // search/wishlist/bag) is NOT pinned; it fades out as the header collapses so
+  // that while scrolling only the (separately pinned) filter row remains. The
+  // strip keeps the notch area white and pushes the filter row below it.
   @override
-  double get minExtent => _toolbarHeight;
+  double get minExtent => topPadding;
 
   @override
-  double get maxExtent => _expandedHeight;
+  double get maxExtent => _expandedHeight + topPadding;
 
-  static const _largeTitleFadeOutStart = 0.50;
-  static const _largeTitleFadeOutEnd = 0.60;
-  static const _collapsedTitleFadeInStart = 0.60;
-  static const _collapsedTitleFadeInEnd = 0.60;
+  static const _largeTitleFadeOutStart = 0.70;
+  static const _largeTitleFadeOutEnd = 0.80;
+  static const _collapsedTitleFadeInStart = 0.70;
+  static const _collapsedTitleFadeInEnd = 0.80;
 
   static const _toolbarFadeStart = 0.62;
   static const _toolbarFadeDuration = 0.38;
@@ -184,9 +203,6 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    /// Device safe-area padding (status bar / notch height)
-    final topPadding = MediaQuery.paddingOf(context).top;
-
     /// Header collapse progress:
     /// 0.0 -> fully expanded
     /// 1.0 -> fully collapsed
@@ -208,6 +224,10 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
     final topBackgroundOpacity = Curves.linearToEaseOut.transform(
       ((progress - _toolbarFadeStart) / _toolbarFadeDuration).clamp(0.0, 1.0),
     );
+
+    /// Toolbar (back + actions) visibility — full when expanded, gone once the
+    /// header is collapsing, so scrolling leaves only the pinned filter row.
+    final toolbarOpacity = (1 - topBackgroundOpacity).clamp(0.0, 1.0);
 
     /// Bottom dark gradient opacity used for large title readability.
     /// Fades out while scrolling upward.
@@ -259,12 +279,11 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
             ),
           ),
 
-          /// SAFE AREA BG
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            height: topPadding + 20,
+            height: topPadding,
             child: IgnorePointer(
               child: ColoredBox(color: Colors.white.withValues(alpha: safeAreaOpacity)),
             ),
@@ -298,54 +317,61 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
             ),
           ),
 
-          /// TOOLBAR
+          /// TOOLBAR — fades out as the header collapses; ignores taps once
+          /// mostly hidden so the invisible buttons aren't tappable.
           Positioned(
             top: topPadding,
             left: 0,
             right: 0,
             height: _toolbarHeight,
-            child: Row(
-              children: [
-                const SizedBox(width: 8),
-                CircleIconButton(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const CustomImage(path: ImageConstants.arrowBack, height: 18),
-                ),
-
-                const SizedBox(width: AppSpacing.xs),
-
-                Expanded(
-                  child: Opacity(
-                    opacity: collapsedTitleOpacity,
-                    child: Text(
-                      displayTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypographyV1.bodySmall.bold.textSeconday(),
+            child: IgnorePointer(
+              ignoring: toolbarOpacity < 0.5,
+              child: Opacity(
+                opacity: toolbarOpacity,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 8),
+                    CircleIconButton(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const CustomImage(path: ImageConstants.arrowBack, height: 18),
                     ),
-                  ),
+
+                    const SizedBox(width: AppSpacing.xs),
+
+                    Expanded(
+                      child: Opacity(
+                        opacity: collapsedTitleOpacity,
+                        child: Text(
+                          displayTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypographyV1.bodySmall.bold.textSeconday(),
+                        ),
+                      ),
+                    ),
+
+                    CircleIconButton(
+                      onTap: () => AppNavigator.goToSearch(context),
+                      child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
+                    ),
+
+                    const SizedBox(width: 8),
+
+                    CircleIconButton(
+                      onTap: () {},
+                      child: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
+                    ),
+
+                    const SizedBox(width: 8),
+
+                    CircleIconButton(
+                      onTap: () => AppNavigator.goToCart(context),
+                      child: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                 ),
-
-                CircleIconButton(
-                  onTap: () => AppNavigator.goToSearch(context),
-                  child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
-                ),
-
-                const SizedBox(width: 8),
-
-                CircleIconButton(
-                  onTap: () {},
-                  child: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
-                ),
-
-                const SizedBox(width: 8),
-
-                CircleIconButton(
-                  onTap: () => AppNavigator.goToCart(context),
-                  child: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
-                ),
-                const SizedBox(width: 12),
-              ],
+              ),
             ),
           ),
         ],
@@ -357,6 +383,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant _PlpHeaderDelegate oldDelegate) {
     return oldDelegate.title != title ||
         oldDelegate.subtitle != subtitle ||
-        oldDelegate.banner != banner;
+        oldDelegate.banner != banner ||
+        oldDelegate.topPadding != topPadding;
   }
 }

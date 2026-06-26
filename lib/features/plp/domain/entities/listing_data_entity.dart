@@ -24,6 +24,7 @@ abstract class ListingDataEntity with _$ListingDataEntity {
     @Default([]) List<ListingProductEntity> records,
     QueryCorrectionEntity? queryCorrection,
     @Default(<MessageBarEntity>[]) List<MessageBarEntity> messageBars,
+    @Default(-1) int orderRule,
   }) = _ListingDataEntity;
 }
 
@@ -33,4 +34,6 @@ extension ListingDataEntityX on ListingDataEntity {
   int get pageNo => pageMeta?.page ?? 0;
   String? get screenName => pageMeta?.pageTitle;
   String? get screenSubtitle => pageMeta?.pageSubtitle;
+
+  int get effectiveOrderRule => orderRule != -1 ? orderRule : (pageMeta?.orderRule ?? -1);
 }

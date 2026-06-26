@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/pincode_check_entity.dart';
 
 part 'pincode_check_model.g.dart';
@@ -18,16 +19,23 @@ class PincodeCheckModel {
     this.noPinCodeMessage,
   });
 
-  @JsonKey(defaultValue: false)
+  @JsonKey(fromJson: parseToBool)
   final bool serviceable;
-  @JsonKey(defaultValue: false)
+  @JsonKey(fromJson: parseToBool)
   final bool codAvailable;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? edd;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? eddPrefix;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? eddSuffix;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? eddSecondaryMsg;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? eddColor;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? eddTextColor;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? noPinCodeMessage;
 
   factory PincodeCheckModel.fromJson(Map<String, dynamic> json) =>

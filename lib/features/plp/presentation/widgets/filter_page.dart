@@ -8,6 +8,7 @@ import 'package:hs_app_flutter/components/form/app_radio.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
+import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/filter_thumbpainter.dart';
@@ -137,13 +138,27 @@ class _FilterPageViewState extends State<_FilterPageView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<FilterBloc, FilterState>(
-      listenWhen: (prev, curr) => prev.selectedSectionIndex != curr.selectedSectionIndex,
-      listener: (context, state) {
-        _resetSearchInput();
-        // _applyDeliveryPincode(state);
-      },
-
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<FilterBloc, FilterState>(
+          listenWhen: (prev, curr) => prev.selectedSectionIndex != curr.selectedSectionIndex,
+          listener: (context, state) {
+            _resetSearchInput();
+            // _applyDeliveryPincode(state);
+          },
+        ),
+        // Surface a filter-refresh failure without blanking the sheet — the
+        // current sections stay visible (see FilterBloc) and we just toast.
+        BlocListener<FilterBloc, FilterState>(
+          listenWhen: (prev, curr) =>
+              prev.status != FilterStatus.error && curr.status == FilterStatus.error,
+          listener: (context, state) {
+            final msg = state.errorMessage;
+            if (msg == null || msg.isEmpty) return;
+            context.showSnack(msg, status: SnackStatus.error);
+          },
+        ),
+      ],
       child: BlocBuilder<FilterBloc, FilterState>(
         builder: (context, state) {
           return SafeArea(
@@ -592,10 +607,10 @@ class _FilterPageViewState extends State<_FilterPageView> {
             Expanded(
               child: PrimaryButton.defaultType(
                 text: CommonStrings.apply,
-                state: state.hasSelections ? ButtonState.enabled : ButtonState.disabled,
-                onTap: state.hasSelections
-                    ? () => Navigator.of(context).pop(state.flattenFilters())
-                    : null,
+                // Always enabled — applying commits the current selection (incl.
+                // removals / cleared state) and fires the filter API.
+                state: ButtonState.enabled,
+                onTap: () => Navigator.of(context).pop(state.flattenFilters()),
               ),
             ),
           ],

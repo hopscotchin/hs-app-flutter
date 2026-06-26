@@ -56,7 +56,7 @@ class AccountMenuItemWidget extends StatelessWidget {
                   Text(title, style: AppTypographyV1.bodyLarge.regular.textPrimary()),
                   if (subtitle != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 12),
+                      padding: const EdgeInsets.only(top: AppSpacing.xs),
                       child: Text(
                         subtitle!,
                         style: AppTypographyV1.labelLarge.regular.copyWith(

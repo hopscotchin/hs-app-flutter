@@ -38,12 +38,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
   @override
   void initState() {
     super.initState();
-    _controllers = {
-      for (final f in ManageAddressField.values) f: TextEditingController(),
-    };
-    context.read<ManageAddressBloc>().add(
-      ManageAddressInitialized(widget.args),
-    );
+    _controllers = {for (final f in ManageAddressField.values) f: TextEditingController()};
+    context.read<ManageAddressBloc>().add(ManageAddressInitialized(widget.args));
   }
 
   @override
@@ -102,12 +98,10 @@ class _AddAddressPageState extends State<AddAddressPage> {
 
   void _onSubmitResult(BuildContext context, ManageAddressState s) {
     if (s.status == ManageAddressStatus.success) {
-      Navigator.of(context).pop<ManageAddressResult>((
-        address: s.submittedAddress,
-        popUpMessage: s.toastMessage,
-      ));
-    } else if (s.status == ManageAddressStatus.returnReady &&
-        s.shipmentResult != null) {
+      Navigator.of(
+        context,
+      ).pop<ManageAddressResult>((address: s.submittedAddress, popUpMessage: s.toastMessage));
+    } else if (s.status == ManageAddressStatus.returnReady && s.shipmentResult != null) {
       Navigator.of(context).pop<ShipmentAddressEntity>(s.shipmentResult);
     }
   }
@@ -122,13 +116,9 @@ class _AddAddressPageState extends State<AddAddressPage> {
       listener: (context, state) {
         _syncControllers(state);
         final willPopWithMessage = state.status == ManageAddressStatus.success;
-        if (!willPopWithMessage &&
-            state.toastMessage != null &&
-            state.toastMessage!.isNotEmpty) {
+        if (!willPopWithMessage && state.toastMessage != null && state.toastMessage!.isNotEmpty) {
           _onSnack(context, state.toastMessage!);
-          context.read<ManageAddressBloc>().add(
-            const ManageAddressTransientConsumed(),
-          );
+          context.read<ManageAddressBloc>().add(const ManageAddressTransientConsumed());
         }
         _onSubmitResult(context, state);
       },
@@ -167,9 +157,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
                           Navigator.of(context).pop();
                         }
                       },
-                      onSave: () => context.read<ManageAddressBloc>().add(
-                        const ManageAddressSubmitted(),
-                      ),
+                      onSave: () =>
+                          context.read<ManageAddressBloc>().add(const ManageAddressSubmitted()),
                     ),
                   ],
                 ),
@@ -216,9 +205,7 @@ class _Form extends StatelessWidget {
           autocorrect: false,
           textInputAction: TextInputAction.next,
           onChanged: (v) => _emit(context, ManageAddressField.name, v),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z ]')),
-          ],
+          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z ]'))],
           errorText: _errorFor(ManageAddressField.name),
         ),
         AppSpacing.verticalGapMd,
@@ -229,10 +216,7 @@ class _Form extends StatelessWidget {
           keyboardType: TextInputType.phone,
           textInputAction: TextInputAction.next,
           prefixText: '+91 ',
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            const MobileNumberFormatter(),
-          ],
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly, const MobileNumberFormatter()],
           onChanged: (v) => _emit(context, ManageAddressField.mobile, v),
           errorText: _errorFor(ManageAddressField.mobile),
         ),
@@ -252,8 +236,7 @@ class _Form extends StatelessWidget {
               FilteringTextInputFormatter.digitsOnly,
               const MobileNumberFormatter(),
             ],
-            onChanged: (v) =>
-                _emit(context, ManageAddressField.alternateMobile, v),
+            onChanged: (v) => _emit(context, ManageAddressField.alternateMobile, v),
             errorText: _errorFor(ManageAddressField.alternateMobile),
           ),
         ),
@@ -264,18 +247,13 @@ class _Form extends StatelessWidget {
           labelText: AddressStrings.pincode,
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.next,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            const PincodeFormatter(),
-          ],
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly, const PincodeFormatter()],
           onChanged: (v) => _emit(context, ManageAddressField.pincode, v),
           errorText: _errorFor(ManageAddressField.pincode),
           suffix: SizedBox(
             width: 16,
             height: 16,
-            child: state.pincodeChecking
-                ? const CircularProgressIndicator(strokeWidth: 2)
-                : null,
+            child: state.pincodeChecking ? const CircularProgressIndicator(strokeWidth: 2) : null,
           ),
         ),
         AppSpacing.verticalGapMd,
@@ -343,9 +321,7 @@ class _Form extends StatelessWidget {
           label: AddressStrings.makeDefault,
           checkBoxSelectedColor: AppColors.secondary,
           checkColor: AppColors.baseDefault,
-          onChanged: (v) => context.read<ManageAddressBloc>().add(
-            ManageAddressDefaultToggled(v),
-          ),
+          onChanged: (v) => context.read<ManageAddressBloc>().add(ManageAddressDefaultToggled(v)),
         ),
       ],
     );
@@ -353,11 +329,7 @@ class _Form extends StatelessWidget {
 }
 
 class _FieldWithTrailingIcon extends StatelessWidget {
-  const _FieldWithTrailingIcon({
-    required this.child,
-    required this.icon,
-    required this.tooltip,
-  });
+  const _FieldWithTrailingIcon({required this.child, required this.icon, required this.tooltip});
 
   final Widget child;
   final IconData icon;
@@ -381,11 +353,7 @@ class _FieldWithTrailingIcon extends StatelessWidget {
               color: AppColors.neutralGrey6,
               shape: _TooltipShape(arrowRightInset: 20),
             ),
-            child: Icon(
-              icon,
-              size: AppSpacing.iconSm,
-              color: AppColors.neutralBlack,
-            ),
+            child: Icon(icon, size: AppSpacing.iconSm, color: AppColors.neutralBlack),
           ),
         ),
       ],
@@ -424,12 +392,7 @@ class _TooltipShape extends ShapeBorder {
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    final body = Rect.fromLTWH(
-      rect.left,
-      rect.top,
-      rect.width,
-      rect.height - arrowHeight,
-    );
+    final body = Rect.fromLTWH(rect.left, rect.top, rect.width, rect.height - arrowHeight);
     final arrowCenter = body.right - arrowRightInset;
     return Path()
       ..addRRect(RRect.fromRectAndRadius(body, Radius.circular(radius)))
@@ -473,19 +436,13 @@ class _MarkOnMapRow extends StatelessWidget {
             Icon(
               locationApplied ? Icons.check_circle_outline : Icons.my_location,
               size: 20,
-              color: locationApplied
-                  ? AppColors.successDefault
-                  : AppColors.neutralBlack,
+              color: locationApplied ? AppColors.successDefault : AppColors.neutralBlack,
             ),
             AppSpacing.horizontalGapSm,
             Expanded(
               child: Text(
-                locationApplied
-                    ? AddressStrings.locationUpdated
-                    : AddressStrings.markItOnMap,
-                style: AppTypographyV1.bodyMedium.medium.copyWith(
-                  color: AppColors.neutralBlack,
-                ),
+                locationApplied ? AddressStrings.locationUpdated : AddressStrings.markItOnMap,
+                style: AppTypographyV1.bodyMedium.medium.copyWith(color: AppColors.neutralBlack),
               ),
             ),
             const Tooltip(
@@ -518,12 +475,7 @@ class _BottomActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: Platform.isIOS
-          ? const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.md,
-              AppSpacing.md,
-              0,
-            )
+          ? const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 0)
           : const EdgeInsets.all(AppSpacing.md),
       child: Row(
         children: [

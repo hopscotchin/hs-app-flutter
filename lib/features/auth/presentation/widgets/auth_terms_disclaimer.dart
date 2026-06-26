@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/config/environment.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
+import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 
 /// "By signing in…" row with tappable T&C and Privacy Policy links.
 ///
-/// Taps open the corresponding page in the in-app browser by default.
+/// Taps open the corresponding page in the ported in-app WebView by default.
 /// Pass [onTermsTap] / [onPrivacyTap] to override the default behaviour.
 class AuthTermsDisclaimer extends StatelessWidget {
   const AuthTermsDisclaimer({super.key, this.onTermsTap, this.onPrivacyTap});
@@ -20,16 +20,18 @@ class AuthTermsDisclaimer extends StatelessWidget {
   static final _base = AppTypographyV1.labelMedium.regular.copyWith(color: AppColors.neutralBlack);
   static final _link = AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.secondary);
 
-  void _openTerms() => launchUrl(
-    Uri.parse('${EnvironmentConfig.baseUrl}/${AuthStrings.termsPath}${AuthStrings.legalUrlParams}'),
-    mode: LaunchMode.inAppBrowserView,
+  void _openTerms(BuildContext context) => AppNavigator.goToWebView(
+    context,
+    url:
+        '${EnvironmentConfig.webBaseUrl}/${AuthStrings.termsPath}${AuthStrings.legalUrlParams}',
+    title: AuthStrings.termsAndConditions,
   );
 
-  void _openPrivacy() => launchUrl(
-    Uri.parse(
-      '${EnvironmentConfig.baseUrl}/${AuthStrings.privacyPath}${AuthStrings.legalUrlParams}',
-    ),
-    mode: LaunchMode.inAppBrowserView,
+  void _openPrivacy(BuildContext context) => AppNavigator.goToWebView(
+    context,
+    url:
+        '${EnvironmentConfig.webBaseUrl}/${AuthStrings.privacyPath}${AuthStrings.legalUrlParams}',
+    title: AuthStrings.privacyPolicy,
   );
 
   @override
@@ -43,12 +45,12 @@ class AuthTermsDisclaimer extends StatelessWidget {
       children: [
         Text(AuthStrings.termsPrefix, style: _base),
         GestureDetector(
-          onTap: onTermsTap ?? _openTerms,
+          onTap: onTermsTap ?? () => _openTerms(context),
           child: Text(AuthStrings.termsAndConditionsUpper, style: _link),
         ),
         Text(AuthStrings.termsAnd, style: _base),
         GestureDetector(
-          onTap: onPrivacyTap ?? _openPrivacy,
+          onTap: onPrivacyTap ?? () => _openPrivacy(context),
           child: Text(AuthStrings.privacyPolicyUpper, style: _link),
         ),
       ],

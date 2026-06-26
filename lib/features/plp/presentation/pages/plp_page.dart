@@ -1,21 +1,25 @@
 import 'dart:convert';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/atoms/empty_state_widget.dart';
-import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/components/page_components/message_bars_widget.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
-import 'package:hs_app_flutter/core/theme/colors.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
+import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
+import 'package:hs_app_flutter/features/plp/presentation/widgets/floating_item_count.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/plp_applied_filters.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/plp_filter_header.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/plp_product_sliver.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/plp_query_correction.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../wishlist/presentation/cubit/wishlist_cubit.dart';
+import '../../domain/entities/listing_product_entity.dart';
 import '../../domain/entities/page_type.dart';
+import '../../domain/entities/plp_list_item.dart';
+import '../../domain/entities/wishlist_info_entity.dart';
 import '../../domain/helpers/plp_query_builder.dart';
 import '../bloc/plp_bloc.dart';
 import '../widgets/plp_shimmer_loading.dart';
@@ -45,13 +49,13 @@ class PlpPage extends StatelessWidget {
         break;
       case PageType.boutique:
         params['salePlanId'] = plpId;
-        params['filterQuery'] = 'salePlanId=$plpId';
         break;
       case PageType.search:
         if (rawSearchParams != null) {
           params['searchParams'] = base64Encode(utf8.encode(rawSearchParams!));
         } else if (searchQuery != null) {
-          params['keyword'] = searchQuery;
+          params['keyWord'] = searchQuery;
+          params['filterQuery'] = 'keyWord=$searchQuery';
         }
         break;
     }
@@ -110,6 +114,14 @@ class _PlpViewState extends State<_PlpView> {
   final ScrollController _scrollController = ScrollController();
   final ValueNotifier<bool> _showScrollToTop = ValueNotifier(false);
 
+  /// Last-visible product count for the "X of Y" indicator. Computed from the
+  /// product sliver's real geometry so it matches what's actually on screen
+  /// (mirrors Android's getActualProductCount(getLastVisiblePosition())).
+  final ValueNotifier<int> _visibleCount = ValueNotifier(0);
+
+  /// Key on the product [SliverList] so we can read its render geometry.
+  final GlobalKey _productSliverKey = GlobalKey();
+
   String get _title => widget.categoryName ?? widget.searchQuery ?? '';
 
   @override
@@ -122,31 +134,80 @@ class _PlpViewState extends State<_PlpView> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _showScrollToTop.dispose();
+    _visibleCount.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
-    final shouldShow = _scrollController.position.pixels > _showAfterOffset;
+    final pixels = _scrollController.position.pixels;
+    final shouldShow = pixels > _showAfterOffset;
     if (_showScrollToTop.value != shouldShow) {
       _showScrollToTop.value = shouldShow;
+    }
+    if (shouldShow) {
+      final count = _lastVisibleProductCount();
+      if (count != null && count != _visibleCount.value) {
+        _visibleCount.value = count;
+      }
     }
   }
 
   void _scrollToTop() {
     _scrollController.animateTo(
       0,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 700),
       curve: Curves.easeOut,
     );
   }
 
   void _resetScroll() {
     _showScrollToTop.value = false;
+    _visibleCount.value = 0;
     if (_scrollController.hasClients) {
       _scrollController.jumpTo(0);
     }
+  }
+
+  /// Number of products up to and including the last item currently visible at
+  /// the bottom of the viewport — the "X" in "X of Y". Reads the product
+  /// [SliverList]'s real geometry (last laid-out child whose start is within the
+  /// visible window) and converts the list-item index to a product count via
+  /// [PlpListItem] (a row = 2 products, XL = 1, floating filter = 0). Returns
+  /// null when geometry isn't ready so the caller keeps the previous value.
+  int? _lastVisibleProductCount() {
+    final renderObject = _productSliverKey.currentContext?.findRenderObject();
+    if (renderObject is! RenderSliverMultiBoxAdaptor) return null;
+    if (renderObject.geometry?.visible != true) return null;
+
+    final constraints = renderObject.constraints;
+    final viewportBottom = constraints.scrollOffset + constraints.remainingPaintExtent;
+
+    int? lastIndex;
+    RenderBox? child = renderObject.firstChild;
+    while (child != null) {
+      final parentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      final childStart = parentData.layoutOffset ?? 0;
+      if (childStart <= viewportBottom) {
+        lastIndex = parentData.index;
+        child = renderObject.childAfter(child);
+      } else {
+        break;
+      }
+    }
+    if (lastIndex == null) return null;
+
+    final listItems = context.read<PlpBloc>().state.listItems;
+    var products = 0;
+    for (var i = 0; i <= lastIndex && i < listItems.length; i++) {
+      products += switch (listItems[i]) {
+        ProductRowItem(:final right) => right == null ? 1 : 2,
+        ProductXLItem() => 1,
+        FloatingFilterItem() => 0,
+      };
+    }
+    return products;
   }
 
   @override
@@ -154,49 +215,39 @@ class _PlpViewState extends State<_PlpView> {
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: ValueListenableBuilder<bool>(
         valueListenable: _showScrollToTop,
-        builder: (context, show, _) => show
-            ? AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: show ? 1.0 : 0.0,
-                child: GestureDetector(
-                  onTap: _scrollToTop,
-                  child: Container(
-                    padding: const EdgeInsets.all(13),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(2),
-                      border: Border.all(color: AppColors.brandPrimary, width: 1.5),
-                    ),
-                    child: Transform.rotate(
-                      angle: 90 * math.pi / 180,
-                      child: const CustomImage(
-                        path: ImageConstants.arrowBack,
-                        color: AppColors.brandPrimary,
-                        height: 14,
-                        width: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            : const SizedBox.shrink(),
+        builder: (context, show, _) {
+          // Hidden at the top of the list; appears once the user scrolls down.
+          if (!show) return const SizedBox.shrink();
+          return BlocSelector<PlpBloc, PlpState, int>(
+            selector: (s) => s.totalRecords ?? 0,
+            builder: (context, total) {
+              if (total <= 0) return const SizedBox.shrink();
+              return ValueListenableBuilder<int>(
+                valueListenable: _visibleCount,
+                builder: (context, count, _) {
+                  final position = count.clamp(1, total);
+                  return FloatingItemCount(
+                    position: position,
+                    totalCount: total,
+                    onTap: _scrollToTop,
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
       body: MultiBlocListener(
         listeners: [
+          // Feed the global WishlistCubit with statuses from each page of results
+          // so the heart reflects server truth and stays in sync everywhere.
           BlocListener<PlpBloc, PlpState>(
-            listenWhen: (prev, curr) => prev.wishlistFeedbackTick != curr.wishlistFeedbackTick,
-            listener: (context, state) {
-              // removed snackbar for whishlist if needed we can add it later
-
-              // final msg = state.wishlistFeedbackMessage;
-              // if (msg == null || msg.isEmpty) return;
-              // context.showSnack(
-              //   msg,
-              //   status: state.wishlistFeedbackIsError ? SnackStatus.error : SnackStatus.success,
-              // );
-            },
+            listenWhen: (prev, curr) =>
+                prev.listItems.length != curr.listItems.length || prev.status != curr.status,
+            listener: (context, state) => _seedWishlist(context, state.listItems),
           ),
           BlocListener<PlpBloc, PlpState>(
             listenWhen: (prev, curr) => curr.status == PlpStatus.loading,
@@ -221,48 +272,63 @@ class _PlpViewState extends State<_PlpView> {
                       PlpStatus.loading => const [SliverFillRemaining(child: PlpShimmerLoading())],
                       PlpStatus.error => [
                         SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 50),
-                            child: EmptyStateWidget(
-                              type: EmptyStateType.serverError,
-                              onButtonTap: () => _retry(context),
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 50),
+                              child: EmptyStateWidget(
+                                type: EmptyStateType.serverError,
+                                onButtonTap: () => _retry(context),
+                              ),
                             ),
                           ),
                         ),
                       ],
                       PlpStatus.empty => [
+                        // When filters produced an empty result, keep the
+                        // filter bar + applied-filter chips visible so the user
+                        // can loosen/remove them instead of being stuck.
+                        if (hasFilters) ...[
+                          PlpFilterHeader(baseQueryParams: widget.baseQueryParams),
+                          const PlpAppliedFilters(),
+                        ],
                         SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 50),
-                            child: EmptyStateWidget(
-                              type: EmptyStateType.plp,
-                              subtitle: hasFilters
-                                  ? PlpStrings.noProductsFiltered
-                                  : PlpStrings.tryAgainAndKeepExploring,
-                              onButtonTap: hasFilters
-                                  ? () => context.read<PlpBloc>().add(const ClearAllFilters())
-                                  : () => _retry(context),
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 50),
+                              child: EmptyStateWidget(
+                                type: EmptyStateType.plp,
+                                subtitle: hasFilters
+                                    ? PlpStrings.noProductsFiltered
+                                    : PlpStrings.tryAgainAndKeepExploring,
+                                onButtonTap: hasFilters
+                                    ? () => context.read<PlpBloc>().add(const ClearAllFilters())
+                                    : () => _retry(context),
+                              ),
                             ),
                           ),
                         ),
                       ],
                       PlpStatus.loaded => [
-                        // SliverToBoxAdapter(
-                        //   child: Padding(
-                        //     padding: const EdgeInsets.symmetric(horizontal: 16),
-                        //     child: MessageBarsWidget(
-                        //       messageBars: state.messageBars,
-                        //       cardStyle: true,
-                        //       onAction: (v, MessageBarEntity s) {},
-                        //     ),
-                        //   ),
-                        // ),
-                        PlpFilterHeader(baseQueryParams: widget.baseQueryParams),
-                        const PlpAppliedFilters(),
+                        if (state.plpFilter != null) ...[
+                          PlpFilterHeader(baseQueryParams: widget.baseQueryParams),
+                          const PlpAppliedFilters(),
+                        ],
                         PlpQueryCorrectionSliver(pageType: widget.pageType, plpId: widget.plpId),
-                        const PlpProductSliver(),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: state.messageBars.isNotEmpty
+                                ? const EdgeInsets.only(left: 24, right: 24, top: 16)
+                                : EdgeInsets.zero,
+                            child: MessageBarsWidget(
+                              messageBars: state.messageBars,
+                              cardStyle: true,
+                              onAction: (v, e) {
+                                context.showSnack('ROUTING IS PENDING HERE');
+                              },
+                            ),
+                          ),
+                        ),
+                        PlpProductSliver(sliverKey: _productSliverKey),
                         BlocSelector<PlpBloc, PlpState, bool>(
                           selector: (s) => s.isLoadingMore,
                           builder: (context, isLoading) => isLoading
@@ -293,10 +359,12 @@ class _PlpViewState extends State<_PlpView> {
     );
   }
 
+  static const double _paginationTriggerFraction = 0.8;
+
   bool _handleScroll(ScrollNotification notification) {
-    if (notification is ScrollEndNotification &&
-        notification.metrics.axis == Axis.vertical &&
-        notification.metrics.pixels >= notification.metrics.maxScrollExtent - 200) {
+    final metrics = notification.metrics;
+    if (metrics.axis != Axis.vertical || metrics.maxScrollExtent <= 0) return false;
+    if (metrics.pixels >= metrics.maxScrollExtent * _paginationTriggerFraction) {
       final state = context.read<PlpBloc>().state;
       if (state.status == PlpStatus.loaded && state.hasMore && !state.isLoadingMore) {
         context.read<PlpBloc>().add(const LoadMorePlpData());
@@ -304,6 +372,28 @@ class _PlpViewState extends State<_PlpView> {
     }
     return false;
   }
+
+  void _seedWishlist(BuildContext context, List<PlpListItem> items) {
+    final seeds = <WishlistSeed>[];
+    for (final item in items) {
+      switch (item) {
+        case ProductRowItem(:final left, :final right):
+          seeds.add(_seedOf(left));
+          if (right != null) seeds.add(_seedOf(right));
+        case ProductXLItem(:final product):
+          seeds.add(_seedOf(product));
+        case FloatingFilterItem():
+          break;
+      }
+    }
+    if (seeds.isNotEmpty) context.read<WishlistCubit>().seed(seeds);
+  }
+
+  WishlistSeed _seedOf(ListingProductEntity p) => WishlistSeed(
+    productId: p.id.toString(),
+    wished: p.wishlistInfo.isWishlisted,
+    wishlistItemId: p.wishlistInfo.wishlistId,
+  );
 
   void _retry(BuildContext context) {
     context.read<PlpBloc>().add(

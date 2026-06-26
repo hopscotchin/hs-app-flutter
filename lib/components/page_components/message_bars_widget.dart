@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hs_app_flutter/components/atoms/custom_image.dart';
+import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 
 import '../../core/constants/image_constants.dart';
 import '../../core/entities/message_bar_entity.dart';
@@ -46,13 +47,7 @@ class MessageBarsWidget extends StatelessWidget {
             final display = bar.displayText;
             return display != null && display.isNotEmpty;
           })
-          .map(
-            (bar) => _MessageBarItem(
-              bar: bar,
-              cardStyle: cardStyle,
-              onAction: onAction,
-            ),
-          )
+          .map((bar) => _MessageBarItem(bar: bar, cardStyle: cardStyle, onAction: onAction))
           .toList(),
     );
   }
@@ -104,11 +99,7 @@ class _MessageBarItem extends StatefulWidget {
   final bool cardStyle;
   final MessageBarActionCallback? onAction;
 
-  const _MessageBarItem({
-    required this.bar,
-    required this.cardStyle,
-    this.onAction,
-  });
+  const _MessageBarItem({required this.bar, required this.cardStyle, this.onAction});
 
   @override
   State<_MessageBarItem> createState() => _MessageBarItemState();
@@ -132,16 +123,16 @@ class _MessageBarItemState extends State<_MessageBarItem> {
     final type = _resolveType(bar);
 
     // Resolve colors — API-provided values override type defaults.
-    final bgColor = _parseColor(bar.bgColor) ?? _defaultBgColor(type);
-    final textColor = _parseColor(bar.textColor) ?? AppColors.neutralBlack;
+    final bgColor = bar.bgColor?.toColor ?? _defaultBgColor(type);
+    final textColor = bar.textColor.toColor ?? AppColors.neutralBlack;
 
     // Resolve icon visibility — typed bars always show their icon; custom bars
     // gate on the hasIcon flag and require a network icon to be present.
     final showIcon = type == _MessageBarType.custom
-        ? (bar.hasIcon && _isNotEmpty(bar.icon))
+        ? (bar.hasIcon && bar.icon.isNotNullOrEmpty)
         : true;
 
-    final hasTwoButtons = _isNotEmpty(bar.actionText) && _isNotEmpty(bar.actionTextRight);
+    final hasTwoButtons = bar.actionText.isNotNullOrEmpty && bar.actionTextRight.isNotNullOrEmpty;
 
     final content = Padding(
       padding: _kContentPadding,
@@ -185,22 +176,12 @@ class _MessageBarItemState extends State<_MessageBarItem> {
 
   Widget _buildIcon(MessageBarEntity bar, _MessageBarType type, Color tintColor) {
     if (type == _MessageBarType.custom) {
-      return Image.network(
-        bar.icon!,
-        width: _kIconSize,
-        height: _kIconSize,
-        errorBuilder: (_, _, _) =>
-            Icon(Icons.info_outline, size: _kIconSize, color: tintColor),
-      );
+      return CustomImage(path: bar.icon!);
     }
 
     return Padding(
       padding: const EdgeInsets.only(top: 1),
-      child: SvgPicture.asset(
-        _typeIconAsset(type)!,
-        width: _kIconSize,
-        height: _kIconSize,
-      ),
+      child: CustomImage(path: _typeIconAsset(type)!, width: _kIconSize, height: _kIconSize),
     );
   }
 
@@ -218,7 +199,7 @@ class _MessageBarItemState extends State<_MessageBarItem> {
 
   /// Message with optional action text stacked below.
   Widget _buildMessageWithInlineAction(MessageBarEntity bar, Color textColor) {
-    if (!_isNotEmpty(bar.actionText)) {
+    if (!bar.actionText.isNotNullOrEmpty) {
       return _buildPlainMessage(bar, textColor);
     }
 
@@ -292,20 +273,5 @@ class _MessageBarItemState extends State<_MessageBarItem> {
         ),
       ),
     );
-  }
-
-  // ─── Helpers ─────────────────────────────────────────────────────────────
-
-  static bool _isNotEmpty(String? s) => s != null && s.isNotEmpty;
-
-  static Color? _parseColor(String? colorStr) {
-    if (colorStr == null || colorStr.isEmpty) return null;
-    try {
-      var hex = colorStr.replaceFirst('#', '');
-      if (hex.length == 6) hex = 'FF$hex';
-      return Color(int.parse(hex, radix: 16));
-    } catch (_) {
-      return null;
-    }
   }
 }

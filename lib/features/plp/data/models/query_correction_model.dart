@@ -1,8 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/query_correction_entity.dart';
 
 part 'query_correction_model.g.dart';
+
+int _parseConfidence(dynamic value) => parseToIntOrNull(value) ?? -2;
 
 /// Parses the `queryCorrection` block of the v8 listing response:
 ///
@@ -26,9 +29,11 @@ class QueryCorrectionModel {
     this.confidence = -2,
   });
 
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? resultsOf;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? searchFor;
-  @JsonKey(defaultValue: -2)
+  @JsonKey(fromJson: _parseConfidence)
   final int confidence;
 
   factory QueryCorrectionModel.fromJson(Map<String, dynamic> json) =>

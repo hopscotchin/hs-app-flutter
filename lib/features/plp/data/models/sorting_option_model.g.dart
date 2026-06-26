@@ -8,7 +8,9 @@ part of 'sorting_option_model.dart';
 
 SortingOptionModel _$SortingOptionModelFromJson(Map<String, dynamic> json) =>
     SortingOptionModel(
-      label: json['label'] as String?,
-      orderRule: (json['orderRule'] as num?)?.toInt() ?? 0,
-      isSelected: json['isSelected'] as bool? ?? false,
+      label: parseToStringOrNull(json['label']),
+      orderRule: json['orderRule'] == null ? 0 : parseToInt(json['orderRule']),
+      isSelected: json['isSelected'] == null
+          ? false
+          : parseToBool(json['isSelected']),
     );

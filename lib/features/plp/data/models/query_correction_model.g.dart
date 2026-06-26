@@ -9,7 +9,9 @@ part of 'query_correction_model.dart';
 QueryCorrectionModel _$QueryCorrectionModelFromJson(
   Map<String, dynamic> json,
 ) => QueryCorrectionModel(
-  resultsOf: json['resultsOf'] as String?,
-  searchFor: json['searchFor'] as String?,
-  confidence: (json['confidence'] as num?)?.toInt() ?? -2,
+  resultsOf: parseToStringOrNull(json['resultsOf']),
+  searchFor: parseToStringOrNull(json['searchFor']),
+  confidence: json['confidence'] == null
+      ? -2
+      : _parseConfidence(json['confidence']),
 );

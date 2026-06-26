@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/floating_filter_entity.dart';
 
 part 'floating_filter_model.g.dart';
@@ -17,14 +18,14 @@ class FloatingFilterChipModel {
     this.isSelected = false,
   });
 
-  final String? filterKey;
-  final String? filterValue;
-  final String? label;
-  final String? chipType;
-  final String? textColor;
-  @JsonKey(name: 'bgColor') final String? backgroundColor;
-  final String? imageUrl;
-  @JsonKey(defaultValue: false) final bool isSelected;
+  @JsonKey(fromJson: parseToStringOrNull) final String? filterKey;
+  @JsonKey(fromJson: parseToStringOrNull) final String? filterValue;
+  @JsonKey(fromJson: parseToStringOrNull) final String? label;
+  @JsonKey(fromJson: parseToStringOrNull) final String? chipType;
+  @JsonKey(fromJson: parseToStringOrNull) final String? textColor;
+  @JsonKey(name: 'bgColor', fromJson: parseToStringOrNull) final String? backgroundColor;
+  @JsonKey(fromJson: parseToStringOrNull) final String? imageUrl;
+  @JsonKey(fromJson: parseToBool) final bool isSelected;
 
   factory FloatingFilterChipModel.fromJson(Map<String, dynamic> json) =>
       _$FloatingFilterChipModelFromJson(json);
@@ -52,11 +53,11 @@ class FloatingFilterSectionModel {
     this.chips = const [],
   });
 
-  final String? title;
-  final String? chipType;
-  final int? position;
-  final int? tileWidth;
-  final int? tileHeight;
+  @JsonKey(fromJson: parseToStringOrNull) final String? title;
+  @JsonKey(fromJson: parseToStringOrNull) final String? chipType;
+  @JsonKey(fromJson: parseToIntOrNull) final int? position;
+  @JsonKey(fromJson: parseToIntOrNull) final int? tileWidth;
+  @JsonKey(fromJson: parseToIntOrNull) final int? tileHeight;
   @JsonKey(defaultValue: []) final List<FloatingFilterChipModel> chips;
 
   factory FloatingFilterSectionModel.fromJson(Map<String, dynamic> json) =>
@@ -76,7 +77,7 @@ class FloatingFilterSectionModel {
 class FloatingFilterModel {
   const FloatingFilterModel({this.type, this.sections = const []});
 
-  final String? type;
+  @JsonKey(fromJson: parseToStringOrNull) final String? type;
   @JsonKey(defaultValue: []) final List<FloatingFilterSectionModel> sections;
 
   factory FloatingFilterModel.fromJson(Map<String, dynamic> json) =>

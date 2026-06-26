@@ -46,4 +46,9 @@ ListingDataModel _$ListingDataModelFromJson(
   messageBars: json['messageBars'] == null
       ? const []
       : _parseMessageBars(json['messageBars']),
+  orderRule: json['orderRule'] == null
+      ? -1
+      : _parseOrderRule(json['orderRule']),
+  action: parseToStringOrNull(json['action']),
+  message: parseToStringOrNull(json['message']),
 );

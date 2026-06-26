@@ -75,7 +75,7 @@ class AddressItemCard extends StatelessWidget {
         //   ),
         // ],
         if (!isSelectable) ...[
-          const SizedBox(height: 7),
+          const SizedBox(height: 6),
           Row(
             children: [
               _ActionLabel(label: AddressStrings.edit, onTap: onEdit),
@@ -88,7 +88,7 @@ class AddressItemCard extends StatelessWidget {
     );
 
     if (!isSelectable) {
-      return Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 20), child: content);
+      return Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 18), child: content);
     }
 
     return GestureDetector(

@@ -66,6 +66,7 @@ class ProductTile extends StatelessWidget {
     bool hasCPT = false,
     double? imageAspectRatio,
     String? imageUrl,
+    bool? isWishlisted,
   }) {
     final price = product.price;
     final hasDiscount = price?.hasDiscount ?? false;
@@ -79,8 +80,8 @@ class ProductTile extends StatelessWidget {
       visualCues: product.visualCues,
       colorVariantsLabel: product.colorVariants,
       isSoldOut: product.isSoldOut,
-      isWishlisted: product.isWishlisted,
-      showWishlistIcon: product.canWishlist,
+      isWishlisted: isWishlisted ?? product.wishlistInfo.isWishlisted,
+      showWishlistIcon: product.wishlistInfo.canWishlist,
       showProductInfo: showProductInfo,
       isCPT: product.isCPT,
       hasCPT: hasCPT,
@@ -119,10 +120,7 @@ class ProductTile extends StatelessWidget {
           if (showProductInfo) ...[
             AppSpacing.verticalGapXsm,
             if (productName.isNotNullOrEmpty) _buildBrandName(),
-            if ((priceText ?? '').isNotEmpty) ...[
-              AppSpacing.verticalGapXs,
-              _buildPriceRow(),
-            ],
+            if ((priceText ?? '').isNotEmpty) ...[AppSpacing.verticalGapXs, _buildPriceRow()],
             if (_resolvedColorLabel != null || hasCPT) ...[
               AppSpacing.verticalGapXsm,
               Text(
@@ -229,7 +227,7 @@ class ProductTile extends StatelessWidget {
             ],
             if (discountText != null) ...[
               TextSpan(
-                text: '\t\t$discountText',
+                text: originalPriceText != null ? '\t\t$discountText' : '\t$discountText',
                 style: AppTypographyV1.labelMedium.regular.brandSecondary(),
               ),
             ],

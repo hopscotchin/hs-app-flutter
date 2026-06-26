@@ -9,9 +9,14 @@ part of 'tracking_meta_model.dart';
 TrackingMetaModel _$TrackingMetaModelFromJson(Map<String, dynamic> json) =>
     TrackingMetaModel(
       clusteringExistsForListingPage:
-          json['clusteringExistsForListingPage'] as bool? ?? false,
-      excludePreorderFilterApplied:
-          json['excludePreorderFilterApplied'] as bool? ?? false,
-      hasXLTiles: json['hasXLTiles'] as bool? ?? false,
-      plpId: (json['plpId'] as num?)?.toInt(),
+          json['clusteringExistsForListingPage'] == null
+          ? false
+          : parseToBool(json['clusteringExistsForListingPage']),
+      excludePreorderFilterApplied: json['excludePreorderFilterApplied'] == null
+          ? false
+          : parseToBool(json['excludePreorderFilterApplied']),
+      hasXLTiles: json['hasXLTiles'] == null
+          ? false
+          : parseToBool(json['hasXLTiles']),
+      plpId: parseToIntOrNull(json['plpId']),
     );

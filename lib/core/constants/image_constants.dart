@@ -33,6 +33,11 @@ class ImageConstants {
   static const String kidsItemIcon = 'assets/icons/account_kids.svg';
   static const String cardsItemIcon = 'assets/icons/account_cards.svg';
 
+  // Legal
+  static const String legalTermsIcon = 'assets/icons/legal/icon_terms_of_service.svg';
+  static const String legalPrivacyIcon = 'assets/icons/legal/icon_privacy_policy.svg';
+  static const String legalAboutUsIcon = 'assets/icons/legal/icon_about_us.svg';
+
   // Help Section
   static const String sqaureStar = 'assets/icons/square-star.svg';
   static const String shareIcon = 'assets/icons/share.svg';

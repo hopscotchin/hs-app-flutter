@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/banner_entity.dart';
 
 part 'banner_model.g.dart';
@@ -8,11 +9,13 @@ part 'banner_model.g.dart';
 class BannerModel {
   const BannerModel({this.imageUrl, this.height, this.width, this.title, this.actionUri});
 
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? imageUrl;
-  final int? height;
-  final int? width;
-  @JsonKey(name: 'title')
+  @JsonKey(fromJson: parseToIntOrNull) final int? height;
+  @JsonKey(fromJson: parseToIntOrNull) final int? width;
+  @JsonKey(name: 'title', fromJson: parseToStringOrNull)
   final String? title;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? actionUri;
 
   factory BannerModel.fromJson(Map<String, dynamic> json) => _$BannerModelFromJson(json);

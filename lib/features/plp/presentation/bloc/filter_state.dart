@@ -9,6 +9,11 @@ abstract class FilterState with _$FilterState {
     @Default(PlpFilterEntity()) PlpFilterEntity plpFilter,
     @Default(<String, Set<String>>{}) Map<String, Set<String>> pendingFilters,
     @Default(<String, String>{}) Map<String, String> treeSelections,
+    // Tree keys written into [treeSelections] purely to auto-expand a
+    // single-child branch for navigation (e.g. a lone top-level category). They
+    // are NOT user selections, so they must not be sent to the API or counted
+    // as active filters unless the user actually selects something below them.
+    @Default(<String>{}) Set<String> autoExpandedKeys,
     @Default(0) int selectedSectionIndex,
     @Default(false) bool isRefreshing,
     @Default(<String, dynamic>{}) Map<String, dynamic> baseQueryParams,
@@ -26,7 +31,13 @@ extension FilterStateX on FilterState {
       sections.isEmpty ? 0 : selectedSectionIndex.clamp(0, sections.length - 1);
 
   bool get hasSelections =>
-      pendingFilters.values.any((v) => v.isNotEmpty) || treeSelections.isNotEmpty;
+      pendingFilters.values.any((v) => v.isNotEmpty) ||
+      treeSelections.keys.any(_isExplicitTreeSelection);
+
+  /// A tree key is a real user selection only when it wasn't auto-added for
+  /// navigation. Auto-expanded keys drive the tree view but aren't filters.
+  bool _isExplicitTreeSelection(String key) =>
+      treeSelections.containsKey(key) && !autoExpandedKeys.contains(key);
 
   FilterSectionEntity? get currentSection => sections.isEmpty ? null : sections[safeSectionIndex];
 
@@ -46,12 +57,12 @@ extension FilterStateX on FilterState {
     for (final wrapper in section.filterList) {
       for (final child in wrapper.filters) {
         final childKey = child.filterKey ?? '';
-        if (treeSelections.containsKey(childKey)) return true;
+        if (_isExplicitTreeSelection(childKey)) return true;
         for (final grandchild in child.filters) {
           final grandchildKey = grandchild.filterKey ?? '';
-          if (treeSelections.containsKey(grandchildKey)) return true;
+          if (_isExplicitTreeSelection(grandchildKey)) return true;
           for (final ggChild in grandchild.filters) {
-            if (treeSelections.containsKey(ggChild.filterKey ?? '')) return true;
+            if (_isExplicitTreeSelection(ggChild.filterKey ?? '')) return true;
           }
         }
       }
@@ -61,13 +72,65 @@ extension FilterStateX on FilterState {
 
   Map<String, String> flattenFilters() {
     final result = <String, String>{};
+
+    // Leaf and flat selections are explicit by definition — always sent.
     for (final entry in pendingFilters.entries) {
       if (entry.value.isNotEmpty) {
         result[entry.key] = entry.value.join(',');
       }
     }
-    result.addAll(treeSelections);
+
+    // Tree drill params. A key auto-expanded only for navigation (a single-child
+    // prefix such as a lone category) must NOT be sent unless the user actually
+    // selected something inside that tree — otherwise every refresh/apply would
+    // filter by a category the user never chose. When there IS a real selection,
+    // the auto-expanded ancestors are sent as its scope. Mirrors Android, where
+    // auto-shown tree nodes never call insertTreeParams but an explicit tap adds
+    // the node together with its ancestors.
+    for (final entry in treeSelections.entries) {
+      if (!autoExpandedKeys.contains(entry.key) || _treeHasRealSelection(entry.key)) {
+        result[entry.key] = entry.value;
+      }
+    }
+
     return result;
+  }
+
+  /// Whether the tree section that owns [autoKey] carries a real user
+  /// selection: an explicitly drilled node (not auto-expanded) or a selected
+  /// leaf. Decides whether [autoKey]'s auto-expanded ancestor is sent as scope.
+  bool _treeHasRealSelection(String autoKey) {
+    final sectionKeys = _treeSectionKeysContaining(autoKey);
+    if (sectionKeys == null) return true; // unknown structure — stay permissive
+    for (final key in treeSelections.keys) {
+      if (key != autoKey && sectionKeys.contains(key) && !autoExpandedKeys.contains(key)) {
+        return true;
+      }
+    }
+    for (final key in sectionKeys) {
+      if (pendingFilters[key]?.isNotEmpty ?? false) return true;
+    }
+    return false;
+  }
+
+  /// Every `filterKey` in the tree section that contains [key], or null when no
+  /// tree section owns it.
+  Set<String>? _treeSectionKeysContaining(String key) {
+    for (final section in plpFilter.filterSections) {
+      if (section.uiType?.toLowerCase() != 'tree') continue;
+      final keys = <String>{};
+      void walk(List<FilterEntity> nodes) {
+        for (final node in nodes) {
+          final k = node.filterKey;
+          if (k != null && k.isNotEmpty) keys.add(k);
+          walk(node.filters);
+        }
+      }
+
+      walk(section.filterList);
+      if (keys.contains(key)) return keys;
+    }
+    return null;
   }
 
   List<String> treeBreadcrumbLabels(FilterSectionEntity section) {

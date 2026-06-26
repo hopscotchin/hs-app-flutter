@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/utils/json_parsers.dart';
+
 part 'media_item_model.g.dart';
 
 /// One entry in `records[].media[]`. Each entry has a `mimeType` of
@@ -12,7 +14,9 @@ part 'media_item_model.g.dart';
 class MediaItemModel {
   const MediaItemModel({this.mimeType, this.url});
 
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? mimeType;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? url;
 
   factory MediaItemModel.fromJson(Map<String, dynamic> json) =>

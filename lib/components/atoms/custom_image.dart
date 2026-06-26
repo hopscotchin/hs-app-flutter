@@ -61,6 +61,7 @@ class CustomImage extends StatelessWidget {
       fit: fit,
       alignment: alignment,
       placeholderBuilder: (context) => placeholder ?? const SizedBox.shrink(),
+      errorBuilder: (context, error, stackTrace) => errorWidget ?? const SizedBox.shrink(),
     );
   }
 
@@ -87,7 +88,7 @@ class CustomImage extends StatelessWidget {
       // Loading placeholder
       placeholder: (context, url) => placeholder ?? const SizedBox.shrink(),
       // Error widget
-      errorWidget: (context, url, error) => errorWidget ?? const Icon(Icons.error),
+      errorWidget: (context, url, error) => errorWidget ?? const SizedBox.shrink(),
       // Needed to apply color
       imageBuilder: (context, imageProvider) {
         return Image(

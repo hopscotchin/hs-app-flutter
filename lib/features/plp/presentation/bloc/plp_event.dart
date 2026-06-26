@@ -27,7 +27,4 @@ sealed class PlpEvent with _$PlpEvent {
 
   const factory PlpEvent.applyFloatingFilter({required String key, required String value}) =
       ApplyFloatingFilter;
-
-  const factory PlpEvent.toggleWishlistOnProduct({required ListingProductEntity product}) =
-      ToggleWishlistOnProduct;
 }

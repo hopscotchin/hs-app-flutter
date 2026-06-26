@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ListingDataEntity {
 
- PageMetaEntity? get pageMeta; TrackingMetaEntity? get trackingMeta; NotificationNudgeEntity? get notificationNudge; List<BannerEntity> get banners; FloatingFilterEntity? get floatingFilter; PlpFilterEntity? get filters; List<ListingProductEntity> get records; QueryCorrectionEntity? get queryCorrection; List<MessageBarEntity> get messageBars;
+ PageMetaEntity? get pageMeta; TrackingMetaEntity? get trackingMeta; NotificationNudgeEntity? get notificationNudge; List<BannerEntity> get banners; FloatingFilterEntity? get floatingFilter; PlpFilterEntity? get filters; List<ListingProductEntity> get records; QueryCorrectionEntity? get queryCorrection; List<MessageBarEntity> get messageBars; int get orderRule;
 /// Create a copy of ListingDataEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ListingDataEntityCopyWith<ListingDataEntity> get copyWith => _$ListingDataEntit
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ListingDataEntity&&(identical(other.pageMeta, pageMeta) || other.pageMeta == pageMeta)&&(identical(other.trackingMeta, trackingMeta) || other.trackingMeta == trackingMeta)&&(identical(other.notificationNudge, notificationNudge) || other.notificationNudge == notificationNudge)&&const DeepCollectionEquality().equals(other.banners, banners)&&(identical(other.floatingFilter, floatingFilter) || other.floatingFilter == floatingFilter)&&(identical(other.filters, filters) || other.filters == filters)&&const DeepCollectionEquality().equals(other.records, records)&&(identical(other.queryCorrection, queryCorrection) || other.queryCorrection == queryCorrection)&&const DeepCollectionEquality().equals(other.messageBars, messageBars));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ListingDataEntity&&(identical(other.pageMeta, pageMeta) || other.pageMeta == pageMeta)&&(identical(other.trackingMeta, trackingMeta) || other.trackingMeta == trackingMeta)&&(identical(other.notificationNudge, notificationNudge) || other.notificationNudge == notificationNudge)&&const DeepCollectionEquality().equals(other.banners, banners)&&(identical(other.floatingFilter, floatingFilter) || other.floatingFilter == floatingFilter)&&(identical(other.filters, filters) || other.filters == filters)&&const DeepCollectionEquality().equals(other.records, records)&&(identical(other.queryCorrection, queryCorrection) || other.queryCorrection == queryCorrection)&&const DeepCollectionEquality().equals(other.messageBars, messageBars)&&(identical(other.orderRule, orderRule) || other.orderRule == orderRule));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,pageMeta,trackingMeta,notificationNudge,const DeepCollectionEquality().hash(banners),floatingFilter,filters,const DeepCollectionEquality().hash(records),queryCorrection,const DeepCollectionEquality().hash(messageBars));
+int get hashCode => Object.hash(runtimeType,pageMeta,trackingMeta,notificationNudge,const DeepCollectionEquality().hash(banners),floatingFilter,filters,const DeepCollectionEquality().hash(records),queryCorrection,const DeepCollectionEquality().hash(messageBars),orderRule);
 
 @override
 String toString() {
-  return 'ListingDataEntity(pageMeta: $pageMeta, trackingMeta: $trackingMeta, notificationNudge: $notificationNudge, banners: $banners, floatingFilter: $floatingFilter, filters: $filters, records: $records, queryCorrection: $queryCorrection, messageBars: $messageBars)';
+  return 'ListingDataEntity(pageMeta: $pageMeta, trackingMeta: $trackingMeta, notificationNudge: $notificationNudge, banners: $banners, floatingFilter: $floatingFilter, filters: $filters, records: $records, queryCorrection: $queryCorrection, messageBars: $messageBars, orderRule: $orderRule)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ListingDataEntityCopyWith<$Res>  {
   factory $ListingDataEntityCopyWith(ListingDataEntity value, $Res Function(ListingDataEntity) _then) = _$ListingDataEntityCopyWithImpl;
 @useResult
 $Res call({
- PageMetaEntity? pageMeta, TrackingMetaEntity? trackingMeta, NotificationNudgeEntity? notificationNudge, List<BannerEntity> banners, FloatingFilterEntity? floatingFilter, PlpFilterEntity? filters, List<ListingProductEntity> records, QueryCorrectionEntity? queryCorrection, List<MessageBarEntity> messageBars
+ PageMetaEntity? pageMeta, TrackingMetaEntity? trackingMeta, NotificationNudgeEntity? notificationNudge, List<BannerEntity> banners, FloatingFilterEntity? floatingFilter, PlpFilterEntity? filters, List<ListingProductEntity> records, QueryCorrectionEntity? queryCorrection, List<MessageBarEntity> messageBars, int orderRule
 });
 
 
@@ -62,7 +62,7 @@ class _$ListingDataEntityCopyWithImpl<$Res>
 
 /// Create a copy of ListingDataEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? pageMeta = freezed,Object? trackingMeta = freezed,Object? notificationNudge = freezed,Object? banners = null,Object? floatingFilter = freezed,Object? filters = freezed,Object? records = null,Object? queryCorrection = freezed,Object? messageBars = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? pageMeta = freezed,Object? trackingMeta = freezed,Object? notificationNudge = freezed,Object? banners = null,Object? floatingFilter = freezed,Object? filters = freezed,Object? records = null,Object? queryCorrection = freezed,Object? messageBars = null,Object? orderRule = null,}) {
   return _then(_self.copyWith(
 pageMeta: freezed == pageMeta ? _self.pageMeta : pageMeta // ignore: cast_nullable_to_non_nullable
 as PageMetaEntity?,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
@@ -73,7 +73,8 @@ as FloatingFilterEntity?,filters: freezed == filters ? _self.filters : filters /
 as PlpFilterEntity?,records: null == records ? _self.records : records // ignore: cast_nullable_to_non_nullable
 as List<ListingProductEntity>,queryCorrection: freezed == queryCorrection ? _self.queryCorrection : queryCorrection // ignore: cast_nullable_to_non_nullable
 as QueryCorrectionEntity?,messageBars: null == messageBars ? _self.messageBars : messageBars // ignore: cast_nullable_to_non_nullable
-as List<MessageBarEntity>,
+as List<MessageBarEntity>,orderRule: null == orderRule ? _self.orderRule : orderRule // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 /// Create a copy of ListingDataEntity
@@ -230,10 +231,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PageMetaEntity? pageMeta,  TrackingMetaEntity? trackingMeta,  NotificationNudgeEntity? notificationNudge,  List<BannerEntity> banners,  FloatingFilterEntity? floatingFilter,  PlpFilterEntity? filters,  List<ListingProductEntity> records,  QueryCorrectionEntity? queryCorrection,  List<MessageBarEntity> messageBars)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PageMetaEntity? pageMeta,  TrackingMetaEntity? trackingMeta,  NotificationNudgeEntity? notificationNudge,  List<BannerEntity> banners,  FloatingFilterEntity? floatingFilter,  PlpFilterEntity? filters,  List<ListingProductEntity> records,  QueryCorrectionEntity? queryCorrection,  List<MessageBarEntity> messageBars,  int orderRule)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ListingDataEntity() when $default != null:
-return $default(_that.pageMeta,_that.trackingMeta,_that.notificationNudge,_that.banners,_that.floatingFilter,_that.filters,_that.records,_that.queryCorrection,_that.messageBars);case _:
+return $default(_that.pageMeta,_that.trackingMeta,_that.notificationNudge,_that.banners,_that.floatingFilter,_that.filters,_that.records,_that.queryCorrection,_that.messageBars,_that.orderRule);case _:
   return orElse();
 
 }
@@ -251,10 +252,10 @@ return $default(_that.pageMeta,_that.trackingMeta,_that.notificationNudge,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PageMetaEntity? pageMeta,  TrackingMetaEntity? trackingMeta,  NotificationNudgeEntity? notificationNudge,  List<BannerEntity> banners,  FloatingFilterEntity? floatingFilter,  PlpFilterEntity? filters,  List<ListingProductEntity> records,  QueryCorrectionEntity? queryCorrection,  List<MessageBarEntity> messageBars)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PageMetaEntity? pageMeta,  TrackingMetaEntity? trackingMeta,  NotificationNudgeEntity? notificationNudge,  List<BannerEntity> banners,  FloatingFilterEntity? floatingFilter,  PlpFilterEntity? filters,  List<ListingProductEntity> records,  QueryCorrectionEntity? queryCorrection,  List<MessageBarEntity> messageBars,  int orderRule)  $default,) {final _that = this;
 switch (_that) {
 case _ListingDataEntity():
-return $default(_that.pageMeta,_that.trackingMeta,_that.notificationNudge,_that.banners,_that.floatingFilter,_that.filters,_that.records,_that.queryCorrection,_that.messageBars);case _:
+return $default(_that.pageMeta,_that.trackingMeta,_that.notificationNudge,_that.banners,_that.floatingFilter,_that.filters,_that.records,_that.queryCorrection,_that.messageBars,_that.orderRule);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -271,10 +272,10 @@ return $default(_that.pageMeta,_that.trackingMeta,_that.notificationNudge,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PageMetaEntity? pageMeta,  TrackingMetaEntity? trackingMeta,  NotificationNudgeEntity? notificationNudge,  List<BannerEntity> banners,  FloatingFilterEntity? floatingFilter,  PlpFilterEntity? filters,  List<ListingProductEntity> records,  QueryCorrectionEntity? queryCorrection,  List<MessageBarEntity> messageBars)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PageMetaEntity? pageMeta,  TrackingMetaEntity? trackingMeta,  NotificationNudgeEntity? notificationNudge,  List<BannerEntity> banners,  FloatingFilterEntity? floatingFilter,  PlpFilterEntity? filters,  List<ListingProductEntity> records,  QueryCorrectionEntity? queryCorrection,  List<MessageBarEntity> messageBars,  int orderRule)?  $default,) {final _that = this;
 switch (_that) {
 case _ListingDataEntity() when $default != null:
-return $default(_that.pageMeta,_that.trackingMeta,_that.notificationNudge,_that.banners,_that.floatingFilter,_that.filters,_that.records,_that.queryCorrection,_that.messageBars);case _:
+return $default(_that.pageMeta,_that.trackingMeta,_that.notificationNudge,_that.banners,_that.floatingFilter,_that.filters,_that.records,_that.queryCorrection,_that.messageBars,_that.orderRule);case _:
   return null;
 
 }
@@ -286,7 +287,7 @@ return $default(_that.pageMeta,_that.trackingMeta,_that.notificationNudge,_that.
 
 
 class _ListingDataEntity implements ListingDataEntity {
-  const _ListingDataEntity({this.pageMeta, this.trackingMeta, this.notificationNudge, final  List<BannerEntity> banners = const [], this.floatingFilter, this.filters, final  List<ListingProductEntity> records = const [], this.queryCorrection, final  List<MessageBarEntity> messageBars = const <MessageBarEntity>[]}): _banners = banners,_records = records,_messageBars = messageBars;
+  const _ListingDataEntity({this.pageMeta, this.trackingMeta, this.notificationNudge, final  List<BannerEntity> banners = const [], this.floatingFilter, this.filters, final  List<ListingProductEntity> records = const [], this.queryCorrection, final  List<MessageBarEntity> messageBars = const <MessageBarEntity>[], this.orderRule = -1}): _banners = banners,_records = records,_messageBars = messageBars;
   
 
 @override final  PageMetaEntity? pageMeta;
@@ -316,6 +317,7 @@ class _ListingDataEntity implements ListingDataEntity {
   return EqualUnmodifiableListView(_messageBars);
 }
 
+@override@JsonKey() final  int orderRule;
 
 /// Create a copy of ListingDataEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -327,16 +329,16 @@ _$ListingDataEntityCopyWith<_ListingDataEntity> get copyWith => __$ListingDataEn
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ListingDataEntity&&(identical(other.pageMeta, pageMeta) || other.pageMeta == pageMeta)&&(identical(other.trackingMeta, trackingMeta) || other.trackingMeta == trackingMeta)&&(identical(other.notificationNudge, notificationNudge) || other.notificationNudge == notificationNudge)&&const DeepCollectionEquality().equals(other._banners, _banners)&&(identical(other.floatingFilter, floatingFilter) || other.floatingFilter == floatingFilter)&&(identical(other.filters, filters) || other.filters == filters)&&const DeepCollectionEquality().equals(other._records, _records)&&(identical(other.queryCorrection, queryCorrection) || other.queryCorrection == queryCorrection)&&const DeepCollectionEquality().equals(other._messageBars, _messageBars));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ListingDataEntity&&(identical(other.pageMeta, pageMeta) || other.pageMeta == pageMeta)&&(identical(other.trackingMeta, trackingMeta) || other.trackingMeta == trackingMeta)&&(identical(other.notificationNudge, notificationNudge) || other.notificationNudge == notificationNudge)&&const DeepCollectionEquality().equals(other._banners, _banners)&&(identical(other.floatingFilter, floatingFilter) || other.floatingFilter == floatingFilter)&&(identical(other.filters, filters) || other.filters == filters)&&const DeepCollectionEquality().equals(other._records, _records)&&(identical(other.queryCorrection, queryCorrection) || other.queryCorrection == queryCorrection)&&const DeepCollectionEquality().equals(other._messageBars, _messageBars)&&(identical(other.orderRule, orderRule) || other.orderRule == orderRule));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,pageMeta,trackingMeta,notificationNudge,const DeepCollectionEquality().hash(_banners),floatingFilter,filters,const DeepCollectionEquality().hash(_records),queryCorrection,const DeepCollectionEquality().hash(_messageBars));
+int get hashCode => Object.hash(runtimeType,pageMeta,trackingMeta,notificationNudge,const DeepCollectionEquality().hash(_banners),floatingFilter,filters,const DeepCollectionEquality().hash(_records),queryCorrection,const DeepCollectionEquality().hash(_messageBars),orderRule);
 
 @override
 String toString() {
-  return 'ListingDataEntity(pageMeta: $pageMeta, trackingMeta: $trackingMeta, notificationNudge: $notificationNudge, banners: $banners, floatingFilter: $floatingFilter, filters: $filters, records: $records, queryCorrection: $queryCorrection, messageBars: $messageBars)';
+  return 'ListingDataEntity(pageMeta: $pageMeta, trackingMeta: $trackingMeta, notificationNudge: $notificationNudge, banners: $banners, floatingFilter: $floatingFilter, filters: $filters, records: $records, queryCorrection: $queryCorrection, messageBars: $messageBars, orderRule: $orderRule)';
 }
 
 
@@ -347,7 +349,7 @@ abstract mixin class _$ListingDataEntityCopyWith<$Res> implements $ListingDataEn
   factory _$ListingDataEntityCopyWith(_ListingDataEntity value, $Res Function(_ListingDataEntity) _then) = __$ListingDataEntityCopyWithImpl;
 @override @useResult
 $Res call({
- PageMetaEntity? pageMeta, TrackingMetaEntity? trackingMeta, NotificationNudgeEntity? notificationNudge, List<BannerEntity> banners, FloatingFilterEntity? floatingFilter, PlpFilterEntity? filters, List<ListingProductEntity> records, QueryCorrectionEntity? queryCorrection, List<MessageBarEntity> messageBars
+ PageMetaEntity? pageMeta, TrackingMetaEntity? trackingMeta, NotificationNudgeEntity? notificationNudge, List<BannerEntity> banners, FloatingFilterEntity? floatingFilter, PlpFilterEntity? filters, List<ListingProductEntity> records, QueryCorrectionEntity? queryCorrection, List<MessageBarEntity> messageBars, int orderRule
 });
 
 
@@ -364,7 +366,7 @@ class __$ListingDataEntityCopyWithImpl<$Res>
 
 /// Create a copy of ListingDataEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? pageMeta = freezed,Object? trackingMeta = freezed,Object? notificationNudge = freezed,Object? banners = null,Object? floatingFilter = freezed,Object? filters = freezed,Object? records = null,Object? queryCorrection = freezed,Object? messageBars = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? pageMeta = freezed,Object? trackingMeta = freezed,Object? notificationNudge = freezed,Object? banners = null,Object? floatingFilter = freezed,Object? filters = freezed,Object? records = null,Object? queryCorrection = freezed,Object? messageBars = null,Object? orderRule = null,}) {
   return _then(_ListingDataEntity(
 pageMeta: freezed == pageMeta ? _self.pageMeta : pageMeta // ignore: cast_nullable_to_non_nullable
 as PageMetaEntity?,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
@@ -375,7 +377,8 @@ as FloatingFilterEntity?,filters: freezed == filters ? _self.filters : filters /
 as PlpFilterEntity?,records: null == records ? _self._records : records // ignore: cast_nullable_to_non_nullable
 as List<ListingProductEntity>,queryCorrection: freezed == queryCorrection ? _self.queryCorrection : queryCorrection // ignore: cast_nullable_to_non_nullable
 as QueryCorrectionEntity?,messageBars: null == messageBars ? _self._messageBars : messageBars // ignore: cast_nullable_to_non_nullable
-as List<MessageBarEntity>,
+as List<MessageBarEntity>,orderRule: null == orderRule ? _self.orderRule : orderRule // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/notification_nudge_entity.dart';
 
 part 'notification_nudge_model.g.dart';
@@ -13,10 +14,10 @@ class NudgeRuleModel {
     this.oneTimeTargetDate,
   });
 
-  @JsonKey(defaultValue: 0) final int dismissedFrequency;
-  @JsonKey(defaultValue: 0) final int showNudgeFrequency;
-  @JsonKey(defaultValue: 0) final int deniedFrequency;
-  final int? oneTimeTargetDate;
+  @JsonKey(fromJson: parseToInt) final int dismissedFrequency;
+  @JsonKey(fromJson: parseToInt) final int showNudgeFrequency;
+  @JsonKey(fromJson: parseToInt) final int deniedFrequency;
+  @JsonKey(fromJson: parseToIntOrNull) final int? oneTimeTargetDate;
 
   factory NudgeRuleModel.fromJson(Map<String, dynamic> json) =>
       _$NudgeRuleModelFromJson(json);
@@ -41,12 +42,12 @@ class NotificationNudgeModel {
     this.rule,
   });
 
-  final String? title;
-  final String? titleImage;
-  final String? description;
-  final String? negativeButtonText;
-  final String? positiveButtonText;
-  final int? position;
+  @JsonKey(fromJson: parseToStringOrNull) final String? title;
+  @JsonKey(fromJson: parseToStringOrNull) final String? titleImage;
+  @JsonKey(fromJson: parseToStringOrNull) final String? description;
+  @JsonKey(fromJson: parseToStringOrNull) final String? negativeButtonText;
+  @JsonKey(fromJson: parseToStringOrNull) final String? positiveButtonText;
+  @JsonKey(fromJson: parseToIntOrNull) final int? position;
   final NudgeRuleModel? rule;
 
   factory NotificationNudgeModel.fromJson(Map<String, dynamic> json) =>

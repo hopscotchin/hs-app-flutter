@@ -8,21 +8,27 @@ part of 'notification_nudge_model.dart';
 
 NudgeRuleModel _$NudgeRuleModelFromJson(Map<String, dynamic> json) =>
     NudgeRuleModel(
-      dismissedFrequency: (json['dismissedFrequency'] as num?)?.toInt() ?? 0,
-      showNudgeFrequency: (json['showNudgeFrequency'] as num?)?.toInt() ?? 0,
-      deniedFrequency: (json['deniedFrequency'] as num?)?.toInt() ?? 0,
-      oneTimeTargetDate: (json['oneTimeTargetDate'] as num?)?.toInt(),
+      dismissedFrequency: json['dismissedFrequency'] == null
+          ? 0
+          : parseToInt(json['dismissedFrequency']),
+      showNudgeFrequency: json['showNudgeFrequency'] == null
+          ? 0
+          : parseToInt(json['showNudgeFrequency']),
+      deniedFrequency: json['deniedFrequency'] == null
+          ? 0
+          : parseToInt(json['deniedFrequency']),
+      oneTimeTargetDate: parseToIntOrNull(json['oneTimeTargetDate']),
     );
 
 NotificationNudgeModel _$NotificationNudgeModelFromJson(
   Map<String, dynamic> json,
 ) => NotificationNudgeModel(
-  title: json['title'] as String?,
-  titleImage: json['titleImage'] as String?,
-  description: json['description'] as String?,
-  negativeButtonText: json['negativeButtonText'] as String?,
-  positiveButtonText: json['positiveButtonText'] as String?,
-  position: (json['position'] as num?)?.toInt(),
+  title: parseToStringOrNull(json['title']),
+  titleImage: parseToStringOrNull(json['titleImage']),
+  description: parseToStringOrNull(json['description']),
+  negativeButtonText: parseToStringOrNull(json['negativeButtonText']),
+  positiveButtonText: parseToStringOrNull(json['positiveButtonText']),
+  position: parseToIntOrNull(json['position']),
   rule: json['rule'] == null
       ? null
       : NudgeRuleModel.fromJson(json['rule'] as Map<String, dynamic>),

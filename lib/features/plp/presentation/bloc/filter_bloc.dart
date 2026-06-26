@@ -39,15 +39,55 @@ class FilterBloc extends BaseBloc<FilterEvent, FilterState> {
 
   void _onInitialize(InitializeFilter event, Emitter<FilterState> emit) {
     final split = _splitAppliedFilters(event.plpFilter, event.appliedFilters);
-    _lastRefreshedFilters = event.appliedFilters;
-    emit(
-      FilterState(
-        plpFilter: event.plpFilter,
-        treeSelections: split.treeSelections,
-        pendingFilters: split.pendingFilters,
-        baseQueryParams: event.baseQueryParams,
-      ),
+    final treeSelections = Map<String, String>.from(split.treeSelections);
+
+    final autoExpandedKeys = _applySingleNodeAutoExpand(
+      event.plpFilter,
+      treeSelections,
+      split.treeSelections.keys.toSet(),
     );
+
+    final initialState = FilterState(
+      plpFilter: event.plpFilter,
+      treeSelections: treeSelections,
+      autoExpandedKeys: autoExpandedKeys,
+      pendingFilters: split.pendingFilters,
+      baseQueryParams: event.baseQueryParams,
+    );
+
+    _lastRefreshedFilters = initialState.flattenFilters();
+    emit(initialState);
+  }
+
+  /// Auto-drills single-child tree branches (e.g. a lone top-level category) so
+  /// the user sees the subcategories directly. The keys written here are pure
+  /// navigation, not selections — they are returned so the state can exclude
+  /// them from the API query. Keys already present in [explicitKeys] (applied or
+  /// user-drilled) are left untouched and never marked auto-expanded.
+  Set<String> _applySingleNodeAutoExpand(
+    PlpFilterEntity plpFilter,
+    Map<String, String> treeSelections,
+    Set<String> explicitKeys,
+  ) {
+    final autoExpandedKeys = <String>{};
+    for (final section in plpFilter.filterSections) {
+      if (section.uiType?.toLowerCase() != 'tree') continue;
+      if (section.filterList.isEmpty) continue;
+
+      var current = section.filterList.first.filters;
+      while (current.length == 1 && current.first.filters.isNotEmpty) {
+        final node = current.first;
+        final key = node.filterKey ?? '';
+        final value = node.filterValue ?? node.label ?? '';
+        if (key.isEmpty || value.isEmpty) break;
+        final existing = treeSelections[key];
+        if (existing != null && existing != value) break; // respect user/applied choice
+        treeSelections[key] = value;
+        if (!explicitKeys.contains(key)) autoExpandedKeys.add(key);
+        current = node.filters;
+      }
+    }
+    return autoExpandedKeys;
   }
 
   void _onToggleFilterItem(ToggleFilterItem event, Emitter<FilterState> emit) {
@@ -67,7 +107,7 @@ class FilterBloc extends BaseBloc<FilterEvent, FilterState> {
     emit(state.copyWith(pendingFilters: updated, errorMessage: null));
   }
 
-  Future<void> _onSelectTreeItem(SelectTreeItem event, Emitter<FilterState> emit) async {
+  void _onSelectTreeItem(SelectTreeItem event, Emitter<FilterState> emit) {
     final section = state.currentSection;
     if (section == null) return;
 
@@ -80,7 +120,6 @@ class FilterBloc extends BaseBloc<FilterEvent, FilterState> {
     updated[event.param] = event.value;
 
     emit(state.copyWith(treeSelections: updated, errorMessage: null));
-    await _refreshFilter(emit);
   }
 
   Future<void> _onSwitchSection(SwitchSection event, Emitter<FilterState> emit) async {
@@ -99,6 +138,7 @@ class FilterBloc extends BaseBloc<FilterEvent, FilterState> {
       state.copyWith(
         pendingFilters: const <String, Set<String>>{},
         treeSelections: const <String, String>{},
+        autoExpandedKeys: const <String>{},
         errorMessage: null,
       ),
     );
@@ -277,16 +317,21 @@ class FilterBloc extends BaseBloc<FilterEvent, FilterState> {
         );
       },
       (filterData) {
+        // A failed/empty refresh (e.g. `action: failure`, or an HTTP 200 with
+        // no sections) must NOT wipe the sheet to a blank screen — keep the
+        // currently shown sections and selections, just clear the spinner.
+        if (filterData.filterSections.isEmpty) {
+          emit(current.copyWith(isRefreshing: false));
+          return;
+        }
+
         // The canonical selected values come from the response's `isSelected`
         // flags — NOT the values the user originally tapped. Dynamic-bucket
         // filters (price, discount, EDD ranges) are recomputed by the backend
         // on every refresh, so the returned bucket boundaries differ from what
         // was sent. Rebuilding pendingFilters from `isSelected` keeps the
         // checkbox UI in sync when the user returns to such a section.
-        final reconciledPending = _reconcilePendingFromResponse(
-          filterData,
-          current.pendingFilters,
-        );
+        final reconciledPending = _reconcilePendingFromResponse(filterData, current.pendingFilters);
 
         final previousLabel = current.currentSection?.label;
         final newSections = filterData.filterSections;
@@ -296,9 +341,21 @@ class FilterBloc extends BaseBloc<FilterEvent, FilterState> {
           if (found >= 0) nextIndex = found;
         }
 
+        final treeSelections = Map<String, String>.from(current.treeSelections);
+        // Everything that isn't a carried-over auto-expanded key is an explicit
+        // selection (user-drilled / applied) and must stay sendable.
+        final explicitKeys = treeSelections.keys.toSet()..removeAll(current.autoExpandedKeys);
+        final autoExpandedKeys = _applySingleNodeAutoExpand(
+          filterData,
+          treeSelections,
+          explicitKeys,
+        );
+
         final reconciled = current.copyWith(
           plpFilter: filterData,
           pendingFilters: reconciledPending,
+          treeSelections: treeSelections,
+          autoExpandedKeys: autoExpandedKeys,
           selectedSectionIndex: nextIndex,
           isRefreshing: false,
           status: FilterStatus.initial,

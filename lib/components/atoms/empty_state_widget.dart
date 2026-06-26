@@ -18,6 +18,7 @@ enum EmptyStateType {
   search,
   orders,
   plp,
+  discover,
   generic,
 
   // ── Error states ──────────────────────────────
@@ -79,6 +80,13 @@ const _configs = <EmptyStateType, _EmptyStateConfig>{
     iconSize: (64, 40),
     buttonLabel: 'Show All Products',
   ),
+  EmptyStateType.discover: _EmptyStateConfig(
+    icon: 'assets/icons/plp_no_product_found.svg',
+    title: 'Oops! Nothing Here',
+    subtitle: 'Looks like there\'s nothing to show yet.',
+    iconSize: (64, 40),
+    buttonLabel: 'Try Again',
+  ),
   EmptyStateType.generic: _EmptyStateConfig(
     icon: '',
     title: 'Nothing Here!',
@@ -88,10 +96,10 @@ const _configs = <EmptyStateType, _EmptyStateConfig>{
 
   // ── Error configs ────────────────────────────────────────────────────────
   EmptyStateType.serverError: _EmptyStateConfig(
-    icon: 'assets/icons/no_network.svg',
-    title: 'Something went wrong',
+    icon: 'assets/icons/server_error.svg',
+    title: 'Oops! Something Went Wrong',
     subtitle:
-        'We\'re having trouble loading this information right now. Please try again in a moment.',
+        'We\'re fixing things behind the scenes.',
     buttonLabel: 'Try Again',
     iconSize: (81, 62),
   ),
@@ -203,20 +211,20 @@ class EmptyStateWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _CircleIconAvatar(child: _resolvedIcon),
-            const SizedBox(height: 40),
+            const SizedBox(height: 30),
             Text(
               _resolvedTitle,
               style: AppTypographyV1.bodyLarge.bold.neutralGrey6(),
               textAlign: TextAlign.center,
             ),
-            AppSpacing.verticalGapLg,
+            AppSpacing.verticalGapSm,
             Text(
               _resolvedSubtitle,
               style: AppTypographyV1.bodySmall.medium.neutralGrey6(),
               textAlign: TextAlign.center,
             ),
             if (_resolvedButtonLabel != null) ...[
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
               AppButton(
                 text: _resolvedButtonLabel!,
                 variant: ButtonVariant.primary,

@@ -2,7 +2,9 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../../../../core/entities/visual_cue_entity.dart';
 import '../../../../core/models/visual_cue_model.dart';
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/listing_product_entity.dart';
+import '../../domain/entities/wishlist_info_entity.dart';
 import 'media_item_model.dart';
 import 'product_price_model.dart';
 import 'wishlist_info_model.dart';
@@ -28,16 +30,19 @@ class ListingProductModel {
     this.trackingMeta,
   });
 
+  @JsonKey(fromJson: parseToInt)
   final int id;
+  @JsonKey(fromJson: parseToString)
   final String name;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? brandName;
-  @JsonKey(defaultValue: 0)
+  @JsonKey(fromJson: parseToInt)
   final int quantity;
-  @JsonKey(defaultValue: false)
+  @JsonKey(fromJson: parseToBool)
   final bool soldOut;
-  @JsonKey(defaultValue: false)
+  @JsonKey(fromJson: parseToBool)
   final bool isXLTile;
-  @JsonKey(defaultValue: false)
+  @JsonKey(fromJson: parseToBool)
   final bool isCPT;
 
   final WishlistInfoModel? wishlistInfo;
@@ -47,7 +52,9 @@ class ListingProductModel {
 
   final ProductPriceModel? priceInfo;
 
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? colorVariants;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? actionUri;
 
   @JsonKey(name: 'visualCue')
@@ -73,9 +80,7 @@ class ListingProductModel {
       id: id,
       name: name,
       brandName: brandName,
-      isWishlisted: wishlistInfo?.isWishlisted ?? false,
-      canWishlist: wishlistInfo?.canWishlist ?? false,
-      wishlistId: wishlistInfo?.id?.toString(),
+      wishlistInfo: wishlistInfo?.toEntity() ?? const WishlistInfoEntity(),
       quantity: quantity,
       soldOut: soldOut,
       isXLTile: isXLTile,

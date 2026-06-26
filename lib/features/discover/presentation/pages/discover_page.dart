@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
 
-import '../../../../components/atoms/error_retry_widget.dart';
+import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/constants/strings/discover_strings.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
@@ -26,16 +26,14 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
   static const _kToolbarHeight = 80.0;
   static const _kTabsHeight = 60.0;
 
-  /// Distance from the bottom (in px) at which the next-page fetch fires.
-  /// Small on purpose: we want the user to have scrolled through the current
-  /// batch of components (pageSize=20) before requesting more — not pre-fetch
-  /// while they're still mid-page.
-  static const _kPaginationThreshold = 200.0;
+  static const _kPaginationTrigger = 0.8;
 
   static const _kCacheExtent = 600.0;
 
   int _selectedTabIndex = 0;
   final ScrollController _scrollController = ScrollController();
+
+  bool _suppressScrollTabsToTop = false;
 
   /// Cached list of sortingOption ids (parallel to the visible tabs). Used so
   /// the bloc receives the API's `pageName` (`Shop_for_Baby`, etc.) on tab tap.
@@ -67,7 +65,8 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
   void _onScroll() {
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
-    if (position.pixels >= position.maxScrollExtent - _kPaginationThreshold) {
+    if (position.maxScrollExtent <= 0) return;
+    if (position.pixels >= position.maxScrollExtent * _kPaginationTrigger) {
       final bloc = context.read<HomeBloc>();
       final state = bloc.state;
       if (state.isSuccess && state.hasNextPage && !state.isLoadingMore) {
@@ -77,28 +76,44 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
   }
 
   void _scrollTabsToTop() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
+    // Deferred so a synchronous `_onTabSelected` (fires after this on tab
+    // switch via SegmentedButton.onSelectionChanged) can flip the suppress
+    // flag and cancel the animation. Re-taps don't trigger onSelectionChanged,
+    // so the flag stays false and the animation runs as intended.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_suppressScrollTabsToTop) {
+        _suppressScrollTabsToTop = false;
+        return;
+      }
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _scrollToTopOnReload() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scrollController.hasClients) return;
-      _scrollController.jumpTo(0);
+      if (_scrollController.position.pixels > _kToolbarHeight) {
+        _scrollController.jumpTo(_kToolbarHeight);
+      }
     });
   }
 
   void _onTabSelected(int index) {
     if (index == _selectedTabIndex) return;
+    // Suppress the deferred `_scrollTabsToTop` animation — switching tabs
+    // shouldn't re-expose the toolbar like a re-tap does.
+    _suppressScrollTabsToTop = true;
     setState(() => _selectedTabIndex = index);
 
-    if (_scrollController.hasClients && _scrollController.position.pixels != 0) {
-      _scrollController.jumpTo(0);
+    if (_scrollController.hasClients && _scrollController.position.pixels > _kToolbarHeight) {
+      _scrollController.jumpTo(_kToolbarHeight);
     }
 
     if (index < _sortOptionIds.length) {
@@ -118,31 +133,6 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
 
     return MultiBlocListener(
       listeners: [
-        BlocListener<ShopTheLookCubit, ShopTheLookCartState>(
-          listenWhen: (prev, curr) =>
-              prev.status == ShopTheLookCartStatus.loading &&
-              curr.status != ShopTheLookCartStatus.loading,
-          listener: (context, state) {
-            if (state.status == ShopTheLookCartStatus.success) {
-              if (state.cartItemQty != null) {
-                context.read<CartCountCubit>().set(state.cartItemQty!);
-              }
-
-              context.showSnack(
-                DiscoverStrings.itemsAddedToBag(state.addedCount),
-                status: SnackStatus.success,
-              );
-            } else if (state.status == ShopTheLookCartStatus.failure) {
-              context.showSnack(
-                state.errorMessage ?? DiscoverStrings.failedToAddItemsToBag,
-                status: SnackStatus.error,
-              );
-            }
-          },
-        ),
-        // Any full reload (pull-to-refresh / login / unlock / logout) routes
-        // through HomeStatus.loading; pagination only flips isLoadingMore. So
-        // this single transition covers every refresh trigger.
         BlocListener<HomeBloc, HomeState>(
           listenWhen: (prev, curr) =>
               prev.status != HomeStatus.loading && curr.status == HomeStatus.loading,
@@ -213,17 +203,15 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
       return SliverToBoxAdapter(child: LoadingShimmer.listShimmer(itemCount: 6, itemHeight: 120));
     }
 
-    final mq = MediaQuery.of(context);
-    final availableHeight = mq.size.height - mq.padding.top - _kToolbarHeight - _kTabsHeight;
-
     if (state.isFailure) {
-      return SliverToBoxAdapter(
-        child: SizedBox(
-          height: availableHeight,
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: _kToolbarHeight + _kTabsHeight),
           child: Center(
-            child: ErrorRetryWidget(
-              message: state.errorMessage,
-              onRetry: () => context.read<HomeBloc>().add(const LoadHomePage()),
+            child: EmptyStateWidget(
+              type: EmptyStateType.serverError,
+              onButtonTap: () => context.read<HomeBloc>().add(const LoadHomePage()),
             ),
           ),
         ),
@@ -232,10 +220,16 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     if (state.isSuccess) {
       final components = state.homePage?.pageComponents ?? [];
       if (components.isEmpty) {
-        return SliverToBoxAdapter(
-          child: SizedBox(
-            height: availableHeight,
-            child: const Center(child: Text(DiscoverStrings.noContentAvailable)),
+        return SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: _kToolbarHeight + _kTabsHeight),
+            child: Center(
+              child: EmptyStateWidget(
+                type: EmptyStateType.discover,
+                onButtonTap: () => context.read<HomeBloc>().add(const LoadHomePage()),
+              ),
+            ),
           ),
         );
       }

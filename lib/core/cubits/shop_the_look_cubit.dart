@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../features/pdp/domain/usecases/add_to_cart_usecase.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 
 enum ShopTheLookCartStatus { idle, loading, success, failure }
@@ -24,9 +23,8 @@ class ShopTheLookCartState extends Equatable {
 }
 
 class ShopTheLookCubit extends Cubit<ShopTheLookCartState> {
-  final AddToCartUseCase _addToCartUseCase;
 
-  ShopTheLookCubit(this._addToCartUseCase)
+  ShopTheLookCubit()
     : super(const ShopTheLookCartState());
 
   Future<void> addToCart(List<ShopTheLookSelection> selections) async {
@@ -36,17 +34,6 @@ class ShopTheLookCubit extends Cubit<ShopTheLookCartState> {
     var addedCount = 0;
     int? lastCartQty;
     String? lastError;
-
-    for (final sel in selections) {
-      if (sel.skuId == null) continue;
-      final result = await _addToCartUseCase(
-        AddToCartParams(skuId: sel.skuId!),
-      );
-      result.fold((f) => lastError = f.message, (entity) {
-        addedCount++;
-        lastCartQty = entity.cartItemQty;
-      });
-    }
 
     if (addedCount > 0) {
       emit(

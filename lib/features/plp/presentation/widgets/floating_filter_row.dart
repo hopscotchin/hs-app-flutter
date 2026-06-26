@@ -142,7 +142,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
             Padding(
               padding: const EdgeInsets.only(left: AppSpacing.lgMd, bottom: AppSpacing.md),
               child: Text(
-                section.title!.toUpperCase(),
+                section.title ?? '',
                 style: AppTypographyV1.titleMedium.bold.textPrimary(),
               ),
             ),
@@ -167,9 +167,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
               child: SecondaryButton.defaultType(
                 text: PlpStrings.applyFilter,
                 state: _selectedValues.isNotEmpty ? ButtonState.enabled : ButtonState.disabled,
-                onTap: () {
-                  //_applyFilter
-                },
+                onTap: _applyFilter,
                 size: ButtonSize.small,
               ),
             ),

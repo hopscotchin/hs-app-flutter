@@ -40,8 +40,7 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
 
   List<HeroTile> get _tiles => widget.heroData.tiles;
   int get _durationMs => widget.heroData.viewConfig?.scrollDuration ?? 3000;
-  double get _cornerRadius =>
-      widget.heroData.viewConfig?.imageCornerRadius ?? 4;
+  double get _cornerRadius => widget.heroData.viewConfig?.imageCornerRadius ?? 4;
 
   @override
   bool get wantKeepAlive => true;
@@ -67,8 +66,7 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _startAutoScroll();
-    } else if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       _cancelTimer();
     }
   }
@@ -103,13 +101,11 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
 
     // horizontalMargin = 0  →  viewportFraction = 1.0  →  full-screen hero
     // horizontalMargin = 20 →  viewportFraction < 1.0  →  adjacent tiles peek on both sides
-    final double horizontalMargin =
-        widget.margins?.horizontal ?? _defaultHorizontalMargin;
+    final double horizontalMargin = widget.margins?.horizontal ?? _defaultHorizontalMargin;
     final double innerHorizontalMargin =
         widget.margins?.innerHorizontalMargin ?? _defaultInnerHorizontalMargin;
 
-    final double viewportFraction =
-        (screenWidth - horizontalMargin * 2) / screenWidth;
+    final double viewportFraction = (screenWidth - horizontalMargin * 2) / screenWidth;
 
     if (_controller == null) {
       final int initialPage = tiles.length * _leftScrollBudget;
@@ -122,15 +118,11 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
 
     final double tileWidth = screenWidth * viewportFraction;
     final double aspectRatio = tiles.first.aspectRatio;
-    final double tileHeight = aspectRatio > 0
-        ? tileWidth / aspectRatio
-        : tileWidth;
+    final double tileHeight = aspectRatio > 0 ? tileWidth / aspectRatio : tileWidth;
 
     // No inner gap when full-screen (viewportFraction = 1.0); adjacent tiles
     // aren't visible so padding would just shrink the image unnecessarily.
-    final double tilePadding = horizontalMargin > 0
-        ? innerHorizontalMargin / 2
-        : 0.0;
+    final double tilePadding = horizontalMargin > 0 ? innerHorizontalMargin / 2 : 0.0;
 
     return SizedBox(
       height: tileHeight,
@@ -150,14 +142,14 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
               child: PageView.builder(
                 controller: _controller!,
                 itemCount: null,
+                allowImplicitScrolling: true,
                 onPageChanged: (int index) => _currentPage.value = index,
                 itemBuilder: (BuildContext context, int index) {
                   final HeroTile tile = tiles[index % tiles.length];
                   return Padding(
                     padding: EdgeInsets.symmetric(horizontal: tilePadding),
                     child: GestureDetector(
-                      onTap: () =>
-                          ActionUrlHandler.navigate(context, tile.actionUri),
+                      onTap: () => ActionUrlHandler.navigate(context, tile.actionUri),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(_cornerRadius),
                         child: CachedImageWidget(
@@ -178,10 +170,7 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
                 right: 0,
                 bottom: 30,
                 child: IgnorePointer(
-                  child: _DotIndicator(
-                    count: tiles.length,
-                    currentPage: _currentPage,
-                  ),
+                  child: _DotIndicator(count: tiles.length, currentPage: _currentPage),
                 ),
               ),
           ],

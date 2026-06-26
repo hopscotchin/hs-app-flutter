@@ -20,4 +20,5 @@ abstract final class RouteNames {
   static const String orders = '/orders';
   static const String addresses = '/addresses';
   static const String addAddress = 'add';
+  static const String legal = '/legal';
 }

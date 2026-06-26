@@ -8,8 +8,10 @@ part of 'selected_filter_model.dart';
 
 SelectedFilterModel _$SelectedFilterModelFromJson(Map<String, dynamic> json) =>
     SelectedFilterModel(
-      filterKey: json['filterKey'] as String?,
-      filterValue: json['filterValue'] as String?,
-      selectedFilterName: json['selectedFilterName'] as String?,
-      showOnUi: json['showOnUi'] as bool? ?? true,
+      filterKey: parseToStringOrNull(json['filterKey']),
+      filterValue: parseToStringOrNull(json['filterValue']),
+      selectedFilterName: parseToStringOrNull(json['selectedFilterName']),
+      showOnUi: json['showOnUi'] == null
+          ? true
+          : _parseShowOnUi(json['showOnUi']),
     );

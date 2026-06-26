@@ -41,9 +41,9 @@ class _SignedInHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
-        AppSpacing.lgMd,
         AppSpacing.md,
         AppSpacing.md,
+        AppSpacing.sm,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -165,12 +165,12 @@ class _SignedOutHeader extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(AccountStrings.heyThere, style: AppTypographyV1.bodyLarge.bold.textPrimary()),
-          AppSpacing.verticalGapSm,
+          AppSpacing.verticalGapXs,
           Text(
             AccountStrings.signOutHeaderSubTitle,
             style: AppTypographyV1.labelLarge.regular.textPrimary(),
           ),
-          AppSpacing.verticalGapLgMd,
+          const SizedBox(height: 17),
           PrimaryButton.defaultType(
             text: AccountStrings.signIn,
             isFullWidth: true,
@@ -191,7 +191,7 @@ class _SignedOutHeader extends StatelessWidget {
               ),
             ),
           ],
-          AppSpacing.verticalGapLgMd,
+          AppSpacing.verticalGapMd,
           AuthFooterLinkRow(
             promptText: AuthStrings.newToHopscotch,
             actionLabel: AuthStrings.joinUs.toUpperCase(),

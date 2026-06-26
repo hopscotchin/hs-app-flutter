@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/quick_filter_entity.dart';
 
 part 'quick_filter_model.g.dart';
@@ -13,9 +14,9 @@ class QuickFilterModel {
     this.trackingMeta = const <String, dynamic>{},
   });
 
-  final String? filterKey;
-  final String? label;
-  @JsonKey(defaultValue: false) final bool isApplied;
+  @JsonKey(fromJson: parseToStringOrNull) final String? filterKey;
+  @JsonKey(fromJson: parseToStringOrNull) final String? label;
+  @JsonKey(fromJson: parseToBool) final bool isApplied;
   @JsonKey(defaultValue: <String, dynamic>{}) final Map<String, dynamic> trackingMeta;
 
   factory QuickFilterModel.fromJson(Map<String, dynamic> json) =>

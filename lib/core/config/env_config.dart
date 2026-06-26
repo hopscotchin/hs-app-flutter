@@ -16,6 +16,11 @@ class EnvConfig {
   static String get httpScheme => dotenv.env['HTTP_SCHEME'] ?? 'http://';
   static String get apiVersion => dotenv.env['API_VERSION'] ?? 'v2';
 
+  // Web Configuration (webview URLs)
+  static String get webHost => dotenv.env['WEB_HOST'] ?? 'www.hopscotch.in';
+  static String get webHostQa => dotenv.env['WEB_HOST_QA'] ?? 'qa.hopscotch.in';
+  static String get webHostQaVpn => dotenv.env['WEB_HOST_QA_VPN'] ?? 'qa-vpn.hopscotch.in';
+
   // Client Credentials
   static String get authMethod => dotenv.env['AUTH_METHOD'] ?? 'v1';
   static String get secretKeyAndroid => dotenv.env['SECRET_KEY_ANDROID'] ?? '';

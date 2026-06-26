@@ -18,6 +18,10 @@ class XLTileWidget extends StatefulWidget {
   final VoidCallback onWishlistTap;
   final VoidCallback? onAddToCartTap;
 
+  /// Caller-supplied (global WishlistCubit) status; falls back to the listing
+  /// response status when null.
+  final bool? isWishlisted;
+
   /// Analytics callback — position is 1-based, direction is "L" or "R"
   final void Function(int position, String direction)? onImageScrolled;
 
@@ -27,6 +31,7 @@ class XLTileWidget extends StatefulWidget {
     required this.onTap,
     required this.onWishlistTap,
     this.onAddToCartTap,
+    this.isWishlisted,
     this.onImageScrolled,
   });
 
@@ -36,6 +41,7 @@ class XLTileWidget extends StatefulWidget {
     required VoidCallback onTap,
     required VoidCallback onWishlistTap,
     VoidCallback? onAddToCartTap,
+    bool? isWishlisted,
     void Function(int position, String direction)? onImageScrolled,
   }) {
     return XLTileWidget(
@@ -44,6 +50,7 @@ class XLTileWidget extends StatefulWidget {
       onTap: onTap,
       onWishlistTap: onWishlistTap,
       onAddToCartTap: onAddToCartTap,
+      isWishlisted: isWishlisted,
       onImageScrolled: onImageScrolled,
     );
   }
@@ -90,7 +97,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
           children: [
             _buildImagePager(),
             ...widget.product.visualCues.map(_buildVisualCue),
-            _buildWishlistIcon(),
+            if (widget.product.wishlistInfo.canWishlist) _buildWishlistIcon(),
             if (_hasMultipleImages) _buildPageIndicator(),
           ],
         ),
@@ -107,6 +114,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
         controller: _pageController,
         itemCount: images.length,
         dragStartBehavior: DragStartBehavior.down,
+        allowImplicitScrolling: true,
         onPageChanged: (index) {
           final direction = index > _previousPage ? 'R' : 'L';
           _previousPage = _currentPage.value;
@@ -131,7 +139,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
       child: GestureDetector(
         onTap: widget.onWishlistTap,
         child: CustomImage(
-          path: widget.product.isWishlisted
+          path: (widget.isWishlisted ?? widget.product.wishlistInfo.isWishlisted)
               ? ImageConstants.wishlistAdded
               : ImageConstants.addWishlist,
           height: 28,
@@ -141,7 +149,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
     );
   }
 
-  // ── Page indicator dots — bottom-right ────────────────────────────────────
+  static const int _maxVisibleDots = 5;
 
   Widget _buildPageIndicator() {
     final count = widget.product.imageUrls.length;
@@ -150,22 +158,34 @@ class _XLTileWidgetState extends State<XLTileWidget> {
       bottom: 12,
       child: ValueListenableBuilder<int>(
         valueListenable: _currentPage,
-        builder: (_, page, _) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(count, (i) {
-            final isSelected = i == page;
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: isSelected ? 28 : 10,
-              height: 10,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(isSelected ? 85 : 100),
-                color: Colors.black.withValues(alpha: 0.5),
-              ),
-            );
-          }),
-        ),
+        builder: (_, page, _) {
+          final start = count <= _maxVisibleDots
+              ? 0
+              : (page - _maxVisibleDots ~/ 2).clamp(0, count - _maxVisibleDots);
+          final end = count <= _maxVisibleDots ? count : start + _maxVisibleDots;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [for (var i = start; i < end; i++) _buildDot(i, page, start, end, count)],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDot(int i, int page, int start, int end, int count) {
+    final isSelected = i == page;
+
+    final isEdge = !isSelected && ((i == start && start > 0) || (i == end - 1 && end < count));
+    final double size = isEdge ? 6 : 10;
+    return AnimatedContainer(
+      key: ValueKey(i),
+      duration: const Duration(milliseconds: 200),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      width: isSelected ? 28 : size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(isSelected ? 85 : 100),
+        color: Colors.black.withValues(alpha: 0.5),
       ),
     );
   }
@@ -178,42 +198,24 @@ class _XLTileWidgetState extends State<XLTileWidget> {
     final isLeft = location.contains('left');
     final isTextType = (cue.uiType?.toUpperCase() ?? '') == 'TEXT';
     final edgeMargin = isTextType ? 12.0 : 8.0;
+    final bgColor = cue.bgColor.toColor ?? AppColors.neutralGrey2;
+    final txtColor = cue.textColor.toColor ?? AppColors.textPrimary;
 
     return Positioned(
       top: isTop ? edgeMargin : null,
       bottom: !isTop ? edgeMargin : null,
       left: isLeft ? edgeMargin : null,
       right: !isLeft ? edgeMargin : null,
-      child: isTextType ? _buildTextCueBadge(cue) : _buildImageCueBadge(cue),
-    );
-  }
-
-  Widget _buildTextCueBadge(VisualCueEntity cue) {
-    final bgColor = cue.bgColor.toColor ?? AppColors.neutralGrey2;
-    final txtColor = cue.textColor.toColor ?? AppColors.textPrimary;
-
-    final badge = cue.imageUrl.isNotNullOrEmpty
-        ? CustomImage(path: cue.imageUrl!, height: 15, width: 64)
-        : CustomChipWidget(
-            text: (cue.text ?? ''),
-            backgroundColor: bgColor,
-            borderColor: widget.product.isSoldOut ? bgColor : txtColor,
-            borderRadius: 4,
-            textStyle: AppTypographyV1.labelMedium.medium.copyWith(color: txtColor),
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-          );
-
-    return Positioned(bottom: AppSpacing.xs, left: AppSpacing.xs, child: badge);
-  }
-
-  Widget _buildImageCueBadge(VisualCueEntity cue) {
-    if (cue.imageUrl == null || cue.imageUrl!.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return SizedBox(
-      height: 26,
-      child: CachedImageWidget(imageUrl: cue.imageUrl!, fit: BoxFit.contain),
+      child: !isTextType && cue.imageUrl.isNotNullOrEmpty
+          ? CustomImage(path: cue.imageUrl!, height: 15, width: 64)
+          : CustomChipWidget(
+              text: (cue.text ?? ''),
+              backgroundColor: bgColor,
+              borderColor: bgColor,
+              borderRadius: 4,
+              textStyle: AppTypographyV1.labelMedium.medium.copyWith(color: txtColor),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+            ),
     );
   }
 

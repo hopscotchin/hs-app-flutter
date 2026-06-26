@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/entities/visual_cue_entity.dart';
 import 'product_price_entity.dart';
+import 'wishlist_info_entity.dart';
 
 part 'listing_product_entity.freezed.dart';
 
@@ -11,9 +12,7 @@ abstract class ListingProductEntity with _$ListingProductEntity {
     required int id,
     required String name,
     String? brandName,
-    @Default(false) bool isWishlisted,
-    @Default(false) bool canWishlist,
-    String? wishlistId,
+    @Default(WishlistInfoEntity()) WishlistInfoEntity wishlistInfo,
     @Default(0) int quantity,
     @Default(false) bool soldOut,
     @Default(false) bool isXLTile,

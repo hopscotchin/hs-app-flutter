@@ -55,6 +55,7 @@ class FilterSectionBadge extends StatelessWidget {
           url,
           fit: BoxFit.contain,
           placeholderBuilder: (_) => SizedBox(height: height),
+          errorBuilder: (_, _, _) => SizedBox(height: height),
         ),
       );
     }

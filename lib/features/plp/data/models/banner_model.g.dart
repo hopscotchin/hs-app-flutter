@@ -7,9 +7,9 @@ part of 'banner_model.dart';
 // **************************************************************************
 
 BannerModel _$BannerModelFromJson(Map<String, dynamic> json) => BannerModel(
-  imageUrl: json['imageUrl'] as String?,
-  height: (json['height'] as num?)?.toInt(),
-  width: (json['width'] as num?)?.toInt(),
-  title: json['title'] as String?,
-  actionUri: json['actionUri'] as String?,
+  imageUrl: parseToStringOrNull(json['imageUrl']),
+  height: parseToIntOrNull(json['height']),
+  width: parseToIntOrNull(json['width']),
+  title: parseToStringOrNull(json['title']),
+  actionUri: parseToStringOrNull(json['actionUri']),
 );

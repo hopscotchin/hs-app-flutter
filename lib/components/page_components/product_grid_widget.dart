@@ -5,6 +5,8 @@ import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/spacing.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../../features/plp/domain/entities/listing_product_entity.dart';
+import '../../features/wishlist/presentation/widgets/wishlist_status_builder.dart';
+import '../../features/wishlist/presentation/wishlist_actions.dart';
 import '../atoms/cached_image_widget.dart';
 import '../atoms/cta_button_component.dart';
 import '../atoms/product_tile.dart';
@@ -33,11 +35,7 @@ class ProductGridWidget extends StatelessWidget {
       children: [
         if (gridData.title?.url != null)
           Padding(
-            padding: EdgeInsets.only(
-              left: titleHMargin,
-              right: titleHMargin,
-              bottom: titleBMargin,
-            ),
+            padding: EdgeInsets.only(left: titleHMargin, right: titleHMargin, bottom: titleBMargin),
             child: CachedImageWidget(
               imageUrl: gridData.title!.url!,
               width: double.infinity,
@@ -46,19 +44,12 @@ class ProductGridWidget extends StatelessWidget {
           ),
         for (int row = 0; row < rowCount; row++)
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.sm,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
             child: _buildProductRow(context, tiles, row * columns, columns),
           ),
         if (gridData.ctaButton != null)
           Padding(
-            padding: EdgeInsets.only(
-              top: ctaTop,
-              left: ctaHMargin,
-              right: ctaHMargin,
-            ),
+            padding: EdgeInsets.only(top: ctaTop, left: ctaHMargin, right: ctaHMargin),
             child: _buildCta(context, gridData.ctaButton!),
           ),
       ],
@@ -88,11 +79,19 @@ class ProductGridWidget extends StatelessWidget {
 
   Widget _buildProductCard(BuildContext context, ListingProductEntity item) {
     final showInfo = gridData.layoutInfo?.showProductInfo ?? true;
-    return ProductTile.fromProduct(
-      item,
-      showProductInfo: showInfo,
-      onTap: () =>
-          ActionUrlHandler.navigate(context, item.actionUri, title: item.name),
+    return WishlistStatusBuilder(
+      product: item,
+      builder: (context, wished) => ProductTile.fromProduct(
+        item,
+        showProductInfo: showInfo,
+        isWishlisted: wished,
+        onTap: () => ActionUrlHandler.navigate(context, item.actionUri, title: item.name),
+        onWishlistTap: () => WishlistActions.toggle(
+          context,
+          productId: item.id.toString(),
+          price: WishlistActions.priceToInt(item.price?.sellingPrice),
+        ),
+      ),
     );
   }
 

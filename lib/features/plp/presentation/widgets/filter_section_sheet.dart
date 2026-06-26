@@ -12,11 +12,6 @@ import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/filter_entity.dart';
 import '../../domain/entities/filter_section_entity.dart';
 
-/// Bottom sheet that shows filter options for a single [FilterSectionEntity].
-///
-/// Used when the user taps an eligible sticky-filter chip (Gender, Age, etc.).
-/// Returns a `Map<String, String>` with selected param→values or null if
-/// dismissed.
 class FilterSectionSheet extends StatefulWidget {
   final FilterSectionEntity section;
   final Map<String, String> appliedFilters;
@@ -120,7 +115,6 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildHeader(),
-
           Flexible(
             child: ListView.builder(
               controller: widget.scrollController,
@@ -246,8 +240,10 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
           Expanded(
             child: PrimaryButton.defaultType(
               text: CommonStrings.apply,
-              state: _hasSelections ? ButtonState.enabled : ButtonState.disabled,
-              onTap: _hasSelections ? _onApply : null,
+              // Always enabled — applying commits the current selection (incl.
+              // removals) and fires the filter API.
+              state: ButtonState.enabled,
+              onTap: _onApply,
             ),
           ),
         ],
@@ -273,6 +269,8 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
     final result = <String, String>{};
     if (_selectedValues.isNotEmpty) {
       result[_param] = _selectedValues.join(',');
+    } else {
+      result[_param] = '';
     }
     Navigator.of(context).pop(result);
   }

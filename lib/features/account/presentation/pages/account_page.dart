@@ -12,6 +12,7 @@ import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
 import 'package:hs_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:hs_app_flutter/features/discover/presentation/bloc/home_bloc.dart';
+import 'package:hs_app_flutter/features/wishlist/presentation/cubit/wishlist_cubit.dart';
 
 import '../../../../core/theme/colors.dart';
 import '../../domain/entities/account_entity.dart';
@@ -105,7 +106,7 @@ class _AccountContent extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  AppSpacing.verticalGapMd,
+                  AppSpacing.verticalGapSm,
                   AccountHeaderWidget(
                     account: account,
                     onForgetMe: () => _showForgetDialog(context),
@@ -256,12 +257,18 @@ class _AccountContent extends StatelessWidget {
                   const AccountHelpSectionWidget(),
                   AccountFooterWidget(
                     isLoggedIn: isLoggedIn,
+                    onLegal: () => AppNavigator.goToLegal(context),
                     onSignIn: () => AppNavigator.goToLogin(context),
                     onSignOut: () {
                       final homeBloc = context.read<HomeBloc>();
+                      final wishlistCubit = context.read<WishlistCubit>();
                       context.read<AuthBloc>().add(
                         AuthEvent.signOut(
                           onSuccess: () {
+                            // Drop the previous user's wishlist/cart so the
+                            // refreshed responses re-seed with the now
+                            // logged-out (false) statuses.
+                            wishlistCubit.invalidateOnAuthChange();
                             homeBloc.add(const RefreshHomePage());
                           },
                         ),

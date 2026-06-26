@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/mixins/safe_api_call.dart';
 import '../../../../core/network/connectivity/network_info.dart';
@@ -34,6 +35,15 @@ class PlpRepositoryImpl with SafeApiCall implements PlpRepository {
       final model = usesSearchEndpoint
           ? await _api.getBoutiqueProducts(queryParams: queryParams, cancelToken: cancelToken)
           : await _api.getPlpProducts(queryParams: queryParams, cancelToken: cancelToken);
+      // The BFF returns HTTP 200 even for logical failures (`action: failure`).
+      // Surface it through the normal error channel so the bloc can fall back
+      // to the previously loaded content (or empty when there's nothing yet).
+      if (model.isFailure) {
+        final message = model.message;
+        throw (message != null && message.isNotEmpty)
+            ? ApiFailureException(message: message)
+            : const ApiFailureException();
+      }
       return model.toEntity();
     });
   }
@@ -45,6 +55,12 @@ class PlpRepositoryImpl with SafeApiCall implements PlpRepository {
   }) {
     return safeApiCall(_networkInfo, () async {
       final model = await _api.getFilterData(queryParams: queryParams, cancelToken: cancelToken);
+      if (model.isFailure) {
+        final message = model.message;
+        throw (message != null && message.isNotEmpty)
+            ? ApiFailureException(message: message)
+            : const ApiFailureException();
+      }
       return model.toEntity();
     });
   }

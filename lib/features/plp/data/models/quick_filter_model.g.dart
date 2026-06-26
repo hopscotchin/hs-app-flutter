@@ -8,8 +8,10 @@ part of 'quick_filter_model.dart';
 
 QuickFilterModel _$QuickFilterModelFromJson(Map<String, dynamic> json) =>
     QuickFilterModel(
-      filterKey: json['filterKey'] as String?,
-      label: json['label'] as String?,
-      isApplied: json['isApplied'] as bool? ?? false,
+      filterKey: parseToStringOrNull(json['filterKey']),
+      label: parseToStringOrNull(json['label']),
+      isApplied: json['isApplied'] == null
+          ? false
+          : parseToBool(json['isApplied']),
       trackingMeta: json['trackingMeta'] as Map<String, dynamic>? ?? {},
     );

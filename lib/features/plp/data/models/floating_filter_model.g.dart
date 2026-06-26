@@ -9,24 +9,26 @@ part of 'floating_filter_model.dart';
 FloatingFilterChipModel _$FloatingFilterChipModelFromJson(
   Map<String, dynamic> json,
 ) => FloatingFilterChipModel(
-  filterKey: json['filterKey'] as String?,
-  filterValue: json['filterValue'] as String?,
-  label: json['label'] as String?,
-  chipType: json['chipType'] as String?,
-  textColor: json['textColor'] as String?,
-  backgroundColor: json['bgColor'] as String?,
-  imageUrl: json['imageUrl'] as String?,
-  isSelected: json['isSelected'] as bool? ?? false,
+  filterKey: parseToStringOrNull(json['filterKey']),
+  filterValue: parseToStringOrNull(json['filterValue']),
+  label: parseToStringOrNull(json['label']),
+  chipType: parseToStringOrNull(json['chipType']),
+  textColor: parseToStringOrNull(json['textColor']),
+  backgroundColor: parseToStringOrNull(json['bgColor']),
+  imageUrl: parseToStringOrNull(json['imageUrl']),
+  isSelected: json['isSelected'] == null
+      ? false
+      : parseToBool(json['isSelected']),
 );
 
 FloatingFilterSectionModel _$FloatingFilterSectionModelFromJson(
   Map<String, dynamic> json,
 ) => FloatingFilterSectionModel(
-  title: json['title'] as String?,
-  chipType: json['chipType'] as String?,
-  position: (json['position'] as num?)?.toInt(),
-  tileWidth: (json['tileWidth'] as num?)?.toInt(),
-  tileHeight: (json['tileHeight'] as num?)?.toInt(),
+  title: parseToStringOrNull(json['title']),
+  chipType: parseToStringOrNull(json['chipType']),
+  position: parseToIntOrNull(json['position']),
+  tileWidth: parseToIntOrNull(json['tileWidth']),
+  tileHeight: parseToIntOrNull(json['tileHeight']),
   chips:
       (json['chips'] as List<dynamic>?)
           ?.map(
@@ -38,7 +40,7 @@ FloatingFilterSectionModel _$FloatingFilterSectionModelFromJson(
 
 FloatingFilterModel _$FloatingFilterModelFromJson(Map<String, dynamic> json) =>
     FloatingFilterModel(
-      type: json['type'] as String?,
+      type: parseToStringOrNull(json['type']),
       sections:
           (json['sections'] as List<dynamic>?)
               ?.map(

@@ -3,7 +3,8 @@ class PlpStrings {
 
   static const String filters = 'Filter';
   static const String filtersChip = 'FILTERS';
-  static const String sortBy = 'Sort';
+  static const String sortBy = 'Sort By';
+  static const String sort = 'Sort';
   static const String sortByChip = 'SORT BY';
   static const String clearFilters = 'Clear Filters';
   static const String noProductsFound = 'No products found';

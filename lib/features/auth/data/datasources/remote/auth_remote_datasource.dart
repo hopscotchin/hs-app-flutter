@@ -4,6 +4,7 @@ import 'package:retrofit/retrofit.dart';
 
 import '../../../../../core/constants/api_constants.dart';
 import '../../models/check_mobile_response/check_mobile_response_model.dart';
+import '../../models/login_ticket_response/login_ticket_response_model.dart';
 import '../../models/logout/logout_model.dart';
 import '../../models/send_otp_response/send_otp_response_model.dart';
 import '../../models/signup_otp_response/signup_otp_response_model.dart';
@@ -50,4 +51,9 @@ abstract class AuthRemoteDatasource {
 
   @GET(ApiConstants.logout)
   Future<LogoutModel> logout({@CancelRequest() CancelToken? cancelToken});
+
+  @POST(ApiConstants.generateLoginTicket)
+  Future<LoginTicketResponseModel> generateLoginTicket({
+    @CancelRequest() CancelToken? cancelToken,
+  });
 }

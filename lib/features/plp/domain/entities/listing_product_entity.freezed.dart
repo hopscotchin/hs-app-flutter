@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ListingProductEntity {
 
- int get id; String get name; String? get brandName; bool get isWishlisted; bool get canWishlist; String? get wishlistId; int get quantity; bool get soldOut; bool get isXLTile; bool get isCPT; List<String> get imageUrls; ProductPriceEntity? get price; String? get colorVariants; String? get actionUri; List<VisualCueEntity> get visualCues; Map<String, dynamic>? get trackingMeta;
+ int get id; String get name; String? get brandName; WishlistInfoEntity get wishlistInfo; int get quantity; bool get soldOut; bool get isXLTile; bool get isCPT; List<String> get imageUrls; ProductPriceEntity? get price; String? get colorVariants; String? get actionUri; List<VisualCueEntity> get visualCues; Map<String, dynamic>? get trackingMeta;
 /// Create a copy of ListingProductEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ListingProductEntityCopyWith<ListingProductEntity> get copyWith => _$ListingPro
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ListingProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.brandName, brandName) || other.brandName == brandName)&&(identical(other.isWishlisted, isWishlisted) || other.isWishlisted == isWishlisted)&&(identical(other.canWishlist, canWishlist) || other.canWishlist == canWishlist)&&(identical(other.wishlistId, wishlistId) || other.wishlistId == wishlistId)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.soldOut, soldOut) || other.soldOut == soldOut)&&(identical(other.isXLTile, isXLTile) || other.isXLTile == isXLTile)&&(identical(other.isCPT, isCPT) || other.isCPT == isCPT)&&const DeepCollectionEquality().equals(other.imageUrls, imageUrls)&&(identical(other.price, price) || other.price == price)&&(identical(other.colorVariants, colorVariants) || other.colorVariants == colorVariants)&&(identical(other.actionUri, actionUri) || other.actionUri == actionUri)&&const DeepCollectionEquality().equals(other.visualCues, visualCues)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ListingProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.brandName, brandName) || other.brandName == brandName)&&(identical(other.wishlistInfo, wishlistInfo) || other.wishlistInfo == wishlistInfo)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.soldOut, soldOut) || other.soldOut == soldOut)&&(identical(other.isXLTile, isXLTile) || other.isXLTile == isXLTile)&&(identical(other.isCPT, isCPT) || other.isCPT == isCPT)&&const DeepCollectionEquality().equals(other.imageUrls, imageUrls)&&(identical(other.price, price) || other.price == price)&&(identical(other.colorVariants, colorVariants) || other.colorVariants == colorVariants)&&(identical(other.actionUri, actionUri) || other.actionUri == actionUri)&&const DeepCollectionEquality().equals(other.visualCues, visualCues)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,brandName,isWishlisted,canWishlist,wishlistId,quantity,soldOut,isXLTile,isCPT,const DeepCollectionEquality().hash(imageUrls),price,colorVariants,actionUri,const DeepCollectionEquality().hash(visualCues),const DeepCollectionEquality().hash(trackingMeta));
+int get hashCode => Object.hash(runtimeType,id,name,brandName,wishlistInfo,quantity,soldOut,isXLTile,isCPT,const DeepCollectionEquality().hash(imageUrls),price,colorVariants,actionUri,const DeepCollectionEquality().hash(visualCues),const DeepCollectionEquality().hash(trackingMeta));
 
 @override
 String toString() {
-  return 'ListingProductEntity(id: $id, name: $name, brandName: $brandName, isWishlisted: $isWishlisted, canWishlist: $canWishlist, wishlistId: $wishlistId, quantity: $quantity, soldOut: $soldOut, isXLTile: $isXLTile, isCPT: $isCPT, imageUrls: $imageUrls, price: $price, colorVariants: $colorVariants, actionUri: $actionUri, visualCues: $visualCues, trackingMeta: $trackingMeta)';
+  return 'ListingProductEntity(id: $id, name: $name, brandName: $brandName, wishlistInfo: $wishlistInfo, quantity: $quantity, soldOut: $soldOut, isXLTile: $isXLTile, isCPT: $isCPT, imageUrls: $imageUrls, price: $price, colorVariants: $colorVariants, actionUri: $actionUri, visualCues: $visualCues, trackingMeta: $trackingMeta)';
 }
 
 
@@ -45,11 +45,11 @@ abstract mixin class $ListingProductEntityCopyWith<$Res>  {
   factory $ListingProductEntityCopyWith(ListingProductEntity value, $Res Function(ListingProductEntity) _then) = _$ListingProductEntityCopyWithImpl;
 @useResult
 $Res call({
- int id, String name, String? brandName, bool isWishlisted, bool canWishlist, String? wishlistId, int quantity, bool soldOut, bool isXLTile, bool isCPT, List<String> imageUrls, ProductPriceEntity? price, String? colorVariants, String? actionUri, List<VisualCueEntity> visualCues, Map<String, dynamic>? trackingMeta
+ int id, String name, String? brandName, WishlistInfoEntity wishlistInfo, int quantity, bool soldOut, bool isXLTile, bool isCPT, List<String> imageUrls, ProductPriceEntity? price, String? colorVariants, String? actionUri, List<VisualCueEntity> visualCues, Map<String, dynamic>? trackingMeta
 });
 
 
-$ProductPriceEntityCopyWith<$Res>? get price;
+$WishlistInfoEntityCopyWith<$Res> get wishlistInfo;$ProductPriceEntityCopyWith<$Res>? get price;
 
 }
 /// @nodoc
@@ -62,15 +62,13 @@ class _$ListingProductEntityCopyWithImpl<$Res>
 
 /// Create a copy of ListingProductEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? brandName = freezed,Object? isWishlisted = null,Object? canWishlist = null,Object? wishlistId = freezed,Object? quantity = null,Object? soldOut = null,Object? isXLTile = null,Object? isCPT = null,Object? imageUrls = null,Object? price = freezed,Object? colorVariants = freezed,Object? actionUri = freezed,Object? visualCues = null,Object? trackingMeta = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? brandName = freezed,Object? wishlistInfo = null,Object? quantity = null,Object? soldOut = null,Object? isXLTile = null,Object? isCPT = null,Object? imageUrls = null,Object? price = freezed,Object? colorVariants = freezed,Object? actionUri = freezed,Object? visualCues = null,Object? trackingMeta = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,brandName: freezed == brandName ? _self.brandName : brandName // ignore: cast_nullable_to_non_nullable
-as String?,isWishlisted: null == isWishlisted ? _self.isWishlisted : isWishlisted // ignore: cast_nullable_to_non_nullable
-as bool,canWishlist: null == canWishlist ? _self.canWishlist : canWishlist // ignore: cast_nullable_to_non_nullable
-as bool,wishlistId: freezed == wishlistId ? _self.wishlistId : wishlistId // ignore: cast_nullable_to_non_nullable
-as String?,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
+as String?,wishlistInfo: null == wishlistInfo ? _self.wishlistInfo : wishlistInfo // ignore: cast_nullable_to_non_nullable
+as WishlistInfoEntity,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,soldOut: null == soldOut ? _self.soldOut : soldOut // ignore: cast_nullable_to_non_nullable
 as bool,isXLTile: null == isXLTile ? _self.isXLTile : isXLTile // ignore: cast_nullable_to_non_nullable
 as bool,isCPT: null == isCPT ? _self.isCPT : isCPT // ignore: cast_nullable_to_non_nullable
@@ -84,6 +82,15 @@ as Map<String, dynamic>?,
   ));
 }
 /// Create a copy of ListingProductEntity
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$WishlistInfoEntityCopyWith<$Res> get wishlistInfo {
+  
+  return $WishlistInfoEntityCopyWith<$Res>(_self.wishlistInfo, (value) {
+    return _then(_self.copyWith(wishlistInfo: value));
+  });
+}/// Create a copy of ListingProductEntity
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
@@ -177,10 +184,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String? brandName,  bool isWishlisted,  bool canWishlist,  String? wishlistId,  int quantity,  bool soldOut,  bool isXLTile,  bool isCPT,  List<String> imageUrls,  ProductPriceEntity? price,  String? colorVariants,  String? actionUri,  List<VisualCueEntity> visualCues,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String? brandName,  WishlistInfoEntity wishlistInfo,  int quantity,  bool soldOut,  bool isXLTile,  bool isCPT,  List<String> imageUrls,  ProductPriceEntity? price,  String? colorVariants,  String? actionUri,  List<VisualCueEntity> visualCues,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ListingProductEntity() when $default != null:
-return $default(_that.id,_that.name,_that.brandName,_that.isWishlisted,_that.canWishlist,_that.wishlistId,_that.quantity,_that.soldOut,_that.isXLTile,_that.isCPT,_that.imageUrls,_that.price,_that.colorVariants,_that.actionUri,_that.visualCues,_that.trackingMeta);case _:
+return $default(_that.id,_that.name,_that.brandName,_that.wishlistInfo,_that.quantity,_that.soldOut,_that.isXLTile,_that.isCPT,_that.imageUrls,_that.price,_that.colorVariants,_that.actionUri,_that.visualCues,_that.trackingMeta);case _:
   return orElse();
 
 }
@@ -198,10 +205,10 @@ return $default(_that.id,_that.name,_that.brandName,_that.isWishlisted,_that.can
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String? brandName,  bool isWishlisted,  bool canWishlist,  String? wishlistId,  int quantity,  bool soldOut,  bool isXLTile,  bool isCPT,  List<String> imageUrls,  ProductPriceEntity? price,  String? colorVariants,  String? actionUri,  List<VisualCueEntity> visualCues,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String? brandName,  WishlistInfoEntity wishlistInfo,  int quantity,  bool soldOut,  bool isXLTile,  bool isCPT,  List<String> imageUrls,  ProductPriceEntity? price,  String? colorVariants,  String? actionUri,  List<VisualCueEntity> visualCues,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _ListingProductEntity():
-return $default(_that.id,_that.name,_that.brandName,_that.isWishlisted,_that.canWishlist,_that.wishlistId,_that.quantity,_that.soldOut,_that.isXLTile,_that.isCPT,_that.imageUrls,_that.price,_that.colorVariants,_that.actionUri,_that.visualCues,_that.trackingMeta);case _:
+return $default(_that.id,_that.name,_that.brandName,_that.wishlistInfo,_that.quantity,_that.soldOut,_that.isXLTile,_that.isCPT,_that.imageUrls,_that.price,_that.colorVariants,_that.actionUri,_that.visualCues,_that.trackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -218,10 +225,10 @@ return $default(_that.id,_that.name,_that.brandName,_that.isWishlisted,_that.can
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String? brandName,  bool isWishlisted,  bool canWishlist,  String? wishlistId,  int quantity,  bool soldOut,  bool isXLTile,  bool isCPT,  List<String> imageUrls,  ProductPriceEntity? price,  String? colorVariants,  String? actionUri,  List<VisualCueEntity> visualCues,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String? brandName,  WishlistInfoEntity wishlistInfo,  int quantity,  bool soldOut,  bool isXLTile,  bool isCPT,  List<String> imageUrls,  ProductPriceEntity? price,  String? colorVariants,  String? actionUri,  List<VisualCueEntity> visualCues,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _ListingProductEntity() when $default != null:
-return $default(_that.id,_that.name,_that.brandName,_that.isWishlisted,_that.canWishlist,_that.wishlistId,_that.quantity,_that.soldOut,_that.isXLTile,_that.isCPT,_that.imageUrls,_that.price,_that.colorVariants,_that.actionUri,_that.visualCues,_that.trackingMeta);case _:
+return $default(_that.id,_that.name,_that.brandName,_that.wishlistInfo,_that.quantity,_that.soldOut,_that.isXLTile,_that.isCPT,_that.imageUrls,_that.price,_that.colorVariants,_that.actionUri,_that.visualCues,_that.trackingMeta);case _:
   return null;
 
 }
@@ -233,15 +240,13 @@ return $default(_that.id,_that.name,_that.brandName,_that.isWishlisted,_that.can
 
 
 class _ListingProductEntity implements ListingProductEntity {
-  const _ListingProductEntity({required this.id, required this.name, this.brandName, this.isWishlisted = false, this.canWishlist = false, this.wishlistId, this.quantity = 0, this.soldOut = false, this.isXLTile = false, this.isCPT = false, final  List<String> imageUrls = const [], this.price, this.colorVariants, this.actionUri, final  List<VisualCueEntity> visualCues = const [], final  Map<String, dynamic>? trackingMeta}): _imageUrls = imageUrls,_visualCues = visualCues,_trackingMeta = trackingMeta;
+  const _ListingProductEntity({required this.id, required this.name, this.brandName, this.wishlistInfo = const WishlistInfoEntity(), this.quantity = 0, this.soldOut = false, this.isXLTile = false, this.isCPT = false, final  List<String> imageUrls = const [], this.price, this.colorVariants, this.actionUri, final  List<VisualCueEntity> visualCues = const [], final  Map<String, dynamic>? trackingMeta}): _imageUrls = imageUrls,_visualCues = visualCues,_trackingMeta = trackingMeta;
   
 
 @override final  int id;
 @override final  String name;
 @override final  String? brandName;
-@override@JsonKey() final  bool isWishlisted;
-@override@JsonKey() final  bool canWishlist;
-@override final  String? wishlistId;
+@override@JsonKey() final  WishlistInfoEntity wishlistInfo;
 @override@JsonKey() final  int quantity;
 @override@JsonKey() final  bool soldOut;
 @override@JsonKey() final  bool isXLTile;
@@ -283,16 +288,16 @@ _$ListingProductEntityCopyWith<_ListingProductEntity> get copyWith => __$Listing
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ListingProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.brandName, brandName) || other.brandName == brandName)&&(identical(other.isWishlisted, isWishlisted) || other.isWishlisted == isWishlisted)&&(identical(other.canWishlist, canWishlist) || other.canWishlist == canWishlist)&&(identical(other.wishlistId, wishlistId) || other.wishlistId == wishlistId)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.soldOut, soldOut) || other.soldOut == soldOut)&&(identical(other.isXLTile, isXLTile) || other.isXLTile == isXLTile)&&(identical(other.isCPT, isCPT) || other.isCPT == isCPT)&&const DeepCollectionEquality().equals(other._imageUrls, _imageUrls)&&(identical(other.price, price) || other.price == price)&&(identical(other.colorVariants, colorVariants) || other.colorVariants == colorVariants)&&(identical(other.actionUri, actionUri) || other.actionUri == actionUri)&&const DeepCollectionEquality().equals(other._visualCues, _visualCues)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ListingProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.brandName, brandName) || other.brandName == brandName)&&(identical(other.wishlistInfo, wishlistInfo) || other.wishlistInfo == wishlistInfo)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.soldOut, soldOut) || other.soldOut == soldOut)&&(identical(other.isXLTile, isXLTile) || other.isXLTile == isXLTile)&&(identical(other.isCPT, isCPT) || other.isCPT == isCPT)&&const DeepCollectionEquality().equals(other._imageUrls, _imageUrls)&&(identical(other.price, price) || other.price == price)&&(identical(other.colorVariants, colorVariants) || other.colorVariants == colorVariants)&&(identical(other.actionUri, actionUri) || other.actionUri == actionUri)&&const DeepCollectionEquality().equals(other._visualCues, _visualCues)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,brandName,isWishlisted,canWishlist,wishlistId,quantity,soldOut,isXLTile,isCPT,const DeepCollectionEquality().hash(_imageUrls),price,colorVariants,actionUri,const DeepCollectionEquality().hash(_visualCues),const DeepCollectionEquality().hash(_trackingMeta));
+int get hashCode => Object.hash(runtimeType,id,name,brandName,wishlistInfo,quantity,soldOut,isXLTile,isCPT,const DeepCollectionEquality().hash(_imageUrls),price,colorVariants,actionUri,const DeepCollectionEquality().hash(_visualCues),const DeepCollectionEquality().hash(_trackingMeta));
 
 @override
 String toString() {
-  return 'ListingProductEntity(id: $id, name: $name, brandName: $brandName, isWishlisted: $isWishlisted, canWishlist: $canWishlist, wishlistId: $wishlistId, quantity: $quantity, soldOut: $soldOut, isXLTile: $isXLTile, isCPT: $isCPT, imageUrls: $imageUrls, price: $price, colorVariants: $colorVariants, actionUri: $actionUri, visualCues: $visualCues, trackingMeta: $trackingMeta)';
+  return 'ListingProductEntity(id: $id, name: $name, brandName: $brandName, wishlistInfo: $wishlistInfo, quantity: $quantity, soldOut: $soldOut, isXLTile: $isXLTile, isCPT: $isCPT, imageUrls: $imageUrls, price: $price, colorVariants: $colorVariants, actionUri: $actionUri, visualCues: $visualCues, trackingMeta: $trackingMeta)';
 }
 
 
@@ -303,11 +308,11 @@ abstract mixin class _$ListingProductEntityCopyWith<$Res> implements $ListingPro
   factory _$ListingProductEntityCopyWith(_ListingProductEntity value, $Res Function(_ListingProductEntity) _then) = __$ListingProductEntityCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String name, String? brandName, bool isWishlisted, bool canWishlist, String? wishlistId, int quantity, bool soldOut, bool isXLTile, bool isCPT, List<String> imageUrls, ProductPriceEntity? price, String? colorVariants, String? actionUri, List<VisualCueEntity> visualCues, Map<String, dynamic>? trackingMeta
+ int id, String name, String? brandName, WishlistInfoEntity wishlistInfo, int quantity, bool soldOut, bool isXLTile, bool isCPT, List<String> imageUrls, ProductPriceEntity? price, String? colorVariants, String? actionUri, List<VisualCueEntity> visualCues, Map<String, dynamic>? trackingMeta
 });
 
 
-@override $ProductPriceEntityCopyWith<$Res>? get price;
+@override $WishlistInfoEntityCopyWith<$Res> get wishlistInfo;@override $ProductPriceEntityCopyWith<$Res>? get price;
 
 }
 /// @nodoc
@@ -320,15 +325,13 @@ class __$ListingProductEntityCopyWithImpl<$Res>
 
 /// Create a copy of ListingProductEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? brandName = freezed,Object? isWishlisted = null,Object? canWishlist = null,Object? wishlistId = freezed,Object? quantity = null,Object? soldOut = null,Object? isXLTile = null,Object? isCPT = null,Object? imageUrls = null,Object? price = freezed,Object? colorVariants = freezed,Object? actionUri = freezed,Object? visualCues = null,Object? trackingMeta = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? brandName = freezed,Object? wishlistInfo = null,Object? quantity = null,Object? soldOut = null,Object? isXLTile = null,Object? isCPT = null,Object? imageUrls = null,Object? price = freezed,Object? colorVariants = freezed,Object? actionUri = freezed,Object? visualCues = null,Object? trackingMeta = freezed,}) {
   return _then(_ListingProductEntity(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,brandName: freezed == brandName ? _self.brandName : brandName // ignore: cast_nullable_to_non_nullable
-as String?,isWishlisted: null == isWishlisted ? _self.isWishlisted : isWishlisted // ignore: cast_nullable_to_non_nullable
-as bool,canWishlist: null == canWishlist ? _self.canWishlist : canWishlist // ignore: cast_nullable_to_non_nullable
-as bool,wishlistId: freezed == wishlistId ? _self.wishlistId : wishlistId // ignore: cast_nullable_to_non_nullable
-as String?,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
+as String?,wishlistInfo: null == wishlistInfo ? _self.wishlistInfo : wishlistInfo // ignore: cast_nullable_to_non_nullable
+as WishlistInfoEntity,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,soldOut: null == soldOut ? _self.soldOut : soldOut // ignore: cast_nullable_to_non_nullable
 as bool,isXLTile: null == isXLTile ? _self.isXLTile : isXLTile // ignore: cast_nullable_to_non_nullable
 as bool,isCPT: null == isCPT ? _self.isCPT : isCPT // ignore: cast_nullable_to_non_nullable
@@ -343,6 +346,15 @@ as Map<String, dynamic>?,
 }
 
 /// Create a copy of ListingProductEntity
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$WishlistInfoEntityCopyWith<$Res> get wishlistInfo {
+  
+  return $WishlistInfoEntityCopyWith<$Res>(_self.wishlistInfo, (value) {
+    return _then(_self.copyWith(wishlistInfo: value));
+  });
+}/// Create a copy of ListingProductEntity
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')

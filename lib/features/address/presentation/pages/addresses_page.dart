@@ -161,7 +161,7 @@ class _AddressesPageState extends State<AddressesPage> {
                           if (otherAddresses.isNotEmpty) ...[
                             const _SectionHeading(
                               label: AddressStrings.otherAddressHeading,
-                              topSpacing: AppSpacing.xs,
+                              topSpacing: 6,
                             ),
                             for (var i = 0; i < otherAddresses.length; i++) ...[
                               AddressItemCard(
@@ -180,7 +180,7 @@ class _AddressesPageState extends State<AddressesPage> {
                                 indent: dividerIndent,
                                 endIndent: 16,
                               ),
-                              if (i != otherAddresses.length - 1) AppSpacing.verticalGapLgMd,
+                              if (i != otherAddresses.length - 1) const SizedBox(height: 17),
                             ],
                           ],
                         ],
@@ -279,7 +279,7 @@ class _AddressesPageState extends State<AddressesPage> {
 }
 
 class _SectionHeading extends StatelessWidget {
-  const _SectionHeading({required this.label, this.topSpacing = 24});
+  const _SectionHeading({required this.label, this.topSpacing = 21});
 
   final String label;
   final double topSpacing;

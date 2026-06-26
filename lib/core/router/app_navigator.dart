@@ -9,6 +9,7 @@ import 'package:hs_app_flutter/features/plp/domain/entities/page_type.dart';
 import '../../features/account/presentation/bloc/account_bloc.dart';
 import '../../features/auth/domain/entities/otp_config/otp_config_entity.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/wishlist/presentation/cubit/wishlist_cubit.dart';
 import '../constants/route_names.dart';
 import '../constants/strings/auth_strings.dart';
 import '../constants/strings/login_redirects.dart';
@@ -100,8 +101,29 @@ abstract final class AppNavigator {
   ///
   /// Pops all auth routes (login, join-us, otp) from the stack first so that
   /// pressing back from the destination never re-enters the auth flow.
+  ///
+  /// Two flavours:
+  ///  - "resume-in-place" types ([LoginRedirects.typeAddToWishlist] /
+  ///    [LoginRedirects.typeAddToCart]) just pop the auth stack — the originating
+  ///    PLP/PDP/discover page is still mounted underneath — then replay the action
+  ///    the user attempted while logged out, so the UI updates on the same page.
+  ///  - destination types (orders, addresses, …) navigate to a fixed screen.
   static void redirectAfterLogin(BuildContext context, String? redirectType) {
+    // Capture singletons before popping — the popped context becomes defunct.
+    final wishlistCubit = context.read<WishlistCubit>();
+
+    // Local state was captured while logged out; re-seed with user-specific data.
+    // (Both leave any pending action intact so resume below still fires.)
+    wishlistCubit.invalidateOnAuthChange();
+
     _clearAuthStack(context);
+
+    switch (redirectType) {
+      case LoginRedirects.typeAddToWishlist:
+        wishlistCubit.resumePending();
+        return;
+    }
+
     final navigate = _redirectNavMap[redirectType] ?? goToAccount;
     navigate(context);
   }
@@ -154,11 +176,25 @@ abstract final class AppNavigator {
     context.pushNamed('landingPage', queryParameters: queryParams);
   }
 
-  static void goToWebView(BuildContext context, {required String url, String? title}) {
-    context.pushNamed('webview', extra: <String, dynamic>{'url': url, 'title': title});
+  static void goToWebView(
+    BuildContext context, {
+    required String url,
+    String? title,
+    bool fromNotification = false,
+  }) {
+    context.pushNamed(
+      'webview',
+      extra: <String, dynamic>{
+        'url': url,
+        'title': title,
+        'fromNotification': fromNotification,
+      },
+    );
   }
 
   static void goToOrders(BuildContext context) => context.pushNamed('orders');
+
+  static void goToLegal(BuildContext context) => context.pushNamed('legal');
 
   static void goToSearch(BuildContext context) => context.pushNamed('search');
   static void goToAddresses(

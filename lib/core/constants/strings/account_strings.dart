@@ -33,6 +33,9 @@ class AccountStrings {
   static const String help = 'Help';
   static const String share = 'Share';
   static const String rate = 'Rate';
+  static const String shareAppMessage =
+      'I love shopping on the Hopscotch app. Download it and give it a go. https://hopscotch.app.link/OAQUPT6bhC';
+  static const String shareAppTitle = 'Share Hopscotch with…';
   static const String appVersion = 'App version';
   static const String confirmDeleteTitle = 'Remove saved details?';
   static const String confirmDeleteGuest =

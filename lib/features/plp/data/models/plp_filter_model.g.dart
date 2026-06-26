@@ -29,4 +29,6 @@ PlpFilterModel _$PlpFilterModelFromJson(
           ?.map((e) => SelectedFilterModel.fromJson(e as Map<String, dynamic>))
           .toList() ??
       [],
+  action: parseToStringOrNull(json['action']),
+  message: parseToStringOrNull(json['message']),
 );

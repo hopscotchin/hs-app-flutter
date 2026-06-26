@@ -801,7 +801,11 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 /// @nodoc
 mixin _$FilterState implements DiagnosticableTreeMixin {
 
- FilterStatus get status; PlpFilterEntity get plpFilter; Map<String, Set<String>> get pendingFilters; Map<String, String> get treeSelections; int get selectedSectionIndex; bool get isRefreshing; Map<String, dynamic> get baseQueryParams; String? get errorMessage; bool get isPincodeLoading; String? get pincodeError; String? get verifiedPincode;
+ FilterStatus get status; PlpFilterEntity get plpFilter; Map<String, Set<String>> get pendingFilters; Map<String, String> get treeSelections;// Tree keys written into [treeSelections] purely to auto-expand a
+// single-child branch for navigation (e.g. a lone top-level category). They
+// are NOT user selections, so they must not be sent to the API or counted
+// as active filters unless the user actually selects something below them.
+ Set<String> get autoExpandedKeys; int get selectedSectionIndex; bool get isRefreshing; Map<String, dynamic> get baseQueryParams; String? get errorMessage; bool get isPincodeLoading; String? get pincodeError; String? get verifiedPincode;
 /// Create a copy of FilterState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -813,21 +817,21 @@ $FilterStateCopyWith<FilterState> get copyWith => _$FilterStateCopyWithImpl<Filt
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
     ..add(DiagnosticsProperty('type', 'FilterState'))
-    ..add(DiagnosticsProperty('status', status))..add(DiagnosticsProperty('plpFilter', plpFilter))..add(DiagnosticsProperty('pendingFilters', pendingFilters))..add(DiagnosticsProperty('treeSelections', treeSelections))..add(DiagnosticsProperty('selectedSectionIndex', selectedSectionIndex))..add(DiagnosticsProperty('isRefreshing', isRefreshing))..add(DiagnosticsProperty('baseQueryParams', baseQueryParams))..add(DiagnosticsProperty('errorMessage', errorMessage))..add(DiagnosticsProperty('isPincodeLoading', isPincodeLoading))..add(DiagnosticsProperty('pincodeError', pincodeError))..add(DiagnosticsProperty('verifiedPincode', verifiedPincode));
+    ..add(DiagnosticsProperty('status', status))..add(DiagnosticsProperty('plpFilter', plpFilter))..add(DiagnosticsProperty('pendingFilters', pendingFilters))..add(DiagnosticsProperty('treeSelections', treeSelections))..add(DiagnosticsProperty('autoExpandedKeys', autoExpandedKeys))..add(DiagnosticsProperty('selectedSectionIndex', selectedSectionIndex))..add(DiagnosticsProperty('isRefreshing', isRefreshing))..add(DiagnosticsProperty('baseQueryParams', baseQueryParams))..add(DiagnosticsProperty('errorMessage', errorMessage))..add(DiagnosticsProperty('isPincodeLoading', isPincodeLoading))..add(DiagnosticsProperty('pincodeError', pincodeError))..add(DiagnosticsProperty('verifiedPincode', verifiedPincode));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FilterState&&(identical(other.status, status) || other.status == status)&&(identical(other.plpFilter, plpFilter) || other.plpFilter == plpFilter)&&const DeepCollectionEquality().equals(other.pendingFilters, pendingFilters)&&const DeepCollectionEquality().equals(other.treeSelections, treeSelections)&&(identical(other.selectedSectionIndex, selectedSectionIndex) || other.selectedSectionIndex == selectedSectionIndex)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&const DeepCollectionEquality().equals(other.baseQueryParams, baseQueryParams)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.isPincodeLoading, isPincodeLoading) || other.isPincodeLoading == isPincodeLoading)&&(identical(other.pincodeError, pincodeError) || other.pincodeError == pincodeError)&&(identical(other.verifiedPincode, verifiedPincode) || other.verifiedPincode == verifiedPincode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FilterState&&(identical(other.status, status) || other.status == status)&&(identical(other.plpFilter, plpFilter) || other.plpFilter == plpFilter)&&const DeepCollectionEquality().equals(other.pendingFilters, pendingFilters)&&const DeepCollectionEquality().equals(other.treeSelections, treeSelections)&&const DeepCollectionEquality().equals(other.autoExpandedKeys, autoExpandedKeys)&&(identical(other.selectedSectionIndex, selectedSectionIndex) || other.selectedSectionIndex == selectedSectionIndex)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&const DeepCollectionEquality().equals(other.baseQueryParams, baseQueryParams)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.isPincodeLoading, isPincodeLoading) || other.isPincodeLoading == isPincodeLoading)&&(identical(other.pincodeError, pincodeError) || other.pincodeError == pincodeError)&&(identical(other.verifiedPincode, verifiedPincode) || other.verifiedPincode == verifiedPincode));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,plpFilter,const DeepCollectionEquality().hash(pendingFilters),const DeepCollectionEquality().hash(treeSelections),selectedSectionIndex,isRefreshing,const DeepCollectionEquality().hash(baseQueryParams),errorMessage,isPincodeLoading,pincodeError,verifiedPincode);
+int get hashCode => Object.hash(runtimeType,status,plpFilter,const DeepCollectionEquality().hash(pendingFilters),const DeepCollectionEquality().hash(treeSelections),const DeepCollectionEquality().hash(autoExpandedKeys),selectedSectionIndex,isRefreshing,const DeepCollectionEquality().hash(baseQueryParams),errorMessage,isPincodeLoading,pincodeError,verifiedPincode);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'FilterState(status: $status, plpFilter: $plpFilter, pendingFilters: $pendingFilters, treeSelections: $treeSelections, selectedSectionIndex: $selectedSectionIndex, isRefreshing: $isRefreshing, baseQueryParams: $baseQueryParams, errorMessage: $errorMessage, isPincodeLoading: $isPincodeLoading, pincodeError: $pincodeError, verifiedPincode: $verifiedPincode)';
+  return 'FilterState(status: $status, plpFilter: $plpFilter, pendingFilters: $pendingFilters, treeSelections: $treeSelections, autoExpandedKeys: $autoExpandedKeys, selectedSectionIndex: $selectedSectionIndex, isRefreshing: $isRefreshing, baseQueryParams: $baseQueryParams, errorMessage: $errorMessage, isPincodeLoading: $isPincodeLoading, pincodeError: $pincodeError, verifiedPincode: $verifiedPincode)';
 }
 
 
@@ -838,7 +842,7 @@ abstract mixin class $FilterStateCopyWith<$Res>  {
   factory $FilterStateCopyWith(FilterState value, $Res Function(FilterState) _then) = _$FilterStateCopyWithImpl;
 @useResult
 $Res call({
- FilterStatus status, PlpFilterEntity plpFilter, Map<String, Set<String>> pendingFilters, Map<String, String> treeSelections, int selectedSectionIndex, bool isRefreshing, Map<String, dynamic> baseQueryParams, String? errorMessage, bool isPincodeLoading, String? pincodeError, String? verifiedPincode
+ FilterStatus status, PlpFilterEntity plpFilter, Map<String, Set<String>> pendingFilters, Map<String, String> treeSelections, Set<String> autoExpandedKeys, int selectedSectionIndex, bool isRefreshing, Map<String, dynamic> baseQueryParams, String? errorMessage, bool isPincodeLoading, String? pincodeError, String? verifiedPincode
 });
 
 
@@ -855,13 +859,14 @@ class _$FilterStateCopyWithImpl<$Res>
 
 /// Create a copy of FilterState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? plpFilter = null,Object? pendingFilters = null,Object? treeSelections = null,Object? selectedSectionIndex = null,Object? isRefreshing = null,Object? baseQueryParams = null,Object? errorMessage = freezed,Object? isPincodeLoading = null,Object? pincodeError = freezed,Object? verifiedPincode = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? plpFilter = null,Object? pendingFilters = null,Object? treeSelections = null,Object? autoExpandedKeys = null,Object? selectedSectionIndex = null,Object? isRefreshing = null,Object? baseQueryParams = null,Object? errorMessage = freezed,Object? isPincodeLoading = null,Object? pincodeError = freezed,Object? verifiedPincode = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FilterStatus,plpFilter: null == plpFilter ? _self.plpFilter : plpFilter // ignore: cast_nullable_to_non_nullable
 as PlpFilterEntity,pendingFilters: null == pendingFilters ? _self.pendingFilters : pendingFilters // ignore: cast_nullable_to_non_nullable
 as Map<String, Set<String>>,treeSelections: null == treeSelections ? _self.treeSelections : treeSelections // ignore: cast_nullable_to_non_nullable
-as Map<String, String>,selectedSectionIndex: null == selectedSectionIndex ? _self.selectedSectionIndex : selectedSectionIndex // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,autoExpandedKeys: null == autoExpandedKeys ? _self.autoExpandedKeys : autoExpandedKeys // ignore: cast_nullable_to_non_nullable
+as Set<String>,selectedSectionIndex: null == selectedSectionIndex ? _self.selectedSectionIndex : selectedSectionIndex // ignore: cast_nullable_to_non_nullable
 as int,isRefreshing: null == isRefreshing ? _self.isRefreshing : isRefreshing // ignore: cast_nullable_to_non_nullable
 as bool,baseQueryParams: null == baseQueryParams ? _self.baseQueryParams : baseQueryParams // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
@@ -962,10 +967,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FilterStatus status,  PlpFilterEntity plpFilter,  Map<String, Set<String>> pendingFilters,  Map<String, String> treeSelections,  int selectedSectionIndex,  bool isRefreshing,  Map<String, dynamic> baseQueryParams,  String? errorMessage,  bool isPincodeLoading,  String? pincodeError,  String? verifiedPincode)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FilterStatus status,  PlpFilterEntity plpFilter,  Map<String, Set<String>> pendingFilters,  Map<String, String> treeSelections,  Set<String> autoExpandedKeys,  int selectedSectionIndex,  bool isRefreshing,  Map<String, dynamic> baseQueryParams,  String? errorMessage,  bool isPincodeLoading,  String? pincodeError,  String? verifiedPincode)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FilterState() when $default != null:
-return $default(_that.status,_that.plpFilter,_that.pendingFilters,_that.treeSelections,_that.selectedSectionIndex,_that.isRefreshing,_that.baseQueryParams,_that.errorMessage,_that.isPincodeLoading,_that.pincodeError,_that.verifiedPincode);case _:
+return $default(_that.status,_that.plpFilter,_that.pendingFilters,_that.treeSelections,_that.autoExpandedKeys,_that.selectedSectionIndex,_that.isRefreshing,_that.baseQueryParams,_that.errorMessage,_that.isPincodeLoading,_that.pincodeError,_that.verifiedPincode);case _:
   return orElse();
 
 }
@@ -983,10 +988,10 @@ return $default(_that.status,_that.plpFilter,_that.pendingFilters,_that.treeSele
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FilterStatus status,  PlpFilterEntity plpFilter,  Map<String, Set<String>> pendingFilters,  Map<String, String> treeSelections,  int selectedSectionIndex,  bool isRefreshing,  Map<String, dynamic> baseQueryParams,  String? errorMessage,  bool isPincodeLoading,  String? pincodeError,  String? verifiedPincode)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FilterStatus status,  PlpFilterEntity plpFilter,  Map<String, Set<String>> pendingFilters,  Map<String, String> treeSelections,  Set<String> autoExpandedKeys,  int selectedSectionIndex,  bool isRefreshing,  Map<String, dynamic> baseQueryParams,  String? errorMessage,  bool isPincodeLoading,  String? pincodeError,  String? verifiedPincode)  $default,) {final _that = this;
 switch (_that) {
 case _FilterState():
-return $default(_that.status,_that.plpFilter,_that.pendingFilters,_that.treeSelections,_that.selectedSectionIndex,_that.isRefreshing,_that.baseQueryParams,_that.errorMessage,_that.isPincodeLoading,_that.pincodeError,_that.verifiedPincode);case _:
+return $default(_that.status,_that.plpFilter,_that.pendingFilters,_that.treeSelections,_that.autoExpandedKeys,_that.selectedSectionIndex,_that.isRefreshing,_that.baseQueryParams,_that.errorMessage,_that.isPincodeLoading,_that.pincodeError,_that.verifiedPincode);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1003,10 +1008,10 @@ return $default(_that.status,_that.plpFilter,_that.pendingFilters,_that.treeSele
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FilterStatus status,  PlpFilterEntity plpFilter,  Map<String, Set<String>> pendingFilters,  Map<String, String> treeSelections,  int selectedSectionIndex,  bool isRefreshing,  Map<String, dynamic> baseQueryParams,  String? errorMessage,  bool isPincodeLoading,  String? pincodeError,  String? verifiedPincode)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FilterStatus status,  PlpFilterEntity plpFilter,  Map<String, Set<String>> pendingFilters,  Map<String, String> treeSelections,  Set<String> autoExpandedKeys,  int selectedSectionIndex,  bool isRefreshing,  Map<String, dynamic> baseQueryParams,  String? errorMessage,  bool isPincodeLoading,  String? pincodeError,  String? verifiedPincode)?  $default,) {final _that = this;
 switch (_that) {
 case _FilterState() when $default != null:
-return $default(_that.status,_that.plpFilter,_that.pendingFilters,_that.treeSelections,_that.selectedSectionIndex,_that.isRefreshing,_that.baseQueryParams,_that.errorMessage,_that.isPincodeLoading,_that.pincodeError,_that.verifiedPincode);case _:
+return $default(_that.status,_that.plpFilter,_that.pendingFilters,_that.treeSelections,_that.autoExpandedKeys,_that.selectedSectionIndex,_that.isRefreshing,_that.baseQueryParams,_that.errorMessage,_that.isPincodeLoading,_that.pincodeError,_that.verifiedPincode);case _:
   return null;
 
 }
@@ -1018,7 +1023,7 @@ return $default(_that.status,_that.plpFilter,_that.pendingFilters,_that.treeSele
 
 
 class _FilterState with DiagnosticableTreeMixin implements FilterState {
-  const _FilterState({this.status = FilterStatus.initial, this.plpFilter = const PlpFilterEntity(), final  Map<String, Set<String>> pendingFilters = const <String, Set<String>>{}, final  Map<String, String> treeSelections = const <String, String>{}, this.selectedSectionIndex = 0, this.isRefreshing = false, final  Map<String, dynamic> baseQueryParams = const <String, dynamic>{}, this.errorMessage, this.isPincodeLoading = false, this.pincodeError, this.verifiedPincode}): _pendingFilters = pendingFilters,_treeSelections = treeSelections,_baseQueryParams = baseQueryParams;
+  const _FilterState({this.status = FilterStatus.initial, this.plpFilter = const PlpFilterEntity(), final  Map<String, Set<String>> pendingFilters = const <String, Set<String>>{}, final  Map<String, String> treeSelections = const <String, String>{}, final  Set<String> autoExpandedKeys = const <String>{}, this.selectedSectionIndex = 0, this.isRefreshing = false, final  Map<String, dynamic> baseQueryParams = const <String, dynamic>{}, this.errorMessage, this.isPincodeLoading = false, this.pincodeError, this.verifiedPincode}): _pendingFilters = pendingFilters,_treeSelections = treeSelections,_autoExpandedKeys = autoExpandedKeys,_baseQueryParams = baseQueryParams;
   
 
 @override@JsonKey() final  FilterStatus status;
@@ -1035,6 +1040,21 @@ class _FilterState with DiagnosticableTreeMixin implements FilterState {
   if (_treeSelections is EqualUnmodifiableMapView) return _treeSelections;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_treeSelections);
+}
+
+// Tree keys written into [treeSelections] purely to auto-expand a
+// single-child branch for navigation (e.g. a lone top-level category). They
+// are NOT user selections, so they must not be sent to the API or counted
+// as active filters unless the user actually selects something below them.
+ final  Set<String> _autoExpandedKeys;
+// Tree keys written into [treeSelections] purely to auto-expand a
+// single-child branch for navigation (e.g. a lone top-level category). They
+// are NOT user selections, so they must not be sent to the API or counted
+// as active filters unless the user actually selects something below them.
+@override@JsonKey() Set<String> get autoExpandedKeys {
+  if (_autoExpandedKeys is EqualUnmodifiableSetView) return _autoExpandedKeys;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_autoExpandedKeys);
 }
 
 @override@JsonKey() final  int selectedSectionIndex;
@@ -1062,21 +1082,21 @@ _$FilterStateCopyWith<_FilterState> get copyWith => __$FilterStateCopyWithImpl<_
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
     ..add(DiagnosticsProperty('type', 'FilterState'))
-    ..add(DiagnosticsProperty('status', status))..add(DiagnosticsProperty('plpFilter', plpFilter))..add(DiagnosticsProperty('pendingFilters', pendingFilters))..add(DiagnosticsProperty('treeSelections', treeSelections))..add(DiagnosticsProperty('selectedSectionIndex', selectedSectionIndex))..add(DiagnosticsProperty('isRefreshing', isRefreshing))..add(DiagnosticsProperty('baseQueryParams', baseQueryParams))..add(DiagnosticsProperty('errorMessage', errorMessage))..add(DiagnosticsProperty('isPincodeLoading', isPincodeLoading))..add(DiagnosticsProperty('pincodeError', pincodeError))..add(DiagnosticsProperty('verifiedPincode', verifiedPincode));
+    ..add(DiagnosticsProperty('status', status))..add(DiagnosticsProperty('plpFilter', plpFilter))..add(DiagnosticsProperty('pendingFilters', pendingFilters))..add(DiagnosticsProperty('treeSelections', treeSelections))..add(DiagnosticsProperty('autoExpandedKeys', autoExpandedKeys))..add(DiagnosticsProperty('selectedSectionIndex', selectedSectionIndex))..add(DiagnosticsProperty('isRefreshing', isRefreshing))..add(DiagnosticsProperty('baseQueryParams', baseQueryParams))..add(DiagnosticsProperty('errorMessage', errorMessage))..add(DiagnosticsProperty('isPincodeLoading', isPincodeLoading))..add(DiagnosticsProperty('pincodeError', pincodeError))..add(DiagnosticsProperty('verifiedPincode', verifiedPincode));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FilterState&&(identical(other.status, status) || other.status == status)&&(identical(other.plpFilter, plpFilter) || other.plpFilter == plpFilter)&&const DeepCollectionEquality().equals(other._pendingFilters, _pendingFilters)&&const DeepCollectionEquality().equals(other._treeSelections, _treeSelections)&&(identical(other.selectedSectionIndex, selectedSectionIndex) || other.selectedSectionIndex == selectedSectionIndex)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&const DeepCollectionEquality().equals(other._baseQueryParams, _baseQueryParams)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.isPincodeLoading, isPincodeLoading) || other.isPincodeLoading == isPincodeLoading)&&(identical(other.pincodeError, pincodeError) || other.pincodeError == pincodeError)&&(identical(other.verifiedPincode, verifiedPincode) || other.verifiedPincode == verifiedPincode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FilterState&&(identical(other.status, status) || other.status == status)&&(identical(other.plpFilter, plpFilter) || other.plpFilter == plpFilter)&&const DeepCollectionEquality().equals(other._pendingFilters, _pendingFilters)&&const DeepCollectionEquality().equals(other._treeSelections, _treeSelections)&&const DeepCollectionEquality().equals(other._autoExpandedKeys, _autoExpandedKeys)&&(identical(other.selectedSectionIndex, selectedSectionIndex) || other.selectedSectionIndex == selectedSectionIndex)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&const DeepCollectionEquality().equals(other._baseQueryParams, _baseQueryParams)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.isPincodeLoading, isPincodeLoading) || other.isPincodeLoading == isPincodeLoading)&&(identical(other.pincodeError, pincodeError) || other.pincodeError == pincodeError)&&(identical(other.verifiedPincode, verifiedPincode) || other.verifiedPincode == verifiedPincode));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,plpFilter,const DeepCollectionEquality().hash(_pendingFilters),const DeepCollectionEquality().hash(_treeSelections),selectedSectionIndex,isRefreshing,const DeepCollectionEquality().hash(_baseQueryParams),errorMessage,isPincodeLoading,pincodeError,verifiedPincode);
+int get hashCode => Object.hash(runtimeType,status,plpFilter,const DeepCollectionEquality().hash(_pendingFilters),const DeepCollectionEquality().hash(_treeSelections),const DeepCollectionEquality().hash(_autoExpandedKeys),selectedSectionIndex,isRefreshing,const DeepCollectionEquality().hash(_baseQueryParams),errorMessage,isPincodeLoading,pincodeError,verifiedPincode);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'FilterState(status: $status, plpFilter: $plpFilter, pendingFilters: $pendingFilters, treeSelections: $treeSelections, selectedSectionIndex: $selectedSectionIndex, isRefreshing: $isRefreshing, baseQueryParams: $baseQueryParams, errorMessage: $errorMessage, isPincodeLoading: $isPincodeLoading, pincodeError: $pincodeError, verifiedPincode: $verifiedPincode)';
+  return 'FilterState(status: $status, plpFilter: $plpFilter, pendingFilters: $pendingFilters, treeSelections: $treeSelections, autoExpandedKeys: $autoExpandedKeys, selectedSectionIndex: $selectedSectionIndex, isRefreshing: $isRefreshing, baseQueryParams: $baseQueryParams, errorMessage: $errorMessage, isPincodeLoading: $isPincodeLoading, pincodeError: $pincodeError, verifiedPincode: $verifiedPincode)';
 }
 
 
@@ -1087,7 +1107,7 @@ abstract mixin class _$FilterStateCopyWith<$Res> implements $FilterStateCopyWith
   factory _$FilterStateCopyWith(_FilterState value, $Res Function(_FilterState) _then) = __$FilterStateCopyWithImpl;
 @override @useResult
 $Res call({
- FilterStatus status, PlpFilterEntity plpFilter, Map<String, Set<String>> pendingFilters, Map<String, String> treeSelections, int selectedSectionIndex, bool isRefreshing, Map<String, dynamic> baseQueryParams, String? errorMessage, bool isPincodeLoading, String? pincodeError, String? verifiedPincode
+ FilterStatus status, PlpFilterEntity plpFilter, Map<String, Set<String>> pendingFilters, Map<String, String> treeSelections, Set<String> autoExpandedKeys, int selectedSectionIndex, bool isRefreshing, Map<String, dynamic> baseQueryParams, String? errorMessage, bool isPincodeLoading, String? pincodeError, String? verifiedPincode
 });
 
 
@@ -1104,13 +1124,14 @@ class __$FilterStateCopyWithImpl<$Res>
 
 /// Create a copy of FilterState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? plpFilter = null,Object? pendingFilters = null,Object? treeSelections = null,Object? selectedSectionIndex = null,Object? isRefreshing = null,Object? baseQueryParams = null,Object? errorMessage = freezed,Object? isPincodeLoading = null,Object? pincodeError = freezed,Object? verifiedPincode = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? plpFilter = null,Object? pendingFilters = null,Object? treeSelections = null,Object? autoExpandedKeys = null,Object? selectedSectionIndex = null,Object? isRefreshing = null,Object? baseQueryParams = null,Object? errorMessage = freezed,Object? isPincodeLoading = null,Object? pincodeError = freezed,Object? verifiedPincode = freezed,}) {
   return _then(_FilterState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FilterStatus,plpFilter: null == plpFilter ? _self.plpFilter : plpFilter // ignore: cast_nullable_to_non_nullable
 as PlpFilterEntity,pendingFilters: null == pendingFilters ? _self._pendingFilters : pendingFilters // ignore: cast_nullable_to_non_nullable
 as Map<String, Set<String>>,treeSelections: null == treeSelections ? _self._treeSelections : treeSelections // ignore: cast_nullable_to_non_nullable
-as Map<String, String>,selectedSectionIndex: null == selectedSectionIndex ? _self.selectedSectionIndex : selectedSectionIndex // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,autoExpandedKeys: null == autoExpandedKeys ? _self._autoExpandedKeys : autoExpandedKeys // ignore: cast_nullable_to_non_nullable
+as Set<String>,selectedSectionIndex: null == selectedSectionIndex ? _self.selectedSectionIndex : selectedSectionIndex // ignore: cast_nullable_to_non_nullable
 as int,isRefreshing: null == isRefreshing ? _self.isRefreshing : isRefreshing // ignore: cast_nullable_to_non_nullable
 as bool,baseQueryParams: null == baseQueryParams ? _self._baseQueryParams : baseQueryParams // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable

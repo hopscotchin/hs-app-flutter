@@ -1,8 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/page_meta_entity.dart';
 
 part 'page_meta_model.g.dart';
+
+int _parseOrderRule(dynamic value) => parseToIntOrNull(value) ?? -1;
 
 @JsonSerializable(createToJson: false)
 class PageMetaModel {
@@ -17,14 +20,14 @@ class PageMetaModel {
     this.orderRule = -1,
   });
 
-  @JsonKey(defaultValue: 1) final int page;
-  @JsonKey(defaultValue: 20) final int pageSize;
-  @JsonKey(defaultValue: 0) final int totalCount;
-  @JsonKey(defaultValue: false) final bool hasNextPage;
-  final String? pageTitle;
-  final String? pageSubtitle;
-  final int? plpId;
-  @JsonKey(defaultValue: -1) final int orderRule;
+  @JsonKey(fromJson: parseToInt) final int page;
+  @JsonKey(fromJson: parseToInt) final int pageSize;
+  @JsonKey(fromJson: parseToInt) final int totalCount;
+  @JsonKey(fromJson: parseToBool) final bool hasNextPage;
+  @JsonKey(fromJson: parseToStringOrNull) final String? pageTitle;
+  @JsonKey(fromJson: parseToStringOrNull) final String? pageSubtitle;
+  @JsonKey(fromJson: parseToIntOrNull) final int? plpId;
+  @JsonKey(fromJson: _parseOrderRule) final int orderRule;
 
   factory PageMetaModel.fromJson(Map<String, dynamic> json) =>
       _$PageMetaModelFromJson(json);

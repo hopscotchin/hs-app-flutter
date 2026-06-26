@@ -4,7 +4,6 @@ import 'package:hs_app_flutter/core/constants/route_names.dart';
 
 import '../../core/cubits/shop_the_look_cubit.dart';
 import '../../core/di/injection.dart';
-import '../../features/pdp/domain/usecases/add_to_cart_usecase.dart';
 import 'presentation/pages/discover_page.dart';
 
 class DiscoverRoute {
@@ -13,10 +12,7 @@ class DiscoverRoute {
       GoRoute(
         path: RouteNames.home,
         name: 'home',
-        builder: (context, state) => BlocProvider<ShopTheLookCubit>(
-          create: (_) => ShopTheLookCubit(sl<AddToCartUseCase>()),
-          child: const DiscoverPage(),
-        ),
+        builder: (context, state) => const DiscoverPage(),
       ),
     ],
   );

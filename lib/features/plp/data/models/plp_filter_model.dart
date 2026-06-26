@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/plp_filter_entity.dart';
 import '../../domain/entities/selected_filter_entity.dart';
 import 'filter_section_model.dart';
@@ -16,6 +17,8 @@ class PlpFilterModel {
     this.sortingOptions,
     this.filterSections = const [],
     this.selectedFilters = const [],
+    this.action,
+    this.message,
   });
 
   @JsonKey(defaultValue: [])
@@ -25,6 +28,15 @@ class PlpFilterModel {
   final List<FilterSectionModel> filterSections;
   @JsonKey(defaultValue: [])
   final List<SelectedFilterModel> selectedFilters;
+
+  /// `"success"` | `"failure"` — the /v2/filter endpoint returns HTTP 200 even
+  /// for logical failures, signalling the error via this field.
+  @JsonKey(fromJson: parseToStringOrNull)
+  final String? action;
+  @JsonKey(fromJson: parseToStringOrNull)
+  final String? message;
+
+  bool get isFailure => action?.toLowerCase() == 'failure';
 
   factory PlpFilterModel.fromJson(Map<String, dynamic> json) => _$PlpFilterModelFromJson(json);
 

@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/models/message_bar_model.dart';
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/listing_data_entity.dart';
 import 'banners_wrapper_model.dart';
 import 'floating_filter_model.dart';
@@ -26,7 +27,17 @@ class ListingDataModel {
     this.records = const [],
     this.queryCorrection,
     this.messageBars = const [],
+    this.orderRule = -1,
+    this.action,
+    this.message,
   });
+
+  /// `"success"` | `"failure"` — the BFF returns HTTP 200 even for logical
+  /// failures, signalling the error via this field (with a human [message]).
+  @JsonKey(fromJson: parseToStringOrNull)
+  final String? action;
+  @JsonKey(fromJson: parseToStringOrNull)
+  final String? message;
 
   final PageMetaModel? pageMeta;
   final TrackingMetaModel? trackingMeta;
@@ -51,11 +62,15 @@ class ListingDataModel {
   @JsonKey(fromJson: _parseMessageBars)
   final List<MessageBarEntity> messageBars;
 
+  @JsonKey(fromJson: _parseOrderRule)
+  final int orderRule;
+
+  bool get isFailure => action?.toLowerCase() == 'failure';
+
   factory ListingDataModel.fromJson(Map<String, dynamic> json) => _$ListingDataModelFromJson(json);
 
   ListingDataEntity toEntity() {
     final pageBanner = banners?.pageBanner?.toEntity();
-
 
     return ListingDataEntity(
       pageMeta: pageMeta?.toEntity(),
@@ -67,6 +82,7 @@ class ListingDataModel {
       records: records.map((r) => r.toEntity()).toList(),
       queryCorrection: queryCorrection?.toEntity(),
       messageBars: messageBars,
+      orderRule: orderRule,
     );
   }
 }
@@ -75,3 +91,5 @@ List<MessageBarEntity> _parseMessageBars(Object? json) {
   if (json is! List) return const [];
   return json.whereType<Map<String, dynamic>>().map(MessageBarModel.fromJson).toList();
 }
+
+int _parseOrderRule(dynamic value) => parseToIntOrNull(value) ?? -1;

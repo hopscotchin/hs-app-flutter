@@ -172,8 +172,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
 
   void _handleBackPress() {
     final now = DateTime.now();
-    if (_lastBackPressedAt != null &&
-        now.difference(_lastBackPressedAt!) > _kBackPressInterval) {
+    if (_lastBackPressedAt != null && now.difference(_lastBackPressedAt!) > _kBackPressInterval) {
       _backPressCount = 2;
     }
 

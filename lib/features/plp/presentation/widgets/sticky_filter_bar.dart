@@ -46,6 +46,7 @@ class StickyFilterBar extends StatelessWidget {
 
     final sortingOption = sortingOptions?.options ?? [];
     final hasFiltersAvailable = sortingOption.isNotEmpty || plpFilter != null;
+    final hasSelectedFilterAvailable = (plpFilter?.selectedFilters ?? []).isNotEmpty;
     return DecoratedBox(
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.neutralGrey1)),
@@ -73,7 +74,7 @@ class StickyFilterBar extends StatelessWidget {
                           label: filter.label ?? '',
                           isActive: filter.hasSelected,
                           onTap: () {
-                            // _showSectionSheet(context, filter);
+                            _showSectionSheet(context, filter);
                           },
                         ),
                       );
@@ -92,9 +93,9 @@ class StickyFilterBar extends StatelessWidget {
                         width: 40,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Colors.white.withAlpha(0), Colors.white],
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,
+                            colors: [Colors.white.withAlpha(0), Colors.white],
                           ),
                         ),
                       ),
@@ -106,21 +107,24 @@ class StickyFilterBar extends StatelessWidget {
           if (hasFiltersAvailable)
             /// RIGHT FIXED ACTIONS
             Padding(
-              padding: const EdgeInsets.only(right: 19, left: 10),
+              padding: const EdgeInsets.only(right: 12, left: 10),
               child: Row(
                 children: [
-                  if (sortingOption.isNotEmpty) ...[
+                  if (sortingOption.isNotEmpty)
                     actionButton(
                       icon: ImageConstants.sortBy,
+                      showFilterSelected: true,
                       label: PlpStrings.sortBy,
                       onTap: () {
-                        // _showSortSheet(context);
+                        _showSortSheet(context);
                       },
                     ),
+
+                  if (sortingOption.isNotEmpty && plpFilter != null) ...[
                     const SizedBox(width: 8),
                     const VerticalDivider(
-                      endIndent: 18,
-                      indent: 10,
+                      endIndent: 20,
+                      indent: 15,
                       width: 1,
                       thickness: 1,
                       color: AppColors.brandPrimary,
@@ -129,10 +133,11 @@ class StickyFilterBar extends StatelessWidget {
                   ],
                   if (plpFilter != null)
                     actionButton(
+                      showFilterSelected: hasSelectedFilterAvailable,
                       icon: ImageConstants.filter,
                       label: PlpStrings.fileterBy,
                       onTap: () {
-                        // _showFilterPage(context);
+                        _showFilterPage(context);
                       },
                     ),
                 ],
@@ -153,14 +158,27 @@ class StickyFilterBar extends StatelessWidget {
     return null;
   }
 
-  Widget actionButton({required String icon, required String label, final VoidCallback? onTap}) {
+  Widget actionButton({
+    required String icon,
+    required String label,
+    final VoidCallback? onTap,
+    final bool showFilterSelected = false,
+  }) {
     return InkWell(
       onTap: onTap,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CustomImage(path: icon, height: 20, width: 20),
-
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomImage(path: icon, height: 20, width: 20),
+              if (showFilterSelected) ...[
+                const SizedBox(width: 2),
+                const CircleAvatar(radius: 2, backgroundColor: AppColors.brandSecondary),
+              ],
+            ],
+          ),
           const SizedBox(height: 2),
           Text(label, style: AppTypographyV1.caption.bold.disabled()),
         ],
@@ -231,7 +249,7 @@ class _FilterChip extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (isActive) ...[
-              const CircleAvatar(radius: 3, backgroundColor: AppColors.brandSecondary),
+              const CircleAvatar(radius: 2, backgroundColor: AppColors.brandSecondary),
               const SizedBox(width: 4),
             ],
             Text(label, style: AppTypographyV1.labelLarge.bold.textPrimary()),

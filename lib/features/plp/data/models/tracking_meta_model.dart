@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/tracking_meta_entity.dart';
 
 part 'tracking_meta_model.g.dart';
@@ -13,10 +14,10 @@ class TrackingMetaModel {
     this.plpId,
   });
 
-  @JsonKey(defaultValue: false) final bool clusteringExistsForListingPage;
-  @JsonKey(defaultValue: false) final bool excludePreorderFilterApplied;
-  @JsonKey(defaultValue: false) final bool hasXLTiles;
-  final int? plpId;
+  @JsonKey(fromJson: parseToBool) final bool clusteringExistsForListingPage;
+  @JsonKey(fromJson: parseToBool) final bool excludePreorderFilterApplied;
+  @JsonKey(fromJson: parseToBool) final bool hasXLTiles;
+  @JsonKey(fromJson: parseToIntOrNull) final int? plpId;
 
   factory TrackingMetaModel.fromJson(Map<String, dynamic> json) =>
       _$TrackingMetaModelFromJson(json);

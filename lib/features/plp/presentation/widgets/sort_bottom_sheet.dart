@@ -24,7 +24,7 @@ class SortBottomSheet extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, AppSpacing.md, AppSpacing.xs),
-              child: Text(PlpStrings.sortBy, style: AppTypographyV1.titleMedium.bold.textPrimary()),
+              child: Text(PlpStrings.sort, style: AppTypographyV1.titleMedium.bold.textPrimary()),
             ),
             ...sortingOptions.map((option) {
               return SizedBox(

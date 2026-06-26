@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../../../../core/entities/visual_cue_entity.dart';
 import '../../../../core/models/visual_cue_model.dart';
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/filter_entity.dart';
 
 part 'filter_model.g.dart';
@@ -24,25 +25,32 @@ class FilterModel {
     this.visualCue,
   });
 
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? filterKey;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? filterValue;
   // Raw API key is `productCount` — remapping here keeps the domain entity
   // field as `count` (used throughout the UI for the trailing "(870)" label)
   // and lets us drop the response transformer.
-  @JsonKey(name: 'productCount')
+  @JsonKey(name: 'productCount', fromJson: parseToIntOrNull)
   final int? count;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? label;
-  @JsonKey(defaultValue: false)
+  @JsonKey(fromJson: parseToBool)
   final bool isSelected;
-  @JsonKey(defaultValue: false)
+  @JsonKey(fromJson: parseToBool)
   final bool isMultiSelect;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? type;
   @JsonKey(defaultValue: [])
   final List<FilterModel> filters;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? colorHex;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? ovalImgUrl;
-  @JsonKey(defaultValue: false)
+  @JsonKey(fromJson: parseToBool)
   final bool isSection;
+  @JsonKey(fromJson: parseToStringOrNull)
   final String? pincode;
 
   @JsonKey(name: 'visualCue')

@@ -15,7 +15,8 @@ extension SnackbarX on BuildContext {
       ..showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: _bgFor(status),
+          backgroundColor: const Color(0xff353535),
+          // _bgFor(status),
           duration: duration,
           action: action,
         ),

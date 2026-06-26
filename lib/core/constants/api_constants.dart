@@ -68,6 +68,10 @@ class ApiConstants {
   // Auto login
   static const String autoLogin = '/customer/login/auto';
 
+  // Web SSO — generates a short-lived ticket appended to web URLs so an
+  // already-authenticated app session is carried into the in-app WebView.
+  static const String generateLoginTicket = '/customer/login/generate-ticket';
+
   // Account
   static const String myAccount = '/myaccount';
   static const String logout = '/customer/logout';
