@@ -77,7 +77,7 @@ class AppBottomSheet extends StatelessWidget {
         padding: EdgeInsets.only(
           left: AppSpacing.md,
           right: AppSpacing.md,
-          top: AppSpacing.lgMd,
+          top: 0,
           bottom: bottomPadding,
         ),
         child: Column(

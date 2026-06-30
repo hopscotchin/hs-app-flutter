@@ -12,11 +12,12 @@ class AddressStrings {
   static const String nonServiceable = 'Non-Serviceable';
 
   static const String confirmDeletePrompt =
-      'Are you sure you want to delete this address?';
+      'Are you sure you want to remove this address?';
 
   // Manage address page
   static const String addAddressTitle = 'Add Address';
   static const String editAddressTitle = 'Edit Address';
+  static const String removeAddressTitle = 'Remove Address';
   static const String shipToTitle = 'Ship To';
   static const String name = 'Name';
   static const String mobile = 'Mobile';

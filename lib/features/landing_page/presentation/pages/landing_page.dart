@@ -61,107 +61,78 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ShopTheLookCubit, ShopTheLookCartState>(
-      listenWhen: (prev, curr) =>
-          prev.status == ShopTheLookCartStatus.loading &&
-          curr.status != ShopTheLookCartStatus.loading,
-      listener: (context, state) {
-        if (state.status == ShopTheLookCartStatus.success) {
-          if (state.cartItemQty != null) {
-            context.read<CartCountCubit>().set(state.cartItemQty!);
-          }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                DiscoverStrings.itemsAddedToBag(state.addedCount),
-              ),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        } else if (state.status == ShopTheLookCartStatus.failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                state.errorMessage ?? DiscoverStrings.failedToAddItemsToBag,
-              ),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              size: 20,
-              color: AppColors.neutralBlack,
-            ),
-            onPressed: () => Navigator.of(context).pop(),
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            size: 20,
+            color: AppColors.neutralBlack,
           ),
-          title: BlocSelector<LandingPageBloc, LandingPageState, String>(
-            selector: (state) =>
-                state.homePage?.pageName ??
-                widget.title ??
-                _formatPageName(widget.pageName),
-            builder: (context, title) =>
-                Text(title, style: AppTypographyV1.bodyLarge.semiBold),
-          ),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        body: BlocBuilder<LandingPageBloc, LandingPageState>(
-          builder: (context, state) {
-            if (state.isLoading) {
-              return LoadingShimmer.listShimmer(itemCount: 6, itemHeight: 120);
-            }
+        title: BlocSelector<LandingPageBloc, LandingPageState, String>(
+          selector: (state) =>
+              state.homePage?.pageName ??
+              widget.title ??
+              _formatPageName(widget.pageName),
+          builder: (context, title) =>
+              Text(title, style: AppTypographyV1.bodyLarge.semiBold),
+        ),
+      ),
+      body: BlocBuilder<LandingPageBloc, LandingPageState>(
+        builder: (context, state) {
+          if (state.isLoading) {
+            return LoadingShimmer.listShimmer(itemCount: 6, itemHeight: 120);
+          }
 
-            if (state.isFailure) {
+          if (state.isFailure) {
+            return EmptyStateWidget(
+              type: EmptyStateType.serverError,
+              onButtonTap: () => context.read<LandingPageBloc>().add(
+                LoadLandingPage(pageName: widget.pageName),
+              ),
+            );
+          }
+
+          if (state.isSuccess) {
+            final components = state.homePage?.pageComponents ?? [];
+            if (components.isEmpty) {
               return EmptyStateWidget(
-                type: EmptyStateType.serverError,
+                type: EmptyStateType.discover,
                 onButtonTap: () => context.read<LandingPageBloc>().add(
                   LoadLandingPage(pageName: widget.pageName),
                 ),
               );
             }
 
-            if (state.isSuccess) {
-              final components = state.homePage?.pageComponents ?? [];
-              if (components.isEmpty) {
-                return EmptyStateWidget(
-                  type: EmptyStateType.discover,
-                  onButtonTap: () => context.read<LandingPageBloc>().add(
-                    LoadLandingPage(pageName: widget.pageName),
-                  ),
-                );
-              }
-
-              final showLoader = state.isLoadingMore;
-              return ListView.builder(
-                controller: _scrollController,
-                cacheExtent: MediaQuery.sizeOf(context).height * 2,
-                itemCount: components.length + (showLoader ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index >= components.length) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
+            final showLoader = state.isLoadingMore;
+            return ListView.builder(
+              controller: _scrollController,
+              cacheExtent: MediaQuery.sizeOf(context).height * 2,
+              itemCount: components.length + (showLoader ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index >= components.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                    );
-                  }
-                  return _KeepAliveItem(
-                    child: PageComponentRenderer(component: components[index]),
+                    ),
                   );
-                },
-              );
-            }
+                }
+                return _KeepAliveItem(
+                  child: PageComponentRenderer(component: components[index]),
+                );
+              },
+            );
+          }
 
-            return const SizedBox.shrink();
-          },
-        ),
+          return const SizedBox.shrink();
+        },
       ),
     );
   }

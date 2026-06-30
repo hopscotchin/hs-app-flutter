@@ -57,7 +57,16 @@ mixin SafeApiCall {
       if (e.type == DioExceptionType.badResponse) {
         return Left(_failureFromResponse(e.response));
       }
-      return Left(UnknownFailure(message: e.message ?? DefaultErrorMessages.unknown));
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        return const Left(TimeoutFailure());
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        return const Left(ConnectionFailure());
+      }
+
+      return const Left(UnknownFailure());
     } catch (_) {
       return const Left(UnknownFailure());
     }
@@ -78,12 +87,12 @@ mixin SafeApiCall {
       409 => ConflictFailure(message: serverMessage ?? DefaultErrorMessages.conflict),
       500 => InternalServerFailure(message: serverMessage ?? DefaultErrorMessages.internalServer),
       503 => ServiceUnavailableFailure(
-          message: serverMessage ?? DefaultErrorMessages.serviceUnavailable,
-        ),
+        message: serverMessage ?? DefaultErrorMessages.serviceUnavailable,
+      ),
       _ => ServerFailure(
-          message: serverMessage ?? DefaultErrorMessages.unknown,
-          statusCode: statusCode,
-        ),
+        message: serverMessage ?? DefaultErrorMessages.unknown,
+        statusCode: statusCode,
+      ),
     };
   }
 }

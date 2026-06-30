@@ -18,4 +18,5 @@ class PlpStrings {
   static const String pincodeValidationFailed = 'Pincode Verification Failed';
   static const String showingResultsFor = 'Showing results for ';
   static const String tryAgainAndKeepExploring = 'Try again and keep exploring.';
+  static const String enterAValidPincode = 'Enter a valid 6-digit pincode';
 }

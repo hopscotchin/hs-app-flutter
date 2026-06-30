@@ -98,15 +98,14 @@ const _configs = <EmptyStateType, _EmptyStateConfig>{
   EmptyStateType.serverError: _EmptyStateConfig(
     icon: 'assets/icons/server_error.svg',
     title: 'Oops! Something Went Wrong',
-    subtitle:
-        'We\'re fixing things behind the scenes.',
+    subtitle: 'We\'re fixing things behind the scenes.',
     buttonLabel: 'Try Again',
     iconSize: (81, 62),
   ),
   EmptyStateType.networkError: _EmptyStateConfig(
     icon: 'assets/icons/no_network.svg',
-    title: 'No Internet Connection!',
-    subtitle: 'Please check your connection and try again.',
+    title: 'Opps! No Network!',
+    subtitle: 'Check your connection to hop back in!',
     buttonLabel: 'Try Again',
     iconSize: (81, 62),
   ),

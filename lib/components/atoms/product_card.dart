@@ -5,6 +5,7 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/theme/typography.dart';
 import 'cached_image_widget.dart';
+import 'strikethrough_text.dart';
 
 /// A reusable product card that renders product image, brand, name, size,
 /// pricing, visual cues, sold-out state, and delivery text.
@@ -275,12 +276,9 @@ class ProductCard extends StatelessWidget {
           ),
         if (_isDiscountAvailable) ...[
           const SizedBox(width: 6),
-          Text(
+          StrikethroughText(
             '\u20B9$regularPrice',
-            style: AppTypography.bodySmall.copyWith(
-              decoration: TextDecoration.lineThrough,
-              color: AppColors.textTertiary,
-            ),
+            style: AppTypography.bodySmall.copyWith(color: AppColors.textTertiary),
           ),
           const SizedBox(width: 6),
           Text(discount!, style: AppTypography.bodySmall.copyWith(color: AppColors.success)),

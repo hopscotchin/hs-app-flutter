@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/atoms/outlined_text_field.dart';
 import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
@@ -8,13 +9,14 @@ import 'package:hs_app_flutter/components/form/app_radio.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
-import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
+import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/filter_thumbpainter.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/filter_visualcue_tag.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/extensions/color_extensions.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
@@ -110,8 +112,6 @@ class _FilterPageView extends StatefulWidget {
 }
 
 class _FilterPageViewState extends State<_FilterPageView> {
-  String _searchQuery = '';
-
   final ScrollController _sidebarController = ScrollController();
 
   final TextEditingController _searchController = TextEditingController();
@@ -144,11 +144,9 @@ class _FilterPageViewState extends State<_FilterPageView> {
           listenWhen: (prev, curr) => prev.selectedSectionIndex != curr.selectedSectionIndex,
           listener: (context, state) {
             _resetSearchInput();
-            // _applyDeliveryPincode(state);
+            _applyDeliveryPincode(state);
           },
         ),
-        // Surface a filter-refresh failure without blanking the sheet — the
-        // current sections stay visible (see FilterBloc) and we just toast.
         BlocListener<FilterBloc, FilterState>(
           listenWhen: (prev, curr) =>
               prev.status != FilterStatus.error && curr.status == FilterStatus.error,
@@ -170,13 +168,16 @@ class _FilterPageViewState extends State<_FilterPageView> {
                   children: [
                     _buildHeader(context, state),
                     Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionSidebar(context, state),
-                          const SizedBox(width: 20),
-                          _buildFilterContent(context, state),
-                        ],
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionSidebar(context, state),
+                            const SizedBox(width: 20),
+                            _buildFilterContent(context, state),
+                          ],
+                        ),
                       ),
                     ),
 
@@ -241,7 +242,6 @@ class _FilterPageViewState extends State<_FilterPageView> {
 
     return SizedBox(
       width: MediaQuery.sizeOf(context).width * 0.345,
-
       child: ColoredBox(
         color: Colors.white,
         child: CustomPaint(
@@ -253,112 +253,113 @@ class _FilterPageViewState extends State<_FilterPageView> {
             trackColor: Colors.transparent,
             rightInset: 0,
           ),
-          child: ListView.builder(
-            controller: _sidebarController,
-            clipBehavior: Clip.none,
-            padding: EdgeInsets.zero,
-            itemCount: sections.length,
-            itemBuilder: (context, index) {
-              final section = sections[index];
-              final isSelected = index == selectedIndex;
-              // final hasActive = state.isSectionActive(section);
+          child: ClipRect(
+            clipper: const _SidebarOverflowClipper(),
+            child: ListView.builder(
+              controller: _sidebarController,
+              clipBehavior: Clip.none,
+              padding: EdgeInsets.zero,
+              itemCount: sections.length,
+              itemBuilder: (context, index) {
+                final section = sections[index];
+                final isSelected = index == selectedIndex;
+                // final hasActive = state.isSectionActive(section);
 
-              const r = Radius.circular(8);
-              final roundTopRight = !isSelected && (index - 1) == selectedIndex;
-              final roundBottomRight = !isSelected && (index + 1) == selectedIndex;
-              final cardRadius = BorderRadius.only(
-                topRight: roundTopRight ? r : Radius.zero,
-                bottomRight: roundBottomRight ? r : Radius.zero,
-              );
+                const r = Radius.circular(8);
+                final roundTopRight = !isSelected && (index - 1) == selectedIndex;
+                final roundBottomRight = !isSelected && (index + 1) == selectedIndex;
+                final cardRadius = BorderRadius.only(
+                  topRight: roundTopRight ? r : Radius.zero,
+                  bottomRight: roundBottomRight ? r : Radius.zero,
+                );
 
-              return GestureDetector(
-                onTap: () => context.read<FilterBloc>().add(SwitchSection(sectionIndex: index)),
-                child: Stack(
-                  clipBehavior: Clip.none,
-
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: isSelected ? Colors.transparent : AppColors.neutralGrey1,
-                        borderRadius: cardRadius,
-                      ),
-                      child: CustomPaint(
-                        painter: isSelected
-                            ? const SelectedAccentPainter(
-                                color: AppColors.brandPrimary,
-                                width: 3,
-                                verticalInset: 0,
-                                cornerRadius: 0,
-                              )
-                            : null,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            left: AppSpacing.md,
-                            right: AppSpacing.xs,
-                            top: AppSpacing.lmd,
-                            bottom: AppSpacing.lmd,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  section.label ?? '',
-                                  style: isSelected
-                                      ? AppTypographyV1.bodyLarge.bold.brandPrimary()
-                                      : AppTypographyV1.bodyMedium.medium.textPrimary(),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                return GestureDetector(
+                  onTap: () => context.read<FilterBloc>().add(SwitchSection(sectionIndex: index)),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.transparent : AppColors.neutralGrey1,
+                          borderRadius: cardRadius,
+                        ),
+                        child: CustomPaint(
+                          painter: isSelected
+                              ? const SelectedAccentPainter(
+                                  color: AppColors.brandPrimary,
+                                  width: 3,
+                                  verticalInset: 0,
+                                  cornerRadius: 0,
+                                )
+                              : null,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: AppSpacing.md,
+                              right: AppSpacing.xs,
+                              top: AppSpacing.lmd,
+                              bottom: AppSpacing.lmd,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    section.label ?? '',
+                                    style: isSelected
+                                        ? AppTypographyV1.bodyLarge.bold.brandPrimary()
+                                        : AppTypographyV1.bodyMedium.medium.textPrimary(),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              ),
-                              if ((section.appliedCount ?? 0) > 0)
-                                Text(
-                                  section.appliedCount.toString(),
-                                  style: isSelected
-                                      ? AppTypographyV1.labelLarge.medium.brandPrimary()
-                                      : AppTypographyV1.labelLarge.medium.copyWith(
-                                          color: Colors.black.withAlpha(50),
-                                        ),
-                                ),
-                            ],
+                                if ((section.appliedCount ?? 0) > 0)
+                                  Text(
+                                    section.appliedCount.toString(),
+                                    style: isSelected
+                                        ? AppTypographyV1.labelLarge.medium.brandPrimary()
+                                        : AppTypographyV1.labelLarge.medium.copyWith(
+                                            color: Colors.black.withAlpha(50),
+                                          ),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
 
-                    // use this for testing the visual cue manually
-                    // index == 4
-                    //     ? const VisualCueEntity(
-                    //         // IMAGE path — backend SVG.
-                    //         uiType: 'IMAGE',
-                    //         imageUrl: 'https://static.hopscotch.in/new-filter-tag.svg',
-                    //       )
-                    //     : const VisualCueEntity(
-                    //         // TEXT path — custom-painted ribbon.
-                    //         text: 'NEW',
-                    //         bgColor: '#BD1550',
-                    //       ),
-                    if (section.visualCue != null)
-                      Positioned(
-                        top: 2,
-                        right: -8,
-
-                        child: FilterSectionBadge(
-                          cue: section.visualCue!,
-                          height: 20,
-                          foldSize: 7,
-                          notchDepth: 5,
-                          fallbackBgColor: const Color(0xFFBD1550),
-                          fallbackTextColor: Colors.white,
-                          fontSize: 6,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                          foldShadowAlpha: 0.6,
+                      // use this for testing the visual cue manually
+                      // index == 4
+                      //     ? const VisualCueEntity(
+                      //         // IMAGE path — backend SVG.
+                      //         uiType: 'IMAGE',
+                      //         imageUrl: 'https://static.hopscotch.in/new-filter-tag.svg',
+                      //       )
+                      //     : const VisualCueEntity(
+                      //         // TEXT path — custom-painted ribbon.
+                      //         text: 'NEW',
+                      //         bgColor: '#BD1550',
+                      //       ),
+                      if (section.visualCue != null)
+                        Positioned(
+                          top: 2,
+                          right: -8,
+                          child: FilterSectionBadge(
+                            cue: section.visualCue!,
+                            height: 20,
+                            foldSize: 7,
+                            notchDepth: 5,
+                            fallbackBgColor: const Color(0xFFBD1550),
+                            fallbackTextColor: Colors.white,
+                            fontSize: 6,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                            foldShadowAlpha: 0.6,
+                          ),
                         ),
-                      ),
-                  ],
-                ),
-              );
-            },
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -391,15 +392,8 @@ class _FilterPageViewState extends State<_FilterPageView> {
     }
 
     final isColourMode = uiType == 'colour';
-    //TODO check this later because from the API we always get showSearch as false, and in the android code i see it's showing same always
     final isDelivery = uiType == 'delivery' || section.showSearch;
     final allFilters = _flattenFilterList(section.filterList);
-
-    final filtered = (isDelivery || _searchQuery.isEmpty)
-        ? allFilters
-        : allFilters
-              .where((f) => (f.label ?? '').toLowerCase().contains(_searchQuery.toLowerCase()))
-              .toList();
 
     return Expanded(
       child: Column(
@@ -408,9 +402,9 @@ class _FilterPageViewState extends State<_FilterPageView> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
-              itemCount: filtered.length,
+              itemCount: allFilters.length,
               itemBuilder: (context, index) {
-                final filter = filtered[index];
+                final filter = allFilters[index];
                 if (filter.isSection) {
                   return _buildSectionHeader(filter);
                 }
@@ -447,11 +441,23 @@ class _FilterPageViewState extends State<_FilterPageView> {
           padding: const EdgeInsets.fromLTRB(0, AppSpacing.xs, AppSpacing.sm, AppSpacing.xxs),
           child: OutlinedTextField(
             required: false,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: (p0) {
+              if (p0 != null && p0.length < 6) {
+                return PlpStrings.enterAValidPincode;
+              }
+              return null;
+            },
             controller: _searchController,
             labelText: hint ?? PlpStrings.pincode,
             errorText: state.pincodeError.isNotNullOrEmpty ? state.pincodeError : null,
             onChanged: _onSearchTextChanged,
             keyboardType: TextInputType.number,
+            autocorrect: false,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(6),
+            ],
             maxLength: 6,
             focusNode: pincodeFocusNode,
             onTapOutside: (p0) => FocusScope.of(context).unfocus(),
@@ -469,8 +475,6 @@ class _FilterPageViewState extends State<_FilterPageView> {
   }
 
   void _onSearchTextChanged(String value) {
-    setState(() => _searchQuery = value);
-
     if (value.length == 6 && value != _lastPincodeHit) {
       _lastPincodeHit = value;
       context.read<FilterBloc>().add(VerifyPincode(pincode: value));
@@ -480,25 +484,23 @@ class _FilterPageViewState extends State<_FilterPageView> {
     }
   }
 
-  void _resetSearchInput() {
-    if (_searchController.text.isEmpty && _searchQuery.isEmpty && _lastPincodeHit == null) {
-      return;
-    }
-    _searchController.clear();
-    _lastPincodeHit = null;
-    context.read<FilterBloc>().add(const ClearPincodeError());
-    setState(() => _searchQuery = '');
-  }
-
   void _applyDeliveryPincode(FilterState state) {
     final pincode = state.currentDeliveryPincode;
     if (pincode == null || pincode.isEmpty) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _searchController.text = pincode;
+      if (_searchController.text.isEmpty) {
+        _searchController.text = pincode;
+      }
+
       _lastPincodeHit = pincode;
-      setState(() => _searchQuery = pincode);
     });
+  }
+
+  void _resetSearchInput() {
+    _searchController.clear();
+    _lastPincodeHit = null;
+    context.read<FilterBloc>().add(const ClearPincodeError());
   }
 
   Widget _buildSectionHeader(FilterEntity filter) {
@@ -540,10 +542,6 @@ class _FilterPageViewState extends State<_FilterPageView> {
           ? AppCheckbox.labeled(
               onChanged: (_) => onToggle(),
               isSelected: isChecked,
-              checkColor:
-                  ['White', 'Yellow', 'Khaki', 'Cream', 'Off-White', 'Ivory'].contains(filter.label)
-                  ? Colors.black
-                  : null,
               label: label,
               count: count,
             )
@@ -560,28 +558,24 @@ class _FilterPageViewState extends State<_FilterPageView> {
     final param = filter.filterKey ?? '';
     final value = filter.filterValue ?? filter.label ?? '';
     final isChecked = _isFilterSelected(state, param, value);
-    final colourHex = filter.colorHex;
-    final showBlackCheckColor = [
-      'White',
-      'Yellow',
-      'Khaki',
-      'Cream',
-      'Off-White',
-      'Ivory',
-    ].contains(filter.label);
+    // Match Android: white tick on dark swatches, grey tick on light ones —
+    // decided by the swatch's perceived luminance, not a colour-name list.
+    final swatch = filter.colorHex.toColor;
+    final useWhiteTick = swatch == null || swatch.isDarkColor;
 
     return SizedBox(
       height: 46,
       child: AppCheckbox.labeled(
-        checkBoxSelectedColor: colourHex.toColor,
-        checkBoxUnSelectedColor: colourHex.toColor,
+        border: Border.all(color: AppColors.neutralGrey1, width: 0.5),
+        checkBoxSelectedColor: swatch,
+        checkBoxUnSelectedColor: swatch,
         onChanged: (_) {
           context.read<FilterBloc>().add(
             ToggleFilterItem(param: param, value: value, isMultiSelect: section.isMultiSelect),
           );
         },
         isSelected: isChecked,
-        checkColor: showBlackCheckColor ? Colors.black : null,
+        checkColor: useWhiteTick ? Colors.white : AppColors.neutralGrey6,
         label: filter.label ?? '',
         count: filter.count != null && filter.count! > 0 ? '(${filter.count})' : null,
       ),
@@ -622,4 +616,17 @@ class _FilterPageViewState extends State<_FilterPageView> {
   bool _isFilterSelected(FilterState state, String param, String value) {
     return state.pendingFilters[param]?.contains(value) == true;
   }
+}
+
+/// Clips the section sidebar to its own bounds vertically (so list items can't
+/// scroll up over the header) while allowing a few px of horizontal overflow on
+/// the right for the section "NEW" badges (positioned at `right: -8`).
+class _SidebarOverflowClipper extends CustomClipper<Rect> {
+  const _SidebarOverflowClipper();
+
+  @override
+  Rect getClip(Size size) => Rect.fromLTWH(0, 0, size.width + 12, size.height);
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
 }

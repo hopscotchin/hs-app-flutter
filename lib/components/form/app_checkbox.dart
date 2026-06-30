@@ -15,6 +15,8 @@ class AppCheckbox extends StatelessWidget {
     this.checkBoxUnSelectedColor,
     this.checkColor,
     this.count,
+    this.maxLabelLines = 1,
+    this.border,
   }) : label = null;
 
   const AppCheckbox.labeled({
@@ -27,6 +29,8 @@ class AppCheckbox extends StatelessWidget {
     this.checkBoxUnSelectedColor,
     this.checkColor,
     this.count,
+    this.maxLabelLines = 1,
+    this.border,
   });
 
   final bool isSelected;
@@ -37,6 +41,8 @@ class AppCheckbox extends StatelessWidget {
   final Color? checkBoxUnSelectedColor;
   final Color? checkColor;
   final String? count;
+  final int maxLabelLines;
+  final BoxBorder? border;
 
   static const double _boxSize = 20.0;
   static const double _radius = 4.0;
@@ -79,7 +85,7 @@ class AppCheckbox extends StatelessWidget {
             label ?? '',
             style: AppTypographyV1.bodyRegular.regular.copyWith(color: _labelColor),
             overflow: TextOverflow.ellipsis,
-            maxLines: 1,
+            maxLines: maxLabelLines,
           ),
         ),
         if (count.isNotNullOrEmpty) ...[
@@ -88,7 +94,7 @@ class AppCheckbox extends StatelessWidget {
             textAlign: TextAlign.end,
             style: AppTypographyV1.labelLarge.regular.copyWith(color: Colors.black.withAlpha(50)),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
         ],
       ],
     );
@@ -104,6 +110,7 @@ class AppCheckbox extends StatelessWidget {
             ? checkBoxSelectedColor ?? AppColors.brandSecondary
             : checkBoxUnSelectedColor ?? AppColors.neutralGrey2,
         borderRadius: BorderRadius.circular(_radius),
+        border: border,
       ),
       child: isSelected
           ? Center(

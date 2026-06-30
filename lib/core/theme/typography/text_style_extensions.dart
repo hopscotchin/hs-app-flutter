@@ -40,6 +40,7 @@ extension TextStyleColorExtensions on TextStyle {
   TextStyle linkColor() => copyWith(color: AppColors.linkDefault);
 
   TextStyle textSecondary() => copyWith(color: AppColors.neutralGrey5);
+  TextStyle blackWithOpacity() => copyWith(color: AppColors.neutralBlack.withValues(alpha: 50));
 }
 
 /// ─────────────────────────────────────────────

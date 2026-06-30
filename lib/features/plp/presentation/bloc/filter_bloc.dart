@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/base/base_bloc.dart';
@@ -444,7 +445,7 @@ class FilterBloc extends BaseBloc<FilterEvent, FilterState> {
 
     // Step 1: client-side validation.
     if (!_isValidPincode(pincode)) {
-      emit(state.copyWith(pincodeError: 'Enter a valid 6-digit pincode'));
+      emit(state.copyWith(pincodeError: PlpStrings.enterAValidPincode));
       return;
     }
 

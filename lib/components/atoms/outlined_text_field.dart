@@ -35,6 +35,7 @@ class OutlinedTextField extends StatefulWidget {
     this.onTapOutside,
     this.suffix,
     this.suffixIcon,
+    this.autovalidateMode,
   });
 
   final TextEditingController controller;
@@ -62,6 +63,7 @@ class OutlinedTextField extends StatefulWidget {
   final Widget? suffix;
   final Widget? suffixIcon;
   final Function(PointerDownEvent)? onTapOutside;
+  final AutovalidateMode? autovalidateMode;
 
   @override
   State<OutlinedTextField> createState() => _OutlinedTextFieldState();
@@ -75,6 +77,7 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
 
   static final _idleLabelStyle = AppTypographyV1.bodyMedium.regular.copyWith(
     color: AppColors.neutralGrey5,
+    height: 1.3,
   );
 
   static final _inputStyle = AppTypographyV1.bodyMedium.medium.copyWith(
@@ -121,6 +124,34 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
     }
   }
 
+  Widget _buildLabel(bool isActive, TextStyle labelStyle, double fieldWidth) {
+    final row = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            widget.labelText,
+            style: labelStyle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (widget.required)
+          Text(
+            ' *',
+            style: labelStyle.copyWith(color: AppColors.dangerDefault),
+          ),
+      ],
+    );
+
+    // Floating (active) label capped at 75% of field width, then ellipsis. Made 0.85 to match visual appearance
+    if (!isActive || !fieldWidth.isFinite) return row;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: fieldWidth * 0.85),
+      child: row,
+    );
+  }
+
   OutlineInputBorder _outline(Color color, {double width = 1}) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(4),
@@ -144,13 +175,17 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
     final activeBorder = _outline(AppColors.brandPrimary);
     final idleBorder = _outline(AppColors.neutralGrey3);
 
-    final floatingLabelStyle = AppTypographyV1.labelLarge.regular.copyWith(color: labelColor);
+    final floatingLabelStyle = AppTypographyV1.labelLarge.regular.copyWith(
+      color: labelColor,
+      height: 1.3,
+    );
     final labelStyle = isActive ? floatingLabelStyle : _idleLabelStyle;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextFormField(
+        LayoutBuilder(
+          builder: (context, constraints) => TextFormField(
           controller: widget.controller,
           focusNode: _focusNode,
           autofocus: widget.autofocus,
@@ -165,10 +200,10 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
           autocorrect: widget.autocorrect,
           maxLength: widget.maxLength,
           minLines: widget.minLines,
+          autovalidateMode: widget.autovalidateMode,
           maxLines: widget.maxLines,
           inputFormatters: widget.inputFormatters,
           style: _inputStyle,
-
           decoration: InputDecoration(
             counterText: '',
             isDense: true,
@@ -187,19 +222,7 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
             errorStyle: AppTypographyV1.labelMedium.regular.copyWith(
               color: AppColors.dangerDefault,
             ),
-            label: Text.rich(
-              TextSpan(
-                text: widget.labelText,
-                style: labelStyle,
-                children: [
-                  if (widget.required)
-                    TextSpan(
-                      text: ' *',
-                      style: labelStyle.copyWith(color: AppColors.dangerDefault),
-                    ),
-                ],
-              ),
-            ),
+            label: _buildLabel(isActive, labelStyle, constraints.maxWidth),
             floatingLabelStyle: floatingLabelStyle,
             enabledBorder: isActive ? activeBorder : idleBorder,
             disabledBorder: isActive ? activeBorder : idleBorder,
@@ -218,6 +241,7 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
                   });
                   return error;
                 },
+          ),
         ),
         if (!hasError && widget.helperText != null && widget.helperText!.isNotEmpty) ...[
           AppSpacing.verticalGapXs,

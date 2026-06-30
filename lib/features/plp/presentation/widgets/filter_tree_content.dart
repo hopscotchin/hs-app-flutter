@@ -194,7 +194,7 @@ class _DrillDownRow extends StatelessWidget {
                     style: isSubCategory
                         ? AppTypographyV1.bodyMedium.regular.textPrimary()
                         : AppTypographyV1.bodyMedium.medium.textPrimary(),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -239,6 +239,7 @@ class _LeafRow extends StatelessWidget {
               onChanged: (_) => onTap(),
               isSelected: isSelected,
               label: filter.label ?? '',
+              maxLabelLines: 2,
               count: filter.count != null && filter.count! > 0 ? '(${filter.count})' : null,
             ),
           ),

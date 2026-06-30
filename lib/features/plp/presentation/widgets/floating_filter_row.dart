@@ -273,7 +273,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
           decoration: BoxDecoration(
             color: Colors.transparent,
             border: Border.all(
-              color: isSelected ? AppColors.brandPrimary : Colors.transparent,
+              color: isSelected ? AppColors.brandPrimary : AppColors.transparent,
               width: 1,
             ),
             borderRadius: BorderRadius.circular(4),
@@ -281,7 +281,11 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
           child: Container(
             height: 40,
             width: 40,
-            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(4)),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.neutralGrey1, width: 0.5),
+              color: bgColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
           ),
         ),
         const SizedBox(height: 4),

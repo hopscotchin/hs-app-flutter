@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/components/atoms/cached_image_widget.dart';
 import 'package:hs_app_flutter/components/atoms/custom_chip_widget.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
+import 'package:hs_app_flutter/components/atoms/strikethrough_text.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/entities/visual_cue_entity.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
@@ -251,9 +252,9 @@ class _XLTileWidgetState extends State<XLTileWidget> {
                     style: AppTypographyV1.bodyRegular.bold.textPrimary(),
                     children: [
                       if (price.mrp.isNotNullOrEmpty) ...[
-                        TextSpan(
-                          text: '${price.mrp}',
-                          style: AppTypographyV1.labelMedium.regular.neutralGrey5().strikeThrough(),
+                        StrikethroughText.span(
+                          price.mrp ?? '',
+                          style: AppTypographyV1.labelMedium.regular.neutralGrey5(),
                         ),
                       ],
 

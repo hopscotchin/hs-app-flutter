@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 
 import '../../../../core/entities/visual_cue_entity.dart';
 
@@ -49,14 +49,14 @@ class FilterSectionBadge extends StatelessWidget {
     final isImage = cue.uiType?.toUpperCase() == 'IMAGE' && url != null && url.trim().isNotEmpty;
 
     if (isImage) {
-      return SizedBox(
+      final imageWidth = height * 3;
+      return CustomImage(
+        path: url,
+        width: imageWidth,
         height: height,
-        child: SvgPicture.network(
-          url,
-          fit: BoxFit.contain,
-          placeholderBuilder: (_) => SizedBox(height: height),
-          errorBuilder: (_, _, _) => SizedBox(height: height),
-        ),
+        fit: BoxFit.contain,
+        placeholder: SizedBox(width: imageWidth, height: height),
+        errorWidget: SizedBox(width: imageWidth, height: height),
       );
     }
 

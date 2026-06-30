@@ -4,7 +4,9 @@ import 'package:hs_app_flutter/components/buttons/button_enums.dart';
 import 'package:hs_app_flutter/components/form/app_checkbox.dart';
 import 'package:hs_app_flutter/components/form/app_radio.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
+import 'package:hs_app_flutter/core/extensions/color_extensions.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
+import 'package:hs_app_flutter/core/theme/colors.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
 
@@ -203,20 +205,15 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
     String label,
     String? count,
   ) {
-    final showBlackCheckColor = const [
-      'White',
-      'Yellow',
-      'Khaki',
-      'Cream',
-      'Off-White',
-      'Ivory',
-    ].contains(filter.label);
+    final swatch = _isColourMode ? filter.colorHex.toColor : null;
+    final useWhiteTick = swatch == null || swatch.isDarkColor;
     return AppCheckbox.labeled(
-      checkBoxSelectedColor: _isColourMode ? filter.colorHex.toColor : null,
-      checkBoxUnSelectedColor: _isColourMode ? filter.colorHex.toColor : null,
+      border: _isColourMode ? Border.all(color: AppColors.neutralGrey1, width: 0.5) : null,
+      checkBoxSelectedColor: swatch,
+      checkBoxUnSelectedColor: swatch,
       onChanged: (_) => _toggle(value),
       isSelected: isSelected,
-      checkColor: showBlackCheckColor ? Colors.black : null,
+      checkColor: _isColourMode ? (useWhiteTick ? Colors.white : AppColors.neutralGrey6) : null,
       label: label,
       count: count,
     );

@@ -260,6 +260,7 @@ class _AddressesPageState extends State<AddressesPage> {
     final bloc = context.read<AddressBloc>();
     final confirmed = await AppBottomSheet.show<bool>(
       context,
+      title: AddressStrings.removeAddressTitle,
       description: AddressStrings.confirmDeletePrompt,
       secondaryAction: AppBottomSheetAction(
         label: CommonStrings.confirm,

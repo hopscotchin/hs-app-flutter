@@ -16,10 +16,10 @@ import '../../domain/entities/page_type.dart';
 import '../bloc/plp_bloc.dart';
 
 typedef _AppBarData = ({
-  int? totalRecords,
-  String? screenName,
-  String? screenSubtitle,
-  BannerEntity? banner,
+int? totalRecords,
+String? screenName,
+String? screenSubtitle,
+BannerEntity? banner,
 });
 
 class PlpSliverAppBar extends StatelessWidget {
@@ -32,10 +32,10 @@ class PlpSliverAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocSelector<PlpBloc, PlpState, _AppBarData>(
       selector: (state) => (
-        totalRecords: state.status == PlpStatus.loaded ? state.totalRecords : null,
-        screenName: state.screenName,
-        screenSubtitle: state.screenSubtitle,
-        banner: state.banners.isNotEmpty ? state.banners.first : null,
+      totalRecords: state.status == PlpStatus.loaded ? state.totalRecords : null,
+      screenName: state.screenName,
+      screenSubtitle: state.screenSubtitle,
+      banner: state.banners.isNotEmpty ? state.banners.first : null,
       ),
       builder: (context, data) {
         final bannerUrl = data.banner?.imageUrl;
@@ -187,8 +187,8 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get maxExtent => _expandedHeight + topPadding;
 
-  static const _largeTitleFadeOutStart = 0.70;
-  static const _largeTitleFadeOutEnd = 0.80;
+  static const _largeTitleFadeOutStart = 0.60;
+  static const _largeTitleFadeOutEnd = 0.75;
   static const _collapsedTitleFadeInStart = 0.70;
   static const _collapsedTitleFadeInEnd = 0.80;
 
@@ -215,7 +215,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
 
     final collapsedTitleOpacity = Curves.easeOut.transform(
       ((progress - _collapsedTitleFadeInStart) /
-              (_collapsedTitleFadeInEnd - _collapsedTitleFadeInStart))
+          (_collapsedTitleFadeInEnd - _collapsedTitleFadeInStart))
           .clamp(0.0, 1.0),
     );
 
@@ -224,10 +224,6 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
     final topBackgroundOpacity = Curves.linearToEaseOut.transform(
       ((progress - _toolbarFadeStart) / _toolbarFadeDuration).clamp(0.0, 1.0),
     );
-
-    /// Toolbar (back + actions) visibility — full when expanded, gone once the
-    /// header is collapsing, so scrolling leaves only the pinned filter row.
-    final toolbarOpacity = (1 - topBackgroundOpacity).clamp(0.0, 1.0);
 
     /// Bottom dark gradient opacity used for large title readability.
     /// Fades out while scrolling upward.
@@ -324,54 +320,50 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
             left: 0,
             right: 0,
             height: _toolbarHeight,
-            child: IgnorePointer(
-              ignoring: toolbarOpacity < 0.5,
-              child: Opacity(
-                opacity: toolbarOpacity,
-                child: Row(
-                  children: [
-                    const SizedBox(width: 8),
-                    CircleIconButton(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: const CustomImage(path: ImageConstants.arrowBack, height: 18),
-                    ),
-
-                    const SizedBox(width: AppSpacing.xs),
-
-                    Expanded(
-                      child: Opacity(
-                        opacity: collapsedTitleOpacity,
-                        child: Text(
-                          displayTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypographyV1.bodySmall.bold.textSeconday(),
-                        ),
-                      ),
-                    ),
-
-                    CircleIconButton(
-                      onTap: () => AppNavigator.goToSearch(context),
-                      child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
-                    ),
-
-                    const SizedBox(width: 8),
-
-                    CircleIconButton(
-                      onTap: () {},
-                      child: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
-                    ),
-
-                    const SizedBox(width: 8),
-
-                    CircleIconButton(
-                      onTap: () => AppNavigator.goToCart(context),
-                      child: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
+            child: Row(
+              children: [
+                const SizedBox(width: 8),
+                CircleIconButton(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const CustomImage(path: ImageConstants.arrowBack, height: 18),
                 ),
-              ),
+
+                const SizedBox(width: AppSpacing.xs),
+
+                // Collapsed title keeps its OWN opacity, independent of the
+                // header collapse — fades in as the large title fades out.
+                Expanded(
+                  child: Opacity(
+                    opacity: collapsedTitleOpacity,
+                    child: Text(
+                      displayTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypographyV1.bodySmall.bold.textSeconday(),
+                    ),
+                  ),
+                ),
+
+                CircleIconButton(
+                  onTap: () => AppNavigator.goToSearch(context),
+                  child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
+                ),
+
+                const SizedBox(width: 8),
+
+                CircleIconButton(
+                  onTap: () {},
+                  child: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
+                ),
+
+                const SizedBox(width: 8),
+
+                CircleIconButton(
+                  onTap: () => AppNavigator.goToCart(context),
+                  child: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
+                ),
+                const SizedBox(width: 12),
+              ],
             ),
           ),
         ],

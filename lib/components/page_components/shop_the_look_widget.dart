@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 
 import '../../core/constants/strings/discover_strings.dart';
 import '../../core/navigation/action_url_handler.dart';
@@ -7,6 +8,7 @@ import '../../core/theme/typography/text_style_extensions.dart';
 import '../../core/theme/typography/typography_v1.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../atoms/cached_image_widget.dart';
+import '../atoms/strikethrough_text.dart';
 import 'shop_the_look_bottom_sheet.dart';
 
 class ShopTheLookWidget extends StatelessWidget {
@@ -14,12 +16,7 @@ class ShopTheLookWidget extends StatelessWidget {
   final ComponentMargins? margins;
   final void Function(List<ShopTheLookSelection>)? onAddToCart;
 
-  const ShopTheLookWidget({
-    super.key,
-    required this.data,
-    this.margins,
-    this.onAddToCart,
-  });
+  const ShopTheLookWidget({super.key, required this.data, this.margins, this.onAddToCart});
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +29,8 @@ class ShopTheLookWidget extends StatelessWidget {
     // titleMargins zeroed when titleImage is null — match that.
     final double horizontalMargin = margins?.horizontal ?? 16;
     final double innerHorizontalMargin = margins?.innerHorizontalMargin ?? 8;
-    final double titleBMargin = data.title != null
-        ? (margins?.titleBottomMargin ?? 0)
-        : 0.0;
-    final double titleHMargin = data.title != null
-        ? (margins?.titleHorizontalMargin ?? 16)
-        : 0.0;
+    final double titleBMargin = data.title != null ? (margins?.titleBottomMargin ?? 0) : 0.0;
+    final double titleHMargin = data.title != null ? (margins?.titleHorizontalMargin ?? 16) : 0.0;
 
     final int minTiles = data.viewConfig?.minTilesToShow ?? 1;
     final int peepingFactor = data.viewConfig?.peepingFactor ?? 0;
@@ -50,8 +43,7 @@ class ShopTheLookWidget extends StatelessWidget {
             ? (peepingFactor > 0 ? innerHorizontalMargin : 0)
             : (minTiles - 1) * innerHorizontalMargin);
 
-    final double tileWidth =
-        availableWidth * 100 / ((minTiles * 100) + peepingFactor);
+    final double tileWidth = availableWidth * 100 / ((minTiles * 100) + peepingFactor);
 
     // Card height calculation:
     // Content width = tileWidth - 2dp border (each side) - 8dp padding (each side) - 6dp col gap
@@ -63,10 +55,7 @@ class ShopTheLookWidget extends StatelessWidget {
     const double dividerAndMargin = 9.0;
     const double cardPaddingVertical = 16.0;
     final double cardHeight =
-        cardPaddingVertical +
-        gridHeight +
-        dividerAndMargin +
-        priceSectionHeight;
+        cardPaddingVertical + gridHeight + dividerAndMargin + priceSectionHeight;
 
     final Widget carousel = SizedBox(
       height: cardHeight,
@@ -79,8 +68,7 @@ class ShopTheLookWidget extends StatelessWidget {
           return _ShopTheLookCard(
             item: items[index],
             tileWidth: tileWidth,
-            onProductTap: (ShopTheLookProduct p) =>
-                ActionUrlHandler.navigate(context, p.actionUri),
+            onProductTap: (ShopTheLookProduct p) => ActionUrlHandler.navigate(context, p.actionUri),
             onAddToCart: () => _showBottomSheet(context, items[index]),
           );
         },
@@ -94,11 +82,7 @@ class ShopTheLookWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: EdgeInsets.only(
-            left: titleHMargin,
-            right: titleHMargin,
-            bottom: titleBMargin,
-          ),
+          padding: EdgeInsets.only(left: titleHMargin, right: titleHMargin, bottom: titleBMargin),
           child: CachedImageWidget(
             imageUrl: data.title!.url!,
             width: double.infinity,
@@ -116,8 +100,7 @@ class ShopTheLookWidget extends StatelessWidget {
       isScrollControlled: true,
       useRootNavigator: true,
       backgroundColor: AppColors.transparent,
-      builder: (_) =>
-          ShopTheLookBottomSheet(item: item, onAddToCart: onAddToCart),
+      builder: (_) => ShopTheLookBottomSheet(item: item, onAddToCart: onAddToCart),
     );
   }
 }
@@ -159,13 +142,9 @@ class _ShopTheLookCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: _buildColumn(tiles[0], tiles[2], [1 / 1.65, 1 / 1.35]),
-              ),
+              Expanded(child: _buildColumn(tiles[0], tiles[2], [1 / 1.65, 1 / 1.35])),
               const SizedBox(width: 6),
-              Expanded(
-                child: _buildColumn(tiles[1], tiles[3], [1 / 1.35, 1 / 1.65]),
-              ),
+              Expanded(child: _buildColumn(tiles[1], tiles[3], [1 / 1.35, 1 / 1.65])),
             ],
           ),
           const SizedBox(height: 8),
@@ -219,9 +198,7 @@ class _ShopTheLookCard extends StatelessWidget {
                 ),
                 child: Text(
                   DiscoverStrings.outOfStock,
-                  style: AppTypographyV1.caption.semiBold.copyWith(
-                    color: AppColors.baseDefault,
-                  ),
+                  style: AppTypographyV1.caption.semiBold.copyWith(color: AppColors.baseDefault),
                 ),
               ),
             ),
@@ -250,24 +227,18 @@ class _ShopTheLookCard extends StatelessWidget {
                 Row(
                   children: [
                     if (price?.displayValue != null)
-                      Text(
-                        price!.displayValue!,
-                        style: AppTypographyV1.labelLarge.bold,
-                      ),
-                    if (price?.mrp != null) ...[
+                      Text(price?.displayValue ?? '', style: AppTypographyV1.labelLarge.bold),
+                    if (price?.mrp.isNotNullOrEmpty ?? false) ...[
                       const SizedBox(width: 6),
                       Flexible(
-                        child: Text(
-                          price!.mrp!,
-                          style: AppTypographyV1.labelLarge.regular
-                              .textTertiary()
-                              .strikeThrough(),
+                        child: StrikethroughText(
+                          price?.mrp ?? '',
+                          style: AppTypographyV1.labelLarge.regular.textTertiary(),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
-                    if (price?.discount != null &&
-                        price!.discount!.isNotEmpty) ...[
+                    if (price?.discount != null && price!.discount!.isNotEmpty) ...[
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(

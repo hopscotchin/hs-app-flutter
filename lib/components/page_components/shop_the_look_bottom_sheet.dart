@@ -8,16 +8,13 @@ import '../../core/theme/typography/text_style_extensions.dart';
 import '../../core/theme/typography/typography_v1.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../atoms/cached_image_widget.dart';
+import '../atoms/strikethrough_text.dart';
 
 class ShopTheLookBottomSheet extends StatefulWidget {
   final ShopTheLookTile item;
   final void Function(List<ShopTheLookSelection>)? onAddToCart;
 
-  const ShopTheLookBottomSheet({
-    super.key,
-    required this.item,
-    this.onAddToCart,
-  });
+  const ShopTheLookBottomSheet({super.key, required this.item, this.onAddToCart});
 
   @override
   State<ShopTheLookBottomSheet> createState() => _ShopTheLookBottomSheetState();
@@ -86,10 +83,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
         setState(() => _selectedProducts.add(productId));
       } else {
         final firstAvailable = widget.item.productTiles
-            .firstWhere(
-              (p) => p.id == productId,
-              orElse: () => const ShopTheLookProduct(),
-            )
+            .firstWhere((p) => p.id == productId, orElse: () => const ShopTheLookProduct())
             .skus
             .where((s) => s.isAvailable)
             .cast<ShopTheLookSku?>()
@@ -113,10 +107,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
 
   void _onAddToCart() {
     final List<ShopTheLookSelection> selections = _selectedProducts.map((id) {
-      return ShopTheLookSelection(
-        productId: id,
-        skuId: _selectedSkus[id]?.skuId,
-      );
+      return ShopTheLookSelection(productId: id, skuId: _selectedSkus[id]?.skuId);
     }).toList();
     Navigator.pop(context);
     widget.onAddToCart?.call(selections);
@@ -129,9 +120,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
     final int totalPrice = pricing.totalPrice;
     final int totalMrp = pricing.totalMrp;
     final int discountAmount = totalMrp - totalPrice;
-    final int discountPercent = totalMrp > 0
-        ? (discountAmount / totalMrp * 100).round()
-        : 0;
+    final int discountPercent = totalMrp > 0 ? (discountAmount / totalMrp * 100).round() : 0;
     final int itemCount = _selectedProducts.length;
 
     return Container(
@@ -172,10 +161,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
             constraints: const BoxConstraints(),
           ),
           const SizedBox(width: 8),
-          Text(
-            DiscoverStrings.selectSize,
-            style: AppTypographyV1.bodyLarge.semiBold,
-          ),
+          Text(DiscoverStrings.selectSize, style: AppTypographyV1.bodyLarge.semiBold),
         ],
       ),
     );
@@ -227,22 +213,14 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                             height: 24,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: isSelected
-                                  ? AppColors.brandDefault
-                                  : AppColors.baseDefault,
+                              color: isSelected ? AppColors.brandDefault : AppColors.baseDefault,
                               border: Border.all(
-                                color: isSelected
-                                    ? AppColors.brandDefault
-                                    : AppColors.dividerLight,
+                                color: isSelected ? AppColors.brandDefault : AppColors.dividerLight,
                                 width: 1.5,
                               ),
                             ),
                             child: isSelected
-                                ? const Icon(
-                                    Icons.check,
-                                    size: 14,
-                                    color: AppColors.baseDefault,
-                                  )
+                                ? const Icon(Icons.check, size: 14, color: AppColors.baseDefault)
                                 : null,
                           ),
                         ),
@@ -267,19 +245,14 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                     if (isOos) ...[
                       const SizedBox(height: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: AppColors.neutralGrey5,
                           borderRadius: BorderRadius.circular(2),
                         ),
                         child: Text(
                           DiscoverStrings.outOfStock,
-                          style: AppTypographyV1.labelSmall.copyWith(
-                            color: AppColors.baseDefault,
-                          ),
+                          style: AppTypographyV1.labelSmall.copyWith(color: AppColors.baseDefault),
                         ),
                       ),
                     ],
@@ -289,10 +262,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                     Row(
                       children: [
                         GestureDetector(
-                          onTap: () => ActionUrlHandler.navigate(
-                            context,
-                            product.actionUri,
-                          ),
+                          onTap: () => ActionUrlHandler.navigate(context, product.actionUri),
                           child: Text(
                             DiscoverStrings.viewDetails,
                             style: AppTypographyV1.labelLarge.regular.brand(),
@@ -301,10 +271,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                         if (product.hasSizeChart == true) ...[
                           const SizedBox(width: 16),
                           GestureDetector(
-                            onTap: () => ActionUrlHandler.navigate(
-                              context,
-                              product.actionUri,
-                            ),
+                            onTap: () => ActionUrlHandler.navigate(context, product.actionUri),
                             child: Text(
                               DiscoverStrings.sizeChart,
                               style: AppTypographyV1.labelLarge.regular.brand(),
@@ -319,24 +286,15 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
             ],
           ),
         ),
-        if (!isLast)
-          const Divider(height: 1, thickness: 1, color: AppColors.dividerLight),
+        if (!isLast) const Divider(height: 1, thickness: 1, color: AppColors.dividerLight),
       ],
     );
   }
 
-  Widget _buildSizeSelector(
-    ShopTheLookProduct product,
-    ShopTheLookSku? selectedSku,
-  ) {
+  Widget _buildSizeSelector(ShopTheLookProduct product, ShopTheLookSku? selectedSku) {
     if (product.skus.isEmpty) return const SizedBox.shrink();
     if (product.skus.length == 1) {
-      return _buildSizeChip(
-        product.skus.first,
-        isSelected: true,
-        isSingleSize: true,
-        onTap: null,
-      );
+      return _buildSizeChip(product.skus.first, isSelected: true, isSingleSize: true, onTap: null);
     }
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -410,12 +368,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
     );
   }
 
-  Widget _buildBottomBar(
-    int totalPrice,
-    int totalMrp,
-    int discountPercent,
-    int itemCount,
-  ) {
+  Widget _buildBottomBar(int totalPrice, int totalMrp, int discountPercent, int itemCount) {
     final bool hasSelection = _selectedProducts.isNotEmpty;
 
     return SafeArea(
@@ -441,17 +394,12 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
                   Row(
                     children: [
                       if (totalPrice > 0)
-                        Text(
-                          '₹$totalPrice',
-                          style: AppTypographyV1.labelLarge.bold,
-                        ),
+                        Text('₹$totalPrice', style: AppTypographyV1.labelLarge.bold),
                       if (totalMrp > 0 && totalMrp != totalPrice) ...[
                         const SizedBox(width: 8),
-                        Text(
-                          '₹$totalMrp',
-                          style: AppTypographyV1.labelLarge.regular
-                              .textTertiary()
-                              .strikeThrough(),
+                        StrikethroughText(
+                          totalMrp.toString(),
+                          style: AppTypographyV1.labelLarge.regular.textTertiary(),
                         ),
                       ],
                       if (discountPercent > 0) ...[
@@ -472,10 +420,7 @@ class _ShopTheLookBottomSheetState extends State<ShopTheLookBottomSheet> {
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brandDefault,
                 disabledBackgroundColor: AppColors.dividerLight,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 textStyle: AppTypographyV1.labelLarge.bold,
               ),
               child: const Text(DiscoverStrings.addToBag),

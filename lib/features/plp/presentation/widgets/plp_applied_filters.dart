@@ -42,7 +42,7 @@ class _AppliedFiltersPinnedDelegate extends SliverPersistentHeaderDelegate {
 
   _AppliedFiltersPinnedDelegate({required this.selectedFilters, required this.hasVisible});
 
-  static const double _height = 58.0;
+  static const double _height = 42.0;
 
   @override
   double get minExtent => hasVisible ? _height : 0.0;
@@ -77,7 +77,6 @@ class _AppliedFiltersPinnedDelegate extends SliverPersistentHeaderDelegate {
                     .toList(),
               ),
             ),
-            const SizedBox(height: 5),
           ],
         ),
       ),

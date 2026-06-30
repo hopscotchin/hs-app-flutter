@@ -12,6 +12,7 @@ import '../../core/theme/spacing.dart';
 import '../../features/plp/domain/entities/listing_product_entity.dart';
 import '../../features/plp/domain/entities/product_price_entity.dart';
 import 'cached_image_widget.dart';
+import 'strikethrough_text.dart';
 
 /// Default tile aspect ratio (image-only). Cards in 2-col grids and carousels
 /// fall back to this when no aspect ratio is supplied.
@@ -105,7 +106,7 @@ class ProductTile extends StatelessWidget {
           aspectRatio: effectiveRatio,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
-            child: CachedImageWidget(imageUrl: imageUrl ?? '', fit: BoxFit.cover),
+            child: CachedImageWidget(imageUrl: imageUrl ?? '', fit: BoxFit.fill),
           ),
         ),
       );
@@ -120,8 +121,8 @@ class ProductTile extends StatelessWidget {
           if (showProductInfo) ...[
             AppSpacing.verticalGapXsm,
             if (productName.isNotNullOrEmpty) _buildBrandName(),
-            if ((priceText ?? '').isNotEmpty) ...[AppSpacing.verticalGapXs, _buildPriceRow()],
-            if (_resolvedColorLabel != null || hasCPT) ...[
+            if (priceText.isNotNullOrEmpty) ...[AppSpacing.verticalGapXs, _buildPriceRow()],
+            if (_resolvedColorLabel.isNotNullOrEmpty) ...[
               AppSpacing.verticalGapXsm,
               Text(
                 _resolvedColorLabel ?? '',
@@ -198,7 +199,11 @@ class ProductTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
       child: Text(
         productName ?? '',
-        style: AppTypographyV1.labelLarge.regular.textPrimary(),
+        style: isSoldOut
+            ? AppTypographyV1.labelLarge.regular.copyWith(
+                color: Colors.black.withValues(alpha: 0.5),
+              )
+            : AppTypographyV1.labelLarge.regular.textPrimary(),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -207,7 +212,7 @@ class ProductTile extends StatelessWidget {
 
   Widget _buildPriceRow() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs, vertical: 0),
       // Single-line + clip — longer mrp strings like "MRP:₹2,665" would
       // otherwise wrap and blow the carousel's fixed product-info reserve.
       child: RichText(
@@ -216,19 +221,25 @@ class ProductTile extends StatelessWidget {
         softWrap: false,
         text: TextSpan(
           text: '${priceText!}\t',
-          style: AppTypographyV1.bodySmall.bold.textPrimary(),
+          style: isSoldOut
+              ? AppTypographyV1.bodySmall.bold.copyWith(color: Colors.black.withValues(alpha: 0.5))
+              : AppTypographyV1.bodySmall.bold.textPrimary(),
           children: [
-            if (originalPriceText != null) ...[
+            if (originalPriceText.isNotNullOrEmpty) ...[
               const WidgetSpan(child: SizedBox(width: 2)),
-              TextSpan(
-                text: originalPriceText,
-                style: AppTypographyV1.labelMedium.regular.neutralGrey5().strikeThrough(),
+              StrikethroughText.span(
+                originalPriceText ?? '',
+                style: AppTypographyV1.labelMedium.regular.neutralGrey5(),
               ),
             ],
             if (discountText != null) ...[
               TextSpan(
                 text: originalPriceText != null ? '\t\t$discountText' : '\t$discountText',
-                style: AppTypographyV1.labelMedium.regular.brandSecondary(),
+                style: isSoldOut
+                    ? AppTypographyV1.labelMedium.regular.copyWith(
+                        color: Colors.black.withValues(alpha: 0.5),
+                      )
+                    : AppTypographyV1.labelMedium.regular.brandSecondary(),
               ),
             ],
           ],

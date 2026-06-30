@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
+import 'package:hs_app_flutter/components/app_tooltip.dart';
 import 'package:hs_app_flutter/components/atoms/filled_text_field.dart';
 import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
 import 'package:hs_app_flutter/components/buttons/button_enums.dart';
@@ -343,75 +344,14 @@ class _FieldWithTrailingIcon extends StatelessWidget {
         child,
         Padding(
           padding: const EdgeInsets.only(right: AppSpacing.md),
-          child: Tooltip(
+          child: AppTooltip(
             message: tooltip,
-            triggerMode: TooltipTriggerMode.tap,
-            preferBelow: false,
-            verticalOffset: 12,
-            margin: const EdgeInsets.only(right: AppSpacing.sm),
-            decoration: const ShapeDecoration(
-              color: AppColors.neutralGrey6,
-              shape: _TooltipShape(arrowRightInset: 20),
-            ),
             child: Icon(icon, size: AppSpacing.iconSm, color: AppColors.neutralBlack),
           ),
         ),
       ],
     );
   }
-}
-
-/// Tooltip bubble with rounded corners and a downward-pointing triangle
-/// at the bottom, positioned near the right edge to point at the info icon.
-class _TooltipShape extends ShapeBorder {
-  const _TooltipShape({
-    this.radius = AppSpacing.xxs,
-    this.arrowWidth = 12,
-    this.arrowHeight = 7,
-    this.arrowRightInset = 14,
-  });
-
-  /// Corner radius of the bubble.
-  final double radius;
-
-  /// Base width of the triangle.
-  final double arrowWidth;
-
-  /// Height the triangle protrudes below the bubble.
-  final double arrowHeight;
-
-  /// Distance from the right edge to the triangle's center.
-  final double arrowRightInset;
-
-  @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.only(bottom: arrowHeight);
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) =>
-      getOuterPath(rect, textDirection: textDirection);
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    final body = Rect.fromLTWH(rect.left, rect.top, rect.width, rect.height - arrowHeight);
-    final arrowCenter = body.right - arrowRightInset;
-    return Path()
-      ..addRRect(RRect.fromRectAndRadius(body, Radius.circular(radius)))
-      ..moveTo(arrowCenter - arrowWidth / 2, body.bottom)
-      ..lineTo(arrowCenter, body.bottom + arrowHeight)
-      ..lineTo(arrowCenter + arrowWidth / 2, body.bottom)
-      ..close();
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
-
-  @override
-  ShapeBorder scale(double t) => _TooltipShape(
-    radius: radius * t,
-    arrowWidth: arrowWidth * t,
-    arrowHeight: arrowHeight * t,
-    arrowRightInset: arrowRightInset * t,
-  );
 }
 
 class _MarkOnMapRow extends StatelessWidget {
@@ -445,10 +385,8 @@ class _MarkOnMapRow extends StatelessWidget {
                 style: AppTypographyV1.bodyMedium.medium.copyWith(color: AppColors.neutralBlack),
               ),
             ),
-            const Tooltip(
+            const AppTooltip(
               message: AddressStrings.tooltipLocation,
-              triggerMode: TooltipTriggerMode.tap,
-              preferBelow: false,
               child: Icon(Icons.info_outline, size: 20),
             ),
           ],
