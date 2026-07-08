@@ -168,7 +168,7 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
               Positioned(
                 left: 0,
                 right: 0,
-                bottom: 30,
+                bottom: 36,
                 child: IgnorePointer(
                   child: _DotIndicator(count: tiles.length, currentPage: _currentPage),
                 ),
@@ -206,8 +206,8 @@ class _DotIndicator extends StatelessWidget {
             return AnimatedContainer(
               duration: _duration,
               margin: _margin,
-              width: isActive ? 45 : 8,
-              height: 6,
+              width: isActive ? 40 : 8,
+              height: 5,
               decoration: BoxDecoration(
                 borderRadius: _borderRadius,
                 color: isActive

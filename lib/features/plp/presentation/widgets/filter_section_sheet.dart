@@ -44,10 +44,10 @@ class FilterSectionSheet extends StatefulWidget {
   static const double _kMaxFraction = 0.85;
 
   static Future<Map<String, String>?> show(
-    BuildContext context, {
-    required FilterSectionEntity section,
-    Map<String, String> appliedFilters = const {},
-  }) {
+      BuildContext context, {
+        required FilterSectionEntity section,
+        Map<String, String> appliedFilters = const {},
+      }) {
     return showModalBottomSheet<Map<String, String>>(
       context: context,
       isScrollControlled: true,
@@ -164,37 +164,46 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
     final label = filter.label ?? '';
     final count = filter.count != null && filter.count! > 0 ? '(${filter.count})' : null;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xsm),
-      child: widget.section.isMultiSelect
-          ? _buildCheckbox(filter, value, isSelected, label, count)
-          : AppRadio.labeled(
-              isSelected: isSelected,
-              label: label,
-              count: count,
-              onTap: () => _toggle(value),
-            ),
+    return widget.section.isMultiSelect
+        ? _buildCheckbox(filter, value, isSelected, label, count)
+        : InkWell(
+      highlightColor: Colors.transparent,
+      onTap: () => _toggle(value),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xsm,
+        ),
+        child: AppRadio.labeled(isSelected: isSelected, label: label, count: count),
+      ),
     );
   }
 
   Widget _buildCheckbox(
-    FilterEntity filter,
-    String value,
-    bool isSelected,
-    String label,
-    String? count,
-  ) {
+      FilterEntity filter,
+      String value,
+      bool isSelected,
+      String label,
+      String? count,
+      ) {
     final swatch = _isColourMode ? filter.colorHex.toColor : null;
     final useWhiteTick = swatch == null || swatch.isDarkColor;
-    return AppCheckbox.labeled(
-      border: _isColourMode ? Border.all(color: AppColors.neutralGrey1, width: 0.5) : null,
-      checkBoxSelectedColor: swatch,
-      checkBoxUnSelectedColor: swatch,
-      onChanged: (_) => _toggle(value),
-      isSelected: isSelected,
-      checkColor: _isColourMode ? (useWhiteTick ? Colors.white : AppColors.neutralGrey6) : null,
-      label: label,
-      count: count,
+    return InkWell(
+      highlightColor: Colors.transparent,
+      overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+      onTap: () => _toggle(value),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xsm),
+        child: AppCheckbox.labeled(
+          border: _isColourMode ? Border.all(color: AppColors.neutralGrey1, width: 0.5) : null,
+          checkBoxSelectedColor: swatch,
+          checkBoxUnSelectedColor: swatch,
+          isSelected: isSelected,
+          checkColor: _isColourMode ? (useWhiteTick ? Colors.white : AppColors.neutralGrey6) : null,
+          label: label,
+          count: count,
+        ),
+      ),
     );
   }
 

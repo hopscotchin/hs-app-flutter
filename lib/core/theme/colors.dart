@@ -110,6 +110,8 @@ class AppColors {
   static const Color dividerLight = Color(0x0D000000);
   static const Color dividerDark = AppColors.neutralGrey4;
 
+  static const Color lineIndicator = Color(0x33070707);
+
   /// Light color scheme for Material 3
   static ColorScheme get lightColorScheme => const ColorScheme.light(
     primary: primary,

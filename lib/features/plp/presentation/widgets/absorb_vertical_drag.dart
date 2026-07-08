@@ -21,22 +21,31 @@ class AbsorbVerticalDrag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Match the Scrollable's touch-slop threshold. Without this our recognizer
+    // uses the default kTouchSlop (18px) while the grid's Scrollable uses the
+    // device-reported slop from MediaQuery — which is smaller on Android (~8px).
+    // That let the Scrollable win the gesture arena before our recognizer even
+    // triggered, so the absorb worked on iOS but not Android. Sharing the same
+    // settings makes our (deeper) recognizer win the arena on both platforms.
+    final gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+
     return RawGestureDetector(
       behavior: HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
         VerticalDragGestureRecognizer:
-            GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-              VerticalDragGestureRecognizer.new,
+        GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+          VerticalDragGestureRecognizer.new,
               (VerticalDragGestureRecognizer instance) {
-                // Claim the vertical drag and do nothing with it, so the ancestor
-                // Scrollable never receives it.
-                instance
-                  ..onStart = (_) {}
-                  ..onUpdate = (_) {}
-                  ..onEnd = (_) {}
-                  ..onCancel = () {};
-              },
-            ),
+            // Claim the vertical drag and do nothing with it, so the ancestor
+            // Scrollable never receives it.
+            instance
+              ..onStart = (_) {}
+              ..onUpdate = (_) {}
+              ..onEnd = (_) {}
+              ..onCancel = () {}
+              ..gestureSettings = gestureSettings;
+          },
+        ),
       },
       child: child,
     );
