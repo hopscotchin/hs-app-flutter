@@ -14,6 +14,11 @@ abstract class FilterState with _$FilterState {
     // are NOT user selections, so they must not be sent to the API or counted
     // as active filters unless the user actually selects something below them.
     @Default(<String>{}) Set<String> autoExpandedKeys,
+    // Whether the filter UI opened with filters already applied. Captured once
+    // at initialization and never mutated. Lets the Apply button stay enabled
+    // after the user clears previously-applied filters, so an empty selection
+    // can still be committed (see [canApply]).
+    @Default(false) bool hadInitialFilters,
     @Default(0) int selectedSectionIndex,
     @Default(false) bool isRefreshing,
     @Default(<String, dynamic>{}) Map<String, dynamic> baseQueryParams,
@@ -33,6 +38,12 @@ extension FilterStateX on FilterState {
   bool get hasSelections =>
       pendingFilters.values.any((v) => v.isNotEmpty) ||
       treeSelections.keys.any(_isExplicitTreeSelection);
+
+  /// Whether the Apply button should be enabled. Enabled when there are current
+  /// selections to commit, or when the UI opened with filters applied (so the
+  /// user can clear them and apply an empty selection). Disabled only when the
+  /// user has selected nothing and nothing was applied before — nothing to do.
+  bool get canApply => hasSelections || hadInitialFilters;
 
   /// A tree key is a real user selection only when it wasn't auto-added for
   /// navigation. Auto-expanded keys drive the tree view but aren't filters.

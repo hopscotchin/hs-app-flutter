@@ -536,16 +536,23 @@ class _FilterPageViewState extends State<_FilterPageView> {
       );
     }
 
-    return SizedBox(
-      height: 40,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xsm),
       child: section.isMultiSelect
           ? AppCheckbox.labeled(
               onChanged: (_) => onToggle(),
               isSelected: isChecked,
               label: label,
               count: count,
+              maxLabelLines: 2,
             )
-          : AppRadio.labeled(onTap: onToggle, isSelected: isChecked, label: label, count: count),
+          : AppRadio.labeled(
+              onTap: onToggle,
+              isSelected: isChecked,
+              label: label,
+              count: count,
+              maxLabelLines: 2,
+            ),
     );
   }
 
@@ -563,12 +570,15 @@ class _FilterPageViewState extends State<_FilterPageView> {
     final swatch = filter.colorHex.toColor;
     final useWhiteTick = swatch == null || swatch.isDarkColor;
 
-    return SizedBox(
-      height: 46,
+    // Same constant vertical padding as _buildFilterItem so colour rows keep the
+    // same spacing across single- and two-line labels.
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xsm),
       child: AppCheckbox.labeled(
         border: Border.all(color: AppColors.neutralGrey1, width: 0.5),
         checkBoxSelectedColor: swatch,
         checkBoxUnSelectedColor: swatch,
+        maxLabelLines: 2,
         onChanged: (_) {
           context.read<FilterBloc>().add(
             ToggleFilterItem(param: param, value: value, isMultiSelect: section.isMultiSelect),
@@ -601,9 +611,10 @@ class _FilterPageViewState extends State<_FilterPageView> {
             Expanded(
               child: PrimaryButton.defaultType(
                 text: CommonStrings.apply,
-                // Always enabled — applying commits the current selection (incl.
-                // removals / cleared state) and fires the filter API.
-                state: ButtonState.enabled,
+                // Enabled when there are selections to commit, or when filters
+                // were applied before (so a cleared selection can still be
+                // applied). Disabled only when nothing is/was selected.
+                state: state.canApply ? ButtonState.enabled : ButtonState.disabled,
                 onTap: () => Navigator.of(context).pop(state.flattenFilters()),
               ),
             ),

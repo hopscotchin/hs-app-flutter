@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
 import 'package:hs_app_flutter/components/buttons/button_enums.dart';
 import 'package:hs_app_flutter/components/form/app_checkbox.dart';
@@ -18,6 +21,9 @@ class FilterSectionSheet extends StatefulWidget {
   final FilterSectionEntity section;
   final Map<String, String> appliedFilters;
 
+  /// Non-null only when hosted inside a [DraggableScrollableSheet] (the tall
+  /// content case); wires the option list to the drag controller so the drag
+  /// and the inner scroll behave as one gesture.
   final ScrollController? scrollController;
 
   const FilterSectionSheet({
@@ -27,60 +33,27 @@ class FilterSectionSheet extends StatefulWidget {
     this.scrollController,
   });
 
-  static const double _kItemHeight = 48;
-  static const double _kHeaderHeight = 28;
-  static const double _kApplyHeight = 72;
-  static const double _kListVPadding = 8;
+  /// Content shorter than this fraction of the screen is shown at its own
+  /// height; taller content opens at [_kInitialFraction].
+  static const double _kMidFraction = 0.5;
+
+  /// Fraction the sheet opens at when the content is taller than [_kMidFraction].
+  static const double _kInitialFraction = 0.5;
+
+  /// Highest fraction the user can drag the sheet up to.
+  static const double _kMaxFraction = 0.85;
 
   static Future<Map<String, String>?> show(
     BuildContext context, {
     required FilterSectionEntity section,
     Map<String, String> appliedFilters = const {},
   }) {
-    final mq = MediaQuery.of(context);
-    final screenH = mq.size.height;
-
-    final itemCount = _flatItemCount(section.filterList);
-    final naturalH =
-        _kHeaderHeight +
-        _kListVPadding +
-        (itemCount * _kItemHeight) +
-        _kApplyHeight +
-        mq.padding.bottom;
-    final fitsAtMid = naturalH <= screenH * 0.5;
-
     return showModalBottomSheet<Map<String, String>>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) {
-        if (fitsAtMid) {
-          return FilterSectionSheet(section: section, appliedFilters: appliedFilters);
-        }
-
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.5,
-          minChildSize: 0.3,
-          maxChildSize: 0.8,
-          snap: true,
-          snapSizes: const [0.5, 0.8],
-          builder: (_, controller) => FilterSectionSheet(
-            section: section,
-            appliedFilters: appliedFilters,
-            scrollController: controller,
-          ),
-        );
-      },
+      builder: (_) => _AdaptiveFilterSheet(section: section, appliedFilters: appliedFilters),
     );
-  }
-
-  static int _flatItemCount(List<FilterEntity> filters) {
-    var n = 0;
-    for (final f in filters) {
-      n += f.filters.isNotEmpty ? f.filters.length : 1;
-    }
-    return n;
   }
 
   @override
@@ -90,6 +63,9 @@ class FilterSectionSheet extends StatefulWidget {
 class _FilterSectionSheetState extends State<FilterSectionSheet> {
   late Set<String> _selectedValues;
   late String _param;
+  // Whether the sheet opened with values already applied. Captured once so
+  // Apply stays enabled after the user clears them and wants to apply empty.
+  late bool _hadInitialSelections;
 
   @override
   void initState() {
@@ -100,14 +76,19 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
     // Seed from already-applied filters.
     final existing = widget.appliedFilters[_param] ?? '';
     _selectedValues = existing.split(',').where((v) => v.isNotEmpty).toSet();
+    _hadInitialSelections = _selectedValues.isNotEmpty;
   }
 
   bool get _hasSelections => _selectedValues.isNotEmpty;
+
+  /// Enabled when there are selections to commit, or when values were applied
+  /// before (so a cleared selection can still be applied). Disabled only when
+  /// nothing is/was selected.
+  bool get _canApply => _hasSelections || _hadInitialSelections;
   bool get _isColourMode => widget.section.uiType?.toLowerCase() == 'colour';
   @override
   Widget build(BuildContext context) {
     final filters = _flattenFilterList(widget.section.filterList);
-
     final draggable = widget.scrollController != null;
 
     return SafeArea(
@@ -120,19 +101,17 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
           Flexible(
             child: ListView.builder(
               controller: widget.scrollController,
+              // Hug the content when hosted at a fixed height; when inside the
+              // draggable sheet, fill it and let the drag controller scroll.
               shrinkWrap: !draggable,
               physics: draggable
                   ? const ClampingScrollPhysics()
                   : const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
               itemCount: filters.length,
-              itemBuilder: (_, index) {
-                final filter = filters[index];
-                return _buildOptionItem(filter);
-              },
+              itemBuilder: (_, index) => _buildOptionItem(filters[index]),
             ),
           ),
-
           _buildApplyButton(),
         ],
       ),
@@ -237,9 +216,10 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
           Expanded(
             child: PrimaryButton.defaultType(
               text: CommonStrings.apply,
-              // Always enabled — applying commits the current selection (incl.
-              // removals) and fires the filter API.
-              state: ButtonState.enabled,
+              // Enabled when there are selections to commit, or when values were
+              // applied before (so a cleared selection can still be applied).
+              // Disabled only when nothing is/was selected.
+              state: _canApply ? ButtonState.enabled : ButtonState.disabled,
               onTap: _onApply,
             ),
           ),
@@ -270,5 +250,122 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
       result[_param] = '';
     }
     Navigator.of(context).pop(result);
+  }
+}
+
+/// Presents [FilterSectionSheet] based on its *real* on-device content height:
+///
+///  • content shorter than [FilterSectionSheet._kMidFraction] of the screen is
+///    shown at exactly that height (no empty space below it),
+///  • taller content uses a [DraggableScrollableSheet] that opens at
+///    [FilterSectionSheet._kInitialFraction], drags up to
+///    [FilterSectionSheet._kMaxFraction], then scrolls internally.
+///
+/// The height is *measured* (laid out off-stage for one frame) rather than
+/// estimated from row-height constants, so the decision is correct on every
+/// device. The measure frame is invisible and runs while the sheet is still
+/// off-screen, so there is no visible flash.
+class _AdaptiveFilterSheet extends StatefulWidget {
+  final FilterSectionEntity section;
+  final Map<String, String> appliedFilters;
+
+  const _AdaptiveFilterSheet({required this.section, required this.appliedFilters});
+
+  @override
+  State<_AdaptiveFilterSheet> createState() => _AdaptiveFilterSheetState();
+}
+
+class _AdaptiveFilterSheetState extends State<_AdaptiveFilterSheet> {
+  double? _contentHeight;
+
+  FilterSectionSheet _sheet({ScrollController? controller}) => FilterSectionSheet(
+    section: widget.section,
+    appliedFilters: widget.appliedFilters,
+    scrollController: controller,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final screenH = MediaQuery.of(context).size.height;
+    final midH = screenH * FilterSectionSheet._kMidFraction;
+    final maxH = screenH * FilterSectionSheet._kMaxFraction;
+
+    // First frame: measure the natural content height off-stage, then rebuild.
+    if (_contentHeight == null) {
+      return Offstage(
+        child: _MeasureSize(
+          onChange: (size) {
+            if (mounted && _contentHeight != size.height) {
+              setState(() => _contentHeight = size.height);
+            }
+          },
+          // Cap the measurement at the tallest the sheet can ever be so a huge
+          // list resolves to "taller than mid" instead of an unbounded height.
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxH),
+            child: _sheet(),
+          ),
+        ),
+      );
+    }
+
+    // Short content → occupy exactly its own height.
+    if (_contentHeight! <= midH) {
+      return SizedBox(height: _contentHeight, child: _sheet());
+    }
+
+    // Tall content → open at mid and let the user drag up, but never past the
+    // content's own height (capped at [_kMaxFraction]). Because the sheet can
+    // never grow taller than the content, there is no empty space at any drag
+    // position — a 70%-tall list stops at 70%, a huge list stops at the cap and
+    // scrolls internally.
+    final contentFraction = (_contentHeight! / screenH).clamp(0.0, 1.0);
+    final maxFraction = math.min(contentFraction, FilterSectionSheet._kMaxFraction);
+    final initialFraction = math.min(FilterSectionSheet._kInitialFraction, maxFraction);
+    // Deduped + sorted so the snap points are always strictly ascending, even
+    // when the content sits right at the initial fraction.
+    final snapSizes = <double>{initialFraction, maxFraction}.toList()..sort();
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: initialFraction,
+      minChildSize: 0.3,
+      maxChildSize: maxFraction,
+      snap: true,
+      snapSizes: snapSizes,
+      builder: (_, controller) => _sheet(controller: controller),
+    );
+  }
+}
+
+/// Reports its child's laid-out size via [onChange] after each layout.
+class _MeasureSize extends SingleChildRenderObjectWidget {
+  final ValueChanged<Size> onChange;
+
+  const _MeasureSize({required this.onChange, required Widget super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _MeasureSizeRenderObject(onChange);
+
+  @override
+  void updateRenderObject(BuildContext context, _MeasureSizeRenderObject renderObject) {
+    renderObject.onChange = onChange;
+  }
+}
+
+class _MeasureSizeRenderObject extends RenderProxyBox {
+  _MeasureSizeRenderObject(this.onChange);
+
+  ValueChanged<Size> onChange;
+  Size? _oldSize;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final size = child?.size ?? Size.zero;
+    if (_oldSize != size) {
+      _oldSize = size;
+      WidgetsBinding.instance.addPostFrameCallback((_) => onChange(size));
+    }
   }
 }

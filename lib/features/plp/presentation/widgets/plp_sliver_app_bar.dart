@@ -14,12 +14,13 @@ import '../../../../core/cubits/cart_count_cubit.dart';
 import '../../domain/entities/banner_entity.dart';
 import '../../domain/entities/page_type.dart';
 import '../bloc/plp_bloc.dart';
+import 'absorb_vertical_drag.dart';
 
 typedef _AppBarData = ({
-int? totalRecords,
-String? screenName,
-String? screenSubtitle,
-BannerEntity? banner,
+  int? totalRecords,
+  String? screenName,
+  String? screenSubtitle,
+  BannerEntity? banner,
 });
 
 class PlpSliverAppBar extends StatelessWidget {
@@ -32,10 +33,10 @@ class PlpSliverAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocSelector<PlpBloc, PlpState, _AppBarData>(
       selector: (state) => (
-      totalRecords: state.status == PlpStatus.loaded ? state.totalRecords : null,
-      screenName: state.screenName,
-      screenSubtitle: state.screenSubtitle,
-      banner: state.banners.isNotEmpty ? state.banners.first : null,
+        totalRecords: state.status == PlpStatus.loaded ? state.totalRecords : null,
+        screenName: state.screenName,
+        screenSubtitle: state.screenSubtitle,
+        banner: state.banners.isNotEmpty ? state.banners.first : null,
       ),
       builder: (context, data) {
         final bannerUrl = data.banner?.imageUrl;
@@ -76,9 +77,7 @@ class _StandardSliverAppBar extends StatelessWidget {
       ),
       titleSpacing: 2,
       primary: true,
-      title: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {},
+      title: AbsorbVerticalDrag(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -90,9 +89,13 @@ class _StandardSliverAppBar extends StatelessWidget {
         ),
       ),
       centerTitle: false,
+      // Full-bleed background layer that swallows vertical drags starting on the
+      // app bar, so dragging on it doesn't scroll the grid. Taps on the
+      // back/search/cart icons and title still work (only vertical drags are
+      // claimed). The app bar still floats away when the GRID is scrolled.
+      flexibleSpace: const AbsorbVerticalDrag(child: SizedBox.expand()),
       pinned: false,
       floating: true,
-      snap: true,
       scrolledUnderElevation: 0,
       automaticallyImplyLeading: false,
       backgroundColor: Colors.white,
@@ -101,25 +104,31 @@ class _StandardSliverAppBar extends StatelessWidget {
       elevation: 0,
       toolbarHeight: 60,
       actions: [
-        BadgeIcon(
-          iconSize: 18,
-          icon: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
-          onTap: () => AppNavigator.goToSearch(context),
+        AbsorbVerticalDrag(
+          child: BadgeIcon(
+            iconSize: 18,
+            icon: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
+            onTap: () => AppNavigator.goToSearch(context),
+          ),
         ),
-        BadgeIcon(
-          iconSize: 18,
-          icon: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
-          count: 0,
-          onTap: () {},
-          iconColor: AppColors.textPrimary,
+        AbsorbVerticalDrag(
+          child: BadgeIcon(
+            iconSize: 18,
+            icon: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
+            count: 0,
+            onTap: () {},
+            iconColor: AppColors.textPrimary,
+          ),
         ),
         const SizedBox(width: 3),
-        BadgeIcon(
-          iconSize: 18,
-          icon: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
-          count: context.watch<CartCountCubit>().state,
-          onTap: () => AppNavigator.goToCart(context),
-          iconColor: AppColors.textPrimary,
+        AbsorbVerticalDrag(
+          child: BadgeIcon(
+            iconSize: 18,
+            icon: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
+            count: context.watch<CartCountCubit>().state,
+            onTap: () => AppNavigator.goToCart(context),
+            iconColor: AppColors.textPrimary,
+          ),
         ),
       ],
       actionsPadding: const EdgeInsets.only(right: 12),
@@ -215,7 +224,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
 
     final collapsedTitleOpacity = Curves.easeOut.transform(
       ((progress - _collapsedTitleFadeInStart) /
-          (_collapsedTitleFadeInEnd - _collapsedTitleFadeInStart))
+              (_collapsedTitleFadeInEnd - _collapsedTitleFadeInStart))
           .clamp(0.0, 1.0),
     );
 
@@ -280,8 +289,10 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
             left: 0,
             right: 0,
             height: topPadding,
-            child: IgnorePointer(
-              child: ColoredBox(color: Colors.white.withValues(alpha: safeAreaOpacity)),
+            child: AbsorbVerticalDrag(
+              child: IgnorePointer(
+                child: ColoredBox(color: Colors.white.withValues(alpha: safeAreaOpacity)),
+              ),
             ),
           ),
 
@@ -320,50 +331,55 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
             left: 0,
             right: 0,
             height: _toolbarHeight,
-            child: Row(
-              children: [
-                const SizedBox(width: 8),
-                CircleIconButton(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const CustomImage(path: ImageConstants.arrowBack, height: 18),
-                ),
+            // Absorb vertical drags on the control strip only — dragging on the
+            // back/search/cart row won't scroll the grid. The banner image below
+            // stays draggable so the header can still be scrolled/collapsed.
+            child: AbsorbVerticalDrag(
+              child: Row(
+                children: [
+                  const SizedBox(width: 8),
+                  CircleIconButton(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const CustomImage(path: ImageConstants.arrowBack, height: 18),
+                  ),
 
-                const SizedBox(width: AppSpacing.xs),
+                  const SizedBox(width: AppSpacing.xs),
 
-                // Collapsed title keeps its OWN opacity, independent of the
-                // header collapse — fades in as the large title fades out.
-                Expanded(
-                  child: Opacity(
-                    opacity: collapsedTitleOpacity,
-                    child: Text(
-                      displayTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypographyV1.bodySmall.bold.textSeconday(),
+                  // Collapsed title keeps its OWN opacity, independent of the
+                  // header collapse — fades in as the large title fades out.
+                  Expanded(
+                    child: Opacity(
+                      opacity: collapsedTitleOpacity,
+                      child: Text(
+                        displayTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypographyV1.bodySmall.bold.textSeconday(),
+                      ),
                     ),
                   ),
-                ),
 
-                CircleIconButton(
-                  onTap: () => AppNavigator.goToSearch(context),
-                  child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
-                ),
+                  CircleIconButton(
+                    onTap: () => AppNavigator.goToSearch(context),
+                    child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
+                  ),
 
-                const SizedBox(width: 8),
+                  const SizedBox(width: 8),
 
-                CircleIconButton(
-                  onTap: () {},
-                  child: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
-                ),
+                  CircleIconButton(
+                    onTap: () {},
+                    child: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
+                  ),
 
-                const SizedBox(width: 8),
+                  const SizedBox(width: 8),
 
-                CircleIconButton(
-                  onTap: () => AppNavigator.goToCart(context),
-                  child: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
-                ),
-                const SizedBox(width: 12),
-              ],
+                  CircleIconButton(
+                    onTap: () => AppNavigator.goToCart(context),
+                    child: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+              ),
             ),
           ),
         ],

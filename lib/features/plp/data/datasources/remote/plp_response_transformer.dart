@@ -103,7 +103,7 @@ List<Map<String, dynamic>> _transformBanners(dynamic raw, [dynamic salePlanDetai
   if (raw is List) {
     banners.addAll(
       raw.whereType<Map<String, dynamic>>().map(
-        (b) => {
+            (b) => {
           'imageUrl': b['imageUrl'] as String? ?? '',
           'aspectRatio': (b['aspectRatio'] as num?)?.toDouble() ?? 1.0,
           'altText': b['altText'] as String? ?? '',
@@ -240,14 +240,14 @@ List<Map<String, dynamic>> _buildQuickFilters(dynamic raw) {
       .whereType<Map<String, dynamic>>()
       .where((s) => _eligibleQuickFilterNames.contains((s['name'] as String? ?? '').toLowerCase()))
       .map((s) {
-        final filterKey = _extractFilterKey(s['filterList']);
-        return {
-          'filterKey': filterKey,
-          'label': s['name'] as String?,
-          'isApplied': s['hasSelected'] as bool? ?? false,
-          'trackingMeta': {'sectionTracking': filterKey},
-        };
-      })
+    final filterKey = _extractFilterKey(s['filterList']);
+    return {
+      'filterKey': filterKey,
+      'label': s['name'] as String?,
+      'isApplied': s['hasSelected'] as bool? ?? false,
+      'trackingMeta': {'sectionTracking': filterKey},
+    };
+  })
       .toList();
 }
 

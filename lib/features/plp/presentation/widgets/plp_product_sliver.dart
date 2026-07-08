@@ -65,56 +65,50 @@ class PlpProductSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<PlpBloc, PlpState, List<PlpListItem>>(
-      selector: (state) => state.listItems,
-      builder: (context, listItems) => SliverList(
+    return BlocSelector<PlpBloc, PlpState, (List<PlpListItem>, Map<String, String>)>(
+      selector: (state) => (state.listItems, state.appliedFilters),
+      builder: (context, plp) => SliverList(
         key: sliverKey,
-        delegate: SliverChildBuilderDelegate(
-          addAutomaticKeepAlives: false,
-          addSemanticIndexes: false,
-          (context, index) {
-            final item = listItems[index];
-            return Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: switch (item) {
-                ProductRowItem(:final left, :final right) => Padding(
-                  key: ValueKey('row_${left.id}'),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xs,
-                  ),
-                  child: _buildProductRow(context, left, right),
+        delegate: SliverChildBuilderDelegate(addSemanticIndexes: false, (context, index) {
+          final item = plp.$1[index];
+          final appliedFilters = plp.$2;
+          return Padding(
+            padding: EdgeInsets.only(top: index == 0 && appliedFilters.isNotEmpty ? 0 : 8),
+            child: switch (item) {
+              ProductRowItem(:final left, :final right) => Padding(
+                key: ValueKey('row_${left.id}'),
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.sm,
+                  index == 0 && appliedFilters.isNotEmpty ? 0 : AppSpacing.xs,
+                  AppSpacing.sm,
+                  AppSpacing.xs,
                 ),
-                ProductXLItem(:final product) => Padding(
-                  key: ValueKey('xl_${product.id}'),
-                  padding: const EdgeInsets.only(
-                    top: AppSpacing.xs,
-                    bottom: 0,
-                    right: 12,
-                    left: 12,
-                  ),
-                  child: BlocSelector<WishlistCubit, WishlistState, bool>(
-                    selector: (s) => s.isWishlisted(product.id.toString()),
-                    builder: (context, wished) => XLTileWidget.fromListingProduct(
-                      product,
-                      isWishlisted: wished,
-                      onTap: () => AppNavigator.goToPdp(context, product.id.toString()),
-                      onWishlistTap: () => _toggleWishlist(context, product),
-                      onAddToCartTap: () {},
-                    ),
+
+                child: _buildProductRow(context, left, right),
+              ),
+              ProductXLItem(:final product) => Padding(
+                key: ValueKey('xl_${product.id}'),
+                padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: 0, right: 12, left: 12),
+                child: BlocSelector<WishlistCubit, WishlistState, bool>(
+                  selector: (s) => s.isWishlisted(product.id.toString()),
+                  builder: (context, wished) => XLTileWidget.fromListingProduct(
+                    product,
+                    isWishlisted: wished,
+                    onTap: () => AppNavigator.goToPdp(context, product.id.toString()),
+                    onWishlistTap: () => _toggleWishlist(context, product),
+                    onAddToCartTap: () {},
                   ),
                 ),
-                FloatingFilterItem(:final section) => FloatingFilterRow(
-                  key: ValueKey('floating_${section.position}_${section.title}'),
-                  section: section,
-                  onFiltersApplied: (key, value) =>
-                      context.read<PlpBloc>().add(ApplyFloatingFilter(key: key, value: value)),
-                ),
-              },
-            );
-          },
-          childCount: listItems.length,
-        ),
+              ),
+              FloatingFilterItem(:final section) => FloatingFilterRow(
+                key: ValueKey('floating_${section.position}_${section.title}'),
+                section: section,
+                onFiltersApplied: (key, value) =>
+                    context.read<PlpBloc>().add(ApplyFloatingFilter(key: key, value: value)),
+              ),
+            },
+          );
+        }, childCount: plp.$1.length),
       ),
     );
   }

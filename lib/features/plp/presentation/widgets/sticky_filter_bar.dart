@@ -61,7 +61,6 @@ class StickyFilterBar extends StatelessWidget {
                 SizedBox(
                   height: 29,
                   child: ListView.separated(
-                    key: const PageStorageKey('sticky_filter_bar'),
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: filterList.length,

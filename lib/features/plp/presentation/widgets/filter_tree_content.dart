@@ -181,36 +181,41 @@ class _DrillDownRow extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        child: SizedBox(
-          width: double.infinity,
-          height: 46,
-          child: Padding(
-            padding: EdgeInsets.only(left: isSubCategory ? AppSpacing.sm : 0, right: 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    filter.label ?? '',
-                    style: isSubCategory
-                        ? AppTypographyV1.bodyMedium.regular.textPrimary()
-                        : AppTypographyV1.bodyMedium.medium.textPrimary(),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+        child: Padding(
+          // Constant vertical padding so single- and two-line rows share the
+          // same spacing (matches _LeafRow). A minHeight only pads short
+          // single-line content, which left two-line rows with a smaller gap.
+          // Full-width tap comes from the Row's Expanded child filling the list.
+          padding: EdgeInsets.only(
+            left: isSubCategory ? AppSpacing.sm : 0,
+            right: 16,
+            top: AppSpacing.xsm,
+            bottom: AppSpacing.xsm,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  filter.label ?? '',
+                  style: isSubCategory
+                      ? AppTypographyV1.bodyMedium.regular.textPrimary()
+                      : AppTypographyV1.bodyMedium.medium.textPrimary(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                if (filter.count != null && filter.count! > 0)
-                  Padding(
-                    padding: const EdgeInsets.only(right: AppSpacing.xxs),
-                    child: Text(
-                      '(${filter.count})',
-                      style: AppTypographyV1.labelLarge.regular.copyWith(
-                        color: Colors.black.withAlpha(50),
-                      ),
+              ),
+              if (filter.count != null && filter.count! > 0)
+                Padding(
+                  padding: const EdgeInsets.only(right: AppSpacing.xs),
+                  child: Text(
+                    '(${filter.count})',
+                    style: AppTypographyV1.labelLarge.regular.copyWith(
+                      color: Colors.black.withAlpha(50),
                     ),
                   ),
-                const Icon(Icons.chevron_right, size: 18, color: AppColors.textTertiary),
-              ],
-            ),
+                ),
+              const Icon(Icons.chevron_right, size: 18, color: AppColors.textTertiary),
+            ],
           ),
         ),
       ),

@@ -4,6 +4,7 @@ import 'package:hs_app_flutter/features/plp/domain/entities/plp_sorting_options_
 
 import '../../domain/entities/plp_filter_entity.dart';
 import '../bloc/plp_bloc.dart';
+import 'absorb_vertical_drag.dart';
 import 'sticky_filter_bar.dart';
 
 typedef _FilterData = ({
@@ -68,7 +69,9 @@ class _StickyFilterBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Material(color: Colors.white, child: child);
+    // Absorb vertical drags so dragging on the filter bar doesn't scroll the
+    // product grid; horizontal chip scrolling and taps still work.
+    return Material(color: Colors.white, child: AbsorbVerticalDrag(child: child));
   }
 
   @override

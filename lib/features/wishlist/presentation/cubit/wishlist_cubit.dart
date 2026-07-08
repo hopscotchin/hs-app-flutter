@@ -33,22 +33,32 @@ class _PendingWishlist {
 @singleton
 class WishlistCubit extends Cubit<WishlistState> {
   WishlistCubit(this._addToWishlist, this._removeFromWishlist)
-    : super(const WishlistState());
+      : super(const WishlistState());
 
   final AddToWishlistUseCase _addToWishlist;
   final RemoveFromWishlistUseCase _removeFromWishlist;
 
   _PendingWishlist? _pending;
 
-  /// Apply server-known statuses. The backend is authoritative, so a (re)load
-  /// overwrites our state by id — except for a product whose toggle is still
-  /// in flight, which would otherwise flicker if a response generated before
-  /// the write arrives mid-call.
+  /// Ids the user has explicitly toggled this session. This cubit is the only
+  /// writer of wishlist membership, so once the user acts on a product our
+  /// local state is authoritative and later [seed]s (which carry the *original*
+  /// listing/detail response status — stale after a toggle) must not override
+  /// it. Without this, a re-seed of already-rendered items (PLP pagination,
+  /// carousel element recycling) would silently revert the user's heart.
+  /// Cleared on auth change so a new user never inherits it.
+  final Set<String> _userTouched = <String>{};
+
+  /// Apply server-known statuses. The backend is authoritative for products the
+  /// user hasn't touched, so a (re)load overwrites our state by id — except for
+  /// (a) a product whose toggle is still in flight (would flicker if a response
+  /// generated before the write arrives mid-call), and (b) a product the user
+  /// has explicitly toggled this session (see [_userTouched]).
   void seed(Iterable<WishlistSeed> seeds) {
     final next = Map<String, String?>.from(state.items);
     var changed = false;
     for (final s in seeds) {
-      if (state.inFlight.contains(s.productId)) continue;
+      if (state.inFlight.contains(s.productId) || _userTouched.contains(s.productId)) continue;
       if (s.wished) {
         if (!next.containsKey(s.productId) || next[s.productId] != s.wishlistItemId) {
           next[s.productId] = s.wishlistItemId;
@@ -78,11 +88,15 @@ class WishlistCubit extends Cubit<WishlistState> {
   /// Drop the previous user's state on login/logout so we never briefly show
   /// their wishlist; the next responses re-seed with the current user's data.
   void invalidateOnAuthChange() {
+    _userTouched.clear();
     emit(state.copyWith(items: const <String, String?>{}, inFlight: const <String>{}));
   }
 
   Future<void> toggle({required String productId, required int price, String? sku}) async {
     if (state.isInFlight(productId)) return;
+
+    // The user acted on this product — local state now wins over any later seed.
+    _userTouched.add(productId);
 
     final wasWishlisted = state.items.containsKey(productId);
     final existingItemId = state.items[productId];
@@ -107,13 +121,13 @@ class WishlistCubit extends Cubit<WishlistState> {
       AddToWishlistParams(productId: productId, price: price, skuId: sku),
     );
     result.fold(
-      (failure) {
+          (failure) {
         if (failure is RequestCancelledFailure) return;
         final reverted = Map<String, String?>.from(state.items)..remove(productId);
         emit(_clearInFlight(productId, items: reverted));
         _emitFeedback("Couldn't add to wishlist", isError: true);
       },
-      (response) {
+          (response) {
         final updated = Map<String, String?>.from(state.items)
           ..[productId] = response.wishlistItemId;
         emit(_clearInFlight(productId, items: updated));
@@ -134,13 +148,13 @@ class WishlistCubit extends Cubit<WishlistState> {
       RemoveFromWishlistParams(wishlistId: wishlistItemId),
     );
     result.fold(
-      (failure) {
+          (failure) {
         if (failure is RequestCancelledFailure) return;
         final reverted = Map<String, String?>.from(state.items)..[productId] = wishlistItemId;
         emit(_clearInFlight(productId, items: reverted));
         _emitFeedback("Couldn't remove from wishlist", isError: true);
       },
-      (_) {
+          (_) {
         emit(_clearInFlight(productId));
         _emitFeedback('Removed from wishlist', isError: false);
       },

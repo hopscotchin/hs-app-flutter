@@ -48,13 +48,16 @@ class FilterBloc extends BaseBloc<FilterEvent, FilterState> {
       split.treeSelections.keys.toSet(),
     );
 
-    final initialState = FilterState(
+    final baseState = FilterState(
       plpFilter: event.plpFilter,
       treeSelections: treeSelections,
       autoExpandedKeys: autoExpandedKeys,
       pendingFilters: split.pendingFilters,
       baseQueryParams: event.baseQueryParams,
     );
+    // Capture whether the UI opened with filters already applied — kept for the
+    // lifetime of the bloc so Apply stays enabled after a Clear all.
+    final initialState = baseState.copyWith(hadInitialFilters: baseState.hasSelections);
 
     _lastRefreshedFilters = initialState.flattenFilters();
     emit(initialState);
