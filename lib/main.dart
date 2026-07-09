@@ -3,6 +3,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_driver/driver_extension.dart';
 import 'package:talker_dio_logger_plus/talker_dio_logger_plus.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -18,9 +19,9 @@ import 'core/theme/app_theme.dart';
 import 'hs_app.dart';
 
 void main() async {
-  // if (kDebugMode) enableFlutterDriverExtension(silenceErrors: true);
-
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (kDebugMode) enableFlutterDriverExtension(silenceErrors: true);
   // debugPaintBaselinesEnabled = true;
 
   SystemChrome.setSystemUIOverlayStyle(AppTheme.systemUiLight);
