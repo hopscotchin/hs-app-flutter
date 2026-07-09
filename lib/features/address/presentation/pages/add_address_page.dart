@@ -14,6 +14,7 @@ import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/atoms/outlined_text_field.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/address_pincode_strings.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
@@ -78,13 +79,17 @@ class _AddAddressPageState extends State<AddAddressPage> {
       context,
       title: AddressStrings.leaveBottomSheetTitle,
       description: AddressStrings.leaveDialogMessage,
+      titleKey: const ValueKey(AddressTestStrings.discardBottomSheetTitle),
+      descriptionKey: const ValueKey(AddressTestStrings.discardBottomSheetDescription),
       secondaryAction: AppBottomSheetAction(
         label: AddressStrings.leaveDiscard,
+        buttonKey: const ValueKey(AddressTestStrings.discardBottomSheetDiscardButton),
         onPressed: () => Navigator.of(context, rootNavigator: true).pop(true),
       ),
       primaryAction: AppBottomSheetAction(
         label: AddressStrings.leaveStay,
         style: AppBottomSheetButtonStyle.filled,
+        buttonKey: const ValueKey(AddressTestStrings.discardBottomSheetStayButton),
         onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
       ),
     );
@@ -137,6 +142,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
               backgroundColor: AppColors.baseDefault,
               appBar: HsAppbar(
                 title: _title(state),
+                titleKey: const ValueKey(AddressTestStrings.formAppBarTitle),
+                backButtonKey: const ValueKey(AddressTestStrings.formBackButton),
                 onLeadingTap: () async {
                   final allow = await _confirmDiscardIfDirty(context);
                   if (allow && context.mounted) Navigator.of(context).pop();
@@ -196,10 +203,15 @@ class _Form extends StatelessWidget {
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       children: [
         if (state.messageBar != null) ...[
-          MessageBarsWidget(messageBars: [state.messageBar!], cardStyle: true),
+          MessageBarsWidget(
+            messageBars: [state.messageBar!],
+            cardStyle: true,
+            keyPrefix: AddressTestStrings.formScreen,
+          ),
           AppSpacing.verticalGapMd,
         ],
         OutlinedTextField(
+          key: const ValueKey(AddressTestStrings.formNameInput),
           controller: controllers[ManageAddressField.name]!,
           onTapOutside: (_) {},
           labelText: AddressStrings.name,
@@ -211,6 +223,7 @@ class _Form extends StatelessWidget {
         ),
         AppSpacing.verticalGapMd,
         OutlinedTextField(
+          key: const ValueKey(AddressTestStrings.formMobileInput),
           controller: controllers[ManageAddressField.mobile]!,
           onTapOutside: (_) {},
           labelText: AddressStrings.mobile,
@@ -226,6 +239,7 @@ class _Form extends StatelessWidget {
           icon: Icons.info_outline,
           tooltip: AddressStrings.tooltipAlternativeMobile,
           child: OutlinedTextField(
+            key: const ValueKey(AddressTestStrings.formAlternateMobileInput),
             controller: controllers[ManageAddressField.alternateMobile]!,
             onTapOutside: (_) {},
             labelText: AddressStrings.alternativeMobile,
@@ -243,6 +257,7 @@ class _Form extends StatelessWidget {
         ),
         AppSpacing.verticalGapMd,
         OutlinedTextField(
+          key: const ValueKey(AddressTestStrings.formPincodeInput),
           controller: controllers[ManageAddressField.pincode]!,
           onTapOutside: (_) {},
           labelText: AddressStrings.pincode,
@@ -263,6 +278,7 @@ class _Form extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedTextField(
+                key: const ValueKey(AddressTestStrings.formCityInput),
                 controller: controllers[ManageAddressField.city]!,
                 labelText: AddressStrings.city,
                 enabled: false,
@@ -273,6 +289,7 @@ class _Form extends StatelessWidget {
             AppSpacing.horizontalGapSm,
             Expanded(
               child: OutlinedTextField(
+                key: const ValueKey(AddressTestStrings.formStateInput),
                 controller: controllers[ManageAddressField.state]!,
                 labelText: AddressStrings.state,
                 enabled: false,
@@ -284,6 +301,7 @@ class _Form extends StatelessWidget {
         ),
         AppSpacing.verticalGapMd,
         OutlinedTextField(
+          key: const ValueKey(AddressTestStrings.formAddress1Input),
           controller: controllers[ManageAddressField.address1]!,
           onTapOutside: (_) {},
           labelText: AddressStrings.flatHouse,
@@ -296,6 +314,7 @@ class _Form extends StatelessWidget {
         ),
         AppSpacing.verticalGapMd,
         OutlinedTextField(
+          key: const ValueKey(AddressTestStrings.formStreetInput),
           controller: controllers[ManageAddressField.streetAddress]!,
           onTapOutside: (_) {},
           labelText: AddressStrings.streetArea,
@@ -308,6 +327,7 @@ class _Form extends StatelessWidget {
         ),
         AppSpacing.verticalGapMd,
         OutlinedTextField(
+          key: const ValueKey(AddressTestStrings.formLandmarkInput),
           controller: controllers[ManageAddressField.landmark]!,
           onTapOutside: (_) {},
           labelText: AddressStrings.landmark,
@@ -318,6 +338,7 @@ class _Form extends StatelessWidget {
         ),
         AppSpacing.verticalGapMd,
         AppCheckbox.labeled(
+          key: const ValueKey(AddressTestStrings.formDefaultCheckbox),
           isSelected: state.isDefault,
           label: AddressStrings.makeDefault,
           checkBoxSelectedColor: AppColors.secondary,
@@ -419,6 +440,7 @@ class _BottomActions extends StatelessWidget {
         children: [
           Expanded(
             child: TertiaryButton.defaultType(
+              key: const ValueKey(AddressTestStrings.formCancelButton),
               text: AddressStrings.cancel,
               isFullWidth: true,
               state: submitting ? ButtonState.disabled : ButtonState.enabled,
@@ -428,6 +450,7 @@ class _BottomActions extends StatelessWidget {
           AppSpacing.horizontalGapXs,
           Expanded(
             child: PrimaryButton.defaultType(
+              key: const ValueKey(AddressTestStrings.formSaveButton),
               text: saveLabel,
               isFullWidth: true,
               state: submitting ? ButtonState.loading : ButtonState.enabled,

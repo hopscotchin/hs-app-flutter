@@ -6,6 +6,7 @@ import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
 import 'package:hs_app_flutter/components/buttons/button_enums.dart';
 import 'package:hs_app_flutter/components/form/app_checkbox.dart';
 import 'package:hs_app_flutter/components/form/app_radio.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/extensions/color_extensions.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
@@ -109,7 +110,7 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
                   : const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
               itemCount: filters.length,
-              itemBuilder: (_, index) => _buildOptionItem(filters[index]),
+              itemBuilder: (_, index) => _buildOptionItem(filters[index], index),
             ),
           ),
           _buildApplyButton(),
@@ -150,6 +151,7 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
       padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.xxs, AppSpacing.xs),
       child: Text(
         widget.section.label ?? 'Filter',
+        key: const ValueKey(PlpTestStrings.filterSectionSheetTitle),
         style: AppTypographyV1.titleMedium.bold.textPrimary(),
       ),
     );
@@ -158,34 +160,36 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
   // ---------------------------------------------------------------------------
 
   // ---------------------------------------------------------------------------
-  Widget _buildOptionItem(FilterEntity filter) {
+  Widget _buildOptionItem(FilterEntity filter, int index) {
     final value = filter.filterValue ?? filter.label ?? '';
     final isSelected = _selectedValues.contains(value);
     final label = filter.label ?? '';
     final count = filter.count != null && filter.count! > 0 ? '(${filter.count})' : null;
+    final optionKey = ValueKey('${PlpTestStrings.filterSectionSheetOption}_$index');
 
     return widget.section.isMultiSelect
-        ? _buildCheckbox(filter, value, isSelected, label, count)
+        ? _buildCheckbox(filter, value, isSelected, label, count, optionKey)
         : InkWell(
-            highlightColor: Colors.transparent,
-            onTap: () => _toggle(value),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xsm,
-              ),
-              child: AppRadio.labeled(isSelected: isSelected, label: label, count: count),
-            ),
-          );
+      highlightColor: Colors.transparent,
+      onTap: () => _toggle(value),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xsm,
+        ),
+        child: AppRadio.labeled(key: optionKey, isSelected: isSelected, label: label, count: count),
+      ),
+    );
   }
 
   Widget _buildCheckbox(
-    FilterEntity filter,
-    String value,
-    bool isSelected,
-    String label,
-    String? count,
-  ) {
+      FilterEntity filter,
+      String value,
+      bool isSelected,
+      String label,
+      String? count,
+      Key? optionKey,
+      ) {
     final swatch = _isColourMode ? filter.colorHex.toColor : null;
     final useWhiteTick = swatch == null || swatch.isDarkColor;
     return InkWell(
@@ -195,6 +199,7 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xsm),
         child: AppCheckbox.labeled(
+          key: optionKey,
           border: _isColourMode ? Border.all(color: AppColors.neutralGrey1, width: 0.5) : null,
           checkBoxSelectedColor: swatch,
           checkBoxUnSelectedColor: swatch,
@@ -217,6 +222,7 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
         children: [
           Expanded(
             child: TertiaryButton.defaultType(
+              key: const ValueKey(PlpTestStrings.filterSectionSheetClearButton),
               text: CommonStrings.clearAll,
               onTap: _hasSelections ? () => setState(() => _selectedValues.clear()) : null,
             ),
@@ -224,6 +230,7 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: PrimaryButton.defaultType(
+              key: const ValueKey(PlpTestStrings.filterSectionSheetApplyButton),
               text: CommonStrings.apply,
               // Enabled when there are selections to commit, or when values were
               // applied before (so a cleared selection can still be applied).

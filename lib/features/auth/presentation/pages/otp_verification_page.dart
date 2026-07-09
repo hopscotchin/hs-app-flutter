@@ -10,6 +10,7 @@ import 'package:sms_autofill/sms_autofill.dart';
 import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
@@ -113,7 +114,12 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.baseDefault,
-      appBar: HsAppbar(title: AuthStrings.verifyMobile, onLeadingTap: () => context.pop()),
+      appBar: HsAppbar(
+        title: AuthStrings.verifyMobile,
+        titleKey: const ValueKey(OtpVerificationTestStrings.otpVerificationAppBarTitle),
+        backButtonKey: const ValueKey(OtpVerificationTestStrings.otpVerificationBackButton),
+        onLeadingTap: () => context.pop(),
+      ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state.isSuccess) {
@@ -148,12 +154,20 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
                   if (state.isError && state.otpMessageBars.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: MessageBarsWidget(messageBars: state.otpMessageBars, cardStyle: true),
+                      child: MessageBarsWidget(
+                        messageBars: state.otpMessageBars,
+                        cardStyle: true,
+                        keyPrefix: OtpVerificationTestStrings.screen,
+                      ),
                     )
                   else if (state.isOtpSent && state.messageBars.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: MessageBarsWidget(messageBars: state.messageBars, cardStyle: true),
+                      child: MessageBarsWidget(
+                        messageBars: state.messageBars,
+                        cardStyle: true,
+                        keyPrefix: OtpVerificationTestStrings.screen,
+                      ),
                     ),
                   Expanded(
                     child: SingleChildScrollView(
@@ -166,6 +180,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
                           AppSpacing.verticalGapLg,
                           Text(
                             AuthStrings.enterOtpSentToNumber,
+                            key: const ValueKey(OtpVerificationTestStrings.otpVerificationPromptTextField),
                             textAlign: TextAlign.center,
                             style: AppTypographyV1.labelLarge.regular.copyWith(
                               color: AppColors.neutralBlack,
@@ -179,6 +194,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
                               Flexible(
                                 child: Text(
                                   _displayLoginId,
+                                  key: const ValueKey(OtpVerificationTestStrings.otpVerificationLoginIdTextField),
                                   style: AppTypographyV1.labelLarge.bold.copyWith(
                                     color: AppColors.neutralBlack,
                                   ),
@@ -188,6 +204,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
                               AppSpacing.horizontalGapMd,
                               GestureDetector(
                                 onTap: () => context.pop(),
+                                key: const ValueKey(OtpVerificationTestStrings.otpVerificationChangeButton),
                                 child: Text(
                                   AuthStrings.change,
                                   style: AppTypographyV1.labelMedium.bold.copyWith(
@@ -205,12 +222,17 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                                  child: AuthOtpSlotRow(length: _otpLength, otp: _otp),
+                                  child: AuthOtpSlotRow(
+                                    key: const ValueKey(OtpVerificationTestStrings.otpVerificationOtpSlotRow),
+                                    length: _otpLength,
+                                    otp: _otp,
+                                  ),
                                 ),
                                 Positioned.fill(
                                   child: Opacity(
                                     opacity: 0,
                                     child: TextField(
+                                      key: const ValueKey(OtpVerificationTestStrings.otpVerificationOtpInputField),
                                       controller: _otpController,
                                       focusNode: _otpFocusNode,
                                       keyboardType: TextInputType.number,
@@ -237,12 +259,14 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
                           _remainingSeconds > 0
                               ? Text(
                                   '${AuthStrings.resendOtpIn} $_remainingSeconds s',
+                                  key: const ValueKey(OtpVerificationTestStrings.otpVerificationResendTimerTextField),
                                   style: AppTypographyV1.labelLarge.regular.copyWith(
                                     color: AppColors.neutralBlack,
                                   ),
                                 )
                               : GestureDetector(
                                   onTap: isLoading ? null : _onResend,
+                                  key: const ValueKey(OtpVerificationTestStrings.otpVerificationResendButton),
                                   child: Text(
                                     AuthStrings.resendOtpButton,
                                     style: AppTypographyV1.bodyRegular.semiBold.copyWith(

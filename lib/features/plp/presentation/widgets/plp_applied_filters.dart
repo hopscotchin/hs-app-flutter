@@ -6,6 +6,7 @@ import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
 
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../domain/entities/selected_filter_entity.dart';
 import '../bloc/plp_bloc.dart';
 import 'absorb_vertical_drag.dart';
@@ -72,13 +73,14 @@ class _AppliedFiltersPinnedDelegate extends SliverPersistentHeaderDelegate {
                 child: ListView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                children: visibleFilters
-                    .map(
-                      (f) => _buildFilterChip(f, () {
-                        context.read<PlpBloc>().add(RemoveFilter(filterToRemove: f));
-                      }),
-                    )
-                    .toList(),
+                children: [
+                  for (var i = 0; i < visibleFilters.length; i++)
+                    _buildFilterChip(visibleFilters[i], i, () {
+                      context.read<PlpBloc>().add(
+                        RemoveFilter(filterToRemove: visibleFilters[i]),
+                      );
+                    }),
+                ],
                 ),
               ),
             ],
@@ -122,10 +124,11 @@ class _AppliedFiltersPinnedDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant _AppliedFiltersPinnedDelegate oldDelegate) =>
       hasVisible != oldDelegate.hasVisible || selectedFilters != oldDelegate.selectedFilters;
 
-  Widget _buildFilterChip(SelectedFilterEntity filter, Function()? onPressed) {
+  Widget _buildFilterChip(SelectedFilterEntity filter, int index, Function()? onPressed) {
     return Padding(
       padding: const EdgeInsets.only(right: AppSpacing.xs),
       child: CustomChipWidget(
+        key: ValueKey('${PlpTestStrings.appliedFilterChip}_$index'),
         onPressed: onPressed,
         text: filter.selectedFilterName ?? '',
         borderRadius: 2,

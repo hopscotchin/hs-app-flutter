@@ -6,6 +6,7 @@ import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
 
 import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/discover_strings.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
 import '../../../../core/cubits/shop_the_look_cubit.dart';
@@ -260,7 +261,11 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
       }
       return SliverList(
         delegate: SliverChildBuilderDelegate(
-          (context, index) => PageComponentRenderer(component: components[index]),
+              (context, index) => PageComponentRenderer(
+                component: components[index],
+                index: index,
+            pagePrefix: HomeComponentTestStrings.homePage,
+          ),
           childCount: components.length,
           // PageComponentRenderer is stateless — no KeepAlive needed and the
           // wrapper element costs add up across many tiles.

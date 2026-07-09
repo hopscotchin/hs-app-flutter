@@ -21,6 +21,8 @@ class AddressItemCard extends StatelessWidget {
     this.onSelect,
     this.onSetDefault,
     this.isSettingDefault = false,
+    this.editKey,
+    this.removeKey,
   });
 
   final AddressEntity address;
@@ -31,6 +33,10 @@ class AddressItemCard extends StatelessWidget {
   final VoidCallback? onSelect;
   final VoidCallback? onSetDefault;
   final bool isSettingDefault;
+
+  /// Automation keys for the inline edit / remove CTAs.
+  final Key? editKey;
+  final Key? removeKey;
 
   @override
   Widget build(BuildContext context) {
@@ -78,9 +84,9 @@ class AddressItemCard extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             children: [
-              _ActionLabel(label: AddressStrings.edit, onTap: onEdit),
+              _ActionLabel(key: editKey, label: AddressStrings.edit, onTap: onEdit),
               AppSpacing.horizontalGapMd,
-              _ActionLabel(label: AddressStrings.remove, onTap: onRemove),
+              _ActionLabel(key: removeKey, label: AddressStrings.remove, onTap: onRemove),
             ],
           ),
         ],
@@ -110,7 +116,7 @@ class AddressItemCard extends StatelessWidget {
 }
 
 class _ActionLabel extends StatelessWidget {
-  const _ActionLabel({required this.label, required this.onTap});
+  const _ActionLabel({super.key, required this.label, required this.onTap});
 
   final String label;
   final VoidCallback? onTap;

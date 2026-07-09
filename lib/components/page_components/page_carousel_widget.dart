@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/constants/strings/auto_test_strings.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/colors.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
@@ -14,10 +15,18 @@ import '../atoms/product_tile.dart';
 typedef _LineState = ({double progress, double fraction});
 
 class PageCarouselWidget extends StatefulWidget {
-  const PageCarouselWidget({super.key, required this.carouselData, this.margins});
+  const PageCarouselWidget({
+    super.key,
+    required this.carouselData,
+    this.margins,
+    this.keyPrefix,
+  });
 
   final PageCarouselData carouselData;
   final ComponentMargins? margins;
+
+  /// Component-level automation key prefix, e.g. `hp_pc_1`. Null → unkeyed.
+  final String? keyPrefix;
 
   @override
   State<PageCarouselWidget> createState() => _PageCarouselWidgetState();
@@ -62,6 +71,13 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
 
   @override
   bool get wantKeepAlive => true;
+
+  Key? _key(String suffix) {
+    final prefix = widget.keyPrefix;
+    return prefix == null ? null : ValueKey('${prefix}_$suffix');
+  }
+
+  Key? _tileKey(int i) => _key('${HomeComponentTestStrings.tiles}_$i');
 
   @override
   void initState() {
@@ -210,7 +226,12 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
             right: titleHorizontalMargin,
             bottom: titleBottomMargin,
           ),
-          child: CachedImageWidget(imageUrl: titleUrl, width: double.infinity, fit: BoxFit.cover),
+          child: CachedImageWidget(
+            key: _key(HomeComponentTestStrings.title),
+            imageUrl: titleUrl,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
         ),
         carousel,
       ],
@@ -265,7 +286,13 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
           itemCount: effectiveCount,
           itemBuilder: (_, index) => Padding(
             padding: EdgeInsets.only(right: innerHorizontalMargin),
-            child: _buildTile(tiles[index % tileCount], tileWidth, tileHeight, imageCornerRadius),
+            child: _buildTile(
+              tiles[index % tileCount],
+              tileWidth,
+              tileHeight,
+              imageCornerRadius,
+              index % tileCount,
+            ),
           ),
         ),
       ),
@@ -313,7 +340,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
           padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
           itemCount: tiles.length,
           separatorBuilder: (_, _) => SizedBox(width: innerHorizontalMargin),
-          itemBuilder: (_, i) => _buildTile(tiles[i], tileWidth, tileHeight, imageCornerRadius),
+          itemBuilder: (_, i) => _buildTile(tiles[i], tileWidth, tileHeight, imageCornerRadius, i),
         ),
       ),
     );
@@ -345,11 +372,12 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   }
 
   Widget _buildTile(
-    PageCarouselTile tile,
-    double tileWidth,
-    double tileHeight,
-    double cornerRadius,
-  ) {
+      PageCarouselTile tile,
+      double tileWidth,
+      double tileHeight,
+      double cornerRadius,
+      int index,
+      ) {
     final product = tile.product;
     final tapUri = tile.actionUri ?? product?.actionUri;
 
@@ -360,6 +388,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
           product: product,
           builder: (context, wished) => ProductTile.fromProduct(
             product,
+            key: _tileKey(index),
             imageUrl: tile.imageUrl ?? product.displayImage,
             imageAspectRatio: tileHeight > 0 ? tileWidth / tileHeight : null,
             isWishlisted: wished,
@@ -381,6 +410,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     );
 
     return GestureDetector(
+      key: _tileKey(index),
       onTap: () => ActionUrlHandler.navigate(context, tapUri),
       child: SizedBox(
         width: tileWidth,

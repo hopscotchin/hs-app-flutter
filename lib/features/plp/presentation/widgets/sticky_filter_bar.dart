@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
@@ -70,6 +71,7 @@ class StickyFilterBar extends StatelessWidget {
                       return Padding(
                         padding: EdgeInsets.only(right: index == filterList.length - 1 ? 10 : 0),
                         child: _FilterChip(
+                          key: ValueKey('${PlpTestStrings.stickyFilterChip}_$index'),
                           label: filter.label ?? '',
                           isActive: filter.hasSelected,
                           onTap: () {
@@ -111,6 +113,7 @@ class StickyFilterBar extends StatelessWidget {
                 children: [
                   if (sortingOption.isNotEmpty)
                     actionButton(
+                      key: const ValueKey(PlpTestStrings.sortByButton),
                       icon: ImageConstants.sortBy,
                       showFilterSelected: true,
                       label: PlpStrings.sortBy,
@@ -132,6 +135,7 @@ class StickyFilterBar extends StatelessWidget {
                   ],
                   if (plpFilter != null)
                     actionButton(
+                      key: const ValueKey(PlpTestStrings.filterByButton),
                       showFilterSelected: hasSelectedFilterAvailable,
                       icon: ImageConstants.filter,
                       label: PlpStrings.fileterBy,
@@ -162,8 +166,10 @@ class StickyFilterBar extends StatelessWidget {
     required String label,
     final VoidCallback? onTap,
     final bool showFilterSelected = false,
+    final Key? key,
   }) {
     return InkWell(
+      key: key,
       onTap: onTap,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -231,7 +237,7 @@ class _FilterChip extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool isActive;
-  const _FilterChip({required this.label, required this.onTap, required this.isActive});
+  const _FilterChip({super.key, required this.label, required this.onTap, required this.isActive});
 
   @override
   Widget build(BuildContext context) {

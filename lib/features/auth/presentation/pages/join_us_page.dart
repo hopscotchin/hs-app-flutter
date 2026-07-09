@@ -10,6 +10,7 @@ import '../../../../components/appbar/hs_appbar.dart';
 import '../widgets/auth_terms_disclaimer.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/navigation/action_url_handler.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
@@ -66,7 +67,12 @@ class _JoinUsPageState extends State<JoinUsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.baseDefault,
-      appBar: HsAppbar(title: AuthStrings.joinUs, onLeadingTap: () => Navigator.of(context).pop()),
+      appBar: HsAppbar(
+        title: AuthStrings.joinUs,
+        titleKey: const ValueKey(JoinUsTestStrings.joinUsAppBarTitle),
+        backButtonKey: const ValueKey(JoinUsTestStrings.joinUsBackButton),
+        onLeadingTap: () => Navigator.of(context).pop(),
+      ),
       body: BlocConsumer<AuthBloc, AuthState>(
         listenWhen: (prev, curr) =>
             (curr.isOtpSent && !prev.isOtpSent) ||
@@ -99,7 +105,11 @@ class _JoinUsPageState extends State<JoinUsPage> {
                 if (state.isError && state.messageBars.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: MessageBarsWidget(messageBars: state.messageBars, cardStyle: true),
+                    child: MessageBarsWidget(
+                      messageBars: state.messageBars,
+                      cardStyle: true,
+                      keyPrefix: JoinUsTestStrings.screen,
+                    ),
                   ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -111,6 +121,7 @@ class _JoinUsPageState extends State<JoinUsPage> {
                         children: [
                           AppSpacing.verticalGapLg,
                           OutlinedTextField(
+                            key: const ValueKey(JoinUsTestStrings.joinUsNameInputField),
                             controller: _nameController,
                             focusNode: _nameFocusNode,
                             labelText: AuthStrings.fullName,
@@ -126,6 +137,7 @@ class _JoinUsPageState extends State<JoinUsPage> {
                           ),
                           AppSpacing.verticalGapMd,
                           OutlinedTextField(
+                            key: const ValueKey(JoinUsTestStrings.joinUsEmailInputField),
                             controller: _emailController,
                             labelText: AuthStrings.emailAddress,
                             keyboardType: TextInputType.emailAddress,
@@ -145,6 +157,7 @@ class _JoinUsPageState extends State<JoinUsPage> {
                           ),
                           AppSpacing.verticalGapMd,
                           OutlinedTextField(
+                            key: const ValueKey(JoinUsTestStrings.joinUsMobileInputField),
                             controller: _mobileController,
                             labelText: AuthStrings.mobileNumberTitle,
                             keyboardType: TextInputType.phone,
@@ -170,16 +183,24 @@ class _JoinUsPageState extends State<JoinUsPage> {
                           ),
                           AppSpacing.verticalGapLg,
                           AuthPrimaryButton(
+                            key: const ValueKey(JoinUsTestStrings.joinUsSendOtpButton),
                             label: AuthStrings.sendOtp,
                             isLoading: isLoading,
                             onPressed: _onSendOtp,
                           ),
                           AppSpacing.verticalGapXl,
-                          const Center(child: AuthTermsDisclaimer()),
+                          const Center(
+                            child: AuthTermsDisclaimer(
+                              key: ValueKey(JoinUsTestStrings.joinUsTermsDisclaimerTextField),
+                              termsKey: ValueKey(JoinUsTestStrings.joinUsTermsAndConditionsButton),
+                              privacyKey: ValueKey(JoinUsTestStrings.joinUsPrivacyPolicyButton),
+                            ),
+                          ),
                           AppSpacing.verticalGapLg,
                           const Divider(height: 1, color: AppColors.dividerLight),
                           AppSpacing.verticalGapLg,
                           AuthFooterLinkRow(
+                            key: const ValueKey(JoinUsTestStrings.joinUsSignInButton),
                             promptText: AuthStrings.haveAccount,
                             actionLabel: AuthStrings.signIn,
                             onActionTap: () => AppNavigator.goToLogin(

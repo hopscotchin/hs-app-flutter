@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
 
 import '../../../../core/theme/colors.dart';
@@ -67,6 +68,7 @@ class _QueryCorrectionBlock extends StatelessWidget {
           if ((data.resultsOf?.isNotEmpty ?? false))
             Text(
               '${PlpStrings.showingResultsFor}${data.resultsOf!}',
+              key: const ValueKey(PlpTestStrings.queryCorrectionText),
               style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
             ),
 
@@ -82,6 +84,7 @@ class _QueryCorrectionBlock extends StatelessWidget {
   Widget _buildLineTwo(String searchFor, int confidence) {
     if (confidence == 0) {
       return InkWell(
+        key: const ValueKey(PlpTestStrings.queryCorrectionSuggestionButton),
         onTap: onSuggestionTap,
         child: Text.rich(
           TextSpan(

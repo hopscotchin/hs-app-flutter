@@ -26,6 +26,12 @@ class XLTileWidget extends StatefulWidget {
   /// Analytics callback — position is 1-based, direction is "L" or "R"
   final void Function(int position, String direction)? onImageScrolled;
 
+  /// Automation key for the main product tap target.
+  final Key? tileKey;
+
+  /// Automation key for the wishlist toggle.
+  final Key? wishlistKey;
+
   const XLTileWidget({
     super.key,
     required this.product,
@@ -34,6 +40,8 @@ class XLTileWidget extends StatefulWidget {
     this.onAddToCartTap,
     this.isWishlisted,
     this.onImageScrolled,
+    this.tileKey,
+    this.wishlistKey,
   });
 
   factory XLTileWidget.fromListingProduct(
@@ -44,6 +52,8 @@ class XLTileWidget extends StatefulWidget {
     VoidCallback? onAddToCartTap,
     bool? isWishlisted,
     void Function(int position, String direction)? onImageScrolled,
+    Key? tileKey,
+    Key? wishlistKey,
   }) {
     return XLTileWidget(
       key: key,
@@ -53,6 +63,8 @@ class XLTileWidget extends StatefulWidget {
       onAddToCartTap: onAddToCartTap,
       isWishlisted: isWishlisted,
       onImageScrolled: onImageScrolled,
+      tileKey: tileKey,
+      wishlistKey: wishlistKey,
     );
   }
 
@@ -79,6 +91,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
     final screenWidth = MediaQuery.sizeOf(context).width;
 
     return GestureDetector(
+      key: widget.tileKey,
       onTap: widget.onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,6 +151,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
       right: 28,
       top: 28,
       child: GestureDetector(
+        key: widget.wishlistKey,
         onTap: widget.onWishlistTap,
         child: CustomImage(
           path: (widget.isWishlisted ?? widget.product.wishlistInfo.isWishlisted)

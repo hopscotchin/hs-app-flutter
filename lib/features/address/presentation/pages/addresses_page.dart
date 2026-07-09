@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
 import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
 import 'package:hs_app_flutter/components/buttons/button_enums.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 
@@ -55,6 +56,8 @@ class _AddressesPageState extends State<AddressesPage> {
         title: widget.mode == AddressListMode.normal
             ? AccountStrings.savedAddresses
             : AddressStrings.shipToTitle,
+        titleKey: const ValueKey(AddressTestStrings.listAppBarTitle),
+        backButtonKey: const ValueKey(AddressTestStrings.listBackButton),
       ),
       body: SafeArea(
         top: false,
@@ -117,6 +120,7 @@ class _AddressesPageState extends State<AddressesPage> {
                         return Center(
                           child: Text(
                             AddressStrings.noSavedAddresses,
+                            key: const ValueKey(AddressTestStrings.listEmptyText),
                             style: AppTypographyV1.bodyLarge.regular.textSecondary(),
                           ),
                         );
@@ -138,16 +142,23 @@ class _AddressesPageState extends State<AddressesPage> {
                         children: [
                           if (defaultAddress.isNotEmpty) ...[
                             const _SectionHeading(label: AddressStrings.defaultAddressHeading),
-                            for (final address in defaultAddress) ...[
+                            for (var d = 0; d < defaultAddress.length; d++) ...[
                               AddressItemCard(
-                                address: address,
+                                key: ValueKey('${AddressTestStrings.listItem}_$d'),
+                                editKey: ValueKey(
+                                  '${AddressTestStrings.listItem}_${d}_${AddressTestStrings.listItemEditSuffix}',
+                                ),
+                                removeKey: ValueKey(
+                                  '${AddressTestStrings.listItem}_${d}_${AddressTestStrings.listItemRemoveSuffix}',
+                                ),
+                                address: defaultAddress[d],
                                 mode: widget.mode,
-                                isSelected: address.id == _selectedId,
-                                isSettingDefault: state.selectingId == address.id,
-                                onSelect: () => setState(() => _selectedId = address.id),
-                                onSetDefault: _onSetDefault(address),
-                                onEdit: () => _onEdit(context, address),
-                                onRemove: () => _confirmRemove(context, address),
+                                isSelected: defaultAddress[d].id == _selectedId,
+                                isSettingDefault: state.selectingId == defaultAddress[d].id,
+                                onSelect: () => setState(() => _selectedId = defaultAddress[d].id),
+                                onSetDefault: _onSetDefault(defaultAddress[d]),
+                                onEdit: () => _onEdit(context, defaultAddress[d]),
+                                onRemove: () => _confirmRemove(context, defaultAddress[d]),
                               ),
                               if (otherAddresses.isEmpty)
                                 Divider(
@@ -164,15 +175,28 @@ class _AddressesPageState extends State<AddressesPage> {
                               topSpacing: 6,
                             ),
                             for (var i = 0; i < otherAddresses.length; i++) ...[
-                              AddressItemCard(
-                                address: otherAddresses[i],
-                                mode: widget.mode,
-                                isSelected: otherAddresses[i].id == _selectedId,
-                                isSettingDefault: state.selectingId == otherAddresses[i].id,
-                                onSelect: () => setState(() => _selectedId = otherAddresses[i].id),
-                                onSetDefault: _onSetDefault(otherAddresses[i]),
-                                onEdit: () => _onEdit(context, otherAddresses[i]),
-                                onRemove: () => _confirmRemove(context, otherAddresses[i]),
+                              // Flat index continues after the default section.
+                              Builder(
+                                builder: (_) {
+                                  final flatIndex = defaultAddress.length + i;
+                                  return AddressItemCard(
+                                    key: ValueKey('${AddressTestStrings.listItem}_$flatIndex'),
+                                    editKey: ValueKey(
+                                      '${AddressTestStrings.listItem}_${flatIndex}_${AddressTestStrings.listItemEditSuffix}',
+                                    ),
+                                    removeKey: ValueKey(
+                                      '${AddressTestStrings.listItem}_${flatIndex}_${AddressTestStrings.listItemRemoveSuffix}',
+                                    ),
+                                    address: otherAddresses[i],
+                                    mode: widget.mode,
+                                    isSelected: otherAddresses[i].id == _selectedId,
+                                    isSettingDefault: state.selectingId == otherAddresses[i].id,
+                                    onSelect: () => setState(() => _selectedId = otherAddresses[i].id),
+                                    onSetDefault: _onSetDefault(otherAddresses[i]),
+                                    onEdit: () => _onEdit(context, otherAddresses[i]),
+                                    onRemove: () => _confirmRemove(context, otherAddresses[i]),
+                                  );
+                                },
                               ),
                               Divider(
                                 height: 1,
@@ -262,13 +286,17 @@ class _AddressesPageState extends State<AddressesPage> {
       context,
       title: AddressStrings.removeAddressTitle,
       description: AddressStrings.confirmDeletePrompt,
+      titleKey: const ValueKey(AddressTestStrings.deleteBottomSheetTitle),
+      descriptionKey: const ValueKey(AddressTestStrings.deleteBottomSheetDescription),
       secondaryAction: AppBottomSheetAction(
         label: CommonStrings.confirm,
+        buttonKey: const ValueKey(AddressTestStrings.deleteBottomSheetConfirmButton),
         onPressed: () => Navigator.of(context, rootNavigator: true).pop(true),
       ),
       primaryAction: AppBottomSheetAction(
         label: CommonStrings.cancel,
         style: AppBottomSheetButtonStyle.filled,
+        buttonKey: const ValueKey(AddressTestStrings.deleteBottomSheetCancelButton),
         onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
       ),
     );
@@ -312,7 +340,11 @@ class _AddNewAddressButton extends StatelessWidget {
       padding: Platform.isIOS ? const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 0) : const EdgeInsets.all(AppSpacing.md),
       child: SizedBox(
         width: double.infinity,
-        child: PrimaryButton.defaultType(text: AddressStrings.addNewAddress, onTap: onPressed),
+        child: PrimaryButton.defaultType(
+          key: const ValueKey(AddressTestStrings.listAddNewButton),
+          text: AddressStrings.addNewAddress,
+          onTap: onPressed,
+        ),
       ),
     );
   }
@@ -337,12 +369,14 @@ class _CheckoutBottomBar extends StatelessWidget {
         children: [
           Expanded(
             child: SecondaryButton.defaultType(
+              key: const ValueKey(AddressTestStrings.listAddNewButton),
               text: AddressStrings.addNewAddress,
               onTap: isSubmitting ? null : onAddNewAddress),
           ),
           AppSpacing.horizontalGapXs,
           Expanded(
             child: PrimaryButton.defaultType(
+              key: const ValueKey(AddressTestStrings.listContinueButton),
               text: AddressStrings.continueLabel,
               onTap: onContinue,
               state: isSubmitting ? ButtonState.loading : ButtonState.enabled,

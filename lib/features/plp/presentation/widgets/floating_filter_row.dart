@@ -3,6 +3,7 @@ import 'package:hs_app_flutter/components/atoms/custom_chip_widget.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
 import 'package:hs_app_flutter/components/buttons/button_enums.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
@@ -33,6 +34,12 @@ class FloatingFilterRow extends StatefulWidget {
 class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
+
+  /// Keys are disambiguated by section position so multiple floating filters on
+  /// one page don't collide: `plp_floating_filter_<pos>_<suffix>`.
+  Key _key(String suffix) => ValueKey(
+    '${PlpTestStrings.floatingFilter}_${widget.section.position}_$suffix',
+  );
 
   late String _filterKey;
 
@@ -154,7 +161,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lgMd),
               itemCount: section.chips.length,
               separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
-              itemBuilder: (_, index) => _buildChip(section.chips[index]),
+              itemBuilder: (_, index) => _buildChip(section.chips[index], index),
             ),
           ),
 
@@ -165,6 +172,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
             child: Padding(
               padding: const EdgeInsets.only(right: AppSpacing.md),
               child: SecondaryButton.defaultType(
+                key: _key(PlpTestStrings.floatingFilterApplySuffix),
                 text: PlpStrings.applyFilter,
                 state: _selectedValues.isNotEmpty ? ButtonState.enabled : ButtonState.disabled,
                 onTap: _applyFilter,
@@ -179,11 +187,12 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
 
   // ── Chip dispatch ─────────────────────────────────────────────────────────
 
-  Widget _buildChip(FloatingFilterChipEntity chip) {
+  Widget _buildChip(FloatingFilterChipEntity chip, int index) {
     final value = chip.filterValue ?? '';
     final isSelected = value.isNotEmpty && _selectedValues.contains(value);
 
     return GestureDetector(
+      key: _key('${PlpTestStrings.floatingFilterChipSuffix}_$index'),
       behavior: HitTestBehavior.opaque,
       onTap: value.isNotEmpty ? () => _toggle(value) : null,
       child: switch (_chipType) {

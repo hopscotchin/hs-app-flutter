@@ -12,10 +12,18 @@ import '../../../../core/theme/typography/typography_v1.dart';
 /// Taps open the corresponding page in the ported in-app WebView by default.
 /// Pass [onTermsTap] / [onPrivacyTap] to override the default behaviour.
 class AuthTermsDisclaimer extends StatelessWidget {
-  const AuthTermsDisclaimer({super.key, this.onTermsTap, this.onPrivacyTap});
+  const AuthTermsDisclaimer({
+    super.key,
+    this.onTermsTap,
+    this.onPrivacyTap,
+    this.termsKey,
+    this.privacyKey,
+  });
 
   final VoidCallback? onTermsTap;
   final VoidCallback? onPrivacyTap;
+  final Key? termsKey;
+  final Key? privacyKey;
 
   static final _base = AppTypographyV1.labelMedium.regular.copyWith(color: AppColors.neutralBlack);
   static final _link = AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.secondary);
@@ -45,11 +53,13 @@ class AuthTermsDisclaimer extends StatelessWidget {
       children: [
         Text(AuthStrings.termsPrefix, style: _base),
         GestureDetector(
+          key: termsKey,
           onTap: onTermsTap ?? () => _openTerms(context),
           child: Text(AuthStrings.termsAndConditionsUpper, style: _link),
         ),
         Text(AuthStrings.termsAnd, style: _base),
         GestureDetector(
+          key: privacyKey,
           onTap: onPrivacyTap ?? () => _openPrivacy(context),
           child: Text(AuthStrings.privacyPolicyUpper, style: _link),
         ),

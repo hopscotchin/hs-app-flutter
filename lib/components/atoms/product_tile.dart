@@ -36,6 +36,12 @@ class ProductTile extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onWishlistTap;
 
+  /// Automation key for the main product tap target.
+  final Key? tileKey;
+
+  /// Automation key for the wishlist toggle button.
+  final Key? wishlistKey;
+
   const ProductTile({
     super.key,
     this.imageUrl,
@@ -54,6 +60,8 @@ class ProductTile extends StatelessWidget {
     this.imageAspectRatio,
     this.onTap,
     this.onWishlistTap,
+    this.tileKey,
+    this.wishlistKey,
   });
 
   /// Build a tile from the unified [ListingProductEntity] — the shape used by
@@ -68,11 +76,15 @@ class ProductTile extends StatelessWidget {
     double? imageAspectRatio,
     String? imageUrl,
     bool? isWishlisted,
+    Key? tileKey,
+    Key? wishlistKey,
   }) {
     final price = product.price;
     final hasDiscount = price?.hasDiscount ?? false;
     return ProductTile(
       key: key,
+      tileKey: tileKey,
+      wishlistKey: wishlistKey,
       imageUrl: imageUrl ?? product.displayImage,
       productName: product.name,
       priceText: price?.sellingPrice,
@@ -101,6 +113,7 @@ class ProductTile extends StatelessWidget {
 
     if (isCPT) {
       return GestureDetector(
+        key: tileKey,
         onTap: onTap,
         child: AspectRatio(
           aspectRatio: effectiveRatio,
@@ -113,6 +126,7 @@ class ProductTile extends StatelessWidget {
     }
 
     return GestureDetector(
+      key: tileKey,
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,6 +198,7 @@ class ProductTile extends StatelessWidget {
       top: AppSpacing.xxs,
       right: AppSpacing.xxs,
       child: IconButton(
+        key: wishlistKey,
         icon: CustomImage(
           path: isWishlisted ? ImageConstants.wishlistAdded : ImageConstants.addWishlist,
           height: 16,

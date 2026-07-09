@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 
+import '../../core/constants/strings/auto_test_strings.dart';
 import '../../core/constants/strings/discover_strings.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
@@ -11,7 +12,18 @@ class CustomTilesWidget extends StatelessWidget {
   final CustomTilesData tilesData;
   final ComponentMargins? margins;
 
-  const CustomTilesWidget({super.key, required this.tilesData, this.margins});
+  /// Component-level automation key prefix, e.g. `hp_ct_0`. Null → unkeyed.
+  final String? keyPrefix;
+
+  const CustomTilesWidget({
+    super.key,
+    required this.tilesData,
+    this.margins,
+    this.keyPrefix,
+  });
+
+  Key? _key(String suffix) =>
+      keyPrefix == null ? null : ValueKey('${keyPrefix}_$suffix');
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +83,10 @@ class CustomTilesWidget extends StatelessWidget {
                     contentRows[i].tileGrid,
                     innerHorizontalMargin,
                     imageCornerRadius,
+                    // Flat tile index across all preceding content rows.
+                    contentRows
+                        .take(i)
+                        .fold<int>(0, (sum, r) => sum + r.tileGrid.length),
                   ),
                 ],
               ],
@@ -83,6 +99,7 @@ class CustomTilesWidget extends StatelessWidget {
             ),
             child: Center(
               child: CtaButtonComponent(
+                key: _key(HomeComponentTestStrings.cta),
                 label: tilesData.ctaButton!.label ?? DiscoverStrings.viewAll,
                 style: CtaButtonStyle.fromString(tilesData.ctaButton!.type),
                 onPressed: () => ActionUrlHandler.navigate(
@@ -117,6 +134,7 @@ class CustomTilesWidget extends StatelessWidget {
             final double availableWidth = constraints.maxWidth;
             final double aspectRatio = titleImage.width! / titleImage.height!;
             return CachedImageWidget(
+              key: _key(HomeComponentTestStrings.title),
               imageUrl: url,
               width: availableWidth,
               height: availableWidth / aspectRatio,
@@ -124,6 +142,7 @@ class CustomTilesWidget extends StatelessWidget {
             );
           }
           return CachedImageWidget(
+            key: _key(HomeComponentTestStrings.title),
             imageUrl: url,
             width: double.infinity,
             fit: BoxFit.cover,
@@ -151,6 +170,7 @@ class CustomTilesWidget extends StatelessWidget {
           final double availableWidth = constraints.maxWidth;
           final double aspectRatio = item.aspectRatio;
           return CachedImageWidget(
+            key: _key(HomeComponentTestStrings.title),
             imageUrl: url,
             width: availableWidth,
             height: aspectRatio > 0 ? availableWidth / aspectRatio : null,
@@ -166,16 +186,17 @@ class CustomTilesWidget extends StatelessWidget {
     List<TileGridItem> tiles,
     double innerHorizontalMargin,
     double imageCornerRadius,
+    int startIndex,
   ) {
     if (tiles.length == 1) {
-      return _buildTile(context, tiles.first, imageCornerRadius);
+      return _buildTile(context, tiles.first, imageCornerRadius, startIndex);
     }
 
     return Row(
       children: [
         for (int i = 0; i < tiles.length; i++) ...[
           if (i > 0) SizedBox(width: innerHorizontalMargin),
-          Expanded(child: _buildTile(context, tiles[i], imageCornerRadius)),
+          Expanded(child: _buildTile(context, tiles[i], imageCornerRadius, startIndex + i)),
         ],
       ],
     );
@@ -185,6 +206,7 @@ class CustomTilesWidget extends StatelessWidget {
     BuildContext context,
     TileGridItem tile,
     double imageCornerRadius,
+    int index,
   ) {
     final Widget image = AspectRatio(
       aspectRatio: tile.aspectRatio,
@@ -194,6 +216,7 @@ class CustomTilesWidget extends StatelessWidget {
       ),
     );
     return GestureDetector(
+      key: _key('${HomeComponentTestStrings.tiles}_$index'),
       onTap: () => ActionUrlHandler.navigate(context, tile.actionUri),
       child: imageCornerRadius > 0
           ? ClipRRect(

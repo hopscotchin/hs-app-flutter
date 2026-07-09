@@ -4,6 +4,7 @@ import 'package:hs_app_flutter/components/atoms/badge_icon.dart';
 import 'package:hs_app_flutter/components/atoms/circular_icon_button.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:hs_app_flutter/core/theme/theme.dart';
@@ -77,6 +78,7 @@ class _StandardSliverAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverAppBar(
       leading: IconButton(
+        key: const ValueKey(PlpTestStrings.appBarBackButton),
         icon: const CustomImage(path: ImageConstants.arrowBack, height: 16),
         onPressed: () => Navigator.of(context).pop(),
       ),
@@ -86,9 +88,17 @@ class _StandardSliverAppBar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: AppTypographyV1.bodySmall.bold.textPrimary()),
+            Text(
+              title,
+              key: const ValueKey(PlpTestStrings.appBarTitle),
+              style: AppTypographyV1.bodySmall.bold.textPrimary(),
+            ),
             if (subtitle.isNotNullOrEmpty) ...[
-              Text(subtitle, style: AppTypographyV1.caption.medium.textPrimary()),
+              Text(
+                subtitle,
+                key: const ValueKey(PlpTestStrings.appBarSubtitle),
+                style: AppTypographyV1.caption.medium.textPrimary(),
+              ),
             ],
           ],
         ),
@@ -111,6 +121,7 @@ class _StandardSliverAppBar extends StatelessWidget {
       actions: [
         AbsorbVerticalDrag(
           child: BadgeIcon(
+            key: const ValueKey(PlpTestStrings.appBarSearchButton),
             iconSize: 18,
             icon: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
             onTap: () => AppNavigator.goToSearch(context),
@@ -118,6 +129,7 @@ class _StandardSliverAppBar extends StatelessWidget {
         ),
         AbsorbVerticalDrag(
           child: BadgeIcon(
+            key: const ValueKey(PlpTestStrings.appBarWishlistButton),
             iconSize: 18,
             icon: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
             count: 0,
@@ -128,6 +140,7 @@ class _StandardSliverAppBar extends StatelessWidget {
         const SizedBox(width: 3),
         AbsorbVerticalDrag(
           child: BadgeIcon(
+            key: const ValueKey(PlpTestStrings.appBarCartButton),
             iconSize: 18,
             icon: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
             count: context.watch<CartCountCubit>().state,
@@ -262,7 +275,11 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
           /// IMAGE
           Positioned.fill(
             child: RepaintBoundary(
-              child: CustomImage(path: banner?.imageUrl ?? '', fit: BoxFit.cover),
+              child: CustomImage(
+                key: const ValueKey(PlpTestStrings.headerImage),
+                path: banner?.imageUrl ?? '',
+                fit: BoxFit.cover,
+              ),
             ),
           ),
 
@@ -317,6 +334,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                       scale: 1 - (progress * _largeTitleScaleReduction),
                       child: Text(
                         displayTitle,
+                        key: const ValueKey(PlpTestStrings.appBarTitle),
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -344,6 +362,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                 children: [
                   const SizedBox(width: 8),
                   CircleIconButton(
+                    key: const ValueKey(PlpTestStrings.appBarBackButton),
                     onTap: () => Navigator.of(context).pop(),
                     child: const CustomImage(path: ImageConstants.arrowBack, height: 18),
                   ),
@@ -357,6 +376,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                       opacity: collapsedTitleOpacity,
                       child: Text(
                         displayTitle,
+                        key: const ValueKey(PlpTestStrings.appBarCollapsedTitle),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypographyV1.bodySmall.bold.textSeconday(),
@@ -365,6 +385,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                   ),
 
                   CircleIconButton(
+                    key: const ValueKey(PlpTestStrings.appBarSearchButton),
                     onTap: () => AppNavigator.goToSearch(context),
                     child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
                   ),
@@ -372,6 +393,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                   const SizedBox(width: 8),
 
                   CircleIconButton(
+                    key: const ValueKey(PlpTestStrings.appBarWishlistButton),
                     onTap: () {},
                     child: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
                   ),
@@ -379,6 +401,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                   const SizedBox(width: 8),
 
                   CircleIconButton(
+                    key: const ValueKey(PlpTestStrings.appBarCartButton),
                     onTap: () => AppNavigator.goToCart(context),
                     child: BadgeIcon(
                       padding: EdgeInsets.zero,

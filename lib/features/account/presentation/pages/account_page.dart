@@ -4,6 +4,7 @@ import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
 import 'package:hs_app_flutter/components/appbar/hs_appbar.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/login_redirects.dart';
 import 'package:hs_app_flutter/core/entities/message_bar_entity.dart';
@@ -30,7 +31,10 @@ class AccountPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.baseDefault,
-      appBar: HsAppbar.titleOnly(title: AccountStrings.accounts),
+      appBar: HsAppbar.titleOnly(
+        title: AccountStrings.accounts,
+        titleKey: const ValueKey(AccountTestStrings.accountAppBarTitle),
+      ),
       body: MultiBlocListener(
         listeners: [
           BlocListener<AccountBloc, AccountState>(
@@ -119,6 +123,7 @@ class _AccountContent extends StatelessWidget {
                   !isLoggedIn ? AppSpacing.verticalGapXl : AppSpacing.verticalGapMd,
 
                   AccountMenuItemWidget(
+                    key: const ValueKey(AccountTestStrings.accountsOrdersMenuItem),
                     svgAsset: ImageConstants.ordersItemIcon,
                     title: AccountStrings.orders,
                     subtitle: isLoggedIn ? null : AccountStrings.ordersSubtitle,
@@ -137,6 +142,7 @@ class _AccountContent extends StatelessWidget {
                           ),
                   ),
                   AccountMenuItemWidget(
+                    key: const ValueKey(AccountTestStrings.accountsWishlistMenuItem),
                     svgAsset: ImageConstants.wishlistItemIcon,
                     title: AccountStrings.wishlist,
                     subtitle: isLoggedIn ? null : AccountStrings.wishlistSubtitle,
@@ -155,6 +161,7 @@ class _AccountContent extends StatelessWidget {
                           ),
                   ),
                   AccountMenuItemWidget(
+                    key: const ValueKey(AccountTestStrings.accountsProfileDetailsMenuItem),
                     svgAsset: ImageConstants.profileDetailsItemIcon,
                     title: AccountStrings.profileDetails,
                     subtitle: isLoggedIn ? null : AccountStrings.profileDetailsSubtitle,
@@ -173,6 +180,7 @@ class _AccountContent extends StatelessWidget {
                           ),
                   ),
                   AccountMenuItemWidget(
+                    key: const ValueKey(AccountTestStrings.accountsSavedAddressesMenuItem),
                     svgAsset: ImageConstants.addressItemIcon,
                     title: AccountStrings.savedAddresses,
                     subtitle: isLoggedIn ? null : AccountStrings.savedAddressesSubtitle,
@@ -191,6 +199,7 @@ class _AccountContent extends StatelessWidget {
                           ),
                   ),
                   AccountMenuItemWidget(
+                    key: const ValueKey(AccountTestStrings.accountsManageCardsMenuItem),
                     svgAsset: ImageConstants.cardsItemIcon,
                     title: AccountStrings.manageCards,
                     subtitle: isLoggedIn ? null : AccountStrings.manageCardsSubtitle,
@@ -209,6 +218,7 @@ class _AccountContent extends StatelessWidget {
                           ),
                   ),
                   AccountMenuItemWidget(
+                    key: const ValueKey(AccountTestStrings.accountsCreditsMenuItem),
                     svgAsset: ImageConstants.creditsItemIcon,
                     title: AccountStrings.creditsMenu,
                     subtitle: isLoggedIn ? null : AccountStrings.checkCreditBalance,
@@ -231,6 +241,7 @@ class _AccountContent extends StatelessWidget {
                           ),
                   ),
                   AccountMenuItemWidget(
+                    key: const ValueKey(AccountTestStrings.accountsMyKidsMenuItem),
                     svgAsset: ImageConstants.kidsItemIcon,
                     title: AccountStrings.myKids,
                     subtitle: isLoggedIn ? null : AccountStrings.myKidsSubtitle,
@@ -298,13 +309,17 @@ class _AccountContent extends StatelessWidget {
       context,
       title: AccountStrings.confirmDeleteTitle,
       description: AccountStrings.confirmDeleteGuest,
+      titleKey: const ValueKey(AccountTestStrings.accountForgetDialogTitleTextField),
+      descriptionKey: const ValueKey(AccountTestStrings.accountForgetDialogDescriptionTextField),
       secondaryAction: AppBottomSheetAction(
         label: CommonStrings.cancel,
+        buttonKey: const ValueKey(AccountTestStrings.accountForgetDialogCancelButton),
         onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
       ),
       primaryAction: AppBottomSheetAction(
         label: CommonStrings.remove,
         style: AppBottomSheetButtonStyle.filled,
+        buttonKey: const ValueKey(AccountTestStrings.accountForgetDialogConfirmButton),
         onPressed: () => Navigator.of(context, rootNavigator: true).pop(true),
       ),
     );

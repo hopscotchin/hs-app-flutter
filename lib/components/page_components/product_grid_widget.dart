@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/strings/auto_test_strings.dart';
 import '../../core/constants/strings/discover_strings.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/spacing.dart';
@@ -15,7 +16,18 @@ class ProductGridWidget extends StatelessWidget {
   final ProductGridData gridData;
   final ComponentMargins? margins;
 
-  const ProductGridWidget({super.key, required this.gridData, this.margins});
+  /// Component-level automation key prefix, e.g. `hp_pg_2`. Null → unkeyed.
+  final String? keyPrefix;
+
+  const ProductGridWidget({
+    super.key,
+    required this.gridData,
+    this.margins,
+    this.keyPrefix,
+  });
+
+  Key? _key(String suffix) =>
+      keyPrefix == null ? null : ValueKey('${keyPrefix}_$suffix');
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +49,7 @@ class ProductGridWidget extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(left: titleHMargin, right: titleHMargin, bottom: titleBMargin),
             child: CachedImageWidget(
+              key: _key(HomeComponentTestStrings.title),
               imageUrl: gridData.title!.url!,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -69,7 +82,7 @@ class ProductGridWidget extends StatelessWidget {
           if (i > 0) const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: startIndex + i < tiles.length
-                ? _buildProductCard(context, tiles[startIndex + i])
+                ? _buildProductCard(context, tiles[startIndex + i], startIndex + i)
                 : const SizedBox.shrink(),
           ),
         ],
@@ -77,12 +90,13 @@ class ProductGridWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard(BuildContext context, ListingProductEntity item) {
+  Widget _buildProductCard(BuildContext context, ListingProductEntity item, int index) {
     final showInfo = gridData.layoutInfo?.showProductInfo ?? true;
     return WishlistStatusBuilder(
       product: item,
       builder: (context, wished) => ProductTile.fromProduct(
         item,
+        key: _key('${HomeComponentTestStrings.tiles}_$index'),
         showProductInfo: showInfo,
         isWishlisted: wished,
         onTap: () => ActionUrlHandler.navigate(context, item.actionUri, title: item.name),
@@ -98,6 +112,7 @@ class ProductGridWidget extends StatelessWidget {
   Widget _buildCta(BuildContext context, CtaButton cta) {
     return Center(
       child: CtaButtonComponent(
+        key: _key(HomeComponentTestStrings.cta),
         label: cta.label ?? DiscoverStrings.viewAll,
         style: CtaButtonStyle.fromString(cta.type),
         onPressed: () => ActionUrlHandler.navigate(context, cta.actionUri),

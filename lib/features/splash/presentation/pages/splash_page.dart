@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/di/injection.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:hs_app_flutter/core/services/pref_manager.dart';
@@ -136,6 +137,7 @@ class _SplashPageState extends State<SplashPage> {
           children: Environment.values.map((env) {
             final isSelected = currentEnvironment == env;
             return ListTile(
+              key: ValueKey(_environmentKey(env)),
               title: Text(_environmentLabel(env)),
               trailing: isSelected ? const Icon(Icons.check, color: AppColors.primary) : null,
               onTap: () => Navigator.of(dialogContext).pop(env),
@@ -155,6 +157,14 @@ class _SplashPageState extends State<SplashPage> {
       Environment.debug => 'Debug',
       Environment.debugVPN => 'Debug VPN',
       Environment.release => 'Release',
+    };
+  }
+
+  String _environmentKey(Environment env) {
+    return switch (env) {
+      Environment.debug => SplashTestStrings.envDebugButton,
+      Environment.debugVPN => SplashTestStrings.envDebugVpnButton,
+      Environment.release => SplashTestStrings.envProdButton,
     };
   }
 }

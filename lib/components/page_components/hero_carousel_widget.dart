@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/colors.dart';
+import '../../core/constants/strings/auto_test_strings.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../atoms/cached_image_widget.dart';
 
@@ -12,7 +13,15 @@ class HeroCarouselWidget extends StatefulWidget {
   final HeroCarouselData heroData;
   final ComponentMargins? margins;
 
-  const HeroCarouselWidget({super.key, required this.heroData, this.margins});
+  /// Component-level automation key prefix, e.g. `hp_hero_0`. Null → unkeyed.
+  final String? keyPrefix;
+
+  const HeroCarouselWidget({
+    super.key,
+    required this.heroData,
+    this.margins,
+    this.keyPrefix,
+  });
 
   @override
   State<HeroCarouselWidget> createState() => _HeroCarouselWidgetState();
@@ -39,6 +48,13 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
   static const double _defaultInnerHorizontalMargin = 12.0;
 
   List<HeroTile> get _tiles => widget.heroData.tiles;
+
+  /// Builds a tile key `<prefix>_tiles_<i>`, or null when unkeyed.
+  Key? _tileKey(int i) {
+    final prefix = widget.keyPrefix;
+    if (prefix == null) return null;
+    return ValueKey('${prefix}_${HomeComponentTestStrings.tiles}_$i');
+  }
   int get _durationMs => widget.heroData.viewConfig?.scrollDuration ?? 3000;
   double get _cornerRadius => widget.heroData.viewConfig?.imageCornerRadius ?? 4;
 
@@ -145,10 +161,12 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
                 allowImplicitScrolling: true,
                 onPageChanged: (int index) => _currentPage.value = index,
                 itemBuilder: (BuildContext context, int index) {
-                  final HeroTile tile = tiles[index % tiles.length];
+                  final int tileIndex = index % tiles.length;
+                  final HeroTile tile = tiles[tileIndex];
                   return Padding(
                     padding: EdgeInsets.symmetric(horizontal: tilePadding),
                     child: GestureDetector(
+                      key: _tileKey(tileIndex),
                       onTap: () => ActionUrlHandler.navigate(context, tile.actionUri),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(_cornerRadius),

@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/atoms/empty_state_widget.dart';
 import 'package:hs_app_flutter/components/page_components/message_bars_widget.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
@@ -230,6 +231,7 @@ class _PlpViewState extends State<_PlpView> {
                 builder: (context, count, _) {
                   final position = count.clamp(1, total);
                   return FloatingItemCount(
+                    key: const ValueKey(PlpTestStrings.productCountButton),
                     position: position,
                     totalCount: total,
                     onTap: _scrollToTop,
@@ -322,6 +324,7 @@ class _PlpViewState extends State<_PlpView> {
                             child: MessageBarsWidget(
                               messageBars: state.messageBars,
                               cardStyle: true,
+                              keyPrefix: PlpTestStrings.screen,
                               onAction: (v, e) {
                                 context.showSnack('ROUTING IS PENDING HERE');
                               },

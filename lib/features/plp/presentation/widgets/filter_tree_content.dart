@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/form/app_checkbox.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
 
@@ -56,25 +57,29 @@ class FilterTreeContent extends StatelessWidget {
         // Breadcrumb rows — stacked, each with its own ⊗.
         for (var i = 0; i < breadcrumbs.length; i++)
           _BreadcrumbRow(
+            key: ValueKey('${PlpTestStrings.filterBreadcrumb}_$i'),
             label: breadcrumbs[i],
             onClose: () => onPopToLevel(i),
             isSubcategory: i > 0,
           ),
 
         // Children at the current level.
-        for (final item in items)
-          if (item.filters.isEmpty)
+        for (var i = 0; i < items.length; i++)
+          if (items[i].filters.isEmpty)
             _LeafRow(
-              filter: item,
-              isSelected: _isLeafSelected(item),
-              onTap: () => onLeafToggle(item.filterKey ?? '', item.filterValue ?? item.label ?? ''),
+              key: ValueKey('${PlpTestStrings.filterLeaf}_$i'),
+              filter: items[i],
+              isSelected: _isLeafSelected(items[i]),
+              onTap: () =>
+                  onLeafToggle(items[i].filterKey ?? '', items[i].filterValue ?? items[i].label ?? ''),
             )
           else
             _DrillDownRow(
-              filter: item,
+              key: ValueKey('${PlpTestStrings.filterDrilldown}_$i'),
+              filter: items[i],
               onTap: () => onDrillIn(
-                item.filterKey ?? '',
-                item.filterValue ?? item.label ?? '',
+                items[i].filterKey ?? '',
+                items[i].filterValue ?? items[i].label ?? '',
                 currentLevel,
               ),
             ),
@@ -130,7 +135,12 @@ class _BreadcrumbRow extends StatelessWidget {
   final VoidCallback onClose;
   final bool isSubcategory;
 
-  const _BreadcrumbRow({required this.label, required this.onClose, this.isSubcategory = false});
+  const _BreadcrumbRow({
+    super.key,
+    required this.label,
+    required this.onClose,
+    this.isSubcategory = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +181,7 @@ class _DrillDownRow extends StatelessWidget {
   final FilterEntity filter;
   final VoidCallback onTap;
 
-  const _DrillDownRow({required this.filter, required this.onTap});
+  const _DrillDownRow({super.key, required this.filter, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -228,7 +238,7 @@ class _LeafRow extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _LeafRow({required this.filter, required this.isSelected, required this.onTap});
+  const _LeafRow({super.key, required this.filter, required this.isSelected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
