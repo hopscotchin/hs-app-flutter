@@ -19,9 +19,14 @@ import 'core/theme/app_theme.dart';
 import 'hs_app.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  if (kDebugMode) enableFlutterDriverExtension(silenceErrors: true);
+  // enableFlutterDriverExtension installs its own WidgetsBinding, so it must run
+  // before ensureInitialized — otherwise the binding is already initialized and
+  // _DriverBinding's constructor throws '_debugInitializedType == null'.
+  if (kDebugMode) {
+    enableFlutterDriverExtension(silenceErrors: true);
+  } else {
+    WidgetsFlutterBinding.ensureInitialized();
+  }
   // debugPaintBaselinesEnabled = true;
 
   SystemChrome.setSystemUIOverlayStyle(AppTheme.systemUiLight);
