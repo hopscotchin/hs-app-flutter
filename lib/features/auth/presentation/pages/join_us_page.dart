@@ -125,6 +125,7 @@ class _JoinUsPageState extends State<JoinUsPage> {
                             controller: _nameController,
                             focusNode: _nameFocusNode,
                             labelText: AuthStrings.fullName,
+                            hintTextKey: const ValueKey(JoinUsTestStrings.joinUsNameInputHint),
                             keyboardType: TextInputType.name,
                             onChanged: _onFieldChanged,
                             validator: (value) {
@@ -140,6 +141,7 @@ class _JoinUsPageState extends State<JoinUsPage> {
                             key: const ValueKey(JoinUsTestStrings.joinUsEmailInputField),
                             controller: _emailController,
                             labelText: AuthStrings.emailAddress,
+                            hintTextKey: const ValueKey(JoinUsTestStrings.joinUsEmailInputHint),
                             keyboardType: TextInputType.emailAddress,
                             onChanged: _onFieldChanged,
                             validator: (value) {
@@ -160,6 +162,7 @@ class _JoinUsPageState extends State<JoinUsPage> {
                             key: const ValueKey(JoinUsTestStrings.joinUsMobileInputField),
                             controller: _mobileController,
                             labelText: AuthStrings.mobileNumberTitle,
+                            hintTextKey: const ValueKey(JoinUsTestStrings.joinUsMobileInputHint),
                             keyboardType: TextInputType.phone,
                             maxLength: 11,
                             prefixText: '+91 ',

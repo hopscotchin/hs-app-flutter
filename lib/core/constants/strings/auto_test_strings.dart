@@ -62,8 +62,11 @@ class JoinUsTestStrings {
 
   static const String joinUsAppBarTitle = 'join_us_app_bar_title';
   static const String joinUsNameInputField = 'join_us_name_input_field';
+  static const String joinUsNameInputHint = 'join_us_name_input_hint';
   static const String joinUsEmailInputField = 'join_us_email_input_field';
+  static const String joinUsEmailInputHint = 'join_us_email_input_hint';
   static const String joinUsMobileInputField = 'join_us_mobile_input_field';
+  static const String joinUsMobileInputHint = 'join_us_mobile_input_hint';
   static const String joinUsSendOtpButton = 'join_us_send_otp_button';
   static const String joinUsTermsDisclaimerTextField = 'join_us_terms_disclaimer_text_field';
   static const String joinUsTermsAndConditionsButton = 'join_us_terms_and_conditions_button';
@@ -80,6 +83,7 @@ class LoginTestStrings {
 
   static const String loginAppBarTitle = 'login_app_bar_title';
   static const String loginMobileInputField = 'login_mobile_input_field';
+  static const String loginMobileInputHint = 'login_mobile_input_hint';
   static const String loginSendOtpButton = 'login_send_otp_button';
   static const String loginJoinUsButton = 'login_join_us_button';
   static const String loginBackButton = 'login_back_button';
@@ -159,6 +163,14 @@ class MessageBarTestStrings {
 /// Product listing page (PLP). Keys are `plp_<element>[_<index>]`. Dynamic list
 /// items (tiles, chips, filter options) carry an index; tile sub-CTAs nest under
 /// the tile, e.g. `plp_tile_3`, `plp_tile_3_wishlist`, `plp_tile_3_add_to_cart`.
+class PincodeTestStrings {
+  PincodeTestStrings();
+
+  // Pincode check bottom sheet
+  static const String sheetInputHint = 'pincode_sheet_input_hint';
+  static const String sheetInputSuffixIcon = 'pincode_sheet_input_suffix_icon';
+}
+
 class PlpTestStrings {
   PlpTestStrings();
 
@@ -212,6 +224,8 @@ class PlpTestStrings {
   static const String filterSection = 'plp_filter_section'; // sidebar → + `_<i>`
   static const String filterOption = 'plp_filter_option'; // flat content → + `_<i>`
   static const String filterSearchInput = 'plp_filter_search_input';
+  static const String filterSearchInputHint = 'plp_filter_search_input_hint';
+  static const String filterSearchInputSuffix = 'plp_filter_search_input_suffix';
   static const String filterClearButton = 'plp_filter_clear_button';
   static const String filterApplyButton = 'plp_filter_apply_button';
   // Nested tree filter rows
@@ -255,14 +269,24 @@ class AddressTestStrings {
   static const String formAppBarTitle = 'address_form_app_bar_title';
   static const String formBackButton = 'address_form_back_button';
   static const String formNameInput = 'address_form_name_input';
+  static const String formNameInputHint = 'address_form_name_input_hint';
   static const String formMobileInput = 'address_form_mobile_input';
+  static const String formMobileInputHint = 'address_form_mobile_input_hint';
   static const String formAlternateMobileInput = 'address_form_alternate_mobile_input';
+  static const String formAlternateMobileInputHint = 'address_form_alternate_mobile_input_hint';
   static const String formPincodeInput = 'address_form_pincode_input';
+  static const String formPincodeInputHint = 'address_form_pincode_input_hint';
+  static const String formPincodeInputSuffix = 'address_form_pincode_input_suffix';
   static const String formCityInput = 'address_form_city_input';
+  static const String formCityInputHint = 'address_form_city_input_hint';
   static const String formStateInput = 'address_form_state_input';
+  static const String formStateInputHint = 'address_form_state_input_hint';
   static const String formAddress1Input = 'address_form_address1_input';
+  static const String formAddress1InputHint = 'address_form_address1_input_hint';
   static const String formStreetInput = 'address_form_street_input';
+  static const String formStreetInputHint = 'address_form_street_input_hint';
   static const String formLandmarkInput = 'address_form_landmark_input';
+  static const String formLandmarkInputHint = 'address_form_landmark_input_hint';
   static const String formDefaultCheckbox = 'address_form_default_checkbox';
   static const String formSaveButton = 'address_form_save_button';
   static const String formCancelButton = 'address_form_cancel_button';

@@ -223,6 +223,7 @@ class _LoginPageState extends State<LoginPage> {
       controller: _inputController,
       focusNode: _inputFocusNode,
       labelText: AuthStrings.mobileNumberTitle,
+      hintTextKey: const ValueKey(LoginTestStrings.loginMobileInputHint),
       keyboardType: TextInputType.phone,
       maxLength: 11,
       prefixText: '+91 ',

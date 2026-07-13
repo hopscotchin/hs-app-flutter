@@ -486,6 +486,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
             },
             controller: _searchController,
             labelText: hint ?? PlpStrings.pincode,
+            hintTextKey: const ValueKey(PlpTestStrings.filterSearchInputHint),
             errorText: state.pincodeError.isNotNullOrEmpty ? state.pincodeError : null,
             onChanged: _onSearchTextChanged,
             keyboardType: TextInputType.number,
@@ -497,6 +498,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
             maxLength: 6,
             focusNode: pincodeFocusNode,
             onTapOutside: (p0) => FocusScope.of(context).unfocus(),
+            suffixKey: const ValueKey(PlpTestStrings.filterSearchInputSuffix),
             suffix: state.isPincodeLoading
                 ? const SizedBox(
                     height: 15,

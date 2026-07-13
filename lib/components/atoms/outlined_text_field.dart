@@ -35,6 +35,9 @@ class OutlinedTextField extends StatefulWidget {
     this.onTapOutside,
     this.suffix,
     this.suffixIcon,
+    this.suffixKey,
+    this.suffixIconKey,
+    this.hintTextKey,
     this.autovalidateMode,
   });
 
@@ -62,6 +65,9 @@ class OutlinedTextField extends StatefulWidget {
   final VoidCallback? onTap;
   final Widget? suffix;
   final Widget? suffixIcon;
+  final Key? suffixKey;
+  final Key? suffixIconKey;
+  final Key? hintTextKey;
   final Function(PointerDownEvent)? onTapOutside;
   final AutovalidateMode? autovalidateMode;
 
@@ -131,6 +137,7 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
         Flexible(
           child: Text(
             widget.labelText,
+            key: widget.hintTextKey,
             style: labelStyle,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -215,8 +222,12 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
             floatingLabelBehavior: FloatingLabelBehavior.auto,
             prefixText: widget.prefixText,
             prefixStyle: widget.prefixStyle ?? _inputStyle,
-            suffix: widget.suffix,
-            suffixIcon: widget.suffixIcon,
+            suffix: widget.suffix == null
+                ? null
+                : KeyedSubtree(key: widget.suffixKey, child: widget.suffix!),
+            suffixIcon: widget.suffixIcon == null
+                ? null
+                : KeyedSubtree(key: widget.suffixIconKey, child: widget.suffixIcon!),
             errorText: widget.errorText,
             errorMaxLines: 3,
             errorStyle: AppTypographyV1.labelMedium.regular.copyWith(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hs_app_flutter/core/constants/strings/address_pincode_strings.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 
@@ -31,10 +32,12 @@ class PincodeInputField extends StatelessWidget {
       controller: controller,
       focusNode: focusNode,
       labelText: AddressStrings.enterPincodeHint,
+      hintTextKey: const ValueKey(PincodeTestStrings.sheetInputHint),
       required: false,
       keyboardType: TextInputType.number,
       maxLength: 6,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      suffixIconKey: const ValueKey(PincodeTestStrings.sheetInputSuffixIcon),
       suffixIcon: Padding(
         padding: const EdgeInsets.only(right: 12),
         child: isChecking
