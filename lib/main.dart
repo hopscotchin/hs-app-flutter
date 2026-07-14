@@ -7,6 +7,7 @@ import 'package:flutter_driver/driver_extension.dart';
 import 'package:talker_dio_logger_plus/talker_dio_logger_plus.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
+import 'core/config/build_config.dart';
 import 'core/config/env_config.dart';
 import 'core/config/environment.dart';
 import 'core/di/injection.dart';
@@ -22,7 +23,9 @@ void main() async {
   // enableFlutterDriverExtension installs its own WidgetsBinding, so it must run
   // before ensureInitialized — otherwise the binding is already initialized and
   // _DriverBinding's constructor throws '_debugInitializedType == null'.
-  if (kDebugMode) {
+  // Only automation builds need the driver extension; normal debug/release use
+  // the standard binding.
+  if (kIsAutomation) {
     enableFlutterDriverExtension(silenceErrors: true);
   } else {
     WidgetsFlutterBinding.ensureInitialized();
