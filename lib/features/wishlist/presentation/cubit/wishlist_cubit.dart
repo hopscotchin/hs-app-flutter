@@ -33,7 +33,7 @@ class _PendingWishlist {
 @singleton
 class WishlistCubit extends Cubit<WishlistState> {
   WishlistCubit(this._addToWishlist, this._removeFromWishlist)
-      : super(const WishlistState());
+    : super(const WishlistState());
 
   final AddToWishlistUseCase _addToWishlist;
   final RemoveFromWishlistUseCase _removeFromWishlist;
@@ -121,13 +121,13 @@ class WishlistCubit extends Cubit<WishlistState> {
       AddToWishlistParams(productId: productId, price: price, skuId: sku),
     );
     result.fold(
-          (failure) {
+      (failure) {
         if (failure is RequestCancelledFailure) return;
         final reverted = Map<String, String?>.from(state.items)..remove(productId);
         emit(_clearInFlight(productId, items: reverted));
         _emitFeedback("Couldn't add to wishlist", isError: true);
       },
-          (response) {
+      (response) {
         final updated = Map<String, String?>.from(state.items)
           ..[productId] = response.wishlistItemId;
         emit(_clearInFlight(productId, items: updated));
@@ -148,13 +148,13 @@ class WishlistCubit extends Cubit<WishlistState> {
       RemoveFromWishlistParams(wishlistId: wishlistItemId),
     );
     result.fold(
-          (failure) {
+      (failure) {
         if (failure is RequestCancelledFailure) return;
         final reverted = Map<String, String?>.from(state.items)..[productId] = wishlistItemId;
         emit(_clearInFlight(productId, items: reverted));
         _emitFeedback("Couldn't remove from wishlist", isError: true);
       },
-          (_) {
+      (_) {
         emit(_clearInFlight(productId));
         _emitFeedback('Removed from wishlist', isError: false);
       },

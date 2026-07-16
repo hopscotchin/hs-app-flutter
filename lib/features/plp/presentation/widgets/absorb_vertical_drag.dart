@@ -33,19 +33,19 @@ class AbsorbVerticalDrag extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
         VerticalDragGestureRecognizer:
-        GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-          VerticalDragGestureRecognizer.new,
+            GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+              VerticalDragGestureRecognizer.new,
               (VerticalDragGestureRecognizer instance) {
-            // Claim the vertical drag and do nothing with it, so the ancestor
-            // Scrollable never receives it.
-            instance
-              ..onStart = (_) {}
-              ..onUpdate = (_) {}
-              ..onEnd = (_) {}
-              ..onCancel = () {}
-              ..gestureSettings = gestureSettings;
-          },
-        ),
+                // Claim the vertical drag and do nothing with it, so the ancestor
+                // Scrollable never receives it.
+                instance
+                  ..onStart = (_) {}
+                  ..onUpdate = (_) {}
+                  ..onEnd = (_) {}
+                  ..onCancel = () {}
+                  ..gestureSettings = gestureSettings;
+              },
+            ),
       },
       child: child,
     );

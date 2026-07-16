@@ -39,11 +39,11 @@ class FilterPage extends StatelessWidget {
   });
 
   static Future<Map<String, String>?> open(
-      BuildContext context, {
-        PlpFilterEntity? plpFilter,
-        Map<String, String> appliedFilters = const {},
-        Map<String, dynamic> baseQueryParams = const {},
-      }) {
+    BuildContext context, {
+    PlpFilterEntity? plpFilter,
+    Map<String, String> appliedFilters = const {},
+    Map<String, dynamic> baseQueryParams = const {},
+  }) {
     final screenH = MediaQuery.of(context).size.height;
 
     return showGeneralDialog<Map<String, String>>(
@@ -149,7 +149,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
         ),
         BlocListener<FilterBloc, FilterState>(
           listenWhen: (prev, curr) =>
-          prev.status != FilterStatus.error && curr.status == FilterStatus.error,
+              prev.status != FilterStatus.error && curr.status == FilterStatus.error,
           listener: (context, state) {
             final msg = state.errorMessage;
             if (msg == null || msg.isEmpty) return;
@@ -285,11 +285,11 @@ class _FilterPageViewState extends State<_FilterPageView> {
                           child: CustomPaint(
                             painter: isSelected
                                 ? const SelectedAccentPainter(
-                              color: AppColors.brandPrimary,
-                              width: 3,
-                              verticalInset: 0,
-                              cornerRadius: 0,
-                            )
+                                    color: AppColors.brandPrimary,
+                                    width: 3,
+                                    verticalInset: 0,
+                                    cornerRadius: 0,
+                                  )
                                 : null,
                             child: Padding(
                               padding: const EdgeInsets.only(
@@ -305,11 +305,11 @@ class _FilterPageViewState extends State<_FilterPageView> {
                                       section.label ?? '',
                                       style: isSelected
                                           ? AppTypographyV1.bodyLarge.bold.brandPrimary().copyWith(
-                                        height: 1,
-                                      )
+                                              height: 1,
+                                            )
                                           : AppTypographyV1.bodyMedium.medium
-                                          .textPrimary()
-                                          .copyWith(height: 1),
+                                                .textPrimary()
+                                                .copyWith(height: 1),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -320,11 +320,11 @@ class _FilterPageViewState extends State<_FilterPageView> {
                                       section.appliedCount.toString(),
                                       style: isSelected
                                           ? AppTypographyV1.labelLarge.medium
-                                          .brandPrimary()
-                                          .copyWith(height: 1)
+                                                .brandPrimary()
+                                                .copyWith(height: 1)
                                           : AppTypographyV1.labelLarge.medium
-                                          .copyWith(color: Colors.black.withAlpha(50))
-                                          .copyWith(height: 1),
+                                                .copyWith(color: Colors.black.withAlpha(50))
+                                                .copyWith(height: 1),
                                     ),
                                   ],
                                 ],
@@ -462,7 +462,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
   Widget _buildSearchBar(String? hint) {
     return BlocBuilder<FilterBloc, FilterState>(
       buildWhen: (prev, curr) =>
-      (prev.pincodeError != curr.pincodeError && curr.pincodeError != null) ||
+          (prev.pincodeError != curr.pincodeError && curr.pincodeError != null) ||
           prev.isPincodeLoading != curr.isPincodeLoading,
       builder: (BuildContext context, state) {
         return Padding(
@@ -491,10 +491,10 @@ class _FilterPageViewState extends State<_FilterPageView> {
             onTapOutside: (p0) => FocusScope.of(context).unfocus(),
             suffix: state.isPincodeLoading
                 ? const SizedBox(
-              height: 15,
-              width: 15,
-              child: CircularProgressIndicator(strokeWidth: 1.5),
-            )
+                    height: 15,
+                    width: 15,
+                    child: CircularProgressIndicator(strokeWidth: 1.5),
+                  )
                 : null,
           ),
         );
@@ -547,11 +547,11 @@ class _FilterPageViewState extends State<_FilterPageView> {
   }
 
   Widget _buildFilterItem(
-      BuildContext context,
-      FilterState state,
-      FilterEntity filter,
-      FilterSectionEntity section,
-      ) {
+    BuildContext context,
+    FilterState state,
+    FilterEntity filter,
+    FilterSectionEntity section,
+  ) {
     final param = filter.filterKey ?? '';
     final value = filter.filterValue ?? filter.label ?? '';
     final isChecked = _isFilterSelected(state, param, value);
@@ -571,22 +571,22 @@ class _FilterPageViewState extends State<_FilterPageView> {
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xsm),
         child: section.isMultiSelect
             ? AppCheckbox.labeled(
-          isSelected: isChecked,
-          label: label,
-          count: count,
-          maxLabelLines: 2,
-        )
+                isSelected: isChecked,
+                label: label,
+                count: count,
+                maxLabelLines: 2,
+              )
             : AppRadio.labeled(isSelected: isChecked, label: label, count: count, maxLabelLines: 2),
       ),
     );
   }
 
   Widget _buildColourFilterItem(
-      BuildContext context,
-      FilterState state,
-      FilterEntity filter,
-      FilterSectionEntity section,
-      ) {
+    BuildContext context,
+    FilterState state,
+    FilterEntity filter,
+    FilterSectionEntity section,
+  ) {
     final param = filter.filterKey ?? '';
     final value = filter.filterValue ?? filter.label ?? '';
     final isChecked = _isFilterSelected(state, param, value);

@@ -43,6 +43,9 @@ class ImageConstants {
   static const String shareIcon = 'assets/icons/share.svg';
   static const String helpIcon = 'assets/icons/help_icon.svg';
 
+  // PDP Icons
+  static const String pdpPincodeInfo = 'assets/icons/pdp/ic_pdp_pincode_info.svg';
+
   // Message Bar Icons
   static const String messageBarError = 'assets/icons/messagebars/ic_error.svg';
   static const String messageBarInfo = 'assets/icons/messagebars/ic_info.svg';

@@ -92,7 +92,9 @@ class ApiConstants {
   static const String deliveryPincode = '/delivery/pincode/{pincode}';
 
   // PDP (Product Detail)
-  static const String productDetails = '/v2/product';
+  static const String productDetails = '/v3/product';
+  static const String recommendations = '/v2/recommendations/product';
+  static const String sizeChart = '/sizeChart';
 
   // PLP (Product Listing)
   static const String boutiqueProducts = '/search/product/v6';

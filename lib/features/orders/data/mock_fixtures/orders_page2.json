@@ -1,0 +1,51 @@
+{
+  "totalRecords": 7,
+  "items": [
+    {
+      "barCode": "BC-10006",
+      "orderId": "ORD-2026-006",
+      "iconStatus": "cancelled",
+      "productId": 50006,
+      "hsBrandLabel": "Disney",
+      "productName": "Frozen Themed School Bag",
+      "productImageUrl": "https://cdn.hopscotch.in/sample/product_6.jpg",
+      "productSize": "One Size",
+      "orderItemId": 70006,
+      "itemCounts": 1,
+      "amount": 799.0,
+      "deliveryMessage": {
+        "deliveryMessage": "Cancelled on Mar 28, 2026",
+        "orderItemActionMessage": "Refund Issued",
+        "secondaryMessage": "Refund credited to wallet",
+        "delayedDeliveryMessage": null,
+        "previousEstimatedDeliveryDate": null,
+        "color": "#757575"
+      },
+      "returnTagMessage": null,
+      "isGift": false
+    },
+    {
+      "barCode": "BC-10007",
+      "orderId": "ORD-2026-007",
+      "iconStatus": "returned",
+      "productId": 50007,
+      "hsBrandLabel": "UCB Kids",
+      "productName": "Polo T-Shirt - Green",
+      "productImageUrl": "https://cdn.hopscotch.in/sample/product_7.jpg",
+      "productSize": "6-7Y",
+      "orderItemId": 70007,
+      "itemCounts": 1,
+      "amount": 699.0,
+      "deliveryMessage": {
+        "deliveryMessage": "Returned on Mar 20, 2026",
+        "orderItemActionMessage": null,
+        "secondaryMessage": "Refund processed",
+        "delayedDeliveryMessage": null,
+        "previousEstimatedDeliveryDate": null,
+        "color": "#757575"
+      },
+      "returnTagMessage": null,
+      "isGift": false
+    }
+  ]
+}

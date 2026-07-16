@@ -10,6 +10,8 @@ import 'core/services/connectivity_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/snackbar_utils.dart';
 import 'features/account/presentation/bloc/account_bloc.dart';
+import 'features/cart/presentation/bloc/cart_bloc.dart';
+import 'features/cart/presentation/cubit/cart_actions_cubit.dart';
 import 'features/categories/presentation/bloc/categories_bloc.dart';
 import 'features/discover/presentation/bloc/home_bloc.dart';
 import 'features/splash/presentation/bloc/splash_bloc.dart';
@@ -31,10 +33,12 @@ class HSApp extends StatelessWidget {
       providers: [
         BlocProvider<CartCountCubit>.value(value: sl<CartCountCubit>()),
         BlocProvider<WishlistCubit>.value(value: sl<WishlistCubit>()),
+        BlocProvider<CartActionsCubit>.value(value: sl<CartActionsCubit>()),
         BlocProvider<SplashBloc>(create: (_) => sl<SplashBloc>()),
         BlocProvider<HomeBloc>(create: (_) => sl<HomeBloc>()),
         BlocProvider<CategoriesBloc>(create: (_) => sl<CategoriesBloc>()),
         BlocProvider<AccountBloc>(create: (_) => sl<AccountBloc>()),
+        BlocProvider<CartBloc>(create: (_) => sl<CartBloc>()),
       ],
       child: MaterialApp.router(
         title: 'Hopscotch',
@@ -47,6 +51,11 @@ class HSApp extends StatelessWidget {
           return MultiBlocListener(
             listeners: [
               BlocListener<WishlistCubit, WishlistState>(
+                listenWhen: (a, b) => a.feedbackTick != b.feedbackTick,
+                listener: (context, state) =>
+                    _showActionSnack(context, state.feedbackMessage, state.feedbackIsError),
+              ),
+              BlocListener<CartActionsCubit, CartActionsState>(
                 listenWhen: (a, b) => a.feedbackTick != b.feedbackTick,
                 listener: (context, state) =>
                     _showActionSnack(context, state.feedbackMessage, state.feedbackIsError),

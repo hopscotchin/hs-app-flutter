@@ -194,6 +194,13 @@ class PrefManager {
   Future<void> setAddressesJson(String? value) =>
       _setStringOrRemove(StorageKeys.addressesJson, value);
 
+  /// Id of the address last selected from the pincode bottom sheet. `null`
+  /// when the user last applied a raw pincode instead of picking an address.
+  int? get lastSelectedPincodeAddressId =>
+      _prefs.getInt(StorageKeys.lastSelectedPincodeAddressId);
+  Future<void> setLastSelectedPincodeAddressId(int? value) =>
+      _setIntOrRemove(StorageKeys.lastSelectedPincodeAddressId, value);
+
   bool? get isStoreButtonClicked => _prefs.getBool(StorageKeys.isFirstLogin);
 
   Future<void> setHasStoreButtonClicked(bool? value) =>
@@ -211,6 +218,13 @@ class PrefManager {
   Future<void> _setBoolOrRemove(String key, bool? value) {
     if (value != null) {
       return _prefs.setBool(key, value);
+    }
+    return _prefs.remove(key);
+  }
+
+  Future<void> _setIntOrRemove(String key, int? value) {
+    if (value != null) {
+      return _prefs.setInt(key, value);
     }
     return _prefs.remove(key);
   }

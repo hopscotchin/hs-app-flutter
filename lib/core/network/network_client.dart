@@ -70,7 +70,7 @@ class NetworkClient {
       dio.interceptors.add(LoggingInterceptor());
     }
 
-    if (kDebugMode && EnvConfig.enableHttpToolkitProxy && await DeviceUtils.isIosSimulator()) {
+    if (kDebugMode && EnvConfig.enableHttpToolkitProxy) {
       // enableProxy(host: EnvConfig.proxyHost, port: EnvConfig.proxyPort);
       dio.interceptors.add(_ProxyRetryInterceptor(dio));
       enableProxy();

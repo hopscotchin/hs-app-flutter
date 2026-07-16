@@ -7,21 +7,22 @@ import '../../../../core/usecases/usecase.dart';
 import '../repositories/wishlist_repository.dart';
 
 @lazySingleton
-class RemoveFromWishlistUseCase implements UseCase<void, RemoveFromWishlistParams> {
-  final WishlistRepository repository;
+class RemoveFromWishlistUseCase
+    implements UseCase<void, RemoveFromWishlistParams> {
+  RemoveFromWishlistUseCase(this._repository);
 
-  RemoveFromWishlistUseCase(this.repository);
+  final WishlistRepository _repository;
 
   @override
   Future<Either<Failure, void>> call(RemoveFromWishlistParams params) {
-    return repository.removeFromWishlist(params.wishlistId);
+    return _repository.removeFromWishlist(params.wishlistId);
   }
 }
 
 class RemoveFromWishlistParams extends Equatable {
-  final String wishlistId;
-
   const RemoveFromWishlistParams({required this.wishlistId});
+
+  final String wishlistId;
 
   @override
   List<Object?> get props => [wishlistId];

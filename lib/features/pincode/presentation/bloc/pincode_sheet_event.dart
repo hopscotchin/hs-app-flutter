@@ -2,7 +2,9 @@ part of 'pincode_sheet_bloc.dart';
 
 @freezed
 sealed class PincodeSheetEvent with _$PincodeSheetEvent {
-  const factory PincodeSheetEvent.open() = OpenPincodeSheet;
+  const factory PincodeSheetEvent.open({
+    @Default(PincodeSheetSource.cart) PincodeSheetSource source,
+  }) = OpenPincodeSheet;
   const factory PincodeSheetEvent.selectAddress(int addressId) =
       SelectPincodeAddress;
   const factory PincodeSheetEvent.focusInput() = FocusPincodeInput;

@@ -44,10 +44,10 @@ class FilterSectionSheet extends StatefulWidget {
   static const double _kMaxFraction = 0.85;
 
   static Future<Map<String, String>?> show(
-      BuildContext context, {
-        required FilterSectionEntity section,
-        Map<String, String> appliedFilters = const {},
-      }) {
+    BuildContext context, {
+    required FilterSectionEntity section,
+    Map<String, String> appliedFilters = const {},
+  }) {
     return showModalBottomSheet<Map<String, String>>(
       context: context,
       isScrollControlled: true,
@@ -167,25 +167,25 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
     return widget.section.isMultiSelect
         ? _buildCheckbox(filter, value, isSelected, label, count)
         : InkWell(
-      highlightColor: Colors.transparent,
-      onTap: () => _toggle(value),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xsm,
-        ),
-        child: AppRadio.labeled(isSelected: isSelected, label: label, count: count),
-      ),
-    );
+            highlightColor: Colors.transparent,
+            onTap: () => _toggle(value),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xsm,
+              ),
+              child: AppRadio.labeled(isSelected: isSelected, label: label, count: count),
+            ),
+          );
   }
 
   Widget _buildCheckbox(
-      FilterEntity filter,
-      String value,
-      bool isSelected,
-      String label,
-      String? count,
-      ) {
+    FilterEntity filter,
+    String value,
+    bool isSelected,
+    String label,
+    String? count,
+  ) {
     final swatch = _isColourMode ? filter.colorHex.toColor : null;
     final useWhiteTick = swatch == null || swatch.isDarkColor;
     return InkWell(

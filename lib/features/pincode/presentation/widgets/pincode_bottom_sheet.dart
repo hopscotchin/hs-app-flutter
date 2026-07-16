@@ -2,25 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/core/constants/strings/address_pincode_strings.dart';
 
+import '../../../../components/buttons/app_button.dart';
+import '../../../../components/buttons/button_enums.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/entities/message_bar_entity.dart';
-import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 import '../../../../core/utils/snackbar_utils.dart';
 import '../bloc/pincode_sheet_bloc.dart';
 import 'pincode_address_section.dart';
+
+export '../bloc/pincode_sheet_source.dart';
 import 'pincode_input_field.dart';
 
 /// Bottom sheet that lets the user pick a saved address or enter a pincode
 /// to validate delivery serviceability. Returns the chosen pincode (string)
 /// to the caller, or `null` if dismissed.
 class PincodeBottomSheet extends StatelessWidget {
-  const PincodeBottomSheet({super.key});
+  const PincodeBottomSheet({super.key, this.onPdpVerify});
 
-  static Future<String?> show(BuildContext context) {
+  /// PDP-only: runs the product-aware verify API while the sheet stays open
+  /// showing the Apply loader. The sheet pops once this completes.
+  final Future<void> Function(String pincode)? onPdpVerify;
+
+  static Future<String?> show(
+    BuildContext context, {
+    PincodeSheetSource source = PincodeSheetSource.cart,
+    Future<void> Function(String pincode)? onPdpVerify,
+  }) {
     return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -30,21 +41,23 @@ class PincodeBottomSheet extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => BlocProvider(
-        create: (_) =>
-            sl<PincodeSheetBloc>()..add(const PincodeSheetEvent.open()),
-        child: const PincodeBottomSheet(),
+        create: (_) => sl<PincodeSheetBloc>()
+          ..add(PincodeSheetEvent.open(source: source)),
+        child: PincodeBottomSheet(onPdpVerify: onPdpVerify),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return const _PincodeSheetBody();
+    return _PincodeSheetBody(onPdpVerify: onPdpVerify);
   }
 }
 
 class _PincodeSheetBody extends StatefulWidget {
-  const _PincodeSheetBody();
+  const _PincodeSheetBody({this.onPdpVerify});
+
+  final Future<void> Function(String pincode)? onPdpVerify;
 
   @override
   State<_PincodeSheetBody> createState() => _PincodeSheetBodyState();
@@ -53,6 +66,9 @@ class _PincodeSheetBody extends StatefulWidget {
 class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
+
+  // PDP-only: true while Proceed drives the verify API, showing the button loader.
+  bool _proceeding = false;
 
   @override
   void initState() {
@@ -84,6 +100,36 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
     }
   }
 
+  Future<void> _onApplyPressed() async {
+    final bloc = context.read<PincodeSheetBloc>();
+    final state = bloc.state;
+    // Fires the Apply loader (isChecking) in both flows.
+    bloc.add(const PincodeSheetEvent.apply());
+
+    // PDP: keep the sheet open with the loader while PDP runs its own
+    // product-aware verify API, then pop. Cart is fully driven by the bloc
+    // (it sets popResult on success, which the listener below pops).
+    if (state.source == PincodeSheetSource.pdp && widget.onPdpVerify != null) {
+      final pincode = state.enteredPincode.trim();
+      if (pincode.length != 6) return;
+      await widget.onPdpVerify!(pincode);
+      if (mounted) Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _onProceedPressed(String pincode) async {
+    final bloc = context.read<PincodeSheetBloc>();
+    // PDP: verify the selected address pincode in-place (button loader), then
+    // pop. Cart already validated on select/apply, so just return the pincode.
+    if (bloc.state.source == PincodeSheetSource.pdp && widget.onPdpVerify != null) {
+      setState(() => _proceeding = true);
+      await widget.onPdpVerify!(pincode);
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
+    Navigator.of(context).pop(pincode);
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewInsets = MediaQuery.of(context).viewInsets.bottom;
@@ -102,6 +148,8 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
         BlocListener<PincodeSheetBloc, PincodeSheetState>(
           listenWhen: (p, c) => p.popResult != c.popResult,
           listener: (context, state) {
+            // Apply closes the sheet immediately with the entered pincode.
+            // Address selection does not set popResult — it waits for Proceed.
             if (state.popResult != null) {
               Navigator.of(context).pop(state.popResult);
             }
@@ -125,16 +173,6 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                AppSpacing.verticalGapMd,
-                Container(
-                  width: AppSpacing.lg,
-                  height: AppSpacing.xxxs,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                AppSpacing.verticalGapXl,
                 const _MessageBarsSlot(),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -146,9 +184,8 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
                     ),
                   ),
                 ),
-                AppSpacing.verticalGapLg,
                 const Flexible(child: _AddressList()),
-                AppSpacing.verticalGapMd,
+                AppSpacing.verticalGapLg,
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   child: BlocBuilder<PincodeSheetBloc, PincodeSheetState>(
@@ -163,11 +200,17 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
                         focusNode: _focusNode,
                         isChecking: state.isChecking,
                         canApply: canApply,
-                        onApply: () => context
-                            .read<PincodeSheetBloc>()
-                            .add(const PincodeSheetEvent.apply()),
+                        onApply: _onApplyPressed,
                       );
                     },
+                  ),
+                ),
+                AppSpacing.verticalGapMd,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  child: _ProceedButton(
+                    loading: _proceeding,
+                    onProceed: _onProceedPressed,
                   ),
                 ),
                 AppSpacing.verticalGapMd,
@@ -176,6 +219,35 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ProceedButton extends StatelessWidget {
+  const _ProceedButton({required this.loading, required this.onProceed});
+
+  final bool loading;
+  final void Function(String pincode) onProceed;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<PincodeSheetBloc, PincodeSheetState>(
+      buildWhen: (p, c) =>
+          p.lastCheckedValidPincode != c.lastCheckedValidPincode ||
+          p.isChecking != c.isChecking,
+      builder: (context, state) {
+        final pincode = state.lastCheckedValidPincode;
+        final canProceed = pincode != null && !state.isChecking;
+        return AppButton(
+          text: AddressStrings.proceed,
+          variant: ButtonVariant.primary,
+          isFullWidth: true,
+          state: loading
+              ? ButtonState.loading
+              : (canProceed ? ButtonState.enabled : ButtonState.disabled),
+          onTap: canProceed && !loading ? () => onProceed(pincode) : null,
+        );
+      },
     );
   }
 }
@@ -195,6 +267,7 @@ class _AddressList extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              AppSpacing.verticalGapLg,
               PincodeAddressSection(
                 title: AddressStrings.defaultAddressHeading,
                 addresses: state.defaultAddresses,

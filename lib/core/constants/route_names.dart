@@ -8,6 +8,7 @@ abstract final class RouteNames {
   static const String search = '/search';
   static const String plp = '/plp';
   static const String pdp = '/pdp/:productId';
+  static const String pdpImageGallery = '/pdp-image-gallery';
   static const String login = '/login';
   static const String joinUs = '/join-us';
   static const String otpVerification = '/otp-verification';

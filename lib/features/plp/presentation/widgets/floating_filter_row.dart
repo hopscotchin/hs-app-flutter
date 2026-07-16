@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/components/atoms/custom_chip_widget.dart';
+import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
 import 'package:hs_app_flutter/components/buttons/button_enums.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
@@ -7,7 +8,6 @@ import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
 
-import '../../../../components/atoms/cached_image_widget.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/floating_filter_entity.dart';
@@ -235,8 +235,8 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: CachedImageWidget(
-                imageUrl: chip.imageUrl ?? '',
+              child: CustomImage(
+                path: chip.imageUrl ?? '',
                 height: 40,
                 width: 40,
                 fit: BoxFit.contain,

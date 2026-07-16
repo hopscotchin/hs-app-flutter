@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/address_entity.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/manage_address_args.dart';
 import 'package:hs_app_flutter/features/address/presentation/widgets/address_item_card.dart';
+import 'package:hs_app_flutter/features/pdp/domain/entities/media_entity.dart';
 import 'package:hs_app_flutter/features/plp/domain/entities/page_type.dart';
 
 import '../../features/account/presentation/bloc/account_bloc.dart';
 import '../../features/auth/domain/entities/otp_config/otp_config_entity.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/cart/presentation/cubit/cart_actions_cubit.dart';
 import '../../features/wishlist/presentation/cubit/wishlist_cubit.dart';
 import '../constants/route_names.dart';
 import '../constants/strings/auth_strings.dart';
@@ -111,16 +113,21 @@ abstract final class AppNavigator {
   static void redirectAfterLogin(BuildContext context, String? redirectType) {
     // Capture singletons before popping — the popped context becomes defunct.
     final wishlistCubit = context.read<WishlistCubit>();
+    final cartCubit = context.read<CartActionsCubit>();
 
     // Local state was captured while logged out; re-seed with user-specific data.
     // (Both leave any pending action intact so resume below still fires.)
     wishlistCubit.invalidateOnAuthChange();
+    cartCubit.clearOnAuthChange();
 
     _clearAuthStack(context);
 
     switch (redirectType) {
       case LoginRedirects.typeAddToWishlist:
         wishlistCubit.resumePending();
+        return;
+      case LoginRedirects.typeAddToCart:
+        cartCubit.resumePending();
         return;
     }
 
@@ -168,6 +175,18 @@ abstract final class AppNavigator {
 
   static void goToPdp(BuildContext context, String productId) {
     context.pushNamed('pdp', pathParameters: {'productId': productId});
+  }
+
+  /// Open the fullscreen product image gallery starting at [initialIndex].
+  static void goToPdpImageGallery(
+    BuildContext context, {
+    required List<MediaEntity> media,
+    int initialIndex = 0,
+  }) {
+    context.pushNamed(
+      'pdpImageGallery',
+      extra: <String, dynamic>{'media': media, 'initialIndex': initialIndex},
+    );
   }
 
   static void goToLandingPage(BuildContext context, {required String pageName, String? title}) {

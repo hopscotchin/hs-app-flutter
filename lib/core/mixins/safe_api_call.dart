@@ -5,6 +5,7 @@ import '../constants/default_error_messages.dart';
 import '../entities/message_bar_entity.dart';
 import '../error/exceptions.dart';
 import '../error/failures.dart';
+import '../logger/my_logger.dart';
 import '../models/message_bar_model.dart';
 import '../network/connectivity/network_info.dart';
 
@@ -20,52 +21,69 @@ mixin SafeApiCall {
     try {
       final result = await apiCall();
       return Right(result);
-    } on TimeoutException catch (e) {
+    } on TimeoutException catch (e, s) {
+      logger.w('API timeout', error: e, stackTrace: s);
       return Left(TimeoutFailure(message: e.message, statusCode: e.statusCode));
     } on RequestCancelledException {
       return const Left(RequestCancelledFailure());
-    } on ConnectionException {
+    } on ConnectionException catch (e, s) {
+      logger.w('No connection', error: e, stackTrace: s);
       return const Left(ConnectionFailure());
-    } on UnauthorizedException catch (e) {
+    } on UnauthorizedException catch (e, s) {
+      logger.w('Unauthorized', error: e, stackTrace: s);
       return Left(UnauthorizedFailure(message: e.message));
-    } on ForbiddenException catch (e) {
+    } on ForbiddenException catch (e, s) {
+      logger.w('Forbidden', error: e, stackTrace: s);
       return Left(ForbiddenFailure(message: e.message));
-    } on NotFoundException catch (e) {
+    } on NotFoundException catch (e, s) {
+      logger.w('Not found', error: e, stackTrace: s);
       return Left(NotFoundFailure(message: e.message));
-    } on BadRequestException catch (e) {
+    } on BadRequestException catch (e, s) {
+      logger.w('Bad request', error: e, stackTrace: s);
       return Left(BadRequestFailure(message: e.message));
-    } on ConflictException catch (e) {
+    } on ConflictException catch (e, s) {
+      logger.w('Conflict', error: e, stackTrace: s);
       return Left(ConflictFailure(message: e.message));
-    } on InternalServerException catch (e) {
+    } on InternalServerException catch (e, s) {
+      logger.e('Internal server error', error: e, stackTrace: s);
       return Left(InternalServerFailure(message: e.message));
-    } on ServiceUnavailableException catch (e) {
+    } on ServiceUnavailableException catch (e, s) {
+      logger.e('Service unavailable', error: e, stackTrace: s);
       return Left(ServiceUnavailableFailure(message: e.message));
-    } on ApiFailureException catch (e) {
+    } on ApiFailureException catch (e, s) {
+      logger.w('API failure', error: e, stackTrace: s);
       final List<MessageBarEntity> bars = e.rawMessageBars
           .whereType<Map<String, dynamic>>()
           .map(MessageBarModel.fromJson)
           .toList();
       return Left(ApiFailure(message: e.message, messageBars: bars));
-    } on ServerException catch (e) {
+    } on ServerException catch (e, s) {
+      logger.e('Server error', error: e, stackTrace: s);
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
-    } on AppException catch (e) {
+    } on AppException catch (e, s) {
+      logger.e('App exception', error: e, stackTrace: s);
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
-    } on DioException catch (e) {
+    } on DioException catch (e, s) {
       if (e.type == DioExceptionType.cancel) {
+        logger.w('Dio cancel', error: e, stackTrace: s);
         return const Left(RequestCancelledFailure());
       }
       if (e.type == DioExceptionType.badResponse) {
+        logger.w('Dio bad response [${e.response?.statusCode}]', error: e, stackTrace: s);
         return Left(_failureFromResponse(e.response));
       }
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.sendTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
+        logger.w('Dio timeout', error: e, stackTrace: s);
         return const Left(TimeoutFailure());
       }
       if (e.type == DioExceptionType.connectionError) {
+        logger.w('Dio connection error', error: e, stackTrace: s);
         return const Left(ConnectionFailure());
       }
 
+      logger.w('Dio unknown error', error: e, stackTrace: s);
       return const Left(UnknownFailure());
     } catch (_) {
       return const Left(UnknownFailure());

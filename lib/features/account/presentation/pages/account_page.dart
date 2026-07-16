@@ -11,6 +11,7 @@ import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
 import 'package:hs_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:hs_app_flutter/features/cart/presentation/cubit/cart_actions_cubit.dart';
 import 'package:hs_app_flutter/features/discover/presentation/bloc/home_bloc.dart';
 import 'package:hs_app_flutter/features/wishlist/presentation/cubit/wishlist_cubit.dart';
 
@@ -262,6 +263,7 @@ class _AccountContent extends StatelessWidget {
                     onSignOut: () {
                       final homeBloc = context.read<HomeBloc>();
                       final wishlistCubit = context.read<WishlistCubit>();
+                      final cartActionsCubit = context.read<CartActionsCubit>();
                       context.read<AuthBloc>().add(
                         AuthEvent.signOut(
                           onSuccess: () {
@@ -269,6 +271,7 @@ class _AccountContent extends StatelessWidget {
                             // refreshed responses re-seed with the now
                             // logged-out (false) statuses.
                             wishlistCubit.invalidateOnAuthChange();
+                            cartActionsCubit.clearOnAuthChange();
                             homeBloc.add(const RefreshHomePage());
                           },
                         ),

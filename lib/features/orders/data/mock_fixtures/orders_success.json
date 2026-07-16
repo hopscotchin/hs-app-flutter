@@ -1,0 +1,128 @@
+{
+  "totalRecords": 5,
+  "items": [
+    {
+      "barCode": "BC-10001",
+      "orderId": "ORD-2026-001",
+      "iconStatus": "delivered",
+      "productId": 50001,
+      "hsBrandLabel": "Mini Klub",
+      "productName": "Cotton Striped Full Sleeves Tee - Blue",
+      "productImageUrl": "https://cdn.hopscotch.in/sample/product_1.jpg",
+      "productSize": "3-4Y",
+      "orderItemId": 70001,
+      "itemCounts": 1,
+      "amount": 499.0,
+      "deliveryMessage": {
+        "deliveryMessage": "Delivered on Apr 10, 2026",
+        "orderItemActionMessage": "Rate & Review",
+        "secondaryMessage": null,
+        "delayedDeliveryMessage": null,
+        "previousEstimatedDeliveryDate": null,
+        "color": "#2E7D32"
+      },
+      "returnTagMessage": {
+        "qcAndWrTagSuccess": true,
+        "mobileNumber": null,
+        "message": "Return available till Apr 25, 2026"
+      },
+      "isGift": false
+    },
+    {
+      "barCode": "BC-10002",
+      "orderId": "ORD-2026-002",
+      "iconStatus": "shipped",
+      "productId": 50002,
+      "hsBrandLabel": "Hopscotch",
+      "productName": "Printed Party Dress - Pink",
+      "productImageUrl": "https://cdn.hopscotch.in/sample/product_2.jpg",
+      "productSize": "5-6Y",
+      "orderItemId": 70002,
+      "itemCounts": 1,
+      "amount": 899.0,
+      "deliveryMessage": {
+        "deliveryMessage": "Out for delivery",
+        "orderItemActionMessage": null,
+        "secondaryMessage": "Expected by Apr 15, 2026",
+        "delayedDeliveryMessage": null,
+        "previousEstimatedDeliveryDate": null,
+        "color": "#F57C00"
+      },
+      "returnTagMessage": null,
+      "isGift": false
+    },
+    {
+      "barCode": "BC-10003",
+      "orderId": "ORD-2026-003",
+      "iconStatus": "processing",
+      "productId": 50003,
+      "hsBrandLabel": "Babyoye",
+      "productName": "Pack of 3 Bodysuits - Multi",
+      "productImageUrl": "https://cdn.hopscotch.in/sample/product_3.jpg",
+      "productSize": "0-3M",
+      "orderItemId": 70003,
+      "itemCounts": 3,
+      "amount": 1299.0,
+      "deliveryMessage": {
+        "deliveryMessage": "Order confirmed",
+        "orderItemActionMessage": "Track Order",
+        "secondaryMessage": "Expected by Apr 20, 2026",
+        "delayedDeliveryMessage": null,
+        "previousEstimatedDeliveryDate": null,
+        "color": "#1565C0"
+      },
+      "returnTagMessage": null,
+      "isGift": true
+    },
+    {
+      "barCode": "BC-10004",
+      "orderId": "ORD-2026-004",
+      "iconStatus": "delivered",
+      "productId": 50004,
+      "hsBrandLabel": "U.S. Polo Assn.",
+      "productName": "Denim Joggers - Dark Wash",
+      "productImageUrl": "https://cdn.hopscotch.in/sample/product_4.jpg",
+      "productSize": "7-8Y",
+      "orderItemId": 70004,
+      "itemCounts": 1,
+      "amount": 1499.0,
+      "deliveryMessage": {
+        "deliveryMessage": "Delivered on Apr 05, 2026",
+        "orderItemActionMessage": "Rate & Review",
+        "secondaryMessage": null,
+        "delayedDeliveryMessage": null,
+        "previousEstimatedDeliveryDate": null,
+        "color": "#2E7D32"
+      },
+      "returnTagMessage": {
+        "qcAndWrTagSuccess": true,
+        "mobileNumber": null,
+        "message": "Return window closed"
+      },
+      "isGift": false
+    },
+    {
+      "barCode": "BC-10005",
+      "orderId": "ORD-2026-005",
+      "iconStatus": "delayed",
+      "productId": 50005,
+      "hsBrandLabel": "Mothercare",
+      "productName": "Fleece-Lined Winter Jacket - Red",
+      "productImageUrl": "https://cdn.hopscotch.in/sample/product_5.jpg",
+      "productSize": "4-5Y",
+      "orderItemId": 70005,
+      "itemCounts": 1,
+      "amount": 1999.0,
+      "deliveryMessage": {
+        "deliveryMessage": "Delivery delayed",
+        "orderItemActionMessage": "Contact Support",
+        "secondaryMessage": "Revised date: Apr 22, 2026",
+        "delayedDeliveryMessage": "Sorry! Your order is taking longer than expected.",
+        "previousEstimatedDeliveryDate": "Apr 14, 2026",
+        "color": "#C62828"
+      },
+      "returnTagMessage": null,
+      "isGift": false
+    }
+  ]
+}

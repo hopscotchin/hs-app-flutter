@@ -47,7 +47,6 @@ void main() async {
   if (!kIsWeb) {
     // Crashlytics: catch all Flutter framework errors (not supported on web)
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-
     // Crashlytics: catch async errors not caught by Flutter
     PlatformDispatcher.instance.onError = (error, stack) {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
@@ -82,40 +81,42 @@ Future<void> _runPostInitBootstrapping() async {
 
   await sl<PushNotificationService>().initialize();
   // HTTP Inspector — debug builds only. Opened via the floating button overlay.
-  final talker = TalkerFlutter.init();
-  networkClient.dio.interceptors.add(
-    AdvancedDioLogger(
-      talker: talker,
-      settings: const AdvancedDioLoggerSettings(
-        printRequestHeaders: true,
-        printResponseHeaders: true,
-        printResponseData: true,
-        printErrorData: true,
-        printErrorHeaders: true,
-        // hiddenHeaders: {'authorization', 'x-api-key', 'cookie'},
-        // hideAuthorizationValue: true,
-        enableCurlGeneration: true,
+  if (kDebugMode) {
+    final talker = TalkerFlutter.init();
+    networkClient.dio.interceptors.add(
+      AdvancedDioLogger(
+        talker: talker,
+        settings: const AdvancedDioLoggerSettings(
+          printRequestHeaders: true,
+          printResponseHeaders: true,
+          printResponseData: true,
+          printErrorData: true,
+          printErrorHeaders: true,
+          // hiddenHeaders: {'authorization', 'x-api-key', 'cookie'},
+          // hideAuthorizationValue: true,
+          enableCurlGeneration: true,
+        ),
       ),
-    ),
-  );
-  sl.registerSingleton<Talker>(talker);
-  // Bloc.observer = TalkerBlocObserver(
-  //   talker: talker,
-  //   settings: const TalkerBlocLoggerSettings(
-  //     printCreations: true,
-  //     printClosings: true,
-  //     printStateFullData: false,
+    );
+    sl.registerSingleton<Talker>(talker);
+    // Bloc.observer = TalkerBlocObserver(
+    //   talker: talker,
+    //   settings: const TalkerBlocLoggerSettings(
+    //     printCreations: true,
+    //     printClosings: true,
+    //     printStateFullData: false,
 
-  // this helps in logging the full event/state data, but can be very verbose and may cause performance issues in large apps, so use with caution
+    // this helps in logging the full event/state data, but can be very verbose and may cause performance issues in large apps, so use with caution
 
-  // transitionFilter: (bloc, transition) {
-  //   print(
-  //     'Bloc transition: ${bloc.runtimeType} ${transition.event}${transition.nextState} ${transition.currentState}',
-  //   );
-  //   return true;
-  // },
-  // ),
-  // );
+    // transitionFilter: (bloc, transition) {
+    //   print(
+    //     'Bloc transition: ${bloc.runtimeType} ${transition.event}${transition.nextState} ${transition.currentState}',
+    //   );
+    //   return true;
+    // },
+    // ),
+    // );
+  }
 }
 
 void _restoreSelectedEnvironment(PrefManager prefManager, NetworkClient networkClient) {

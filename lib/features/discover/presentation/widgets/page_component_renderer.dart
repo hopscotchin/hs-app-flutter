@@ -31,6 +31,11 @@ class PageComponentRenderer extends StatelessWidget {
         parsed,
         margins,
       ),
+      PageComponentType.shopTheLook => _buildShopTheLook(
+        context,
+        parsed,
+        margins,
+      ),
       _ => const SizedBox.shrink(),
     };
 
@@ -90,5 +95,24 @@ class PageComponentRenderer extends StatelessWidget {
         : null;
     if (data == null) return const SizedBox.shrink();
     return CustomTilesWidget(tilesData: data, margins: margins);
+  }
+
+  Widget _buildShopTheLook(
+    BuildContext context,
+    Object? parsed,
+    ComponentMargins? margins,
+  ) {
+    final data = parsed is ShopTheLookData
+        ? parsed
+        : component.data != null
+        ? ComponentDataParser.parseShopTheLook(component.data!)
+        : null;
+    if (data == null) return const SizedBox.shrink();
+    return ShopTheLookWidget(
+      data: data,
+      margins: margins,
+      onAddToCart: (selections) =>
+          context.read<ShopTheLookCubit>().addToCart(selections),
+    );
   }
 }

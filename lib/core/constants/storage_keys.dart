@@ -44,6 +44,7 @@ class StorageKeys {
   static const String continueBrowsingEligibleVisitor = 'hs_continue_browsing_eligible_visitor';
   static const String productImageConfig = 'hs_product_image_config';
   static const String addressesJson = 'hs_addresses_json';
+  static const String lastSelectedPincodeAddressId = 'hs_last_selected_pincode_address_id';
 
   // Device / Push
   static const String pushToken = 'hs_push_token';

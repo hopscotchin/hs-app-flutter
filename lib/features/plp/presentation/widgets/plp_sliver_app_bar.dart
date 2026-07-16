@@ -21,6 +21,7 @@ typedef _AppBarData = ({
   String? screenName,
   String? screenSubtitle,
   BannerEntity? banner,
+  PlpStatus? status,
 });
 
 class PlpSliverAppBar extends StatelessWidget {
@@ -37,8 +38,12 @@ class PlpSliverAppBar extends StatelessWidget {
         screenName: state.screenName,
         screenSubtitle: state.screenSubtitle,
         banner: state.banners.isNotEmpty ? state.banners.first : null,
+        status: state.status,
       ),
       builder: (context, data) {
+        if (data.status == PlpStatus.loading) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
         final bannerUrl = data.banner?.imageUrl;
 
         final hasBanner =
@@ -375,7 +380,14 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
 
                   CircleIconButton(
                     onTap: () => AppNavigator.goToCart(context),
-                    child: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
+                    child: BadgeIcon(
+                      padding: EdgeInsets.zero,
+                      iconSize: 18,
+                      icon: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
+                      count: context.watch<CartCountCubit>().state,
+                      onTap: () => AppNavigator.goToCart(context),
+                      iconColor: AppColors.textPrimary,
+                    ),
                   ),
                   const SizedBox(width: 12),
                 ],

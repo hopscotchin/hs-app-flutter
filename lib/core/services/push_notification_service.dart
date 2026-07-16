@@ -6,9 +6,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../features/device/domain/usecases/register_device_usecase.dart';
 import '../services/pref_manager.dart';
 import '../utils/device_utils.dart';
+import '../../features/device/domain/usecases/register_device_usecase.dart';
 
 @lazySingleton
 class PushNotificationService {

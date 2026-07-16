@@ -57,7 +57,7 @@ class ProductTile extends StatelessWidget {
   });
 
   /// Build a tile from the unified [ListingProductEntity] — the shape used by
-  /// PLP records, PageCarousel tiles, and PRODUCT_GRID tiles.
+  /// PLP records, PageCarousel tiles, PRODUCT_GRID tiles, and PDP recently viewed tiles.
   factory ProductTile.fromProduct(
     ListingProductEntity product, {
     Key? key,

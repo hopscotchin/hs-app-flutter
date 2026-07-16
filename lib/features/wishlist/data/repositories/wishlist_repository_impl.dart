@@ -7,6 +7,7 @@ import '../../../../core/network/connectivity/network_info.dart';
 import '../../domain/entities/wishlist_response_entity.dart';
 import '../../domain/repositories/wishlist_repository.dart';
 import '../datasources/remote/wishlist_remote_datasource.dart';
+import '../models/wishlist_response_model.dart';
 
 @LazySingleton(as: WishlistRepository)
 class WishlistRepositoryImpl with SafeApiCall implements WishlistRepository {
@@ -23,7 +24,7 @@ class WishlistRepositoryImpl with SafeApiCall implements WishlistRepository {
   ) {
     return safeApiCall(
       networkInfo,
-      () => remoteDataSource.addToWishlist(productId, price, skuId),
+      () async => (await remoteDataSource.addToWishlist(productId, price, skuId)).toEntity(),
     );
   }
 

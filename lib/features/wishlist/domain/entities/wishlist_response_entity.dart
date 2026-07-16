@@ -1,12 +1,12 @@
-import '../../../../core/network/models/action_response.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class WishlistResponseEntity extends ActionResponse {
-  final String? wishlistItemId;
+part 'wishlist_response_entity.freezed.dart';
 
-  const WishlistResponseEntity({super.action, super.message, this.wishlistItemId});
-
-  WishlistResponseEntity.fromJson(super.json, {this.wishlistItemId}) : super.fromJson();
-
-  @override
-  List<Object?> get props => [action, message, wishlistItemId];
+@freezed
+abstract class WishlistResponseEntity with _$WishlistResponseEntity {
+  const factory WishlistResponseEntity({
+    String? action,
+    String? message,
+    String? wishlistItemId,
+  }) = _WishlistResponseEntity;
 }

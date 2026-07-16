@@ -63,6 +63,11 @@ class ActionUrlHandler {
       return ExternalDestination(url: actionUrl);
     }
 
+    // Relative path (e.g. /product/943469/…) — treat as a Hopscotch web path.
+    if (uri.scheme.isEmpty && uri.path.startsWith('/')) {
+      return _parseWebLink(uri);
+    }
+
     return null;
   }
 

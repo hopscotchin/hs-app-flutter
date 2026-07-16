@@ -6,8 +6,12 @@ import 'package:hs_app_flutter/core/router/navigation_observer.dart';
 import 'package:hs_app_flutter/core/router/shell_route.dart';
 import 'package:hs_app_flutter/features/address/presentation/address_route.dart';
 import 'package:hs_app_flutter/features/auth/presentation/auth_route.dart';
+import 'package:hs_app_flutter/features/cart/presentation/cart_route.dart';
 import 'package:hs_app_flutter/features/landing_page/presentation/landing_page_route.dart';
 import 'package:hs_app_flutter/features/legal/presentation/legal_route.dart';
+import 'package:hs_app_flutter/features/orders/presentation/orders_route.dart';
+import 'package:hs_app_flutter/features/pdp/presentation/pdp_fullscreen_gallery_route.dart';
+import 'package:hs_app_flutter/features/pdp/presentation/pdp_route.dart';
 import 'package:hs_app_flutter/features/plp/presentation/plp_route.dart';
 import 'package:hs_app_flutter/features/search/presentation/search_route.dart';
 import 'package:hs_app_flutter/features/splash/presentation/splash_route.dart';
@@ -36,10 +40,14 @@ class AppRouter {
       SplashRoute.getRoute(),
       shellRoute,
       ...AuthRoute.getRoutes(_rootNavigatorKey),
+      CartRoute.getRoute(_rootNavigatorKey),
       PlpRoute.getRoute(_rootNavigatorKey),
       SearchRoute.getRoute(_rootNavigatorKey),
+      PdpRoute.getRoute(_rootNavigatorKey),
+      PdpFullscreenGalleryRoute.getRoute(_rootNavigatorKey),
       WebViewRoute.getRoute(_rootNavigatorKey),
       LandingPageRoute.getRoute(_rootNavigatorKey),
+      OrdersRoute.getRoute(_rootNavigatorKey),
       AddressRoute.getRoute(_rootNavigatorKey),
       LegalRoute.getRoute(_rootNavigatorKey),
     ],

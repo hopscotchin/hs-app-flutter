@@ -6,6 +6,7 @@ enum PincodeSheetStatus { initial, loaded }
 abstract class PincodeSheetState with _$PincodeSheetState {
   const factory PincodeSheetState({
     @Default(PincodeSheetStatus.initial) PincodeSheetStatus status,
+    @Default(PincodeSheetSource.cart) PincodeSheetSource source,
     @Default(<AddressEntity>[]) List<AddressEntity> addresses,
     int? selectedAddressId,
     @Default('') String enteredPincode,

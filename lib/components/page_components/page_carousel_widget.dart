@@ -151,10 +151,10 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     } else {
       availableWidth =
           screenWidth -
-              (peepingFactor > 0 ? horizontalMargin : horizontalMargin * 2) -
-              (minTilesToShow == 1
-                  ? (peepingFactor > 0 ? innerHorizontalMargin : 0)
-                  : (minTilesToShow - 1) * innerHorizontalMargin);
+          (peepingFactor > 0 ? horizontalMargin : horizontalMargin * 2) -
+          (minTilesToShow == 1
+              ? (peepingFactor > 0 ? innerHorizontalMargin : 0)
+              : (minTilesToShow - 1) * innerHorizontalMargin);
     }
 
     final tileWidth = isFullWidth
@@ -174,28 +174,28 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
 
     final carousel = hasSnapping
         ? _buildSnappingCarousel(
-      tiles: tiles,
-      tileWidth: tileWidth,
-      tileHeight: tileHeight,
-      carouselHeight: carouselHeight,
-      horizontalMargin: horizontalMargin,
-      innerHorizontalMargin: innerHorizontalMargin,
-      isFullWidth: isFullWidth,
-      showIndicators: showIndicators,
-      imageCornerRadius: imageCornerRadius,
-      screenWidth: screenWidth,
-    )
+            tiles: tiles,
+            tileWidth: tileWidth,
+            tileHeight: tileHeight,
+            carouselHeight: carouselHeight,
+            horizontalMargin: horizontalMargin,
+            innerHorizontalMargin: innerHorizontalMargin,
+            isFullWidth: isFullWidth,
+            showIndicators: showIndicators,
+            imageCornerRadius: imageCornerRadius,
+            screenWidth: screenWidth,
+          )
         : _buildScrollableCarousel(
-      tiles: tiles,
-      tileWidth: tileWidth,
-      tileHeight: tileHeight,
-      carouselHeight: carouselHeight,
-      horizontalMargin: horizontalMargin,
-      innerHorizontalMargin: innerHorizontalMargin,
-      isFullWidth: isFullWidth,
-      showIndicators: showIndicators,
-      imageCornerRadius: imageCornerRadius,
-    );
+            tiles: tiles,
+            tileWidth: tileWidth,
+            tileHeight: tileHeight,
+            carouselHeight: carouselHeight,
+            horizontalMargin: horizontalMargin,
+            innerHorizontalMargin: innerHorizontalMargin,
+            isFullWidth: isFullWidth,
+            showIndicators: showIndicators,
+            imageCornerRadius: imageCornerRadius,
+          );
 
     final titleUrl = data.title?.url;
     if (titleUrl == null) return carousel;
@@ -241,8 +241,8 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     // Used to suppress the indicator when there's no scope to scroll.
     final contentExtent =
         horizontalMargin * 2 +
-            tileCount * tileWidth +
-            (tileCount > 0 ? (tileCount - 1) * innerHorizontalMargin : 0);
+        tileCount * tileWidth +
+        (tileCount > 0 ? (tileCount - 1) * innerHorizontalMargin : 0);
     final hasScrollScope = _hasProducts ? contentExtent > screenWidth + 0.5 : true;
 
     // Trailing list-padding = horizontalMargin minus the inner-margin baked
@@ -345,11 +345,11 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   }
 
   Widget _buildTile(
-      PageCarouselTile tile,
-      double tileWidth,
-      double tileHeight,
-      double cornerRadius,
-      ) {
+    PageCarouselTile tile,
+    double tileWidth,
+    double tileHeight,
+    double cornerRadius,
+  ) {
     final product = tile.product;
     final tapUri = tile.actionUri ?? product?.actionUri;
 

@@ -66,12 +66,26 @@ class AddressCacheManager {
     final remaining =
         current.where((m) => m['id'] != id).toList(growable: false);
     await setAll(remaining);
+    // Drop the pincode-sheet selection if it pointed at the removed address.
+    if (_prefManager.lastSelectedPincodeAddressId == id) {
+      await _prefManager.setLastSelectedPincodeAddressId(null);
+    }
   }
 
   Future<void> clear() async {
     _memory = null;
     await _prefManager.setAddressesJson(null);
+    await _prefManager.setLastSelectedPincodeAddressId(null);
   }
+
+  /// Id of the address last chosen from the pincode bottom sheet, or `null`
+  /// when the user last applied a raw pincode. Drives the "selected" indicator
+  /// the next time the sheet opens (shared across cart and PDP).
+  int? get lastSelectedPincodeAddressId =>
+      _prefManager.lastSelectedPincodeAddressId;
+
+  Future<void> setLastSelectedPincodeAddressId(int? id) =>
+      _prefManager.setLastSelectedPincodeAddressId(id);
 
   List<Map<String, dynamic>>? _readFromPrefs() {
     final raw = _prefManager.addressesJson;
