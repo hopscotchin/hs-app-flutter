@@ -1,0 +1,264 @@
+# Automation Test Keys — QA Reference
+
+Master list of every `ValueKey` wired into the app for automated (integration/
+widget) testing. Source of truth is
+[`auto_test_strings.dart`](./auto_test_strings.dart). **This doc is a mirror,
+regenerated whenever keys are added — if it drifts from the Dart file, the Dart
+file wins.**
+
+## How to read a key
+
+Key string format: `<screen>_<element>[_<sub>][_<index>]`
+
+- **screen** — surface slug (`account`, `login`, `plp`, `address_form`, …).
+- **element** — role: `button`, `input`/`input_field`, `input_hint`,
+  `input_suffix`/`suffix_icon`, `text_field` (asserted text), `app_bar_title` /
+  `title` / `subtitle`, `back_button`, `image`, `checkbox` / `radio`,
+  `item` / `tile`.
+- **index** — 0-based position in a dynamic list, appended as `_<i>`.
+- **sub** — a CTA nested in a list item nests under it, e.g. `plp_tile_3` →
+  `plp_tile_3_wishlist`, `plp_tile_3_add_to_cart`.
+
+**Type** column = the widget role. **Key** column shows the literal key; dynamic
+keys show the `_<i>` pattern with 1–2 concrete examples. **Widget file** = the
+`.dart` file (under `lib/…`) where the key is attached.
+
+---
+
+## Splash
+File: `lib/features/splash/presentation/pages/splash_page.dart`
+
+| Type | Key | Widget file |
+|---|---|---|
+| Button | `splash_env_debug_button` | splash_page.dart |
+| Button | `splash_env_debug_vpn_button` | splash_page.dart |
+| Button | `splash_env_prod_button` | splash_page.dart |
+
+## Account
+
+| Type | Key | Widget file |
+|---|---|---|
+| Button | `account_footer_sign_out_button` | account_footer_widget.dart |
+| Button | `account_footer_legal_button` | account_footer_widget.dart |
+| Text | `account_footer_app_version_text_field` | account_footer_widget.dart |
+| Button | `account_help_item_help_button` | account_help_section_widget.dart |
+| Button | `account_help_item_share_button` | account_help_section_widget.dart |
+| Button | `account_help_item_rate_button` | account_help_section_widget.dart |
+| Text | `account_sign_in_header_greeting_text_field` | account_header_widget.dart |
+| Text | `account_sign_in_header_contact_text_field` | account_header_widget.dart |
+| Image | `account_sign_in_header_avatar_image` | account_header_widget.dart |
+| Text | `account_sign_in_header_avatar_initials` | account_header_widget.dart |
+| Text | `account_sign_out_header_title_text_field` | account_header_widget.dart |
+| Text | `account_sign_out_header_subtitle_text_field` | account_header_widget.dart |
+| Text | `account_sign_out_header_erase_message_text_field` | account_header_widget.dart |
+| Button | `account_sign_out_header_sign_in_button` | account_header_widget.dart |
+| Button | `account_sign_out_header_forget_me_button` | account_header_widget.dart |
+| Button | `account_sign_out_header_join_us_button` | account_header_widget.dart |
+| List item | `accounts_orders_menu_item` | account_page.dart |
+| List item | `accounts_wishlist_menu_item` | account_page.dart |
+| List item | `accounts_profile_details_menu_item` | account_page.dart |
+| List item | `accounts_saved_addresses_menu_item` | account_page.dart |
+| List item | `accounts_manage_cards_menu_item` | account_page.dart |
+| List item | `accounts_credits_menu_item` | account_page.dart |
+| List item | `accounts_my_kids_menu_item` | account_page.dart |
+| Title | `account_app_bar_title` | account_page.dart |
+| Text | `account_forget_dialog_title_text_field` | account_page.dart |
+| Text | `account_forget_dialog_description_text_field` | account_page.dart |
+| Button | `account_forget_dialog_cancel_button` | account_page.dart |
+| Button | `account_forget_dialog_confirm_button` | account_page.dart |
+
+## Join Us
+File: `lib/features/auth/presentation/pages/join_us_page.dart`
+
+| Type | Key | Widget file |
+|---|---|---|
+| Title | `join_us_app_bar_title` | join_us_page.dart |
+| Text field | `join_us_name_input_field` | join_us_page.dart |
+| Hint | `join_us_name_input_hint` | join_us_page.dart |
+| Text field | `join_us_email_input_field` | join_us_page.dart |
+| Hint | `join_us_email_input_hint` | join_us_page.dart |
+| Text field | `join_us_mobile_input_field` | join_us_page.dart |
+| Hint | `join_us_mobile_input_hint` | join_us_page.dart |
+| Button | `join_us_send_otp_button` | join_us_page.dart |
+| Text | `join_us_terms_disclaimer_text_field` | join_us_page.dart |
+| Button | `join_us_terms_and_conditions_button` | join_us_page.dart |
+| Button | `join_us_privacy_policy_button` | join_us_page.dart |
+| Button | `join_us_sign_in_button` | join_us_page.dart |
+| Button | `join_us_back_button` | join_us_page.dart |
+
+## Login
+File: `lib/features/auth/presentation/pages/login_page.dart`
+
+| Type | Key | Widget file |
+|---|---|---|
+| Title | `login_app_bar_title` | login_page.dart |
+| Text field | `login_mobile_input_field` | login_page.dart |
+| Hint | `login_mobile_input_hint` | login_page.dart |
+| Button | `login_send_otp_button` | login_page.dart |
+| Button | `login_join_us_button` | login_page.dart |
+| Button | `login_back_button` | login_page.dart |
+
+## OTP Verification
+File: `lib/features/auth/presentation/pages/otp_verification_page.dart`
+
+| Type | Key | Widget file |
+|---|---|---|
+| Title | `otp_verification_app_bar_title` | otp_verification_page.dart |
+| Text | `otp_verification_prompt_text_field` | otp_verification_page.dart |
+| Text | `otp_verification_login_id_text_field` | otp_verification_page.dart |
+| Button | `otp_verification_change_button` | otp_verification_page.dart |
+| Text field | `otp_verification_otp_input_field` | otp_verification_page.dart |
+| Row | `otp_verification_otp_slot_row` | otp_verification_page.dart |
+| Text | `otp_verification_resend_timer_text_field` | otp_verification_page.dart |
+| Button | `otp_verification_resend_button` | otp_verification_page.dart |
+| Button | `otp_verification_back_button` | otp_verification_page.dart |
+
+## Dashboard (bottom nav)
+File: `lib/features/dashboard/dashboard.dart`
+
+| Type | Key | Widget file |
+|---|---|---|
+| Nav item | `dashboard_home_nav_item` | dashboard.dart |
+| Nav item | `dashboard_categories_nav_item` | dashboard.dart |
+| Nav item | `dashboard_search_nav_item` | dashboard.dart |
+| Nav item | `dashboard_account_nav_item` | dashboard.dart |
+
+## Home / Landing Components (server-driven)
+
+Composed at runtime as `<page>_<component>_<compIndex>[_<element>[_<itemIndex>]]`.
+Page prefix = `hp` (home) or `lp_<pageName>` (landing); `<compIndex>` is the
+component's render position on the page.
+
+| Type | Key (pattern) | Examples | Widget file |
+|---|---|---|---|
+| Tab | `hp_tab_<i>` | `hp_tab_0`, `hp_tab_1` | combined_header_delegate.dart |
+| Button | `hp_wishlist_button` | — | combined_header_delegate.dart |
+| Button | `hp_cart_button` | — | combined_header_delegate.dart |
+| Tiles | `<page>_hero_<c>_tiles_<i>` | `hp_hero_0_tiles_0` | hero_carousel_widget.dart |
+| Title | `<page>_pg_<c>_title` | `hp_pg_2_title` | product_grid_widget.dart |
+| CTA | `<page>_pg_<c>_cta` | `hp_pg_2_cta` | product_grid_widget.dart |
+| Tiles | `<page>_pg_<c>_tiles_<i>` | `hp_pg_2_tiles_0`, `hp_pg_2_tiles_1` | product_grid_widget.dart |
+| Title | `<page>_ct_<c>_title` | `hp_ct_1_title` | custom_tiles_widget.dart |
+| CTA | `<page>_ct_<c>_cta` | `hp_ct_1_cta` | custom_tiles_widget.dart |
+| Tiles | `<page>_ct_<c>_tiles_<i>` | `hp_ct_1_tiles_0` | custom_tiles_widget.dart |
+| Title | `<page>_pc_<c>_title` | `lp_summer-sale_pc_1_title` | page_carousel_widget.dart |
+| Tiles | `<page>_pc_<c>_tiles_<i>` | `lp_summer-sale_pc_1_tiles_3` | page_carousel_widget.dart |
+
+Prefix composition (`hp_pg_2`, `lp_<pageName>_...`) is done in
+`page_component_renderer.dart`; component abbreviations: `hero`, `ct`
+(custom tiles), `pg` (product grid), `pc` (page carousel).
+
+## Message Bar (reusable — host screen prefixes + list index)
+
+Rendered via `MessageBarsWidget`; host passes its screen slug as `keyPrefix`, bar
+index appended. So the same base yields per-screen keys.
+
+| Type | Key (pattern) | Examples | Widget file |
+|---|---|---|---|
+| Text | `<screen>_message_bar_message_text_field_<i>` | `login_message_bar_message_text_field_0`, `plp_message_bar_message_text_field_0` | message_bars_widget.dart |
+| Button | `<screen>_message_bar_action_button_<i>` | `login_message_bar_action_button_0` | message_bars_widget.dart |
+| Button | `<screen>_message_bar_left_button_<i>` | `plp_message_bar_left_button_0` | message_bars_widget.dart |
+| Button | `<screen>_message_bar_right_button_<i>` | `plp_message_bar_right_button_0` | message_bars_widget.dart |
+
+## Pincode Check (bottom sheet)
+File: `lib/features/pincode/presentation/widgets/pincode_input_field.dart`
+
+| Type | Key | Widget file |
+|---|---|---|
+| Hint | `pincode_sheet_input_hint` | pincode_input_field.dart |
+| Suffix | `pincode_sheet_input_suffix_icon` | pincode_input_field.dart |
+
+## PLP (Product Listing Page)
+
+| Type | Key (pattern) | Examples | Widget file |
+|---|---|---|---|
+| Button | `plp_appbar_back_button` | — | plp_sliver_app_bar.dart |
+| Title | `plp_appbar_title` | — | plp_sliver_app_bar.dart |
+| Title | `plp_appbar_collapsed_title` | — | plp_sliver_app_bar.dart |
+| Text | `plp_appbar_subtitle` | — | plp_sliver_app_bar.dart |
+| Button | `plp_appbar_search_button` | — | plp_sliver_app_bar.dart |
+| Button | `plp_appbar_wishlist_button` | — | plp_sliver_app_bar.dart |
+| Button | `plp_appbar_cart_button` | — | plp_sliver_app_bar.dart |
+| Image | `plp_header_image` | — | plp_sliver_app_bar.dart |
+| Chip | `plp_applied_filter_chip_<i>` | `plp_applied_filter_chip_0`, `plp_applied_filter_chip_1` | plp_applied_filters.dart |
+| Button | `plp_sort_by_button` | — | sticky_filter_bar.dart |
+| Button | `plp_filter_by_button` | — | sticky_filter_bar.dart |
+| Chip | `plp_sticky_filter_chip_<i>` | `plp_sticky_filter_chip_0`, `plp_sticky_filter_chip_1` | sticky_filter_bar.dart |
+| Text | `plp_query_correction_text` | — | plp_query_correction.dart |
+| Button | `plp_query_correction_suggestion_button` | — | plp_query_correction.dart |
+| List item | `plp_tile_<i>` | `plp_tile_0`, `plp_tile_1` | plp_product_sliver.dart |
+| Button | `plp_tile_<i>_wishlist` | `plp_tile_0_wishlist` | plp_product_sliver.dart |
+| Button | `plp_tile_<i>_add_to_cart` | `plp_tile_0_add_to_cart` | *(defined, not yet wired)* |
+| Chip | `plp_floating_filter_<pos>_chip_<i>` | `plp_floating_filter_0_chip_0` | floating_filter_row.dart |
+| Button | `plp_floating_filter_<pos>_apply_button` | `plp_floating_filter_0_apply_button` | floating_filter_row.dart |
+| Button | `plp_product_count_button` | — | plp_page.dart |
+| Title | `plp_sort_sheet_title` | — | sort_bottom_sheet.dart |
+| Option | `plp_sort_sheet_option_<i>` | `plp_sort_sheet_option_0`, `plp_sort_sheet_option_1` | sort_bottom_sheet.dart |
+| Title | `plp_filter_title` | — | filter_page.dart |
+| Button | `plp_filter_close_button` | — | filter_page.dart |
+| Option | `plp_filter_section_<i>` | `plp_filter_section_0`, `plp_filter_section_1` | filter_page.dart |
+| Option | `plp_filter_option_<i>` | `plp_filter_option_0`, `plp_filter_option_1` | filter_page.dart |
+| Text field | `plp_filter_search_input` | — | filter_page.dart |
+| Hint | `plp_filter_search_input_hint` | — | filter_page.dart |
+| Suffix | `plp_filter_search_input_suffix` | — | filter_page.dart |
+| Button | `plp_filter_clear_button` | — | filter_page.dart |
+| Button | `plp_filter_apply_button` | — | filter_page.dart |
+| List item | `plp_filter_leaf_<i>` | `plp_filter_leaf_0`, `plp_filter_leaf_1` | filter_tree_content.dart |
+| List item | `plp_filter_drilldown_<i>` | `plp_filter_drilldown_0` | filter_tree_content.dart |
+| List item | `plp_filter_breadcrumb_<i>` | `plp_filter_breadcrumb_0` | filter_tree_content.dart |
+| Title | `plp_filter_section_sheet_title` | — | filter_section_sheet.dart |
+| Option | `plp_filter_section_sheet_option_<i>` | `plp_filter_section_sheet_option_0` | filter_section_sheet.dart |
+| Button | `plp_filter_section_sheet_clear_button` | — | filter_section_sheet.dart |
+| Button | `plp_filter_section_sheet_apply_button` | — | filter_section_sheet.dart |
+
+## Address — List
+File: `lib/features/address/presentation/pages/addresses_page.dart`
+
+| Type | Key (pattern) | Examples | Widget file |
+|---|---|---|---|
+| Title | `address_list_app_bar_title` | — | addresses_page.dart |
+| Button | `address_list_back_button` | — | addresses_page.dart |
+| List item | `address_list_item_<i>` | `address_list_item_0`, `address_list_item_1` | addresses_page.dart |
+| Button | `address_list_item_<i>_edit` | `address_list_item_0_edit` | addresses_page.dart |
+| Button | `address_list_item_<i>_remove` | `address_list_item_0_remove` | addresses_page.dart |
+| Button | `address_list_add_new_button` | — | addresses_page.dart |
+| Button | `address_list_continue_button` | — | addresses_page.dart |
+| Text | `address_list_empty_text` | — | addresses_page.dart |
+| Title | `address_list_delete_bottomsheet_title` | — | addresses_page.dart |
+| Text | `address_list_delete_bottomsheet_description` | — | addresses_page.dart |
+| Button | `address_list_delete_bottomsheet_cancel_button` | — | addresses_page.dart |
+| Button | `address_list_delete_bottomsheet_confirm_button` | — | addresses_page.dart |
+
+## Address — Add / Edit Form
+File: `lib/features/address/presentation/pages/add_address_page.dart`
+
+| Type | Key | Widget file |
+|---|---|---|
+| Title | `address_form_app_bar_title` | add_address_page.dart |
+| Button | `address_form_back_button` | add_address_page.dart |
+| Text field | `address_form_name_input` | add_address_page.dart |
+| Hint | `address_form_name_input_hint` | add_address_page.dart |
+| Text field | `address_form_mobile_input` | add_address_page.dart |
+| Hint | `address_form_mobile_input_hint` | add_address_page.dart |
+| Text field | `address_form_alternate_mobile_input` | add_address_page.dart |
+| Hint | `address_form_alternate_mobile_input_hint` | add_address_page.dart |
+| Text field | `address_form_pincode_input` | add_address_page.dart |
+| Hint | `address_form_pincode_input_hint` | add_address_page.dart |
+| Suffix | `address_form_pincode_input_suffix` | add_address_page.dart |
+| Text field | `address_form_city_input` | add_address_page.dart |
+| Hint | `address_form_city_input_hint` | add_address_page.dart |
+| Text field | `address_form_state_input` | add_address_page.dart |
+| Hint | `address_form_state_input_hint` | add_address_page.dart |
+| Text field | `address_form_address1_input` | add_address_page.dart |
+| Hint | `address_form_address1_input_hint` | add_address_page.dart |
+| Text field | `address_form_street_input` | add_address_page.dart |
+| Hint | `address_form_street_input_hint` | add_address_page.dart |
+| Text field | `address_form_landmark_input` | add_address_page.dart |
+| Hint | `address_form_landmark_input_hint` | add_address_page.dart |
+| Checkbox | `address_form_default_checkbox` | add_address_page.dart |
+| Button | `address_form_save_button` | add_address_page.dart |
+| Button | `address_form_cancel_button` | add_address_page.dart |
+| Title | `address_form_discard_bottomsheet_title` | add_address_page.dart |
+| Text | `address_form_discard_bottomsheet_description` | add_address_page.dart |
+| Button | `address_form_discard_bottomsheet_stay_button` | add_address_page.dart |
+| Button | `address_form_discard_bottomsheet_discard_button` | add_address_page.dart |

@@ -160,9 +160,7 @@ class MessageBarTestStrings {
   static const String messageBarRightButton = 'message_bar_right_button';
 }
 
-/// Product listing page (PLP). Keys are `plp_<element>[_<index>]`. Dynamic list
-/// items (tiles, chips, filter options) carry an index; tile sub-CTAs nest under
-/// the tile, e.g. `plp_tile_3`, `plp_tile_3_wishlist`, `plp_tile_3_add_to_cart`.
+/// Pincode-check bottom sheet. Keys are `pincode_sheet_<element>`.
 class PincodeTestStrings {
   PincodeTestStrings();
 
@@ -171,6 +169,9 @@ class PincodeTestStrings {
   static const String sheetInputSuffixIcon = 'pincode_sheet_input_suffix_icon';
 }
 
+/// Product listing page (PLP). Keys are `plp_<element>[_<index>]`. Dynamic list
+/// items (tiles, chips, filter options) carry an index; tile sub-CTAs nest under
+/// the tile, e.g. `plp_tile_3`, `plp_tile_3_wishlist`, `plp_tile_3_add_to_cart`.
 class PlpTestStrings {
   PlpTestStrings();
 
