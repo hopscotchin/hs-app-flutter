@@ -357,6 +357,9 @@ class _FilterPageViewState extends State<_FilterPageView> {
                             top: 2,
                             right: -8,
                             child: FilterSectionBadge(
+                              key: ValueKey(
+                                '${PlpTestStrings.filterSection}_${index}_${PlpTestStrings.filterSectionBadgeSuffix}',
+                              ),
                               cue: section.visualCue!,
                               height: 20,
                               foldSize: 7,

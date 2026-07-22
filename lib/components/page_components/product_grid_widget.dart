@@ -29,6 +29,10 @@ class ProductGridWidget extends StatelessWidget {
   Key? _key(String suffix) =>
       keyPrefix == null ? null : ValueKey('${keyPrefix}_$suffix');
 
+  /// Sub-element key nested under tile `index` → `<prefix>_tiles_<i>_<suffix>`.
+  Key? _tileSubKey(int index, String suffix) =>
+      _key('${HomeComponentTestStrings.tiles}_${index}_$suffix');
+
   @override
   Widget build(BuildContext context) {
     if (gridData.tiles.isEmpty) return const SizedBox.shrink();
@@ -97,6 +101,13 @@ class ProductGridWidget extends StatelessWidget {
       builder: (context, wished) => ProductTile.fromProduct(
         item,
         key: _key('${HomeComponentTestStrings.tiles}_$index'),
+        wishlistKey: _tileSubKey(index, HomeComponentTestStrings.tileWishlistSuffix),
+        nameKey: _tileSubKey(index, HomeComponentTestStrings.tileNameSuffix),
+        priceKey: _tileSubKey(index, HomeComponentTestStrings.tilePriceSuffix),
+        discountKey: _tileSubKey(index, HomeComponentTestStrings.tileDiscountSuffix),
+        colorVariantsKey: _tileSubKey(index, HomeComponentTestStrings.tileColorVariantsSuffix),
+        visualCueKeyBuilder: (j) =>
+            _tileSubKey(index, '${HomeComponentTestStrings.tileVisualCueSuffix}_$j'),
         showProductInfo: showInfo,
         isWishlisted: wished,
         onTap: () => ActionUrlHandler.navigate(context, item.actionUri, title: item.name),

@@ -79,6 +79,10 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
 
   Key? _tileKey(int i) => _key('${HomeComponentTestStrings.tiles}_$i');
 
+  /// Sub-element key nested under tile `i` → `<prefix>_tiles_<i>_<suffix>`.
+  Key? _tileSubKey(int i, String suffix) =>
+      _key('${HomeComponentTestStrings.tiles}_${i}_$suffix');
+
   @override
   void initState() {
     super.initState();
@@ -389,6 +393,13 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
           builder: (context, wished) => ProductTile.fromProduct(
             product,
             key: _tileKey(index),
+            wishlistKey: _tileSubKey(index, HomeComponentTestStrings.tileWishlistSuffix),
+            nameKey: _tileSubKey(index, HomeComponentTestStrings.tileNameSuffix),
+            priceKey: _tileSubKey(index, HomeComponentTestStrings.tilePriceSuffix),
+            discountKey: _tileSubKey(index, HomeComponentTestStrings.tileDiscountSuffix),
+            colorVariantsKey: _tileSubKey(index, HomeComponentTestStrings.tileColorVariantsSuffix),
+            visualCueKeyBuilder: (j) =>
+                _tileSubKey(index, '${HomeComponentTestStrings.tileVisualCueSuffix}_$j'),
             imageUrl: tile.imageUrl ?? product.displayImage,
             imageAspectRatio: tileHeight > 0 ? tileWidth / tileHeight : null,
             isWishlisted: wished,

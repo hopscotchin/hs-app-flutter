@@ -42,6 +42,16 @@ class ProductTile extends StatelessWidget {
   /// Automation key for the wishlist toggle button.
   final Key? wishlistKey;
 
+  /// Automation key for the visual-cue overlay at rendered index `j`
+  /// (nests under the tile → `plp_tile_<i>_visual_cue_<j>`).
+  final Key? Function(int index)? visualCueKeyBuilder;
+
+  /// Automation keys for the info-section text (nest under the tile).
+  final Key? nameKey;
+  final Key? priceKey;
+  final Key? discountKey;
+  final Key? colorVariantsKey;
+
   const ProductTile({
     super.key,
     this.imageUrl,
@@ -62,6 +72,11 @@ class ProductTile extends StatelessWidget {
     this.onWishlistTap,
     this.tileKey,
     this.wishlistKey,
+    this.visualCueKeyBuilder,
+    this.nameKey,
+    this.priceKey,
+    this.discountKey,
+    this.colorVariantsKey,
   });
 
   /// Build a tile from the unified [ListingProductEntity] — the shape used by
@@ -78,6 +93,11 @@ class ProductTile extends StatelessWidget {
     bool? isWishlisted,
     Key? tileKey,
     Key? wishlistKey,
+    Key? Function(int index)? visualCueKeyBuilder,
+    Key? nameKey,
+    Key? priceKey,
+    Key? discountKey,
+    Key? colorVariantsKey,
   }) {
     final price = product.price;
     final hasDiscount = price?.hasDiscount ?? false;
@@ -85,6 +105,11 @@ class ProductTile extends StatelessWidget {
       key: key,
       tileKey: tileKey,
       wishlistKey: wishlistKey,
+      visualCueKeyBuilder: visualCueKeyBuilder,
+      nameKey: nameKey,
+      priceKey: priceKey,
+      discountKey: discountKey,
+      colorVariantsKey: colorVariantsKey,
       imageUrl: imageUrl ?? product.displayImage,
       productName: product.name,
       priceText: price?.sellingPrice,
@@ -140,6 +165,7 @@ class ProductTile extends StatelessWidget {
               AppSpacing.verticalGapXsm,
               Text(
                 _resolvedColorLabel ?? '',
+                key: colorVariantsKey,
                 style: AppTypographyV1.labelMedium.regular.copyWith(
                   color: Colors.black.withValues(alpha: 0.5),
                 ),
@@ -152,6 +178,9 @@ class ProductTile extends StatelessWidget {
   }
 
   Widget _buildImage(double aspectRatio) {
+    final cues = visualCues
+        .where((cue) => (cue.text.isNotNullOrEmpty || cue.imageUrl.isNotNullOrEmpty))
+        .toList();
     return AspectRatio(
       aspectRatio: aspectRatio,
       child: LayoutBuilder(
@@ -165,9 +194,7 @@ class ProductTile extends StatelessWidget {
               width: constraints.maxWidth,
             ),
             if (isSoldOut) ColoredBox(color: AppColors.whiteColor.withValues(alpha: 0.5)),
-            ...visualCues
-                .where((cue) => (cue.text.isNotNullOrEmpty || cue.imageUrl.isNotNullOrEmpty))
-                .map(_buildVisualCueOverlay),
+            for (var i = 0; i < cues.length; i++) _buildVisualCueOverlay(cues[i], i),
             if (showWishlistIcon) _buildWishlistIcon(),
           ],
         ),
@@ -175,7 +202,7 @@ class ProductTile extends StatelessWidget {
     );
   }
 
-  Widget _buildVisualCueOverlay(VisualCueEntity cue) {
+  Widget _buildVisualCueOverlay(VisualCueEntity cue, int index) {
     final bgColor = cue.bgColor.toColor ?? AppColors.neutralGrey2;
     final txtColor = cue.textColor.toColor ?? AppColors.textPrimary;
 
@@ -190,7 +217,12 @@ class ProductTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
           );
 
-    return Positioned(bottom: AppSpacing.xs, left: AppSpacing.xs, child: badge);
+    return Positioned(
+      key: visualCueKeyBuilder?.call(index),
+      bottom: AppSpacing.xs,
+      left: AppSpacing.xs,
+      child: badge,
+    );
   }
 
   Widget _buildWishlistIcon() {
@@ -214,6 +246,7 @@ class ProductTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
       child: Text(
         productName ?? '',
+        key: nameKey,
         style: isSoldOut
             ? AppTypographyV1.labelLarge.regular.copyWith(
                 color: Colors.black.withValues(alpha: 0.5),
@@ -231,6 +264,7 @@ class ProductTile extends StatelessWidget {
       // Single-line + clip — longer mrp strings like "MRP:₹2,665" would
       // otherwise wrap and blow the carousel's fixed product-info reserve.
       child: RichText(
+        key: priceKey,
         maxLines: 1,
         overflow: TextOverflow.clip,
         softWrap: false,
@@ -248,13 +282,20 @@ class ProductTile extends StatelessWidget {
               ),
             ],
             if (discountText != null) ...[
-              TextSpan(
-                text: originalPriceText != null ? '\t\t$discountText' : '\t$discountText',
-                style: isSoldOut
-                    ? AppTypographyV1.labelMedium.regular.copyWith(
-                        color: Colors.black.withValues(alpha: 0.5),
-                      )
-                    : AppTypographyV1.labelMedium.regular.brandSecondary(),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: Padding(
+                  padding: EdgeInsets.only(left: originalPriceText != null ? 8 : 4),
+                  child: Text(
+                    discountText!,
+                    key: discountKey,
+                    style: isSoldOut
+                        ? AppTypographyV1.labelMedium.regular.copyWith(
+                            color: Colors.black.withValues(alpha: 0.5),
+                          )
+                        : AppTypographyV1.labelMedium.regular.brandSecondary(),
+                  ),
+                ),
               ),
             ],
           ],

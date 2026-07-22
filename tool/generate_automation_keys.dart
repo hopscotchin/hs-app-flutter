@@ -192,6 +192,16 @@ String _inferType(String pattern) {
   if (ends('_nav_item')) return 'Nav item';
   if (ends('_menu_item') || ends('_item') || ends('_tile')) return 'List item';
   if (ends('_chip')) return 'Chip';
+  if (ends('_visual_cue')) return 'Visual cue';
+  if (ends('_badge')) return 'Badge';
+  if (ends('_name') ||
+      ends('_price') ||
+      ends('_color_variants') ||
+      ends('_discount') ||
+      ends('_label') ||
+      ends('_count')) {
+    return 'Text';
+  }
   if (ends('_option') || ends('_section')) return 'Option';
   if (ends('_leaf') || ends('_drilldown') || ends('_breadcrumb')) {
     return 'List item';
@@ -302,11 +312,23 @@ Server-driven. Composed at runtime as
 | Title | `<page>_pg_<c>_title` | `hp_pg_2_title` | `product_grid_widget.dart` |
 | CTA | `<page>_pg_<c>_cta` | `hp_pg_2_cta` | `product_grid_widget.dart` |
 | Tiles | `<page>_pg_<c>_tiles_<i>` | `hp_pg_2_tiles_0`, `hp_pg_2_tiles_1` | `product_grid_widget.dart` |
+| Text | `<page>_pg_<c>_tiles_<i>_name` | `hp_pg_2_tiles_0_name` | `product_grid_widget.dart` |
+| Text | `<page>_pg_<c>_tiles_<i>_price` | `hp_pg_2_tiles_0_price` | `product_grid_widget.dart` |
+| Text | `<page>_pg_<c>_tiles_<i>_discount` | `hp_pg_2_tiles_0_discount` | `product_grid_widget.dart` |
+| Text | `<page>_pg_<c>_tiles_<i>_color_variants` | `hp_pg_2_tiles_0_color_variants` | `product_grid_widget.dart` |
+| Button | `<page>_pg_<c>_tiles_<i>_wishlist` | `hp_pg_2_tiles_0_wishlist` | `product_grid_widget.dart` |
+| Visual cue | `<page>_pg_<c>_tiles_<i>_visual_cue_<j>` | `hp_pg_2_tiles_0_visual_cue_0` | `product_grid_widget.dart` |
 | Title | `<page>_ct_<c>_title` | `hp_ct_1_title` | `custom_tiles_widget.dart` |
 | CTA | `<page>_ct_<c>_cta` | `hp_ct_1_cta` | `custom_tiles_widget.dart` |
 | Tiles | `<page>_ct_<c>_tiles_<i>` | `hp_ct_1_tiles_0` | `custom_tiles_widget.dart` |
 | Title | `<page>_pc_<c>_title` | `lp_summer-sale_pc_1_title` | `page_carousel_widget.dart` |
 | Tiles | `<page>_pc_<c>_tiles_<i>` | `lp_summer-sale_pc_1_tiles_3` | `page_carousel_widget.dart` |
+| Text | `<page>_pc_<c>_tiles_<i>_name` | `lp_summer-sale_pc_1_tiles_3_name` | `page_carousel_widget.dart` |
+| Text | `<page>_pc_<c>_tiles_<i>_price` | `lp_summer-sale_pc_1_tiles_3_price` | `page_carousel_widget.dart` |
+| Text | `<page>_pc_<c>_tiles_<i>_discount` | `lp_summer-sale_pc_1_tiles_3_discount` | `page_carousel_widget.dart` |
+| Text | `<page>_pc_<c>_tiles_<i>_color_variants` | `lp_summer-sale_pc_1_tiles_3_color_variants` | `page_carousel_widget.dart` |
+| Button | `<page>_pc_<c>_tiles_<i>_wishlist` | `lp_summer-sale_pc_1_tiles_3_wishlist` | `page_carousel_widget.dart` |
+| Visual cue | `<page>_pc_<c>_tiles_<i>_visual_cue_<j>` | `lp_summer-sale_pc_1_tiles_3_visual_cue_0` | `page_carousel_widget.dart` |
 
 Prefix composition (`hp_pg_2`, `lp_<pageName>_...`) happens in
 `page_component_renderer.dart`; component abbreviations: `hero`, `ct`, `pg`, `pc`.''';

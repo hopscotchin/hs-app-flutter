@@ -140,6 +140,15 @@ class HomeComponentTestStrings {
   static const String cta = 'cta';
   static const String tiles = 'tiles';
 
+  // Product-tile sub-elements (nest under a tile → `<prefix>_tiles_<i>_<suffix>`).
+  static const String tileNameSuffix = 'name'; // → `<prefix>_tiles_<i>_name`
+  static const String tilePriceSuffix = 'price'; // → `<prefix>_tiles_<i>_price`
+  static const String tileDiscountSuffix = 'discount'; // → `<prefix>_tiles_<i>_discount`
+  static const String tileColorVariantsSuffix =
+      'color_variants'; // → `<prefix>_tiles_<i>_color_variants`
+  static const String tileWishlistSuffix = 'wishlist'; // → `<prefix>_tiles_<i>_wishlist`
+  static const String tileVisualCueSuffix = 'visual_cue'; // → `<prefix>_tiles_<i>_visual_cue_<j>`
+
   // Home page header category tabs — key `hp_tab_<i>`.
   static const String tab = 'tab';
 
@@ -206,6 +215,11 @@ class PlpTestStrings {
   static const String tile = 'plp_tile'; // main tap → `plp_tile_<i>`
   static const String wishlistSuffix = 'wishlist'; // → `plp_tile_<i>_wishlist`
   static const String addToCartSuffix = 'add_to_cart'; // → `plp_tile_<i>_add_to_cart`
+  static const String visualCueSuffix = 'visual_cue'; // → `plp_tile_<i>_visual_cue_<j>`
+  static const String nameSuffix = 'name'; // → `plp_tile_<i>_name`
+  static const String priceSuffix = 'price'; // → `plp_tile_<i>_price`
+  static const String colorVariantsSuffix = 'color_variants'; // → `plp_tile_<i>_color_variants`
+  static const String discountSuffix = 'discount'; // → `plp_tile_<i>_discount`
 
   // Floating filter tile (repeats → disambiguated by section position)
   static const String floatingFilter = 'plp_floating_filter'; // + `_<pos>_chip_<i>` / `_<pos>_apply_button`
@@ -215,6 +229,16 @@ class PlpTestStrings {
   // Product count pill (FAB)
   static const String productCountButton = 'plp_product_count_button';
 
+  // Empty state (no products / filtered-empty)
+  static const String emptyStateTitle = 'plp_empty_state_title';
+  static const String emptyStateSubtitle = 'plp_empty_state_subtitle';
+  static const String emptyStateButton = 'plp_empty_state_button';
+
+  // Error state (server error)
+  static const String errorStateTitle = 'plp_error_state_title';
+  static const String errorStateSubtitle = 'plp_error_state_subtitle';
+  static const String errorStateButton = 'plp_error_state_button';
+
   // Sort bottom sheet
   static const String sortSheetTitle = 'plp_sort_sheet_title';
   static const String sortSheetOption = 'plp_sort_sheet_option'; // + `_<i>`
@@ -223,6 +247,7 @@ class PlpTestStrings {
   static const String filterTitle = 'plp_filter_title';
   static const String filterCloseButton = 'plp_filter_close_button';
   static const String filterSection = 'plp_filter_section'; // sidebar → + `_<i>`
+  static const String filterSectionBadgeSuffix = 'badge'; // → `plp_filter_section_<i>_badge`
   static const String filterOption = 'plp_filter_option'; // flat content → + `_<i>`
   static const String filterSearchInput = 'plp_filter_search_input';
   static const String filterSearchInputHint = 'plp_filter_search_input_hint';
@@ -237,6 +262,11 @@ class PlpTestStrings {
   // Filter section sheet (opened by sticky chips)
   static const String filterSectionSheetTitle = 'plp_filter_section_sheet_title';
   static const String filterSectionSheetOption = 'plp_filter_section_sheet_option'; // + `_<i>`
+  // Label / count text inside each option row (nest under the option index).
+  static const String filterSectionSheetOptionLabelSuffix =
+      'label'; // → `plp_filter_section_sheet_option_<i>_label`
+  static const String filterSectionSheetOptionCountSuffix =
+      'count'; // → `plp_filter_section_sheet_option_<i>_count`
   static const String filterSectionSheetClearButton = 'plp_filter_section_sheet_clear_button';
   static const String filterSectionSheetApplyButton = 'plp_filter_section_sheet_apply_button';
 }

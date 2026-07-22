@@ -135,11 +135,23 @@ Server-driven. Composed at runtime as
 | Title | `<page>_pg_<c>_title` | `hp_pg_2_title` | `product_grid_widget.dart` |
 | CTA | `<page>_pg_<c>_cta` | `hp_pg_2_cta` | `product_grid_widget.dart` |
 | Tiles | `<page>_pg_<c>_tiles_<i>` | `hp_pg_2_tiles_0`, `hp_pg_2_tiles_1` | `product_grid_widget.dart` |
+| Text | `<page>_pg_<c>_tiles_<i>_name` | `hp_pg_2_tiles_0_name` | `product_grid_widget.dart` |
+| Text | `<page>_pg_<c>_tiles_<i>_price` | `hp_pg_2_tiles_0_price` | `product_grid_widget.dart` |
+| Text | `<page>_pg_<c>_tiles_<i>_discount` | `hp_pg_2_tiles_0_discount` | `product_grid_widget.dart` |
+| Text | `<page>_pg_<c>_tiles_<i>_color_variants` | `hp_pg_2_tiles_0_color_variants` | `product_grid_widget.dart` |
+| Button | `<page>_pg_<c>_tiles_<i>_wishlist` | `hp_pg_2_tiles_0_wishlist` | `product_grid_widget.dart` |
+| Visual cue | `<page>_pg_<c>_tiles_<i>_visual_cue_<j>` | `hp_pg_2_tiles_0_visual_cue_0` | `product_grid_widget.dart` |
 | Title | `<page>_ct_<c>_title` | `hp_ct_1_title` | `custom_tiles_widget.dart` |
 | CTA | `<page>_ct_<c>_cta` | `hp_ct_1_cta` | `custom_tiles_widget.dart` |
 | Tiles | `<page>_ct_<c>_tiles_<i>` | `hp_ct_1_tiles_0` | `custom_tiles_widget.dart` |
 | Title | `<page>_pc_<c>_title` | `lp_summer-sale_pc_1_title` | `page_carousel_widget.dart` |
 | Tiles | `<page>_pc_<c>_tiles_<i>` | `lp_summer-sale_pc_1_tiles_3` | `page_carousel_widget.dart` |
+| Text | `<page>_pc_<c>_tiles_<i>_name` | `lp_summer-sale_pc_1_tiles_3_name` | `page_carousel_widget.dart` |
+| Text | `<page>_pc_<c>_tiles_<i>_price` | `lp_summer-sale_pc_1_tiles_3_price` | `page_carousel_widget.dart` |
+| Text | `<page>_pc_<c>_tiles_<i>_discount` | `lp_summer-sale_pc_1_tiles_3_discount` | `page_carousel_widget.dart` |
+| Text | `<page>_pc_<c>_tiles_<i>_color_variants` | `lp_summer-sale_pc_1_tiles_3_color_variants` | `page_carousel_widget.dart` |
+| Button | `<page>_pc_<c>_tiles_<i>_wishlist` | `lp_summer-sale_pc_1_tiles_3_wishlist` | `page_carousel_widget.dart` |
+| Visual cue | `<page>_pc_<c>_tiles_<i>_visual_cue_<j>` | `lp_summer-sale_pc_1_tiles_3_visual_cue_0` | `page_carousel_widget.dart` |
 
 Prefix composition (`hp_pg_2`, `lp_<pageName>_...`) happens in
 `page_component_renderer.dart`; component abbreviations: `hero`, `ct`, `pg`, `pc`.
@@ -181,17 +193,29 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Chip | `plp_sticky_filter_chip_<i>` | `plp_sticky_filter_chip_0`, `plp_sticky_filter_chip_1` | `sticky_filter_bar.dart` |
 | Text | `plp_query_correction_text` | — | `plp_query_correction.dart` |
 | Button | `plp_query_correction_suggestion_button` | — | `plp_query_correction.dart` |
-| List item | `plp_tile_<i>` | `plp_tile_0`, `plp_tile_1` | `plp_product_sliver.dart` |
-| Button | `plp_tile_<i>_wishlist` | `plp_tile_0_wishlist`, `plp_tile_1_wishlist` | `plp_product_sliver.dart` |
+| List item | `plp_tile_<i>` | `plp_tile_0`, `plp_tile_1` | `plp_product_sliver.dart`, `product_grid.dart` |
+| Button | `plp_tile_<i>_wishlist` | `plp_tile_0_wishlist`, `plp_tile_1_wishlist` | `plp_product_sliver.dart`, `product_grid.dart` |
 | Button | `plp_tile_<i>_add_to_cart` | `plp_tile_0_add_to_cart`, `plp_tile_1_add_to_cart` | *(defined, not yet wired)* |
+| Visual cue | `plp_tile_<i>_visual_cue_<j>` | `plp_tile_0_visual_cue_<j>`, `plp_tile_1_visual_cue_<j>` | `plp_product_sliver.dart`, `product_grid.dart` |
+| Text | `plp_tile_<i>_name` | `plp_tile_0_name`, `plp_tile_1_name` | `plp_product_sliver.dart`, `product_grid.dart` |
+| Text | `plp_tile_<i>_price` | `plp_tile_0_price`, `plp_tile_1_price` | `plp_product_sliver.dart`, `product_grid.dart` |
+| Text | `plp_tile_<i>_color_variants` | `plp_tile_0_color_variants`, `plp_tile_1_color_variants` | `plp_product_sliver.dart`, `product_grid.dart` |
+| Text | `plp_tile_<i>_discount` | `plp_tile_0_discount`, `plp_tile_1_discount` | `plp_product_sliver.dart`, `product_grid.dart` |
 | Chip | `plp_floating_filter_<pos>_chip_<i>` | `plp_floating_filter_0_chip_0`, `plp_floating_filter_0_chip_1` | `floating_filter_row.dart` |
 | Button | `plp_floating_filter_<pos>_apply_button` | `plp_floating_filter_0_apply_button` | `floating_filter_row.dart` |
 | Button | `plp_product_count_button` | — | `plp_page.dart` |
+| Title | `plp_empty_state_title` | — | `plp_page.dart` |
+| Text | `plp_empty_state_subtitle` | — | `plp_page.dart` |
+| Button | `plp_empty_state_button` | — | `plp_page.dart` |
+| Title | `plp_error_state_title` | — | `plp_page.dart` |
+| Text | `plp_error_state_subtitle` | — | `plp_page.dart` |
+| Button | `plp_error_state_button` | — | `plp_page.dart` |
 | Title | `plp_sort_sheet_title` | — | `sort_bottom_sheet.dart` |
 | Option | `plp_sort_sheet_option_<i>` | `plp_sort_sheet_option_0`, `plp_sort_sheet_option_1` | `sort_bottom_sheet.dart` |
 | Title | `plp_filter_title` | — | `filter_page.dart` |
 | Button | `plp_filter_close_button` | — | `filter_page.dart` |
 | Option | `plp_filter_section_<i>` | `plp_filter_section_0`, `plp_filter_section_1` | `filter_page.dart` |
+| Badge | `plp_filter_section_<i>_badge` | `plp_filter_section_0_badge`, `plp_filter_section_1_badge` | `filter_page.dart` |
 | Option | `plp_filter_option_<i>` | `plp_filter_option_0`, `plp_filter_option_1` | `filter_page.dart` |
 | Text field | `plp_filter_search_input` | — | `filter_page.dart` |
 | Hint | `plp_filter_search_input_hint` | — | `filter_page.dart` |
@@ -202,6 +226,8 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | List item | `plp_filter_breadcrumb_<i>` | `plp_filter_breadcrumb_0`, `plp_filter_breadcrumb_1` | `filter_tree_content.dart` |
 | Title | `plp_filter_section_sheet_title` | — | `filter_section_sheet.dart` |
 | Option | `plp_filter_section_sheet_option_<i>` | `plp_filter_section_sheet_option_0`, `plp_filter_section_sheet_option_1` | `filter_section_sheet.dart` |
+| Text | `plp_filter_section_sheet_option_<i>_label` | `plp_filter_section_sheet_option_0_label`, `plp_filter_section_sheet_option_1_label` | `filter_section_sheet.dart` |
+| Text | `plp_filter_section_sheet_option_<i>_count` | `plp_filter_section_sheet_option_0_count`, `plp_filter_section_sheet_option_1_count` | `filter_section_sheet.dart` |
 | Button | `plp_filter_section_sheet_clear_button` | — | `filter_section_sheet.dart` |
 | Button | `plp_filter_section_sheet_apply_button` | — | `filter_section_sheet.dart` |
 

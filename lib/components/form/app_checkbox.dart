@@ -17,6 +17,8 @@ class AppCheckbox extends StatelessWidget {
     this.count,
     this.maxLabelLines = 1,
     this.border,
+    this.labelKey,
+    this.countKey,
   }) : label = null;
 
   const AppCheckbox.labeled({
@@ -31,6 +33,8 @@ class AppCheckbox extends StatelessWidget {
     this.count,
     this.maxLabelLines = 1,
     this.border,
+    this.labelKey,
+    this.countKey,
   });
 
   final bool isSelected;
@@ -43,6 +47,10 @@ class AppCheckbox extends StatelessWidget {
   final String? count;
   final int maxLabelLines;
   final BoxBorder? border;
+
+  /// Automation keys for the label / count text (null → unkeyed).
+  final Key? labelKey;
+  final Key? countKey;
 
   static const double _boxSize = 20.0;
   static const double _radius = 4.0;
@@ -83,6 +91,7 @@ class AppCheckbox extends StatelessWidget {
         Expanded(
           child: Text(
             label ?? '',
+            key: labelKey,
             style: AppTypographyV1.bodyRegular.regular.copyWith(color: _labelColor),
             overflow: TextOverflow.ellipsis,
             maxLines: maxLabelLines,
@@ -91,6 +100,7 @@ class AppCheckbox extends StatelessWidget {
         if (count.isNotNullOrEmpty) ...[
           Text(
             count ?? '',
+            key: countKey,
             textAlign: TextAlign.end,
             style: AppTypographyV1.labelLarge.regular.copyWith(color: Colors.black.withAlpha(50)),
           ),

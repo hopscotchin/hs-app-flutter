@@ -26,6 +26,18 @@ class PlpProductSliver extends StatelessWidget {
   Key _wishlistKey(int i) =>
       ValueKey('${PlpTestStrings.tile}_${i}_${PlpTestStrings.wishlistSuffix}');
 
+  /// Visual-cue key nested under the tile → `plp_tile_<i>_visual_cue_<j>`.
+  Key _visualCueKey(int i, int j) =>
+      ValueKey('${PlpTestStrings.tile}_${i}_${PlpTestStrings.visualCueSuffix}_$j');
+
+  /// Info-section keys nested under the tile.
+  Key _nameKey(int i) => ValueKey('${PlpTestStrings.tile}_${i}_${PlpTestStrings.nameSuffix}');
+  Key _priceKey(int i) => ValueKey('${PlpTestStrings.tile}_${i}_${PlpTestStrings.priceSuffix}');
+  Key _discountKey(int i) =>
+      ValueKey('${PlpTestStrings.tile}_${i}_${PlpTestStrings.discountSuffix}');
+  Key _colorVariantsKey(int i) =>
+      ValueKey('${PlpTestStrings.tile}_${i}_${PlpTestStrings.colorVariantsSuffix}');
+
   Widget _buildProductRow(
     BuildContext context,
     ListingProductEntity left,
@@ -58,6 +70,11 @@ class PlpProductSliver extends StatelessWidget {
         isWishlisted: wished,
         tileKey: _tileKey(index),
         wishlistKey: _wishlistKey(index),
+        visualCueKeyBuilder: (j) => _visualCueKey(index, j),
+        nameKey: _nameKey(index),
+        priceKey: _priceKey(index),
+        discountKey: _discountKey(index),
+        colorVariantsKey: _colorVariantsKey(index),
         onTap: () {
           if (product.isCPT) {
             ActionUrlHandler.navigate(context, product.actionUri, title: product.name);
@@ -127,6 +144,11 @@ class PlpProductSliver extends StatelessWidget {
                       isWishlisted: wished,
                       tileKey: _tileKey(productStart),
                       wishlistKey: _wishlistKey(productStart),
+                      visualCueKeyBuilder: (j) => _visualCueKey(productStart, j),
+                      nameKey: _nameKey(productStart),
+                      priceKey: _priceKey(productStart),
+                      discountKey: _discountKey(productStart),
+                      colorVariantsKey: _colorVariantsKey(productStart),
                       onTap: () => AppNavigator.goToPdp(context, product.id.toString()),
                       onWishlistTap: () => _toggleWishlist(context, product),
                       onAddToCartTap: () {},

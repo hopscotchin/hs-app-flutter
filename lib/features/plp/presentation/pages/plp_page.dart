@@ -279,6 +279,9 @@ class _PlpViewState extends State<_PlpView> {
                               padding: const EdgeInsets.only(bottom: 50),
                               child: EmptyStateWidget(
                                 type: EmptyStateType.serverError,
+                                titleKey: const ValueKey(PlpTestStrings.errorStateTitle),
+                                subtitleKey: const ValueKey(PlpTestStrings.errorStateSubtitle),
+                                buttonKey: const ValueKey(PlpTestStrings.errorStateButton),
                                 onButtonTap: () => _retry(context),
                               ),
                             ),
@@ -299,6 +302,9 @@ class _PlpViewState extends State<_PlpView> {
                               padding: const EdgeInsets.only(bottom: 50),
                               child: EmptyStateWidget(
                                 type: EmptyStateType.plp,
+                                titleKey: const ValueKey(PlpTestStrings.emptyStateTitle),
+                                subtitleKey: const ValueKey(PlpTestStrings.emptyStateSubtitle),
+                                buttonKey: const ValueKey(PlpTestStrings.emptyStateButton),
                                 subtitle: hasFilters
                                     ? PlpStrings.noProductsFiltered
                                     : PlpStrings.tryAgainAndKeepExploring,

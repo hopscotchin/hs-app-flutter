@@ -165,10 +165,13 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
     final isSelected = _selectedValues.contains(value);
     final label = filter.label ?? '';
     final count = filter.count != null && filter.count! > 0 ? '(${filter.count})' : null;
-    final optionKey = ValueKey('${PlpTestStrings.filterSectionSheetOption}_$index');
+    final optionBase = '${PlpTestStrings.filterSectionSheetOption}_$index';
+    final optionKey = ValueKey(optionBase);
+    final labelKey = ValueKey('${optionBase}_${PlpTestStrings.filterSectionSheetOptionLabelSuffix}');
+    final countKey = ValueKey('${optionBase}_${PlpTestStrings.filterSectionSheetOptionCountSuffix}');
 
     return widget.section.isMultiSelect
-        ? _buildCheckbox(filter, value, isSelected, label, count, optionKey)
+        ? _buildCheckbox(filter, value, isSelected, label, count, optionKey, labelKey, countKey)
         : InkWell(
       highlightColor: Colors.transparent,
       onTap: () => _toggle(value),
@@ -177,7 +180,14 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
           horizontal: AppSpacing.sm,
           vertical: AppSpacing.xsm,
         ),
-        child: AppRadio.labeled(key: optionKey, isSelected: isSelected, label: label, count: count),
+        child: AppRadio.labeled(
+          key: optionKey,
+          isSelected: isSelected,
+          label: label,
+          count: count,
+          labelKey: labelKey,
+          countKey: countKey,
+        ),
       ),
     );
   }
@@ -189,6 +199,8 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
       String label,
       String? count,
       Key? optionKey,
+      Key? labelKey,
+      Key? countKey,
       ) {
     final swatch = _isColourMode ? filter.colorHex.toColor : null;
     final useWhiteTick = swatch == null || swatch.isDarkColor;
@@ -207,6 +219,8 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
           checkColor: _isColourMode ? (useWhiteTick ? Colors.white : AppColors.neutralGrey6) : null,
           label: label,
           count: count,
+          labelKey: labelKey,
+          countKey: countKey,
         ),
       ),
     );
