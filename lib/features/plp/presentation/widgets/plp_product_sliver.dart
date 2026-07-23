@@ -148,8 +148,6 @@ class PlpProductSliver extends StatelessWidget {
                       priceKey: _priceKey(productStart),
                       discountKey: _discountKey(productStart),
                       colorVariantsKey: _colorVariantsKey(productStart),
-                      tileKey: _tileKey(productStart),
-                      wishlistKey: _wishlistKey(productStart),
                       onTap: () => AppNavigator.goToPdp(context, product.id.toString()),
                       onWishlistTap: () => _toggleWishlist(context, product),
                       onAddToCartTap: () {},

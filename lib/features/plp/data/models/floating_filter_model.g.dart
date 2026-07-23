@@ -29,9 +29,6 @@ FloatingFilterSectionModel _$FloatingFilterSectionModelFromJson(
   position: parseToIntOrNull(json['position']),
   tileWidth: parseToIntOrNull(json['tileWidth']),
   tileHeight: parseToIntOrNull(json['tileHeight']),
-  isMultiSelect: json['isMultiSelect'] == null
-      ? true
-      : parseToBool(json['isMultiSelect']),
   chips:
       (json['chips'] as List<dynamic>?)
           ?.map(
