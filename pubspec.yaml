@@ -84,10 +84,12 @@ dependencies:
   talker_bloc_logger: ^5.1.17
   talker_dio_logger_plus: ^1.0.5
 
+  # Flutter Driver extension (enabled only in debug via kDebugMode)
+  flutter_driver:
+    sdk: flutter
+
 dev_dependencies:
   flutter_test:
-    sdk: flutter
-  flutter_driver:
     sdk: flutter
 
   flutter_lints: ^6.0.0

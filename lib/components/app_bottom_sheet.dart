@@ -15,11 +15,13 @@ class AppBottomSheetAction {
     required this.label,
     required this.onPressed,
     this.style = AppBottomSheetButtonStyle.outlined,
+    this.buttonKey,
   });
 
   final String label;
   final VoidCallback onPressed;
   final AppBottomSheetButtonStyle style;
+  final Key? buttonKey;
 }
 
 class AppBottomSheet extends StatelessWidget {
@@ -29,12 +31,16 @@ class AppBottomSheet extends StatelessWidget {
     required this.description,
     required this.primaryAction,
     this.secondaryAction,
+    this.titleKey,
+    this.descriptionKey,
   });
 
   final String? title;
   final String description;
   final AppBottomSheetAction primaryAction;
   final AppBottomSheetAction? secondaryAction;
+  final Key? titleKey;
+  final Key? descriptionKey;
 
   static Future<T?> show<T>(
     BuildContext context, {
@@ -44,6 +50,8 @@ class AppBottomSheet extends StatelessWidget {
     AppBottomSheetAction? secondaryAction,
     bool isDismissible = true,
     bool enableDrag = true,
+    Key? titleKey,
+    Key? descriptionKey,
   }) {
     return showModalBottomSheet<T>(
       context: context,
@@ -60,6 +68,8 @@ class AppBottomSheet extends StatelessWidget {
         description: description,
         primaryAction: primaryAction,
         secondaryAction: secondaryAction,
+        titleKey: titleKey,
+        descriptionKey: descriptionKey,
       ),
     );
   }
@@ -85,11 +95,12 @@ class AppBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (title.isNotNullOrEmpty) ...[
-              Text(title!, style: AppTypographyV1.titleSmall.bold.textPrimary()),
+              Text(title!, key: titleKey, style: AppTypographyV1.titleSmall.bold.textPrimary()),
               AppSpacing.verticalGapMd,
             ],
             Text(
               description,
+              key: descriptionKey,
               style: AppTypographyV1.bodyRegular.regular.textPrimary().copyWith(height: 1.5),
             ),
             const SizedBox(height: 28),
@@ -129,6 +140,7 @@ class _SheetButton extends StatelessWidget {
 
     if (isFilled) {
       return TextButton(
+        key: action.buttonKey,
         onPressed: action.onPressed,
         style: TextButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -140,6 +152,7 @@ class _SheetButton extends StatelessWidget {
       );
     }
     return TextButton(
+      key: action.buttonKey,
       onPressed: action.onPressed,
       style: TextButton.styleFrom(
         backgroundColor: AppColors.brandTertiary,

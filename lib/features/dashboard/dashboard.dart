@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/components/spring/spring_bottom_nav_bar.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/features/account/presentation/bloc/account_bloc.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -48,10 +49,10 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
   // (lazy on first access) instead of allocating four NavBarItem + four
   // closure objects on every Scaffold rebuild.
   late final List<NavBarItem> _navItems = [
-    _navItem(ImageConstants.discover, 'Home'),
-    _navItem(ImageConstants.categories, 'Categories'),
-    _navItem(ImageConstants.search, 'Search'),
-    _navItem(ImageConstants.profile, 'Account'),
+    _navItem(ImageConstants.discover, 'Home', DashboardTestStrings.dashboardHomeNavItem),
+    _navItem(ImageConstants.categories, 'Categories', DashboardTestStrings.dashboardCategoriesNavItem),
+    _navItem(ImageConstants.search, 'Search', DashboardTestStrings.dashboardSearchNavItem),
+    _navItem(ImageConstants.profile, 'Account', DashboardTestStrings.dashboardAccountNavItem),
   ];
 
   late int _navIndex;
@@ -193,7 +194,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     SystemNavigator.pop();
   }
 
-  NavBarItem _navItem(String asset, String label) => NavBarItem(
+  NavBarItem _navItem(String asset, String label, String testKey) => NavBarItem(
     buildIcon: (_, color, _) => SvgPicture.asset(
       asset,
       width: _navIconSize,
@@ -203,6 +204,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     ),
     label: label,
+    tileKey: ValueKey(testKey),
   );
 
   // withOpacity keeps RGB fixed at the light lavender; only alpha changes.

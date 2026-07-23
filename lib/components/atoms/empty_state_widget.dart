@@ -198,6 +198,11 @@ class EmptyStateWidget extends StatelessWidget {
   /// Outer horizontal padding (default: [AppSpacing.xl] = 32 dp).
   final EdgeInsets padding;
 
+  /// Automation keys (null → unkeyed; each caller passes its own screen keys).
+  final Key? titleKey;
+  final Key? subtitleKey;
+  final Key? buttonKey;
+
   const EmptyStateWidget({
     super.key,
     this.type,
@@ -207,6 +212,9 @@ class EmptyStateWidget extends StatelessWidget {
     this.buttonLabel,
     this.onButtonTap,
     this.padding = const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+    this.titleKey,
+    this.subtitleKey,
+    this.buttonKey,
   }) : assert(
          type != null || (title != null && subtitle != null),
          'Provide either a type or explicit title + subtitle.',
@@ -246,18 +254,21 @@ class EmptyStateWidget extends StatelessWidget {
             const SizedBox(height: 30),
             Text(
               _resolvedTitle,
+              key: titleKey,
               style: AppTypographyV1.bodyLarge.bold.neutralGrey6(),
               textAlign: TextAlign.center,
             ),
             AppSpacing.verticalGapSm,
             Text(
               _resolvedSubtitle,
+              key: subtitleKey,
               style: AppTypographyV1.bodySmall.medium.neutralGrey6(),
               textAlign: TextAlign.center,
             ),
             if (_resolvedButtonLabel != null) ...[
               const SizedBox(height: 30),
               AppButton(
+                key: buttonKey,
                 text: _resolvedButtonLabel!,
                 variant: ButtonVariant.primary,
                 isFullWidth: true,

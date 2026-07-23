@@ -26,6 +26,22 @@ class XLTileWidget extends StatefulWidget {
   /// Analytics callback — position is 1-based, direction is "L" or "R"
   final void Function(int position, String direction)? onImageScrolled;
 
+  /// Automation key for the main product tap target.
+  final Key? tileKey;
+
+  /// Automation key for the wishlist toggle.
+  final Key? wishlistKey;
+
+  /// Automation key for the visual-cue overlay at rendered index `j`
+  /// (nests under the tile → `plp_tile_<i>_visual_cue_<j>`).
+  final Key? Function(int index)? visualCueKeyBuilder;
+
+  /// Automation keys for the info-section text (nest under the tile).
+  final Key? nameKey;
+  final Key? priceKey;
+  final Key? discountKey;
+  final Key? colorVariantsKey;
+
   const XLTileWidget({
     super.key,
     required this.product,
@@ -34,6 +50,13 @@ class XLTileWidget extends StatefulWidget {
     this.onAddToCartTap,
     this.isWishlisted,
     this.onImageScrolled,
+    this.tileKey,
+    this.wishlistKey,
+    this.visualCueKeyBuilder,
+    this.nameKey,
+    this.priceKey,
+    this.discountKey,
+    this.colorVariantsKey,
   });
 
   factory XLTileWidget.fromListingProduct(
@@ -44,6 +67,13 @@ class XLTileWidget extends StatefulWidget {
     VoidCallback? onAddToCartTap,
     bool? isWishlisted,
     void Function(int position, String direction)? onImageScrolled,
+    Key? tileKey,
+    Key? wishlistKey,
+    Key? Function(int index)? visualCueKeyBuilder,
+    Key? nameKey,
+    Key? priceKey,
+    Key? discountKey,
+    Key? colorVariantsKey,
   }) {
     return XLTileWidget(
       key: key,
@@ -53,6 +83,13 @@ class XLTileWidget extends StatefulWidget {
       onAddToCartTap: onAddToCartTap,
       isWishlisted: isWishlisted,
       onImageScrolled: onImageScrolled,
+      tileKey: tileKey,
+      wishlistKey: wishlistKey,
+      visualCueKeyBuilder: visualCueKeyBuilder,
+      nameKey: nameKey,
+      priceKey: priceKey,
+      discountKey: discountKey,
+      colorVariantsKey: colorVariantsKey,
     );
   }
 
@@ -79,6 +116,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
     final screenWidth = MediaQuery.sizeOf(context).width;
 
     return GestureDetector(
+      key: widget.tileKey,
       onTap: widget.onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,7 +135,8 @@ class _XLTileWidgetState extends State<XLTileWidget> {
         child: Stack(
           children: [
             _buildImagePager(),
-            ...widget.product.visualCues.map(_buildVisualCue),
+            for (var i = 0; i < widget.product.visualCues.length; i++)
+              _buildVisualCue(widget.product.visualCues[i], i),
             if (widget.product.wishlistInfo.canWishlist) _buildWishlistIcon(),
             if (_hasMultipleImages) _buildPageIndicator(),
           ],
@@ -138,6 +177,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
       right: 28,
       top: 28,
       child: GestureDetector(
+        key: widget.wishlistKey,
         onTap: widget.onWishlistTap,
         child: CustomImage(
           path: (widget.isWishlisted ?? widget.product.wishlistInfo.isWishlisted)
@@ -193,7 +233,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
 
   // ── Visual cues — four corners ────────────────────────────────────────────
 
-  Widget _buildVisualCue(VisualCueEntity cue) {
+  Widget _buildVisualCue(VisualCueEntity cue, int index) {
     final location = cue.location?.toLowerCase() ?? '';
     final isTop = location.contains('top');
     final isLeft = location.contains('left');
@@ -203,6 +243,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
     final txtColor = cue.textColor.toColor ?? AppColors.textPrimary;
 
     return Positioned(
+      key: widget.visualCueKeyBuilder?.call(index),
       top: isTop ? edgeMargin : null,
       bottom: !isTop ? edgeMargin : null,
       left: isLeft ? edgeMargin : null,
@@ -234,6 +275,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
           if (product.name.isNotNullOrEmpty) ...[
             Text(
               product.name,
+              key: widget.nameKey,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypographyV1.labelLarge.regular.textPrimary(),
@@ -247,6 +289,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 RichText(
+                  key: widget.priceKey,
                   text: TextSpan(
                     text: '${price.sellingPrice}\t\t',
                     style: AppTypographyV1.bodyRegular.bold.textPrimary(),
@@ -259,9 +302,16 @@ class _XLTileWidgetState extends State<XLTileWidget> {
                       ],
 
                       if (price.discountLabel.isNotNullOrEmpty) ...[
-                        TextSpan(
-                          text: '\t\t${price.discountLabel!}',
-                          style: AppTypographyV1.labelMedium.medium.brandSecondary(),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.middle,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Text(
+                              price.discountLabel!,
+                              key: widget.discountKey,
+                              style: AppTypographyV1.labelMedium.medium.brandSecondary(),
+                            ),
+                          ),
                         ),
                       ],
                     ],
@@ -276,6 +326,7 @@ class _XLTileWidgetState extends State<XLTileWidget> {
               alignment: Alignment.bottomLeft,
               child: Text(
                 product.colorVariants ?? '',
+                key: widget.colorVariantsKey,
                 style: AppTypographyV1.labelMedium.medium.copyWith(
                   color: Colors.black.withValues(alpha: 0.5),
                 ),

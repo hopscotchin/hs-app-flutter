@@ -3,6 +3,7 @@ import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 
 import '../../core/constants/image_constants.dart';
+import '../../core/constants/strings/auto_test_strings.dart';
 import '../../core/entities/message_bar_entity.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
@@ -30,25 +31,38 @@ class MessageBarsWidget extends StatelessWidget {
   /// Optional callback when an action link is tapped.
   final MessageBarActionCallback? onAction;
 
+  /// Screen-specific prefix for automation keys (e.g. `login`, `join_us`).
+  /// When set, keys become `<keyPrefix>_<base>_<index>`.
+  final String? keyPrefix;
+
   const MessageBarsWidget({
     super.key,
     required this.messageBars,
     this.cardStyle = false,
     this.onAction,
+    this.keyPrefix,
   });
 
   @override
   Widget build(BuildContext context) {
     if (messageBars.isEmpty) return const SizedBox.shrink();
 
+    final visibleBars = messageBars.where((bar) {
+      final display = bar.displayText;
+      return display != null && display.isNotEmpty;
+    }).toList();
+
     return Column(
-      children: messageBars
-          .where((bar) {
-            final display = bar.displayText;
-            return display != null && display.isNotEmpty;
-          })
-          .map((bar) => _MessageBarItem(bar: bar, cardStyle: cardStyle, onAction: onAction))
-          .toList(),
+      children: [
+        for (var i = 0; i < visibleBars.length; i++)
+          _MessageBarItem(
+            bar: visibleBars[i],
+            cardStyle: cardStyle,
+            onAction: onAction,
+            index: i,
+            keyPrefix: keyPrefix,
+          ),
+      ],
     );
   }
 }
@@ -98,8 +112,16 @@ class _MessageBarItem extends StatefulWidget {
   final MessageBarEntity bar;
   final bool cardStyle;
   final MessageBarActionCallback? onAction;
+  final int index;
+  final String? keyPrefix;
 
-  const _MessageBarItem({required this.bar, required this.cardStyle, this.onAction});
+  const _MessageBarItem({
+    required this.bar,
+    required this.cardStyle,
+    required this.index,
+    this.onAction,
+    this.keyPrefix,
+  });
 
   @override
   State<_MessageBarItem> createState() => _MessageBarItemState();
@@ -107,6 +129,14 @@ class _MessageBarItem extends StatefulWidget {
 
 class _MessageBarItemState extends State<_MessageBarItem> {
   bool _dismissed = false;
+
+  /// Builds an automation key: `<keyPrefix>_<base>_<index>`, or `<base>_<index>`
+  /// when no screen prefix is supplied.
+  ValueKey<String> _key(String base) {
+    final prefix = widget.keyPrefix;
+    final name = prefix == null ? base : '${prefix}_$base';
+    return ValueKey('${name}_${widget.index}');
+  }
 
   void _handleAction(String? link) {
     if (link != null && link.toLowerCase() == 'dismiss') {
@@ -194,7 +224,11 @@ class _MessageBarItemState extends State<_MessageBarItem> {
       AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.brandSecondary);
 
   Widget _buildPlainMessage(MessageBarEntity bar, Color textColor) {
-    return Text(bar.displayText!, style: _messageTextStyle(textColor));
+    return Text(
+      bar.displayText!,
+      key: _key(MessageBarTestStrings.messageBarMessageTextField),
+      style: _messageTextStyle(textColor),
+    );
   }
 
   /// Message with optional action text stacked below.
@@ -206,10 +240,15 @@ class _MessageBarItemState extends State<_MessageBarItem> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(bar.displayText!, style: _messageTextStyle(textColor)),
+        Text(
+          bar.displayText!,
+          key: _key(MessageBarTestStrings.messageBarMessageTextField),
+          style: _messageTextStyle(textColor),
+        ),
         const SizedBox(height: 4),
         GestureDetector(
           onTap: () => _handleAction(bar.actionLink),
+          key: _key(MessageBarTestStrings.messageBarActionButton),
           child: Text(bar.actionText!, style: _actionTextStyle),
         ),
       ],
@@ -223,12 +262,17 @@ class _MessageBarItemState extends State<_MessageBarItem> {
       children: [
         // Left button — outlined (secondary color border)
         Expanded(
-          child: _outlineButton(text: bar.actionText!, onTap: () => _handleAction(bar.actionLink)),
+          child: _outlineButton(
+            key: _key(MessageBarTestStrings.messageBarLeftButton),
+            text: bar.actionText!,
+            onTap: () => _handleAction(bar.actionLink),
+          ),
         ),
         const SizedBox(width: 16),
         // Right button — filled (secondary color bg)
         Expanded(
           child: _filledButton(
+            key: _key(MessageBarTestStrings.messageBarRightButton),
             text: bar.actionTextRight!,
             onTap: () => _handleAction(bar.actionLinkRight),
           ),
@@ -237,8 +281,9 @@ class _MessageBarItemState extends State<_MessageBarItem> {
     );
   }
 
-  Widget _outlineButton({required String text, required VoidCallback onTap}) {
+  Widget _outlineButton({required String text, required VoidCallback onTap, Key? key}) {
     return GestureDetector(
+      key: key,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
@@ -256,8 +301,9 @@ class _MessageBarItemState extends State<_MessageBarItem> {
     );
   }
 
-  Widget _filledButton({required String text, required VoidCallback onTap}) {
+  Widget _filledButton({required String text, required VoidCallback onTap, Key? key}) {
     return GestureDetector(
+      key: key,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),

@@ -8,6 +8,7 @@ import '../../../../components/atoms/filled_text_field.dart' show MobileNumberFo
 import '../../../../components/atoms/outlined_text_field.dart';
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../widgets/auth_footer_link_row.dart';
 import '../widgets/auth_primary_button.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
@@ -78,6 +79,8 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: AppColors.baseDefault,
       appBar: HsAppbar(
         title: AuthStrings.signInTitle,
+        titleKey: const ValueKey(LoginTestStrings.loginAppBarTitle),
+        backButtonKey: const ValueKey(LoginTestStrings.loginBackButton),
         onLeadingTap: () => Navigator.of(context).pop(),
       ),
       body: widget.isCheckoutFlow
@@ -165,6 +168,7 @@ class _LoginPageState extends State<LoginPage> {
                           messageBars: bars,
                           cardStyle: true,
                           onAction: onMessageAction,
+                          keyPrefix: LoginTestStrings.screen,
                         ),
                       ),
                     ],
@@ -183,6 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                         _buildMobileField(),
                         AppSpacing.verticalGapLg,
                         AuthPrimaryButton(
+                          key: const ValueKey(LoginTestStrings.loginSendOtpButton),
                           label: AuthStrings.sendOtp,
                           isLoading: isLoading,
                           onPressed: _onSendOtp,
@@ -190,6 +195,7 @@ class _LoginPageState extends State<LoginPage> {
 
                         AppSpacing.verticalGapXl,
                         AuthFooterLinkRow(
+                          key: const ValueKey(LoginTestStrings.loginJoinUsButton),
                           promptText: AuthStrings.newToHopscotch,
                           actionLabel: AuthStrings.joinUs.toUpperCase(),
                           onActionTap: () => AppNavigator.goToJoinUs(
@@ -213,9 +219,11 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildMobileField() {
     return OutlinedTextField(
+      key: const ValueKey(LoginTestStrings.loginMobileInputField),
       controller: _inputController,
       focusNode: _inputFocusNode,
       labelText: AuthStrings.mobileNumberTitle,
+      hintTextKey: const ValueKey(LoginTestStrings.loginMobileInputHint),
       keyboardType: TextInputType.phone,
       maxLength: 11,
       prefixText: '+91 ',

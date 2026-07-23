@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hs_app_flutter/core/config/environment.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../../../components/buttons/app_button.dart';
 import '../../../../components/buttons/button_enums.dart';
@@ -43,6 +44,7 @@ class AccountFooterWidget extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
                 child: AppButton(
+                  key: const ValueKey(AccountTestStrings.accountFooterSignOutButton),
                   text: AccountStrings.signOut,
                   variant: ButtonVariant.secondary,
                   isFullWidth: true,
@@ -76,6 +78,7 @@ class AccountFooterWidget extends StatelessWidget {
                               : '${AccountStrings.appVersion} ${info.version}';
                           return Text(
                             versionText,
+                            key: const ValueKey(AccountTestStrings.accountFooterAppVersionTextField),
                             textAlign: TextAlign.center,
                             style: AppTypographyV1.bodySmall.medium.copyWith(
                               color: AppColors.neutralGrey0,
@@ -89,6 +92,7 @@ class AccountFooterWidget extends StatelessWidget {
                 // Legal link
                 GestureDetector(
                   onTap: onLegal ?? () {},
+                  key: const ValueKey(AccountTestStrings.accountFooterLegalButton),
                   child: Text(
                     AccountStrings.legal,
                     style: AppTypographyV1.bodySmall.medium.copyWith(

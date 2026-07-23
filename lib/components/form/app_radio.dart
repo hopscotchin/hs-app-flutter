@@ -13,6 +13,8 @@ class AppRadio extends StatelessWidget {
     this.isDisabled = false,
     this.count,
     this.maxLabelLines = 3,
+    this.labelKey,
+    this.countKey,
   }) : label = null;
 
   const AppRadio.labeled({
@@ -23,6 +25,8 @@ class AppRadio extends StatelessWidget {
     this.isDisabled = false,
     this.count,
     this.maxLabelLines = 3,
+    this.labelKey,
+    this.countKey,
   });
 
   final bool isSelected;
@@ -31,6 +35,10 @@ class AppRadio extends StatelessWidget {
   final bool isDisabled;
   final String? count;
   final int maxLabelLines;
+
+  /// Automation keys for the label / count text (null → unkeyed).
+  final Key? labelKey;
+  final Key? countKey;
 
   static const Color _labelColor = AppColors.neutralBlack;
 
@@ -62,6 +70,7 @@ class AppRadio extends StatelessWidget {
           flex: 1,
           child: Text(
             label ?? '',
+            key: labelKey,
             style: AppTypographyV1.bodyRegular.regular.copyWith(color: _labelColor),
             overflow: TextOverflow.ellipsis,
             maxLines: maxLabelLines,
@@ -71,6 +80,7 @@ class AppRadio extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             count ?? '',
+            key: countKey,
             style: AppTypographyV1.labelLarge.regular.copyWith(color: Colors.black.withAlpha(50)),
           ),
           const SizedBox(width: 10),

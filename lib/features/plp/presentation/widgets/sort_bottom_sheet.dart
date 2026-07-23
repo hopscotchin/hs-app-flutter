@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/components/form/app_radio.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
@@ -24,14 +25,21 @@ class SortBottomSheet extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, AppSpacing.md, AppSpacing.xs),
-              child: Text(PlpStrings.sort, style: AppTypographyV1.titleMedium.bold.textPrimary()),
+              child: Text(
+                PlpStrings.sort,
+                key: const ValueKey(PlpTestStrings.sortSheetTitle),
+                style: AppTypographyV1.titleMedium.bold.textPrimary(),
+              ),
             ),
-            ...sortingOptions.map((option) {
+            ...sortingOptions.asMap().entries.map((entry) {
+              final index = entry.key;
+              final option = entry.value;
               return SizedBox(
                 width: double.infinity,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xsm),
                   child: AppRadio.labeled(
+                    key: ValueKey('${PlpTestStrings.sortSheetOption}_$index'),
                     isSelected: option.isSelected,
                     label: option.label ?? '',
                     onTap: () {

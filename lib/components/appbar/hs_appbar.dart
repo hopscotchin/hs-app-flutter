@@ -30,12 +30,15 @@ class HsAppbar extends AppBarBase {
     List<Widget>? actions,
     bool showBottomBorder = true,
     bool showBackButton = true,
+    Key? titleKey,
+    Key? backButtonKey,
   }) {
     return HsAppbar._raw(
       key: key,
-      leading: leading ?? (showBackButton ? _BackButton(onBack: onLeadingTap) : null),
+      leading: leading ?? (showBackButton ? _BackButton(key: backButtonKey, onBack: onLeadingTap) : null),
       center: Text(
         title,
+        key: titleKey,
         style: AppTypographyV1.titleMedium.bold.copyWith(color: AppColors.neutralBlack),
       ),
       actions: actions,
@@ -48,10 +51,15 @@ class HsAppbar extends AppBarBase {
   }
 
   /// Only Title (centered), no back button, no actions.
-  factory HsAppbar.titleOnly({required String title, bool showBottomBorder = true}) {
+  factory HsAppbar.titleOnly({
+    required String title,
+    bool showBottomBorder = true,
+    Key? titleKey,
+  }) {
     return HsAppbar._raw(
       center: Text(
         title,
+        key: titleKey,
         style: AppTypographyV1.titleMedium.bold.copyWith(color: AppColors.neutralBlack),
       ),
       backgroundColor: AppColors.baseDefault,
@@ -113,7 +121,7 @@ class _DefaultBackButton extends StatelessWidget {
 class _BackButton extends StatelessWidget {
   final VoidCallback? onBack;
 
-  const _BackButton({this.onBack});
+  const _BackButton({super.key, this.onBack});
 
   @override
   Widget build(BuildContext context) {

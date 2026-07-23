@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/cubits/cart_count_cubit.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 
@@ -167,6 +168,9 @@ class _TabsRow extends StatelessWidget {
             label: Align(
               alignment: Alignment.center,
               child: Container(
+                key: ValueKey(
+                  '${HomeComponentTestStrings.homePage}_${HomeComponentTestStrings.tab}_$i',
+                ),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: isSelected ? activePillDecoration : null,
                 child: Text(labels[i], style: isSelected ? activeStyle : inactiveStyle),
@@ -217,6 +221,9 @@ class _AppBarContent extends StatelessWidget {
           ),
           const Spacer(),
           GestureDetector(
+            key: const ValueKey(
+              '${HomeComponentTestStrings.homePage}_${HomeComponentTestStrings.wishlistButton}',
+            ),
             onTap: () {},
             child: RepaintBoundary(
               child: SvgPicture.asset(
@@ -230,6 +237,9 @@ class _AppBarContent extends StatelessWidget {
           ),
           const SizedBox(width: 18),
           GestureDetector(
+            key: const ValueKey(
+              '${HomeComponentTestStrings.homePage}_${HomeComponentTestStrings.cartButton}',
+            ),
             onTap: () => AppNavigator.goToCart(context),
             child: BadgeIcon(
               count: context.watch<CartCountCubit>().state,

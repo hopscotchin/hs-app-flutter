@@ -8,25 +8,58 @@ import '../../../../components/page_components/product_grid_widget.dart';
 import '../../../../components/page_components/shop_the_look_widget.dart';
 import '../../data/models/component_models.dart';
 import '../../domain/entities/home_page_entity.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/cubits/shop_the_look_cubit.dart';
 
 class PageComponentRenderer extends StatelessWidget {
   final PageComponent component;
 
-  const PageComponentRenderer({super.key, required this.component});
+  /// Render index on the page — used as the component-instance disambiguator
+  /// in automation keys (`<page>_<component>_<index>`).
+  final int index;
+
+  /// Host page prefix for automation keys: `hp` for home, `lp_<pageName>` for
+  /// a landing page. Null disables keying (component renders without keys).
+  final String? pagePrefix;
+
+  const PageComponentRenderer({
+    super.key,
+    required this.component,
+    this.index = 0,
+    this.pagePrefix,
+  });
+
+  /// Composes the component-level key prefix, e.g. `hp_pg_2`. Returns null when
+  /// no page prefix is supplied or the component type has no abbreviation.
+  String? _keyPrefix() {
+    final page = pagePrefix;
+    if (page == null) return null;
+    final abbrev = switch (component.type) {
+      PageComponentType.hero => HomeComponentTestStrings.hero,
+      PageComponentType.customTiles ||
+      PageComponentType.tabbedCustomTiles => HomeComponentTestStrings.customTiles,
+      PageComponentType.productGrid => HomeComponentTestStrings.productGrid,
+      PageComponentType.pageCarousel => HomeComponentTestStrings.pageCarousel,
+      _ => null,
+    };
+    if (abbrev == null) return null;
+    return '${page}_${abbrev}_$index';
+  }
 
   @override
   Widget build(BuildContext context) {
     final parsed = component.parsedData;
     final margins = component.margins;
+    final keyPrefix = _keyPrefix();
 
     // Each widget handles horizontal + inner margins internally.
     // Renderer only applies top/bottom outer spacing.
     final child = switch (component.type) {
-      PageComponentType.hero => _buildHero(parsed, margins),
-      PageComponentType.customTiles => _buildCustomTiles(parsed, margins),
-      PageComponentType.productGrid => _buildProductGrid(parsed, margins),
-      PageComponentType.pageCarousel => _buildPageCarousel(parsed, margins),
+      PageComponentType.hero => _buildHero(parsed, margins, keyPrefix),
+      PageComponentType.customTiles => _buildCustomTiles(parsed, margins, keyPrefix),
+      PageComponentType.productGrid => _buildProductGrid(parsed, margins, keyPrefix),
+      PageComponentType.pageCarousel => _buildPageCarousel(parsed, margins, keyPrefix),
+      // Tabbed custom tiles intentionally unkeyed (excluded from automation scope).
       PageComponentType.tabbedCustomTiles => _buildTabbedCustomTiles(
         parsed,
         margins,
@@ -47,44 +80,44 @@ class PageComponentRenderer extends StatelessWidget {
     );
   }
 
-  Widget _buildHero(Object? parsed, ComponentMargins? margins) {
+  Widget _buildHero(Object? parsed, ComponentMargins? margins, String? keyPrefix) {
     final data = parsed is HeroCarouselData
         ? parsed
         : component.data != null
         ? ComponentDataParser.parseHero(component.data!)
         : null;
     if (data == null) return const SizedBox.shrink();
-    return HeroCarouselWidget(heroData: data, margins: margins);
+    return HeroCarouselWidget(heroData: data, margins: margins, keyPrefix: keyPrefix);
   }
 
-  Widget _buildCustomTiles(Object? parsed, ComponentMargins? margins) {
+  Widget _buildCustomTiles(Object? parsed, ComponentMargins? margins, String? keyPrefix) {
     final data = parsed is CustomTilesData
         ? parsed
         : component.data != null
         ? ComponentDataParser.parseCustomTiles(component.data!)
         : null;
     if (data == null) return const SizedBox.shrink();
-    return CustomTilesWidget(tilesData: data, margins: margins);
+    return CustomTilesWidget(tilesData: data, margins: margins, keyPrefix: keyPrefix);
   }
 
-  Widget _buildProductGrid(Object? parsed, ComponentMargins? margins) {
+  Widget _buildProductGrid(Object? parsed, ComponentMargins? margins, String? keyPrefix) {
     final data = parsed is ProductGridData
         ? parsed
         : component.data != null
         ? ComponentDataParser.parseProductGrid(component.data!)
         : null;
     if (data == null) return const SizedBox.shrink();
-    return ProductGridWidget(gridData: data, margins: margins);
+    return ProductGridWidget(gridData: data, margins: margins, keyPrefix: keyPrefix);
   }
 
-  Widget _buildPageCarousel(Object? parsed, ComponentMargins? margins) {
+  Widget _buildPageCarousel(Object? parsed, ComponentMargins? margins, String? keyPrefix) {
     final data = parsed is PageCarouselData
         ? parsed
         : component.data != null
         ? ComponentDataParser.parsePageCarousel(component.data!)
         : null;
     if (data == null) return const SizedBox.shrink();
-    return PageCarouselWidget(carouselData: data, margins: margins);
+    return PageCarouselWidget(carouselData: data, margins: margins, keyPrefix: keyPrefix);
   }
 
   Widget _buildTabbedCustomTiles(Object? parsed, ComponentMargins? margins) {

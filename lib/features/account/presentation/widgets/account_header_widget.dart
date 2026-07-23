@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/auth_strings.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
 import '../../../../components/buttons/app_button_named.dart';
@@ -56,6 +57,7 @@ class _SignedInHeader extends StatelessWidget {
               children: [
                 Text(
                   '${AccountStrings.hey} ${account.name ?? ''}',
+                  key: const ValueKey(AccountTestStrings.accountSignInHeaderGreetingTextField),
                   style: AppTypographyV1.bodyLarge.bold.textPrimary(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -79,6 +81,7 @@ class _SignedInHeader extends StatelessWidget {
               backgroundColor: AppColors.primary,
               child: account.avatarUrl != null && account.avatarUrl!.isNotEmpty
                   ? CachedImageWidget(
+                      key: const ValueKey(AccountTestStrings.accountSignInHeaderAvatarImage),
                       imageUrl: account.avatarUrl!,
                       width: 48,
                       height: 48,
@@ -86,6 +89,7 @@ class _SignedInHeader extends StatelessWidget {
                     )
                   : Text(
                       _initials,
+                      key: const ValueKey(AccountTestStrings.accountSignInHeaderAvatarInitials),
                       style: AppTypographyV1.titleMedium.semiBold.copyWith(
                         color: AppColors.onPrimary,
                       ),
@@ -102,7 +106,11 @@ class _SignedInHeader extends StatelessWidget {
     final hasEmail = account.email != null && account.email!.isNotEmpty;
 
     if (!hasPhone && !hasEmail) {
-      return Text(AuthStrings.doMoreWithAccount, style: AppTypographyV1.labelLarge.textSeconday());
+      return Text(
+        AuthStrings.doMoreWithAccount,
+        key: const ValueKey(AccountTestStrings.accountSignInHeaderContactTextField),
+        style: AppTypographyV1.labelLarge.textSeconday(),
+      );
     }
 
     return Row(
@@ -117,6 +125,7 @@ class _SignedInHeader extends StatelessWidget {
         Flexible(
           child: Text(
             hasPhone ? _formattedPhone : account.email!,
+            key: const ValueKey(AccountTestStrings.accountSignInHeaderContactTextField),
             style: AppTypographyV1.labelLarge.medium.copyWith(color: AppColors.neutralGrey5),
             overflow: TextOverflow.ellipsis,
           ),
@@ -164,14 +173,20 @@ class _SignedOutHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(AccountStrings.heyThere, style: AppTypographyV1.bodyLarge.bold.textPrimary()),
+          Text(
+            AccountStrings.heyThere,
+            key: const ValueKey(AccountTestStrings.accountSignOutHeaderTitleTextField),
+            style: AppTypographyV1.bodyLarge.bold.textPrimary(),
+          ),
           AppSpacing.verticalGapXs,
           Text(
             AccountStrings.signOutHeaderSubTitle,
+            key: const ValueKey(AccountTestStrings.accountSignOutHeaderSubtitleTextField),
             style: AppTypographyV1.labelLarge.regular.textPrimary(),
           ),
           const SizedBox(height: 17),
           PrimaryButton.defaultType(
+            key: const ValueKey(AccountTestStrings.accountSignOutHeaderSignInButton),
             text: AccountStrings.signIn,
             isFullWidth: true,
             onTap: () => AppNavigator.goToLogin(context),
@@ -179,6 +194,7 @@ class _SignedOutHeader extends StatelessWidget {
           if (account.hasGuestData) ...[
             AppSpacing.verticalGapSm,
             SecondaryButton.defaultType(
+              key: const ValueKey(AccountTestStrings.accountSignOutHeaderForgetMeButton),
               text: AccountStrings.forgetMe,
               isFullWidth: true,
               onTap: onForgetMe,
@@ -187,12 +203,14 @@ class _SignedOutHeader extends StatelessWidget {
             Center(
               child: Text(
                 AccountStrings.eraseMessage,
+                key: const ValueKey(AccountTestStrings.accountSignOutHeaderEraseMessageTextField),
                 style: AppTypographyV1.labelMedium.regular.textPrimary(),
               ),
             ),
           ],
           AppSpacing.verticalGapMd,
           AuthFooterLinkRow(
+            key: const ValueKey(AccountTestStrings.accountSignOutHeaderJoinUsButton),
             promptText: AuthStrings.newToHopscotch,
             actionLabel: AuthStrings.joinUs.toUpperCase(),
             onActionTap: () => AppNavigator.goToJoinUs(context),

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hs_app_flutter/core/config/build_config.dart';
 import 'package:hs_app_flutter/core/di/injection.dart';
 import 'package:hs_app_flutter/core/router/app_router.dart';
 import 'package:talker_dio_logger_plus/talker_dio_logger_plus.dart';
@@ -28,7 +29,7 @@ class _TalkerFloatingButtonState extends State<TalkerFloatingButton> {
 
   @override
   Widget build(BuildContext context) {
-    if (!kDebugMode) return widget.child;
+    if (!kDebugMode || kIsAutomation) return widget.child;
     final screenSize = MediaQuery.sizeOf(context);
     return Stack(
       children: [

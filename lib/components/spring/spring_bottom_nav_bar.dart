@@ -68,7 +68,7 @@ const double _kTileSpacing = 30.0;
 // ─────────────────────────────────────────────────────────────────────────────
 
 class NavBarItem {
-  const NavBarItem({required this.buildIcon, required this.label});
+  const NavBarItem({required this.buildIcon, required this.label, this.tileKey});
 
   /// Called inside _NavTile.build — receives the tile's BuildContext (usable
   /// with context.watch), the interpolated color, and whether the tab is
@@ -76,6 +76,9 @@ class NavBarItem {
   final Widget Function(BuildContext context, Color color, bool isActive)
   buildIcon;
   final String label;
+
+  /// Optional automation key applied to this tab's tile.
+  final Key? tileKey;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -452,6 +455,7 @@ class _SpringBottomNavBarState extends State<SpringBottomNavBar>
                         for (int i = 0; i < widget.items.length; i++)
                           Expanded(
                             child: _NavTile(
+                              key: widget.items[i].tileKey,
                               item: widget.items[i],
                               expansion: exps[i],
                               activeColor: widget.activeColor,
@@ -496,6 +500,7 @@ const _kNavLabelBase = TextStyle(
 ///                 outer Row spacing) defines the capsule's footprint.
 class _NavTile extends StatelessWidget {
   const _NavTile({
+    super.key,
     required this.item,
     required this.expansion,
     required this.activeColor,

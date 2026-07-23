@@ -6,6 +6,7 @@ import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
 import 'package:hs_app_flutter/components/buttons/button_enums.dart';
 import 'package:hs_app_flutter/components/form/app_checkbox.dart';
 import 'package:hs_app_flutter/components/form/app_radio.dart';
+import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
@@ -221,8 +222,13 @@ class _FilterPageViewState extends State<_FilterPageView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(PlpStrings.filters, style: AppTypographyV1.titleMedium.bold.textPrimary()),
+          Text(
+            PlpStrings.filters,
+            key: const ValueKey(PlpTestStrings.filterTitle),
+            style: AppTypographyV1.titleMedium.bold.textPrimary(),
+          ),
           IconButton(
+            key: const ValueKey(PlpTestStrings.filterCloseButton),
             icon: const Icon(Icons.close, size: 24),
             onPressed: () => Navigator.of(context).pop(),
             padding: EdgeInsets.zero,
@@ -273,6 +279,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
                   );
 
                   return GestureDetector(
+                    key: ValueKey('${PlpTestStrings.filterSection}_$index'),
                     onTap: () => context.read<FilterBloc>().add(SwitchSection(sectionIndex: index)),
                     child: Stack(
                       clipBehavior: Clip.none,
@@ -350,6 +357,9 @@ class _FilterPageViewState extends State<_FilterPageView> {
                             top: 2,
                             right: -8,
                             child: FilterSectionBadge(
+                              key: ValueKey(
+                                '${PlpTestStrings.filterSection}_${index}_${PlpTestStrings.filterSectionBadgeSuffix}',
+                              ),
                               cue: section.visualCue!,
                               height: 20,
                               foldSize: 7,
@@ -437,8 +447,8 @@ class _FilterPageViewState extends State<_FilterPageView> {
                   return _buildSectionHeader(filter);
                 }
                 return isColourMode
-                    ? _buildColourFilterItem(context, state, filter, section)
-                    : _buildFilterItem(context, state, filter, section);
+                    ? _buildColourFilterItem(context, state, filter, section, index)
+                    : _buildFilterItem(context, state, filter, section, index);
               },
             ),
           ),
@@ -468,6 +478,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
         return Padding(
           padding: const EdgeInsets.fromLTRB(0, AppSpacing.xs, AppSpacing.sm, AppSpacing.xxs),
           child: OutlinedTextField(
+            key: const ValueKey(PlpTestStrings.filterSearchInput),
             required: false,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (p0) {
@@ -478,6 +489,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
             },
             controller: _searchController,
             labelText: hint ?? PlpStrings.pincode,
+            hintTextKey: const ValueKey(PlpTestStrings.filterSearchInputHint),
             errorText: state.pincodeError.isNotNullOrEmpty ? state.pincodeError : null,
             onChanged: _onSearchTextChanged,
             keyboardType: TextInputType.number,
@@ -489,6 +501,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
             maxLength: 6,
             focusNode: pincodeFocusNode,
             onTapOutside: (p0) => FocusScope.of(context).unfocus(),
+            suffixKey: const ValueKey(PlpTestStrings.filterSearchInputSuffix),
             suffix: state.isPincodeLoading
                 ? const SizedBox(
                     height: 15,
@@ -551,12 +564,14 @@ class _FilterPageViewState extends State<_FilterPageView> {
     FilterState state,
     FilterEntity filter,
     FilterSectionEntity section,
+      int index,
   ) {
     final param = filter.filterKey ?? '';
     final value = filter.filterValue ?? filter.label ?? '';
     final isChecked = _isFilterSelected(state, param, value);
     final label = filter.label ?? '';
     final count = filter.count != null && filter.count! > 0 ? '(${filter.count})' : null;
+    final optionKey = ValueKey('${PlpTestStrings.filterOption}_$index');
 
     void onToggle() {
       context.read<FilterBloc>().add(
@@ -571,6 +586,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xsm),
         child: section.isMultiSelect
             ? AppCheckbox.labeled(
+          key: optionKey,
                 isSelected: isChecked,
                 label: label,
                 count: count,
@@ -586,6 +602,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
     FilterState state,
     FilterEntity filter,
     FilterSectionEntity section,
+      int index,
   ) {
     final param = filter.filterKey ?? '';
     final value = filter.filterValue ?? filter.label ?? '';
@@ -607,6 +624,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xsm),
         child: AppCheckbox.labeled(
+          key: ValueKey('${PlpTestStrings.filterOption}_$index'),
           border: Border.all(color: AppColors.neutralGrey1, width: 0.5),
           checkBoxSelectedColor: swatch,
           checkBoxUnSelectedColor: swatch,
@@ -629,6 +647,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
           children: [
             Expanded(
               child: TertiaryButton.defaultType(
+                key: const ValueKey(PlpTestStrings.filterClearButton),
                 text: CommonStrings.clearAll,
                 onTap: state.hasSelections
                     ? () => context.read<FilterBloc>().add(const ClearAllPendingFilters())
@@ -638,6 +657,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: PrimaryButton.defaultType(
+                key: const ValueKey(PlpTestStrings.filterApplyButton),
                 text: CommonStrings.apply,
                 // Enabled when there are selections to commit, or when filters
                 // were applied before (so a cleared selection can still be
