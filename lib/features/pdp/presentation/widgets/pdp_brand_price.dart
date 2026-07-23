@@ -7,12 +7,10 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 import '../../../../features/plp/domain/entities/product_price_entity.dart';
 import '../../domain/entities/product_entity.dart';
+import '../../../../components/page_components/price_info_row.dart';
 
 // Design tokens from spec
-const _kPriceColor = Color(0xFF070707); // selling price
-const _kMrpColor = AppColors.neutralGrey5; // #AEAEB2
 const _kCalloutColor = AppColors.neutralGrey5; // #AEAEB2
-const _kDiscountColor = AppColors.secondaryLight; // #836EF1
 
 class PdpBrandPrice extends StatelessWidget {
   final ProductEntity product;
@@ -44,7 +42,7 @@ class PdpBrandPrice extends StatelessWidget {
           // ── Row 1: product name ──────────────────────────────────────────────
           if (product.name != null)
             Padding(
-              padding: const EdgeInsets.only(top: 16),
+              padding: const EdgeInsets.only(top: 4),
               child: Text(
                 product.name!,
                 style: AppTypographyV1.titleSmall.copyWith(
@@ -65,7 +63,8 @@ class PdpBrandPrice extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (price != null) _buildPriceRow(price),
+                    if (price != null)
+                      PriceInfoRow(price: price),
                     if (price?.callout != null) ...[
                       const SizedBox(height: 4),
                       Text(
@@ -93,7 +92,9 @@ class PdpBrandPrice extends StatelessWidget {
                   ),
                   AppSpacing.horizontalGapSm,
                   _ActionIcon(
-                    path: isWishlisted ? ImageConstants.wishlistAdded : ImageConstants.addWishlist,
+                    path: isWishlisted
+                        ? ImageConstants.wishlistAdded
+                        : ImageConstants.addWishlist,
                     onTap: onWishlistTap,
                     width: 20,
                     height: 20,
@@ -107,57 +108,6 @@ class PdpBrandPrice extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildPriceRow(ProductPriceEntity price) {
-    final hasMrp = price.mrp != null && price.mrp != price.sellingPrice;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Selling price — 20px w700
-        if (price.sellingPrice != null)
-          Text(
-            price.sellingPrice!,
-            style: AppTypographyV1.titleMedium.copyWith(
-              fontWeight: FontWeight.w700,
-              color: _kPriceColor,
-            ),
-          ),
-
-        if (hasMrp || price.discountLabel != null) ...[
-          const SizedBox(width: AppSpacing.lgMd),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // MRP strikethrough — 16px w400
-              if (hasMrp)
-                Text(
-                  price.mrp!,
-                  style: AppTypographyV1.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w400,
-                    color: _kMrpColor,
-                    decoration: TextDecoration.lineThrough,
-                    decorationColor: _kMrpColor,
-                  ),
-                ),
-
-              // Discount — 10px w400
-              if (price.discountLabel != null) ...[
-                const SizedBox(width: AppSpacing.xsm),
-                Text(
-                  price.discountLabel!,
-                  style: AppTypographyV1.labelMedium.copyWith(
-                    fontWeight: FontWeight.w400,
-                    color: _kDiscountColor,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ],
-      ],
-    );
-  }
 }
 
 class _ActionIcon extends StatelessWidget {
@@ -167,14 +117,26 @@ class _ActionIcon extends StatelessWidget {
   final double? height;
   final VoidCallback? onTap;
 
-  const _ActionIcon({required this.path, this.color, this.width, this.height, this.onTap});
+  const _ActionIcon({
+    super.key,
+    required this.path,
+    this.color,
+    this.width,
+    this.height,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: CustomImage(path: path, color: color, width: width, height: height),
+      child: CustomImage(
+        path: path,
+        color: color,
+        width: width,
+        height: height,
+      ),
     );
   }
 }

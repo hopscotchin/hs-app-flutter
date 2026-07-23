@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../components/atoms/badge_icon.dart';
 import '../../../../components/atoms/custom_image.dart';
@@ -13,20 +14,24 @@ import '../../../../core/theme/spacing.dart';
 class PdpAppBar extends StatelessWidget {
   const PdpAppBar({
     super.key,
-    required this.sheetController,
-    required this.minSize,
-    required this.maxSize,
+    required this.scrollController,
+    required this.whiteThreshold,
     this.onBack,
+    this.cartIconKey,
   });
 
-  final DraggableScrollableController sheetController;
-  final double minSize;
-  final double maxSize;
+  /// The single page scroll controller. The bar turns white once the page has
+  /// scrolled [whiteThreshold] px (i.e. the image has largely scrolled away).
+  final ScrollController scrollController;
+  final double whiteThreshold;
 
   /// Invoked when the back button is tapped. When null, the button just pops
-  /// the route. The PDP passes a handler that collapses an expanded sheet
-  /// first (matching the system back gesture).
+  /// the route.
   final VoidCallback? onBack;
+
+  /// Attached to the bag icon so the fly-to-cart animation can locate it as
+  /// the flight target. Null on views without an animation (e.g. error view).
+  final GlobalKey? cartIconKey;
 
   @override
   Widget build(BuildContext context) {
@@ -35,27 +40,31 @@ class PdpAppBar extends StatelessWidget {
       left: 0,
       right: 0,
       child: ListenableBuilder(
-        listenable: sheetController,
+        listenable: scrollController,
         builder: (context, child) {
-          final expansion = sheetController.isAttached
-              ? ((sheetController.size - minSize) / (maxSize - minSize)).clamp(0.0, 1.0)
+          final offset = scrollController.hasClients
+              ? scrollController.offset
               : 0.0;
-          // Stay transparent throughout the drag; only turn white once the sheet
-          // is fully expanded, rather than fading in progressively as it opens.
-          final fullyExpanded = expansion >= 0.99;
+          // Stay transparent while the image is in view; turn white once the
+          // page has scrolled far enough that the image has largely scrolled off.
+          final fullyExpanded = offset >= whiteThreshold;
           return AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOut,
             decoration: BoxDecoration(
-              color: AppColors.baseDefault.withValues(alpha: fullyExpanded ? 1.0 : 0.0),
+              color: AppColors.baseDefault.withValues(
+                alpha: fullyExpanded ? 1.0 : 0.0,
+              ),
               border: fullyExpanded
-                  ? const Border(bottom: BorderSide(color: AppColors.neutralGrey2))
+                  ? const Border(
+                      bottom: BorderSide(color: AppColors.neutralGrey2),
+                    )
                   : null,
             ),
             child: child,
           );
         },
-        child: PdpAppBarContent(onBack: onBack),
+        child: PdpAppBarContent(onBack: onBack, cartIconKey: cartIconKey),
       ),
     );
   }
@@ -63,33 +72,55 @@ class PdpAppBar extends StatelessWidget {
 
 /// The static contents of the PDP app bar (back, wishlist, bag). Extracted so
 /// it can be reused outside the animated overlay — e.g. on the error view,
-/// where there is no draggable sheet to drive the background fade.
+/// where there is no scroll controller to drive the background fade.
 class PdpAppBarContent extends StatelessWidget {
-  const PdpAppBarContent({super.key, this.onBack});
+  const PdpAppBarContent({super.key, this.onBack, this.cartIconKey});
 
-  /// Back-button handler. Falls back to popping the route when null (e.g. on
-  /// the error view, where there is no sheet to collapse).
+  /// Back-button handler. Falls back to popping the route when null.
   final VoidCallback? onBack;
+
+  /// Attached to the bag icon as the fly-to-cart animation target. Optional —
+  /// the error view renders this content without an animation.
+  final GlobalKey? cartIconKey;
 
   @override
   Widget build(BuildContext context) {
+    final bag = BadgeIcon(
+      key: cartIconKey,
+      iconSize: AppSpacing.iconSm,
+      icon: const CustomImage(
+        path: ImageConstants.bag,
+        height: AppSpacing.iconSm,
+        width: AppSpacing.iconSm,
+      ),
+      count: context.watch<CartCountCubit>().state,
+      padding: EdgeInsets.zero,
+      onTap: () => AppNavigator.goToCart(context),
+    );
     return SafeArea(
       bottom: false,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: PdpStrings.appBarVerticalPadding,
-        ),
+        padding: const EdgeInsets.only(right: AppSpacing.md),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             GestureDetector(
-              onTap: onBack ?? () => Navigator.of(context).pop(),
-              child: const CustomImage(
-                path: ImageConstants.arrowBack,
-                height: AppSpacing.lmd,
-                width: AppSpacing.lmd,
-                color: AppColors.neutralBlack,
+              behavior: HitTestBehavior.opaque,
+              onTap: onBack ?? () => context.pop(),
+              child: const Padding(
+                // Vertical padding drives the app bar's height — see
+                // PdpStrings.appBarHeight, which PdpContent uses as its
+                // white-background threshold.
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: PdpStrings.appBarVerticalPadding,
+                ),
+                child: CustomImage(
+                  path: ImageConstants.arrowBack,
+                  height: AppSpacing.lmd,
+                  width: AppSpacing.lmd,
+                  color: AppColors.neutralBlack,
+                ),
               ),
             ),
             Row(
@@ -104,17 +135,7 @@ class PdpAppBarContent extends StatelessWidget {
                   width: AppSpacing.iconSm,
                 ),
                 AppSpacing.horizontalGapMd,
-                BadgeIcon(
-                  iconSize: AppSpacing.iconSm,
-                  icon: const CustomImage(
-                    path: ImageConstants.bag,
-                    height: AppSpacing.iconSm,
-                    width: AppSpacing.iconSm,
-                  ),
-                  count: context.watch<CartCountCubit>().state,
-                  padding: EdgeInsets.zero,
-                  onTap: () => AppNavigator.goToCart(context),
-                ),
+                bag,
               ],
             ),
           ],
