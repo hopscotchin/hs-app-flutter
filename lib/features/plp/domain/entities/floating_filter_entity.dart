@@ -24,6 +24,7 @@ abstract class FloatingFilterSectionEntity with _$FloatingFilterSectionEntity {
     int? position,
     int? tileWidth,
     int? tileHeight,
+    @Default(true) bool isMultiSelect,
     @Default([]) List<FloatingFilterChipEntity> chips,
   }) = _FloatingFilterSectionEntity;
 }

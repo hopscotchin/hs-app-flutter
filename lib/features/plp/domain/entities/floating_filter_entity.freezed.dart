@@ -292,7 +292,7 @@ as bool,
 /// @nodoc
 mixin _$FloatingFilterSectionEntity {
 
- String? get title; String? get chipType; int? get position; int? get tileWidth; int? get tileHeight; List<FloatingFilterChipEntity> get chips;
+ String? get title; String? get chipType; int? get position; int? get tileWidth; int? get tileHeight; bool get isMultiSelect; List<FloatingFilterChipEntity> get chips;
 /// Create a copy of FloatingFilterSectionEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -303,16 +303,16 @@ $FloatingFilterSectionEntityCopyWith<FloatingFilterSectionEntity> get copyWith =
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FloatingFilterSectionEntity&&(identical(other.title, title) || other.title == title)&&(identical(other.chipType, chipType) || other.chipType == chipType)&&(identical(other.position, position) || other.position == position)&&(identical(other.tileWidth, tileWidth) || other.tileWidth == tileWidth)&&(identical(other.tileHeight, tileHeight) || other.tileHeight == tileHeight)&&const DeepCollectionEquality().equals(other.chips, chips));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FloatingFilterSectionEntity&&(identical(other.title, title) || other.title == title)&&(identical(other.chipType, chipType) || other.chipType == chipType)&&(identical(other.position, position) || other.position == position)&&(identical(other.tileWidth, tileWidth) || other.tileWidth == tileWidth)&&(identical(other.tileHeight, tileHeight) || other.tileHeight == tileHeight)&&(identical(other.isMultiSelect, isMultiSelect) || other.isMultiSelect == isMultiSelect)&&const DeepCollectionEquality().equals(other.chips, chips));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,title,chipType,position,tileWidth,tileHeight,const DeepCollectionEquality().hash(chips));
+int get hashCode => Object.hash(runtimeType,title,chipType,position,tileWidth,tileHeight,isMultiSelect,const DeepCollectionEquality().hash(chips));
 
 @override
 String toString() {
-  return 'FloatingFilterSectionEntity(title: $title, chipType: $chipType, position: $position, tileWidth: $tileWidth, tileHeight: $tileHeight, chips: $chips)';
+  return 'FloatingFilterSectionEntity(title: $title, chipType: $chipType, position: $position, tileWidth: $tileWidth, tileHeight: $tileHeight, isMultiSelect: $isMultiSelect, chips: $chips)';
 }
 
 
@@ -323,7 +323,7 @@ abstract mixin class $FloatingFilterSectionEntityCopyWith<$Res>  {
   factory $FloatingFilterSectionEntityCopyWith(FloatingFilterSectionEntity value, $Res Function(FloatingFilterSectionEntity) _then) = _$FloatingFilterSectionEntityCopyWithImpl;
 @useResult
 $Res call({
- String? title, String? chipType, int? position, int? tileWidth, int? tileHeight, List<FloatingFilterChipEntity> chips
+ String? title, String? chipType, int? position, int? tileWidth, int? tileHeight, bool isMultiSelect, List<FloatingFilterChipEntity> chips
 });
 
 
@@ -340,14 +340,15 @@ class _$FloatingFilterSectionEntityCopyWithImpl<$Res>
 
 /// Create a copy of FloatingFilterSectionEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? title = freezed,Object? chipType = freezed,Object? position = freezed,Object? tileWidth = freezed,Object? tileHeight = freezed,Object? chips = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? title = freezed,Object? chipType = freezed,Object? position = freezed,Object? tileWidth = freezed,Object? tileHeight = freezed,Object? isMultiSelect = null,Object? chips = null,}) {
   return _then(_self.copyWith(
 title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,chipType: freezed == chipType ? _self.chipType : chipType // ignore: cast_nullable_to_non_nullable
 as String?,position: freezed == position ? _self.position : position // ignore: cast_nullable_to_non_nullable
 as int?,tileWidth: freezed == tileWidth ? _self.tileWidth : tileWidth // ignore: cast_nullable_to_non_nullable
 as int?,tileHeight: freezed == tileHeight ? _self.tileHeight : tileHeight // ignore: cast_nullable_to_non_nullable
-as int?,chips: null == chips ? _self.chips : chips // ignore: cast_nullable_to_non_nullable
+as int?,isMultiSelect: null == isMultiSelect ? _self.isMultiSelect : isMultiSelect // ignore: cast_nullable_to_non_nullable
+as bool,chips: null == chips ? _self.chips : chips // ignore: cast_nullable_to_non_nullable
 as List<FloatingFilterChipEntity>,
   ));
 }
@@ -433,10 +434,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? title,  String? chipType,  int? position,  int? tileWidth,  int? tileHeight,  List<FloatingFilterChipEntity> chips)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? title,  String? chipType,  int? position,  int? tileWidth,  int? tileHeight,  bool isMultiSelect,  List<FloatingFilterChipEntity> chips)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FloatingFilterSectionEntity() when $default != null:
-return $default(_that.title,_that.chipType,_that.position,_that.tileWidth,_that.tileHeight,_that.chips);case _:
+return $default(_that.title,_that.chipType,_that.position,_that.tileWidth,_that.tileHeight,_that.isMultiSelect,_that.chips);case _:
   return orElse();
 
 }
@@ -454,10 +455,10 @@ return $default(_that.title,_that.chipType,_that.position,_that.tileWidth,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? title,  String? chipType,  int? position,  int? tileWidth,  int? tileHeight,  List<FloatingFilterChipEntity> chips)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? title,  String? chipType,  int? position,  int? tileWidth,  int? tileHeight,  bool isMultiSelect,  List<FloatingFilterChipEntity> chips)  $default,) {final _that = this;
 switch (_that) {
 case _FloatingFilterSectionEntity():
-return $default(_that.title,_that.chipType,_that.position,_that.tileWidth,_that.tileHeight,_that.chips);case _:
+return $default(_that.title,_that.chipType,_that.position,_that.tileWidth,_that.tileHeight,_that.isMultiSelect,_that.chips);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -474,10 +475,10 @@ return $default(_that.title,_that.chipType,_that.position,_that.tileWidth,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? title,  String? chipType,  int? position,  int? tileWidth,  int? tileHeight,  List<FloatingFilterChipEntity> chips)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? title,  String? chipType,  int? position,  int? tileWidth,  int? tileHeight,  bool isMultiSelect,  List<FloatingFilterChipEntity> chips)?  $default,) {final _that = this;
 switch (_that) {
 case _FloatingFilterSectionEntity() when $default != null:
-return $default(_that.title,_that.chipType,_that.position,_that.tileWidth,_that.tileHeight,_that.chips);case _:
+return $default(_that.title,_that.chipType,_that.position,_that.tileWidth,_that.tileHeight,_that.isMultiSelect,_that.chips);case _:
   return null;
 
 }
@@ -489,7 +490,7 @@ return $default(_that.title,_that.chipType,_that.position,_that.tileWidth,_that.
 
 
 class _FloatingFilterSectionEntity implements FloatingFilterSectionEntity {
-  const _FloatingFilterSectionEntity({this.title, this.chipType, this.position, this.tileWidth, this.tileHeight, final  List<FloatingFilterChipEntity> chips = const []}): _chips = chips;
+  const _FloatingFilterSectionEntity({this.title, this.chipType, this.position, this.tileWidth, this.tileHeight, this.isMultiSelect = true, final  List<FloatingFilterChipEntity> chips = const []}): _chips = chips;
   
 
 @override final  String? title;
@@ -497,6 +498,7 @@ class _FloatingFilterSectionEntity implements FloatingFilterSectionEntity {
 @override final  int? position;
 @override final  int? tileWidth;
 @override final  int? tileHeight;
+@override@JsonKey() final  bool isMultiSelect;
  final  List<FloatingFilterChipEntity> _chips;
 @override@JsonKey() List<FloatingFilterChipEntity> get chips {
   if (_chips is EqualUnmodifiableListView) return _chips;
@@ -515,16 +517,16 @@ _$FloatingFilterSectionEntityCopyWith<_FloatingFilterSectionEntity> get copyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FloatingFilterSectionEntity&&(identical(other.title, title) || other.title == title)&&(identical(other.chipType, chipType) || other.chipType == chipType)&&(identical(other.position, position) || other.position == position)&&(identical(other.tileWidth, tileWidth) || other.tileWidth == tileWidth)&&(identical(other.tileHeight, tileHeight) || other.tileHeight == tileHeight)&&const DeepCollectionEquality().equals(other._chips, _chips));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FloatingFilterSectionEntity&&(identical(other.title, title) || other.title == title)&&(identical(other.chipType, chipType) || other.chipType == chipType)&&(identical(other.position, position) || other.position == position)&&(identical(other.tileWidth, tileWidth) || other.tileWidth == tileWidth)&&(identical(other.tileHeight, tileHeight) || other.tileHeight == tileHeight)&&(identical(other.isMultiSelect, isMultiSelect) || other.isMultiSelect == isMultiSelect)&&const DeepCollectionEquality().equals(other._chips, _chips));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,title,chipType,position,tileWidth,tileHeight,const DeepCollectionEquality().hash(_chips));
+int get hashCode => Object.hash(runtimeType,title,chipType,position,tileWidth,tileHeight,isMultiSelect,const DeepCollectionEquality().hash(_chips));
 
 @override
 String toString() {
-  return 'FloatingFilterSectionEntity(title: $title, chipType: $chipType, position: $position, tileWidth: $tileWidth, tileHeight: $tileHeight, chips: $chips)';
+  return 'FloatingFilterSectionEntity(title: $title, chipType: $chipType, position: $position, tileWidth: $tileWidth, tileHeight: $tileHeight, isMultiSelect: $isMultiSelect, chips: $chips)';
 }
 
 
@@ -535,7 +537,7 @@ abstract mixin class _$FloatingFilterSectionEntityCopyWith<$Res> implements $Flo
   factory _$FloatingFilterSectionEntityCopyWith(_FloatingFilterSectionEntity value, $Res Function(_FloatingFilterSectionEntity) _then) = __$FloatingFilterSectionEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String? title, String? chipType, int? position, int? tileWidth, int? tileHeight, List<FloatingFilterChipEntity> chips
+ String? title, String? chipType, int? position, int? tileWidth, int? tileHeight, bool isMultiSelect, List<FloatingFilterChipEntity> chips
 });
 
 
@@ -552,14 +554,15 @@ class __$FloatingFilterSectionEntityCopyWithImpl<$Res>
 
 /// Create a copy of FloatingFilterSectionEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? title = freezed,Object? chipType = freezed,Object? position = freezed,Object? tileWidth = freezed,Object? tileHeight = freezed,Object? chips = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? title = freezed,Object? chipType = freezed,Object? position = freezed,Object? tileWidth = freezed,Object? tileHeight = freezed,Object? isMultiSelect = null,Object? chips = null,}) {
   return _then(_FloatingFilterSectionEntity(
 title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,chipType: freezed == chipType ? _self.chipType : chipType // ignore: cast_nullable_to_non_nullable
 as String?,position: freezed == position ? _self.position : position // ignore: cast_nullable_to_non_nullable
 as int?,tileWidth: freezed == tileWidth ? _self.tileWidth : tileWidth // ignore: cast_nullable_to_non_nullable
 as int?,tileHeight: freezed == tileHeight ? _self.tileHeight : tileHeight // ignore: cast_nullable_to_non_nullable
-as int?,chips: null == chips ? _self._chips : chips // ignore: cast_nullable_to_non_nullable
+as int?,isMultiSelect: null == isMultiSelect ? _self.isMultiSelect : isMultiSelect // ignore: cast_nullable_to_non_nullable
+as bool,chips: null == chips ? _self._chips : chips // ignore: cast_nullable_to_non_nullable
 as List<FloatingFilterChipEntity>,
   ));
 }

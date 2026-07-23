@@ -135,35 +135,35 @@ class _LandingPageState extends State<LandingPage> {
                 );
               }
 
-            final showLoader = state.isLoadingMore;
-            return ListView.builder(
-              controller: _scrollController,
-              cacheExtent: MediaQuery.sizeOf(context).height * 2,
-              itemCount: components.length + (showLoader ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index >= components.length) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+              final showLoader = state.isLoadingMore;
+              return ListView.builder(
+                controller: _scrollController,
+                cacheExtent: MediaQuery.sizeOf(context).height * 2,
+                itemCount: components.length + (showLoader ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index >= components.length) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
                       ),
+                    );
+                  }
+                  return _KeepAliveItem(
+                    child: PageComponentRenderer(
+                      component: components[index],
+                      index: index,
+                      pagePrefix:
+                          '${HomeComponentTestStrings.landingPage}_${widget.pageName}',
                     ),
                   );
-                }
-                return _KeepAliveItem(
-                  child: PageComponentRenderer(
-                    component: components[index],
-                    index: index,
-                    pagePrefix:
-                    '${HomeComponentTestStrings.landingPage}_${widget.pageName}',
-                  ),
-                );
-              },
-            );
-          }
+                },
+              );
+            }
 
             return const SizedBox.shrink();
           },

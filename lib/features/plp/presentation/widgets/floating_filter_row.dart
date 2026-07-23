@@ -88,6 +88,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
       if (_selectedValues.contains(value)) {
         _selectedValues.remove(value);
       } else {
+        if (!widget.section.isMultiSelect) _selectedValues.clear();
         _selectedValues.add(value);
       }
     });

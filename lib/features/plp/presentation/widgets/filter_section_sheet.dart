@@ -181,10 +181,7 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
           vertical: AppSpacing.xsm,
         ),
         child: AppRadio.labeled(
-          key: optionKey,
-          isSelected: isSelected,
-          label: label,
-          count: count,
+          key: optionKey, isSelected: isSelected, label: label, count: count,
           labelKey: labelKey,
           countKey: countKey,
         ),

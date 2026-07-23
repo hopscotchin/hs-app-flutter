@@ -564,7 +564,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
     FilterState state,
     FilterEntity filter,
     FilterSectionEntity section,
-      int index,
+    int index,
   ) {
     final param = filter.filterKey ?? '';
     final value = filter.filterValue ?? filter.label ?? '';
@@ -586,7 +586,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xsm),
         child: section.isMultiSelect
             ? AppCheckbox.labeled(
-          key: optionKey,
+                key: optionKey,
                 isSelected: isChecked,
                 label: label,
                 count: count,
@@ -602,7 +602,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
     FilterState state,
     FilterEntity filter,
     FilterSectionEntity section,
-      int index,
+    int index,
   ) {
     final param = filter.filterKey ?? '';
     final value = filter.filterValue ?? filter.label ?? '';
