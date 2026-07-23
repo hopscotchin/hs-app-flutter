@@ -165,6 +165,10 @@ class _PdpContentState extends State<PdpContent> {
                                   ),
                                 ),
                           ),
+                        // Temporary scroll padding — extra empty space so the
+                        // full page scroll and the app-bar colour transition can
+                        // be exercised while the sections below are still stubbed.
+                        SizedBox(height: constraints.maxHeight * 1.5),
                       ]),
                     ),
                   ],
