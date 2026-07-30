@@ -38,14 +38,22 @@ class DetailItemModel {
     this.fieldPath,
   });
 
-  @JsonKey(defaultValue: null) final String? type;
-  @JsonKey(defaultValue: null) final int? span;
-  @JsonKey(defaultValue: null) final String? displayKey;
-  @JsonKey(defaultValue: []) final List<String> values;
-  @JsonKey(defaultValue: null) final String? displayStyle;
-  @JsonKey(defaultValue: null) final bool? showBullet;
-  @JsonKey(defaultValue: null) final bool? showDivider;
-  @JsonKey(defaultValue: null) final String? fieldPath;
+  @JsonKey(defaultValue: null)
+  final String? type;
+  @JsonKey(defaultValue: null)
+  final int? span;
+  @JsonKey(defaultValue: null)
+  final String? displayKey;
+  @JsonKey(defaultValue: [])
+  final List<String> values;
+  @JsonKey(defaultValue: null)
+  final String? displayStyle;
+  @JsonKey(defaultValue: null)
+  final bool? showBullet;
+  @JsonKey(defaultValue: null)
+  final bool? showDivider;
+  @JsonKey(defaultValue: null)
+  final String? fieldPath;
 
   factory DetailItemModel.fromJson(Map<String, dynamic> json) =>
       _$DetailItemModelFromJson(json);

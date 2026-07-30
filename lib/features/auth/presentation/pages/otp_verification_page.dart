@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -231,14 +230,13 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
                                 ),
                                 Positioned.fill(
                                   child: Opacity(
-                                    opacity: kDebugMode ? 0.01 : 0,
+                                    opacity: 0,
                                     child: TextField(
                                       key: const ValueKey(OtpVerificationTestStrings.otpVerificationOtpInputField),
                                       controller: _otpController,
                                       focusNode: _otpFocusNode,
                                       keyboardType: TextInputType.number,
-                                      autofillHints: kDebugMode ? const []: const [AutofillHints.oneTimeCode],
-                                      enableIMEPersonalizedLearning: kDebugMode ? false : true,
+                                      autofillHints: const [AutofillHints.oneTimeCode],
                                       maxLength: _otpLength,
                                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                       decoration: const InputDecoration(

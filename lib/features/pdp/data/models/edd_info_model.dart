@@ -8,9 +8,12 @@ part 'edd_info_model.g.dart';
 class EddInfoModel {
   const EddInfoModel({this.destination, this.edd, this.orderSla});
 
-  @JsonKey(defaultValue: null) final String? destination;
-  @JsonKey(defaultValue: null) final String? edd;
-  @JsonKey(defaultValue: null) final String? orderSla;
+  @JsonKey(defaultValue: null)
+  final String? destination;
+  @JsonKey(defaultValue: null)
+  final String? edd;
+  @JsonKey(defaultValue: null)
+  final String? orderSla;
 
   factory EddInfoModel.fromJson(Map<String, dynamic> json) =>
       _$EddInfoModelFromJson(json);

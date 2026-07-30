@@ -15,12 +15,13 @@ class GetRecommendationsUseCase
   final PdpRepository _repository;
 
   @override
-  Future<Either<Failure, RecommendationsEntity>> call(GetRecommendationsParams params) =>
-      _repository.getRecommendations(
-        params.productId,
-        pageNo: params.pageNo,
-        cancelToken: params.cancelToken,
-      );
+  Future<Either<Failure, RecommendationsEntity>> call(
+    GetRecommendationsParams params,
+  ) => _repository.getRecommendations(
+    params.productId,
+    pageNo: params.pageNo,
+    cancelToken: params.cancelToken,
+  );
 }
 
 class GetRecommendationsParams extends Equatable {

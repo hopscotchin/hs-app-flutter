@@ -1,7 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/analytics/constants/analytics_defaults.dart';
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/home_events.dart';
+import '../../../../core/analytics/home/home_track_analytic_manager.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/constants/strings/discover_strings.dart';
 import '../../../../core/error/failures.dart';
@@ -14,20 +20,39 @@ part 'home_state.dart';
 
 @injectable
 class HomeBloc extends BaseBloc<HomeEvent, HomeState> {
-  HomeBloc(this._getHomePage) : super(const HomeState()) {
+  HomeBloc(this._getHomePage, this._analytics, this._homeTrack)
+    : super(const HomeState()) {
     on<LoadHomePage>(_onLoad);
     on<RefreshHomePage>(_onRefresh);
     on<LoadNextHomePage>(_onLoadNext);
   }
 
   final GetHomePageUseCase _getHomePage;
+  final AnalyticsHelper _analytics;
+  final HomeTrackAnalyticManager _homeTrack;
 
   String _pageName = DiscoverStrings.defaultPageName;
   int _pageNo = 1;
 
+  /// Fires `homepage_viewed` only on the FIRST successful load of this bloc
+  /// instance. Mirrors Android `CollectionsFragment.kt:588` which excludes
+  /// `fromRefresh || sortOptionSelected || onPagination`. Tab-strip changes
+  /// after the first load reuse the same bloc instance and so are filtered
+  /// out by this flag.
+  bool _hasFiredHomePageViewed = false;
+
   Future<void> _onLoad(LoadHomePage event, Emitter<HomeState> emit) async {
     _pageName = event.pageName ?? DiscoverStrings.defaultPageName;
     _pageNo = 1;
+    // Fire the lifecycle chain (app_launched → application_opened →
+    // homepage_viewed) up-front so those events queue to Segment BEFORE
+    // the network response can trigger impressions. Guarded to run only on
+    // the first load per bloc instance (mirrors Android's fromRefresh /
+    // sortOptionSelected / onPagination exclusion).
+    if (!_hasFiredHomePageViewed) {
+      _hasFiredHomePageViewed = true;
+      unawaited(_analytics.logHomePageViewed(fromScreen: FromScreens.discover));
+    }
     emit(state.copyWith(status: HomeStatus.loading, isLoadingMore: false, errorMessage: ''));
     await _fetch(emit, append: false);
   }
@@ -87,12 +112,14 @@ class HomeBloc extends BaseBloc<HomeEvent, HomeState> {
 
     if (!append) {
       emit(HomeState(status: HomeStatus.success, homePage: page));
+      _homeTrack.pageComponents = page.pageComponents;
       return;
     }
 
     final current = state.homePage;
     if (current == null) {
       emit(HomeState(status: HomeStatus.success, homePage: page));
+      _homeTrack.pageComponents = page.pageComponents;
       return;
     }
 
@@ -105,5 +132,17 @@ class HomeBloc extends BaseBloc<HomeEvent, HomeState> {
           : page.sortingOptions,
     );
     emit(state.copyWith(status: HomeStatus.success, homePage: merged, isLoadingMore: false));
+    _homeTrack.pageComponents = merged.pageComponents;
   }
+
+  @override
+  Future<void> close() async {
+    // Flush any pending horizontal-carousel scrolls, then destroy the tracker
+    // so the next Discover instance starts clean. Tile impressions now fire
+    // eagerly per visibility cross, so there's no impression buffer to drain.
+    await _homeTrack.flushCarouselScrolls();
+    _homeTrack.destroyFromHomeBloc();
+    return super.close();
+  }
+
 }

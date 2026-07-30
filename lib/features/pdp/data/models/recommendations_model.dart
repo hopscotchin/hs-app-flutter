@@ -8,10 +8,7 @@ part 'recommendations_model.g.dart';
 
 @JsonSerializable(createToJson: false)
 class RecommendationsModel {
-  const RecommendationsModel({
-    this.records = const [],
-    this.pageMeta,
-  });
+  const RecommendationsModel({this.records = const [], this.pageMeta});
 
   @JsonKey(defaultValue: [])
   final List<ListingProductModel> records;

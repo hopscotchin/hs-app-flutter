@@ -6,8 +6,10 @@ part 'action_response_model.g.dart';
 class ActionResponseModel {
   const ActionResponseModel({this.action, this.message});
 
-  @JsonKey(defaultValue: null) final String? action;
-  @JsonKey(defaultValue: null) final String? message;
+  @JsonKey(defaultValue: null)
+  final String? action;
+  @JsonKey(defaultValue: null)
+  final String? message;
 
   factory ActionResponseModel.fromJson(Map<String, dynamic> json) =>
       _$ActionResponseModelFromJson(json);

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/color_variants_entity.dart';
@@ -37,10 +38,12 @@ class PdpColorVariants extends StatelessWidget {
               itemBuilder: (context, index) {
                 final variant = colorVariants[index];
                 // Backend sends isSelected; also guard against current product match
-                final isSelected = variant.isSelected || variant.productId == currentProductId;
+                final isSelected =
+                    variant.isSelected || variant.productId == currentProductId;
                 final inStock = variant.isStockAvailable;
 
                 return GestureDetector(
+                  key: ValueKey('${PdpTestStrings.colorVariant}_$index'),
                   onTap: () {
                     if (variant.productId != null && !isSelected) {
                       onColorSelected(variant.productId!);
@@ -52,20 +55,27 @@ class PdpColorVariants extends StatelessWidget {
                       width: 40,
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: isSelected ? AppColors.brandDefault : AppColors.transparent,
+                          color: isSelected
+                              ? AppColors.brandDefault
+                              : AppColors.transparent,
                           width: 1,
                         ),
-                        borderRadius: const BorderRadius.all(Radius.circular(6)),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
+                        ),
                       ),
                       child: variant.mediaUrl != null
                           ? ClipRRect(
-                              borderRadius: const BorderRadius.all(Radius.circular(5)),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(5),
+                              ),
                               child: CachedNetworkImage(
                                 imageUrl: variant.mediaUrl!,
                                 fit: BoxFit.cover,
                                 fadeInDuration: Duration.zero,
                                 fadeOutDuration: Duration.zero,
-                                errorWidget: (_, _, _) => _buildPlaceholder(inStock),
+                                errorWidget: (_, _, _) =>
+                                    _buildPlaceholder(inStock),
                               ),
                             )
                           : _buildPlaceholder(inStock),
@@ -87,7 +97,9 @@ class PdpColorVariants extends StatelessWidget {
       children: [
         Container(color: AppColors.secondary),
         if (!inStock)
-          const Positioned.fill(child: CustomPaint(painter: _CrossLinePainter(AppColors.border))),
+          const Positioned.fill(
+            child: CustomPaint(painter: _CrossLinePainter(AppColors.border)),
+          ),
       ],
     );
   }

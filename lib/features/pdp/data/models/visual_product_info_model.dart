@@ -12,9 +12,12 @@ class VisualProductInfoModel {
     this.title,
   });
 
-  @JsonKey(defaultValue: null) final String? groupName;
-  @JsonKey(defaultValue: []) final List<VisualProductItemModel> items;
-  @JsonKey(defaultValue: null) final String? title;
+  @JsonKey(defaultValue: null)
+  final String? groupName;
+  @JsonKey(defaultValue: [])
+  final List<VisualProductItemModel> items;
+  @JsonKey(defaultValue: null)
+  final String? title;
 
   factory VisualProductInfoModel.fromJson(Map<String, dynamic> json) =>
       _$VisualProductInfoModelFromJson(json);
@@ -32,10 +35,14 @@ extension VisualProductInfoModelX on VisualProductInfoModel {
 class VisualProductItemModel {
   const VisualProductItemModel({this.id, this.name, this.type, this.url});
 
-  @JsonKey(defaultValue: null) final String? id;
-  @JsonKey(defaultValue: null) final String? name;
-  @JsonKey(defaultValue: null) final String? type;
-  @JsonKey(defaultValue: null) final String? url;
+  @JsonKey(defaultValue: null)
+  final String? id;
+  @JsonKey(defaultValue: null)
+  final String? name;
+  @JsonKey(defaultValue: null)
+  final String? type;
+  @JsonKey(defaultValue: null)
+  final String? url;
 
   factory VisualProductItemModel.fromJson(Map<String, dynamic> json) =>
       _$VisualProductItemModelFromJson(json);

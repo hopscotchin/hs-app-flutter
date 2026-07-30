@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -6,7 +8,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:talker_dio_logger_plus/talker_dio_logger_plus.dart';
 import 'package:talker_flutter/talker_flutter.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
+import 'core/analytics/attribution/utm_header_util.dart';
+import 'core/analytics/events/analytics_helper.dart';
+import 'core/analytics/services/clarity_helper.dart';
+import 'core/analytics/services/clevertap_service.dart';
+import 'core/analytics/state/device_probes.dart';
+import 'core/analytics/state/experiments_util.dart';
+import 'core/analytics/state/launch_timer.dart';
 import 'core/config/build_config.dart';
 import 'core/config/env_config.dart';
 import 'core/config/environment.dart';
@@ -25,12 +35,21 @@ void main() async {
   // _DriverBinding's constructor throws '_debugInitializedType == null'.
   // Only automation builds need the driver extension; normal debug/release use
   // the standard binding.
-  if (kIsAutomation) {
+  if (kIsAutomation && kDebugMode) {
     enableFlutterDriverExtension(silenceErrors: true);
   } else {
     WidgetsFlutterBinding.ensureInitialized();
   }
   // debugPaintBaselinesEnabled = true;
+
+  // Tighten VisibilityDetector callback cadence for home-page analytics.
+  // Default is 500ms — long enough that initial-fold components can be
+  // scrolled past before their first callback fires, missing impressions
+  // for above-the-fold items on fast opens. 100ms is snappy enough that
+  // even a quick scroll registers first-frame visibility, still infrequent
+  // enough not to thrash the scroll loop.
+  VisibilityDetectorController.instance.updateInterval =
+      const Duration(milliseconds: 100);
 
   SystemChrome.setSystemUIOverlayStyle(AppTheme.systemUiLight);
 
@@ -63,7 +82,7 @@ void main() async {
     };
   }
 
-  runApp(const HSApp());
+  runApp(sl<ClarityHelper>().wrap(const HSApp()));
 }
 
 Future<void> _runPostInitBootstrapping() async {
@@ -78,6 +97,46 @@ Future<void> _runPostInitBootstrapping() async {
   // Initialize cookie/session helpers with DI-managed PrefManager.
   HSCookieStore.init(prefManager);
   CookiesBasedEventsUtil.instance.init(prefManager);
+
+  // Analytics bootstrap. Order matters:
+  //   1. UTM disk hydration → so a cold-start deeplink's UTM context is
+  //      visible to the first identify call.
+  //   2. Fast device probes (awaited) → push permission + device profile +
+  //      hs_device_id populated so the first cookie-driven identify ships a
+  //      real hs_device_id.
+  //   3. CleverTap init → fetches cleverTapId into PrefManager so the very
+  //      first track/identify carries it (matches Android `CleverTapHelper`).
+  //   4. Set applicationStatusFlag=true → mirrors Android SplashActivity.onCreate
+  //      line 165. Without this, the 2nd+ cold-start `application_opened` never
+  //      fires (fireLifeCycleEvents sets false on first fire and there was
+  //      no writer to flip it back on subsequent launches).
+  //   5. CookiesBasedEventsUtil.wireAnalytics → so the next HTTP response
+  //      fires identifyOnCookieChange / session_started via AnalyticsHelper.
+  //   6. LaunchTimer.recordProcessStart → anchors `tti` / `ttl` for the
+  //      first viewable screen's `app_launched` event.
+  //   7. Advertising-id probe (unawaited) → ATT prompt + IDFA/GAID. On Android
+  //      the ad id auto-lands into the next cookie-driven identify via
+  //      `_getUserTraits()` reading `_prefs.advertisingId`. **No explicit
+  //      identifyAnonymous is fired** — Android emits zero identifies from
+  //      `HsApplication.onCreate`; every identify comes from the cookie
+  //      interceptor after the first HTTP response.
+  sl<UtmHeaderUtil>().hydrateFromDisk();
+  await sl<DeviceProbeService>().probe();
+  await sl<CleverTapService>().init();
+  await prefManager.setApplicationStatusFlag(true);
+  CookiesBasedEventsUtil.instance.wireAnalytics(
+    analyticsHelper: sl<AnalyticsHelper>(),
+    utm: sl<UtmHeaderUtil>(),
+    experiments: sl<ExperimentsUtil>(),
+    clarity: sl<ClarityHelper>(),
+  );
+  sl<LaunchTimer>().recordProcessStart();
+  // Resolve install type upfront so the first screen's `logAppLaunched`
+  // ships the correct `install_type`.
+  sl<AnalyticsHelper>().bootstrapInstallType();
+  unawaited(sl<DeviceProbeService>().probeAdvertisingId());
+
+
 
   // Restore persistent ticket so initial API requests include auth header.
   final savedTicket = prefManager.persistentTicket;
@@ -96,11 +155,11 @@ Future<void> _runPostInitBootstrapping() async {
       AdvancedDioLogger(
         talker: talker,
         settings: const AdvancedDioLoggerSettings(
-          printRequestHeaders: true,
-          printResponseHeaders: true,
-          printResponseData: true,
-          printErrorData: true,
-          printErrorHeaders: true,
+          printRequestHeaders: false,
+          printResponseHeaders: false,
+          printResponseData: false,
+          printErrorData: false,
+          printErrorHeaders: false,
           // hiddenHeaders: {'authorization', 'x-api-key', 'cookie'},
           // hideAuthorizationValue: true,
           enableCurlGeneration: true,
@@ -115,15 +174,15 @@ Future<void> _runPostInitBootstrapping() async {
     //     printClosings: true,
     //     printStateFullData: false,
 
-    // this helps in logging the full event/state data, but can be very verbose and may cause performance issues in large apps, so use with caution
-
-    // transitionFilter: (bloc, transition) {
-    //   print(
-    //     'Bloc transition: ${bloc.runtimeType} ${transition.event}${transition.nextState} ${transition.currentState}',
-    //   );
-    //   return true;
-    // },
-    // ),
+    // // this helps in logging the full event/state data, but can be very verbose and may cause performance issues in large apps, so use with caution
+    //
+    // //transitionFilter: (bloc, transition) {
+    //   //print(
+    //     //'Bloc transition: ${bloc.runtimeType} ${transition.event}${transition.nextState} ${transition.currentState}',
+    //   //);
+    //   //return true;
+    // //},
+    //   ),
     // );
   }
 }

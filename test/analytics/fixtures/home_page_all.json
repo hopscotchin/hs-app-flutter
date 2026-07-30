@@ -1,0 +1,2556 @@
+{
+  "pageMeta": {
+    "pageName": "New",
+    "totalCollections": 23,
+    "hasNextPage": true
+  },
+  "sortingOptions": [
+    {
+      "label": "All",
+      "id": "discover"
+    },
+    {
+      "label": "Baby",
+      "id": "baby"
+    },
+    {
+      "label": "Girl",
+      "id": "girls"
+    },
+    {
+      "label": "Boy",
+      "id": "boys"
+    }
+  ],
+  "pageComponents": [
+    {
+      "type": "PageCarousel",
+      "position": 2,
+      "data": {
+        "viewConfig": {
+          "tileWidth": 296,
+          "tileHeight": 296,
+          "minTilesToShow": 1,
+          "navigation": false,
+          "snapping": false,
+          "showPageIndicators": false,
+          "peepingFactor": 25,
+          "imageCornerRadius": 4
+        },
+        "tiles": [
+          {
+            "id": 10430,
+            "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/2f97128f-3f86-469d-8c1e-70ecad2b3533_full.jpg?version=1780467909678",
+            "actionUri": "hopscotch://products?id=12165",
+            "mimeType": "image",
+            "trackingMeta": {
+              "tile_detail_id": 10430,
+              "action_uri": "hopscotch://products?id=12165",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/2f97128f-3f86-469d-8c1e-70ecad2b3533_full.jpg?version=1780467909678",
+              "slice_id": "01_01"
+            }
+          },
+          {
+            "id": 10429,
+            "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/aecb0093-1451-427a-9e67-a6e569f4fd30_full.jpg?version=1780467892696",
+            "actionUri": "hopscotch://products?id=12175",
+            "mimeType": "image",
+            "trackingMeta": {
+              "tile_detail_id": 10429,
+              "action_uri": "hopscotch://products?id=12175",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/aecb0093-1451-427a-9e67-a6e569f4fd30_full.jpg?version=1780467892696",
+              "slice_id": "01_02"
+            }
+          },
+          {
+            "id": 10431,
+            "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/61d88b19-fa6a-4189-9b8d-713fb26b9a5e_full.jpg?version=1780467925362",
+            "actionUri": "hopscotch://products?id=12163",
+            "mimeType": "image",
+            "trackingMeta": {
+              "tile_detail_id": 10431,
+              "action_uri": "hopscotch://products?id=12163",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/61d88b19-fa6a-4189-9b8d-713fb26b9a5e_full.jpg?version=1780467925362",
+              "slice_id": "01_03"
+            }
+          }
+        ],
+        "title": {
+          "url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/131ac8da-f36c-4cc1-a110-e6856a89f470_full.jpg?version=1780467881226",
+          "height": 260,
+          "width": 832
+        },
+        "margins": {
+          "top": 20,
+          "bottom": 20,
+          "horizontal": 16,
+          "innerHorizontalMargin": 8,
+          "titleBottomMargin": 16,
+          "titleHorizontalMargin": 16
+        },
+        "trackingMeta": {
+          "carousel_id": 2501,
+          "cbt_id": 2501,
+          "carousel_type": "Page",
+          "banner_name": "Sample_Flutter",
+          "funnel_row": 1,
+          "sectionName": null,
+          "property_type": "MT",
+          "funnel_tile": "PC-T1-P1-2501",
+          "width": 296,
+          "height": 296
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 3,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 960,
+                "height": 960,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202502/b7140abe-bee8-4505-95f2-18de19de5118_full.jpg?version=1738576810509",
+                "actionUri": "hopscotch://boutique?id=57923",
+                "action_type": "BOUTIQUE",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/collection/57923/water+yellowW+-+57923",
+                "action_value": "water yellowW - 57923",
+                "trackingMeta": {
+                  "width": 960,
+                  "action": "BOUTIQUE",
+                  "height": 960,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202502/b7140abe-bee8-4505-95f2-18de19de5118_full.jpg?version=1738576810509",
+                  "action_uri": "hopscotch://boutique?id=57923",
+                  "tile_detail_id": 1442
+                }
+              }
+            ],
+            "tile_detail_id": 1442
+          },
+          {
+            "tileGrid": [
+              {
+                "width": 740,
+                "height": 740,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/2250318b-3c78-4709-9b13-957020f514df_full.jpg?version=1782214459687",
+                "mimeType": "image",
+                "actionUri": "hopscotch://boutique?id=58066",
+                "action_type": "BOUTIQUE",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/collection/58066/flutter+-+58066",
+                "action_value": "flutter - 58066",
+                "trackingMeta": {
+                  "width": 740,
+                  "action": "BOUTIQUE",
+                  "height": 740,
+                  "slice_id": "02_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/2250318b-3c78-4709-9b13-957020f514df_full.jpg?version=1782214459687",
+                  "action_uri": "hopscotch://boutique?id=58066",
+                  "tile_detail_id": 1443
+                }
+              }
+            ],
+            "tile_detail_id": 1443
+          }
+        ],
+        "margins": {
+          "top": 10,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 0,
+          "titleHorizontalMargin": 0
+        },
+        "viewConfig": {
+          "name": "Boutique",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "1441",
+          "end_date": "2028-01-31T07:41:00Z",
+          "page_name": "homepage",
+          "funnel_row": "1",
+          "start_date": "2025-01-09T07:41:31Z",
+          "banner_name": "Boutique",
+          "funnel_tile": "CT1441",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 4,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 960,
+                "height": 84,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202602/dc4e8218-7617-4f1b-b072-3c212c07b15e_full.jpg?version=1770966807255",
+                "isTitleItem": true
+              }
+            ],
+            "tile_detail_id": 2104
+          },
+          {
+            "tileGrid": [
+              {
+                "width": 540,
+                "height": 540,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202601/a4b0d34d-3c2e-4fc3-bf5c-90297cf53176_full.jpg?version=1768561920998",
+                "mimeType": "image",
+                "actionUri": "hopscotch://tabbedLandingPage?id=2154",
+                "action_type": "TABBED_PAGE",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/sections/2154",
+                "action_value": "asgf - 2154",
+                "trackingMeta": {
+                  "width": 540,
+                  "action": "TABBED_PAGE",
+                  "height": 540,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202601/a4b0d34d-3c2e-4fc3-bf5c-90297cf53176_full.jpg?version=1768561920998",
+                  "action_uri": "hopscotch://tabbedLandingPage?id=2154",
+                  "action_uri_web": "/sections/2154",
+                  "tile_detail_id": 2105
+                }
+              }
+            ],
+            "tile_detail_id": 2105
+          }
+        ],
+        "margins": {
+          "top": 10,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 16,
+          "titleHorizontalMargin": 16
+        },
+        "viewConfig": {
+          "name": "TESTMRP",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "2103",
+          "end_date": "2026-08-29T11:10:00Z",
+          "page_name": "homepage",
+          "funnel_row": "1",
+          "start_date": "2026-01-16T11:10:53Z",
+          "banner_name": "TESTMRP",
+          "funnel_tile": "CT2103",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 5,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 832,
+                "height": 260,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202602/38915369-b01f-4bee-ada3-9b2e06cc3ae5_full.jpg?version=1770981450413",
+                "isTitleItem": true
+              }
+            ],
+            "tile_detail_id": 2134
+          },
+          {
+            "tileGrid": [
+              {
+                "width": 540,
+                "height": 630,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202607/b1bdba8f-f0ad-4fc3-bd8f-48883bb5692d_full.jpg?version=1784527502122",
+                "mimeType": "image",
+                "actionUri": "hopscotch://products?id=12158",
+                "action_type": "PLP",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/products/12158/test+clone+-+12158",
+                "action_value": "test clone - 12158",
+                "trackingMeta": {
+                  "width": 540,
+                  "action": "PLP",
+                  "height": 630,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202607/b1bdba8f-f0ad-4fc3-bd8f-48883bb5692d_full.jpg?version=1784527502122",
+                  "action_uri": "hopscotch://products?id=12158",
+                  "tile_detail_id": 2135
+                }
+              }
+            ],
+            "tile_detail_id": 2135
+          }
+        ],
+        "margins": {
+          "top": 10,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 16,
+          "titleHorizontalMargin": 16
+        },
+        "viewConfig": {
+          "name": "TestPST",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "2133",
+          "end_date": "2027-02-28T10:11:00Z",
+          "page_name": "homepage",
+          "funnel_row": "1",
+          "start_date": "2026-02-13T10:11:29Z",
+          "banner_name": "TestPST",
+          "funnel_tile": "CT2133",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "PRODUCT_GRID",
+      "position": 6,
+      "data": {
+        "tiles": [
+          {
+            "id": 946940,
+            "name": "Grey Roses Lehengas and Blouse Set",
+            "brandName": "Kids Chakra",
+            "quantity": 2,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202007/15d69072-6622-4c9d-8998-0bda79eaec9e_full.jpg?version=1594465213401"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹1,800",
+              "mrp": "MRP:₹2,400",
+              "discount": "25% OFF",
+              "absoluteValue": 1800,
+              "callout": "Inclusive of all taxes"
+            },
+            "actionUri": "hopscotch://product?id=946940",
+            "actionUriWeb": "/product/946940/Kids+Chakra-Grey+Roses+Lehengas+and+Blouse+Set",
+            "visualCue": {
+              "uiType": "TEXT",
+              "location": "BottomLeft",
+              "text": "2 LEFT",
+              "textColor": "#333333",
+              "backgroundColor": "#E5E5EA"
+            },
+            "trackingMeta": {
+              "product_id": "946940",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=946940",
+              "slice_id": "01_01",
+              "tile_detail_id": "946940"
+            },
+            "xltile": false,
+            "cpt": false
+          },
+          {
+            "id": 946941,
+            "name": "Green Solid Lehengas and Blouse Set",
+            "brandName": "Kids Chakra",
+            "quantity": 8,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202007/da530d5b-5466-4f96-8e41-cf20a0193311_full.jpg?version=1594465265921"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹1,550",
+              "mrp": "MRP:₹1,700",
+              "absoluteValue": 1550,
+              "callout": "Inclusive of all taxes"
+            },
+            "actionUri": "hopscotch://product?id=946941",
+            "actionUriWeb": "/product/946941/Kids+Chakra-Green+Solid+Lehengas+and+Blouse+Set",
+            "trackingMeta": {
+              "product_id": "946941",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=946941",
+              "slice_id": "01_02",
+              "tile_detail_id": "946941"
+            },
+            "xltile": false,
+            "cpt": false
+          },
+          {
+            "id": 946942,
+            "name": "Yellow Solid Lehengas and Blouse Set",
+            "brandName": "Kids Chakra",
+            "quantity": 7,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202007/06305804-6b89-4b49-8123-378f3895428f_full.jpg?version=1594465311001"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹1,550",
+              "mrp": "MRP:₹1,700",
+              "absoluteValue": 1550,
+              "callout": "Inclusive of all taxes"
+            },
+            "actionUri": "hopscotch://product?id=946942",
+            "actionUriWeb": "/product/946942/Kids+Chakra-Yellow+Solid+Lehengas+and+Blouse+Set",
+            "trackingMeta": {
+              "product_id": "946942",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=946942",
+              "slice_id": "02_01",
+              "tile_detail_id": "946942"
+            },
+            "xltile": false,
+            "cpt": false
+          },
+          {
+            "id": 946943,
+            "name": "Pink Stripes Lehengas and Blouse Set",
+            "brandName": "Kids Chakra",
+            "quantity": 7,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202007/2b731f59-e470-4bb8-a3bc-b38e58a25c2f_full.jpg?version=1594465354054"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹1,800",
+              "mrp": "MRP:₹2,400",
+              "discount": "25% OFF",
+              "absoluteValue": 1800,
+              "callout": "Inclusive of all taxes"
+            },
+            "actionUri": "hopscotch://product?id=946943",
+            "actionUriWeb": "/product/946943/Kids+Chakra-Pink+Stripes+Lehengas+and+Blouse+Set",
+            "visualCue": {
+              "uiType": "IMAGE",
+              "location": "BottomLeft",
+              "text": "TRENDING",
+              "textColor": "",
+              "backgroundColor": "",
+              "imageUrl": "https://qastatic.hopscotch.in/fstatic/trending.svg"
+            },
+            "trackingMeta": {
+              "product_id": "946943",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=946943",
+              "slice_id": "02_02",
+              "tile_detail_id": "946943"
+            },
+            "xltile": false,
+            "cpt": false
+          },
+          {
+            "id": 946944,
+            "name": "Yellow Stripes Lehengas and Blouse Set",
+            "brandName": "Kids Chakra",
+            "quantity": 6,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202007/7214d926-fe27-4a58-bc7a-99ef8304b311_full.jpg?version=1594465463853"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹1,800",
+              "mrp": "MRP:₹2,400",
+              "discount": "25% OFF",
+              "absoluteValue": 1800,
+              "callout": "Inclusive of all taxes"
+            },
+            "actionUri": "hopscotch://product?id=946944",
+            "actionUriWeb": "/product/946944/Kids+Chakra-Yellow+Stripes+Lehengas+and+Blouse+Set",
+            "trackingMeta": {
+              "product_id": "946944",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=946944",
+              "slice_id": "03_01",
+              "tile_detail_id": "946944"
+            },
+            "xltile": false,
+            "cpt": false
+          },
+          {
+            "id": 946945,
+            "name": "Pack Of 3 Full Sleeves Multi Printed Rompers",
+            "brandName": "Junior Star",
+            "quantity": 19,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202007/09c86273-8fa0-44f0-8d85-72f5e937277f_full.jpg?version=1594030666157"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹699",
+              "absoluteValue": 699,
+              "callout": "Inclusive of all taxes"
+            },
+            "actionUri": "hopscotch://product?id=946945",
+            "actionUriWeb": "/product/946945/Junior+Star-Pack+Of+3+Full+Sleeves+Multi+Printed+Rompers",
+            "trackingMeta": {
+              "product_id": "946945",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=946945",
+              "slice_id": "03_02",
+              "tile_detail_id": "946945"
+            },
+            "xltile": false,
+            "cpt": false
+          }
+        ],
+        "title": {
+          "url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202508/a38656e6-ba75-405e-b863-f4b5ce801e11_full.jpg?version=1754035026186",
+          "width": 960,
+          "height": 103
+        },
+        "margins": {
+          "top": 16,
+          "bottom": 16,
+          "horizontal": 16,
+          "ctaTopMargin": 24,
+          "titleBottomMargin": 24,
+          "ctaHorizontalMargin": 16,
+          "innerVerticalMargin": 8,
+          "innerHorizontalMargin": 4
+        },
+        "ctaButton": {
+          "type": "primary",
+          "label": "TestCTA",
+          "actionUri": "hopscotch://products?id=12113",
+          "actionType": "plp",
+          "trackingMeta": {
+            "action_uri": "hopscotch://products?id=12113",
+            "action_type": "plp",
+            "funnel_tile": "PC-T2-P6-12113"
+          }
+        },
+        "layoutInfo": {
+          "columns": 2,
+          "showProductInfo": true
+        },
+        "viewConfig": {
+          "name": "Anas",
+          "useCase": "PLP_grid"
+        },
+        "trackingMeta": {
+          "cbt_id": "2171",
+          "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202508/a38656e6-ba75-405e-b863-f4b5ce801e11_full.jpg?version=1754035026186",
+          "funnel_row": "1",
+          "banner_name": "Anas",
+          "funnel_tile": "PG2171",
+          "property_type": "PLP_grid",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 7,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 1000,
+                "height": 1400,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202607/a55fa267-afad-47aa-9922-df8b7d7e6f62_full.png?version=1784092559032",
+                "isTitleItem": true
+              }
+            ],
+            "tile_detail_id": 2174
+          },
+          {
+            "tileGrid": [
+              {
+                "width": 1000,
+                "height": 1400,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202607/3b5855f6-3c83-4c45-ab59-b255837ae28d_full.jpg?version=1784092574770",
+                "mimeType": "image",
+                "actionUri": "hopscotch://special?id=gokulanewspl",
+                "action_type": "SP",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/collections/gokulanewspl",
+                "action_value": "gokulanewspl",
+                "trackingMeta": {
+                  "width": 1000,
+                  "action": "SP",
+                  "height": 1400,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202607/3b5855f6-3c83-4c45-ab59-b255837ae28d_full.jpg?version=1784092574770",
+                  "action_uri": "hopscotch://special?id=gokulanewspl",
+                  "action_uri_web": "/collections/gokulanewspl",
+                  "tile_detail_id": 2175
+                }
+              }
+            ],
+            "tile_detail_id": 2175
+          }
+        ],
+        "margins": {
+          "top": 10,
+          "bottom": 20,
+          "horizontal": 0,
+          "titleBottomMargin": 16,
+          "titleHorizontalMargin": 16
+        },
+        "viewConfig": {
+          "name": "CustomTile",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "2173",
+          "end_date": "2026-07-31T05:08:00Z",
+          "page_name": "homepage",
+          "funnel_row": "2",
+          "start_date": "2026-07-15T05:08:42Z",
+          "banner_name": "CustomTile",
+          "funnel_tile": "CT2173",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 8,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 540,
+                "height": 540,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202601/03f825c9-9443-4ea1-9da6-9294a78299c2_full.jpg?version=1768889895935",
+                "mimeType": "image",
+                "actionUri": "hopscotch://tabbedLandingPage?id=2123",
+                "action_type": "TABBED_PAGE",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/sections/2123",
+                "action_value": "Test tab page - 2123",
+                "trackingMeta": {
+                  "width": 540,
+                  "action": "TABBED_PAGE",
+                  "height": 540,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202601/03f825c9-9443-4ea1-9da6-9294a78299c2_full.jpg?version=1768889895935",
+                  "action_uri": "hopscotch://tabbedLandingPage?id=2123",
+                  "action_uri_web": "/sections/2123",
+                  "tile_detail_id": 2125
+                }
+              }
+            ],
+            "tile_detail_id": 2125
+          }
+        ],
+        "margins": {
+          "top": 0,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 0,
+          "titleHorizontalMargin": 0
+        },
+        "viewConfig": {
+          "name": "Testing Tab page",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "2124",
+          "end_date": "2026-07-31T06:16:00Z",
+          "page_name": "homepage",
+          "funnel_row": "2",
+          "start_date": "2026-01-20T06:16:42Z",
+          "banner_name": "Testing Tab page",
+          "funnel_tile": "CT2124",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "PageCarousel",
+      "position": 9,
+      "data": {
+        "viewConfig": {
+          "tileWidth": 280,
+          "tileHeight": 392,
+          "minTilesToShow": 1,
+          "navigation": false,
+          "snapping": true,
+          "showPageIndicators": true,
+          "peepingFactor": 75,
+          "imageCornerRadius": 4
+        },
+        "tiles": [
+          {
+            "id": 10466,
+            "product": {
+              "id": 957737,
+              "name": "VPK -Yellow Glitter Print Sleeveless Slip",
+              "brandName": "Twinklers",
+              "priceInfo": {
+                "sellingPrice": "₹193",
+                "mrp": "MRP:₹349",
+                "discount": "45% OFF",
+                "absoluteValue": 193,
+                "callout": "Inclusive of all taxes"
+              },
+              "wishlistInfo": {
+                "isWishlisted": false,
+                "canWishlist": true,
+                "id": 0
+              },
+              "soldOut": false,
+              "actionUri": "hopscotch://product?id=957737",
+              "media": [
+                {
+                  "mimeType": "IMAGE",
+                  "url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/ba16ca7e-3699-4154-8f35-8751dd0941fc_full.jpg?version=1781500585351"
+                }
+              ],
+              "visualCue": {
+                "uiType": "IMAGE",
+                "location": "BottomLeft",
+                "text": "TRENDING",
+                "textColor": "",
+                "backgroundColor": "",
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/trending.svg"
+              },
+              "trackingMeta": {
+                "widgetName": "xl_tile",
+                "productId": "957737"
+              }
+            },
+            "trackingMeta": {
+              "tile_detail_id": 10466,
+              "action_uri": "hopscotch://product?id=957737",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/ba16ca7e-3699-4154-8f35-8751dd0941fc_full.jpg?version=1781500585351",
+              "slice_id": "01_01"
+            }
+          },
+          {
+            "id": 10467,
+            "product": {
+              "id": 944873,
+              "name": "Triangle Print Patch Peplum dhoti For Girls- Pink",
+              "brandName": "BownBee",
+              "priceInfo": {
+                "sellingPrice": "₹1,599",
+                "mrp": "MRP:₹2,665",
+                "discount": "40% OFF",
+                "absoluteValue": 1599,
+                "callout": "Inclusive of all taxes"
+              },
+              "wishlistInfo": {
+                "isWishlisted": false,
+                "canWishlist": true,
+                "id": 0
+              },
+              "soldOut": false,
+              "actionUri": "hopscotch://product?id=944873",
+              "media": [
+                {
+                  "mimeType": "IMAGE",
+                  "url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/1ea12cd5-7d2d-4dce-95ed-7ae8fb757551_full.jpg?version=1781500594520"
+                }
+              ],
+              "visualCue": {
+                "uiType": "TEXT",
+                "location": "BottomLeft",
+                "text": "1 LEFT",
+                "textColor": "#333333",
+                "backgroundColor": "#E5E5EA"
+              },
+              "trackingMeta": {
+                "widgetName": "xl_tile",
+                "productId": "944873"
+              }
+            },
+            "trackingMeta": {
+              "tile_detail_id": 10467,
+              "action_uri": "hopscotch://product?id=944873",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/1ea12cd5-7d2d-4dce-95ed-7ae8fb757551_full.jpg?version=1781500594520",
+              "slice_id": "01_02"
+            }
+          },
+          {
+            "id": 10473,
+            "product": {
+              "id": 949631,
+              "name": "Blue-Red-White Printed Vest Pack of 3",
+              "brandName": "OHMS",
+              "priceInfo": {
+                "sellingPrice": "₹249",
+                "absoluteValue": 249,
+                "callout": "Inclusive of all taxes"
+              },
+              "wishlistInfo": {
+                "isWishlisted": false,
+                "canWishlist": true,
+                "id": 0
+              },
+              "soldOut": false,
+              "actionUri": "hopscotch://product?id=949631",
+              "media": [
+                {
+                  "mimeType": "IMAGE",
+                  "url": "https://qastatic.hopscotch.in/fstatic/product/202008/8d5e594a-23b2-4917-b1f3-1ada58b07fd1_full.jpg?version=1596543955652"
+                }
+              ],
+              "trackingMeta": {
+                "widgetName": "xl_tile",
+                "productId": "949631"
+              }
+            },
+            "trackingMeta": {
+              "tile_detail_id": 10473,
+              "action_uri": "hopscotch://product?id=949631",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/product/202008/8d5e594a-23b2-4917-b1f3-1ada58b07fd1_full.jpg?version=1596543955652",
+              "slice_id": "01_03"
+            }
+          },
+          {
+            "id": 10502,
+            "imageUrl": "https://static.hopscotch.in/View_All.svg",
+            "actionUri": "hopscotch://products?id=12150",
+            "mimeType": "image",
+            "trackingMeta": {
+              "tile_detail_id": 10502,
+              "action_uri": "hopscotch://products?id=12150",
+              "image_url": "https://static.hopscotch.in/View_All.svg",
+              "slice_id": "01_04"
+            }
+          }
+        ],
+        "title": {
+          "url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/33152ab7-b348-4a30-94b3-bd43430063db_full.png?version=1781500866940",
+          "height": 252,
+          "width": 2974
+        },
+        "margins": {
+          "top": 20,
+          "bottom": 20,
+          "horizontal": 16,
+          "innerHorizontalMargin": 8,
+          "titleBottomMargin": 16,
+          "titleHorizontalMargin": 16
+        },
+        "trackingMeta": {
+          "carousel_id": 2508,
+          "cbt_id": 2508,
+          "carousel_type": "Page",
+          "banner_name": "SPRTEST02",
+          "funnel_row": 3,
+          "sectionName": null,
+          "property_type": "Other",
+          "funnel_tile": "PODC-T1-P3-2508",
+          "width": 280,
+          "height": 392
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 10,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 320,
+                "height": 320,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/74613da3-0d3c-431f-a914-0491906e5215_full.jpg?version=1780569966571",
+                "mimeType": "image",
+                "actionUri": "hopscotch://products?id=12175",
+                "action_type": "PLP",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/products/12175/PLPTest+-+12175",
+                "action_value": "PLPTest - 12175",
+                "trackingMeta": {
+                  "width": 320,
+                  "action": "PLP",
+                  "height": 320,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/74613da3-0d3c-431f-a914-0491906e5215_full.jpg?version=1780569966571",
+                  "action_uri": "hopscotch://products?id=12175",
+                  "tile_detail_id": 2163
+                }
+              }
+            ],
+            "tile_detail_id": 2163
+          },
+          {
+            "tileGrid": [
+              {
+                "width": 3024,
+                "height": 3024,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/742d96ec-af3e-4848-b852-6dd083d5b706_full.jpg?version=1782303742443",
+                "mimeType": "image",
+                "actionUri": "hopscotch://products?id=12176",
+                "action_type": "PLP",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/products/12176/kjlj+-+12176",
+                "action_value": "kjlj - 12176",
+                "trackingMeta": {
+                  "width": 3024,
+                  "action": "PLP",
+                  "height": 3024,
+                  "slice_id": "02_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202606/742d96ec-af3e-4848-b852-6dd083d5b706_full.jpg?version=1782303742443",
+                  "action_uri": "hopscotch://products?id=12176",
+                  "tile_detail_id": 2164
+                }
+              }
+            ],
+            "tile_detail_id": 2164
+          }
+        ],
+        "margins": {
+          "top": 10,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 0,
+          "titleHorizontalMargin": 0
+        },
+        "viewConfig": {
+          "name": "Test_Flutter",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "lp_cbt_id": "2162",
+          "lp_end_date": "2027-06-30T10:43:00Z",
+          "lp_page_name": "homepage",
+          "lp_funnel_row": "3",
+          "lp_start_date": "2026-06-04T10:43:54Z",
+          "lp_banner_name": "Test_Flutter",
+          "lp_funnel_tile": "CT2162",
+          "lp_funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 11,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 1500,
+                "height": 2100,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202607/fbb3d44c-90da-4519-b3d8-0d6fa38148be_full.jpg?version=1784802070069",
+                "mimeType": "image",
+                "actionUri": "hopscotch://products?id=12170",
+                "action_type": "PLP",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/products/12170/TEST+PLP+CLUSTERING+TIMEOUT+-+12170",
+                "action_value": "TEST PLP CLUSTERING TIMEOUT - 12170",
+                "trackingMeta": {
+                  "width": 1500,
+                  "action": "PLP",
+                  "height": 2100,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202607/fbb3d44c-90da-4519-b3d8-0d6fa38148be_full.jpg?version=1784802070069",
+                  "action_uri": "hopscotch://products?id=12170",
+                  "action_uri_web": "/products/12170/TEST+PLP+CLUSTERING+TIMEOUT+-+12170",
+                  "tile_detail_id": 2177
+                }
+              },
+              {
+                "width": 1500,
+                "height": 2100,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202607/246ca429-cfa7-4937-b953-bb97327610e6_full.jpg?version=1784802110100",
+                "mimeType": "image",
+                "actionUri": "hopscotch://special?id=TEST_MADHU123",
+                "action_type": "SP",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/collections/TEST_MADHU123",
+                "action_value": "TEST_MADHU123",
+                "trackingMeta": {
+                  "width": 1500,
+                  "action": "SP",
+                  "height": 2100,
+                  "slice_id": "01_02",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202607/246ca429-cfa7-4937-b953-bb97327610e6_full.jpg?version=1784802110100",
+                  "action_uri": "hopscotch://special?id=TEST_MADHU123",
+                  "action_uri_web": "/collections/TEST_MADHU123",
+                  "tile_detail_id": 2177
+                }
+              },
+              {
+                "width": 1500,
+                "height": 2100,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202607/7bdbe998-1938-4e9b-bbe6-53db5a99f962_full.jpg?version=1784802123904",
+                "mimeType": "image",
+                "actionUri": "hopscotch://products?id=12172",
+                "action_type": "PLP",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/products/12172/test+-+12172",
+                "action_value": "test - 12172",
+                "trackingMeta": {
+                  "width": 1500,
+                  "action": "PLP",
+                  "height": 2100,
+                  "slice_id": "01_03",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202607/7bdbe998-1938-4e9b-bbe6-53db5a99f962_full.jpg?version=1784802123904",
+                  "action_uri": "hopscotch://products?id=12172",
+                  "action_uri_web": "/products/12172/test+-+12172",
+                  "tile_detail_id": 2177
+                }
+              }
+            ],
+            "tile_detail_id": 2177
+          }
+        ],
+        "margins": {
+          "top": 0,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 0,
+          "titleHorizontalMargin": 0
+        },
+        "viewConfig": {
+          "name": "Testing Custom Tile",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "2176",
+          "end_date": "2026-07-31T10:19:00Z",
+          "page_name": "homepage",
+          "funnel_row": "3",
+          "start_date": "2026-07-23T10:19:00Z",
+          "banner_name": "Testing Custom Tile",
+          "funnel_tile": "CT2176",
+          "property_type": "MT",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "PRODUCT_GRID",
+      "position": 12,
+      "data": {
+        "tiles": [
+          {
+            "id": 943489,
+            "name": "Black Color  Embroidery Collar Less Jacket and Kurta Pyjama Set",
+            "brandName": "JBN Creations ",
+            "quantity": 33,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202006/7a69d3d3-d879-4a9b-a214-fce33c6ff037_full.jpg?version=1591377948750"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹999",
+              "mrp": "MRP:₹3,999",
+              "discount": "75% OFF",
+              "absoluteValue": 999,
+              "callout": "Inclusive of all taxes"
+            },
+            "actionUri": "hopscotch://product?id=943489",
+            "actionUriWeb": "/product/943489/JBN+Creations+-Black+Color++Embroidery+Collar+Less+Jacket+and+Kurta+Pyjama+Set",
+            "trackingMeta": {
+              "product_id": "943489",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=943489",
+              "slice_id": "01_01",
+              "tile_detail_id": "943489"
+            },
+            "xltile": false,
+            "cpt": false
+          },
+          {
+            "id": 948274,
+            "name": "Blue Floral Print Dress",
+            "brandName": "Crayon Flakes",
+            "quantity": 2,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202007/cf379f81-186c-4bb2-8fd2-a989e426a967_full.jpg?version=1595063121894"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹349",
+              "mrp": "MRP:₹499",
+              "discount": "30% OFF",
+              "absoluteValue": 349,
+              "callout": "Inclusive of all taxes"
+            },
+            "colorVariants": "+2 Colors",
+            "actionUri": "hopscotch://product?id=948274",
+            "actionUriWeb": "/product/948274/Crayon+Flakes-Blue+Floral+Print+Dress",
+            "visualCue": {
+              "uiType": "TEXT",
+              "location": "BottomLeft",
+              "text": "2 LEFT",
+              "textColor": "#333333",
+              "backgroundColor": "#E5E5EA"
+            },
+            "trackingMeta": {
+              "product_id": "948274",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=948274",
+              "slice_id": "01_02",
+              "tile_detail_id": "948274"
+            },
+            "xltile": false,
+            "cpt": false
+          },
+          {
+            "id": 1232603,
+            "name": "At814",
+            "brandName": "Simba Toys",
+            "quantity": 1,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202501/0155e689-826e-4cfa-8ce7-02a1fcc2e7a2_full.png?version=1737312624693"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹1,000",
+              "mrp": "MRP:₹1,001",
+              "absoluteValue": 1000,
+              "callout": "Inclusive of all taxes"
+            },
+            "actionUri": "hopscotch://product?id=1232603",
+            "actionUriWeb": "/product/1232603/Simba+Toys-At814",
+            "visualCue": {
+              "uiType": "TEXT",
+              "location": "BottomLeft",
+              "text": "1 LEFT",
+              "textColor": "#333333",
+              "backgroundColor": "#E5E5EA"
+            },
+            "trackingMeta": {
+              "product_id": "1232603",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=1232603",
+              "slice_id": "01_03",
+              "tile_detail_id": "1232603"
+            },
+            "xltile": false,
+            "cpt": false
+          },
+          {
+            "id": 935194,
+            "name": "Navy abstract printed Casual Shirt",
+            "brandName": "Mint & Cotton",
+            "quantity": 6,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202003/4b2135a7-3aca-4a85-8914-7e4c198b5827_full.jpg?version=1585132679832"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹399",
+              "mrp": "MRP:₹699",
+              "discount": "43% OFF",
+              "absoluteValue": 399,
+              "callout": "Inclusive of all taxes"
+            },
+            "actionUri": "hopscotch://product?id=935194",
+            "actionUriWeb": "/product/935194/Mint+%26+Cotton-Navy+abstract+printed+Casual+Shirt",
+            "trackingMeta": {
+              "product_id": "935194",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=935194",
+              "slice_id": "02_01",
+              "tile_detail_id": "935194"
+            },
+            "xltile": false,
+            "cpt": false
+          },
+          {
+            "id": 923438,
+            "name": "White Collar Neck Organic Cotton Short Sleeve Shirts",
+            "brandName": "nino bambino",
+            "quantity": 3,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202002/4c380100-4cf0-449b-aae4-daa1e89a08e9_full.jpg?version=1582803176521"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹999",
+              "absoluteValue": 999,
+              "callout": "Inclusive of all taxes"
+            },
+            "actionUri": "hopscotch://product?id=923438",
+            "actionUriWeb": "/product/923438/nino+bambino-White+Collar+Neck+Organic+Cotton+Short+Sleeve+Shirts",
+            "visualCue": {
+              "uiType": "TEXT",
+              "location": "BottomLeft",
+              "text": "3 LEFT",
+              "textColor": "#333333",
+              "backgroundColor": "#E5E5EA"
+            },
+            "trackingMeta": {
+              "product_id": "923438",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=923438",
+              "slice_id": "02_02",
+              "tile_detail_id": "923438"
+            },
+            "xltile": false,
+            "cpt": false
+          },
+          {
+            "id": 907340,
+            "name": "Blue Square Printed Full Roll up Sleeves Cotton Casual Shirt",
+            "brandName": "GENTLE BRAT",
+            "quantity": 23,
+            "soldOut": false,
+            "wishlistInfo": {
+              "id": 0,
+              "canWishlist": true,
+              "wishlisted": false
+            },
+            "media": [
+              {
+                "mimeType": "IMAGE",
+                "url": "https://qastatic.hopscotch.in/fstatic/product/202001/3f556330-08b7-46da-84f2-afed30fd972e_full.jpg?version=1578639611380"
+              }
+            ],
+            "priceInfo": {
+              "sellingPrice": "₹649",
+              "absoluteValue": 649,
+              "callout": "Inclusive of all taxes"
+            },
+            "actionUri": "hopscotch://product?id=907340",
+            "actionUriWeb": "/product/907340/GENTLE+BRAT-Blue+Square+Printed+Full+Roll+up+Sleeves+Cotton+Casual+Shirt",
+            "trackingMeta": {
+              "product_id": "907340",
+              "action": "PDP",
+              "action_uri": "hopscotch://product?id=907340",
+              "slice_id": "02_03",
+              "tile_detail_id": "907340"
+            },
+            "xltile": false,
+            "cpt": false
+          }
+        ],
+        "title": {
+          "url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202508/a38656e6-ba75-405e-b863-f4b5ce801e11_full.jpg?version=1754035026186",
+          "width": 960,
+          "height": 103
+        },
+        "margins": {
+          "top": 16,
+          "bottom": 16,
+          "horizontal": 16,
+          "ctaTopMargin": 24,
+          "titleBottomMargin": 24,
+          "ctaHorizontalMargin": 16,
+          "innerVerticalMargin": 4,
+          "innerHorizontalMargin": 4
+        },
+        "ctaButton": {
+          "type": "primary",
+          "label": "TestCTA",
+          "actionUri": "hopscotch://products?id=12113",
+          "actionType": "plp",
+          "trackingMeta": {
+            "action_uri": "hopscotch://products?id=12113",
+            "action_type": "plp",
+            "funnel_tile": "PC-T2-P6-12113"
+          }
+        },
+        "layoutInfo": {
+          "columns": 3,
+          "showProductInfo": false
+        },
+        "viewConfig": {
+          "name": "home grid ",
+          "useCase": "PLP_grid"
+        },
+        "trackingMeta": {
+          "cbt_id": "1935",
+          "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202508/a38656e6-ba75-405e-b863-f4b5ce801e11_full.jpg?version=1754035026186",
+          "funnel_row": "3",
+          "banner_name": "home grid ",
+          "funnel_tile": "PG1935",
+          "property_type": "PLP_grid",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "PageCarousel",
+      "position": 13,
+      "data": {
+        "viewConfig": {
+          "tileWidth": 280,
+          "tileHeight": 392,
+          "minTilesToShow": 1,
+          "navigation": false,
+          "snapping": true,
+          "showPageIndicators": true,
+          "peepingFactor": 50,
+          "imageCornerRadius": 4
+        },
+        "tiles": [
+          {
+            "id": 9258,
+            "product": {
+              "id": 943717,
+              "name": "Pink Sleeveless Floral Printed Casual Dresses",
+              "brandName": "Peaches",
+              "priceInfo": {
+                "sellingPrice": "₹599",
+                "mrp": "MRP:₹1,349",
+                "discount": "56% OFF",
+                "absoluteValue": 599,
+                "callout": "Inclusive of all taxes"
+              },
+              "wishlistInfo": {
+                "isWishlisted": false,
+                "canWishlist": true,
+                "id": 0
+              },
+              "soldOut": false,
+              "actionUri": "hopscotch://product?id=943717",
+              "media": [
+                {
+                  "mimeType": "IMAGE",
+                  "url": "https://qastatic.hopscotch.in/fstatic/product/202006/f121992b-78b6-4f79-a1b9-b81c2c978b00_full.jpg?version=1592892890085"
+                }
+              ],
+              "visualCue": {
+                "uiType": "TEXT",
+                "location": "BottomLeft",
+                "text": "1 LEFT",
+                "textColor": "#333333",
+                "backgroundColor": "#E5E5EA"
+              },
+              "trackingMeta": {
+                "widgetName": "xl_tile",
+                "productId": "943717"
+              }
+            },
+            "videoDetails": {
+              "previewUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "autoplay": false,
+              "videoUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "thumbnailUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202505/f8c01ce0-ab87-4d72-b82f-5e66e8808242_full.jpg?version=1746592724021",
+              "trackingMeta": {
+                "aspectRatio": "9:16",
+                "createdDate": "2025-05-08 11:46:26",
+                "videoLength": 26,
+                "videoIdentifier": "97ba1510-ce36-4ed0-8abe-83d8d275f9c5"
+              },
+              "hasAudio": false,
+              "previewHasAudio": false,
+              "ctaButton": {
+                "label": "ykkyuktjruy",
+                "actionType": "product",
+                "actionUri": "hopscotch://product?id=943717",
+                "trackingMeta": {
+                  "funnel_tile": "PODC-T1-P5-2178",
+                  "action_type": "product",
+                  "action_uri": "hopscotch://product?id=943717"
+                }
+              }
+            },
+            "trackingMeta": {
+              "tile_detail_id": 9258,
+              "action_uri": "hopscotch://product?id=943717",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/product/202006/f121992b-78b6-4f79-a1b9-b81c2c978b00_full.jpg?version=1592892890085",
+              "slice_id": "01_01"
+            }
+          },
+          {
+            "id": 9259,
+            "product": {
+              "id": 934141,
+              "name": "Purple & Blue Leaf Print Button Down Dress - Purple & Blue",
+              "brandName": "Campana",
+              "priceInfo": {
+                "sellingPrice": "₹999",
+                "absoluteValue": 999,
+                "callout": "Inclusive of all taxes"
+              },
+              "wishlistInfo": {
+                "isWishlisted": false,
+                "canWishlist": true,
+                "id": 0
+              },
+              "soldOut": false,
+              "actionUri": "hopscotch://product?id=934141",
+              "media": [
+                {
+                  "mimeType": "IMAGE",
+                  "url": "https://qastatic.hopscotch.in/fstatic/product/202003/09fc8918-58e4-40ba-828c-4ea0c2f9b6b4_full.jpg?version=1584093359150"
+                }
+              ],
+              "trackingMeta": {
+                "widgetName": "xl_tile",
+                "productId": "934141"
+              }
+            },
+            "videoDetails": {
+              "previewUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "autoplay": false,
+              "videoUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "thumbnailUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202505/f8c01ce0-ab87-4d72-b82f-5e66e8808242_full.jpg?version=1746592724021",
+              "trackingMeta": {
+                "aspectRatio": "9:16",
+                "createdDate": "2025-05-08 11:46:26",
+                "videoLength": 26,
+                "videoIdentifier": "97ba1510-ce36-4ed0-8abe-83d8d275f9c5"
+              },
+              "hasAudio": false,
+              "previewHasAudio": false,
+              "ctaButton": {
+                "label": "ykkyuktjruy",
+                "actionType": "product",
+                "actionUri": "hopscotch://product?id=934141",
+                "trackingMeta": {
+                  "funnel_tile": "PODC-T1-P5-2178",
+                  "action_type": "product",
+                  "action_uri": "hopscotch://product?id=934141"
+                }
+              }
+            },
+            "trackingMeta": {
+              "tile_detail_id": 9259,
+              "action_uri": "hopscotch://product?id=934141",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/product/202003/09fc8918-58e4-40ba-828c-4ea0c2f9b6b4_full.jpg?version=1584093359150",
+              "slice_id": "01_02"
+            }
+          },
+          {
+            "id": 9260,
+            "product": {
+              "id": 923464,
+              "name": "Red Round Neck Organic Cotton Sleeveless Dress",
+              "brandName": "nino bambino",
+              "priceInfo": {
+                "sellingPrice": "₹799",
+                "absoluteValue": 799,
+                "callout": "Inclusive of all taxes"
+              },
+              "wishlistInfo": {
+                "isWishlisted": false,
+                "canWishlist": true,
+                "id": 0
+              },
+              "soldOut": false,
+              "actionUri": "hopscotch://product?id=923464",
+              "media": [
+                {
+                  "mimeType": "IMAGE",
+                  "url": "https://qastatic.hopscotch.in/fstatic/product/202005/7b9a5539-1353-440e-a15f-4a37763248d1_full.jpg?version=1590476037936"
+                }
+              ],
+              "trackingMeta": {
+                "widgetName": "xl_tile",
+                "productId": "923464"
+              }
+            },
+            "videoDetails": {
+              "previewUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "autoplay": false,
+              "videoUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "thumbnailUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202505/f8c01ce0-ab87-4d72-b82f-5e66e8808242_full.jpg?version=1746592724021",
+              "trackingMeta": {
+                "aspectRatio": "9:16",
+                "createdDate": "2025-05-08 11:46:26",
+                "videoLength": 26,
+                "videoIdentifier": "97ba1510-ce36-4ed0-8abe-83d8d275f9c5"
+              },
+              "hasAudio": false,
+              "previewHasAudio": false,
+              "ctaButton": {
+                "label": "ykkyuktjruy",
+                "actionType": "product",
+                "actionUri": "hopscotch://product?id=923464",
+                "trackingMeta": {
+                  "funnel_tile": "PODC-T1-P5-2178",
+                  "action_type": "product",
+                  "action_uri": "hopscotch://product?id=923464"
+                }
+              }
+            },
+            "trackingMeta": {
+              "tile_detail_id": 9260,
+              "action_uri": "hopscotch://product?id=923464",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/product/202005/7b9a5539-1353-440e-a15f-4a37763248d1_full.jpg?version=1590476037936",
+              "slice_id": "01_03"
+            }
+          },
+          {
+            "id": 9261,
+            "product": {
+              "id": 953420,
+              "name": "Yellow Embroidery Work Top",
+              "brandName": "Aww Hunnie!!",
+              "priceInfo": {
+                "sellingPrice": "₹550",
+                "absoluteValue": 550,
+                "callout": "Inclusive of all taxes"
+              },
+              "wishlistInfo": {
+                "isWishlisted": false,
+                "canWishlist": true,
+                "id": 0
+              },
+              "soldOut": false,
+              "actionUri": "hopscotch://product?id=953420",
+              "media": [
+                {
+                  "mimeType": "IMAGE",
+                  "url": "https://qastatic.hopscotch.in/fstatic/product/202007/bfb56e4b-7da3-476a-aaed-3f26607d7cfe_full.jpg?version=1594899635555"
+                }
+              ],
+              "trackingMeta": {
+                "widgetName": "xl_tile",
+                "productId": "953420"
+              }
+            },
+            "videoDetails": {
+              "previewUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "autoplay": false,
+              "videoUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "thumbnailUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202505/f8c01ce0-ab87-4d72-b82f-5e66e8808242_full.jpg?version=1746592724021",
+              "trackingMeta": {
+                "aspectRatio": "9:16",
+                "createdDate": "2025-05-08 11:46:26",
+                "videoLength": 26,
+                "videoIdentifier": "97ba1510-ce36-4ed0-8abe-83d8d275f9c5"
+              },
+              "hasAudio": false,
+              "previewHasAudio": false,
+              "ctaButton": {
+                "label": "ykkyuktjruy",
+                "actionType": "product",
+                "actionUri": "hopscotch://product?id=953420",
+                "trackingMeta": {
+                  "funnel_tile": "PODC-T1-P5-2178",
+                  "action_type": "product",
+                  "action_uri": "hopscotch://product?id=953420"
+                }
+              }
+            },
+            "trackingMeta": {
+              "tile_detail_id": 9261,
+              "action_uri": "hopscotch://product?id=953420",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/product/202007/bfb56e4b-7da3-476a-aaed-3f26607d7cfe_full.jpg?version=1594899635555",
+              "slice_id": "01_04"
+            }
+          },
+          {
+            "id": 9262,
+            "imageUrl": "https://static.hopscotch.in/View_All.svg",
+            "actionUri": "hopscotch://products?id=11959",
+            "mimeType": "image",
+            "trackingMeta": {
+              "tile_detail_id": 9262,
+              "action_uri": "hopscotch://products?id=11959",
+              "image_url": "https://static.hopscotch.in/View_All.svg",
+              "slice_id": "01_05"
+            }
+          }
+        ],
+        "title": {
+          "url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/03526e4e-8fcc-4ad6-ba56-a0a3e77b93a7_full.jpg?version=1737637817755",
+          "height": 75,
+          "width": 960
+        },
+        "margins": {
+          "top": 20,
+          "bottom": 20,
+          "horizontal": 16,
+          "innerHorizontalMargin": 20,
+          "titleBottomMargin": 16,
+          "titleHorizontalMargin": 16
+        },
+        "trackingMeta": {
+          "carousel_id": 2178,
+          "cbt_id": 2178,
+          "carousel_type": "Page",
+          "banner_name": "All_PID Pos8",
+          "funnel_row": 5,
+          "sectionName": null,
+          "property_type": "PID_carousel",
+          "funnel_tile": "PODC-T1-P5-2178",
+          "width": 280,
+          "height": 392
+        }
+      }
+    },
+    {
+      "type": "PageCarousel",
+      "position": 14,
+      "data": {
+        "viewConfig": {
+          "tileWidth": 280,
+          "tileHeight": 392,
+          "minTilesToShow": 1,
+          "navigation": false,
+          "snapping": true,
+          "showPageIndicators": true,
+          "peepingFactor": 50,
+          "imageCornerRadius": 4
+        },
+        "tiles": [
+          {
+            "id": 10369,
+            "product": {
+              "id": 943717,
+              "name": "Pink Sleeveless Floral Printed Casual Dresses",
+              "brandName": "Peaches",
+              "priceInfo": {
+                "sellingPrice": "₹599",
+                "mrp": "MRP:₹1,349",
+                "discount": "56% OFF",
+                "absoluteValue": 599,
+                "callout": "Inclusive of all taxes"
+              },
+              "wishlistInfo": {
+                "isWishlisted": false,
+                "canWishlist": true,
+                "id": 0
+              },
+              "soldOut": false,
+              "actionUri": "hopscotch://product?id=943717",
+              "media": [
+                {
+                  "mimeType": "IMAGE",
+                  "url": "https://qastatic.hopscotch.in/fstatic/product/202006/f121992b-78b6-4f79-a1b9-b81c2c978b00_full.jpg?version=1592892890085"
+                }
+              ],
+              "visualCue": {
+                "uiType": "TEXT",
+                "location": "BottomLeft",
+                "text": "1 LEFT",
+                "textColor": "#333333",
+                "backgroundColor": "#E5E5EA"
+              },
+              "trackingMeta": {
+                "widgetName": "xl_tile",
+                "productId": "943717"
+              }
+            },
+            "videoDetails": {
+              "previewUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "autoplay": false,
+              "videoUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "thumbnailUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202505/f8c01ce0-ab87-4d72-b82f-5e66e8808242_full.jpg?version=1746592724021",
+              "trackingMeta": {
+                "aspectRatio": "9:16",
+                "createdDate": "2025-05-08 11:46:26",
+                "videoLength": 26,
+                "videoIdentifier": "97ba1510-ce36-4ed0-8abe-83d8d275f9c5"
+              },
+              "hasAudio": false,
+              "previewHasAudio": false,
+              "ctaButton": {
+                "label": "ykkyuktjruy",
+                "actionType": "product",
+                "actionUri": "hopscotch://product?id=943717",
+                "trackingMeta": {
+                  "funnel_tile": "PODC-T1-P10-2486",
+                  "action_type": "product",
+                  "action_uri": "hopscotch://product?id=943717"
+                }
+              }
+            },
+            "trackingMeta": {
+              "tile_detail_id": 10369,
+              "action_uri": "hopscotch://product?id=943717",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/product/202006/f121992b-78b6-4f79-a1b9-b81c2c978b00_full.jpg?version=1592892890085",
+              "slice_id": "01_01"
+            }
+          },
+          {
+            "id": 10370,
+            "product": {
+              "id": 934141,
+              "name": "Purple & Blue Leaf Print Button Down Dress - Purple & Blue",
+              "brandName": "Campana",
+              "priceInfo": {
+                "sellingPrice": "₹999",
+                "absoluteValue": 999,
+                "callout": "Inclusive of all taxes"
+              },
+              "wishlistInfo": {
+                "isWishlisted": false,
+                "canWishlist": true,
+                "id": 0
+              },
+              "soldOut": false,
+              "actionUri": "hopscotch://product?id=934141",
+              "media": [
+                {
+                  "mimeType": "IMAGE",
+                  "url": "https://qastatic.hopscotch.in/fstatic/product/202003/09fc8918-58e4-40ba-828c-4ea0c2f9b6b4_full.jpg?version=1584093359150"
+                }
+              ],
+              "trackingMeta": {
+                "widgetName": "xl_tile",
+                "productId": "934141"
+              }
+            },
+            "videoDetails": {
+              "previewUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "autoplay": false,
+              "videoUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "thumbnailUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202505/f8c01ce0-ab87-4d72-b82f-5e66e8808242_full.jpg?version=1746592724021",
+              "trackingMeta": {
+                "aspectRatio": "9:16",
+                "createdDate": "2025-05-08 11:46:26",
+                "videoLength": 26,
+                "videoIdentifier": "97ba1510-ce36-4ed0-8abe-83d8d275f9c5"
+              },
+              "hasAudio": false,
+              "previewHasAudio": false,
+              "ctaButton": {
+                "label": "ykkyuktjruy",
+                "actionType": "product",
+                "actionUri": "hopscotch://product?id=934141",
+                "trackingMeta": {
+                  "funnel_tile": "PODC-T1-P10-2486",
+                  "action_type": "product",
+                  "action_uri": "hopscotch://product?id=934141"
+                }
+              }
+            },
+            "trackingMeta": {
+              "tile_detail_id": 10370,
+              "action_uri": "hopscotch://product?id=934141",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/product/202003/09fc8918-58e4-40ba-828c-4ea0c2f9b6b4_full.jpg?version=1584093359150",
+              "slice_id": "01_02"
+            }
+          },
+          {
+            "id": 10371,
+            "product": {
+              "id": 923464,
+              "name": "Red Round Neck Organic Cotton Sleeveless Dress",
+              "brandName": "nino bambino",
+              "priceInfo": {
+                "sellingPrice": "₹799",
+                "absoluteValue": 799,
+                "callout": "Inclusive of all taxes"
+              },
+              "wishlistInfo": {
+                "isWishlisted": false,
+                "canWishlist": true,
+                "id": 0
+              },
+              "soldOut": false,
+              "actionUri": "hopscotch://product?id=923464",
+              "media": [
+                {
+                  "mimeType": "IMAGE",
+                  "url": "https://qastatic.hopscotch.in/fstatic/product/202005/7b9a5539-1353-440e-a15f-4a37763248d1_full.jpg?version=1590476037936"
+                }
+              ],
+              "trackingMeta": {
+                "widgetName": "xl_tile",
+                "productId": "923464"
+              }
+            },
+            "videoDetails": {
+              "previewUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "autoplay": false,
+              "videoUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "thumbnailUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202505/f8c01ce0-ab87-4d72-b82f-5e66e8808242_full.jpg?version=1746592724021",
+              "trackingMeta": {
+                "aspectRatio": "9:16",
+                "createdDate": "2025-05-08 11:46:26",
+                "videoLength": 26,
+                "videoIdentifier": "97ba1510-ce36-4ed0-8abe-83d8d275f9c5"
+              },
+              "hasAudio": false,
+              "previewHasAudio": false,
+              "ctaButton": {
+                "label": "ykkyuktjruy",
+                "actionType": "product",
+                "actionUri": "hopscotch://product?id=923464",
+                "trackingMeta": {
+                  "funnel_tile": "PODC-T1-P10-2486",
+                  "action_type": "product",
+                  "action_uri": "hopscotch://product?id=923464"
+                }
+              }
+            },
+            "trackingMeta": {
+              "tile_detail_id": 10371,
+              "action_uri": "hopscotch://product?id=923464",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/product/202005/7b9a5539-1353-440e-a15f-4a37763248d1_full.jpg?version=1590476037936",
+              "slice_id": "01_03"
+            }
+          },
+          {
+            "id": 10372,
+            "product": {
+              "id": 953420,
+              "name": "Yellow Embroidery Work Top",
+              "brandName": "Aww Hunnie!!",
+              "priceInfo": {
+                "sellingPrice": "₹550",
+                "absoluteValue": 550,
+                "callout": "Inclusive of all taxes"
+              },
+              "wishlistInfo": {
+                "isWishlisted": false,
+                "canWishlist": true,
+                "id": 0
+              },
+              "soldOut": false,
+              "actionUri": "hopscotch://product?id=953420",
+              "media": [
+                {
+                  "mimeType": "IMAGE",
+                  "url": "https://qastatic.hopscotch.in/fstatic/product/202007/bfb56e4b-7da3-476a-aaed-3f26607d7cfe_full.jpg?version=1594899635555"
+                }
+              ],
+              "trackingMeta": {
+                "widgetName": "xl_tile",
+                "productId": "953420"
+              }
+            },
+            "videoDetails": {
+              "previewUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "autoplay": false,
+              "videoUrl": "https://ik.imagekit.io/demo/sample-video.mp4",
+              "thumbnailUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202505/f8c01ce0-ab87-4d72-b82f-5e66e8808242_full.jpg?version=1746592724021",
+              "trackingMeta": {
+                "aspectRatio": "9:16",
+                "createdDate": "2025-05-08 11:46:26",
+                "videoLength": 26,
+                "videoIdentifier": "97ba1510-ce36-4ed0-8abe-83d8d275f9c5"
+              },
+              "hasAudio": false,
+              "previewHasAudio": false,
+              "ctaButton": {
+                "label": "ykkyuktjruy",
+                "actionType": "product",
+                "actionUri": "hopscotch://product?id=953420",
+                "trackingMeta": {
+                  "funnel_tile": "PODC-T1-P10-2486",
+                  "action_type": "product",
+                  "action_uri": "hopscotch://product?id=953420"
+                }
+              }
+            },
+            "trackingMeta": {
+              "tile_detail_id": 10372,
+              "action_uri": "hopscotch://product?id=953420",
+              "image_url": "https://qastatic.hopscotch.in/fstatic/product/202007/bfb56e4b-7da3-476a-aaed-3f26607d7cfe_full.jpg?version=1594899635555",
+              "slice_id": "01_04"
+            }
+          },
+          {
+            "id": 10373,
+            "imageUrl": "https://static.hopscotch.in/View_All.svg",
+            "actionUri": "hopscotch://products?id=11959",
+            "mimeType": "image",
+            "trackingMeta": {
+              "tile_detail_id": 10373,
+              "action_uri": "hopscotch://products?id=11959",
+              "image_url": "https://static.hopscotch.in/View_All.svg",
+              "slice_id": "01_05"
+            }
+          }
+        ],
+        "title": {
+          "url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/c44c41d2-c91c-4780-853e-7f7f04f81bdb_full.jpg?version=1775642675616",
+          "height": 53,
+          "width": 960
+        },
+        "margins": {
+          "top": 20,
+          "bottom": 20,
+          "horizontal": 16,
+          "innerHorizontalMargin": 8,
+          "titleBottomMargin": 16,
+          "titleHorizontalMargin": 16
+        },
+        "trackingMeta": {
+          "carousel_id": 2486,
+          "cbt_id": 2486,
+          "carousel_type": "Page",
+          "banner_name": "Cloned All_PID Pos8",
+          "funnel_row": 10,
+          "sectionName": null,
+          "property_type": "PID_carousel",
+          "funnel_tile": "PODC-T1-P10-2486",
+          "width": 280,
+          "height": 392
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 15,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 720,
+                "height": 77,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/7c7d66f5-d8c0-4527-bc68-24aaeea731e4_full.jpg?version=1736507762619",
+                "isTitleItem": true
+              }
+            ],
+            "tile_detail_id": 1145
+          },
+          {
+            "tileGrid": [
+              {
+                "width": 720,
+                "height": 254,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/9f0e0249-7a72-4e1d-9504-f8e7a53acb63_full.jpg?version=1736507739551",
+                "actionUri": "hopscotch://products?id=9183",
+                "action_type": "PLP",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/products/9183/Shop+Toys++-+9183",
+                "action_value": "Shop Toys  - 9183",
+                "trackingMeta": {
+                  "width": 720,
+                  "action": "PLP",
+                  "height": 254,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/9f0e0249-7a72-4e1d-9504-f8e7a53acb63_full.jpg?version=1736507739551",
+                  "action_uri": "hopscotch://products?id=9183",
+                  "action_uri_web": "/products/9183/Shop+Toys++-+9183",
+                  "tile_detail_id": 1146
+                }
+              }
+            ],
+            "tile_detail_id": 1146
+          }
+        ],
+        "margins": {
+          "top": 10,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 16,
+          "titleHorizontalMargin": 16
+        },
+        "viewConfig": {
+          "name": "007_Hopscotch Promise_Pink _Pos 80",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "1144",
+          "end_date": "2028-04-20T09:20:00Z",
+          "page_name": "homepage",
+          "funnel_row": "21",
+          "start_date": "2025-01-10T09:20:48Z",
+          "banner_name": "007_Hopscotch Promise_Pink _Pos 80",
+          "funnel_tile": "CT1144",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 16,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 720,
+                "height": 77,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/7c7d66f5-d8c0-4527-bc68-24aaeea731e4_full.jpg?version=1736507762619",
+                "isTitleItem": true
+              }
+            ],
+            "tile_detail_id": 1973
+          },
+          {
+            "tileGrid": [
+              {
+                "width": 720,
+                "height": 254,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/9f0e0249-7a72-4e1d-9504-f8e7a53acb63_full.jpg?version=1736507739551",
+                "actionUri": "hopscotch://products?id=9183",
+                "action_type": "PLP",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/products/9183/Shop+Toys++-+9183",
+                "action_value": "Shop Toys  - 9183",
+                "trackingMeta": {
+                  "width": 720,
+                  "action": "PLP",
+                  "height": 254,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/9f0e0249-7a72-4e1d-9504-f8e7a53acb63_full.jpg?version=1736507739551",
+                  "action_uri": "hopscotch://products?id=9183",
+                  "action_uri_web": "/products/9183/Shop+Toys++-+9183",
+                  "tile_detail_id": 1974
+                }
+              }
+            ],
+            "tile_detail_id": 1974
+          }
+        ],
+        "margins": {
+          "top": 10,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 16,
+          "titleHorizontalMargin": 16
+        },
+        "viewConfig": {
+          "name": "Cloned 007_Hopscotch Promise_Pink _Pos 80",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "1972",
+          "end_date": "2028-04-20T09:20:00Z",
+          "page_name": "homepage",
+          "funnel_row": "22",
+          "start_date": "2025-01-10T09:20:48Z",
+          "banner_name": "Cloned 007_Hopscotch Promise_Pink _Pos 80",
+          "funnel_tile": "CT1972",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 17,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 960,
+                "height": 70,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/6a81acb6-3637-4430-989e-211ef04a7f2a_full.jpg?version=1736758273303",
+                "actionUri": "hopscotch://special?id=BigBoyShop",
+                "action_type": "SP",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/collections/BigBoyShop",
+                "action_value": "BigBoyShop",
+                "trackingMeta": {
+                  "width": 960,
+                  "action": "SP",
+                  "height": 70,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/6a81acb6-3637-4430-989e-211ef04a7f2a_full.jpg?version=1736758273303",
+                  "action_uri": "hopscotch://special?id=BigBoyShop",
+                  "tile_detail_id": 1161
+                }
+              }
+            ],
+            "tile_detail_id": 1161
+          },
+          {
+            "tileGrid": [
+              {
+                "width": 320,
+                "height": 217,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/d9ffe945-ce90-4f40-8e6c-fe381df98bfd_full.jpg?version=1736758284383",
+                "actionUri": "hopscotch://bottomSheet?type=shopByAge&id=1372",
+                "action_type": "SHOW_BOTTOMSHEET_LIST",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/v1/ui-components?ids=1372",
+                "action_value": "SBA_Girls(0-1) yrs - 1372",
+                "trackingMeta": {
+                  "width": 320,
+                  "action": "SHOW_BOTTOMSHEET_LIST",
+                  "height": 217,
+                  "slice_id": "02_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/d9ffe945-ce90-4f40-8e6c-fe381df98bfd_full.jpg?version=1736758284383",
+                  "action_uri": "hopscotch://bottomSheet?type=shopByAge&id=1372",
+                  "tile_detail_id": 1162
+                }
+              },
+              {
+                "width": 320,
+                "height": 217,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/87b51b00-6ff1-4351-b300-61d7127f6b9c_full.jpg?version=1736758297990",
+                "actionUri": "hopscotch://bottomSheet?type=shopByAge&id=1373",
+                "action_type": "SHOW_BOTTOMSHEET_LIST",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/v1/ui-components?ids=1373",
+                "action_value": "SBA_Girls(1-6) yrs  - 1373",
+                "trackingMeta": {
+                  "width": 320,
+                  "action": "SHOW_BOTTOMSHEET_LIST",
+                  "height": 217,
+                  "slice_id": "02_02",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/87b51b00-6ff1-4351-b300-61d7127f6b9c_full.jpg?version=1736758297990",
+                  "action_uri": "hopscotch://bottomSheet?type=shopByAge&id=1373",
+                  "tile_detail_id": 1162
+                }
+              },
+              {
+                "width": 320,
+                "height": 217,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/b60fa36c-6c76-46b4-96b7-78b12e946ec9_full.jpg?version=1736758317155",
+                "actionUri": "hopscotch://bottomSheet?type=shopByAge&id=1374",
+                "action_type": "SHOW_BOTTOMSHEET_LIST",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/v1/ui-components?ids=1374",
+                "action_value": "SBA_Girls(6+) yrs  cloned - 1374",
+                "trackingMeta": {
+                  "width": 320,
+                  "action": "SHOW_BOTTOMSHEET_LIST",
+                  "height": 217,
+                  "slice_id": "02_03",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/b60fa36c-6c76-46b4-96b7-78b12e946ec9_full.jpg?version=1736758317155",
+                  "action_uri": "hopscotch://bottomSheet?type=shopByAge&id=1374",
+                  "tile_detail_id": 1162
+                }
+              }
+            ],
+            "tile_detail_id": 1162
+          },
+          {
+            "tileGrid": [
+              {
+                "width": 320,
+                "height": 217,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/42ee0677-d3bc-4fe9-bd1b-b4f854b48fe6_full.jpg?version=1736758331900",
+                "actionUri": "hopscotch://bottomSheet?type=shopByAge&id=1375",
+                "action_type": "SHOW_BOTTOMSHEET_LIST",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/v1/ui-components?ids=1375",
+                "action_value": "SBA_Boys(0-1) yrs  - 1375",
+                "trackingMeta": {
+                  "width": 320,
+                  "action": "SHOW_BOTTOMSHEET_LIST",
+                  "height": 217,
+                  "slice_id": "03_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/42ee0677-d3bc-4fe9-bd1b-b4f854b48fe6_full.jpg?version=1736758331900",
+                  "action_uri": "hopscotch://bottomSheet?type=shopByAge&id=1375",
+                  "tile_detail_id": 1163
+                }
+              },
+              {
+                "width": 320,
+                "height": 217,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/94280347-ebe2-4da0-9fe9-e0b2474a8faf_full.jpg?version=1736758338626",
+                "actionUri": "hopscotch://bottomSheet?type=shopByAge&id=1376",
+                "action_type": "SHOW_BOTTOMSHEET_LIST",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/v1/ui-components?ids=1376",
+                "action_value": "SBA_Boys(1-6) yrs   - 1376",
+                "trackingMeta": {
+                  "width": 320,
+                  "action": "SHOW_BOTTOMSHEET_LIST",
+                  "height": 217,
+                  "slice_id": "03_02",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/94280347-ebe2-4da0-9fe9-e0b2474a8faf_full.jpg?version=1736758338626",
+                  "action_uri": "hopscotch://bottomSheet?type=shopByAge&id=1376",
+                  "tile_detail_id": 1163
+                }
+              },
+              {
+                "width": 320,
+                "height": 217,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/f99d0297-8900-4d7f-8240-b15c815b8e42_full.jpg?version=1736758345499",
+                "actionUri": "hopscotch://bottomSheet?type=shopByAge&id=1377",
+                "action_type": "SHOW_BOTTOMSHEET_LIST",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/v1/ui-components?ids=1377",
+                "action_value": "SBA_Boys(6+) yrs  - 1377",
+                "trackingMeta": {
+                  "width": 320,
+                  "action": "SHOW_BOTTOMSHEET_LIST",
+                  "height": 217,
+                  "slice_id": "03_03",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202501/f99d0297-8900-4d7f-8240-b15c815b8e42_full.jpg?version=1736758345499",
+                  "action_uri": "hopscotch://bottomSheet?type=shopByAge&id=1377",
+                  "tile_detail_id": 1163
+                }
+              }
+            ],
+            "tile_detail_id": 1163
+          }
+        ],
+        "margins": {
+          "top": 10,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 0,
+          "titleHorizontalMargin": 0
+        },
+        "viewConfig": {
+          "name": "008_Shop BY AGE - Latest Pos 80",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "1160",
+          "end_date": "2031-01-11T05:54:41Z",
+          "page_name": "homepage",
+          "funnel_row": "80",
+          "start_date": "2025-01-10T05:54:41Z",
+          "banner_name": "008_Shop BY AGE - Latest Pos 80",
+          "funnel_tile": "CT1160",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 18,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 960,
+                "height": 960,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/5b57d448-053f-440d-b65c-1de3e41f2e35_full.jpg?version=1775642310507",
+                "mimeType": "image",
+                "actionUri": "hopscotch://special?id=TEST_MADHU123",
+                "action_type": "SP",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "actionUriWeb": "/collections/TEST_MADHU123",
+                "action_value": "TEST_MADHU123",
+                "trackingMeta": {
+                  "width": 960,
+                  "action": "SP",
+                  "height": 960,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/5b57d448-053f-440d-b65c-1de3e41f2e35_full.jpg?version=1775642310507",
+                  "action_uri": "hopscotch://special?id=TEST_MADHU123",
+                  "tile_detail_id": 2151
+                }
+              }
+            ],
+            "tile_detail_id": 2151
+          }
+        ],
+        "margins": {
+          "top": 10,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 0,
+          "titleHorizontalMargin": 0
+        },
+        "ctaButton": {
+          "type": "primary",
+          "trackingMeta": {
+            "funnel_tile": "PC-T2-P5-null"
+          }
+        },
+        "viewConfig": {
+          "name": "H1_Test",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "2150",
+          "end_date": "2027-02-28T10:11:00Z",
+          "funnel_row": "500",
+          "start_date": "2026-02-13T10:11:29Z",
+          "banner_name": "H1_Test",
+          "funnel_tile": "PC-T2-P5-null",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 19,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 960,
+                "height": 53,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/eb4add6f-5d77-4927-a794-8f050f447028_full.jpg?version=1775642518176",
+                "isTitleItem": true
+              }
+            ],
+            "tile_detail_id": 2153
+          },
+          {
+            "tileGrid": [
+              {
+                "width": 240,
+                "height": 289,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/ac0abd2f-804b-4115-bb89-e83bbd8a5b68_full.jpg?version=1775642479534",
+                "mimeType": "image",
+                "actionUri": "",
+                "action_type": "NA",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "action_value": "",
+                "trackingMeta": {
+                  "width": 240,
+                  "action": "NA",
+                  "height": 289,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/ac0abd2f-804b-4115-bb89-e83bbd8a5b68_full.jpg?version=1775642479534",
+                  "action_uri": "",
+                  "tile_detail_id": 2154
+                }
+              },
+              {
+                "width": 240,
+                "height": 289,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/0f9cfe8c-f6b4-4889-bfcc-f63e52c492b5_full.jpg?version=1775642481721",
+                "mimeType": "image",
+                "actionUri": "",
+                "action_type": "NA",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "action_value": "",
+                "trackingMeta": {
+                  "width": 240,
+                  "action": "NA",
+                  "height": 289,
+                  "slice_id": "01_02",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/0f9cfe8c-f6b4-4889-bfcc-f63e52c492b5_full.jpg?version=1775642481721",
+                  "action_uri": "",
+                  "tile_detail_id": 2154
+                }
+              },
+              {
+                "width": 240,
+                "height": 289,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/4b316752-a251-4c09-aa92-7d0cc3ba8593_full.jpg?version=1775642487314",
+                "mimeType": "image",
+                "actionUri": "",
+                "action_type": "NA",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "action_value": "",
+                "trackingMeta": {
+                  "width": 240,
+                  "action": "NA",
+                  "height": 289,
+                  "slice_id": "01_03",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/4b316752-a251-4c09-aa92-7d0cc3ba8593_full.jpg?version=1775642487314",
+                  "action_uri": "",
+                  "tile_detail_id": 2154
+                }
+              },
+              {
+                "width": 240,
+                "height": 289,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/69362191-e1af-4fa6-965f-beff7e22de98_full.jpg?version=1775642492356",
+                "mimeType": "image",
+                "actionUri": "",
+                "action_type": "NA",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "action_value": "",
+                "trackingMeta": {
+                  "width": 240,
+                  "action": "NA",
+                  "height": 289,
+                  "slice_id": "01_04",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/69362191-e1af-4fa6-965f-beff7e22de98_full.jpg?version=1775642492356",
+                  "action_uri": "",
+                  "tile_detail_id": 2154
+                }
+              }
+            ],
+            "tile_detail_id": 2154
+          }
+        ],
+        "margins": {
+          "top": 10,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 16,
+          "titleHorizontalMargin": 16
+        },
+        "viewConfig": {
+          "name": "Wardrobe",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "2152",
+          "end_date": "2027-02-28T10:11:00Z",
+          "page_name": "homepage",
+          "funnel_row": "550",
+          "start_date": "2026-02-13T10:11:29Z",
+          "banner_name": "Wardrobe",
+          "funnel_tile": "CT2152",
+          "funnel_section": "New"
+        }
+      }
+    },
+    {
+      "type": "CustomTiles",
+      "position": 20,
+      "data": {
+        "tiles": [
+          {
+            "tileGrid": [
+              {
+                "width": 960,
+                "height": 53,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/f5037980-1ff3-417b-8bdf-98b43ce182f2_full.jpg?version=1775642393211",
+                "isTitleItem": true
+              }
+            ],
+            "tile_detail_id": 2152
+          },
+          {
+            "tileGrid": [
+              {
+                "width": 960,
+                "height": 480,
+                "imageUrl": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/0b086e64-763c-46bd-a009-9e693fd16a22_full.jpg?version=1775642434171",
+                "mimeType": "image",
+                "actionUri": "",
+                "action_type": "NA",
+                "appImageUrl": "",
+                "isTitleItem": false,
+                "action_value": "",
+                "trackingMeta": {
+                  "width": 960,
+                  "action": "NA",
+                  "height": 480,
+                  "slice_id": "01_01",
+                  "image_url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202604/0b086e64-763c-46bd-a009-9e693fd16a22_full.jpg?version=1775642434171",
+                  "action_uri": "",
+                  "tile_detail_id": 2153
+                }
+              }
+            ],
+            "tile_detail_id": 2153
+          }
+        ],
+        "margins": {
+          "top": 10,
+          "bottom": 20,
+          "horizontal": 16,
+          "titleBottomMargin": 16,
+          "titleHorizontalMargin": 16
+        },
+        "viewConfig": {
+          "name": "Summer_Video",
+          "type": "COLLECTION",
+          "pageName": "homepage"
+        },
+        "trackingMeta": {
+          "cbt_id": "2151",
+          "end_date": "2027-02-28T10:11:00Z",
+          "page_name": "homepage",
+          "funnel_row": "580",
+          "start_date": "2026-02-13T10:11:29Z",
+          "banner_name": "Summer_Video",
+          "funnel_tile": "CT2151",
+          "funnel_section": "New"
+        }
+      }
+    }
+  ],
+  "action": "success"
+}

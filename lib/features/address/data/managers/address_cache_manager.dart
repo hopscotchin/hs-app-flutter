@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/services/pref_manager.dart';
+import '../../domain/entities/address_entity.dart';
+import '../models/address_model.dart';
 
 /// In-memory + SharedPreferences cache for the user's address list.
 ///
@@ -27,6 +29,17 @@ class AddressCacheManager {
     _memory = _readFromPrefs();
     return _memory;
   }
+
+  /// Returns the cached addresses as domain entities.
+  ///
+  /// This is the only place the raw JSON shape is converted via
+  /// [AddressModel.fromJson] — callers (blocs, use cases) must use this
+  /// instead of parsing [cached] themselves, per the no-JSON-outside-data-layer
+  /// rule.
+  List<AddressEntity> get cachedEntities =>
+      (cached ?? const <Map<String, dynamic>>[])
+          .map((m) => AddressModel.fromJson(m).toEntity())
+          .toList(growable: false);
 
   Future<void> setAll(List<Map<String, dynamic>> items) async {
     final normalized = _enforceSingleDefault(items);

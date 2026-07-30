@@ -11,4 +11,8 @@ sealed class PincodeSheetEvent with _$PincodeSheetEvent {
   const factory PincodeSheetEvent.pincodeChanged(String pincode) =
       PincodeInputChanged;
   const factory PincodeSheetEvent.apply() = ApplyPincode;
+  /// PDP-only: the product-aware verify (run by the caller) failed. Clears the
+  /// loader and shows [error] as a plain inline message.
+  const factory PincodeSheetEvent.pdpVerifyFailed(String? pincodeError) =
+      PdpVerifyFailed;
 }

@@ -15,7 +15,8 @@ import '../../models/product_detail_model.dart';
 import '../../models/recommendations_model.dart';
 
 /// Lazily parsed entity — real model/entity code path is exercised.
-ProductDetailEntity get pdpMockEntity => ProductDetailModel.fromJson(_kPdpMockJson).toEntity();
+ProductDetailEntity get pdpMockEntity =>
+    ProductDetailModel.fromJson(_kPdpMockJson).toEntity();
 
 RecommendationsEntity get pdpRecommendationsMockEntity =>
     RecommendationsModel.fromJson(_kRecommendationsMockJson).toEntity();
@@ -246,7 +247,10 @@ const Map<String, dynamic> _kPdpMockJson = {
           'absoluteValue': 1199,
           'callout': 'Inclusive of all taxes',
         },
-        'eddInfo': {'edd': 'Get it in 2-3 days', 'orderSla': 'Usually ships within a day'},
+        'eddInfo': {
+          'edd': 'Get it in 2-3 days',
+          'orderSla': 'Usually ships within a day',
+        },
         'skuAttributes': {'skuMrp': '₹1,149', 'size': '0-1 Y'},
       },
       {
@@ -261,7 +265,10 @@ const Map<String, dynamic> _kPdpMockJson = {
           'absoluteValue': 2000,
           'callout': 'Inclusive of all taxes',
         },
-        'eddInfo': {'edd': 'Get it in 2-3 days', 'orderSla': 'Usually ships within a day'},
+        'eddInfo': {
+          'edd': 'Get it in 2-3 days',
+          'orderSla': 'Usually ships within a day',
+        },
         'skuAttributes': {'skuMrp': '₹2000', 'size': '1-2 Y'},
       },
       {
@@ -290,14 +297,29 @@ const Map<String, dynamic> _kPdpMockJson = {
           'absoluteValue': 1199,
           'callout': 'Inclusive of all taxes',
         },
-        'eddInfo': {'edd': 'Get it in 3-5 days', 'orderSla': 'Usually ships in 2 days'},
+        'eddInfo': {
+          'edd': 'Get it in 3-5 days',
+          'orderSla': 'Usually ships in 2 days',
+        },
       },
     ],
-    'eddInfo': {'edd': 'Get it in 2-3 days', 'orderSla': 'Usually ships within a day'},
+    'eddInfo': {
+      'edd': 'Get it in 2-3 days',
+      'orderSla': 'Usually ships within a day',
+    },
     'serviceGuarantee': [
-      {'label': '7 Days Return', 'icon': 'https://static.hopscotch.in/return-available.png'},
-      {'label': '7 Days Exchange', 'icon': 'https://static.hopscotch.in/exchange-available.png'},
-      {'label': 'Cash On Delivery', 'icon': 'https://static.hopscotch.in/cod-available.png'},
+      {
+        'label': '7 Days Return',
+        'icon': 'https://static.hopscotch.in/return-available.png',
+      },
+      {
+        'label': '7 Days Exchange',
+        'icon': 'https://static.hopscotch.in/exchange-available.png',
+      },
+      {
+        'label': 'Cash On Delivery',
+        'icon': 'https://static.hopscotch.in/cod-available.png',
+      },
     ],
     'details': [
       {
@@ -489,7 +511,11 @@ const Map<String, dynamic> _kPdpMockJson = {
             'discount': '20% OFF',
             'absoluteValue': 1199,
           },
-          'wishlistInfo': {'id': 233, 'isWishlisted': false, 'canWishlist': true},
+          'wishlistInfo': {
+            'id': 233,
+            'isWishlisted': false,
+            'canWishlist': true,
+          },
           'soldOut': false,
           'colorVariants': '+2 Colors',
           'actionUri': 'hopscotch://product?id=1317681',
@@ -532,7 +558,11 @@ const Map<String, dynamic> _kPdpMockJson = {
             'absoluteValue': 999,
             'callout': 'Inclusive of all taxes',
           },
-          'wishlistInfo': {'id': 234, 'isWishlisted': false, 'canWishlist': true},
+          'wishlistInfo': {
+            'id': 234,
+            'isWishlisted': false,
+            'canWishlist': true,
+          },
           'soldOut': false,
           'colorVariants': null,
           'actionUri': 'hopscotch://product?id=1317682',
@@ -560,7 +590,11 @@ const Map<String, dynamic> _kPdpMockJson = {
             'absoluteValue': 1499,
             'callout': 'Inclusive of all taxes',
           },
-          'wishlistInfo': {'id': 235, 'isWishlisted': true, 'canWishlist': true},
+          'wishlistInfo': {
+            'id': 235,
+            'isWishlisted': true,
+            'canWishlist': true,
+          },
           'soldOut': false,
           'colorVariants': '+1 Color',
           'actionUri': 'hopscotch://product?id=1317683',

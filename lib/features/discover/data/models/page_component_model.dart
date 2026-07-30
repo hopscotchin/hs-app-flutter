@@ -65,5 +65,15 @@ extension PageComponentModelX on PageComponentModel {
     data: rawData,
     parsedData: parsedData,
     margins: margins,
+    // Prefer component-level `trackingMeta`, fall back to a nested `data.trackingMeta`
+    // if the backend places it inside the typed data block instead of at the
+    // component root. Either shape lands the same key/value pairs on the wire.
+    trackingMeta: _readTopLevelTrackingMeta(rawData),
   );
+}
+
+Map<String, dynamic>? _readTopLevelTrackingMeta(Map<String, dynamic>? data) {
+  if (data == null) return null;
+  final raw = data['trackingMeta'];
+  return raw is Map<String, dynamic> ? Map<String, dynamic>.of(raw) : null;
 }

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 
 import '../../core/constants/strings/auto_test_strings.dart';
+import '../../core/analytics/home/home_component_click_handlers.dart';
+import '../../core/analytics/home/home_track_analytic_manager.dart';
 import '../../core/constants/strings/discover_strings.dart';
+import '../../core/di/injection.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../atoms/cached_image_widget.dart';
@@ -55,7 +58,7 @@ class CustomTilesWidget extends StatelessWidget {
         : 0.0;
     // viewConfig.imageCornerRadius (defaults to 4 when not supplied by API).
     final double imageCornerRadius =
-        tilesData.viewConfig?.imageCornerRadius ?? 4;
+        tilesData.viewConfig?.imageCornerRadius ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +83,7 @@ class CustomTilesWidget extends StatelessWidget {
                     SizedBox(height: innerVerticalMargin),
                   _buildRow(
                     context,
-                    contentRows[i].tileGrid,
+                    contentRows[i],
                     innerHorizontalMargin,
                     imageCornerRadius,
                     // Flat tile index across all preceding content rows.
@@ -183,20 +186,22 @@ class CustomTilesWidget extends StatelessWidget {
 
   Widget _buildRow(
     BuildContext context,
-    List<TileGridItem> tiles,
+    CustomTilesTile row,
     double innerHorizontalMargin,
     double imageCornerRadius,
     int startIndex,
   ) {
+    final tiles = row.tileGrid;
     if (tiles.length == 1) {
-      return _buildTile(context, tiles.first, imageCornerRadius, startIndex);
+      return _buildTile(context, row, tiles.first, imageCornerRadius, startIndex);
     }
-
     return Row(
       children: [
         for (int i = 0; i < tiles.length; i++) ...[
           if (i > 0) SizedBox(width: innerHorizontalMargin),
-          Expanded(child: _buildTile(context, tiles[i], imageCornerRadius, startIndex + i)),
+          Expanded(
+            child: _buildTile(context, row, tiles[i], imageCornerRadius, startIndex + i),
+          ),
         ],
       ],
     );
@@ -204,6 +209,7 @@ class CustomTilesWidget extends StatelessWidget {
 
   Widget _buildTile(
     BuildContext context,
+    CustomTilesTile row,
     TileGridItem tile,
     double imageCornerRadius,
     int index,
@@ -217,7 +223,13 @@ class CustomTilesWidget extends StatelessWidget {
     );
     return GestureDetector(
       key: _key('${HomeComponentTestStrings.tiles}_$index'),
-      onTap: () => ActionUrlHandler.navigate(context, tile.actionUri),
+      onTap: () async {
+        await sl<HomeTrackAnalyticManager>()
+            .onCustomTileTapped(tilesData, row, tile);
+        if (context.mounted) {
+          ActionUrlHandler.navigate(context, tile.actionUri);
+        }
+      },
       child: imageCornerRadius > 0
           ? ClipRRect(
               borderRadius: BorderRadius.circular(imageCornerRadius),

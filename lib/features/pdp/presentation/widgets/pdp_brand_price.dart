@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../components/atoms/custom_image.dart';
 import '../../../../core/constants/image_constants.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
@@ -45,6 +46,7 @@ class PdpBrandPrice extends StatelessWidget {
               padding: const EdgeInsets.only(top: 4),
               child: Text(
                 product.name!,
+                key: const ValueKey(PdpTestStrings.productNameText),
                 style: AppTypographyV1.titleSmall.copyWith(
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF000000),
@@ -64,11 +66,21 @@ class PdpBrandPrice extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (price != null)
-                      PriceInfoRow(price: price),
+                      PriceInfoRow(
+                        price: price,
+                        sellingPriceKey: const ValueKey(
+                          PdpTestStrings.sellingPriceText,
+                        ),
+                        mrpKey: const ValueKey(PdpTestStrings.mrpText),
+                        discountKey: const ValueKey(
+                          PdpTestStrings.discountText,
+                        ),
+                      ),
                     if (price?.callout != null) ...[
                       const SizedBox(height: 4),
                       Text(
                         price!.callout!,
+                        key: const ValueKey(PdpTestStrings.priceCalloutText),
                         style: AppTypographyV1.bodySmall.copyWith(
                           fontWeight: FontWeight.w500,
                           color: _kCalloutColor,
@@ -84,6 +96,7 @@ class PdpBrandPrice extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _ActionIcon(
+                    key: const ValueKey(PdpTestStrings.shareButton),
                     path: ImageConstants.shareIcon,
                     color: AppColors.primary,
                     onTap: onShareTap,
@@ -92,6 +105,7 @@ class PdpBrandPrice extends StatelessWidget {
                   ),
                   AppSpacing.horizontalGapSm,
                   _ActionIcon(
+                    key: const ValueKey(PdpTestStrings.wishlistButton),
                     path: isWishlisted
                         ? ImageConstants.wishlistAdded
                         : ImageConstants.addWishlist,

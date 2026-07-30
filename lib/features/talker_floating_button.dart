@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hs_app_flutter/core/config/build_config.dart';
 import 'package:hs_app_flutter/core/di/injection.dart';
 import 'package:hs_app_flutter/core/router/app_router.dart';
+import 'package:hs_app_flutter/features/analytics/presentation/pages/analytics_debug_page.dart';
 import 'package:talker_dio_logger_plus/talker_dio_logger_plus.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -18,6 +20,21 @@ class TalkerFloatingButton extends StatefulWidget {
 class _TalkerFloatingButtonState extends State<TalkerFloatingButton> {
   Offset _position = const Offset(16, 120);
   bool _isDragging = false;
+
+  void _copyToClipboard(
+    BuildContext screenContext,
+    Talker talker,
+    TalkerData data,
+  ) {
+    final text = data.generateTextMessage(
+      timeFormat: talker.settings.timeFormat,
+    );
+    Clipboard.setData(ClipboardData(text: text));
+    final messenger = ScaffoldMessenger.maybeOf(screenContext);
+    messenger?.showSnackBar(
+      const SnackBar(content: Text('Log copied to clipboard')),
+    );
+  }
 
   void _clampPosition(Size screen) {
     const size = 52.0;
@@ -47,6 +64,13 @@ class _TalkerFloatingButtonState extends State<TalkerFloatingButton> {
                 });
               },
               onPanEnd: (_) => setState(() => _isDragging = false),
+              onLongPress: () {
+                AppRouter.navigatorKey.currentState?.push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const AnalyticsDebugPage(),
+                  ),
+                );
+              },
               onTap: () {
                 final talker = sl<Talker>();
                 const theme = TalkerScreenTheme();
@@ -63,6 +87,7 @@ class _TalkerFloatingButtonState extends State<TalkerFloatingButton> {
                           data: data,
                           backgroundColor: theme.cardColor,
                           color: data.getFlutterColor(theme),
+                          onCopyTap: () => _copyToClipboard(context, talker, data),
                         );
                       },
                     ),

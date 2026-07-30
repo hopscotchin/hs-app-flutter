@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../components/atoms/empty_state_widget.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/pdp_strings.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../widgets/pdp_appbar.dart';
@@ -19,10 +20,12 @@ class PdpErrorView extends StatelessWidget {
         const PdpAppBarContent(),
         Expanded(
           child: EmptyStateWidget(
+            key: const ValueKey(PdpTestStrings.errorView),
             type: EmptyStateType.notFound,
             title: PdpStrings.productMovedTitle,
             subtitle: PdpStrings.productMovedSubtitle,
             buttonLabel: PdpStrings.exploreNow,
+            buttonKey: const ValueKey(PdpTestStrings.errorExploreButton),
             onButtonTap: () => AppNavigator.goToHome(context),
           ),
         ),

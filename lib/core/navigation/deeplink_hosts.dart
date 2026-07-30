@@ -31,13 +31,6 @@ abstract final class DeeplinkHost {
   static const shoppingCart = 'shoppingCart';
   static const cartMerge = 'cartMerge';
 
-  // Moments
-  static const momentPage = 'momentPage';
-  static const momentUpload = 'momentUpload';
-  static const momentUpload2 = 'momentUpload2';
-  static const myMoment = 'myMoment';
-  static const photo = 'photo';
-
   // Account / Me
   static const meTab = 'meTab';
   static const accountPage = 'accountPage';

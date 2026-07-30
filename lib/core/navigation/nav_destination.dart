@@ -75,15 +75,6 @@ class CategoriesDestination extends NavDestination {
   }
 }
 
-class MomentsDestination extends NavDestination {
-  const MomentsDestination();
-
-  @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
-    AppNavigator.goToMoments(context);
-  }
-}
-
 class AccountDestination extends NavDestination {
   const AccountDestination();
 

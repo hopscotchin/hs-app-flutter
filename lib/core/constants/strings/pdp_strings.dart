@@ -6,19 +6,23 @@ class PdpStrings {
   // Image carousel — matches Android's default ImageConfig.productAspectRatio (5:7 portrait).
   static const double imageAspectRatio = 5 / 7;
 
-  // App bar — vertical padding around its content. Shared between
-  // PdpAppBar's own Padding and PdpContent's sheet-maxSize calculation so the
-  // two never drift out of sync when this value changes.
+  // App bar — vertical padding around the back button, which is the tallest
+  // item in the row and therefore what sets the bar's height.
   static const double appBarVerticalPadding = AppSpacing.lgMd;
 
-  // Collapsed sheet's overlap into the bottom of the carousel — shared
-  // between PdpContent's peek-height calculation and PdpImageCarousel's
-  // visual cue badge position so both agree on the sheet's collapsed
-  // geometry. Mirrors Android's SheetAnimationHandler IMAGE_OFFSET.
+  // The app bar's content height within its SafeArea: the back button's
+  // padding ×2 plus its icon. Derived from the two values it actually depends
+  // on, and shared with PdpContent (which uses it as the scroll offset at
+  // which the bar turns white) so the two can't drift apart.
+  static const double appBarHeight = appBarVerticalPadding * 2 + AppSpacing.lmd;
+
+  // How far the content sheet overlaps the bottom of the carousel — shared
+  // between PdpContent's sheet-lip position and PdpImageCarousel's visual cue
+  // badge so both agree where the content's top edge sits. Mirrors Android's
+  // SheetAnimationHandler IMAGE_OFFSET.
   static const double sheetCarouselOverlap = 16.0;
 
-  // Visual cue badge — vertical gap kept above the collapsed bottom sheet's
-  // top edge.
+  // Visual cue badge — vertical gap kept above the content sheet's top edge.
   static const double visualCueBottomGap = 24.0;
 
   static const String addToCart = 'ADD TO CART';
@@ -36,6 +40,8 @@ class PdpStrings {
   static const String buyNow = 'Buy Now';
   static const String addToBag = 'Add To Bag';
   static const String goToBag = 'Go To Bag';
+  // Shown on the fly-to-cart animation overlay while the product image holds.
+  static const String addedToBag = 'Added to bag';
 
   // Delivery info
   static const String deliveryAvailability = 'Delivery Availability';
@@ -45,8 +51,10 @@ class PdpStrings {
   // Contextual delivery-date prompts (mirror Android EddInfoView.getMessage3).
   static const String selectPincodeAndSize =
       'Select pincode and size to get the exact delivery date';
-  static const String enterPincodeForDelivery = 'Enter pincode to get accurate delivery date';
-  static const String selectSizeForDelivery = 'Select size to get the exact delivery date';
+  static const String enterPincodeForDelivery =
+      'Enter pincode to get accurate delivery date';
+  static const String selectSizeForDelivery =
+      'Select size to get the exact delivery date';
 
   // Offers
   static const String offersAndDiscounts = 'Offers & Discounts';
@@ -68,7 +76,8 @@ class PdpStrings {
   static const String exploreOurCollection = 'EXPLORE OUR COLLECTION';
   static const String somethingWentWrong = 'Something went wrong.';
   static const String productMovedTitle = 'Looks Like This Product Moved';
-  static const String productMovedSubtitle = "But there's plenty more to discover.";
+  static const String productMovedSubtitle =
+      "But there's plenty more to discover.";
   static const String exploreNow = 'Explore Now';
 
   // Share

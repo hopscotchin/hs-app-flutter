@@ -8,7 +8,6 @@ import '../../../../core/base/base_bloc.dart';
 import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/error/failures.dart';
 import '../../../address/data/managers/address_cache_manager.dart';
-import '../../../address/data/models/address_model.dart';
 import '../../../address/domain/entities/address_entity.dart';
 import '../../../address/domain/usecases/select_address_usecase.dart';
 import '../../domain/usecases/check_delivery_pincode_usecase.dart';
@@ -29,6 +28,7 @@ class PincodeSheetBloc extends BaseBloc<PincodeSheetEvent, PincodeSheetState> {
     on<FocusPincodeInput>(_onFocusInput);
     on<PincodeInputChanged>(_onPincodeChanged);
     on<ApplyPincode>(_onApply);
+    on<PdpVerifyFailed>(_onPdpVerifyFailed);
   }
 
   final CheckDeliveryPincodeUseCase _checkPincode;
@@ -36,10 +36,7 @@ class PincodeSheetBloc extends BaseBloc<PincodeSheetEvent, PincodeSheetState> {
   final AddressCacheManager _cache;
 
   void _onOpen(OpenPincodeSheet event, Emitter<PincodeSheetState> emit) {
-    final raw = _cache.cached ?? const <Map<String, dynamic>>[];
-    final addresses = raw
-        .map((m) => AddressModel.fromJson(m).toEntity())
-        .toList(growable: false);
+    final addresses = _cache.cachedEntities;
     // Restore the last address picked from the sheet (cart or PDP) so its
     // indicator shows again — but only if it still exists in the list.
     final trackedId = _cache.lastSelectedPincodeAddressId;
@@ -65,8 +62,9 @@ class PincodeSheetBloc extends BaseBloc<PincodeSheetEvent, PincodeSheetState> {
     if (addr.id == 0 || !addr.isServicable) return;
 
     // From PDP: skip both the serviceability check and the selectAddress API —
-    // PDP runs its own product-aware verifyPincode after the sheet pops. Pop
-    // immediately with the address pincode.
+    // the sheet runs its own product-aware verifyPincode in-place. Show the
+    // loader while it runs; the sheet pops itself on success (see
+    // PincodeBottomSheet.onPdpVerify).
     if (current.source == PincodeSheetSource.pdp) {
       // Track this address so its indicator shows next time the sheet opens.
       unawaited(_cache.setLastSelectedPincodeAddressId(addr.id));
@@ -74,8 +72,9 @@ class PincodeSheetBloc extends BaseBloc<PincodeSheetEvent, PincodeSheetState> {
         selectedAddressId: event.addressId,
         enteredPincode: '',
         lastCheckedValidPincode: addr.pincode,
-        isChecking: false,
+        isChecking: true,
         messageBars: const [],
+        pincodeError: null,
         toastMessage: null,
       ));
       return;
@@ -102,6 +101,7 @@ class PincodeSheetBloc extends BaseBloc<PincodeSheetEvent, PincodeSheetState> {
       selectedAddressId: null,
       lastCheckedValidPincode: null,
       messageBars: const [],
+      pincodeError: null,
     ));
   }
 
@@ -112,6 +112,7 @@ class PincodeSheetBloc extends BaseBloc<PincodeSheetEvent, PincodeSheetState> {
     emit(state.copyWith(
       enteredPincode: event.pincode,
       lastCheckedValidPincode: null,
+      pincodeError: null,
     ));
   }
 
@@ -136,6 +137,7 @@ class PincodeSheetBloc extends BaseBloc<PincodeSheetEvent, PincodeSheetState> {
         lastCheckedValidPincode: pincode,
         isChecking: true,
         messageBars: const [],
+        pincodeError: null,
         toastMessage: null,
       ));
       return;
@@ -149,6 +151,20 @@ class PincodeSheetBloc extends BaseBloc<PincodeSheetEvent, PincodeSheetState> {
     ));
 
     await _runCheck(pincode, emit);
+  }
+
+  void _onPdpVerifyFailed(
+    PdpVerifyFailed event,
+    Emitter<PincodeSheetState> emit,
+  ) {
+    // The caller ran the product-aware verify and it failed. Drop the loader,
+    // invalidate the pending pincode (disables Proceed), and show the error as
+    // a plain inline message.
+    emit(state.copyWith(
+      isChecking: false,
+      lastCheckedValidPincode: null,
+      pincodeError: event.pincodeError,
+    ));
   }
 
   Future<void> _runCheck(
@@ -227,12 +243,15 @@ class PincodeSheetBloc extends BaseBloc<PincodeSheetEvent, PincodeSheetState> {
           unawaited(_cache.setPrimary(addressId));
           // Track this address so its indicator shows next time the sheet opens.
           unawaited(_cache.setLastSelectedPincodeAddressId(addressId));
+          // Cart: no Proceed button anymore — close the sheet with the
+          // validated pincode as soon as the address select succeeds.
           emit(state.copyWith(
             isChecking: false,
             lastCheckedValidPincode: pincode,
             toastMessage:
                 mutation.popUpMessage.isEmpty ? null : mutation.popUpMessage,
             messageBars: const [],
+            popResult: pincode,
           ));
         } else {
           emit(state.copyWith(

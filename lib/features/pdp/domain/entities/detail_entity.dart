@@ -57,12 +57,12 @@ class DetailItemEntity {
 
   @override
   int get hashCode => Object.hash(
-        type,
-        span,
-        displayKey,
-        displayStyle,
-        showBullet,
-        showDivider,
-        fieldPath,
-      );
+    type,
+    span,
+    displayKey,
+    displayStyle,
+    showBullet,
+    showDivider,
+    fieldPath,
+  );
 }

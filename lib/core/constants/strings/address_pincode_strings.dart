@@ -71,5 +71,6 @@ class AddressStrings {
   // Pincode
   static const String enterPincodeHint = 'Enter A Pincode Instead';
   static const String deliverTo = 'Deliver To';
+  static const String enterPincodeForEdd = 'Enter pincode for EDD';
   static const String proceed = 'Proceed';
 }

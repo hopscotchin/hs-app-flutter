@@ -2,7 +2,7 @@ name: hs_app_flutter
 description: "HS Flutter"
 publish_to: "none"
 
-version: 14.5.0+2026072301
+version: 14.6.0+2026073001
 
 environment:
   sdk: ^3.11.0
@@ -51,10 +51,17 @@ dependencies:
   # Loading Placeholders
   shimmer: ^3.0.0
 
+  # Viewport visibility — drives per-component impression tracking on the
+  # Discover feed via HomeTrackAnalyticManager.
+  visibility_detector: ^0.4.0+2
+
   # Firebase
   firebase_core: ^4.7.0
   firebase_crashlytics: ^5.2.2
   firebase_messaging: ^16.2.2
+  # setUserProperty("ct_objectId", cleverTapId) parity with Android
+  # HsApplication.initFirebaseUserProps line 164-173.
+  firebase_analytics: 12.4.3 # ponytail: 12.4.4 imports non-existent FirebasePlugin symbol, unpin when upstream fixes
 
   # Network Connectivity
   connectivity_plus: ^7.1.1
@@ -78,18 +85,42 @@ dependencies:
   logger:
     ^2.7.0
 
-    # HTTP Inspector (debug mode only — gated with kDebugMode at runtime)
+  # HTTP Inspector (debug mode only — gated with kDebugMode at runtime)
   talker_flutter: ^5.1.16
   talker_dio_logger: ^5.1.16
   talker_bloc_logger: ^5.1.17
   talker_dio_logger_plus: ^1.0.5
 
-  # Flutter Driver extension (enabled only in debug via kDebugMode)
-  flutter_driver:
-    sdk: flutter
+  # Analytics — Segment (official segmentio/analytics_flutter) + AppsFlyer +
+  # CleverTap + ATT/advertising-id.
+  # http is pulled in directly (also transitive via segment_analytics) — we
+  # use it to build a custom requestFactory that rewrites the SDK's `/b` path
+  # to the Hopscotch proxy's expected wire format with Basic Auth.
+  segment_analytics: ^1.1.11
+  appsflyer_sdk: ^6.16.2
+  clevertap_plugin: ^3.4.0
+  # Microsoft Clarity — session replays + custom tags for user_type / utm /
+  # PID / PLP / boutiqueId + user id. Mirrors Android
+  # `common/helper/ClarityHelper.kt`. Feature-flag gated via
+  # `PrefManager.featureFlagClarity`.
+  clarity_flutter: ^1.9.0
+  app_tracking_transparency: ^2.0.6+1
+  advertising_id: ^2.4.0
+  # Android: `Settings.Secure.ANDROID_ID` reader. `device_info_plus.androidInfo.id`
+  # returns `Build.ID` (OS build fingerprint), NOT ANDROID_ID — confirmed in
+  # device_info_plus 13.1.0/MethodCallHandlerImpl.kt:38. Using it for hs_device_id
+  # collapses all users on the same OS build into one analytics identity.
+  android_id: ^0.4.0
+  # iOS: Keychain-backed persistence for hs_device_id so the UUID survives app
+  # uninstall (matches Android `Settings.Secure.ANDROID_ID` stability and the
+  # iOS-native `DeviceUID.m` Keychain pattern).
+  flutter_secure_storage: ^10.3.1
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  flutter_driver:
     sdk: flutter
 
   flutter_lints: ^6.0.0

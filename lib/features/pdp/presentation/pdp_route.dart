@@ -15,8 +15,9 @@ class PdpRoute {
     builder: (context, state) {
       final productId = int.parse(state.pathParameters['productId']!);
       return BlocProvider(
-        create: (_) => sl<PdpBloc>()
-          ..add(PdpEvent.loadProductDetails(productId: productId)),
+        create: (_) =>
+            sl<PdpBloc>()
+              ..add(PdpEvent.loadProductDetails(productId: productId)),
         child: const PdpPage(),
       );
     },

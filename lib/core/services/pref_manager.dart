@@ -26,14 +26,27 @@ class PrefManager {
   Future<bool> removeCookies(String host) => _prefs.remove(host);
 
   // ─── Session Tracking ─────────────────────────────────────────────
+  //
+  // These four keys are the change-detection anchors used by
+  // CookieAnalyticsInterceptor — each new cookie value is diffed against the
+  // cached one before identify/session_started fires. Mirrors Android
+  // AppRecordData session-tracking fields written by CookiesBasedEventsUtil.
 
   int get sessionCount => _prefs.getInt(StorageKeys.sessionCount) ?? 0;
+  Future<void> setSessionCount(int value) =>
+      _prefs.setInt(StorageKeys.sessionCount, value);
 
   String? get startSessionId => _prefs.getString(StorageKeys.startSessionId);
+  Future<void> setStartSessionId(String? value) =>
+      _setStringOrRemove(StorageKeys.startSessionId, value);
 
   String? get currentUserType => _prefs.getString(StorageKeys.currentUserType);
+  Future<void> setCurrentUserType(String? value) =>
+      _setStringOrRemove(StorageKeys.currentUserType, value);
 
   String? get previousExperiments => _prefs.getString(StorageKeys.previousExperiments);
+  Future<void> setPreviousExperiments(String? value) =>
+      _setStringOrRemove(StorageKeys.previousExperiments, value);
 
   Future<void> persistSessionData({
     required int sessionCount,
@@ -181,6 +194,194 @@ class PrefManager {
   bool get isDeviceTokenSent => _prefs.getBool(StorageKeys.isDeviceTokenSent) ?? false;
   Future<void> setIsDeviceTokenSent(bool value) =>
       _setBoolOrRemove(StorageKeys.isDeviceTokenSent, value);
+
+  // ─── Analytics ────────────────────────────────────────────────────
+
+  String? get cleverTapId => _prefs.getString(StorageKeys.cleverTapId);
+  Future<void> setCleverTapId(String? value) =>
+      _setStringOrRemove(StorageKeys.cleverTapId, value);
+
+  /// JSON blob of the accumulated identify-trait union. Read on
+  /// `AnalyticsService` init to hydrate `_accumulatedTraits`; rewritten on
+  /// every `identify()` call. Cleared by `reset()`.
+  String? get accumulatedTraits =>
+      _prefs.getString(StorageKeys.accumulatedTraits);
+  Future<void> setAccumulatedTraits(String? value) =>
+      _setStringOrRemove(StorageKeys.accumulatedTraits, value);
+
+  String? get hsDeviceId => _prefs.getString(StorageKeys.hsDeviceId);
+  Future<void> setHsDeviceId(String? value) =>
+      _setStringOrRemove(StorageKeys.hsDeviceId, value);
+
+  String? get advertisingId => _prefs.getString(StorageKeys.advertisingId);
+  Future<void> setAdvertisingId(String? value) =>
+      _setStringOrRemove(StorageKeys.advertisingId, value);
+
+  // ─── Analytics: identity / session traits ─────────────────────────
+  //
+  // Written by CookieAnalyticsInterceptor from the four server-set cookies;
+  // read by AnalyticsHelper.identifyOnCookieChange to produce identify traits.
+  // userType is the value sent in `user_type` trait; currentUserType (above)
+  // is the change-detection cache.
+
+  String? get userType => _prefs.getString(StorageKeys.userType);
+  Future<void> setUserType(String? value) =>
+      _setStringOrRemove(StorageKeys.userType, value);
+
+  String? get segmentUserType => _prefs.getString(StorageKeys.segmentUserType);
+  Future<void> setSegmentUserType(String? value) =>
+      _setStringOrRemove(StorageKeys.segmentUserType, value);
+
+  /// Set at ATC time by the cart repository. Survives `order_placed` (unlike
+  /// [segmentUserType]) — see checkout_chain.md.
+  String? get atcUserType => _prefs.getString(StorageKeys.atcUserType);
+  Future<void> setAtcUserType(String? value) =>
+      _setStringOrRemove(StorageKeys.atcUserType, value);
+
+  /// Set during checkout flow. Survives `order_placed`.
+  String? get checkoutFlowUserType => _prefs.getString(StorageKeys.checkoutFlowUserType);
+  Future<void> setCheckoutFlowUserType(String? value) =>
+      _setStringOrRemove(StorageKeys.checkoutFlowUserType, value);
+
+  String? get lastVisitDate => _prefs.getString(StorageKeys.lastVisitDate);
+  Future<void> setLastVisitDate(String? value) =>
+      _setStringOrRemove(StorageKeys.lastVisitDate, value);
+
+  int get daysSinceLastVisit => _prefs.getInt(StorageKeys.daysSinceLastVisitAnalytics) ?? 0;
+  Future<void> setDaysSinceLastVisit(int value) =>
+      _prefs.setInt(StorageKeys.daysSinceLastVisitAnalytics, value);
+
+  /// Defaults to true on a fresh install. Flipped to false after the first
+  /// identify-on-session-change fires `visitor_type = "new visitor"`.
+  bool get isNewVisitor => _prefs.getBool(StorageKeys.isNewVisitor) ?? true;
+  Future<void> setIsNewVisitor(bool value) =>
+      _prefs.setBool(StorageKeys.isNewVisitor, value);
+
+  // ─── Analytics: lifecycle / install detection ─────────────────────
+
+  /// Defaults to true on fresh install. Flipped to false by
+  /// AnalyticsHelper.fireLifeCycleEvents after deciding install_type = "New".
+  bool get isFirstInstall => _prefs.getBool(StorageKeys.isFirstInstall) ?? true;
+  Future<void> setIsFirstInstall(bool value) =>
+      _prefs.setBool(StorageKeys.isFirstInstall, value);
+
+  /// Defaults to true so `application_opened` fires once on the first cold
+  /// start of a session. Lifecycle observer sets true when app moves to
+  /// foreground; fireApplicationOpenedEvent flips back to false after firing.
+  bool get applicationStatusFlag =>
+      _prefs.getBool(StorageKeys.applicationStatusFlag) ?? true;
+  Future<void> setApplicationStatusFlag(bool value) =>
+      _prefs.setBool(StorageKeys.applicationStatusFlag, value);
+
+  String? get cachedVersionName => _prefs.getString(StorageKeys.cachedVersionName);
+  Future<void> setCachedVersionName(String? value) =>
+      _setStringOrRemove(StorageKeys.cachedVersionName, value);
+
+  int get cachedVersionCode => _prefs.getInt(StorageKeys.cachedVersionCode) ?? 0;
+  Future<void> setCachedVersionCode(int value) =>
+      _prefs.setInt(StorageKeys.cachedVersionCode, value);
+
+  bool get isUpdated => _prefs.getBool(StorageKeys.isUpdated) ?? false;
+  Future<void> setIsUpdated(bool value) =>
+      _prefs.setBool(StorageKeys.isUpdated, value);
+
+  // ─── Analytics: device probes (read by application_opened) ────────
+
+  String? get deviceProfile => _prefs.getString(StorageKeys.deviceProfile);
+  Future<void> setDeviceProfile(String? value) =>
+      _setStringOrRemove(StorageKeys.deviceProfile, value);
+
+  bool get isDeviceProfileSet =>
+      _prefs.getBool(StorageKeys.isDeviceProfileSet) ?? false;
+  Future<void> setIsDeviceProfileSet(bool value) =>
+      _prefs.setBool(StorageKeys.isDeviceProfileSet, value);
+
+  bool get pushEnabledAnalytics => _prefs.getBool(StorageKeys.pushEnabled) ?? true;
+  Future<void> setPushEnabledAnalytics(bool value) =>
+      _prefs.setBool(StorageKeys.pushEnabled, value);
+
+  bool get isFbAvailable => _prefs.getBool(StorageKeys.isFbAvailable) ?? false;
+  Future<void> setIsFbAvailable(bool value) =>
+      _prefs.setBool(StorageKeys.isFbAvailable, value);
+
+  bool get isWaAvailable => _prefs.getBool(StorageKeys.isWaAvailable) ?? false;
+  Future<void> setIsWaAvailable(bool value) =>
+      _prefs.setBool(StorageKeys.isWaAvailable, value);
+
+  bool get isFcAvailable => _prefs.getBool(StorageKeys.isFcAvailable) ?? false;
+  Future<void> setIsFcAvailable(bool value) =>
+      _prefs.setBool(StorageKeys.isFcAvailable, value);
+
+  bool get isMyAvailable => _prefs.getBool(StorageKeys.isMyAvailable) ?? false;
+  Future<void> setIsMyAvailable(bool value) =>
+      _prefs.setBool(StorageKeys.isMyAvailable, value);
+
+  bool get isDeviceRooted => _prefs.getBool(StorageKeys.isDeviceRooted) ?? false;
+  Future<void> setIsDeviceRooted(bool value) =>
+      _prefs.setBool(StorageKeys.isDeviceRooted, value);
+
+  // ─── Analytics: misc ──────────────────────────────────────────────
+
+  String? get homePageSkin => _prefs.getString(StorageKeys.homePageSkin);
+  Future<void> setHomePageSkin(String? value) =>
+      _setStringOrRemove(StorageKeys.homePageSkin, value);
+
+  bool get isOrderPaid => _prefs.getBool(StorageKeys.isOrderPaid) ?? false;
+  Future<void> setIsOrderPaid(bool value) =>
+      _prefs.setBool(StorageKeys.isOrderPaid, value);
+
+  // ─── Analytics: attribution ───────────────────────────────────────
+
+  /// Order-funnel JSON blob (AttributionData). Written by
+  /// OrderAttributionHelper on every tile click / sort change / deeplink.
+  /// Cleared only on cold start (Splash).
+  String? get currentAttributionData =>
+      _prefs.getString(StorageKeys.currentAttributionData);
+  Future<void> setCurrentAttributionData(String? value) =>
+      _setStringOrRemove(StorageKeys.currentAttributionData, value);
+
+  /// Snapshot of attribution params taken at shell mount / tab change /
+  /// app resume, used by `logScrollEvent(useSavedAttribution: true)`.
+  String? get attributionSnapshotForScroll =>
+      _prefs.getString(StorageKeys.attributionSnapshotForScroll);
+  Future<void> setAttributionSnapshotForScroll(String? value) =>
+      _setStringOrRemove(StorageKeys.attributionSnapshotForScroll, value);
+
+  /// Bounded deque (max 5) of LP attribution entries, JSON-encoded.
+  /// Owned by LPAttributionHelper.
+  String? get lpAttributionData => _prefs.getString(StorageKeys.lpAttributionData);
+  Future<void> setLpAttributionData(String? value) =>
+      _setStringOrRemove(StorageKeys.lpAttributionData, value);
+
+  // ─── Analytics: UTM disk mirror (UtmHeaderUtil) ───────────────────
+
+  String? get utmSource => _prefs.getString(StorageKeys.utmSource);
+  Future<void> setUtmSource(String? value) =>
+      _setStringOrRemove(StorageKeys.utmSource, value);
+
+  String? get utmMedium => _prefs.getString(StorageKeys.utmMedium);
+  Future<void> setUtmMedium(String? value) =>
+      _setStringOrRemove(StorageKeys.utmMedium, value);
+
+  String? get utmCampaign => _prefs.getString(StorageKeys.utmCampaign);
+  Future<void> setUtmCampaign(String? value) =>
+      _setStringOrRemove(StorageKeys.utmCampaign, value);
+
+  String? get utmContent => _prefs.getString(StorageKeys.utmContent);
+  Future<void> setUtmContent(String? value) =>
+      _setStringOrRemove(StorageKeys.utmContent, value);
+
+  String? get utmTerm => _prefs.getString(StorageKeys.utmTerm);
+  Future<void> setUtmTerm(String? value) =>
+      _setStringOrRemove(StorageKeys.utmTerm, value);
+
+  String? get utmGender => _prefs.getString(StorageKeys.utmGender);
+  Future<void> setUtmGender(String? value) =>
+      _setStringOrRemove(StorageKeys.utmGender, value);
+
+  String? get utmDeeplink => _prefs.getString(StorageKeys.utmDeeplink);
+  Future<void> setUtmDeeplink(String? value) =>
+      _setStringOrRemove(StorageKeys.utmDeeplink, value);
 
   // ─── Environment ──────────────────────────────────────────────────
 

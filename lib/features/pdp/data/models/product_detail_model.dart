@@ -19,12 +19,16 @@ class ProductDetailModel {
     this.recentlyViewed,
   });
 
-  @JsonKey(defaultValue: null) final String? action;
-  @JsonKey(defaultValue: null) final String? message;
-  @JsonKey(defaultValue: []) final List<BannerModel> banners;
+  @JsonKey(defaultValue: null)
+  final String? action;
+  @JsonKey(defaultValue: null)
+  final String? message;
+  @JsonKey(defaultValue: [])
+  final List<BannerModel> banners;
   @JsonKey(defaultValue: null, fromJson: _productFromJson)
   final ProductModel? product;
-  @JsonKey(defaultValue: null) final OffersListModel? offersList;
+  @JsonKey(defaultValue: null)
+  final OffersListModel? offersList;
   @JsonKey(defaultValue: null, fromJson: _recentlyViewedFromJson)
   final RecentlyViewedModel? recentlyViewed;
 

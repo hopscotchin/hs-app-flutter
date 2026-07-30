@@ -16,7 +16,7 @@ import 'cookies/hs_cookie_store.dart';
 import 'interceptors/auth_header_interceptor.dart';
 import 'interceptors/auto_login_interceptor.dart';
 import 'interceptors/cookie_interceptor.dart';
-import 'interceptors/logging_interceptor.dart';
+// import 'interceptors/logging_interceptor.dart';
 
 class NetworkClient {
   late final Dio dio;
@@ -66,9 +66,9 @@ class NetworkClient {
     dio.interceptors.add(authHeaderInterceptor);
     dio.interceptors.add(cookieInterceptor);
     dio.interceptors.add(_autoLoginInterceptor);
-    if (kDebugMode) {
-      dio.interceptors.add(LoggingInterceptor());
-    }
+    // if (kDebugMode) {
+    //   dio.interceptors.add(LoggingInterceptor());
+    // }
 
     if (kDebugMode && EnvConfig.enableHttpToolkitProxy) {
       // enableProxy(host: EnvConfig.proxyHost, port: EnvConfig.proxyPort);

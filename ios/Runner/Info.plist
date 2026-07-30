@@ -4,8 +4,21 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>Allow local network access for Flutter automation testing.</string>
+	<!-- CleverTap — populated by xcconfig variables at build time.
+	     `flutter run --flavor staging` selects `Debug-staging.xcconfig`
+	     → TEST workspace; `--flavor prod` → production workspace.
+	     Mirrors Android's `${CLEVERTAP_ACCOUNT_ID}` manifestPlaceholder.
+	     Build configs and schemes must be registered in Xcode — see the
+	     project README. -->
+	<key>CleverTapAccountID</key>
+	<string>$(CLEVERTAP_ACCOUNT_ID)</string>
+	<key>CleverTapToken</key>
+	<string>$(CLEVERTAP_TOKEN)</string>
+	<!-- App Tracking Transparency — copy shown in the ATT system dialog.
+	     Apple requires this string for any app that calls
+	     requestTrackingAuthorization. -->
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Hopscotch uses this identifier to personalise recommendations and measure marketing campaign performance.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -111,15 +124,10 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 </dict>
 </plist>

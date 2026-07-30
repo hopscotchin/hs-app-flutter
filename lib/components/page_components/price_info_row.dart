@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../atoms/strikethrough_text.dart';
+import '../../core/extensions/string_extensions.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/theme/typography/typography_v1.dart';
@@ -59,14 +61,16 @@ class PriceInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasMrp = price.mrp != null && price.mrp != price.sellingPrice;
+    // Pure pass-through: each element renders only when the backend sends it.
+    // No client-side comparison decides whether an MRP is worth striking out.
+    final hasMrp = price.mrp.isNotNullOrEmpty;
 
     return Row(
       mainAxisAlignment: mainAxisAlignment,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Selling price — 20px w700
-        if (price.sellingPrice != null)
+        if (price.sellingPrice.isNotNullOrEmpty)
           Text(
             price.sellingPrice!,
             key: sellingPriceKey,
@@ -77,27 +81,29 @@ class PriceInfoRow extends StatelessWidget {
             ),
           ),
 
-        if (hasMrp || price.discountLabel != null) ...[
+        if (hasMrp || price.hasDiscount) ...[
           const SizedBox(width: AppSpacing.lgMd),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // MRP strikethrough — 16px w400
+              // MRP strikethrough — 16px w400.
+              // Hand-painted line rather than TextDecoration.lineThrough:
+              // Satoshi has no ₹ glyph, so the built-in decoration steps at the
+              // fallback-font boundary instead of running straight through.
               if (hasMrp)
-                Text(
+                StrikethroughText(
                   price.mrp!,
                   key: mrpKey,
                   style: AppTypographyV1.bodyLarge.copyWith(
                     fontWeight: FontWeight.w400,
                     color: mrpColor,
-                    decoration: TextDecoration.lineThrough,
-                    decorationColor: mrpColor,
                     fontSize: mrpFontSize,
                   ),
+                  lineColor: mrpColor,
                 ),
 
               // Discount — 10px w400
-              if (price.discountLabel != null) ...[
+              if (price.hasDiscount) ...[
                 const SizedBox(width: AppSpacing.xsm),
                 Text(
                   price.discountLabel!,

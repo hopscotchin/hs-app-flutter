@@ -57,7 +57,10 @@ class PdpShimmerLoading extends StatelessWidget {
             ...List.generate(
               3,
               (_) => const Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 6),
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: 6,
+                ),
                 child: _ShimmerBox(height: 44),
               ),
             ),
@@ -78,15 +81,18 @@ class _ShimmerBox extends StatefulWidget {
   State<_ShimmerBox> createState() => _ShimmerBoxState();
 }
 
-class _ShimmerBoxState extends State<_ShimmerBox> with SingleTickerProviderStateMixin {
+class _ShimmerBoxState extends State<_ShimmerBox>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))
-      ..repeat(reverse: true);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
     _animation = Tween<double>(begin: 0.08, end: 0.15).animate(_controller);
   }
 

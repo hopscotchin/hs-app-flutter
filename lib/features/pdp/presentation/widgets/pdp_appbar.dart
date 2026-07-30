@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../components/atoms/badge_icon.dart';
 import '../../../../components/atoms/custom_image.dart';
 import '../../../../core/constants/image_constants.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/pdp_strings.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
 import '../../../../core/router/app_navigator.dart';
@@ -86,7 +86,7 @@ class PdpAppBarContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bag = BadgeIcon(
-      key: cartIconKey,
+      key: cartIconKey ?? const ValueKey(PdpTestStrings.appBarCartButton),
       iconSize: AppSpacing.iconSm,
       icon: const CustomImage(
         path: ImageConstants.bag,
@@ -105,8 +105,9 @@ class PdpAppBarContent extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             GestureDetector(
+              key: const ValueKey(PdpTestStrings.appBarBackButton),
               behavior: HitTestBehavior.opaque,
-              onTap: onBack ?? () => context.pop(),
+              onTap: onBack ?? () => AppNavigator.goBack(context),
               child: const Padding(
                 // Vertical padding drives the app bar's height — see
                 // PdpStrings.appBarHeight, which PdpContent uses as its
@@ -130,6 +131,7 @@ class PdpAppBarContent extends StatelessWidget {
                 // reflect membership state. No-op until a wishlist listing
                 // screen exists to navigate to.
                 const CustomImage(
+                  key: ValueKey(PdpTestStrings.appBarWishlistButton),
                   path: ImageConstants.heart,
                   height: AppSpacing.iconSm,
                   width: AppSpacing.iconSm,

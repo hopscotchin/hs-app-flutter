@@ -10,7 +10,8 @@ part 'offer_model.g.dart';
 class OffersListModel {
   const OffersListModel({this.data = const []});
 
-  @JsonKey(defaultValue: []) final List<OfferModel> data;
+  @JsonKey(defaultValue: [])
+  final List<OfferModel> data;
 
   factory OffersListModel.fromJson(Map<String, dynamic> json) =>
       _$OffersListModelFromJson(json);
@@ -26,16 +27,20 @@ class OfferModel {
   });
 
   /// Coupon/promo code, e.g. "10OFF".
-  @JsonKey(defaultValue: null) final String? promoCode;
+  @JsonKey(defaultValue: null)
+  final String? promoCode;
 
   /// Bold headline shown in the card, e.g. "Get flat 10% off".
-  @JsonKey(defaultValue: null) final String? header;
+  @JsonKey(defaultValue: null)
+  final String? header;
 
   /// Description text shown below the headline.
-  @JsonKey(defaultValue: null) final String? description;
+  @JsonKey(defaultValue: null)
+  final String? description;
 
   /// Controls chip/copy button visibility: {displayCoupon: bool, copyCoupon: bool}.
-  @JsonKey(defaultValue: null) final Map<String, dynamic>? features;
+  @JsonKey(defaultValue: null)
+  final Map<String, dynamic>? features;
 
   factory OfferModel.fromJson(Map<String, dynamic> json) =>
       _$OfferModelFromJson(json);

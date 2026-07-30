@@ -25,5 +25,8 @@ abstract class PdpRepository {
     CancelToken? cancelToken,
   });
 
-  Future<Either<Failure, SizeChartEntity>> getSizeChart(int productId, {CancelToken? cancelToken});
+  Future<Either<Failure, SizeChartEntity>> getSizeChart(
+    int productId, {
+    CancelToken? cancelToken,
+  });
 }

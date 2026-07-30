@@ -9,10 +9,14 @@ part 'banner_model.g.dart';
 class BannerModel {
   const BannerModel({this.actionUri, this.id, this.media, this.position});
 
-  @JsonKey(defaultValue: null) final String? actionUri;
-  @JsonKey(defaultValue: null, fromJson: _idFromJson) final String? id;
-  @JsonKey(defaultValue: null, fromJson: _mediaFromJson) final MediaModel? media;
-  @JsonKey(defaultValue: null, fromJson: _positionFromJson) final int? position;
+  @JsonKey(defaultValue: null)
+  final String? actionUri;
+  @JsonKey(defaultValue: null, fromJson: _idFromJson)
+  final String? id;
+  @JsonKey(defaultValue: null, fromJson: _mediaFromJson)
+  final MediaModel? media;
+  @JsonKey(defaultValue: null, fromJson: _positionFromJson)
+  final int? position;
 
   factory BannerModel.fromJson(Map<String, dynamic> json) =>
       _$BannerModelFromJson(json);

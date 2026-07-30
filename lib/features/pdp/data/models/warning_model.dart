@@ -8,8 +8,10 @@ part 'warning_model.g.dart';
 class WarningModel {
   const WarningModel({this.text, this.textColor});
 
-  @JsonKey(defaultValue: null) final String? text;
-  @JsonKey(defaultValue: null) final String? textColor;
+  @JsonKey(defaultValue: null)
+  final String? text;
+  @JsonKey(defaultValue: null)
+  final String? textColor;
 
   factory WarningModel.fromJson(Map<String, dynamic> json) =>
       _$WarningModelFromJson(json);

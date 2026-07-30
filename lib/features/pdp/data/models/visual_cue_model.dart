@@ -15,12 +15,18 @@ class VisualCueModel {
     this.imageUrl,
   });
 
-  @JsonKey(defaultValue: null) final String? bgColor;
-  @JsonKey(defaultValue: null) final String? text;
-  @JsonKey(defaultValue: null) final String? textColor;
-  @JsonKey(defaultValue: null) final String? location;
-  @JsonKey(defaultValue: null) final String? uiType;
-  @JsonKey(defaultValue: null) final String? imageUrl;
+  @JsonKey(defaultValue: null)
+  final String? bgColor;
+  @JsonKey(defaultValue: null)
+  final String? text;
+  @JsonKey(defaultValue: null)
+  final String? textColor;
+  @JsonKey(defaultValue: null)
+  final String? location;
+  @JsonKey(defaultValue: null)
+  final String? uiType;
+  @JsonKey(defaultValue: null)
+  final String? imageUrl;
 
   factory VisualCueModel.fromJson(Map<String, dynamic> json) =>
       _$VisualCueModelFromJson(json);

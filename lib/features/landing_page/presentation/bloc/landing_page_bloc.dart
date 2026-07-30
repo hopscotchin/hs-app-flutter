@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/landing_page_events.dart';
+import '../../../../core/analytics/home/home_track_analytic_manager.dart';
 import '../../../../core/base/base_bloc.dart';
+import '../../../../core/router/navigation_observer.dart';
 import '../../../../core/constants/strings/discover_strings.dart';
 import '../../../../core/error/failures.dart';
 import '../../../discover/domain/entities/home_page_entity.dart';
@@ -14,16 +20,29 @@ part 'landing_page_state.dart';
 
 @injectable
 class LandingPageBloc extends BaseBloc<LandingPageEvent, LandingPageState> {
-  LandingPageBloc(this._getHomePage) : super(const LandingPageState()) {
+  LandingPageBloc(
+    this._getHomePage,
+    this._homeTrack,
+    this._analytics,
+    this._navObserver,
+  ) : super(const LandingPageState()) {
     on<LoadLandingPage>(_onLoad);
     on<RefreshLandingPage>(_onRefresh);
     on<LoadNextLandingPage>(_onLoadNext);
   }
 
   final GetHomePageUseCase _getHomePage;
+  final HomeTrackAnalyticManager _homeTrack;
+  final AnalyticsHelper _analytics;
+  final AppNavigationObserver _navObserver;
 
   String? _pageName;
   int _pageNo = 1;
+
+  /// One-shot guard — `special_page_viewed` is a per-screen-instance event
+  /// (mirrors Android `SearchResultsShowingBoutiquesActivity` firing once in
+  /// `onCreate`). Pagination + pull-to-refresh MUST NOT re-fire it.
+  bool _hasFiredSpecialPageViewed = false;
 
   Future<void> _onLoad(
     LoadLandingPage event,
@@ -32,7 +51,10 @@ class LandingPageBloc extends BaseBloc<LandingPageEvent, LandingPageState> {
     _pageName = event.pageName;
     _pageNo = 1;
     // Preserve the previous page snapshot through the loading transition
-    // so the screen doesn't flash empty between fetches.
+    // so the screen doesn't flash empty between fetches. The tracker gets
+    // flipped into LP mode inside [_emit] once pageMeta.pageId + pageName
+    // are available — impressions only fire after paint, which is after
+    // that update lands.
     emit(state.copyWith(
       status: LandingPageStatus.loading,
       isLoadingMore: false,
@@ -113,6 +135,9 @@ class LandingPageBloc extends BaseBloc<LandingPageEvent, LandingPageState> {
         status: LandingPageStatus.success,
         homePage: page,
       ));
+      _refineLpContext(page);
+      _homeTrack.pageComponents = page.pageComponents;
+      _fireSpecialPageViewedIfNeeded(page);
       return;
     }
 
@@ -122,6 +147,9 @@ class LandingPageBloc extends BaseBloc<LandingPageEvent, LandingPageState> {
         status: LandingPageStatus.success,
         homePage: page,
       ));
+      _refineLpContext(page);
+      _homeTrack.pageComponents = page.pageComponents;
+      _fireSpecialPageViewedIfNeeded(page);
       return;
     }
 
@@ -140,5 +168,43 @@ class LandingPageBloc extends BaseBloc<LandingPageEvent, LandingPageState> {
       homePage: merged,
       isLoadingMore: false,
     ));
+    _homeTrack.pageComponents = merged.pageComponents;
+  }
+
+  /// The route observer flips the tracker to `fromHomePage: false` at push
+  /// time, but it doesn't have `pageMeta` yet. Once the response arrives,
+  /// call it back to fill `lp_id` / `lp_name`. Back-nav to this LP replays
+  /// this path via `didPop → didPush`-equivalent observer callbacks +
+  /// state restoration from the current snapshot, so no manual resume hook
+  /// is needed.
+  void _refineLpContext(HomePageEntity page) {
+    _navObserver.setLandingPageContext(
+      name: page.pageMeta?.pageName ?? _pageName,
+      id: page.pageMeta?.pageId?.toString(),
+    );
+  }
+
+  /// Fires `special_page_viewed` once per bloc instance on the first
+  /// successful load. Pagination + pull-to-refresh reuse the same bloc, so
+  /// the `_hasFiredSpecialPageViewed` guard keeps this from re-firing.
+  void _fireSpecialPageViewedIfNeeded(HomePageEntity page) {
+    if (_hasFiredSpecialPageViewed) return;
+    final id = page.pageMeta?.pageId;
+    final name = page.pageMeta?.pageName;
+    if (id == null || name == null) return;
+    _hasFiredSpecialPageViewed = true;
+    unawaited(_analytics.logSpecialPageViewed(id: id, name: name));
+  }
+
+  @override
+  Future<void> close() async {
+    // Flush any pending horizontal-carousel scrolls. Tracker context and
+    // per-screen visibility reset are owned by AppNavigationObserver —
+    // whichever route surfaces next re-applies the right context via didPop.
+    // NEVER call `_homeTrack.destroy()` here: the tracker is a shared
+    // singleton and destroy() would wipe Home's pageComponents/sortBar,
+    // silencing Home's impressions on back-nav.
+    await _homeTrack.flushCarouselScrolls();
+    return super.close();
   }
 }

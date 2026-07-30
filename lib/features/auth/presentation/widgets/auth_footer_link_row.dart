@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 
@@ -17,7 +18,9 @@ class AuthFooterLinkRow extends StatelessWidget {
   final VoidCallback onActionTap;
 
   static final _promptStyle = AppTypographyV1.labelMedium.regular.textPrimary();
-  static final _actionStyle = AppTypographyV1.labelMedium.bold.brand();
+  static final _actionStyle = AppTypographyV1.labelMedium.bold.copyWith(
+    color: AppColors.secondary,
+  );
 
   @override
   Widget build(BuildContext context) {

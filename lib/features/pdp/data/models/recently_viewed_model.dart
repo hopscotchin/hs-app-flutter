@@ -18,14 +18,22 @@ class ViewConfigModel {
     this.peepingFactor = 0,
   });
 
-  @JsonKey(defaultValue: 240.0) final double tileWidth;
-  @JsonKey(defaultValue: 214.0) final double tileHeight;
-  @JsonKey(defaultValue: 3) final int minTilesToShow;
-  @JsonKey(defaultValue: 4.0) final double imageCornerRadius;
-  @JsonKey(defaultValue: false) final bool navigation;
-  @JsonKey(defaultValue: false) final bool snapping;
-  @JsonKey(defaultValue: false) final bool showPageIndicators;
-  @JsonKey(defaultValue: 0) final int peepingFactor;
+  @JsonKey(defaultValue: 240.0)
+  final double tileWidth;
+  @JsonKey(defaultValue: 214.0)
+  final double tileHeight;
+  @JsonKey(defaultValue: 3)
+  final int minTilesToShow;
+  @JsonKey(defaultValue: 4.0)
+  final double imageCornerRadius;
+  @JsonKey(defaultValue: false)
+  final bool navigation;
+  @JsonKey(defaultValue: false)
+  final bool snapping;
+  @JsonKey(defaultValue: false)
+  final bool showPageIndicators;
+  @JsonKey(defaultValue: 0)
+  final int peepingFactor;
 
   factory ViewConfigModel.fromJson(Map<String, dynamic> json) =>
       _$ViewConfigModelFromJson(json);
@@ -48,9 +56,12 @@ extension ViewConfigModelX on ViewConfigModel {
 class RecentlyViewedHeadingModel {
   const RecentlyViewedHeadingModel({this.url, this.width, this.height});
 
-  @JsonKey(defaultValue: null) final String? url;
-  @JsonKey(defaultValue: null) final int? width;
-  @JsonKey(defaultValue: null) final int? height;
+  @JsonKey(defaultValue: null)
+  final String? url;
+  @JsonKey(defaultValue: null)
+  final int? width;
+  @JsonKey(defaultValue: null)
+  final int? height;
 
   factory RecentlyViewedHeadingModel.fromJson(Map<String, dynamic> json) =>
       _$RecentlyViewedHeadingModelFromJson(json);
@@ -72,12 +83,18 @@ class RecentlyViewedMarginsModel {
     this.titleHorizontalMargin = 0.0,
   });
 
-  @JsonKey(defaultValue: 12.0) final double top;
-  @JsonKey(defaultValue: 12.0) final double bottom;
-  @JsonKey(defaultValue: 16.0) final double horizontal;
-  @JsonKey(defaultValue: 8.0) final double innerHorizontalMargin;
-  @JsonKey(defaultValue: 0.0) final double titleBottomMargin;
-  @JsonKey(defaultValue: 0.0) final double titleHorizontalMargin;
+  @JsonKey(defaultValue: 12.0)
+  final double top;
+  @JsonKey(defaultValue: 12.0)
+  final double bottom;
+  @JsonKey(defaultValue: 16.0)
+  final double horizontal;
+  @JsonKey(defaultValue: 8.0)
+  final double innerHorizontalMargin;
+  @JsonKey(defaultValue: 0.0)
+  final double titleBottomMargin;
+  @JsonKey(defaultValue: 0.0)
+  final double titleHorizontalMargin;
 
   factory RecentlyViewedMarginsModel.fromJson(Map<String, dynamic> json) =>
       _$RecentlyViewedMarginsModelFromJson(json);
@@ -137,10 +154,14 @@ ViewConfigModel? _viewConfigFromJson(Object? json) =>
     json is Map<String, dynamic> ? ViewConfigModel.fromJson(json) : null;
 
 RecentlyViewedHeadingModel? _headingFromJson(Object? json) =>
-    json is Map<String, dynamic> ? RecentlyViewedHeadingModel.fromJson(json) : null;
+    json is Map<String, dynamic>
+    ? RecentlyViewedHeadingModel.fromJson(json)
+    : null;
 
 RecentlyViewedMarginsModel? _marginsFromJson(Object? json) =>
-    json is Map<String, dynamic> ? RecentlyViewedMarginsModel.fromJson(json) : null;
+    json is Map<String, dynamic>
+    ? RecentlyViewedMarginsModel.fromJson(json)
+    : null;
 
 extension RecentlyViewedModelX on RecentlyViewedModel {
   RecentlyViewedEntity toEntity() => RecentlyViewedEntity(

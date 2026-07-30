@@ -13,6 +13,8 @@ abstract class PincodeSheetState with _$PincodeSheetState {
     String? lastCheckedValidPincode,
     @Default(false) bool isChecking,
     @Default(<MessageBarEntity>[]) List<MessageBarEntity> messageBars,
+    // PDP-only: plain inline error shown when the product-aware verify fails.
+    String? pincodeError,
     String? toastMessage,
     String? popResult,
   }) = _PincodeSheetState;

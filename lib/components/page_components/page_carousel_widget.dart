@@ -1,9 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dart';
 
-import '../../core/constants/strings/auto_test_strings.dart';
+import '../../core/analytics/home/home_component_click_handlers.dart';
+import '../../core/analytics/home/home_track_analytic_manager.dart';
+import '../../core/di/injection.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/colors.dart';
+import '../../core/constants/strings/auto_test_strings.dart';
+import '../../core/constants/strings/login_redirects.dart';
+import '../../core/entities/message_bar_entity.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../../features/plp/domain/entities/listing_product_entity.dart';
 import '../../features/wishlist/presentation/widgets/wishlist_status_builder.dart';
@@ -64,6 +70,17 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   /// without recomputing layout.
   double _snapItemStride = 0.0;
 
+  /// Stride for the non-snapping ListView.separated variant — same recipe
+  /// (tileWidth + innerHorizontalMargin). Used by [_reportCarouselScroll]
+  /// to compute the leading-edge tile index on scroll.
+  double _listItemStride = 0.0;
+
+  /// Previous pixel offsets for direction detection on each controller.
+  /// Positive delta → forward scroll (report last-visible+1); negative →
+  /// backward (report first-visible+1). Mirrors Android's dx sign check.
+  double _prevListPixels = 0.0;
+  double _prevSnapPixels = 0.0;
+
   /// Notifier-backed page index so swipes only rebuild the indicator,
   /// not the snapping list and its layout math above.
   final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
@@ -110,6 +127,8 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   void _onListScroll() {
     if (!_listController.hasClients) return;
     final pos = _listController.position;
+    _reportCarouselScroll(pos, _listItemStride, _prevListPixels);
+    _prevListPixels = pos.pixels;
     if (pos.maxScrollExtent <= 0) {
       _lineState.value = const (progress: 0.0, fraction: 1.0);
       return;
@@ -124,6 +143,8 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     if (!_snapController.hasClients) return;
     if (_snapItemStride <= 0) return;
     final pos = _snapController.position;
+    _reportCarouselScroll(pos, _snapItemStride, _prevSnapPixels);
+    _prevSnapPixels = pos.pixels;
     final tileCount = widget.carouselData.tiles.length;
     if (tileCount == 0) return;
 
@@ -137,6 +158,34 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     if (rounded != _currentPage.value) {
       _currentPage.value = rounded;
     }
+  }
+
+  /// Push the current scroll target to the tracker. Last-write-wins per
+  /// carousel — the manager keeps the latest and emits ONE
+  void _reportCarouselScroll(
+    ScrollPosition pos,
+    double stride,
+    double prevPixels,
+  ) {
+    if (stride <= 0) return;
+    final delta = pos.pixels - prevPixels;
+    if (delta.abs() < 0.5) return;
+
+    final tileCount = widget.carouselData.tiles.length;
+    if (tileCount == 0) return;
+    final firstVisible = (pos.pixels / stride).floor();
+    final lastVisible = ((pos.pixels + pos.viewportDimension) / stride)
+        .ceil() - 1;
+    final target = (delta > 0 ? lastVisible : firstVisible);
+
+    // Merge with root trackingMeta (opaque). Only client-supplied key is
+    // `scrolled_tiles` — the scroll target the user reached.
+    final meta = <String, dynamic>{
+      ...?widget.carouselData.trackingMeta,
+      AnalyticsProperties.scrolledTiles: target.toString(),
+    };
+    sl<HomeTrackAnalyticManager>()
+        .logCarouselScrolled(identityHashCode(widget.carouselData), meta);
   }
 
   @override
@@ -190,6 +239,8 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
 
     if (hasSnapping) {
       _snapItemStride = isFullWidth ? screenWidth : tileWidth + innerHorizontalMargin;
+    } else {
+      _listItemStride = tileWidth + innerHorizontalMargin;
     }
 
     final carousel = hasSnapping
@@ -290,9 +341,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
           itemCount: effectiveCount,
           itemBuilder: (_, index) => Padding(
             padding: EdgeInsets.only(right: innerHorizontalMargin),
-            child: _buildTile(
-              tiles[index % tileCount],
-              tileWidth,
+            child: _buildTile(tiles[index % tileCount], index % tileCount, tileWidth,
               tileHeight,
               imageCornerRadius,
               index % tileCount,
@@ -344,7 +393,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
           padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
           itemCount: tiles.length,
           separatorBuilder: (_, _) => SizedBox(width: innerHorizontalMargin),
-          itemBuilder: (_, i) => _buildTile(tiles[i], tileWidth, tileHeight, imageCornerRadius, i),
+          itemBuilder: (_, i) => _buildTile(tiles[i], i, tileWidth, tileHeight, imageCornerRadius, i),
         ),
       ),
     );
@@ -376,14 +425,18 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   }
 
   Widget _buildTile(
-      PageCarouselTile tile,
-      double tileWidth,
-      double tileHeight,
-      double cornerRadius,
-      int index,
-      ) {
+    PageCarouselTile tile,
+    int position,
+    double tileWidth,
+    double tileHeight,
+    double cornerRadius,
+    int index,
+  ) {
     final product = tile.product;
     final tapUri = tile.actionUri ?? product?.actionUri;
+
+    Future<void> logClick() => sl<HomeTrackAnalyticManager>()
+        .onPageCarouselTileTapped(widget.carouselData, tile);
 
     if (product != null) {
       return SizedBox(
@@ -403,11 +456,23 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
             imageUrl: tile.imageUrl ?? product.displayImage,
             imageAspectRatio: tileHeight > 0 ? tileWidth / tileHeight : null,
             isWishlisted: wished,
-            onTap: () => ActionUrlHandler.navigate(context, tapUri),
+            onTap: () async {
+              await logClick();
+              if (context.mounted) {
+                ActionUrlHandler.navigate(context, tapUri);
+              }
+            },
             onWishlistTap: () => WishlistActions.toggle(
               context,
               productId: product.id.toString(),
               price: WishlistActions.priceToInt(product.price?.sellingPrice),
+              loggedOutMessageBars: const [
+                MessageBarEntity(
+                  text: LoginRedirects.redirectAddToWishlist,
+                  type: 'info',
+                  hasIcon: true,
+                ),
+              ],
             ),
           ),
         ),
@@ -422,7 +487,10 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
 
     return GestureDetector(
       key: _tileKey(index),
-      onTap: () => ActionUrlHandler.navigate(context, tapUri),
+      onTap: () {
+        logClick();
+        ActionUrlHandler.navigate(context, tapUri);
+      },
       child: SizedBox(
         width: tileWidth,
         child: Align(

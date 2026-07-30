@@ -20,16 +20,21 @@ class SkuModel {
     this.skuAttributes,
   });
 
-  @JsonKey(defaultValue: null) final String? skuId;
-  @JsonKey(defaultValue: null) final String? title;
-  @JsonKey(defaultValue: null) final String? subTitle;
+  @JsonKey(defaultValue: null)
+  final String? skuId;
+  @JsonKey(defaultValue: null)
+  final String? title;
+  @JsonKey(defaultValue: null)
+  final String? subTitle;
   @JsonKey(defaultValue: null, fromJson: _priceFromJson)
   final ProductPriceModel? priceInfo;
-  @JsonKey(defaultValue: null) final bool? enable;
+  @JsonKey(defaultValue: null)
+  final bool? enable;
   @JsonKey(defaultValue: null, fromJson: _eddInfoFromJson)
   final EddInfoModel? eddInfo;
   @JsonKey(defaultValue: null, fromJson: _warningFromJson)
   final WarningModel? info;
+
   /// Flat key→value attributes (e.g. {"skuMrp": "₹1,149"}).
   @JsonKey(defaultValue: null)
   final Map<String, dynamic>? skuAttributes;

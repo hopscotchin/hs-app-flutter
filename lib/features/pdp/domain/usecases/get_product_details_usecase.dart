@@ -9,13 +9,16 @@ import '../entities/product_detail_entity.dart';
 import '../repositories/pdp_repository.dart';
 
 @lazySingleton
-class GetProductDetailsUseCase implements UseCase<ProductDetailEntity, GetProductDetailsParams> {
+class GetProductDetailsUseCase
+    implements UseCase<ProductDetailEntity, GetProductDetailsParams> {
   GetProductDetailsUseCase(this._repository);
 
   final PdpRepository _repository;
 
   @override
-  Future<Either<Failure, ProductDetailEntity>> call(GetProductDetailsParams params) {
+  Future<Either<Failure, ProductDetailEntity>> call(
+    GetProductDetailsParams params,
+  ) {
     return _repository.getProductDetails(
       params.productId,
       cancelToken: params.cancelToken,
@@ -24,10 +27,7 @@ class GetProductDetailsUseCase implements UseCase<ProductDetailEntity, GetProduc
 }
 
 class GetProductDetailsParams extends Equatable {
-  const GetProductDetailsParams({
-    required this.productId,
-    this.cancelToken,
-  });
+  const GetProductDetailsParams({required this.productId, this.cancelToken});
 
   final int productId;
   final CancelToken? cancelToken;

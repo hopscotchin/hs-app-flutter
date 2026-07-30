@@ -56,6 +56,7 @@ PageMeta? _parsePageMeta(Object? json) {
   if (json is! Map<String, dynamic>) return null;
   return PageMeta(
     pageName: json['pageName'] as String?,
+    pageId: (json['pageId'] as num?)?.toInt(),
     totalCollections: (json['totalCollections'] as num?)?.toInt() ?? 0,
     hasNextPage: json['hasNextPage'] as bool? ?? false,
     headerImageUrl: json['headerImageUrl'] as String?,

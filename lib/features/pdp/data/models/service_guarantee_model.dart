@@ -8,8 +8,10 @@ part 'service_guarantee_model.g.dart';
 class ServiceGuaranteeModel {
   const ServiceGuaranteeModel({this.icon, this.label});
 
-  @JsonKey(defaultValue: null) final String? icon;
-  @JsonKey(defaultValue: null) final String? label;
+  @JsonKey(defaultValue: null)
+  final String? icon;
+  @JsonKey(defaultValue: null)
+  final String? label;
 
   factory ServiceGuaranteeModel.fromJson(Map<String, dynamic> json) =>
       _$ServiceGuaranteeModelFromJson(json);

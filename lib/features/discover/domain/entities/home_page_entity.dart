@@ -33,6 +33,7 @@ extension HomePageEntityX on HomePageEntity {
 /// Top-level page metadata (v13 `pageMeta`).
 class PageMeta extends Equatable {
   final String? pageName;
+  final int? pageId;
   final int totalCollections;
   final bool hasNextPage;
   final String? headerImageUrl;
@@ -40,6 +41,7 @@ class PageMeta extends Equatable {
 
   const PageMeta({
     this.pageName,
+    this.pageId,
     this.totalCollections = 0,
     this.hasNextPage = false,
     this.headerImageUrl,
@@ -49,6 +51,7 @@ class PageMeta extends Equatable {
   @override
   List<Object?> get props => [
     pageName,
+    pageId,
     totalCollections,
     hasNextPage,
     headerImageUrl,
@@ -77,16 +80,24 @@ class PageComponent extends Equatable {
   final Object? parsedData;
   final ComponentMargins? margins;
 
+  /// Component-level tracking overrides supplied by the backend. When
+  /// present, every key/value in this map is merged verbatim into every
+  /// impression / click payload produced for this component — the backend's
+  /// contract for extensible analytics without client changes. Merged LAST
+  /// so backend-supplied keys win over locally-assembled defaults.
+  final Map<String, dynamic>? trackingMeta;
+
   const PageComponent({
     required this.type,
     this.position = 0,
     this.data,
     this.parsedData,
     this.margins,
+    this.trackingMeta,
   });
 
   @override
-  List<Object?> get props => [type, position, data, margins];
+  List<Object?> get props => [type, position, data, margins, trackingMeta];
 }
 
 /// `type` constants from the v13 API.
@@ -94,10 +105,8 @@ class PageComponentType {
   static const String hero = 'Hero';
   static const String customTiles = 'CustomTiles';
   static const String pageCarousel = 'PageCarousel';
-  static const String tabbedCustomTiles = 'TABBED_CUSTOM_TILES';
   static const String productGrid = 'PRODUCT_GRID';
   static const String ctaButton = 'CTA_BUTTON';
-  static const String shopTheLook = 'SHOP_THE_LOOK';
 }
 
 // ─── Shared building blocks ───
@@ -140,6 +149,10 @@ class TileGridItem extends Equatable {
   final String? appImageUrl;
   final bool isTitleItem;
 
+  /// Leaf-level tracking overrides. Merged onto click / impression payloads
+  /// deepest-wins.
+  final Map<String, dynamic>? trackingMeta;
+
   const TileGridItem({
     this.imageUrl,
     this.actionUri,
@@ -151,6 +164,7 @@ class TileGridItem extends Equatable {
     this.actionValue,
     this.appImageUrl,
     this.isTitleItem = false,
+    this.trackingMeta,
   });
 
   double get aspectRatio =>
@@ -177,7 +191,16 @@ class PageCarouselData extends Equatable {
   final TitleImage? title;
   final List<PageCarouselTile> tiles;
 
-  const PageCarouselData({this.viewConfig, this.title, this.tiles = const []});
+  /// Component-scoped tracking overrides from the backend. See
+  /// [PageComponent.trackingMeta] for the merge contract.
+  final Map<String, dynamic>? trackingMeta;
+
+  const PageCarouselData({
+    this.viewConfig,
+    this.title,
+    this.tiles = const [],
+    this.trackingMeta,
+  });
 
   double get parsedAspectRatio {
     final w = viewConfig?.tileWidth;
@@ -187,7 +210,7 @@ class PageCarouselData extends Equatable {
   }
 
   @override
-  List<Object?> get props => [viewConfig, title, tiles];
+  List<Object?> get props => [viewConfig, title, tiles, trackingMeta];
 }
 
 class PageCarouselViewConfig extends Equatable {
@@ -231,6 +254,7 @@ class PageCarouselTile extends Equatable {
   final String? mimeType;
   final String? sort;
   final ListingProductEntity? product;
+  final Map<String, dynamic>? trackingMeta;
 
   const PageCarouselTile({
     this.id,
@@ -239,10 +263,12 @@ class PageCarouselTile extends Equatable {
     this.mimeType,
     this.sort,
     this.product,
+    this.trackingMeta,
   });
 
   @override
-  List<Object?> get props => [id, imageUrl, actionUri, mimeType, sort, product];
+  List<Object?> get props =>
+      [id, imageUrl, actionUri, mimeType, sort, product, trackingMeta];
 }
 
 // ─── Hero ───
@@ -251,10 +277,18 @@ class HeroCarouselData extends Equatable {
   final HeroViewConfig? viewConfig;
   final List<HeroTile> tiles;
 
-  const HeroCarouselData({this.viewConfig, this.tiles = const []});
+  /// Component-scoped tracking overrides from the backend. See
+  /// [PageComponent.trackingMeta].
+  final Map<String, dynamic>? trackingMeta;
+
+  const HeroCarouselData({
+    this.viewConfig,
+    this.tiles = const [],
+    this.trackingMeta,
+  });
 
   @override
-  List<Object?> get props => [viewConfig, tiles];
+  List<Object?> get props => [viewConfig, tiles, trackingMeta];
 }
 
 class HeroViewConfig extends Equatable {
@@ -291,6 +325,7 @@ class HeroTile extends Equatable {
   final String? pageName;
   final int? position;
   final List<HeroTileDetail> tileDetails;
+  final Map<String, dynamic>? trackingMeta;
 
   const HeroTile({
     this.id,
@@ -299,6 +334,7 @@ class HeroTile extends Equatable {
     this.pageName,
     this.position,
     this.tileDetails = const [],
+    this.trackingMeta,
   });
 
   TileGridItem? get firstImage {
@@ -317,17 +353,23 @@ class HeroTile extends Equatable {
   double get aspectRatio => height > 0 ? width / height : 1.0;
 
   @override
-  List<Object?> get props => [id, name, type, pageName, position, tileDetails];
+  List<Object?> get props =>
+      [id, name, type, pageName, position, tileDetails, trackingMeta];
 }
 
 class HeroTileDetail extends Equatable {
   final int? tileDetailId;
   final List<TileGridItem> tileGrid;
+  final Map<String, dynamic>? trackingMeta;
 
-  const HeroTileDetail({this.tileDetailId, this.tileGrid = const []});
+  const HeroTileDetail({
+    this.tileDetailId,
+    this.tileGrid = const [],
+    this.trackingMeta,
+  });
 
   @override
-  List<Object?> get props => [tileDetailId, tileGrid];
+  List<Object?> get props => [tileDetailId, tileGrid, trackingMeta];
 }
 
 // ─── CustomTiles ───
@@ -338,15 +380,20 @@ class CustomTilesData extends Equatable {
   final TitleImage? title;
   final List<CustomTilesTile> tiles;
 
+  /// Component-scoped tracking overrides from the backend. See
+  /// [PageComponent.trackingMeta].
+  final Map<String, dynamic>? trackingMeta;
+
   const CustomTilesData({
     this.viewConfig,
     this.ctaButton,
     this.title,
     this.tiles = const [],
+    this.trackingMeta,
   });
 
   @override
-  List<Object?> get props => [viewConfig, ctaButton, title, tiles];
+  List<Object?> get props => [viewConfig, ctaButton, title, tiles, trackingMeta];
 }
 
 class CustomTilesViewConfig extends Equatable {
@@ -359,7 +406,7 @@ class CustomTilesViewConfig extends Equatable {
     this.name,
     this.type,
     this.pageName,
-    this.imageCornerRadius = 4,
+    this.imageCornerRadius = 0,
   });
 
   @override
@@ -370,14 +417,19 @@ class CustomTilesViewConfig extends Equatable {
 class CustomTilesTile extends Equatable {
   final int? tileDetailId;
   final List<TileGridItem> tileGrid;
+  final Map<String, dynamic>? trackingMeta;
 
-  const CustomTilesTile({this.tileDetailId, this.tileGrid = const []});
+  const CustomTilesTile({
+    this.tileDetailId,
+    this.tileGrid = const [],
+    this.trackingMeta,
+  });
 
   bool get isTitleRow =>
       tileGrid.isNotEmpty && tileGrid.every((t) => t.isTitleItem);
 
   @override
-  List<Object?> get props => [tileDetailId, tileGrid];
+  List<Object?> get props => [tileDetailId, tileGrid, trackingMeta];
 }
 
 // ─── ProductGrid ───
@@ -389,16 +441,28 @@ class ProductGridData extends Equatable {
   final LayoutInfoData? layoutInfo;
   final List<ListingProductEntity> tiles;
 
+  /// Component-scoped tracking overrides from the backend. See
+  /// [PageComponent.trackingMeta].
+  final Map<String, dynamic>? trackingMeta;
+
   const ProductGridData({
     this.viewConfig,
     this.ctaButton,
     this.title,
     this.layoutInfo,
     this.tiles = const [],
+    this.trackingMeta,
   });
 
   @override
-  List<Object?> get props => [viewConfig, ctaButton, title, layoutInfo, tiles];
+  List<Object?> get props => [
+    viewConfig,
+    ctaButton,
+    title,
+    layoutInfo,
+    tiles,
+    trackingMeta,
+  ];
 }
 
 class ProductGridViewConfig extends Equatable {
@@ -420,144 +484,6 @@ class LayoutInfoData extends Equatable {
   @override
   List<Object?> get props => [columns, showProductInfo];
 }
-
-// ─── ShopTheLook ───
-
-class ShopTheLookData extends Equatable {
-  final int? id;
-  final TitleImage? title;
-  final ShopTheLookViewConfig? viewConfig;
-  final List<ShopTheLookTile> tiles;
-
-  const ShopTheLookData({
-    this.id,
-    this.title,
-    this.viewConfig,
-    this.tiles = const [],
-  });
-
-  @override
-  List<Object?> get props => [id, title, viewConfig, tiles];
-}
-
-class ShopTheLookViewConfig extends Equatable {
-  final int? itemWidth;
-  final int? itemHeight;
-  final int? minTilesToShow;
-  final int? peepingFactor;
-
-  const ShopTheLookViewConfig({
-    this.itemWidth,
-    this.itemHeight,
-    this.minTilesToShow,
-    this.peepingFactor,
-  });
-
-  @override
-  List<Object?> get props => [
-    itemWidth,
-    itemHeight,
-    minTilesToShow,
-    peepingFactor,
-  ];
-}
-
-class ShopTheLookTile extends Equatable {
-  final int? id;
-  final List<ShopTheLookProduct> productTiles;
-  final ShopTheLookPrice? price;
-
-  const ShopTheLookTile({this.id, this.productTiles = const [], this.price});
-
-  @override
-  List<Object?> get props => [id, productTiles, price];
-}
-
-class ShopTheLookProduct extends Equatable {
-  final int? id;
-  final String? actionUri;
-  final String? actionUriWeb;
-  final bool? hasInv;
-  final bool? hasSizeChart;
-  final String? imageUrl;
-  final String? productName;
-  final List<ShopTheLookSku> skus;
-
-  const ShopTheLookProduct({
-    this.id,
-    this.actionUri,
-    this.actionUriWeb,
-    this.hasInv,
-    this.hasSizeChart,
-    this.imageUrl,
-    this.productName,
-    this.skus = const [],
-  });
-
-  @override
-  List<Object?> get props => [
-    id,
-    actionUri,
-    actionUriWeb,
-    hasInv,
-    hasSizeChart,
-    imageUrl,
-    productName,
-    skus,
-  ];
-}
-
-class ShopTheLookSku extends Equatable {
-  final String? skuId;
-  final String? size;
-  final int? availableQuantity;
-  final ShopTheLookPrice? price;
-
-  const ShopTheLookSku({
-    this.skuId,
-    this.size,
-    this.availableQuantity,
-    this.price,
-  });
-
-  bool get isAvailable => (availableQuantity ?? 0) > 0;
-
-  @override
-  List<Object?> get props => [skuId, size, availableQuantity, price];
-}
-
-class ShopTheLookPrice extends Equatable {
-  final String? displayValue;
-  final String? mrp;
-  final int? absoluteValue;
-  final int? absoluteMrp;
-  final String? discount;
-
-  const ShopTheLookPrice({
-    this.displayValue,
-    this.mrp,
-    this.absoluteValue,
-    this.absoluteMrp,
-    this.discount,
-  });
-
-  @override
-  List<Object?> get props => [
-    displayValue,
-    mrp,
-    absoluteValue,
-    absoluteMrp,
-    discount,
-  ];
-}
-
-class ShopTheLookSelection {
-  final int productId;
-  final String? skuId;
-
-  const ShopTheLookSelection({required this.productId, this.skuId});
-}
-
 
 /// Mirrors Android's Margins model. Controls outer/inner spacing per component.
 class ComponentMargins extends Equatable {

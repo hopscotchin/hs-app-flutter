@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/analytics/attribution/order_attribution_helper.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/config/environment.dart';
 import '../../../../core/error/failures.dart';
@@ -31,6 +32,7 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
     this._prefManager,
     this.addressCache,
     this._getAddresses,
+    this._orderAttribution,
   ) : super(const SplashState()) {
     on<InitializeApp>(_onInitializeApp);
     on<SelectEnvironment>(_onSelectEnvironment);
@@ -44,8 +46,14 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
   final PrefManager _prefManager;
   final AddressCacheManager addressCache;
   final GetAddressesUseCase _getAddresses;
+  final OrderAttributionHelper _orderAttribution;
 
   Future<void> _onInitializeApp(InitializeApp event, Emitter<SplashState> emit) async {
+    // Wipe stale funnel attribution at cold start. Mirrors Android
+    // `SplashActivity.java:151` — `OrderAttributionHelper.clearAttributionData()`
+    // followed by a fresh empty struct. Without this, a funnel set in the
+    // previous app session bleeds into the first tile click of this session.
+    await _orderAttribution.clear();
     // Show the environment picker only in debug builds AND only when the
     // user isn't already signed in.
     if (!kReleaseMode && !_prefManager.isLoggedIn) {

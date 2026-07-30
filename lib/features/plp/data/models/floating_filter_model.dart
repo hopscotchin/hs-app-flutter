@@ -50,6 +50,7 @@ class FloatingFilterSectionModel {
     this.position,
     this.tileWidth,
     this.tileHeight,
+    this.isMultiSelect = true,
     this.chips = const [],
   });
 
@@ -58,6 +59,7 @@ class FloatingFilterSectionModel {
   @JsonKey(fromJson: parseToIntOrNull) final int? position;
   @JsonKey(fromJson: parseToIntOrNull) final int? tileWidth;
   @JsonKey(fromJson: parseToIntOrNull) final int? tileHeight;
+  @JsonKey(fromJson: parseToBool, defaultValue: true) final bool isMultiSelect;
   @JsonKey(defaultValue: []) final List<FloatingFilterChipModel> chips;
 
   factory FloatingFilterSectionModel.fromJson(Map<String, dynamic> json) =>
@@ -69,6 +71,7 @@ class FloatingFilterSectionModel {
     position: position,
     tileWidth: tileWidth,
     tileHeight: tileHeight,
+    isMultiSelect: isMultiSelect,
     chips: chips.map((c) => c.toEntity()).toList(),
   );
 }

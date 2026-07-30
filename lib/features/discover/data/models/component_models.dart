@@ -58,6 +58,7 @@ class ComponentDataParser {
           json['action_value'] as String? ?? json['actionValue'] as String?,
       appImageUrl: json['appImageUrl'] as String?,
       isTitleItem: json['isTitleItem'] as bool? ?? false,
+      trackingMeta: _readTrackingMeta(json),
     );
   }
 
@@ -107,6 +108,7 @@ class ComponentDataParser {
                   tileDetailId: (d['tile_detail_id'] as num?)?.toInt() ??
                       (d['tileDetailId'] as num?)?.toInt(),
                   tileGrid: _parseTileGrid(d['tileGrid']),
+                  trackingMeta: _readTrackingMeta(d),
                 ),
               )
               .toList();
@@ -119,12 +121,17 @@ class ComponentDataParser {
                 tileJson['pageName'] as String?,
             position: (tileJson['position'] as num?)?.toInt(),
             tileDetails: tileDetails,
+            trackingMeta: _readTrackingMeta(tileJson),
           );
         })
         .where((tile) => tile.firstImage != null)
         .toList();
 
-    return HeroCarouselData(viewConfig: viewConfig, tiles: tiles);
+    return HeroCarouselData(
+      viewConfig: viewConfig,
+      tiles: tiles,
+      trackingMeta: _readTrackingMeta(json),
+    );
   }
 
   // ─── CustomTiles ───
@@ -139,7 +146,7 @@ class ComponentDataParser {
             pageName: viewConfigJson['pageName'] as String? ??
                 viewConfigJson['page_name'] as String?,
             imageCornerRadius:
-                (viewConfigJson['imageCornerRadius'] as num?)?.toDouble() ?? 4,
+                (viewConfigJson['imageCornerRadius'] as num?)?.toDouble() ?? 0,
           );
 
     final rawTiles = json['tiles'] as List<dynamic>? ??
@@ -154,6 +161,7 @@ class ComponentDataParser {
             tileDetailId: (t['tile_detail_id'] as num?)?.toInt() ??
                 (t['tileDetailId'] as num?)?.toInt(),
             tileGrid: _parseTileGrid(t['tileGrid']),
+            trackingMeta: _readTrackingMeta(t),
           ),
         )
         .toList();
@@ -163,6 +171,7 @@ class ComponentDataParser {
       ctaButton: _parseCtaButton(json['ctaButton']),
       title: _parseTitle(json['title'] ?? json['titleImage']),
       tiles: tiles,
+      trackingMeta: _readTrackingMeta(json),
     );
   }
 
@@ -198,6 +207,7 @@ class ComponentDataParser {
             mimeType: t['mimeType'] as String?,
             sort: t['sort'] as String?,
             product: _parseHomepageProduct(t['product']),
+            trackingMeta: _readTrackingMeta(t),
           ),
         )
         .toList();
@@ -206,28 +216,8 @@ class ComponentDataParser {
       viewConfig: viewConfig,
       title: _parseTitle(json['title'] ?? json['titleImage']),
       tiles: tiles,
+      trackingMeta: _readTrackingMeta(json),
     );
-  }
-
-  // ─── TabbedCustomTiles ───
-
-  static CustomTilesData? parseTabbedCustomTiles(Map<String, dynamic> json) {
-    final tabs = json['tabs'] as List<dynamic>? ?? const [];
-    if (tabs.isEmpty) return null;
-
-    Map<String, dynamic>? selectedTab;
-    for (final tab in tabs) {
-      if (tab is! Map<String, dynamic>) continue;
-      if (tab['isSelected'] == true) {
-        selectedTab = tab;
-        break;
-      }
-    }
-    selectedTab ??= tabs.first as Map<String, dynamic>;
-
-    final customTilesJson = selectedTab['customTiles'] as Map<String, dynamic>?;
-    if (customTilesJson == null) return null;
-    return parseCustomTiles(customTilesJson);
   }
 
   // ─── ProductGrid ───
@@ -263,87 +253,17 @@ class ComponentDataParser {
       title: _parseTitle(json['title'] ?? json['titleImage']),
       layoutInfo: layoutInfo,
       tiles: tiles,
+      trackingMeta: _readTrackingMeta(json),
     );
   }
 
-  // ─── ShopTheLook ───
-
-  static ShopTheLookData parseShopTheLook(Map<String, dynamic> json) {
-    ShopTheLookViewConfig? viewConfig;
-    if (json['viewConfig'] is Map<String, dynamic>) {
-      final vc = json['viewConfig'] as Map<String, dynamic>;
-      viewConfig = ShopTheLookViewConfig(
-        itemWidth: (vc['itemWidth'] as num?)?.toInt(),
-        itemHeight: (vc['itemHeight'] as num?)?.toInt(),
-        minTilesToShow: (vc['minTilesToShow'] as num?)?.toInt(),
-        peepingFactor: (vc['peepingFactor'] as num?)?.toInt(),
-      );
-    }
-
-    final rawTiles = json['tiles'] as List<dynamic>? ??
-        json['items'] as List<dynamic>? ??
-        const [];
-
-    final tiles = rawTiles.whereType<Map<String, dynamic>>().map((itemJson) {
-      final itemPrice = _parseShopTheLookPrice(itemJson['price']);
-
-      final rawProducts = itemJson['productTiles'] as List<dynamic>? ?? const [];
-      final productTiles = rawProducts.whereType<Map<String, dynamic>>().map((
-        tileJson,
-      ) {
-        final rawSkus = tileJson['skus'] as List<dynamic>? ?? const [];
-        final skus = rawSkus.whereType<Map<String, dynamic>>().map((skuJson) {
-          return ShopTheLookSku(
-            skuId: skuJson['skuId'] as String?,
-            size: skuJson['size'] as String?,
-            availableQuantity: (skuJson['availableQuantity'] as num?)?.toInt(),
-            price: _parseShopTheLookPrice(skuJson['price']),
-          );
-        }).toList();
-
-        final media = tileJson['media'];
-        final imageUrl = media is Map<String, dynamic>
-            ? media['url'] as String?
-            : media is String
-                ? media
-                : null;
-
-        return ShopTheLookProduct(
-          id: (tileJson['id'] as num?)?.toInt(),
-          actionUri: tileJson['actionUri'] as String?,
-          actionUriWeb: tileJson['actionUriWeb'] as String?,
-          hasInv: tileJson['hasInv'] as bool?,
-          hasSizeChart: tileJson['hasSizeChart'] as bool?,
-          imageUrl: imageUrl,
-          productName: tileJson['productName'] as String?,
-          skus: skus,
-        );
-      }).toList();
-
-      return ShopTheLookTile(
-        id: (itemJson['id'] as num?)?.toInt(),
-        productTiles: productTiles,
-        price: itemPrice,
-      );
-    }).toList();
-
-    return ShopTheLookData(
-      id: (json['id'] as num?)?.toInt(),
-      title: _parseTitle(json['title'] ?? json['titleImage']),
-      viewConfig: viewConfig,
-      tiles: tiles,
-    );
-  }
-
-  static ShopTheLookPrice? _parseShopTheLookPrice(Object? json) {
-    if (json is! Map<String, dynamic>) return null;
-    return ShopTheLookPrice(
-      displayValue: json['displayValue'] as String?,
-      mrp: json['mrp'] as String?,
-      absoluteValue: (json['absoluteValue'] as num?)?.toInt(),
-      absoluteMrp: (json['absoluteMrp'] as num?)?.toInt(),
-      discount: json['discount'] as String?,
-    );
+  /// Extracts the raw `trackingMeta` map from a component's JSON payload
+  /// verbatim. Every key/value goes straight through to impression / click
+  /// analytics payloads — the backend owns the analytics contract, the
+  /// client just passes what it's told.
+  static Map<String, dynamic>? _readTrackingMeta(Map<String, dynamic> json) {
+    final raw = json['trackingMeta'];
+    return raw is Map<String, dynamic> ? Map<String, dynamic>.of(raw) : null;
   }
 
   // ─── Dispatcher ───
@@ -355,8 +275,6 @@ class ComponentDataParser {
       PageComponentType.customTiles => parseCustomTiles(data),
       PageComponentType.productGrid => parseProductGrid(data),
       PageComponentType.pageCarousel => parsePageCarousel(data),
-      PageComponentType.tabbedCustomTiles => parseTabbedCustomTiles(data),
-      PageComponentType.shopTheLook => parseShopTheLook(data),
       _ => null,
     };
   }

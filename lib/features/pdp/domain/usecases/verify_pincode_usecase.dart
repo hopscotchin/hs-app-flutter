@@ -9,7 +9,8 @@ import '../entities/pincode_check_entity.dart';
 import '../repositories/pdp_repository.dart';
 
 @lazySingleton
-class VerifyPincodeUseCase implements UseCase<PincodeCheckEntity, VerifyPincodeParams> {
+class VerifyPincodeUseCase
+    implements UseCase<PincodeCheckEntity, VerifyPincodeParams> {
   VerifyPincodeUseCase(this._repository);
 
   final PdpRepository _repository;
@@ -25,7 +26,11 @@ class VerifyPincodeUseCase implements UseCase<PincodeCheckEntity, VerifyPincodeP
 }
 
 class VerifyPincodeParams extends Equatable {
-  const VerifyPincodeParams({required this.productId, required this.pincode, this.cancelToken});
+  const VerifyPincodeParams({
+    required this.productId,
+    required this.pincode,
+    this.cancelToken,
+  });
 
   final int productId;
   final String pincode;

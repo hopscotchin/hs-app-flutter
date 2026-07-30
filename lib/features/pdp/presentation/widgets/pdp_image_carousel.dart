@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../components/atoms/cached_image_widget.dart';
 import '../../../../components/atoms/custom_image.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/pdp_strings.dart';
 import '../../../../core/entities/visual_cue_entity.dart';
 import '../../../../core/router/app_navigator.dart';
@@ -183,6 +184,7 @@ class _PdpImageCarouselState extends State<PdpImageCarousel> {
                 // InteractiveViewer here — its opaque scale gesture steals
                 // vertical drags from the PageView once the page has scrolled.
                 return GestureDetector(
+                  key: ValueKey('${PdpTestStrings.carouselImage}_$index'),
                   onTap: () => AppNavigator.goToPdpImageGallery(
                     context,
                     media: widget.media,
@@ -204,6 +206,7 @@ class _PdpImageCarouselState extends State<PdpImageCarousel> {
                 bottom: 0,
                 child: Center(
                   child: PdpVerticalDotIndicator(
+                    key: const ValueKey(PdpTestStrings.carouselDotIndicator),
                     count: widget.media.length,
                     currentIndex: _currentPage,
                   ),
@@ -225,7 +228,10 @@ class _PdpImageCarouselState extends State<PdpImageCarousel> {
                     maxWidth: 120,
                     maxHeight: 26,
                   ),
-                  child: _VisualCueBadge(cue: widget.visualCue!),
+                  child: _VisualCueBadge(
+                    key: const ValueKey(PdpTestStrings.visualCueBadge),
+                    cue: widget.visualCue!,
+                  ),
                 ),
               ),
           ],

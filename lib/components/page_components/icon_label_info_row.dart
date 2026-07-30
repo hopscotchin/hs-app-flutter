@@ -2,90 +2,138 @@ import 'package:flutter/material.dart';
 
 import '../atoms/custom_image.dart';
 import '../../core/theme/colors.dart';
-import '../../core/theme/spacing.dart';
 import '../../core/theme/typography/typography_v1.dart';
-import '../../features/pdp/domain/entities/service_guarantee_entity.dart';
 
+/// Presentation-owned data for a single [IconLabelInfoItem].
+///
+/// Kept deliberately free of any feature/domain type so this component can be
+/// reused anywhere. Callers map their own model into this at the call site.
+class IconLabelInfo {
+  const IconLabelInfo({this.icon, this.label});
+
+  /// Icon image path (asset or network). When null, [IconLabelInfoRow.fallbackIcon]
+  /// is shown instead.
+  final String? icon;
+  final String? label;
+}
+
+/// A row of icon + label chips, each slot sized equally and centered.
 class IconLabelInfoRow extends StatelessWidget {
-  const IconLabelInfoRow({super.key, required this.items});
-  final List<ServiceGuaranteeEntity> items;
+  const IconLabelInfoRow({
+    super.key,
+    required this.items,
+    this.iconSize = 16,
+    this.itemMaxWidth = 90,
+    this.tileSize = 40,
+    this.tileColor = const Color(0xFFFFFFFF),
+    this.tileRadius = 3.82,
+    this.labelStyle,
+    this.fallbackIcon = Icons.verified_outlined,
+    this.fallbackIconColor = AppColors.brandDefault,
+  });
+
+  final List<IconLabelInfo> items;
+  final double iconSize;
+  final double itemMaxWidth;
+  final double tileSize;
+  final Color tileColor;
+  final double tileRadius;
+
+  /// Overrides the default label text style when provided.
+  final TextStyle? labelStyle;
+  final IconData fallbackIcon;
+  final Color fallbackIconColor;
 
   @override
   Widget build(BuildContext context) {
-    // Distribution by count (item/icon/label sizes stay fixed):
-    //  • 1 item  → aligned to the start
-    //  • 2 items → row split into two equal halves, each item centered in its half
-    //  • 3 items → centered as a group with gaps between (unchanged)
-    switch (items.length) {
-      case 1:
-        return Row(children: [IconLabelInfoItem(item: items.first)]);
-      case 2:
-        return Row(
-          children: [
-            for (final item in items)
-              Expanded(
-                child: Center(child: IconLabelInfoItem(item: item)),
+    // Row split into equal parts, each item centered in its slot.
+    return Row(
+      children: [
+        for (final item in items)
+          Expanded(
+            child: Center(
+              child: IconLabelInfoItem(
+                item: item,
+                iconSize: iconSize,
+                maxWidth: itemMaxWidth,
+                tileSize: tileSize,
+                tileColor: tileColor,
+                tileRadius: tileRadius,
+                labelStyle: labelStyle,
+                fallbackIcon: fallbackIcon,
+                fallbackIconColor: fallbackIconColor,
               ),
-          ],
-        );
-      default:
-        return Row(
-          children: [
-            for (int i = 0; i < items.length; i++) ...[
-              Expanded(
-                child: Center(child: IconLabelInfoItem(item: items[i])),
-              ),
-            ],
-          ],
-        );
-    }
+            ),
+          ),
+      ],
+    );
   }
 }
 
 class IconLabelInfoItem extends StatelessWidget {
-  const IconLabelInfoItem({super.key, required this.item});
-  final ServiceGuaranteeEntity item;
+  const IconLabelInfoItem({
+    super.key,
+    required this.item,
+    this.iconSize = 16,
+    this.maxWidth = 90,
+    this.tileSize = 40,
+    this.tileColor = const Color(0xFFFFFFFF),
+    this.tileRadius = 3.82,
+    this.labelStyle,
+    this.fallbackIcon = Icons.verified_outlined,
+    this.fallbackIconColor = AppColors.brandDefault,
+  });
 
-  static const double _iconSize = 16;
+  final IconLabelInfo item;
+  final double iconSize;
+  final double maxWidth;
+  final double tileSize;
+  final Color tileColor;
+  final double tileRadius;
+  final TextStyle? labelStyle;
+  final IconData fallbackIcon;
+  final Color fallbackIconColor;
 
   @override
   Widget build(BuildContext context) {
+    final resolvedLabelStyle =
+        labelStyle ??
+        AppTypographyV1.labelMedium.copyWith(
+          fontWeight: FontWeight.w700,
+          color: const Color(0x80000000),
+          height: 14 / 10,
+        );
+
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 90, minHeight: 40),
+      constraints: BoxConstraints(maxWidth: maxWidth, minHeight: tileSize),
+      // Fixed-width slot: the Expanded label consumes all free space, so there
+      // is nothing for a main-axis alignment to distribute. Centering of the
+      // item within its slot is done by the parent [Center].
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFFFFFF),
-              borderRadius: BorderRadius.all(Radius.circular(3.82)),
+            width: tileSize,
+            height: tileSize,
+            decoration: BoxDecoration(
+              color: tileColor,
+              borderRadius: BorderRadius.all(Radius.circular(tileRadius)),
             ),
             child: Center(
               child: item.icon != null
                   ? CustomImage(
                       path: item.icon!,
-                      width: _iconSize,
-                      height: _iconSize,
+                      width: iconSize,
+                      height: iconSize,
                       fit: BoxFit.contain,
                     )
-                  : const Icon(
-                      Icons.verified_outlined,
-                      size: _iconSize,
-                      color: AppColors.brandDefault,
-                    ),
+                  : Icon(fallbackIcon, size: iconSize, color: fallbackIconColor),
             ),
           ),
           Expanded(
             child: Text(
               item.label ?? '',
-              style: AppTypographyV1.labelMedium.copyWith(
-                fontWeight: FontWeight.w700,
-                color: const Color(0x80000000),
-                height: 14 / 10,
-              ),
+              style: resolvedLabelStyle,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

@@ -8,10 +8,14 @@ part 'media_model.g.dart';
 class MediaModel {
   const MediaModel({this.height, this.mimeType, this.url, this.width});
 
-  @JsonKey(defaultValue: null) final int? height;
-  @JsonKey(defaultValue: null) final String? mimeType;
-  @JsonKey(defaultValue: null) final String? url;
-  @JsonKey(defaultValue: null) final int? width;
+  @JsonKey(defaultValue: null)
+  final int? height;
+  @JsonKey(defaultValue: null)
+  final String? mimeType;
+  @JsonKey(defaultValue: null)
+  final String? url;
+  @JsonKey(defaultValue: null)
+  final int? width;
 
   factory MediaModel.fromJson(Map<String, dynamic> json) =>
       _$MediaModelFromJson(json);

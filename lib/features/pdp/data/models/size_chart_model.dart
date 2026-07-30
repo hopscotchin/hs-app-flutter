@@ -32,12 +32,16 @@ class SizeChartDtoModel {
   final String? illustrationImageUrl;
   final String? lengthUnit;
   final String? weightUnit;
-  @JsonKey(defaultValue: []) final List<String> notesList;
-  @JsonKey(defaultValue: []) final List<String> cueImageUrlList;
+  @JsonKey(defaultValue: [])
+  final List<String> notesList;
+  @JsonKey(defaultValue: [])
+  final List<String> cueImageUrlList;
   @JsonKey(defaultValue: [])
   final List<SizeChartParameterValueModel> sizeChartParameterValueDTOList;
-  @JsonKey(defaultValue: []) final List<String> parameterNamesList;
-  @JsonKey(defaultValue: []) final List<String> parameterMeasureTypeList;
+  @JsonKey(defaultValue: [])
+  final List<String> parameterNamesList;
+  @JsonKey(defaultValue: [])
+  final List<String> parameterMeasureTypeList;
   final String? importantInfo;
 
   factory SizeChartDtoModel.fromJson(Map<String, dynamic> json) =>
@@ -48,7 +52,8 @@ class SizeChartDtoModel {
 class SizeChartParameterValueModel {
   const SizeChartParameterValueModel({this.valueList = const []});
 
-  @JsonKey(defaultValue: []) final List<String> valueList;
+  @JsonKey(defaultValue: [])
+  final List<String> valueList;
 
   factory SizeChartParameterValueModel.fromJson(Map<String, dynamic> json) =>
       _$SizeChartParameterValueModelFromJson(json);

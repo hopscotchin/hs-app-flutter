@@ -36,30 +36,42 @@ class ProductModel {
     this.isGift = false,
   });
 
-  @JsonKey(defaultValue: null) final int? id;
-  @JsonKey(defaultValue: null) final String? name;
+  @JsonKey(defaultValue: null)
+  final int? id;
+  @JsonKey(defaultValue: null)
+  final String? name;
   @JsonKey(defaultValue: null, fromJson: _priceFromJson)
   final ProductPriceModel? priceInfo;
-  @JsonKey(defaultValue: false) final bool soldOut;
+  @JsonKey(defaultValue: false)
+  final bool soldOut;
   @JsonKey(defaultValue: null, fromJson: _wishlistFromJson)
   final WishlistInfoModel? wishlistInfo;
-  @JsonKey(defaultValue: []) final List<MediaModel> media;
-  @JsonKey(defaultValue: []) final List<SkuModel> skus;
+  @JsonKey(defaultValue: [])
+  final List<MediaModel> media;
+  @JsonKey(defaultValue: [])
+  final List<SkuModel> skus;
   @JsonKey(defaultValue: [], fromJson: _colorVariantsFromJson)
   final List<ColorVariantModel> colorVariants;
-  @JsonKey(defaultValue: []) final List<DetailModel> details;
+  @JsonKey(defaultValue: [])
+  final List<DetailModel> details;
   @JsonKey(defaultValue: null, fromJson: _eddInfoFromJson)
   final EddInfoModel? eddInfo;
-  @JsonKey(defaultValue: null) final bool? hasSizeChart;
-  @JsonKey(defaultValue: null) final bool? isServiceable;
-  @JsonKey(defaultValue: null) final bool? isEddDifferentForSKUs;
-  @JsonKey(defaultValue: null) final bool? isReturnInfoDifferentForSKUs;
-  @JsonKey(defaultValue: []) final List<ServiceGuaranteeModel> serviceGuarantee;
+  @JsonKey(defaultValue: null)
+  final bool? hasSizeChart;
+  @JsonKey(defaultValue: null)
+  final bool? isServiceable;
+  @JsonKey(defaultValue: null)
+  final bool? isEddDifferentForSKUs;
+  @JsonKey(defaultValue: null)
+  final bool? isReturnInfoDifferentForSKUs;
+  @JsonKey(defaultValue: [])
+  final List<ServiceGuaranteeModel> serviceGuarantee;
 
   /// Raw visualCue map from JSON. Parsed lazily via [VisualCueModel].
   @JsonKey(defaultValue: null)
   final Map<String, dynamic>? visualCue;
-  @JsonKey(defaultValue: false) final bool isGift;
+  @JsonKey(defaultValue: false)
+  final bool isGift;
 
   factory ProductModel.fromJson(Map<String, dynamic> json) =>
       _$ProductModelFromJson(json);
@@ -68,12 +80,18 @@ class ProductModel {
 /// Handles both array shape `[...]` and object shape `{"variants": [...], ...}`.
 List<ColorVariantModel> _colorVariantsFromJson(Object? json) {
   if (json is List) {
-    return json.whereType<Map<String, dynamic>>().map(ColorVariantModel.fromJson).toList();
+    return json
+        .whereType<Map<String, dynamic>>()
+        .map(ColorVariantModel.fromJson)
+        .toList();
   }
   if (json is Map<String, dynamic>) {
     final variants = json['variants'];
     if (variants is List) {
-      return variants.whereType<Map<String, dynamic>>().map(ColorVariantModel.fromJson).toList();
+      return variants
+          .whereType<Map<String, dynamic>>()
+          .map(ColorVariantModel.fromJson)
+          .toList();
     }
   }
   return [];

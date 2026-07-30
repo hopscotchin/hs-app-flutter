@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../components/atoms/cached_image_widget.dart';
 import '../../domain/entities/visual_product_info_entity.dart';
 
 class PdpVisualContent extends StatelessWidget {
@@ -17,11 +18,10 @@ class PdpVisualContent extends StatelessWidget {
 
     return Column(
       children: imageItems.map((item) {
-        return Image.network(
-          item.url!,
+        return CachedImageWidget(
+          imageUrl: item.url!,
           width: double.infinity,
           fit: BoxFit.fitWidth,
-          errorBuilder: (_, _, _) => const SizedBox.shrink(),
         );
       }).toList(),
     );

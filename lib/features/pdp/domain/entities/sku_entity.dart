@@ -18,6 +18,7 @@ abstract class SkuEntity with _$SkuEntity {
     WarningEntity? info,
     @Default(false) bool isSelected,
     @Default(false) bool isAddedToBag,
+
     /// Raw key→value map from API (e.g. {"skuMrp": "₹1,149"}).
     /// Used to resolve `skuValue` type detail items via fieldPath.
     Map<String, dynamic>? skuAttributes,

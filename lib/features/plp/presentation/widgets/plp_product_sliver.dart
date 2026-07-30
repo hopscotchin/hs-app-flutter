@@ -4,6 +4,8 @@ import 'package:hs_app_flutter/components/atoms/product_tile.dart';
 
 import '../../../../components/atoms/xl_tile_widget.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
+import '../../../../core/constants/strings/login_redirects.dart';
+import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/navigation/action_url_handler.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/spacing.dart';
@@ -92,6 +94,13 @@ class PlpProductSliver extends StatelessWidget {
       context,
       productId: product.id.toString(),
       price: WishlistActions.priceToInt(product.price?.sellingPrice),
+      loggedOutMessageBars: const [
+        MessageBarEntity(
+          text: LoginRedirects.redirectAddToWishlist,
+          type: 'info',
+          hasIcon: true,
+        ),
+      ],
     );
   }
 
@@ -141,7 +150,8 @@ class PlpProductSliver extends StatelessWidget {
                     selector: (s) => s.isWishlisted(product.id.toString()),
                     builder: (context, wished) => XLTileWidget.fromListingProduct(
                       product,
-                      isWishlisted: wished,tileKey: _tileKey(productStart),
+                      isWishlisted: wished,
+                      tileKey: _tileKey(productStart),
                       wishlistKey: _wishlistKey(productStart),
                       visualCueKeyBuilder: (j) => _visualCueKey(productStart, j),
                       nameKey: _nameKey(productStart),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../components/atoms/cached_image_widget.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
+import '../../../../core/router/app_navigator.dart';
 import '../../../../core/constants/strings/pdp_strings.dart';
 import '../../domain/entities/media_entity.dart';
 import '../widgets/pdp_vertical_dot_indicator.dart';
@@ -25,7 +26,8 @@ class PdpFullscreenGalleryPage extends StatefulWidget {
   final int initialIndex;
 
   @override
-  State<PdpFullscreenGalleryPage> createState() => _PdpFullscreenGalleryPageState();
+  State<PdpFullscreenGalleryPage> createState() =>
+      _PdpFullscreenGalleryPageState();
 }
 
 class _PdpFullscreenGalleryPageState extends State<PdpFullscreenGalleryPage> {
@@ -69,7 +71,7 @@ class _PdpFullscreenGalleryPageState extends State<PdpFullscreenGalleryPage> {
       body: SafeArea(
         child: Column(
           children: [
-            _Toolbar(onBack: () => context.pop()),
+            _Toolbar(onBack: () => AppNavigator.goBack(context)),
             Expanded(
               child: Align(
                 alignment: Alignment.topCenter,
@@ -89,7 +91,7 @@ class _PdpFullscreenGalleryPageState extends State<PdpFullscreenGalleryPage> {
                           final url = widget.media[index].url;
                           if (url == null) return const SizedBox.expand();
                           return _ZoomableImage(
-                            key: ValueKey(index),
+                            key: ValueKey('${PdpTestStrings.galleryImage}_$index'),
                             imageUrl: url,
                             onZoomChanged: _onZoomChanged,
                           );
@@ -102,6 +104,9 @@ class _PdpFullscreenGalleryPageState extends State<PdpFullscreenGalleryPage> {
                           bottom: 0,
                           child: Center(
                             child: PdpVerticalDotIndicator(
+                              key: const ValueKey(
+                                PdpTestStrings.galleryDotIndicator,
+                              ),
                               count: widget.media.length,
                               currentIndex: _currentPage,
                             ),
@@ -138,7 +143,10 @@ class _Toolbar extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Padding(
             padding: const EdgeInsets.only(left: 12),
-            child: _CircularBackButton(onTap: onBack),
+            child: _CircularBackButton(
+              key: const ValueKey(PdpTestStrings.galleryBackButton),
+              onTap: onBack,
+            ),
           ),
         ),
       ),
@@ -147,7 +155,7 @@ class _Toolbar extends StatelessWidget {
 }
 
 class _CircularBackButton extends StatelessWidget {
-  const _CircularBackButton({required this.onTap});
+  const _CircularBackButton({super.key, required this.onTap});
 
   final VoidCallback onTap;
 
@@ -205,11 +213,13 @@ class _ZoomableImageState extends State<_ZoomableImage>
     super.initState();
     _controller = TransformationController()..addListener(_onTransformChanged);
     _animController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 200))
-          ..addListener(() {
-            final value = _animation?.value;
-            if (value != null) _controller.value = value;
-          });
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 200),
+        )..addListener(() {
+          final value = _animation?.value;
+          if (value != null) _controller.value = value;
+        });
   }
 
   void _onTransformChanged() {
@@ -233,8 +243,10 @@ class _ZoomableImageState extends State<_ZoomableImage>
         )
         ..scaleByDouble(_doubleTapScale, _doubleTapScale, _doubleTapScale, 1);
     }
-    _animation = Matrix4Tween(begin: _controller.value, end: target)
-        .animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
+    _animation = Matrix4Tween(
+      begin: _controller.value,
+      end: target,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
     _animController.forward(from: 0);
   }
 
@@ -258,7 +270,10 @@ class _ZoomableImageState extends State<_ZoomableImage>
         // Fill the page so the viewport equals the image — swiping then reads
         // as simply changing images rather than scrolling an oversized area.
         child: SizedBox.expand(
-          child: CachedImageWidget(imageUrl: widget.imageUrl, fit: BoxFit.cover),
+          child: CachedImageWidget(
+            imageUrl: widget.imageUrl,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

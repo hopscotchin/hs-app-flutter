@@ -5,7 +5,8 @@ import '../../../plp/domain/entities/listing_product_entity.dart';
 part 'recently_viewed_entity.freezed.dart';
 
 @freezed
-abstract class RecentlyViewedViewConfigEntity with _$RecentlyViewedViewConfigEntity {
+abstract class RecentlyViewedViewConfigEntity
+    with _$RecentlyViewedViewConfigEntity {
   const factory RecentlyViewedViewConfigEntity({
     @Default(240.0) double tileWidth,
     @Default(214.0) double tileHeight,

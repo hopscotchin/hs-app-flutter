@@ -21,15 +21,22 @@ class PincodeCheckModel {
     this.noPinCodeMessage,
   });
 
-  @JsonKey(defaultValue: null) final String? action;
-  @JsonKey(defaultValue: null) final String? message;
-  @JsonKey(defaultValue: []) final List<SkuModel> skus;
-  @JsonKey(defaultValue: null) final bool? isServiceable;
+  @JsonKey(defaultValue: null)
+  final String? action;
+  @JsonKey(defaultValue: null)
+  final String? message;
+  @JsonKey(defaultValue: [])
+  final List<SkuModel> skus;
+  @JsonKey(defaultValue: null)
+  final bool? isServiceable;
   @JsonKey(defaultValue: null, fromJson: _eddInfoFromJson)
   final EddInfoModel? eddInfo;
-  @JsonKey(defaultValue: []) final List<VisualCueModel> visualCues;
-  @JsonKey(defaultValue: []) final List<ServiceGuaranteeModel> serviceGuarantee;
-  @JsonKey(defaultValue: null) final String? noPinCodeMessage;
+  @JsonKey(defaultValue: [])
+  final List<VisualCueModel> visualCues;
+  @JsonKey(defaultValue: [])
+  final List<ServiceGuaranteeModel> serviceGuarantee;
+  @JsonKey(defaultValue: null)
+  final String? noPinCodeMessage;
 
   factory PincodeCheckModel.fromJson(Map<String, dynamic> json) =>
       _$PincodeCheckModelFromJson(json);

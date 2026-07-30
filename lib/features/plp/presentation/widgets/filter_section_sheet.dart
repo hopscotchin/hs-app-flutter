@@ -173,32 +173,35 @@ class _FilterSectionSheetState extends State<FilterSectionSheet> {
     return widget.section.isMultiSelect
         ? _buildCheckbox(filter, value, isSelected, label, count, optionKey, labelKey, countKey)
         : InkWell(
-      highlightColor: Colors.transparent,
-      onTap: () => _toggle(value),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xsm,
-        ),
-        child: AppRadio.labeled(
-          key: optionKey, isSelected: isSelected, label: label, count: count,
-          labelKey: labelKey,
-          countKey: countKey,
-        ),
-      ),
-    );
+            highlightColor: Colors.transparent,
+            onTap: () => _toggle(value),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xsm,
+              ),
+              child: AppRadio.labeled(
+                key: optionKey,
+                isSelected: isSelected,
+                label: label,
+                count: count,
+                labelKey: labelKey,
+                countKey: countKey,
+              ),
+            ),
+          );
   }
 
   Widget _buildCheckbox(
-      FilterEntity filter,
-      String value,
-      bool isSelected,
-      String label,
-      String? count,
-      Key? optionKey,
-      Key? labelKey,
-      Key? countKey,
-      ) {
+    FilterEntity filter,
+    String value,
+    bool isSelected,
+    String label,
+    String? count,
+    Key? optionKey,
+    Key? labelKey,
+    Key? countKey,
+  ) {
     final swatch = _isColourMode ? filter.colorHex.toColor : null;
     final useWhiteTick = swatch == null || swatch.isDarkColor;
     return InkWell(

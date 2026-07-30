@@ -131,15 +131,6 @@ class ActionUrlHandler {
       case _Route.categories:
         return const CategoriesDestination();
 
-      // ── Moments ──
-      case _Route.moments ||
-          DeeplinkHost.momentPage ||
-          DeeplinkHost.momentUpload ||
-          DeeplinkHost.momentUpload2 ||
-          DeeplinkHost.myMoment ||
-          DeeplinkHost.photo:
-        return const MomentsDestination();
-
       // ── Account & sub-pages ──
       case _Route.account ||
           DeeplinkHost.meTab ||
@@ -296,10 +287,6 @@ class ActionUrlHandler {
       case _Route.categories || 'category':
         return const CategoriesDestination();
 
-      // ── Moments ──
-      case _Route.moments || 'moment':
-        return const MomentsDestination();
-
       // ── Account: /account, /my/*, /helpcenter ──
       case _Route.account || 'my' || 'helpcenter':
         return const AccountDestination();
@@ -363,6 +350,5 @@ abstract final class _Route {
   static const search = 'search';
   static const cart = 'cart';
   static const categories = 'categories';
-  static const moments = 'moments';
   static const account = 'account';
 }

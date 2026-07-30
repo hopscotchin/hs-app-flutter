@@ -60,21 +60,21 @@ class XLTileWidget extends StatefulWidget {
   });
 
   factory XLTileWidget.fromListingProduct(
-      ListingProductEntity product, {
-        Key? key,
-        required VoidCallback onTap,
-        required VoidCallback onWishlistTap,
-        VoidCallback? onAddToCartTap,
-        bool? isWishlisted,
-        void Function(int position, String direction)? onImageScrolled,
-        Key? tileKey,
-        Key? wishlistKey,
-        Key? Function(int index)? visualCueKeyBuilder,
-        Key? nameKey,
-        Key? priceKey,
-        Key? discountKey,
-        Key? colorVariantsKey,
-      }) {
+    ListingProductEntity product, {
+    Key? key,
+    required VoidCallback onTap,
+    required VoidCallback onWishlistTap,
+    VoidCallback? onAddToCartTap,
+    bool? isWishlisted,
+    void Function(int position, String direction)? onImageScrolled,
+    Key? tileKey,
+    Key? wishlistKey,
+    Key? Function(int index)? visualCueKeyBuilder,
+    Key? nameKey,
+    Key? priceKey,
+    Key? discountKey,
+    Key? colorVariantsKey,
+  }) {
     return XLTileWidget(
       key: key,
       product: product,
@@ -251,13 +251,13 @@ class _XLTileWidgetState extends State<XLTileWidget> {
       child: !isTextType && cue.imageUrl.isNotNullOrEmpty
           ? CustomImage(path: cue.imageUrl!, height: 15, width: 64)
           : CustomChipWidget(
-        text: (cue.text ?? ''),
-        backgroundColor: bgColor,
-        borderColor: bgColor,
-        borderRadius: 4,
-        textStyle: AppTypographyV1.labelMedium.medium.copyWith(color: txtColor),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-      ),
+              text: (cue.text ?? ''),
+              backgroundColor: bgColor,
+              borderColor: bgColor,
+              borderRadius: 4,
+              textStyle: AppTypographyV1.labelMedium.medium.copyWith(color: txtColor),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+            ),
     );
   }
 

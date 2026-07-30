@@ -328,3 +328,112 @@ class AddressTestStrings {
   static const String discardBottomSheetStayButton = 'address_form_discard_bottomsheet_stay_button';
   static const String discardBottomSheetDiscardButton = 'address_form_discard_bottomsheet_discard_button';
 }
+
+/// Product detail page (PDP). Keys are `pdp_<element>[_<index>]`. Dynamic lists
+/// (size chips, color variants, offer cards, detail tabs) carry an index; offer
+/// sub-CTAs nest under the card. The recommendations grid and recently-viewed
+/// carousel reuse the shared components via `keyPrefix`, producing
+/// `pdp_recommended_row_<r>_tiles_<i>` and `pdp_recently_viewed_tiles_<i>`.
+class PdpTestStrings {
+  PdpTestStrings();
+
+  /// Screen prefix for shared-component keys.
+  static const String screen = 'pdp';
+
+  // App bar (shared by content + error view)
+  static const String appBarBackButton = 'pdp_appbar_back_button';
+  static const String appBarWishlistButton = 'pdp_appbar_wishlist_button';
+  static const String appBarCartButton = 'pdp_appbar_cart_button';
+
+  // Brand / price header
+  static const String productNameText = 'pdp_product_name_text_field';
+  static const String shareButton = 'pdp_share_button';
+  static const String wishlistButton = 'pdp_wishlist_button';
+
+  // Color variants (dynamic)
+  static const String colorVariant = 'pdp_color_variant'; // + `_<i>`
+
+  // Size selector
+  static const String sizeChartButton = 'pdp_size_chart_button';
+  static const String sizeChip = 'pdp_size_chip'; // + `_<i>`
+
+  // Delivery & availability
+  static const String deliveryTitle = 'pdp_delivery_title';
+  static const String enterPincodeButton = 'pdp_enter_pincode_button';
+  static const String changePincodeButton = 'pdp_change_pincode_button';
+
+  // Offers (dynamic; copy CTA nests under the card)
+  static const String offersTitle = 'pdp_offers_title';
+  static const String offerCard = 'pdp_offer_card'; // + `_<i>`
+  static const String offerCopySuffix = 'copy'; // → `pdp_offer_card_<i>_copy`
+
+  // Product details (dynamic tabs)
+  static const String productDetailsTitle = 'pdp_product_details_title';
+  static const String detailTab = 'pdp_detail_tab'; // header → + `_<i>`
+
+  // Add-to-bag bar (floating primary + docked copy — both mounted, keyed apart)
+  static const String addToBagButton = 'pdp_add_to_bag_button';
+  static const String buyNowButton = 'pdp_buy_now_button';
+  static const String dockedAddToBagButton = 'pdp_docked_add_to_bag_button';
+  static const String dockedBuyNowButton = 'pdp_docked_buy_now_button';
+
+  // Scroll-to-top pill
+  static const String scrollToTopButton = 'pdp_scroll_to_top_button';
+
+  // Recommendations & recently-viewed rails (keyPrefix on shared components)
+  static const String recommendedTitle = 'pdp_recommended_title';
+  static const String recommendedPrefix = 'pdp_recommended'; // + `_row_<r>_tiles_<i>`
+  static const String recentlyViewedPrefix = 'pdp_recently_viewed'; // + `_tiles_<i>`
+
+  // Size selection bottom sheet
+  static const String sizeSheetTitle = 'pdp_size_sheet_title';
+  static const String sizeSheetSizeChartButton = 'pdp_size_sheet_size_chart_button';
+  static const String sizeSheetChip = 'pdp_size_sheet_chip'; // + `_<i>`
+  static const String sizeSheetConfirmButton = 'pdp_size_sheet_confirm_button';
+
+  // Size chart bottom sheet
+  static const String sizeChartSheetTitle = 'pdp_size_chart_sheet_title';
+  static const String sizeChartSheetCloseButton = 'pdp_size_chart_sheet_close_button';
+
+  // Fullscreen image gallery
+  static const String galleryBackButton = 'pdp_gallery_back_button';
+
+  // Error view
+  static const String errorView = 'pdp_error_view';
+  static const String errorExploreButton = 'pdp_error_explore_button';
+
+  // Position indicators (carry no assertion value on their own)
+  static const String carouselDotIndicator = 'pdp_carousel_dot_indicator';
+  static const String galleryDotIndicator = 'pdp_gallery_dot_indicator';
+  static const String offersIndicator = 'pdp_offers_indicator';
+  static const String sizeChartTableIndicator = 'pdp_size_chart_table_indicator'; // + `_<chart>`
+
+  // Decoration / structure
+  static const String sheetLip = 'pdp_sheet_lip';
+  static const String deliveryDivider = 'pdp_delivery_divider';
+  static const String detailTabDividerSuffix = 'divider'; // → `pdp_detail_tab_<i>_divider`
+
+  // Carousel & gallery images (dynamic) + visual-cue badge
+  static const String carouselImage = 'pdp_carousel_image'; // + `_<i>`
+  static const String galleryImage = 'pdp_gallery_image'; // + `_<i>`
+  static const String visualCueBadge = 'pdp_visual_cue_badge';
+
+  // Price text — brand/price header
+  static const String sellingPriceText = 'pdp_selling_price_text';
+  static const String mrpText = 'pdp_mrp_text';
+  static const String discountText = 'pdp_discount_text';
+  static const String priceCalloutText = 'pdp_price_callout_text';
+
+  // Price text — size selection sheet strip
+  static const String sizeSheetSellingPriceText = 'pdp_size_sheet_selling_price_text';
+  static const String sizeSheetMrpText = 'pdp_size_sheet_mrp_text';
+  static const String sizeSheetDiscountText = 'pdp_size_sheet_discount_text';
+
+  // Size-chart table (dynamic; chart-scoped so multiple tables stay unique)
+  static const String sizeChartUnitButton = 'pdp_size_chart_unit_button'; // + `_<chart>_<unit>`
+  static const String sizeChartHeader = 'pdp_size_chart_header'; // + `_<chart>_<col>`
+  static const String sizeChartCell = 'pdp_size_chart_cell'; // + `_<chart>_<row>_<col>`
+
+  // Recommendations pagination
+  static const String recommendedLoading = 'pdp_recommended_loading';
+}

@@ -175,28 +175,24 @@ class _AddressesPageState extends State<AddressesPage> {
                               topSpacing: 6,
                             ),
                             for (var i = 0; i < otherAddresses.length; i++) ...[
-                              // Flat index continues after the default section.
-                              Builder(
-                                builder: (_) {
-                                  final flatIndex = defaultAddress.length + i;
-                                  return AddressItemCard(
-                                    key: ValueKey('${AddressTestStrings.listItem}_$flatIndex'),
-                                    editKey: ValueKey(
-                                      '${AddressTestStrings.listItem}_${flatIndex}_${AddressTestStrings.listItemEditSuffix}',
-                                    ),
-                                    removeKey: ValueKey(
-                                      '${AddressTestStrings.listItem}_${flatIndex}_${AddressTestStrings.listItemRemoveSuffix}',
-                                    ),
-                                    address: otherAddresses[i],
-                                    mode: widget.mode,
-                                    isSelected: otherAddresses[i].id == _selectedId,
-                                    isSettingDefault: state.selectingId == otherAddresses[i].id,
-                                    onSelect: () => setState(() => _selectedId = otherAddresses[i].id),
-                                    onSetDefault: _onSetDefault(otherAddresses[i]),
-                                    onEdit: () => _onEdit(context, otherAddresses[i]),
-                                    onRemove: () => _confirmRemove(context, otherAddresses[i]),
-                                  );
-                                },
+                              AddressItemCard(
+                                key: ValueKey(
+                                  '${AddressTestStrings.listItem}_${defaultAddress.length + i}',
+                                ),
+                                editKey: ValueKey(
+                                  '${AddressTestStrings.listItem}_${defaultAddress.length + i}_${AddressTestStrings.listItemEditSuffix}',
+                                ),
+                                removeKey: ValueKey(
+                                  '${AddressTestStrings.listItem}_${defaultAddress.length + i}_${AddressTestStrings.listItemRemoveSuffix}',
+                                ),
+                                address: otherAddresses[i],
+                                mode: widget.mode,
+                                isSelected: otherAddresses[i].id == _selectedId,
+                                isSettingDefault: state.selectingId == otherAddresses[i].id,
+                                onSelect: () => setState(() => _selectedId = otherAddresses[i].id),
+                                onSetDefault: _onSetDefault(otherAddresses[i]),
+                                onEdit: () => _onEdit(context, otherAddresses[i]),
+                                onRemove: () => _confirmRemove(context, otherAddresses[i]),
                               ),
                               Divider(
                                 height: 1,

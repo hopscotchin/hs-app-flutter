@@ -27,11 +27,12 @@ abstract final class AppNavigator {
 
   static void goToCategories(BuildContext context) => context.go(RouteNames.categories);
 
-  static void goToMoments(BuildContext context) => context.go(RouteNames.moments);
-
   static void goToAccount(BuildContext context) => context.go(RouteNames.account);
 
   static void goToCart(BuildContext context) => context.pushNamed(RouteNames.cart);
+
+  /// Pops the current route / dismisses the top-most sheet or dialog.
+  static void goBack(BuildContext context) => context.pop();
 
   static void goToLogin(
     BuildContext context, {

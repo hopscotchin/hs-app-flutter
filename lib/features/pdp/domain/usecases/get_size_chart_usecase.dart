@@ -9,14 +9,18 @@ import '../entities/size_chart_entity.dart';
 import '../repositories/pdp_repository.dart';
 
 @lazySingleton
-class GetSizeChartUseCase implements UseCase<SizeChartEntity, GetSizeChartParams> {
+class GetSizeChartUseCase
+    implements UseCase<SizeChartEntity, GetSizeChartParams> {
   GetSizeChartUseCase(this._repository);
 
   final PdpRepository _repository;
 
   @override
   Future<Either<Failure, SizeChartEntity>> call(GetSizeChartParams params) {
-    return _repository.getSizeChart(params.productId, cancelToken: params.cancelToken);
+    return _repository.getSizeChart(
+      params.productId,
+      cancelToken: params.cancelToken,
+    );
   }
 }
 

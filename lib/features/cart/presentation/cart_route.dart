@@ -7,7 +7,7 @@ import 'pages/cart_page.dart';
 class CartRoute {
   static GoRoute getRoute(GlobalKey<NavigatorState> rootKey) => GoRoute(
     path: RouteNames.cart,
-    name: RouteNames.cart,
+    name: RouteNames.cartName,
     parentNavigatorKey: rootKey,
     builder: (context, state) => const CartPage(),
   );

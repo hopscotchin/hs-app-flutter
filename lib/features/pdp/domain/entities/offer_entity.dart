@@ -1,40 +1,24 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'offer_entity.freezed.dart';
+
 /// Represents a single coupon/offer on the PDP.
-class OfferEntity {
-  const OfferEntity({
-    this.couponCode,
-    this.header,
-    this.description,
-    this.displayCoupon = true,
-    this.copyCoupon = true,
-  });
+@freezed
+abstract class OfferEntity with _$OfferEntity {
+  const factory OfferEntity({
+    /// Promo/coupon code, e.g. "10OFF".
+    String? couponCode,
 
-  /// Promo/coupon code, e.g. "10OFF".
-  final String? couponCode;
+    /// Bold headline text, e.g. "Get flat 10% off".
+    String? header,
 
-  /// Bold headline text, e.g. "Get flat 10% off".
-  final String? header;
+    /// Body description, e.g. "Add this promo code to get flat 10% off upto ₹100".
+    String? description,
 
-  /// Body description, e.g. "Add this promo code to get flat 10% off upto ₹100".
-  final String? description;
+    /// Whether to show the coupon code chip.
+    @Default(true) bool displayCoupon,
 
-  /// Whether to show the coupon code chip.
-  final bool displayCoupon;
-
-  /// Whether the Copy button is active.
-  final bool copyCoupon;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is OfferEntity &&
-          runtimeType == other.runtimeType &&
-          couponCode == other.couponCode &&
-          header == other.header &&
-          description == other.description &&
-          displayCoupon == other.displayCoupon &&
-          copyCoupon == other.copyCoupon;
-
-  @override
-  int get hashCode =>
-      Object.hash(couponCode, header, description, displayCoupon, copyCoupon);
+    /// Whether the Copy button is active.
+    @Default(true) bool copyCoupon,
+  }) = _OfferEntity;
 }

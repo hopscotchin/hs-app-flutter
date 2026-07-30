@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/home/home_component_click_handlers.dart';
+import '../../core/analytics/home/home_track_analytic_manager.dart';
+import '../../core/di/injection.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/colors.dart';
 import '../../core/constants/strings/auto_test_strings.dart';
@@ -55,8 +58,9 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
     if (prefix == null) return null;
     return ValueKey('${prefix}_${HomeComponentTestStrings.tiles}_$i');
   }
+
   int get _durationMs => widget.heroData.viewConfig?.scrollDuration ?? 3000;
-  double get _cornerRadius => widget.heroData.viewConfig?.imageCornerRadius ?? 4;
+  double get _cornerRadius => widget.heroData.viewConfig?.imageCornerRadius ?? 0;
 
   @override
   bool get wantKeepAlive => true;
@@ -167,7 +171,13 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
                     padding: EdgeInsets.symmetric(horizontal: tilePadding),
                     child: GestureDetector(
                       key: _tileKey(tileIndex),
-                      onTap: () => ActionUrlHandler.navigate(context, tile.actionUri),
+                      onTap: () async {
+                        await sl<HomeTrackAnalyticManager>()
+                            .onHeroTileTapped(widget.heroData, tile);
+                        if (context.mounted) {
+                          ActionUrlHandler.navigate(context, tile.actionUri);
+                        }
+                      },
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(_cornerRadius),
                         child: CachedImageWidget(

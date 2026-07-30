@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../components/atoms/custom_image.dart';
 import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
-import '../../../../core/constants/strings/discover_strings.dart';
-import '../../../../core/cubits/cart_count_cubit.dart';
-import '../../../../core/cubits/shop_the_look_cubit.dart';
-import '../../../../core/theme/colors.dart';
+import '../../../../core/constants/image_constants.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 import '../../../discover/domain/entities/home_page_entity.dart';
@@ -62,42 +60,10 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ShopTheLookCubit, ShopTheLookCartState>(
-      listenWhen: (prev, curr) =>
-          prev.status == ShopTheLookCartStatus.loading &&
-          curr.status != ShopTheLookCartStatus.loading,
-      listener: (context, state) {
-        if (state.status == ShopTheLookCartStatus.success) {
-          if (state.cartItemQty != null) {
-            context.read<CartCountCubit>().set(state.cartItemQty!);
-          }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                DiscoverStrings.itemsAddedToBag(state.addedCount),
-              ),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        } else if (state.status == ShopTheLookCartStatus.failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                state.errorMessage ?? DiscoverStrings.failedToAddItemsToBag,
-              ),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      },
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              size: 20,
-              color: AppColors.neutralBlack,
-            ),
+            icon: const CustomImage(path: ImageConstants.arrowBack, height: 16),
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: BlocSelector<LandingPageBloc, LandingPageState, String>(
@@ -168,7 +134,6 @@ class _LandingPageState extends State<LandingPage> {
             return const SizedBox.shrink();
           },
         ),
-      ),
     );
   }
 

@@ -274,3 +274,63 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Text | `address_form_discard_bottomsheet_description` | — | `add_address_page.dart` |
 | Button | `address_form_discard_bottomsheet_stay_button` | — | `add_address_page.dart` |
 | Button | `address_form_discard_bottomsheet_discard_button` | — | `add_address_page.dart` |
+
+## Pdp
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Button | `pdp_appbar_back_button` | — | `pdp_appbar.dart` |
+| Button | `pdp_appbar_wishlist_button` | — | `pdp_appbar.dart` |
+| Button | `pdp_appbar_cart_button` | — | `pdp_appbar.dart` |
+| Text | `pdp_product_name_text_field` | — | `pdp_brand_price.dart` |
+| Button | `pdp_share_button` | — | `pdp_brand_price.dart` |
+| Button | `pdp_wishlist_button` | — | `pdp_brand_price.dart` |
+| Tile | `pdp_color_variant_<i>` | `pdp_color_variant_0`, `pdp_color_variant_1` | `pdp_color_variants.dart` |
+| Button | `pdp_size_chart_button` | — | `pdp_size_selector.dart` |
+| Chip | `pdp_size_chip_<i>` | `pdp_size_chip_0`, `pdp_size_chip_1` | `pdp_size_selector.dart` |
+| Title | `pdp_delivery_title` | — | `pdp_delivery_info.dart` |
+| Button | `pdp_enter_pincode_button` | — | `pdp_delivery_info.dart` |
+| Button | `pdp_change_pincode_button` | — | `pdp_delivery_info.dart` |
+| Title | `pdp_offers_title` | — | `pdp_offers.dart` |
+| Card | `pdp_offer_card_<i>` | `pdp_offer_card_0`, `pdp_offer_card_1` | `pdp_offers.dart` |
+| Button | `pdp_offer_card_<i>_copy` | `pdp_offer_card_0_copy`, `pdp_offer_card_1_copy` | `pdp_offers.dart` |
+| Title | `pdp_product_details_title` | — | `pdp_product_details.dart` |
+| Tab | `pdp_detail_tab_<i>` | `pdp_detail_tab_0`, `pdp_detail_tab_1` | `pdp_product_details.dart` |
+| Button | `pdp_add_to_bag_button` | — | `pdp_content.dart` |
+| Button | `pdp_buy_now_button` | — | `pdp_content.dart` |
+| Button | `pdp_docked_add_to_bag_button` | — | `pdp_content.dart` |
+| Button | `pdp_docked_buy_now_button` | — | `pdp_content.dart` |
+| Button | `pdp_scroll_to_top_button` | — | `pdp_content.dart` |
+| Title | `pdp_recommended_title` | — | `pdp_recommended_products.dart` |
+| Element | `pdp_recommended_row_<r>_tiles_<i>` | `pdp_recommended_row_<r>_tiles_0`, `pdp_recommended_row_<r>_tiles_1` | `pdp_recommended_products.dart` |
+| Element | `pdp_recently_viewed_tiles_<i>` | `pdp_recently_viewed_tiles_0`, `pdp_recently_viewed_tiles_1` | `pdp_recently_viewed.dart` |
+| Title | `pdp_size_sheet_title` | — | `pdp_size_selection_bottom_sheet.dart` |
+| Button | `pdp_size_sheet_size_chart_button` | — | `pdp_size_selection_bottom_sheet.dart` |
+| Chip | `pdp_size_sheet_chip_<i>` | `pdp_size_sheet_chip_0`, `pdp_size_sheet_chip_1` | `pdp_size_selection_bottom_sheet.dart` |
+| Button | `pdp_size_sheet_confirm_button` | — | `pdp_size_selection_bottom_sheet.dart` |
+| Title | `pdp_size_chart_sheet_title` | — | `pdp_size_chart_bottom_sheet.dart` |
+| Button | `pdp_size_chart_sheet_close_button` | — | `pdp_size_chart_bottom_sheet.dart` |
+| Button | `pdp_gallery_back_button` | — | `pdp_fullscreen_gallery_page.dart` |
+| View | `pdp_error_view` | — | `pdp_error_view.dart` |
+| Button | `pdp_error_explore_button` | — | `pdp_error_view.dart` |
+| Indicator | `pdp_carousel_dot_indicator` | — | `pdp_image_carousel.dart` |
+| Indicator | `pdp_gallery_dot_indicator` | — | `pdp_fullscreen_gallery_page.dart` |
+| Indicator | `pdp_offers_indicator` | — | `pdp_offers.dart` |
+| Indicator | `pdp_size_chart_table_indicator_<chart>` | `pdp_size_chart_table_indicator_<chart>` | `pdp_size_chart_bottom_sheet.dart` |
+| Decoration | `pdp_sheet_lip` | — | `pdp_content.dart` |
+| Divider | `pdp_delivery_divider` | — | `pdp_delivery_info.dart` |
+| Divider | `pdp_detail_tab_<i>_divider` | `pdp_detail_tab_0_divider`, `pdp_detail_tab_1_divider` | `pdp_product_details.dart` |
+| Image | `pdp_carousel_image_<i>` | `pdp_carousel_image_0`, `pdp_carousel_image_1` | `pdp_image_carousel.dart` |
+| Image | `pdp_gallery_image_<i>` | `pdp_gallery_image_0`, `pdp_gallery_image_1` | `pdp_fullscreen_gallery_page.dart` |
+| Badge | `pdp_visual_cue_badge` | — | `pdp_image_carousel.dart` |
+| Text | `pdp_selling_price_text` | — | `pdp_brand_price.dart` |
+| Text | `pdp_mrp_text` | — | `pdp_brand_price.dart` |
+| Text | `pdp_discount_text` | — | `pdp_brand_price.dart` |
+| Text | `pdp_price_callout_text` | — | `pdp_brand_price.dart` |
+| Text | `pdp_size_sheet_selling_price_text` | — | `pdp_size_selection_bottom_sheet.dart` |
+| Text | `pdp_size_sheet_mrp_text` | — | `pdp_size_selection_bottom_sheet.dart` |
+| Text | `pdp_size_sheet_discount_text` | — | `pdp_size_selection_bottom_sheet.dart` |
+| Button | `pdp_size_chart_unit_button_<chart>_<unit>` | `pdp_size_chart_unit_button_<chart>_<unit>` | `pdp_size_chart_bottom_sheet.dart` |
+| Header | `pdp_size_chart_header_<chart>_<col>` | `pdp_size_chart_header_<chart>_<col>` | `pdp_size_chart_bottom_sheet.dart` |
+| Cell | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_bottom_sheet.dart` |
+| Loading | `pdp_recommended_loading` | — | `pdp_recommended_products.dart` |

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,8 +8,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/components/spring/spring_bottom_nav_bar.dart';
+import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
+import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.dart';
+import 'package:hs_app_flutter/core/analytics/state/checkout_timer.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
+import 'package:hs_app_flutter/core/di/injection.dart';
+import 'package:hs_app_flutter/core/router/navigation_observer.dart';
 import 'package:hs_app_flutter/features/account/presentation/bloc/account_bloc.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -24,7 +30,8 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserver {
+class _DashboardPageState extends State<DashboardPage>
+    with WidgetsBindingObserver {
   static const double _navHeight = 64;
   static const double _navTileRadius = 18;
   static const double _navIconSize = 18;
@@ -66,6 +73,14 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     super.initState();
     _navIndex = _branchToNavIndex(widget.navigationShell.currentIndex);
     WidgetsBinding.instance.addObserver(this);
+    // Publish the initial funnel so the nav observer knows what to restore
+    // to when a pushed route (LP/PDP/cart/…) later pops back to the shell.
+    _publishActiveFunnel(_navIndex);
+  }
+
+  void _publishActiveFunnel(int navIndex) {
+    final funnel = _funnelForNavIndex(navIndex);
+    if (funnel != null) sl<AppNavigationObserver>().setActiveFunnel(funnel);
   }
 
   @override
@@ -87,26 +102,31 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     super.dispose();
   }
 
-  // DateTime? _lastResumedTime;
+  void _flushCarouselScrolls() {
+    unawaited(sl<HomeTrackAnalyticManager>().flushCarouselScrolls());
+  }
+
+  /// Map nav-bar index → funnel value. Search (nav 2) opens a pushed route
+  /// so the observer handles its funnel on push — Dashboard skips it here.
+  String? _funnelForNavIndex(int navIndex) => switch (navIndex) {
+    0 => FromScreens.discover,
+    1 => FromScreens.categories,
+    3 => FromScreens.account,
+    _ => null,
+  };
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // if (state == AppLifecycleState.resumed) {
-    //   final now = DateTime.now();
-
-    //   if (_lastResumedTime == null ||
-    //       now.difference(_lastResumedTime!) > const Duration(seconds: 5)) {
-    //     final currentIndex = widget.navigationShell.currentIndex;
-    //     _onTabResume(context, currentIndex);
-
-    //     _lastResumedTime = now;
-    //   }
-    // }
-
-    // below is enough if we don;t want to limit the refresh frequency, but it may cause too many refreshes when user switch between apps quickly
-
     if (state == AppLifecycleState.resumed) {
+      // Accumulate the just-finished background stint onto the checkout
+      // funnel's `background_time`. Guarded inside CheckoutTimer against
+      // a stray resume with no prior pause.
+      sl<CheckoutTimer>().setBackgroundEnd();
       _onTabResume(context, _navIndex);
+    } else if (state == AppLifecycleState.paused) {
+      // Anchor pause start for checkout funnel `background_time`.
+      sl<CheckoutTimer>().setBackgroundStart();
+      if (_navIndex == _kDiscoverNavIndex) _flushCarouselScrolls();
     }
   }
 
@@ -221,6 +241,10 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     // is isolated from the Dashboard tree rebuild driven by the setState.
     _navVisible.value = true;
     _onTabResume(context, navIndex);
+    // Publish the new funnel — the observer flushes pending carousel scrolls
+    // and clears LP attribution as part of applying it, so no explicit calls
+    // are needed here.
+    _publishActiveFunnel(navIndex);
     final branchIndex = _navToBranchIndex(navIndex);
     widget.navigationShell.goBranch(
       branchIndex,

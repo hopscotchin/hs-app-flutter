@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/home/home_component_click_handlers.dart';
+import '../../core/analytics/home/home_track_analytic_manager.dart';
 import '../../core/constants/strings/auto_test_strings.dart';
 import '../../core/constants/strings/discover_strings.dart';
+import '../../core/constants/strings/login_redirects.dart';
+import '../../core/entities/message_bar_entity.dart';
+import '../../core/di/injection.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/spacing.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
@@ -110,11 +115,24 @@ class ProductGridWidget extends StatelessWidget {
             _tileSubKey(index, '${HomeComponentTestStrings.tileVisualCueSuffix}_$j'),
         showProductInfo: showInfo,
         isWishlisted: wished,
-        onTap: () => ActionUrlHandler.navigate(context, item.actionUri, title: item.name),
+        onTap: () async {
+          await sl<HomeTrackAnalyticManager>()
+              .onProductGridTileTapped(gridData, item);
+          if (context.mounted) {
+            ActionUrlHandler.navigate(context, item.actionUri, title: item.name);
+          }
+        },
         onWishlistTap: () => WishlistActions.toggle(
           context,
           productId: item.id.toString(),
           price: WishlistActions.priceToInt(item.price?.sellingPrice),
+          loggedOutMessageBars: const [
+            MessageBarEntity(
+              text: LoginRedirects.redirectAddToWishlist,
+              type: 'info',
+              hasIcon: true,
+            ),
+          ],
         ),
       ),
     );

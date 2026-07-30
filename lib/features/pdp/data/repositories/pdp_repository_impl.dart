@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:injectable/injectable.dart';
 
@@ -30,7 +31,9 @@ class PdpRepositoryImpl with SafeApiCall implements PdpRepository {
     int productId, {
     CancelToken? cancelToken,
   }) {
-    if (dotenv.env['PDP_USE_MOCK'] == 'true') return Future.value(Right(pdpMockEntity));
+    if (kDebugMode && dotenv.env['PDP_USE_MOCK'] == 'true') {
+      return Future.value(Right(pdpMockEntity));
+    }
     return safeApiCall(_networkInfo, () async {
       final response = await _api.getProductDetails(
         productId: productId,
@@ -46,7 +49,7 @@ class PdpRepositoryImpl with SafeApiCall implements PdpRepository {
     required int pageNo,
     CancelToken? cancelToken,
   }) {
-    if (dotenv.env['PDP_USE_MOCK'] == 'true') {
+    if (kDebugMode && dotenv.env['PDP_USE_MOCK'] == 'true') {
       return Future.value(Right(pdpRecommendationsMockEntity));
     }
     return safeApiCall(_networkInfo, () async {
@@ -78,7 +81,10 @@ class PdpRepositoryImpl with SafeApiCall implements PdpRepository {
     int productId, {
     CancelToken? cancelToken,
   }) => safeApiCall(_networkInfo, () async {
-    final response = await _api.getSizeChart(productId: productId, cancelToken: cancelToken);
+    final response = await _api.getSizeChart(
+      productId: productId,
+      cancelToken: cancelToken,
+    );
     return response.toEntity();
   });
 }

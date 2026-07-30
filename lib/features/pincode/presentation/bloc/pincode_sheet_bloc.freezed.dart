@@ -55,7 +55,7 @@ extension PincodeSheetEventPatterns on PincodeSheetEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( OpenPincodeSheet value)?  open,TResult Function( SelectPincodeAddress value)?  selectAddress,TResult Function( FocusPincodeInput value)?  focusInput,TResult Function( PincodeInputChanged value)?  pincodeChanged,TResult Function( ApplyPincode value)?  apply,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( OpenPincodeSheet value)?  open,TResult Function( SelectPincodeAddress value)?  selectAddress,TResult Function( FocusPincodeInput value)?  focusInput,TResult Function( PincodeInputChanged value)?  pincodeChanged,TResult Function( ApplyPincode value)?  apply,TResult Function( PdpVerifyFailed value)?  pdpVerifyFailed,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case OpenPincodeSheet() when open != null:
@@ -63,7 +63,8 @@ return open(_that);case SelectPincodeAddress() when selectAddress != null:
 return selectAddress(_that);case FocusPincodeInput() when focusInput != null:
 return focusInput(_that);case PincodeInputChanged() when pincodeChanged != null:
 return pincodeChanged(_that);case ApplyPincode() when apply != null:
-return apply(_that);case _:
+return apply(_that);case PdpVerifyFailed() when pdpVerifyFailed != null:
+return pdpVerifyFailed(_that);case _:
   return orElse();
 
 }
@@ -81,7 +82,7 @@ return apply(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( OpenPincodeSheet value)  open,required TResult Function( SelectPincodeAddress value)  selectAddress,required TResult Function( FocusPincodeInput value)  focusInput,required TResult Function( PincodeInputChanged value)  pincodeChanged,required TResult Function( ApplyPincode value)  apply,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( OpenPincodeSheet value)  open,required TResult Function( SelectPincodeAddress value)  selectAddress,required TResult Function( FocusPincodeInput value)  focusInput,required TResult Function( PincodeInputChanged value)  pincodeChanged,required TResult Function( ApplyPincode value)  apply,required TResult Function( PdpVerifyFailed value)  pdpVerifyFailed,}){
 final _that = this;
 switch (_that) {
 case OpenPincodeSheet():
@@ -89,7 +90,8 @@ return open(_that);case SelectPincodeAddress():
 return selectAddress(_that);case FocusPincodeInput():
 return focusInput(_that);case PincodeInputChanged():
 return pincodeChanged(_that);case ApplyPincode():
-return apply(_that);}
+return apply(_that);case PdpVerifyFailed():
+return pdpVerifyFailed(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -103,7 +105,7 @@ return apply(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( OpenPincodeSheet value)?  open,TResult? Function( SelectPincodeAddress value)?  selectAddress,TResult? Function( FocusPincodeInput value)?  focusInput,TResult? Function( PincodeInputChanged value)?  pincodeChanged,TResult? Function( ApplyPincode value)?  apply,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( OpenPincodeSheet value)?  open,TResult? Function( SelectPincodeAddress value)?  selectAddress,TResult? Function( FocusPincodeInput value)?  focusInput,TResult? Function( PincodeInputChanged value)?  pincodeChanged,TResult? Function( ApplyPincode value)?  apply,TResult? Function( PdpVerifyFailed value)?  pdpVerifyFailed,}){
 final _that = this;
 switch (_that) {
 case OpenPincodeSheet() when open != null:
@@ -111,7 +113,8 @@ return open(_that);case SelectPincodeAddress() when selectAddress != null:
 return selectAddress(_that);case FocusPincodeInput() when focusInput != null:
 return focusInput(_that);case PincodeInputChanged() when pincodeChanged != null:
 return pincodeChanged(_that);case ApplyPincode() when apply != null:
-return apply(_that);case _:
+return apply(_that);case PdpVerifyFailed() when pdpVerifyFailed != null:
+return pdpVerifyFailed(_that);case _:
   return null;
 
 }
@@ -128,14 +131,15 @@ return apply(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( PincodeSheetSource source)?  open,TResult Function( int addressId)?  selectAddress,TResult Function()?  focusInput,TResult Function( String pincode)?  pincodeChanged,TResult Function()?  apply,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( PincodeSheetSource source)?  open,TResult Function( int addressId)?  selectAddress,TResult Function()?  focusInput,TResult Function( String pincode)?  pincodeChanged,TResult Function()?  apply,TResult Function( String? pincodeError)?  pdpVerifyFailed,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case OpenPincodeSheet() when open != null:
 return open(_that.source);case SelectPincodeAddress() when selectAddress != null:
 return selectAddress(_that.addressId);case FocusPincodeInput() when focusInput != null:
 return focusInput();case PincodeInputChanged() when pincodeChanged != null:
 return pincodeChanged(_that.pincode);case ApplyPincode() when apply != null:
-return apply();case _:
+return apply();case PdpVerifyFailed() when pdpVerifyFailed != null:
+return pdpVerifyFailed(_that.pincodeError);case _:
   return orElse();
 
 }
@@ -153,14 +157,15 @@ return apply();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( PincodeSheetSource source)  open,required TResult Function( int addressId)  selectAddress,required TResult Function()  focusInput,required TResult Function( String pincode)  pincodeChanged,required TResult Function()  apply,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( PincodeSheetSource source)  open,required TResult Function( int addressId)  selectAddress,required TResult Function()  focusInput,required TResult Function( String pincode)  pincodeChanged,required TResult Function()  apply,required TResult Function( String? pincodeError)  pdpVerifyFailed,}) {final _that = this;
 switch (_that) {
 case OpenPincodeSheet():
 return open(_that.source);case SelectPincodeAddress():
 return selectAddress(_that.addressId);case FocusPincodeInput():
 return focusInput();case PincodeInputChanged():
 return pincodeChanged(_that.pincode);case ApplyPincode():
-return apply();}
+return apply();case PdpVerifyFailed():
+return pdpVerifyFailed(_that.pincodeError);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -174,14 +179,15 @@ return apply();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( PincodeSheetSource source)?  open,TResult? Function( int addressId)?  selectAddress,TResult? Function()?  focusInput,TResult? Function( String pincode)?  pincodeChanged,TResult? Function()?  apply,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( PincodeSheetSource source)?  open,TResult? Function( int addressId)?  selectAddress,TResult? Function()?  focusInput,TResult? Function( String pincode)?  pincodeChanged,TResult? Function()?  apply,TResult? Function( String? pincodeError)?  pdpVerifyFailed,}) {final _that = this;
 switch (_that) {
 case OpenPincodeSheet() when open != null:
 return open(_that.source);case SelectPincodeAddress() when selectAddress != null:
 return selectAddress(_that.addressId);case FocusPincodeInput() when focusInput != null:
 return focusInput();case PincodeInputChanged() when pincodeChanged != null:
 return pincodeChanged(_that.pincode);case ApplyPincode() when apply != null:
-return apply();case _:
+return apply();case PdpVerifyFailed() when pdpVerifyFailed != null:
+return pdpVerifyFailed(_that.pincodeError);case _:
   return null;
 
 }
@@ -452,9 +458,76 @@ String toString() {
 
 
 /// @nodoc
+
+
+class PdpVerifyFailed implements PincodeSheetEvent {
+  const PdpVerifyFailed(this.pincodeError);
+  
+
+ final  String? pincodeError;
+
+/// Create a copy of PincodeSheetEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PdpVerifyFailedCopyWith<PdpVerifyFailed> get copyWith => _$PdpVerifyFailedCopyWithImpl<PdpVerifyFailed>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PdpVerifyFailed&&(identical(other.pincodeError, pincodeError) || other.pincodeError == pincodeError));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,pincodeError);
+
+@override
+String toString() {
+  return 'PincodeSheetEvent.pdpVerifyFailed(pincodeError: $pincodeError)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $PdpVerifyFailedCopyWith<$Res> implements $PincodeSheetEventCopyWith<$Res> {
+  factory $PdpVerifyFailedCopyWith(PdpVerifyFailed value, $Res Function(PdpVerifyFailed) _then) = _$PdpVerifyFailedCopyWithImpl;
+@useResult
+$Res call({
+ String? pincodeError
+});
+
+
+
+
+}
+/// @nodoc
+class _$PdpVerifyFailedCopyWithImpl<$Res>
+    implements $PdpVerifyFailedCopyWith<$Res> {
+  _$PdpVerifyFailedCopyWithImpl(this._self, this._then);
+
+  final PdpVerifyFailed _self;
+  final $Res Function(PdpVerifyFailed) _then;
+
+/// Create a copy of PincodeSheetEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? pincodeError = freezed,}) {
+  return _then(PdpVerifyFailed(
+freezed == pincodeError ? _self.pincodeError : pincodeError // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$PincodeSheetState {
 
- PincodeSheetStatus get status; PincodeSheetSource get source; List<AddressEntity> get addresses; int? get selectedAddressId; String get enteredPincode; String? get lastCheckedValidPincode; bool get isChecking; List<MessageBarEntity> get messageBars; String? get toastMessage; String? get popResult;
+ PincodeSheetStatus get status; PincodeSheetSource get source; List<AddressEntity> get addresses; int? get selectedAddressId; String get enteredPincode; String? get lastCheckedValidPincode; bool get isChecking; List<MessageBarEntity> get messageBars;// PDP-only: plain inline error shown when the product-aware verify fails.
+ String? get pincodeError; String? get toastMessage; String? get popResult;
 /// Create a copy of PincodeSheetState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -465,16 +538,16 @@ $PincodeSheetStateCopyWith<PincodeSheetState> get copyWith => _$PincodeSheetStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PincodeSheetState&&(identical(other.status, status) || other.status == status)&&(identical(other.source, source) || other.source == source)&&const DeepCollectionEquality().equals(other.addresses, addresses)&&(identical(other.selectedAddressId, selectedAddressId) || other.selectedAddressId == selectedAddressId)&&(identical(other.enteredPincode, enteredPincode) || other.enteredPincode == enteredPincode)&&(identical(other.lastCheckedValidPincode, lastCheckedValidPincode) || other.lastCheckedValidPincode == lastCheckedValidPincode)&&(identical(other.isChecking, isChecking) || other.isChecking == isChecking)&&const DeepCollectionEquality().equals(other.messageBars, messageBars)&&(identical(other.toastMessage, toastMessage) || other.toastMessage == toastMessage)&&(identical(other.popResult, popResult) || other.popResult == popResult));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PincodeSheetState&&(identical(other.status, status) || other.status == status)&&(identical(other.source, source) || other.source == source)&&const DeepCollectionEquality().equals(other.addresses, addresses)&&(identical(other.selectedAddressId, selectedAddressId) || other.selectedAddressId == selectedAddressId)&&(identical(other.enteredPincode, enteredPincode) || other.enteredPincode == enteredPincode)&&(identical(other.lastCheckedValidPincode, lastCheckedValidPincode) || other.lastCheckedValidPincode == lastCheckedValidPincode)&&(identical(other.isChecking, isChecking) || other.isChecking == isChecking)&&const DeepCollectionEquality().equals(other.messageBars, messageBars)&&(identical(other.pincodeError, pincodeError) || other.pincodeError == pincodeError)&&(identical(other.toastMessage, toastMessage) || other.toastMessage == toastMessage)&&(identical(other.popResult, popResult) || other.popResult == popResult));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,source,const DeepCollectionEquality().hash(addresses),selectedAddressId,enteredPincode,lastCheckedValidPincode,isChecking,const DeepCollectionEquality().hash(messageBars),toastMessage,popResult);
+int get hashCode => Object.hash(runtimeType,status,source,const DeepCollectionEquality().hash(addresses),selectedAddressId,enteredPincode,lastCheckedValidPincode,isChecking,const DeepCollectionEquality().hash(messageBars),pincodeError,toastMessage,popResult);
 
 @override
 String toString() {
-  return 'PincodeSheetState(status: $status, source: $source, addresses: $addresses, selectedAddressId: $selectedAddressId, enteredPincode: $enteredPincode, lastCheckedValidPincode: $lastCheckedValidPincode, isChecking: $isChecking, messageBars: $messageBars, toastMessage: $toastMessage, popResult: $popResult)';
+  return 'PincodeSheetState(status: $status, source: $source, addresses: $addresses, selectedAddressId: $selectedAddressId, enteredPincode: $enteredPincode, lastCheckedValidPincode: $lastCheckedValidPincode, isChecking: $isChecking, messageBars: $messageBars, pincodeError: $pincodeError, toastMessage: $toastMessage, popResult: $popResult)';
 }
 
 
@@ -485,7 +558,7 @@ abstract mixin class $PincodeSheetStateCopyWith<$Res>  {
   factory $PincodeSheetStateCopyWith(PincodeSheetState value, $Res Function(PincodeSheetState) _then) = _$PincodeSheetStateCopyWithImpl;
 @useResult
 $Res call({
- PincodeSheetStatus status, PincodeSheetSource source, List<AddressEntity> addresses, int? selectedAddressId, String enteredPincode, String? lastCheckedValidPincode, bool isChecking, List<MessageBarEntity> messageBars, String? toastMessage, String? popResult
+ PincodeSheetStatus status, PincodeSheetSource source, List<AddressEntity> addresses, int? selectedAddressId, String enteredPincode, String? lastCheckedValidPincode, bool isChecking, List<MessageBarEntity> messageBars, String? pincodeError, String? toastMessage, String? popResult
 });
 
 
@@ -502,7 +575,7 @@ class _$PincodeSheetStateCopyWithImpl<$Res>
 
 /// Create a copy of PincodeSheetState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? source = null,Object? addresses = null,Object? selectedAddressId = freezed,Object? enteredPincode = null,Object? lastCheckedValidPincode = freezed,Object? isChecking = null,Object? messageBars = null,Object? toastMessage = freezed,Object? popResult = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? source = null,Object? addresses = null,Object? selectedAddressId = freezed,Object? enteredPincode = null,Object? lastCheckedValidPincode = freezed,Object? isChecking = null,Object? messageBars = null,Object? pincodeError = freezed,Object? toastMessage = freezed,Object? popResult = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as PincodeSheetStatus,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
@@ -512,7 +585,8 @@ as int?,enteredPincode: null == enteredPincode ? _self.enteredPincode : enteredP
 as String,lastCheckedValidPincode: freezed == lastCheckedValidPincode ? _self.lastCheckedValidPincode : lastCheckedValidPincode // ignore: cast_nullable_to_non_nullable
 as String?,isChecking: null == isChecking ? _self.isChecking : isChecking // ignore: cast_nullable_to_non_nullable
 as bool,messageBars: null == messageBars ? _self.messageBars : messageBars // ignore: cast_nullable_to_non_nullable
-as List<MessageBarEntity>,toastMessage: freezed == toastMessage ? _self.toastMessage : toastMessage // ignore: cast_nullable_to_non_nullable
+as List<MessageBarEntity>,pincodeError: freezed == pincodeError ? _self.pincodeError : pincodeError // ignore: cast_nullable_to_non_nullable
+as String?,toastMessage: freezed == toastMessage ? _self.toastMessage : toastMessage // ignore: cast_nullable_to_non_nullable
 as String?,popResult: freezed == popResult ? _self.popResult : popResult // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -599,10 +673,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PincodeSheetStatus status,  PincodeSheetSource source,  List<AddressEntity> addresses,  int? selectedAddressId,  String enteredPincode,  String? lastCheckedValidPincode,  bool isChecking,  List<MessageBarEntity> messageBars,  String? toastMessage,  String? popResult)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PincodeSheetStatus status,  PincodeSheetSource source,  List<AddressEntity> addresses,  int? selectedAddressId,  String enteredPincode,  String? lastCheckedValidPincode,  bool isChecking,  List<MessageBarEntity> messageBars,  String? pincodeError,  String? toastMessage,  String? popResult)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PincodeSheetState() when $default != null:
-return $default(_that.status,_that.source,_that.addresses,_that.selectedAddressId,_that.enteredPincode,_that.lastCheckedValidPincode,_that.isChecking,_that.messageBars,_that.toastMessage,_that.popResult);case _:
+return $default(_that.status,_that.source,_that.addresses,_that.selectedAddressId,_that.enteredPincode,_that.lastCheckedValidPincode,_that.isChecking,_that.messageBars,_that.pincodeError,_that.toastMessage,_that.popResult);case _:
   return orElse();
 
 }
@@ -620,10 +694,10 @@ return $default(_that.status,_that.source,_that.addresses,_that.selectedAddressI
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PincodeSheetStatus status,  PincodeSheetSource source,  List<AddressEntity> addresses,  int? selectedAddressId,  String enteredPincode,  String? lastCheckedValidPincode,  bool isChecking,  List<MessageBarEntity> messageBars,  String? toastMessage,  String? popResult)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PincodeSheetStatus status,  PincodeSheetSource source,  List<AddressEntity> addresses,  int? selectedAddressId,  String enteredPincode,  String? lastCheckedValidPincode,  bool isChecking,  List<MessageBarEntity> messageBars,  String? pincodeError,  String? toastMessage,  String? popResult)  $default,) {final _that = this;
 switch (_that) {
 case _PincodeSheetState():
-return $default(_that.status,_that.source,_that.addresses,_that.selectedAddressId,_that.enteredPincode,_that.lastCheckedValidPincode,_that.isChecking,_that.messageBars,_that.toastMessage,_that.popResult);case _:
+return $default(_that.status,_that.source,_that.addresses,_that.selectedAddressId,_that.enteredPincode,_that.lastCheckedValidPincode,_that.isChecking,_that.messageBars,_that.pincodeError,_that.toastMessage,_that.popResult);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -640,10 +714,10 @@ return $default(_that.status,_that.source,_that.addresses,_that.selectedAddressI
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PincodeSheetStatus status,  PincodeSheetSource source,  List<AddressEntity> addresses,  int? selectedAddressId,  String enteredPincode,  String? lastCheckedValidPincode,  bool isChecking,  List<MessageBarEntity> messageBars,  String? toastMessage,  String? popResult)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PincodeSheetStatus status,  PincodeSheetSource source,  List<AddressEntity> addresses,  int? selectedAddressId,  String enteredPincode,  String? lastCheckedValidPincode,  bool isChecking,  List<MessageBarEntity> messageBars,  String? pincodeError,  String? toastMessage,  String? popResult)?  $default,) {final _that = this;
 switch (_that) {
 case _PincodeSheetState() when $default != null:
-return $default(_that.status,_that.source,_that.addresses,_that.selectedAddressId,_that.enteredPincode,_that.lastCheckedValidPincode,_that.isChecking,_that.messageBars,_that.toastMessage,_that.popResult);case _:
+return $default(_that.status,_that.source,_that.addresses,_that.selectedAddressId,_that.enteredPincode,_that.lastCheckedValidPincode,_that.isChecking,_that.messageBars,_that.pincodeError,_that.toastMessage,_that.popResult);case _:
   return null;
 
 }
@@ -655,7 +729,7 @@ return $default(_that.status,_that.source,_that.addresses,_that.selectedAddressI
 
 
 class _PincodeSheetState implements PincodeSheetState {
-  const _PincodeSheetState({this.status = PincodeSheetStatus.initial, this.source = PincodeSheetSource.cart, final  List<AddressEntity> addresses = const <AddressEntity>[], this.selectedAddressId, this.enteredPincode = '', this.lastCheckedValidPincode, this.isChecking = false, final  List<MessageBarEntity> messageBars = const <MessageBarEntity>[], this.toastMessage, this.popResult}): _addresses = addresses,_messageBars = messageBars;
+  const _PincodeSheetState({this.status = PincodeSheetStatus.initial, this.source = PincodeSheetSource.cart, final  List<AddressEntity> addresses = const <AddressEntity>[], this.selectedAddressId, this.enteredPincode = '', this.lastCheckedValidPincode, this.isChecking = false, final  List<MessageBarEntity> messageBars = const <MessageBarEntity>[], this.pincodeError, this.toastMessage, this.popResult}): _addresses = addresses,_messageBars = messageBars;
   
 
 @override@JsonKey() final  PincodeSheetStatus status;
@@ -678,6 +752,8 @@ class _PincodeSheetState implements PincodeSheetState {
   return EqualUnmodifiableListView(_messageBars);
 }
 
+// PDP-only: plain inline error shown when the product-aware verify fails.
+@override final  String? pincodeError;
 @override final  String? toastMessage;
 @override final  String? popResult;
 
@@ -691,16 +767,16 @@ _$PincodeSheetStateCopyWith<_PincodeSheetState> get copyWith => __$PincodeSheetS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PincodeSheetState&&(identical(other.status, status) || other.status == status)&&(identical(other.source, source) || other.source == source)&&const DeepCollectionEquality().equals(other._addresses, _addresses)&&(identical(other.selectedAddressId, selectedAddressId) || other.selectedAddressId == selectedAddressId)&&(identical(other.enteredPincode, enteredPincode) || other.enteredPincode == enteredPincode)&&(identical(other.lastCheckedValidPincode, lastCheckedValidPincode) || other.lastCheckedValidPincode == lastCheckedValidPincode)&&(identical(other.isChecking, isChecking) || other.isChecking == isChecking)&&const DeepCollectionEquality().equals(other._messageBars, _messageBars)&&(identical(other.toastMessage, toastMessage) || other.toastMessage == toastMessage)&&(identical(other.popResult, popResult) || other.popResult == popResult));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PincodeSheetState&&(identical(other.status, status) || other.status == status)&&(identical(other.source, source) || other.source == source)&&const DeepCollectionEquality().equals(other._addresses, _addresses)&&(identical(other.selectedAddressId, selectedAddressId) || other.selectedAddressId == selectedAddressId)&&(identical(other.enteredPincode, enteredPincode) || other.enteredPincode == enteredPincode)&&(identical(other.lastCheckedValidPincode, lastCheckedValidPincode) || other.lastCheckedValidPincode == lastCheckedValidPincode)&&(identical(other.isChecking, isChecking) || other.isChecking == isChecking)&&const DeepCollectionEquality().equals(other._messageBars, _messageBars)&&(identical(other.pincodeError, pincodeError) || other.pincodeError == pincodeError)&&(identical(other.toastMessage, toastMessage) || other.toastMessage == toastMessage)&&(identical(other.popResult, popResult) || other.popResult == popResult));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,source,const DeepCollectionEquality().hash(_addresses),selectedAddressId,enteredPincode,lastCheckedValidPincode,isChecking,const DeepCollectionEquality().hash(_messageBars),toastMessage,popResult);
+int get hashCode => Object.hash(runtimeType,status,source,const DeepCollectionEquality().hash(_addresses),selectedAddressId,enteredPincode,lastCheckedValidPincode,isChecking,const DeepCollectionEquality().hash(_messageBars),pincodeError,toastMessage,popResult);
 
 @override
 String toString() {
-  return 'PincodeSheetState(status: $status, source: $source, addresses: $addresses, selectedAddressId: $selectedAddressId, enteredPincode: $enteredPincode, lastCheckedValidPincode: $lastCheckedValidPincode, isChecking: $isChecking, messageBars: $messageBars, toastMessage: $toastMessage, popResult: $popResult)';
+  return 'PincodeSheetState(status: $status, source: $source, addresses: $addresses, selectedAddressId: $selectedAddressId, enteredPincode: $enteredPincode, lastCheckedValidPincode: $lastCheckedValidPincode, isChecking: $isChecking, messageBars: $messageBars, pincodeError: $pincodeError, toastMessage: $toastMessage, popResult: $popResult)';
 }
 
 
@@ -711,7 +787,7 @@ abstract mixin class _$PincodeSheetStateCopyWith<$Res> implements $PincodeSheetS
   factory _$PincodeSheetStateCopyWith(_PincodeSheetState value, $Res Function(_PincodeSheetState) _then) = __$PincodeSheetStateCopyWithImpl;
 @override @useResult
 $Res call({
- PincodeSheetStatus status, PincodeSheetSource source, List<AddressEntity> addresses, int? selectedAddressId, String enteredPincode, String? lastCheckedValidPincode, bool isChecking, List<MessageBarEntity> messageBars, String? toastMessage, String? popResult
+ PincodeSheetStatus status, PincodeSheetSource source, List<AddressEntity> addresses, int? selectedAddressId, String enteredPincode, String? lastCheckedValidPincode, bool isChecking, List<MessageBarEntity> messageBars, String? pincodeError, String? toastMessage, String? popResult
 });
 
 
@@ -728,7 +804,7 @@ class __$PincodeSheetStateCopyWithImpl<$Res>
 
 /// Create a copy of PincodeSheetState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? source = null,Object? addresses = null,Object? selectedAddressId = freezed,Object? enteredPincode = null,Object? lastCheckedValidPincode = freezed,Object? isChecking = null,Object? messageBars = null,Object? toastMessage = freezed,Object? popResult = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? source = null,Object? addresses = null,Object? selectedAddressId = freezed,Object? enteredPincode = null,Object? lastCheckedValidPincode = freezed,Object? isChecking = null,Object? messageBars = null,Object? pincodeError = freezed,Object? toastMessage = freezed,Object? popResult = freezed,}) {
   return _then(_PincodeSheetState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as PincodeSheetStatus,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
@@ -738,7 +814,8 @@ as int?,enteredPincode: null == enteredPincode ? _self.enteredPincode : enteredP
 as String,lastCheckedValidPincode: freezed == lastCheckedValidPincode ? _self.lastCheckedValidPincode : lastCheckedValidPincode // ignore: cast_nullable_to_non_nullable
 as String?,isChecking: null == isChecking ? _self.isChecking : isChecking // ignore: cast_nullable_to_non_nullable
 as bool,messageBars: null == messageBars ? _self._messageBars : messageBars // ignore: cast_nullable_to_non_nullable
-as List<MessageBarEntity>,toastMessage: freezed == toastMessage ? _self.toastMessage : toastMessage // ignore: cast_nullable_to_non_nullable
+as List<MessageBarEntity>,pincodeError: freezed == pincodeError ? _self.pincodeError : pincodeError // ignore: cast_nullable_to_non_nullable
+as String?,toastMessage: freezed == toastMessage ? _self.toastMessage : toastMessage // ignore: cast_nullable_to_non_nullable
 as String?,popResult: freezed == popResult ? _self.popResult : popResult // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

@@ -31,37 +31,49 @@ class CookieInterceptor extends Interceptor {
   }
 
   @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) {
-    _receiveCookies(response.requestOptions.uri, response.headers);
+  Future<void> onResponse(
+    Response response,
+    ResponseInterceptorHandler handler,
+  ) async {
+    await _receiveCookies(response.requestOptions.uri, response.headers);
     handler.next(response);
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
+  Future<void> onError(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
     if (err.response != null) {
-      _receiveCookies(err.requestOptions.uri, err.response!.headers);
+      await _receiveCookies(err.requestOptions.uri, err.response!.headers);
     }
     handler.next(err);
   }
 
-  void _receiveCookies(Uri uri, Headers headers) {
+  /// Persists Set-Cookie headers and drives cookie-based identify. Awaited by
+  /// `onResponse`/`onError` before `handler.next(...)` so the identify pipeline
+  /// (including `InjectUserInfo`, which updates `state.userInfo.userTraits`)
+  /// completes before the app receives the response. Without this,
+  /// homepage_viewed and other track events that read `context.traits` via
+  /// `ContextParityPlugin` can race the cookie-driven identify and ship
+  /// stale traits (notably `experiments`, `visitor_type`, `days_since_last_visit`).
+  Future<void> _receiveCookies(Uri uri, Headers headers) async {
     if (uri.toString().contains('latencycheck')) return;
 
     final setCookies = headers['set-cookie'];
     if (setCookies == null || setCookies.isEmpty) return;
 
-    HSCookieStore.setCookies(setCookies.toSet())
-        .then((_) {
-          CookiesBasedEventsUtil.instance.handleCookiesAndSessionStartEvent();
-        })
-        .catchError((Object e) {
-          if (kDebugMode) {
-            developer.log(
-              'Error storing cookies: $e',
-              name: 'CookieInterceptor',
-            );
-          }
-        });
+    try {
+      await HSCookieStore.setCookies(setCookies.toSet());
+      await CookiesBasedEventsUtil.instance.handleCookiesAndSessionStartEvent();
+    } catch (e) {
+      if (kDebugMode) {
+        developer.log(
+          'Error storing cookies: $e',
+          name: 'CookieInterceptor',
+        );
+      }
+    }
   }
 
   Future<void> clear() async {

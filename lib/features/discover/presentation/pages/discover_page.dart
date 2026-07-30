@@ -2,14 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
 
 import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
-import '../../../../core/constants/strings/discover_strings.dart';
-import '../../../../core/cubits/cart_count_cubit.dart';
-import '../../../../core/cubits/shop_the_look_cubit.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
+import '../../../../core/analytics/events/modules/home_events.dart';
+import '../../../../core/analytics/home/home_track_analytic_manager.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/router/navigation_observer.dart';
 import '../../domain/entities/home_page_entity.dart';
 import '../bloc/home_bloc.dart';
 import '../widgets/combined_header_delegate.dart';
@@ -51,13 +52,29 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     super.initState();
     context.read<HomeBloc>().add(const LoadHomePage());
     _scrollController.addListener(_onScroll);
+    // Re-hydrate the shared tracker with Home's pageComponents whenever
+    // Discover becomes the active funnel again (back-nav from LP/PDP/PLP,
+    // tab switch). LP overwrites the shared tracker's pageComponents on
+    // push; without this, Home would fire impressions against LP's list.
+    sl<AppNavigationObserver>().onFunnelActivated = _onFunnelActivated;
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    final observer = sl<AppNavigationObserver>();
+    if (observer.onFunnelActivated == _onFunnelActivated) {
+      observer.onFunnelActivated = null;
+    }
     super.dispose();
+  }
+
+  void _onFunnelActivated(String funnel) {
+    if (funnel != FromScreens.discover) return;
+    final components = context.read<HomeBloc>().state.homePage?.pageComponents;
+    if (components == null || components.isEmpty) return;
+    sl<HomeTrackAnalyticManager>().pageComponents = components;
   }
 
   @override
@@ -111,7 +128,16 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     // Suppress the deferred `_scrollTabsToTop` animation — switching tabs
     // shouldn't re-expose the toolbar like a re-tap does.
     _suppressScrollTabsToTop = true;
+    // Drain any pending carousel_scrolled from the old tab before its
+    // carousels get replaced.
+    unawaited(sl<HomeTrackAnalyticManager>().flushCarouselScrolls());
     setState(() => _selectedTabIndex = index);
+    _syncSortbarOnTracker();
+    if (index < _labels.length) {
+      unawaited(sl<HomeTrackAnalyticManager>()
+          .analytics
+          .logSortbarChanged(sortBar: _labels[index]));
+    }
 
     if (_scrollController.hasClients && _scrollController.position.pixels > _kToolbarHeight) {
       _scrollController.jumpTo(_kToolbarHeight);
@@ -120,6 +146,14 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     if (index < _sortOptionIds.length) {
       context.read<HomeBloc>().add(LoadHomePage(pageName: _sortOptionIds[index]));
     }
+  }
+
+  void _retryCurrentTab() {
+    final pageName =
+        (_selectedTabIndex >= 0 && _selectedTabIndex < _sortOptionIds.length)
+            ? _sortOptionIds[_selectedTabIndex]
+            : null;
+    context.read<HomeBloc>().add(LoadHomePage(pageName: pageName));
   }
 
   Future<void> _handleRefresh() {
@@ -132,39 +166,13 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
   Widget build(BuildContext context) {
     super.build(context);
 
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<ShopTheLookCubit, ShopTheLookCartState>(
-          listenWhen: (prev, curr) =>
-              prev.status == ShopTheLookCartStatus.loading &&
-              curr.status != ShopTheLookCartStatus.loading,
-          listener: (context, state) {
-            if (state.status == ShopTheLookCartStatus.success) {
-              if (state.cartItemQty != null) {
-                context.read<CartCountCubit>().set(state.cartItemQty!);
-              }
-
-              context.showSnack(
-                DiscoverStrings.itemsAddedToBag(state.addedCount),
-                status: SnackStatus.success,
-              );
-            } else if (state.status == ShopTheLookCartStatus.failure) {
-              context.showSnack(
-                state.errorMessage ?? DiscoverStrings.failedToAddItemsToBag,
-                status: SnackStatus.error,
-              );
-            }
-          },
-        ),
-        // Any full reload (pull-to-refresh / login / unlock / logout) routes
-        // through HomeStatus.loading; pagination only flips isLoadingMore. So
-        // this single transition covers every refresh trigger.
-        BlocListener<HomeBloc, HomeState>(
-          listenWhen: (prev, curr) =>
-              prev.status != HomeStatus.loading && curr.status == HomeStatus.loading,
-          listener: (context, _) => _scrollToTopOnReload(),
-        ),
-      ],
+    // Any full reload (pull-to-refresh / login / unlock / logout) routes
+    // through HomeStatus.loading; pagination only flips isLoadingMore. So
+    // this single transition covers every refresh trigger.
+    return BlocListener<HomeBloc, HomeState>(
+      listenWhen: (prev, curr) =>
+          prev.status != HomeStatus.loading && curr.status == HomeStatus.loading,
+      listener: (context, _) => _scrollToTopOnReload(),
       child: BlocBuilder<HomeBloc, HomeState>(
         // Skip rebuilds for pure-pagination flips (isLoadingMore true ↔ false).
         // The spinner sliver below has its own BlocSelector that handles
@@ -222,6 +230,19 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     _lastSortOptions = options;
     _sortOptionIds = options.map((o) => o.id).toList(growable: false);
     _labels = options.map((o) => o.label).toList(growable: false);
+    _syncSortbarOnTracker();
+  }
+
+  /// Stamps the currently-selected tab label onto both the tracker (feeds
+  /// `sortbar` on impressions / carousel_scrolled) AND the persisted order
+  /// attribution (feeds `sortbar` on every event fired with
+  /// `attribution: true`). Called on initial sortOptions load and tab change.
+  void _syncSortbarOnTracker() {
+    if (_selectedTabIndex < 0 || _selectedTabIndex >= _labels.length) return;
+    final label = _labels[_selectedTabIndex];
+    final tracker = sl<HomeTrackAnalyticManager>();
+    tracker.sortBarName = label;
+    unawaited(tracker.orderAttribution.setSortBar(label));
   }
 
   Widget _buildContentSliver(BuildContext context, HomeState state) {
@@ -237,7 +258,7 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
           child: Center(
             child: EmptyStateWidget(
               type: EmptyStateType.serverError,
-              onButtonTap: () => context.read<HomeBloc>().add(const LoadHomePage()),
+              onButtonTap: _retryCurrentTab,
             ),
           ),
         ),
@@ -253,7 +274,7 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
             child: Center(
               child: EmptyStateWidget(
                 type: EmptyStateType.discover,
-                onButtonTap: () => context.read<HomeBloc>().add(const LoadHomePage()),
+                onButtonTap: _retryCurrentTab,
               ),
             ),
           ),
@@ -261,9 +282,9 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
       }
       return SliverList(
         delegate: SliverChildBuilderDelegate(
-              (context, index) => PageComponentRenderer(
-                component: components[index],
-                index: index,
+          (context, index) => PageComponentRenderer(
+            component: components[index],
+            index: index,
             pagePrefix: HomeComponentTestStrings.homePage,
           ),
           childCount: components.length,

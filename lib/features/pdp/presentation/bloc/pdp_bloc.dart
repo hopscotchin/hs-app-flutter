@@ -49,18 +49,12 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
   final CartCountCubit cartCountCubit;
   final GetSizeChartUseCase getSizeChartUseCase;
 
-  Future<void> _onLoadProductDetails(
-    LoadProductDetails event,
-    Emitter<PdpState> emit,
-  ) async {
+  Future<void> _onLoadProductDetails(LoadProductDetails event, Emitter<PdpState> emit) async {
     emit(const PdpState(status: PdpStatus.loading));
     final token = swapCancelToken();
 
     final result = await getProductDetailsUseCase(
-      GetProductDetailsParams(
-        productId: event.productId,
-        cancelToken: token,
-      ),
+      GetProductDetailsParams(productId: event.productId, cancelToken: token),
     );
 
     result.fold(
@@ -69,37 +63,27 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
         emit(PdpState(status: PdpStatus.error, errorMessage: f.message));
       },
       (productDetail) {
-        emit(PdpState(
-          status: PdpStatus.success,
-          productDetail: productDetail,
-        ));
+        emit(PdpState(status: PdpStatus.success, productDetail: productDetail));
         add(PdpEvent.loadRecommendations(productId: event.productId));
       },
     );
   }
 
-  Future<void> _onLoadRecommendations(
-    LoadRecommendations event,
-    Emitter<PdpState> emit,
-  ) async {
+  Future<void> _onLoadRecommendations(LoadRecommendations event, Emitter<PdpState> emit) async {
     final current = state;
     if (current.status != PdpStatus.success) return;
 
     final token = swapCancelToken();
     final result = await getRecommendationsUseCase(
-      GetRecommendationsParams(
-        productId: event.productId,
-        cancelToken: token,
-      ),
+      GetRecommendationsParams(productId: event.productId, cancelToken: token),
     );
 
     result.fold(
       (f) {
         if (f is RequestCancelledFailure) return;
       },
-      (recommendations) => emit(
-        state.copyWith(recommendations: recommendations, recommendationsPage: 1),
-      ),
+      (recommendations) =>
+          emit(state.copyWith(recommendations: recommendations, recommendationsPage: 1)),
     );
   }
 
@@ -122,11 +106,7 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
 
     final token = swapCancelToken();
     final result = await getRecommendationsUseCase(
-      GetRecommendationsParams(
-        productId: productId,
-        pageNo: nextPage,
-        cancelToken: token,
-      ),
+      GetRecommendationsParams(productId: productId, pageNo: nextPage, cancelToken: token),
     );
 
     result.fold(
@@ -134,14 +114,16 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
         if (f is RequestCancelledFailure) return;
         emit(current.copyWith(isLoadingMoreRecommendations: false));
       },
-      (newPage) => emit(current.copyWith(
-        isLoadingMoreRecommendations: false,
-        recommendationsPage: nextPage,
-        recommendations: existing.copyWith(
-          records: [...existing.records, ...newPage.records],
-          pageMeta: newPage.pageMeta,
+      (newPage) => emit(
+        current.copyWith(
+          isLoadingMoreRecommendations: false,
+          recommendationsPage: nextPage,
+          recommendations: existing.copyWith(
+            records: [...existing.records, ...newPage.records],
+            pageMeta: newPage.pageMeta,
+          ),
         ),
-      )),
+      ),
     );
   }
 
@@ -159,9 +141,7 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
 
     emit(current.copyWith(isAddingToBag: true));
 
-    final result = await addToCartUseCase(
-      AddToCartParams(skuId: event.skuId),
-    );
+    final result = await addToCartUseCase(AddToCartParams(skuId: event.skuId));
 
     result.fold(
       (f) {
@@ -180,12 +160,14 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
           cartCountCubit.set(response.cartItemQty!);
         }
         final updated = _markSkuAsAddedToBag(current, event.skuId);
-        emit(updated.copyWith(
-          isAddingToBag: false,
-          snackBarTick: current.snackBarTick + 1,
-          snackBarMessage: response.message ?? 'Added to bag',
-          snackBarIsError: false,
-        ));
+        emit(
+          updated.copyWith(
+            isAddingToBag: false,
+            snackBarTick: current.snackBarTick + 1,
+            snackBarMessage: response.message ?? 'Added to bag',
+            snackBarIsError: false,
+          ),
+        );
       },
     );
   }
@@ -196,39 +178,38 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
 
     emit(current.copyWith(isBuyingNow: true));
 
-    final result = await addToCartUseCase(
-      AddToCartParams(skuId: event.skuId, fromBuyNow: true),
-    );
+    final result = await addToCartUseCase(AddToCartParams(skuId: event.skuId, fromBuyNow: true));
 
     result.fold(
       (f) {
         if (f is RequestCancelledFailure) return;
-        emit(current.copyWith(
-          isBuyingNow: false,
-          snackBarTick: current.snackBarTick + 1,
-          snackBarMessage: f.message,
-          snackBarIsError: true,
-        ));
+        emit(
+          current.copyWith(
+            isBuyingNow: false,
+            snackBarTick: current.snackBarTick + 1,
+            snackBarMessage: f.message,
+            snackBarIsError: true,
+          ),
+        );
       },
       (response) {
         if (response.cartItemQty != null) {
           cartCountCubit.set(response.cartItemQty!);
         }
         final updated = _markSkuAsAddedToBag(current, event.skuId);
-        emit(updated.copyWith(
-          isBuyingNow: false,
-          snackBarTick: current.snackBarTick + 1,
-          snackBarMessage: response.message,
-          snackBarIsError: false,
-        ));
+        emit(
+          updated.copyWith(
+            isBuyingNow: false,
+            snackBarTick: current.snackBarTick + 1,
+            snackBarMessage: response.message,
+            snackBarIsError: false,
+          ),
+        );
       },
     );
   }
 
-  Future<void> _onVerifyPincode(
-    VerifyPincode event,
-    Emitter<PdpState> emit,
-  ) async {
+  Future<void> _onVerifyPincode(VerifyPincode event, Emitter<PdpState> emit) async {
     final current = state;
     if (current.status != PdpStatus.success) return;
 
@@ -239,40 +220,42 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
     if (productId == null) return;
 
     final token = swapCancelToken();
-    final result = await verifyPincodeUseCase(
-      VerifyPincodeParams(
-        productId: productId,
-        pincode: event.pincode,
-        cancelToken: token,
-      ),
+    final result = await verifyPincodeUseCase.call(
+      VerifyPincodeParams(productId: productId, pincode: event.pincode, cancelToken: token),
     );
 
     result.fold(
       (f) {
         if (f is RequestCancelledFailure) return;
-        emit(current.copyWith(
-          snackBarTick: current.snackBarTick + 1,
-          snackBarMessage: f.message,
-          snackBarIsError: true,
-        ));
+        // Network/unknown failure — reported to the (still-open) sheet, which
+        // shows it inline and lets the user retry. Prefer server-provided bars
+        // (cart-style) when present, else wrap the plain message.
+        emit(
+          current.copyWith(
+            pincodeVerifyTick: current.pincodeVerifyTick + 1,
+            pincodeVerifyError: _pincodeError(f.message),
+          ),
+        );
       },
       (pincodeCheck) {
         final action = pincodeCheck.action?.toLowerCase();
         final isFailure = action != null && action != 'success';
         if (isFailure) {
-          emit(current.copyWith(
-            verifiedPincode: event.pincode,
-            pincodeErrorMessage: pincodeCheck.message?.isNotEmpty == true
-                ? pincodeCheck.message
-                : CommonStrings.somethingWentWrong,
-          ));
+          // Not serviceable for this product. Leave verifiedPincode untouched —
+          // the pincode isn't accepted — and hand the message(s) to the sheet.
+          // The verify response carries only a plain string today, so wrap it;
+          // if the endpoint ever returns bars, prefer them here (like cart).
+          emit(
+            current.copyWith(
+              pincodeVerifyTick: current.pincodeVerifyTick + 1,
+              pincodeVerifyError: _pincodeError(pincodeCheck.message),
+            ),
+          );
           return;
         }
 
         final updatedSkus = product.skus.map((sku) {
-          final matchingSku = pincodeCheck.skus
-              .where((s) => s.skuId == sku.skuId)
-              .firstOrNull;
+          final matchingSku = pincodeCheck.skus.where((s) => s.skuId == sku.skuId).firstOrNull;
           if (matchingSku?.eddInfo != null) {
             return sku.copyWith(eddInfo: matchingSku!.eddInfo);
           }
@@ -297,43 +280,43 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
               .where((s) => s.skuId == updatedSelectedSku!.skuId)
               .firstOrNull;
           if (matchingSku?.eddInfo != null) {
-            updatedSelectedSku = updatedSelectedSku.copyWith(
-              eddInfo: matchingSku!.eddInfo,
-            );
+            updatedSelectedSku = updatedSelectedSku.copyWith(eddInfo: matchingSku!.eddInfo);
           }
         }
 
-        emit(current.copyWith(
-          productDetail: current.productDetail!.copyWith(
-            product: updatedProduct,
+        emit(
+          current.copyWith(
+            productDetail: current.productDetail!.copyWith(product: updatedProduct),
+            selectedSku: updatedSelectedSku,
+            verifiedPincode: event.pincode,
+            // A null error signals success to the awaiting sheet, which then pops.
+            pincodeVerifyTick: current.pincodeVerifyTick + 1,
+            pincodeVerifyError: null,
           ),
-          selectedSku: updatedSelectedSku,
-          verifiedPincode: event.pincode,
-          pincodeErrorMessage: null,
-        ));
+        );
       },
     );
   }
 
-  void _onSelectColorVariant(
-    SelectColorVariant event,
-    Emitter<PdpState> emit,
-  ) {
+  /// Resolves the verify failure [message] to a plain error string, falling
+  /// back to a generic message when the API returns nothing usable.
+  String _pincodeError(String? message) =>
+      message != null && message.isNotEmpty
+          ? message
+          : CommonStrings.somethingWentWrong;
+
+  void _onSelectColorVariant(SelectColorVariant event, Emitter<PdpState> emit) {
     add(PdpEvent.loadProductDetails(productId: event.productId));
   }
 
   void _onExpandDetailTab(ExpandDetailTab event, Emitter<PdpState> emit) {
     final current = state;
     if (current.status != PdpStatus.success) return;
-    final newIndex =
-        current.expandedDetailTab == event.tabIndex ? -1 : event.tabIndex;
+    final newIndex = current.expandedDetailTab == event.tabIndex ? -1 : event.tabIndex;
     emit(current.copyWith(expandedDetailTab: newIndex));
   }
 
-  Future<void> _onLoadSizeChart(
-    LoadSizeChart event,
-    Emitter<PdpState> emit,
-  ) async {
+  Future<void> _onLoadSizeChart(LoadSizeChart event, Emitter<PdpState> emit) async {
     final current = state;
     if (current.status != PdpStatus.success) return;
 
@@ -345,13 +328,10 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
     final result = await getSizeChartUseCase(
       GetSizeChartParams(productId: productId, cancelToken: token),
     );
-    result.fold(
-      (f) {
-        if (f is RequestCancelledFailure) return;
-        emit(current.copyWith(isLoadingSizeChart: false, sizeChartError: f.message));
-      },
-      (entity) => emit(current.copyWith(isLoadingSizeChart: false, sizeChart: entity)),
-    );
+    result.fold((f) {
+      if (f is RequestCancelledFailure) return;
+      emit(current.copyWith(isLoadingSizeChart: false, sizeChartError: f.message));
+    }, (entity) => emit(current.copyWith(isLoadingSizeChart: false, sizeChart: entity)));
   }
 
   PdpState _markSkuAsAddedToBag(PdpState current, String skuId) {
@@ -369,9 +349,7 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
     }
 
     return current.copyWith(
-      productDetail: current.productDetail!.copyWith(
-        product: product.copyWith(skus: updatedSkus),
-      ),
+      productDetail: current.productDetail!.copyWith(product: product.copyWith(skus: updatedSkus)),
       selectedSku: updatedSelectedSku,
     );
   }
