@@ -17,10 +17,18 @@ workflows:
           inputs:
             - version: "$FLUTTER_VERSION"
 
-  bundle_android:
-    description: Debug APK (universal) + AAB, deployed to Firebase App Distribution.
+  _test:
     before_run:
       - _setup
+    steps:
+      - flutter-analyze@0:
+          inputs:
+            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+      - flutter-test@1:
+          inputs:
+            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+
+  _deploy_android_debug:
     steps:
       - set-java-version@1:
           inputs:
@@ -40,27 +48,87 @@ workflows:
             - groups: "$TEST_GROUPS"
             - release_notes: "$BITRISE_GIT_MESSAGE"
             - firebase_token: "$FIREBASE_TOKEN"
-      - flutter-build@0:
-          title: Build debug AAB
+      # ponytail: AAB distribution disabled — Firebase App Distribution needs
+      # Play Store integration linked for the hs-app-flutter project. Re-enable
+      # once Firebase Console → Integrations → Google Play is set up.
+      # - flutter-build@0:
+      #     title: Build debug AAB
+      #     inputs:
+      #       - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+      #       - platform: android
+      #       - android_output_type: appbundle
+      #       - android_additional_params: "--debug"
+      # - firebase-app-distribution@0:
+      #     title: Firebase Deployment - Debug AAB
+      #     inputs:
+      #       - app_path: "$BITRISE_AAB_PATH"
+      #       - app: "$FIREBASE_ANDROID_APP_ID"
+      #       - groups: "$TEST_GROUPS"
+      #       - release_notes: "$BITRISE_GIT_MESSAGE"
+      #       - firebase_token: "$FIREBASE_TOKEN"
+      - deploy-to-bitrise-io@2: {}
+
+  _deploy_ios_debug:
+    steps:
+      - script:
+          title: flutter pub get + iOS config prep
           inputs:
-            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
-            - platform: android
-            - android_output_type: appbundle
-            - android_additional_params: "--debug"
+            - content: |-
+                #!/usr/bin/env bash
+                set -ex
+                flutter pub get
+                dart pub global activate flutterfire_cli
+                envman add --key PATH --value "$HOME/.pub-cache/bin:$PATH"
+                flutter build ios --config-only --debug
+      - manage-ios-code-signing@2:
+          inputs:
+            - distribution_method: development
+            - apple_service_connection: api-key
+            - project_path: "./ios/Runner.xcworkspace"
+            - scheme: Runner
+      - xcode-archive@5:
+          inputs:
+            - project_path: "./ios/Runner.xcworkspace"
+            - scheme: Runner
+            - configuration: Debug
+            - distribution_method: development
+            - automatic_code_signing: api-key
       - firebase-app-distribution@0:
-          title: Firebase Deployment - Debug AAB
+          title: Firebase Deployment - Debug IPA
           inputs:
-            - app_path: "$BITRISE_AAB_PATH"
-            - app: "$FIREBASE_ANDROID_APP_ID"
+            - app_path: "$BITRISE_IPA_PATH"
+            - app: "$FIREBASE_IOS_APP_ID"
             - groups: "$TEST_GROUPS"
             - release_notes: "$BITRISE_GIT_MESSAGE"
             - firebase_token: "$FIREBASE_TOKEN"
       - deploy-to-bitrise-io@2: {}
 
-  release_android:
-    description: Release APK (universal) + AAB, deployed to Firebase App Distribution.
+  bundle_android:
+    description: Test + Debug APK/AAB, deployed to Firebase App Distribution.
     before_run:
-      - _setup
+      - _test
+    after_run:
+      - _deploy_android_debug
+
+  bundle_iOS:
+    description: Test + Debug iOS build (dev-signed), deployed to Firebase App Distribution.
+    before_run:
+      - _test
+    after_run:
+      - _deploy_ios_debug
+
+  bundle_flutter:
+    description: Test + Android + iOS debug builds, deployed to Firebase App Distribution.
+    before_run:
+      - _test
+    after_run:
+      - _deploy_android_debug
+      - _deploy_ios_debug
+
+  release_android:
+    description: Test + Release APK/AAB, deployed to Firebase App Distribution.
+    before_run:
+      - _test
     steps:
       - set-java-version@1:
           inputs:
@@ -79,57 +147,53 @@ workflows:
             - groups: "$TEST_GROUPS"
             - release_notes: "$BITRISE_GIT_MESSAGE"
             - firebase_token: "$FIREBASE_TOKEN"
-      - flutter-build@0:
-          title: Build release AAB
-          inputs:
-            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
-            - platform: android
-            - android_output_type: appbundle
-      - firebase-app-distribution@0:
-          title: Firebase Deployment - Release AAB
-          inputs:
-            - app_path: "$BITRISE_AAB_PATH"
-            - app: "$FIREBASE_ANDROID_APP_ID"
-            - groups: "$TEST_GROUPS"
-            - release_notes: "$BITRISE_GIT_MESSAGE"
-            - firebase_token: "$FIREBASE_TOKEN"
-      - deploy-to-bitrise-io@2: {}
-
-  bundle_iOS:
-    description: Debug iOS build (dev-signed), deployed to Firebase App Distribution.
-    before_run:
-      - _setup
-    steps:
-      - certificate-and-profile-installer@1: {}
-      - flutter-build@0:
-          title: Build debug IPA
-          inputs:
-            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
-            - platform: ios
-            - ios_output_type: archive
-            - ios_additional_params: "--debug --export-method development"
-      - firebase-app-distribution@0:
-          title: Firebase Deployment - Debug IPA
-          inputs:
-            - app_path: "$BITRISE_IPA_PATH"
-            - app: "$FIREBASE_IOS_APP_ID"
-            - groups: "$TEST_GROUPS"
-            - release_notes: "$BITRISE_GIT_MESSAGE"
-            - firebase_token: "$FIREBASE_TOKEN"
+      # ponytail: AAB distribution disabled — Firebase App Distribution needs
+      # Play Store integration linked for the hs-app-flutter project. Re-enable
+      # once Firebase Console → Integrations → Google Play is set up.
+      # - flutter-build@0:
+      #     title: Build release AAB
+      #     inputs:
+      #       - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+      #       - platform: android
+      #       - android_output_type: appbundle
+      # - firebase-app-distribution@0:
+      #     title: Firebase Deployment - Release AAB
+      #     inputs:
+      #       - app_path: "$BITRISE_AAB_PATH"
+      #       - app: "$FIREBASE_ANDROID_APP_ID"
+      #       - groups: "$TEST_GROUPS"
+      #       - release_notes: "$BITRISE_GIT_MESSAGE"
+      #       - firebase_token: "$FIREBASE_TOKEN"
       - deploy-to-bitrise-io@2: {}
 
   release_iOS:
-    description: Release iOS archive, deployed to Firebase App Distribution.
+    description: Test + Release iOS archive (ad-hoc signed), deployed to Firebase App Distribution.
     before_run:
-      - _setup
+      - _test
     steps:
-      - certificate-and-profile-installer@1: {}
-      - flutter-build@0:
-          title: Build release IPA
+      - script:
+          title: flutter pub get + iOS config prep
           inputs:
-            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
-            - platform: ios
-            - ios_output_type: archive
+            - content: |-
+                #!/usr/bin/env bash
+                set -ex
+                flutter pub get
+                dart pub global activate flutterfire_cli
+                envman add --key PATH --value "$HOME/.pub-cache/bin:$PATH"
+                flutter build ios --config-only --release
+      - manage-ios-code-signing@2:
+          inputs:
+            - distribution_method: ad-hoc
+            - apple_service_connection: api-key
+            - project_path: "./ios/Runner.xcworkspace"
+            - scheme: Runner
+      - xcode-archive@5:
+          inputs:
+            - project_path: "./ios/Runner.xcworkspace"
+            - scheme: Runner
+            - configuration: Release
+            - distribution_method: ad-hoc
+            - automatic_code_signing: api-key
       - firebase-app-distribution@0:
           title: Firebase Deployment - Release IPA
           inputs:
@@ -183,7 +247,7 @@ app:
       FIREBASE_IOS_APP_ID: "1:645600819281:ios:c1c6acb94446b90249a070"
     - opts:
         is_expand: false
-      TEST_GROUPS: "app-devs, qa, product"
+      TEST_GROUPS: "Solo"
     - opts:
         is_expand: false
       _JAVA_OPTIONS: "-Xms1024m -Xmx3072m"

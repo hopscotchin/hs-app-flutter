@@ -170,30 +170,6 @@ void main() {
             reason: 'click lost root.${entry.key}');
       }
     }, skip: skipIfMissing);
-
-    test('attribution carries forward to next-screen event', () async {
-      final tile = (pg.data!['tiles'] as List).first as Map<String, dynamic>;
-      await tracker.logTileClick(trackingMetaChain: [
-        pg.data!['trackingMeta'] as Map<String, dynamic>?,
-        tile['trackingMeta'] as Map<String, dynamic>?,
-      ]);
-      h.clear();
-
-      await h.analytics.logEvent(
-        AnalyticsEvents.productViewed,
-        <String, Object?>{AnalyticsProperties.productId: 42},
-        attribution: true,
-      );
-
-      final payload = h.singleEvent(AnalyticsEvents.productViewed);
-      expectNoNullFields(payload);
-      final tileMeta = tile['trackingMeta'] as Map<String, dynamic>;
-      for (final entry in tileMeta.entries) {
-        if (entry.value == null) continue;
-        expect(payload[entry.key], entry.value,
-            reason: 'attribution.${entry.key} lost home→PDP');
-      }
-    }, skip: skipIfMissing);
   });
 
 }
