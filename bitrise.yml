@@ -107,7 +107,7 @@ workflows:
             - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
             - platform: ios
             - ios_output_type: archive
-            - ios_additional_params: "--debug"
+            - ios_additional_params: "--debug --export-method development"
       - firebase-app-distribution@0:
           title: Firebase Deployment - Debug IPA
           inputs:

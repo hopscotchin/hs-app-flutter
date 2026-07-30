@@ -56,12 +56,12 @@ dependencies:
   visibility_detector: ^0.4.0+2
 
   # Firebase
-  firebase_core: 4.11.0 # ponytail: pinned — 4.12.0 pulls firebase-ios-sdk 12.15.0 which firebase_messaging 16.3.0 doesn't support yet, unpin when messaging catches up
+  firebase_core: 4.10.0 # ponytail: pinned — 4.11+ pulls firebase-ios-sdk 12.15.0 which firebase_messaging 16.3.0 doesn't support, unpin when messaging catches up
   firebase_crashlytics: ^5.2.2
   firebase_messaging: ^16.2.2
   # setUserProperty("ct_objectId", cleverTapId) parity with Android
   # HsApplication.initFirebaseUserProps line 164-173.
-  firebase_analytics: 12.4.3 # ponytail: 12.4.4 imports non-existent FirebasePlugin symbol, unpin when upstream fixes
+  firebase_analytics: 12.4.2 # ponytail: pinned — 12.4.3+ requires firebase_core ^4.11.0 which pulls firebase-ios-sdk 12.15.0 (incompatible with firebase_messaging 16.3.0); 12.4.4 also imports non-existent FirebasePlugin symbol. Unpin when messaging catches up to SDK 12.15.0
 
   # Network Connectivity
   connectivity_plus: ^7.1.1
