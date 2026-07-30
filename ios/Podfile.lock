@@ -1,14 +1,6 @@
 PODS:
   - advertising_id (0.0.1):
     - Flutter
-  - appsflyer_sdk (6.18.0):
-    - appsflyer_sdk/Core (= 6.18.0)
-  - appsflyer_sdk/Core (6.18.0):
-    - AppsFlyerFramework (= 6.18.0)
-    - Flutter
-  - AppsFlyerFramework (6.18.0):
-    - AppsFlyerFramework/Main (= 6.18.0)
-  - AppsFlyerFramework/Main (6.18.0)
   - CleverTap-iOS-SDK (7.5.0):
     - SDWebImage (~> 5.11)
   - clevertap_plugin (3.8.1):
@@ -30,22 +22,17 @@ PODS:
   - SDWebImage/Core (5.21.7)
   - segment_analytics (0.0.1):
     - Flutter
-  - sms_autofill (0.0.1):
-    - Flutter
 
 DEPENDENCIES:
   - advertising_id (from `.symlinks/plugins/advertising_id/ios`)
-  - appsflyer_sdk (from `.symlinks/plugins/appsflyer_sdk/ios`)
   - clevertap_plugin (from `.symlinks/plugins/clevertap_plugin/ios`)
   - Flutter (from `Flutter`)
   - flutter_fgbg (from `.symlinks/plugins/flutter_fgbg/ios`)
   - hypersdkflutter (from `.symlinks/plugins/hypersdkflutter/ios`)
   - segment_analytics (from `.symlinks/plugins/segment_analytics/ios`)
-  - sms_autofill (from `.symlinks/plugins/sms_autofill/ios`)
 
 SPEC REPOS:
   trunk:
-    - AppsFlyerFramework
     - CleverTap-iOS-SDK
     - HyperCore
     - HyperSDK
@@ -55,8 +42,6 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   advertising_id:
     :path: ".symlinks/plugins/advertising_id/ios"
-  appsflyer_sdk:
-    :path: ".symlinks/plugins/appsflyer_sdk/ios"
   clevertap_plugin:
     :path: ".symlinks/plugins/clevertap_plugin/ios"
   Flutter:
@@ -67,13 +52,9 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/hypersdkflutter/ios"
   segment_analytics:
     :path: ".symlinks/plugins/segment_analytics/ios"
-  sms_autofill:
-    :path: ".symlinks/plugins/sms_autofill/ios"
 
 SPEC CHECKSUMS:
   advertising_id: d5de9e659986092d7ca50977dc50f4f4fcd4c30a
-  appsflyer_sdk: 334ef01a9d1a1b1483ef092c729da0bbd2f115c3
-  AppsFlyerFramework: c1e1e4cd3b98ffdca2fe32b17ae93909e409b6ab
   CleverTap-iOS-SDK: 000af11abfaa0e5ba779563a9a2e56555c0e07aa
   clevertap_plugin: a1e518d90c823856bd27cb3477cebfb6d0ccdc5b
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
@@ -84,7 +65,6 @@ SPEC CHECKSUMS:
   JuspaySafeBrowser: 04ad004fa85e9db766d4e2af45f60ac6b5eeba61
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   segment_analytics: 74650ab14e31db0a16a1599dbc11aabd644192a6
-  sms_autofill: b36b2147535657fea83d7f3898d7831de70bd8e4
 
 PODFILE CHECKSUM: 5d756f17ad2f0445d3b44517f147ac3e9ab8bc23
 

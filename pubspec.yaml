@@ -56,7 +56,7 @@ dependencies:
   visibility_detector: ^0.4.0+2
 
   # Firebase
-  firebase_core: ^4.7.0
+  firebase_core: 4.11.0 # ponytail: pinned — 4.12.0 pulls firebase-ios-sdk 12.15.0 which firebase_messaging 16.3.0 doesn't support yet, unpin when messaging catches up
   firebase_crashlytics: ^5.2.2
   firebase_messaging: ^16.2.2
   # setUserProperty("ct_objectId", cleverTapId) parity with Android

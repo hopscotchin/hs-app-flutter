@@ -1,530 +1,192 @@
----
-format_version: 1.2.0
+format_version: '26'
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
-project_type: android
+project_type: flutter
+
 workflows:
-  bundle:
+  _setup:
     steps:
-      - activate-ssh-key:
+      - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - change-workdir:
+      - git-clone@8: {}
+      - file-downloader@1:
+          title: Download .env from Bitrise Generic File Storage
           inputs:
-            - path: "$REACT_NATIVE_WORKING_DIRECTORY"
-          title: Switch to hs-app-rn directory
-      - git-clone:
+            - source: "$BITRISEIO_ENV_FILE_URL"
+            - destination: "$BITRISE_SOURCE_DIR/.env"
+      - flutter-installer@1:
           inputs:
-            - repository_url: "$REACT_NATIVE_GIT_URL"
-          title: Clone react native (hs-app-rn) repository
-      - nvm:
-          inputs:
-            - node_version: "$NODE_VERSION"
-          title: Install nvm and nodejs
-      - script:
-          inputs:
-            - working_dir: ''
-            - is_debug: 'yes'
-            - content: |-
-                #!/usr/bin/env bash
-                # fail if any commands fails
-                chmod a+x post-npm-install.sh
-          title: Give permissions to post-npm-install script
-      - npm:
-          inputs:
-            - command: install -g react-native-cli
-          title: Install react-native-cli
-      - npm:
-          inputs:
-            - workdir: "$REACT_NATIVE_WORKING_DIRECTORY"
-            - command: install
-          title: Run npm install
-      - change-workdir:
-          inputs:
-            - path: "$ANDROID_WORKING_DIRECTORY"
-          title: Change directory to clone android repo
+            - version: "$FLUTTER_VERSION"
+
+  bundle_android:
+    description: Debug APK (universal) + AAB, deployed to Firebase App Distribution.
+    before_run:
+      - _setup
+    steps:
       - set-java-version@1:
           inputs:
-            - set_java_version: 17
-      - git-clone:
-          title: Clone Android Repository
-      - change-workdir:
+            - set_java_version: 21
+      - flutter-build@0:
+          title: Build debug APK (universal)
           inputs:
-            - path: "$REACT_NATIVE_WORKING_DIRECTORY"
-          title: Change working directory to hs-app-rn
-      - script:
+            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+            - platform: android
+            - android_output_type: apk
+            - android_additional_params: "--debug"
+      - firebase-app-distribution@0:
+          title: Firebase Deployment - Debug APK
           inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                # fail if any commands fails
-                react-native bundle --platform android --dev true  --entry-file index.js --bundle-output ../hs-app-android/hsapp/src/main/assets/index.android.bundle --assets-dest ../hs-app-android/hsapp/src/main/res
-          title: Run react native bundle command
-      - change-workdir:
-          inputs:
-            - path: "$ANDROID_WORKING_DIRECTORY"
-          title: Change Working Directory back to hs-app-android
-      - gradle-runner:
-          inputs:
-            - gradle_task: "$GRADLE_BUILD_TASK"
-          title: Gradle Runner with assembleBundle
-      - gradle-runner:
-          inputs:
-            - gradle_task: "$GRADLE_BUILD_TASK_BUNDLE"
-          title: Gradle Runner with bundleDebug
-      - deploy-to-bitrise-io: {}
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$BUNDLE_PATH"
-            - app: "$FIREBASE_APP_ID"
-            - testers: "$TEST_GROUPS"
-            - groups: "$TEST_GROUP_APP_DEVS$TEST_GROUPS"
-            - release_notes_file: "$BITRISE_GIT_COMMIT"
-            - release_notes: "$BITRISE_GIT_MESSAGE"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - BUNDLE
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_ARM"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
+            - app_path: "$BITRISE_APK_PATH"
+            - app: "$FIREBASE_ANDROID_APP_ID"
             - groups: "$TEST_GROUPS"
             - release_notes: "$BITRISE_GIT_MESSAGE"
             - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - ARM
-      - firebase-app-distribution:
+      - flutter-build@0:
+          title: Build debug AAB
           inputs:
-            - app_path: "$APK_ARM_64"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
+            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+            - platform: android
+            - android_output_type: appbundle
+            - android_additional_params: "--debug"
+      - firebase-app-distribution@0:
+          title: Firebase Deployment - Debug AAB
+          inputs:
+            - app_path: "$BITRISE_AAB_PATH"
+            - app: "$FIREBASE_ANDROID_APP_ID"
             - groups: "$TEST_GROUPS"
             - release_notes: "$BITRISE_GIT_MESSAGE"
             - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - ARM_64
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_x86"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - release_notes: "$BITRISE_GIT_MESSAGE"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - x86
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_x86_64"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - release_notes: "$BITRISE_GIT_MESSAGE"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - x86_64
-    envs:
-      - REACT_NATIVE_GIT_URL: git@github.com:hopscotchin/hs-app-rn.git
-      - REACT_NATIVE_WORKING_DIRECTORY: "/bitrise/src/hs-app-rn"
-      - ANDROID_WORKING_DIRECTORY: "/bitrise/src/hs-app-android"
-      - GRADLE_BUILD_TASK: assembleBundle
-      - APK_x86: "/bitrise/deploy/hsapp-x86-bundle.apk"
-      - APK_ARM: "/bitrise/deploy/hsapp-armeabi-v7a-bundle.apk"
-      - APK_ARM_64: "/bitrise/deploy/hsapp-arm64-v8a-bundle.apk"
-      - APK_x86_64: "/bitrise/deploy/hsapp-x86_64-bundle.apk"
-      - opts:
-          is_expand: false
-        GRADLE_BUILD_TASK_BUNDLE: bundleBundle
-      - opts:
-          is_expand: false
-        BUNDLE_PATH: "/bitrise/deploy/hsapp-bundle.aab"
-  qa:
+      - deploy-to-bitrise-io@2: {}
+
+  release_android:
+    description: Release APK (universal) + AAB, deployed to Firebase App Distribution.
+    before_run:
+      - _setup
     steps:
-      - activate-ssh-key:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - change-workdir:
-          inputs:
-            - path: "$REACT_NATIVE_WORKING_DIRECTORY"
-          title: Switch to hs-app-rn directory
-      - git-clone:
-          inputs:
-            - repository_url: "$REACT_NATIVE_GIT_URL"
-          title: Clone react native (hs-app-rn) repository
-      - nvm:
-          inputs:
-            - node_version: "$NODE_VERSION"
-          title: Install nvm and nodejs
-      - script:
-          inputs:
-            - working_dir: ''
-            - is_debug: 'yes'
-            - content: |-
-                #!/usr/bin/env bash
-                # fail if any commands fails
-                chmod a+x post-npm-install.sh
-          title: Give permissions to post-npm-install script
-      - npm:
-          inputs:
-            - npm_version: "$NPM_VERSION"
-            - command: install -g react-native-cli
-          title: Install react-native-cli
-      - npm:
-          inputs:
-            - workdir: "$REACT_NATIVE_WORKING_DIRECTORY"
-            - npm_version: "$NPM_VERSION"
-            - command: install
-          title: Run npm install
-      - change-workdir:
-          inputs:
-            - path: "$ANDROID_WORKING_DIRECTORY"
-          title: Change directory to clone android repo
-      - git-clone:
-          title: Clone Android Repository
-      - change-workdir:
-          inputs:
-            - path: "$REACT_NATIVE_WORKING_DIRECTORY"
-          title: Change working directory to hs-app-rn
-      - script:
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                # fail if any commands fails
-                react-native bundle --platform android --dev true  --entry-file index.js --bundle-output ../hs-app-android/hsapp/src/main/assets/index.android.bundle --assets-dest ../hs-app-android/hsapp/src/main/res
-          title: Run react native bundle command
-      - change-workdir:
-          inputs:
-            - path: "$ANDROID_WORKING_DIRECTORY"
-          title: Change Working Directory back to hs-app-android
-      - gradle-runner:
-          inputs:
-            - gradle_task: "$GRADLE_BUILD_TASK"
-          title: Gradle Runner with assembleQa
-      - deploy-to-bitrise-io: {}
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_ARM"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - ARM
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_ARM_64"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - ARM_64
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_x86"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - x86
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_x86_64"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - x86_64
-    envs:
-      - REACT_NATIVE_GIT_URL: git@github.com:hopscotchin/hs-app-rn.git
-      - REACT_NATIVE_WORKING_DIRECTORY: "/bitrise/src/hs-app-rn"
-      - ANDROID_WORKING_DIRECTORY: "/bitrise/src/hs-app-android"
-      - GRADLE_BUILD_TASK: assembleQa
-      - APK_x86: "/bitrise/deploy/hsapp-x86-qa.apk"
-      - APK_ARM: "/bitrise/deploy/hsapp-armeabi-v7a-qa.apk"
-      - APK_ARM_64: "/bitrise/deploy/hsapp-arm64-v8a-qa.apk"
-      - APK_x86_64: "/bitrise/deploy/hsapp-x86_64-qa.apk"
-      - opts:
-          is_expand: false
-        GRADLE_BUILD_TASK_BUNDLE: bundleQa
-      - opts:
-          is_expand: false
-        BUNDLE_PATH: "/bitrise/deploy/hsapp-bundle.aab"
-  staging:
-    steps:
-      - activate-ssh-key:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - change-workdir:
-          inputs:
-            - path: "$REACT_NATIVE_WORKING_DIRECTORY"
-          title: Switch to hs-app-rn directory
-      - git-clone:
-          inputs:
-            - repository_url: "$REACT_NATIVE_GIT_URL"
-          title: Clone react native (hs-app-rn) repository
-      - nvm:
-          inputs:
-            - node_version: "$NODE_VERSION"
-          title: Install nvm and nodejs
-      - script:
-          inputs:
-            - working_dir: ''
-            - is_debug: 'yes'
-            - content: |-
-                #!/usr/bin/env bash
-                # fail if any commands fails
-                chmod a+x post-npm-install.sh
-          title: Give permissions to post-npm-install script
-      - npm:
-          inputs:
-            - npm_version: "$NPM_VERSION"
-            - command: install -g react-native-cli
-          title: Install react-native-cli
-      - npm:
-          inputs:
-            - workdir: "$REACT_NATIVE_WORKING_DIRECTORY"
-            - npm_version: "$NPM_VERSION"
-            - command: install
-          title: Run npm install
-      - change-workdir:
-          inputs:
-            - path: "$ANDROID_WORKING_DIRECTORY"
-          title: Change directory to clone android repo
-      - git-clone:
-          title: Clone Android Repository
-      - change-workdir:
-          inputs:
-            - path: "$REACT_NATIVE_WORKING_DIRECTORY"
-          title: Change working directory to hs-app-rn
-      - script:
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                # fail if any commands fails
-                react-native bundle --platform android --dev true  --entry-file index.js --bundle-output ../hs-app-android/hsapp/src/main/assets/index.android.bundle --assets-dest ../hs-app-android/hsapp/src/main/res
-          title: Run react native bundle command
-      - change-workdir:
-          inputs:
-            - path: "$ANDROID_WORKING_DIRECTORY"
-          title: Change Working Directory back to hs-app-android
-      - gradle-runner:
-          inputs:
-            - gradle_task: "$GRADLE_BUILD_TASK"
-          title: Gradle Runner with assembleStaging
-      - deploy-to-bitrise-io: {}
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$BUNDLE_PATH"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - BUNDLE
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_ARM"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - ARM
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_ARM_64"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - ARM_64
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_x86"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - x86
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_x86_64"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - x86_64
-    envs:
-      - REACT_NATIVE_GIT_URL: git@github.com:hopscotchin/hs-app-rn.git
-      - REACT_NATIVE_WORKING_DIRECTORY: "/bitrise/src/hs-app-rn"
-      - ANDROID_WORKING_DIRECTORY: "/bitrise/src/hs-app-android"
-      - GRADLE_BUILD_TASK: assembleStaging
-      - APK_x86: "/bitrise/deploy/hsapp-x86-staging.apk"
-      - APK_ARM: "/bitrise/deploy/hsapp-armeabi-v7a-staging.apk"
-      - APK_ARM_64: "/bitrise/deploy/hsapp-arm64-v8a-staging.apk"
-      - APK_x86_64: "/bitrise/deploy/hsapp-x86_64-staging.apk"
-      - opts:
-          is_expand: false
-        GRADLE_BUILD_TASK_BUNDLE: bundleStaging
-      - opts:
-          is_expand: false
-        BUNDLE_PATH: "/bitrise/deploy/hsapp-bundle.aab"
-  uat:
-    steps:
-      - activate-ssh-key:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - change-workdir:
-          inputs:
-            - path: "$REACT_NATIVE_WORKING_DIRECTORY"
-          title: Switch to hs-app-rn directory
-      - git-clone:
-          inputs:
-            - repository_url: "$REACT_NATIVE_GIT_URL"
-          title: Clone react native (hs-app-rn) repository
-      - nvm:
-          inputs:
-            - node_version: "$NODE_VERSION"
-          title: Install nvm and nodejs
-      - script:
-          inputs:
-            - working_dir: ''
-            - is_debug: 'yes'
-            - content: |-
-                #!/usr/bin/env bash
-                # fail if any commands fails
-                chmod a+x post-npm-install.sh
-          title: Give permissions to post-npm-install script
-      - npm:
-          inputs:
-            - npm_version: "$NPM_VERSION"
-            - command: install -g react-native-cli
-          title: Install react-native-cli
-      - npm:
-          inputs:
-            - workdir: "$REACT_NATIVE_WORKING_DIRECTORY"
-            - npm_version: "$NPM_VERSION"
-            - command: install
-          title: Run npm install
-      - change-workdir:
-          inputs:
-            - path: "$ANDROID_WORKING_DIRECTORY"
-          title: Change directory to clone android repo
-      - git-clone:
-          title: Clone Android Repository
-      - change-workdir:
-          inputs:
-            - path: "$REACT_NATIVE_WORKING_DIRECTORY"
-          title: Change working directory to hs-app-rn
-      - script:
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                # fail if any commands fails
-                react-native bundle --platform android --dev true  --entry-file index.js --bundle-output ../hs-app-android/hsapp/src/main/assets/index.android.bundle --assets-dest ../hs-app-android/hsapp/src/main/res
-          title: Run react native bundle command
-      - change-workdir:
-          inputs:
-            - path: "$ANDROID_WORKING_DIRECTORY"
-          title: Change Working Directory back to hs-app-android
-      - gradle-runner:
-          inputs:
-            - gradle_task: "$GRADLE_BUILD_TASK"
-          title: Gradle Runner with assembleUat
-      - deploy-to-bitrise-io: {}
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_ARM"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - ARM
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_ARM_64"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - ARM_64
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_x86"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - x86
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$APK_x86_64"
-            - app: "$FIREBASE_APP_ID"
-            - testers: ''
-            - groups: "$TEST_GROUPS"
-            - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - x86_64
-    envs:
-      - REACT_NATIVE_GIT_URL: git@github.com:hopscotchin/hs-app-rn.git
-      - REACT_NATIVE_WORKING_DIRECTORY: "/bitrise/src/hs-app-rn"
-      - ANDROID_WORKING_DIRECTORY: "/bitrise/src/hs-app-android"
-      - GRADLE_BUILD_TASK: assembleUat
-      - APK_x86: "/bitrise/deploy/hsapp-x86-uat.apk"
-      - APK_ARM: "/bitrise/deploy/hsapp-armeabi-v7a-uat.apk"
-      - APK_ARM_64: "/bitrise/deploy/hsapp-arm64-v8a-uat.apk"
-      - APK_x86_64: "/bitrise/deploy/hsapp-x86_64-uat.apk"
-      - opts:
-          is_expand: false
-        GRADLE_BUILD_TASK_BUNDLE: bundleUat
-      - opts:
-          is_expand: false
-        BUNDLE_PATH: "/bitrise/deploy/hsapp-bundle.aab"
-  bundle_native:
-    steps:
-      - activate-ssh-key:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - set-java-version@1:
           inputs:
-            - set_java_version: '21'
-      - change-workdir:
+            - set_java_version: 18
+      - flutter-build@0:
+          title: Build release APK (universal)
           inputs:
-            - path: "$ANDROID_WORKING_DIRECTORY"
-          title: Change directory to clone android repo
-      - git-clone:
-          title: Clone Android Repository
-      - gradle-runner:
+            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+            - platform: android
+            - android_output_type: apk
+      - firebase-app-distribution@0:
+          title: Firebase Deployment - Release APK
           inputs:
-            - gradle_task: "$GRADLE_BUILD_TASK"
-          title: Gradle Runner with assembleBundle
-      - gradle-runner:
-          inputs:
-            - gradle_task: "$GRADLE_BUILD_TASK_BUNDLE"
-          title: Gradle Runner with bundleDebug
-      - deploy-to-bitrise-io: {}
-      - firebase-app-distribution:
-          inputs:
-            - app_path: "$BUNDLE_PATH"
-            - app: "$FIREBASE_APP_ID"
-            - testers: "$TEST_GROUPS"
-            - groups: "$TEST_GROUP_APP_DEVS$TEST_GROUPS"
-            - release_notes_file: "$BITRISE_GIT_COMMIT"
+            - app_path: "$BITRISE_APK_PATH"
+            - app: "$FIREBASE_ANDROID_APP_ID"
+            - groups: "$TEST_GROUPS"
             - release_notes: "$BITRISE_GIT_MESSAGE"
             - firebase_token: "$FIREBASE_TOKEN"
-          title: Firebase Deployment - BUNDLE
-    envs:
-      - ANDROID_WORKING_DIRECTORY: "/bitrise/src/hs-app-android"
-      - GRADLE_BUILD_TASK: assembleBundle
-      - GRADLE_BUILD_TASK_BUNDLE: bundleBundle
-      - BUNDLE_PATH: "/bitrise/deploy/hsapp-bundle.aab"
+      - flutter-build@0:
+          title: Build release AAB
+          inputs:
+            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+            - platform: android
+            - android_output_type: appbundle
+      - firebase-app-distribution@0:
+          title: Firebase Deployment - Release AAB
+          inputs:
+            - app_path: "$BITRISE_AAB_PATH"
+            - app: "$FIREBASE_ANDROID_APP_ID"
+            - groups: "$TEST_GROUPS"
+            - release_notes: "$BITRISE_GIT_MESSAGE"
+            - firebase_token: "$FIREBASE_TOKEN"
+      - deploy-to-bitrise-io@2: {}
+
+  bundle_iOS:
+    description: Debug iOS build (dev-signed), deployed to Firebase App Distribution.
+    before_run:
+      - _setup
+    steps:
+      - certificate-and-profile-installer@1: {}
+      - flutter-build@0:
+          title: Build debug IPA
+          inputs:
+            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+            - platform: ios
+            - ios_output_type: archive
+            - ios_additional_params: "--debug"
+      - firebase-app-distribution@0:
+          title: Firebase Deployment - Debug IPA
+          inputs:
+            - app_path: "$BITRISE_IPA_PATH"
+            - app: "$FIREBASE_IOS_APP_ID"
+            - groups: "$TEST_GROUPS"
+            - release_notes: "$BITRISE_GIT_MESSAGE"
+            - firebase_token: "$FIREBASE_TOKEN"
+      - deploy-to-bitrise-io@2: {}
+
+  release_iOS:
+    description: Release iOS archive, deployed to Firebase App Distribution.
+    before_run:
+      - _setup
+    steps:
+      - certificate-and-profile-installer@1: {}
+      - flutter-build@0:
+          title: Build release IPA
+          inputs:
+            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+            - platform: ios
+            - ios_output_type: archive
+      - firebase-app-distribution@0:
+          title: Firebase Deployment - Release IPA
+          inputs:
+            - app_path: "$BITRISE_IPA_PATH"
+            - app: "$FIREBASE_IOS_APP_ID"
+            - groups: "$TEST_GROUPS"
+            - release_notes: "$BITRISE_GIT_MESSAGE"
+            - firebase_token: "$FIREBASE_TOKEN"
+      - deploy-to-bitrise-io@2: {}
+
+  run_tests:
+    description: Runs flutter analyze + tests on push to develop and all PRs.
+    steps:
+      - git-clone@8: {}
+      - flutter-installer@1:
+          inputs:
+            - version: "$FLUTTER_VERSION"
+      - restore-dart-cache@3: {}
+      - flutter-analyze@0:
+          inputs:
+            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+      - flutter-test@1:
+          inputs:
+            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+      - save-dart-cache@1: {}
+      - deploy-to-bitrise-io@2: {}
+    triggers:
+      push:
+        - branch: develop
+      pull_request:
+        - source_branch: "*"
+
 meta:
   bitrise.io:
-    stack: linux-docker-android-22.04
+    stack: osx-xcode-26.6.x
+    machine_type_id: g2.mac.large
+
 app:
   envs:
     - opts:
         is_expand: false
-      GRADLE_BUILD_FILE_PATH: build.gradle
+      BITRISE_FLUTTER_PROJECT_LOCATION: "."
     - opts:
         is_expand: false
-      GRADLE_TASK: assembleDebug
+      FLUTTER_VERSION: 3.44.8
     - opts:
         is_expand: false
-      GRADLEW_PATH: "./gradlew"
-    - TEST_FAIRY_API_KEY: 1f06e0bc8a717cb882ef700470ad978db98fb6b7
-    - ANDROID_MAIL: Hopscotch-Android
-    - NODE_VERSION: 16.13.0
-    - NPM_VERSION: 7.20.3
-    - _JAVA_OPTIONS: "-Xms1024m -Xmx3072m"
-    - GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError"
-    - FIREBASE_APP_ID: 1:722884108401:android:698499a3312099ba
-    - TEST_GROUPS: app-devs, qa-team, product
+      FIREBASE_ANDROID_APP_ID: "1:645600819281:android:e618ecc14b4118c849a070"
     - opts:
         is_expand: false
-      GRADLE_BUILD_TASK_BUNDLE: bundleDebug
+      FIREBASE_IOS_APP_ID: "1:645600819281:ios:c1c6acb94446b90249a070"
+    - opts:
+        is_expand: false
+      TEST_GROUPS: "app-devs, qa, product"
+    - opts:
+        is_expand: false
+      _JAVA_OPTIONS: "-Xms1024m -Xmx3072m"
+    - opts:
+        is_expand: false
+      GRADLE_OPTS: "-Dorg.gradle.jvmargs=\"-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError\""
