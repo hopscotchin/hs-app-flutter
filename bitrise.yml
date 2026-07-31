@@ -20,13 +20,16 @@ workflows:
   _test:
     before_run:
       - _setup
-    steps:
-      - flutter-analyze@0:
-          inputs:
-            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
-      - flutter-test@1:
-          inputs:
-            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+    steps: []
+      # ponytail: tests disabled for the deploy variants. Uncomment to re-enable
+      # analyze + test gating on bundle_*/release_* runs. run_tests workflow
+      # still runs these on PR + develop pushes independently.
+      # - flutter-analyze@0:
+      #     inputs:
+      #       - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+      # - flutter-test@1:
+      #     inputs:
+      #       - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
 
   _deploy_android_debug:
     steps:
@@ -69,6 +72,11 @@ workflows:
       - deploy-to-bitrise-io@2: {}
 
   _deploy_ios_debug:
+    # ponytail: iOS "bundle" builds must be profile mode, NOT debug. Flutter
+    # debug on iOS uses JIT + requires ptrace, which only works with Xcode
+    # attached — a standalone tap-to-launch install exits immediately with
+    # "ptrace(PT_TRACE_ME): Operation not permitted". Profile mode is AOT-
+    # compiled and runs standalone.
     steps:
       - script:
           title: flutter pub get + iOS config prep
@@ -79,7 +87,7 @@ workflows:
                 flutter pub get
                 dart pub global activate flutterfire_cli
                 envman add --key PATH --value "$HOME/.pub-cache/bin:$PATH"
-                flutter build ios --config-only --debug
+                flutter build ios --config-only --profile
       - manage-ios-code-signing@2:
           inputs:
             - distribution_method: development
@@ -90,7 +98,7 @@ workflows:
           inputs:
             - project_path: "./ios/Runner.xcworkspace"
             - scheme: Runner
-            - configuration: Debug
+            - configuration: Profile
             - distribution_method: development
             - automatic_code_signing: api-key
       - firebase-app-distribution@0:
@@ -247,7 +255,7 @@ app:
       FIREBASE_IOS_APP_ID: "1:645600819281:ios:c1c6acb94446b90249a070"
     - opts:
         is_expand: false
-      TEST_GROUPS: "Solo"
+      TEST_GROUPS: "app-devs, qa, product"
     - opts:
         is_expand: false
       _JAVA_OPTIONS: "-Xms1024m -Xmx3072m"
