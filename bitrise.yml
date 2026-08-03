@@ -13,6 +13,15 @@ workflows:
           inputs:
             - source: "$BITRISEIO_ENV_FILE_URL"
             - destination: "$BITRISE_SOURCE_DIR/.env"
+      - script:
+          title: Compute build number (YYYYMMDDHH IST)
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -e
+                BUILD_NUMBER=$(TZ='Asia/Kolkata' date +'%Y%m%d%H')
+                envman add --key BUILD_NUMBER --value "$BUILD_NUMBER"
+                echo "BUILD_NUMBER=$BUILD_NUMBER"
       - flutter-installer@1:
           inputs:
             - version: "$FLUTTER_VERSION"
@@ -42,7 +51,7 @@ workflows:
             - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
             - platform: android
             - android_output_type: apk
-            - android_additional_params: "--debug"
+            - android_additional_params: "--debug --build-number=$BUILD_NUMBER"
       - firebase-app-distribution@0:
           title: Firebase Deployment - Debug APK
           inputs:
@@ -87,7 +96,7 @@ workflows:
                 flutter pub get
                 dart pub global activate flutterfire_cli
                 envman add --key PATH --value "$HOME/.pub-cache/bin:$PATH"
-                flutter build ios --config-only --profile
+                flutter build ios --config-only --profile --build-number=$BUILD_NUMBER
       - manage-ios-code-signing@2:
           inputs:
             - distribution_method: development
@@ -147,6 +156,7 @@ workflows:
             - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
             - platform: android
             - android_output_type: apk
+            - android_additional_params: "--build-number=$BUILD_NUMBER"
       - firebase-app-distribution@0:
           title: Firebase Deployment - Release APK
           inputs:
@@ -188,7 +198,7 @@ workflows:
                 flutter pub get
                 dart pub global activate flutterfire_cli
                 envman add --key PATH --value "$HOME/.pub-cache/bin:$PATH"
-                flutter build ios --config-only --release
+                flutter build ios --config-only --release --build-number=$BUILD_NUMBER
       - manage-ios-code-signing@2:
           inputs:
             - distribution_method: ad-hoc
