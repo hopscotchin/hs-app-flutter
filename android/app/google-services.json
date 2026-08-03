@@ -12,7 +12,12 @@
           "package_name": "in.hopscotch.android.flutter"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "645600819281-8klavhh0q8qc4ekobr27im92q7ra6gig.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBng2y9mafF1ARbr6b5ANeJqUuLzs75h6I"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "645600819281-8klavhh0q8qc4ekobr27im92q7ra6gig.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
