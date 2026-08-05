@@ -3,28 +3,57 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyB7agsqzsCoyr5hruHqIoO95Xp3nJJePS8</string>
+	<string>AIzaSyDlYQsffRC1qIv-lOnOI4XAsAflFDj28zs</string>
+	<key>BUNDLE_ID</key>
+	<string>in.hopscotch.hopscotch</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>amzn-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+				<string>juspay-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+				<string>$(PRODUCT_BUNDLE_IDENTIFIER).cred</string>
+			</array>
+		</dict>
+	</array>
+	<key>CLIENT_ID</key>
+	<string>610092542748-e2j2qp4k2t32frln05bg4d7br67oaa51.apps.googleusercontent.com</string>
+	<key>DATABASE_URL</key>
+	<string>https://hopscotch-ios-new.firebaseio.com</string>
 	<key>GCM_SENDER_ID</key>
-	<string>645600819281</string>
+	<string>610092542748</string>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:610092542748:ios:b2d093f0c659e2f800e8d9</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>credpay</string>
+		<string>phonepe</string>
+		<string>paytmmp</string>
+		<string>tez</string>
+		<string>paytm</string>
+		<string>bhim</string>
+		<string>devtools</string>
+	</array>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
-	<key>BUNDLE_ID</key>
-	<string>in.hopscotch.hopscotch.new</string>
 	<key>PROJECT_ID</key>
-	<string>hs-app-flutter</string>
+	<string>hopscotch-ios-new</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.610092542748-e2j2qp4k2t32frln05bg4d7br67oaa51</string>
 	<key>STORAGE_BUCKET</key>
-	<string>hs-app-flutter.firebasestorage.app</string>
-	<key>IS_ADS_ENABLED</key>
-	<false></false>
-	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
-	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
-	<key>IS_GCM_ENABLED</key>
-	<true></true>
-	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
-	<key>GOOGLE_APP_ID</key>
-	<string>1:645600819281:ios:c1c6acb94446b90249a070</string>
+	<string>hopscotch-ios-new.appspot.com</string>
 </dict>
 </plist>

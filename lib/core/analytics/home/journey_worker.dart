@@ -138,6 +138,9 @@ List<EmitEntry> buildImpressions(
   final bannerEvent = seed.fromHomePage
       ? AnalyticsEvents.bannerImpression
       : AnalyticsEvents.lpBannerImpression;
+  final tileEvent = seed.fromHomePage
+      ? AnalyticsEvents.tileImpression
+      : AnalyticsEvents.lpTileImpression;
 
   for (final i in indices) {
     if (i < 0 || i >= snapshots.length) continue;
@@ -243,3 +246,69 @@ Map<String, dynamic> stripLpPrefixed(Map<String, dynamic> meta) {
   return out;
 }
 
+// ─── Walk internals ───────────────────────────────────────────────────
+
+/// Per-type walk descriptor. Each step is a list of alternate JSON keys
+/// (accept both camelCase and snake_case). Last entry is the innermost
+/// tile level; deeper `trackingMeta` wins.
+const Map<String, List<List<String>>> tilePaths = {
+  PageComponentType.hero: [
+    ['tiles'],
+    ['tile_details', 'tileDetails'],
+    ['tileGrid'],
+  ],
+  PageComponentType.customTiles: [
+    ['tiles', 'tile_details', 'tileDetails'],
+    ['tileGrid'],
+  ],
+  PageComponentType.pageCarousel: [
+    ['tiles'],
+  ],
+  PageComponentType.productGrid: [
+    ['tiles'],
+  ],
+};
+
+/// Yields root-first chains of `trackingMeta` per innermost leaf. At the
+/// leaf, absorbs `trackingMeta` from immediate Map children too (e.g.
+/// `tile.product.trackingMeta`) but not from intermediate-level peers
+/// like `ctaButton` / `title` (those own their own analytics).
+Iterable<List<Map<String, dynamic>>> _walkTileChains(
+  Map<String, dynamic> data,
+  List<List<String>> path,
+) sync* {
+  final chain = <Map<String, dynamic>>[];
+  final selfMeta = data['trackingMeta'];
+  if (selfMeta is Map<String, dynamic>) chain.add(selfMeta);
+
+  if (path.isEmpty) {
+    for (final entry in data.entries) {
+      if (entry.key == 'trackingMeta') continue;
+      final v = entry.value;
+      if (v is Map<String, dynamic>) {
+        final childMeta = v['trackingMeta'];
+        if (childMeta is Map<String, dynamic>) chain.add(childMeta);
+      }
+    }
+    yield chain;
+    return;
+  }
+
+  final keys = path.first;
+  final rest = path.sublist(1);
+  List<dynamic>? list;
+  for (final k in keys) {
+    final v = data[k];
+    if (v is List) {
+      list = v;
+      break;
+    }
+  }
+  if (list == null) return;
+  for (final item in list) {
+    if (item is! Map<String, dynamic>) continue;
+    for (final subChain in _walkTileChains(item, rest)) {
+      yield <Map<String, dynamic>>[...chain, ...subChain];
+    }
+  }
+}
