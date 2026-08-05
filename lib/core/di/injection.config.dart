@@ -23,6 +23,8 @@ import 'package:hs_app_flutter/core/analytics/events/analytics_helper.dart'
     as _i127;
 import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.dart'
     as _i66;
+import 'package:hs_app_flutter/core/analytics/home/journey_worker.dart'
+    as _i473;
 import 'package:hs_app_flutter/core/analytics/services/clarity_helper.dart'
     as _i903;
 import 'package:hs_app_flutter/core/analytics/services/clevertap_service.dart'
@@ -586,12 +588,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i765.GetDepartmentsUseCase>(
       () => _i765.GetDepartmentsUseCase(gh<_i816.CategoriesRepository>()),
     );
-    gh.lazySingleton<_i66.HomeTrackAnalyticManager>(
-      () => _i66.HomeTrackAnalyticManager(
-        analytics: gh<_i127.AnalyticsHelper>(),
-        orderAttribution: gh<_i179.OrderAttributionHelper>(),
-        lpAttribution: gh<_i233.LpAttributionHelper>(),
-      ),
+    gh.lazySingleton<_i473.JourneyWorker>(
+      () => _i473.JourneyWorker(gh<_i127.AnalyticsHelper>()),
     );
     gh.lazySingleton<_i705.GetAppConfigUseCase>(
       () => _i705.GetAppConfigUseCase(gh<_i68.SplashRepository>()),

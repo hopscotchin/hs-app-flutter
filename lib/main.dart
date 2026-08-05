@@ -44,12 +44,12 @@ void main() async {
 
   // Tighten VisibilityDetector callback cadence for home-page analytics.
   // Default is 500ms — long enough that initial-fold components can be
-  // scrolled past before their first callback fires, missing impressions
-  // for above-the-fold items on fast opens. 100ms is snappy enough that
-  // even a quick scroll registers first-frame visibility, still infrequent
-  // enough not to thrash the scroll loop.
+  // scrolled past before their first callback fires. 250ms is snappy
+  // enough to catch fast opens without pounding the intersection-check
+  // path 10x/sec per detector during a scroll (100ms was measurably
+  // janky with 6+ components mounted).
   VisibilityDetectorController.instance.updateInterval =
-      const Duration(milliseconds: 100);
+      const Duration(milliseconds: 500);
 
   SystemChrome.setSystemUIOverlayStyle(AppTheme.systemUiLight);
 
@@ -149,7 +149,7 @@ Future<void> _runPostInitBootstrapping() async {
 
   await sl<PushNotificationService>().initialize();
   // HTTP Inspector — debug builds only. Opened via the floating button overlay.
-  if (kDebugMode) {
+  if (kDebugMode || kProfileMode) {
     final talker = TalkerFlutter.init();
     networkClient.dio.interceptors.add(
       AdvancedDioLogger(

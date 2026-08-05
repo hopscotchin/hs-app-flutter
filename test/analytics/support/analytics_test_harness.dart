@@ -11,6 +11,7 @@ import 'package:hs_app_flutter/core/analytics/attribution/order_attribution_help
 import 'package:hs_app_flutter/core/analytics/attribution/utm_header_util.dart';
 import 'package:hs_app_flutter/core/analytics/events/analytics_helper.dart';
 import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.dart';
+import 'package:hs_app_flutter/core/analytics/home/journey_worker.dart';
 import 'package:hs_app_flutter/core/analytics/state/checkout_timer.dart';
 import 'package:hs_app_flutter/core/analytics/state/experiments_util.dart';
 import 'package:hs_app_flutter/core/analytics/state/launch_timer.dart';
@@ -80,6 +81,11 @@ class AnalyticsTestHarness {
     String appVersion = '1.99.0',
     String buildNumber = '99999',
   }) async {
+    // `HomeTrackAnalyticManager.constructor` calls
+    // `WidgetsBinding.instance.addObserver(this)` for background flushes,
+    // so the binding has to exist before we register the tracker.
+    // Idempotent.
+    TestWidgetsFlutterBinding.ensureInitialized();
     debugDefaultTargetPlatformOverride = _testPlatform;
 
     SharedPreferences.setMockInitialValues(initialPrefs);
@@ -114,6 +120,9 @@ class AnalyticsTestHarness {
     if (sl.isRegistered<HomeTrackAnalyticManager>()) {
       await sl.unregister<HomeTrackAnalyticManager>();
     }
+    if (sl.isRegistered<JourneyWorker>()) {
+      await sl.unregister<JourneyWorker>();
+    }
     final analyticsForTrack = AnalyticsHelper(
       service,
       prefs,
@@ -127,11 +136,19 @@ class AnalyticsTestHarness {
       utm,
       navObserver,
     );
+    // InlineJourneyWorker routes through the harness AnalyticsHelper,
+    // which lands captured events on `MockAnalyticsService.track`.
+    // Isolate-backed production impl would need a RootIsolateToken and
+    // a real Segment SDK — neither exists in a unit-test host.
+    sl.registerLazySingleton<JourneyWorker>(
+      () => JourneyWorker(analyticsForTrack),
+    );
     sl.registerLazySingleton<HomeTrackAnalyticManager>(
       () => HomeTrackAnalyticManager(
         analytics: analyticsForTrack,
         orderAttribution: orderAttribution,
         lpAttribution: lpAttribution,
+        journeyWorker: sl<JourneyWorker>(),
       ),
     );
 
@@ -177,7 +194,6 @@ class AnalyticsTestHarness {
 
   /// Restore the global platform override.
   void tearDown() {
-
     debugDefaultTargetPlatformOverride = null;
   }
 
