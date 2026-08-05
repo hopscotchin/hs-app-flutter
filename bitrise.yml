@@ -1,7 +1,6 @@
 format_version: '26'
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 project_type: flutter
-
 workflows:
   _setup:
     steps:
@@ -16,20 +15,19 @@ workflows:
       - flutter-installer@1:
           inputs:
             - version: "$FLUTTER_VERSION"
-
   _test:
     before_run:
       - _setup
-    steps: []
+    steps: [ ]
       # ponytail: tests disabled for the deploy variants. Uncomment to re-enable
       # analyze + test gating on bundle_*/release_* runs. run_tests workflow
       # still runs these on PR + develop pushes independently.
       # - flutter-analyze@0:
       #     inputs:
-      #       - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
-      # - flutter-test@1:
-      #     inputs:
-      #       - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+    #       - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+    # - flutter-test@1:
+    #     inputs:
+    #       - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
 
   _deploy_android_debug:
     steps:
@@ -69,14 +67,9 @@ workflows:
       #       - groups: "$TEST_GROUPS"
       #       - release_notes: "$BITRISE_GIT_MESSAGE"
       #       - firebase_token: "$FIREBASE_TOKEN"
-      - deploy-to-bitrise-io@2: {}
+      - deploy-to-bitrise-io@2: { }
 
   _deploy_ios_debug:
-    # ponytail: iOS "bundle" builds must be profile mode, NOT debug. Flutter
-    # debug on iOS uses JIT + requires ptrace, which only works with Xcode
-    # attached — a standalone tap-to-launch install exits immediately with
-    # "ptrace(PT_TRACE_ME): Operation not permitted". Profile mode is AOT-
-    # compiled and runs standalone.
     steps:
       - script:
           title: flutter pub get + iOS config prep
@@ -110,21 +103,18 @@ workflows:
             - release_notes: "$BITRISE_GIT_MESSAGE"
             - firebase_token: "$FIREBASE_TOKEN"
       - deploy-to-bitrise-io@2: {}
-
   bundle_android:
     description: Test + Debug APK/AAB, deployed to Firebase App Distribution.
     before_run:
       - _test
     after_run:
       - _deploy_android_debug
-
   bundle_iOS:
     description: Test + Debug iOS build (dev-signed), deployed to Firebase App Distribution.
     before_run:
       - _test
     after_run:
       - _deploy_ios_debug
-
   bundle_flutter:
     description: Test + Android + iOS debug builds, deployed to Firebase App Distribution.
     before_run:
@@ -132,7 +122,6 @@ workflows:
     after_run:
       - _deploy_android_debug
       - _deploy_ios_debug
-
   release_android:
     description: Test + Release APK/AAB, deployed to Firebase App Distribution.
     before_run:
@@ -140,7 +129,7 @@ workflows:
     steps:
       - set-java-version@1:
           inputs:
-            - set_java_version: 18
+            - set_java_version: 21
       - flutter-build@0:
           title: Build release APK (universal)
           inputs:
@@ -152,30 +141,27 @@ workflows:
           inputs:
             - app_path: "$BITRISE_APK_PATH"
             - app: "$FIREBASE_ANDROID_APP_ID"
-            - groups: "$TEST_GROUPS"
+            - groups: "$SOLO_TEST"
             - release_notes: "$BITRISE_GIT_MESSAGE"
             - firebase_token: "$FIREBASE_TOKEN"
-      # ponytail: AAB distribution disabled — Firebase App Distribution needs
-      # Play Store integration linked for the hs-app-flutter project. Re-enable
-      # once Firebase Console → Integrations → Google Play is set up.
-      # - flutter-build@0:
-      #     title: Build release AAB
-      #     inputs:
-      #       - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
-      #       - platform: android
-      #       - android_output_type: appbundle
-      # - firebase-app-distribution@0:
-      #     title: Firebase Deployment - Release AAB
-      #     inputs:
-      #       - app_path: "$BITRISE_AAB_PATH"
-      #       - app: "$FIREBASE_ANDROID_APP_ID"
-      #       - groups: "$TEST_GROUPS"
-      #       - release_notes: "$BITRISE_GIT_MESSAGE"
-      #       - firebase_token: "$FIREBASE_TOKEN"
+      - flutter-build@0:
+          title: Build release AAB
+          inputs:
+            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
+            - platform: android
+            - android_output_type: appbundle
+      - firebase-app-distribution@0:
+          title: Firebase Deployment - Release AAB
+          inputs:
+            - app_path: "$BITRISE_AAB_PATH"
+            - app: "$FIREBASE_ANDROID_APP_ID"
+            - groups: "$SOLO_TEST"
+            - release_notes: "$BITRISE_GIT_MESSAGE"
+            - firebase_token: "$FIREBASE_TOKEN"
       - deploy-to-bitrise-io@2: {}
-
   release_iOS:
-    description: Test + Release iOS archive (ad-hoc signed), deployed to Firebase App Distribution.
+    description: Test + Release iOS archive (ad-hoc signed), deployed to Firebase
+      App Distribution.
     before_run:
       - _test
     steps:
@@ -211,7 +197,6 @@ workflows:
             - release_notes: "$BITRISE_GIT_MESSAGE"
             - firebase_token: "$FIREBASE_TOKEN"
       - deploy-to-bitrise-io@2: {}
-
   run_tests:
     description: Runs flutter analyze + tests on push to develop and all PRs.
     steps:
@@ -233,12 +218,10 @@ workflows:
         - branch: develop
       pull_request:
         - source_branch: "*"
-
 meta:
   bitrise.io:
     stack: osx-xcode-26.6.x
     machine_type_id: g2.mac.large
-
 app:
   envs:
     - opts:
@@ -249,16 +232,19 @@ app:
       FLUTTER_VERSION: 3.44.8
     - opts:
         is_expand: false
-      FIREBASE_ANDROID_APP_ID: "1:645600819281:android:e618ecc14b4118c849a070"
+      FIREBASE_ANDROID_APP_ID: 1:645600819281:android:e618ecc14b4118c849a070
     - opts:
         is_expand: false
-      FIREBASE_IOS_APP_ID: "1:645600819281:ios:c1c6acb94446b90249a070"
+      FIREBASE_IOS_APP_ID: 1:645600819281:ios:c1c6acb94446b90249a070
     - opts:
         is_expand: false
-      TEST_GROUPS: "app-devs, qa, product"
+      TEST_GROUPS: app-devs, qa, product
+    - opts:
+        is_expand: false
+      SOLO_TEST: Solo
     - opts:
         is_expand: false
       _JAVA_OPTIONS: "-Xms1024m -Xmx3072m"
     - opts:
         is_expand: false
-      GRADLE_OPTS: "-Dorg.gradle.jvmargs=\"-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError\""
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError"
