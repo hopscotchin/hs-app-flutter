@@ -130,6 +130,19 @@ workflows:
       - set-java-version@1:
           inputs:
             - set_java_version: 21
+      - file-downloader@1:
+          title: Download release keystore zip from Bitrise Generic File Storage
+          inputs:
+            - source: "BITRISEIO_ANDROID_KEYSTORE_ZIP_URL"
+            - destination: "$BITRISE_SOURCE_DIR/android/keystore.zip"
+      - script:
+          title: Unzip keystore into android/
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -ex
+                unzip -o "$BITRISE_SOURCE_DIR/android/keystore.zip" -d "$BITRISE_SOURCE_DIR/android/"
+                rm "$BITRISE_SOURCE_DIR/android/keystore.zip"
       - flutter-build@0:
           title: Build release APK (universal)
           inputs:
