@@ -140,8 +140,8 @@ void main() {
     final lpRoute = _pageRoute('landingPage');
     h.navObserver.didPush(lpRoute, null);
     h.navObserver.setLandingPageContext(name: 'LP1', id: '100');
-    await tracker.notifyVisible(0);
-    await pumpEventQueue(); // drain the unawaited banner-impression fire
+    tracker.notifyVisible(0);
+    await tracker.flushJourney();
 
     final firstFire =
         h.eventsNamed(AnalyticsEvents.lpBannerImpression).length;
@@ -155,8 +155,8 @@ void main() {
     // _onActive → resetVisibilityState clears _currentlyVisible so the
     // next notifyVisible(0) succeeds instead of short-circuiting.
     h.navObserver.didPop(talker, lpRoute);
-    await tracker.notifyVisible(0);
-    await pumpEventQueue();
+    tracker.notifyVisible(0);
+    await tracker.flushJourney();
 
     final secondFire =
         h.eventsNamed(AnalyticsEvents.lpBannerImpression).length;

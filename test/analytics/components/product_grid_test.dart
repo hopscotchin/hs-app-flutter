@@ -4,6 +4,7 @@ import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart'
 import 'package:hs_app_flutter/core/analytics/constants/analytics_events.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dart';
 import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.dart';
+import 'package:hs_app_flutter/core/analytics/home/journey_worker.dart';
 import 'package:hs_app_flutter/features/discover/domain/entities/home_page_entity.dart';
 
 import '../support/analytics_test_harness.dart';
@@ -29,6 +30,7 @@ void main() {
       analytics: h.analytics,
       orderAttribution: h.orderAttribution,
       lpAttribution: h.lpAttribution,
+      journeyWorker: JourneyWorker(h.analytics),
     );
     tracker.extraData = const ExtraData(fromHomePage: true);
     tracker.sortBarName = AnalyticsDefaults.sortBarAll;
@@ -50,7 +52,8 @@ void main() {
   group('banner_impression', () {
     test('fires once with client keys + root trackingMeta (no null fields)',
         () async {
-      await tracker.notifyVisible(pgIndex);
+      tracker.notifyVisible(pgIndex);
+      await tracker.flushJourney();
 
       final payload = h.singleEvent(AnalyticsEvents.bannerImpression);
       expectTimeBuckets(payload);
@@ -70,7 +73,8 @@ void main() {
 
     test('required keys are all present, non-null, non-empty (home context)',
         () async {
-      await tracker.notifyVisible(pgIndex);
+      tracker.notifyVisible(pgIndex);
+      await tracker.flushJourney();
       final payload = h.singleEvent(AnalyticsEvents.bannerImpression);
       expectRequiredNonEmpty(payload, requiredKeysBannerImpressionHome);
     }, skip: skipIfMissing);
@@ -80,7 +84,8 @@ void main() {
 
   group('tile_impression', () {
     test('fires one tile_impression per product tile (no null fields)', () async {
-      await tracker.notifyVisible(pgIndex);
+      tracker.notifyVisible(pgIndex);
+      await tracker.flushJourney();
 
       final tileCount = (pg.data!['tiles'] as List).length;
       final events = h.eventsNamed(AnalyticsEvents.tileImpression);
@@ -93,7 +98,8 @@ void main() {
     }, skip: skipIfMissing);
 
     test('each tile_impression carries root + tile trackingMeta verbatim', () async {
-      await tracker.notifyVisible(pgIndex);
+      tracker.notifyVisible(pgIndex);
+      await tracker.flushJourney();
 
       final events = h.eventsNamed(AnalyticsEvents.tileImpression);
       final tiles = pg.data!['tiles'] as List;
@@ -122,14 +128,16 @@ void main() {
     }, skip: skipIfMissing);
 
     test('required keys on every tile_impression (home context)', () async {
-      await tracker.notifyVisible(pgIndex);
+      tracker.notifyVisible(pgIndex);
+      await tracker.flushJourney();
       for (final e in h.eventsNamed(AnalyticsEvents.tileImpression)) {
         expectRequiredNonEmpty(e, requiredKeysTileImpressionHome);
       }
     }, skip: skipIfMissing);
 
     test('product_id + slice_id are unique per tile', () async {
-      await tracker.notifyVisible(pgIndex);
+      tracker.notifyVisible(pgIndex);
+      await tracker.flushJourney();
       final events = h.eventsNamed(AnalyticsEvents.tileImpression);
       expect(events.map((e) => e['product_id']).toSet(),
           hasLength(events.length));

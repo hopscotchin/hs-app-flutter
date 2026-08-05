@@ -171,12 +171,14 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
                     padding: EdgeInsets.symmetric(horizontal: tilePadding),
                     child: GestureDetector(
                       key: _tileKey(tileIndex),
-                      onTap: () async {
-                        await sl<HomeTrackAnalyticManager>()
-                            .onHeroTileTapped(widget.heroData, tile);
-                        if (context.mounted) {
-                          ActionUrlHandler.navigate(context, tile.actionUri);
-                        }
+                      onTap: () {
+                        // Fire-and-forget: OrderAttribution/LpAttribution
+                        // update in-memory synchronously; only the pref
+                        // disk write + Segment track is async. Awaiting
+                        // blocked navigation by tens/hundreds of ms.
+                        unawaited(sl<HomeTrackAnalyticManager>()
+                            .onHeroTileTapped(widget.heroData, tile));
+                        ActionUrlHandler.navigate(context, tile.actionUri);
                       },
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(_cornerRadius),

@@ -1,4 +1,4 @@
-package `in`.hopscotch.android.flutter
+package `in`.hopscotch.android
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
