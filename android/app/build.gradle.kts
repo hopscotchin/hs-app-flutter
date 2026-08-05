@@ -56,7 +56,7 @@ android {
             manifestPlaceholders["CLEVERTAP_TOKEN"] = "TEST-046-401"
         }
         release {
-            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release")
             // CleverTap production workspace — mirrors native Android's
             // `release` / `beta` buildTypes.
             manifestPlaceholders["CLEVERTAP_ACCOUNT_ID"] = "WW4-64W-955Z"
