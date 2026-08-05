@@ -626,14 +626,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i692.RemoveFromWishlistUseCase>(),
       ),
     );
-    gh.factory<_i206.LandingPageBloc>(
-      () => _i206.LandingPageBloc(
-        gh<_i325.GetHomePageUseCase>(),
-        gh<_i66.HomeTrackAnalyticManager>(),
-        gh<_i127.AnalyticsHelper>(),
-        gh<_i93.AppNavigationObserver>(),
-      ),
-    );
     gh.factory<_i724.SearchBloc>(
       () => _i724.SearchBloc(gh<_i938.GetSearchSuggestionsUseCase>()),
     );
@@ -686,11 +678,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i884.CartCountCubit>(),
       ),
     );
-    gh.factory<_i626.HomeBloc>(
-      () => _i626.HomeBloc(
-        gh<_i325.GetHomePageUseCase>(),
-        gh<_i127.AnalyticsHelper>(),
-        gh<_i66.HomeTrackAnalyticManager>(),
+    gh.lazySingleton<_i66.HomeTrackAnalyticManager>(
+      () => _i66.HomeTrackAnalyticManager(
+        analytics: gh<_i127.AnalyticsHelper>(),
+        orderAttribution: gh<_i179.OrderAttributionHelper>(),
+        lpAttribution: gh<_i233.LpAttributionHelper>(),
+        journeyWorker: gh<_i473.JourneyWorker>(),
       ),
     );
     gh.factory<_i620.CategoriesBloc>(
@@ -710,6 +703,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i283.CheckPincodeUseCase>(
       () => _i283.CheckPincodeUseCase(gh<_i760.PlpRepository>()),
     );
+    gh.factory<_i206.LandingPageBloc>(
+      () => _i206.LandingPageBloc(
+        gh<_i325.GetHomePageUseCase>(),
+        gh<_i66.HomeTrackAnalyticManager>(),
+        gh<_i127.AnalyticsHelper>(),
+        gh<_i93.AppNavigationObserver>(),
+      ),
+    );
     gh.factory<_i419.AuthBloc>(
       () => _i419.AuthBloc(
         gh<_i766.CheckMobileUseCase>(),
@@ -727,6 +728,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i113.FilterBloc(
         getFilterDataUseCase: gh<_i804.GetFilterDataUseCase>(),
         checkPincodeUseCase: gh<_i283.CheckPincodeUseCase>(),
+      ),
+    );
+    gh.factory<_i626.HomeBloc>(
+      () => _i626.HomeBloc(
+        gh<_i325.GetHomePageUseCase>(),
+        gh<_i127.AnalyticsHelper>(),
+        gh<_i66.HomeTrackAnalyticManager>(),
       ),
     );
     return this;
