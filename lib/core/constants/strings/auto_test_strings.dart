@@ -363,6 +363,7 @@ class PdpTestStrings {
   static const String changePincodeButton = 'pdp_change_pincode_button';
 
   // Offers (dynamic; copy CTA nests under the card)
+  static const String offersSection = 'pdp_offers_section';
   static const String offersTitle = 'pdp_offers_title';
   static const String offerCard = 'pdp_offer_card'; // + `_<i>`
   static const String offerCopySuffix = 'copy'; // → `pdp_offer_card_<i>_copy`

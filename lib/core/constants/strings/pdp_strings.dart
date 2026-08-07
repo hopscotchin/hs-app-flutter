@@ -59,6 +59,9 @@ class PdpStrings {
   // Offers
   static const String offersAndDiscounts = 'Offers & Discounts';
   static const String copy = 'Copy';
+  // Prefix of the coupon copy confirmation; the copied code is appended after a
+  // colon, per the couponCode-Snackbars design ("Coupon Code Copied: OFF90").
+  static const String couponCodeCopied = 'Coupon Code Copied';
 
   // Product details
   static const String productDetails = 'Product Details';

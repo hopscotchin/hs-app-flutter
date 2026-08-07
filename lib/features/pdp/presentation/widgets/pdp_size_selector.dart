@@ -18,7 +18,7 @@ const _kTitleNormal = Color(
 ); // #000000 solid black (not textPrimary which is 80%)
 const _kDisabledColor = Color(0x33000000); // rgba(0,0,0,0.2)
 
-class PdpSizeSelector extends StatelessWidget {
+class PdpSizeSelector extends StatefulWidget {
   final List<SkuEntity> skus;
   final SkuEntity? selectedSku;
   final bool hasSizeChart;
@@ -35,7 +35,26 @@ class PdpSizeSelector extends StatelessWidget {
   });
 
   @override
+  State<PdpSizeSelector> createState() => _PdpSizeSelectorState();
+}
+
+// Kept alive so the chip row's horizontal offset survives scrolling the PDP.
+// The selector is a child of the page's SliverList, so once it leaves the
+// viewport's cache extent its element would be unmounted and the chip row's
+// scroll position destroyed — coming back it would rebuild at offset 0 with the
+// selected chip off-screen. AutomaticKeepAliveClientMixin holds the element
+// (SliverChildListDelegate defaults to addAutomaticKeepAlives: true), so the
+// position is retained for as long as the user stays on this PDP.
+class _PdpSizeSelectorState extends State<PdpSizeSelector>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
+
+    final skus = widget.skus;
     if (skus.isEmpty) return const SizedBox.shrink();
 
     // Responsive horizontal padding: 4% of screen width, min 12 max 20
@@ -47,12 +66,12 @@ class PdpSizeSelector extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // "Size Chart >" — right-aligned
-          if (hasSizeChart)
+          if (widget.hasSizeChart)
             Align(
               alignment: Alignment.centerRight,
               child: GestureDetector(
                 key: const ValueKey(PdpTestStrings.sizeChartButton),
-                onTap: onSizeChartTap,
+                onTap: widget.onSizeChartTap,
                 behavior: HitTestBehavior.opaque,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -74,12 +93,15 @@ class PdpSizeSelector extends StatelessWidget {
                 ),
               ),
             ),
-          if (hasSizeChart) AppSpacing.verticalGapSm,
+          if (widget.hasSizeChart) AppSpacing.verticalGapSm,
 
-          // Chips row — horizontal scroll
+          // Chips row — horizontal scroll. Clamping, not bouncing: bouncing lets
+          // the drag pull the chips past either end and exposes blank space
+          // inside the section. Matches the page scroll view and the carousel,
+          // and Android's RecyclerView, which don't overscroll either.
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
+            physics: const ClampingScrollPhysics(),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -88,9 +110,9 @@ class PdpSizeSelector extends StatelessWidget {
                   PdpSizeChip(
                     key: ValueKey('${PdpTestStrings.sizeChip}_$i'),
                     sku: skus[i],
-                    isSelected: selectedSku?.skuId == skus[i].skuId,
+                    isSelected: widget.selectedSku?.skuId == skus[i].skuId,
                     onTap: skus[i].enable == true && skus[i].skuId != null
-                        ? () => onSizeSelected(skus[i].skuId!)
+                        ? () => widget.onSizeSelected(skus[i].skuId!)
                         : null,
                   ),
                 ],

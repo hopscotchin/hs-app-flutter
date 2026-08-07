@@ -45,8 +45,7 @@ class PdpRecommendedProducts extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             child: Text(
-              recommendations.pageMeta?.pageTitle ??
-                  PdpStrings.productsYouMayLike,
+              recommendations.pageMeta?.pageTitle ?? PdpStrings.productsYouMayLike,
               key: const ValueKey(PdpTestStrings.recommendedTitle),
               style: AppTypographyV1.titleMedium.copyWith(
                 fontWeight: FontWeight.w700,
@@ -60,9 +59,7 @@ class PdpRecommendedProducts extends StatelessWidget {
         SliverList(
           delegate: SliverChildBuilderDelegate((context, rowIndex) {
             final start = rowIndex * _columns;
-            final end = start + _columns > records.length
-                ? records.length
-                : start + _columns;
+            final end = start + _columns > records.length ? records.length : start + _columns;
             // One row of the canonical grid — reused verbatim so tiles look and
             // behave exactly as in the eager grid, but built lazily per row.
             return ProductGridWidget(
@@ -70,10 +67,7 @@ class PdpRecommendedProducts extends StatelessWidget {
               // grid keys its tiles from 0, so a shared prefix would collide.
               keyPrefix: '${PdpTestStrings.recommendedPrefix}_row_$rowIndex',
               gridData: ProductGridData(
-                layoutInfo: const LayoutInfoData(
-                  columns: _columns,
-                  showProductInfo: true,
-                ),
+                layoutInfo: const LayoutInfoData(columns: _columns, showProductInfo: true),
                 tiles: records.sublist(start, end),
               ),
             );
@@ -92,7 +86,7 @@ class PdpRecommendedProducts extends StatelessWidget {
               ),
             ),
           ),
-        const SliverToBoxAdapter(child: SizedBox(height: 150)),
+        const SliverToBoxAdapter(child: SizedBox(height: 100)),
       ],
     );
   }

@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/pdp_strings.dart';
@@ -23,6 +25,9 @@ const _kCopyColor = Color(0xFF000000);
 const _kIndicatorActiveColor = AppColors.neutralGrey6;
 const _kIndicatorTrackColor = Color(0xFF000000); // opacity 0.2 applied inline
 const _kCardGap = 8.0;
+// How much of each neighbouring card shows alongside the current one — the
+// previous card on the left, the next on the right.
+const _kCardPeek = 38.0;
 
 class PdpOffers extends StatefulWidget {
   const PdpOffers({super.key, required this.offers});
@@ -33,7 +38,22 @@ class PdpOffers extends StatefulWidget {
   State<PdpOffers> createState() => _PdpOffersState();
 }
 
-class _PdpOffersState extends State<PdpOffers> {
+// Kept alive so the carousel survives leaving the viewport. Without it the
+// section's element is unmounted once it passes the page's cache extent, taking
+// the scroll offset and _currentIndex with it — scrolling back rebuilt at card 0
+// and auto-scroll resumed from there. Android keeps its position because
+// PromoView and its inner RecyclerView outlive the PDP scroll, and promoPageNumber
+// is a field on it. SliverChildListDelegate defaults to addAutomaticKeepAlives,
+// so claiming it here is enough.
+//
+// VisibilityDetector still reports 0 while kept alive: it checks paintsChild()
+// up the ancestor chain, and a kept-alive sliver child is laid out but not
+// painted — so the auto-scroll gate and the forcedStop reset both still fire.
+class _PdpOffersState extends State<PdpOffers>
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final _scrollController = ScrollController();
 
   // Notifier-backed snapped card index — mirrors PageCarouselWidget's
@@ -48,28 +68,56 @@ class _PdpOffersState extends State<PdpOffers> {
   // PageCarouselWidget's _snapItemStride.
   double _snapItemStride = 0.0;
 
-  // Auto-scroll — mirrors Android's PromoView (2s interval, wrap to first,
-  // pause on user interaction, resume shortly after it ends).
+  // Shift between the list's leading padding and where a card rests when
+  // snapped. See build() for how it is derived; scroll offset for card k is
+  // k * stride - _snapOrigin, clamped into range, which is what makes the first
+  // and last cards sit flush against the screen edges.
+  double _snapOrigin = 0.0;
+
+  // Auto-scroll — ported from Android's PromoView. Its rules, in full:
+  //
+  //  * 2s between advances, and the first advance is 2s after starting
+  //    (`delay` precedes `smoothScrollToPosition` in its loop).
+  //  * advances to the next card index, wrapping to the first after the last
+  //    (getNextSnappedPosition), continuing from wherever the user left off —
+  //    Android reads that index back from the snapped view after a drag, which
+  //    is what _currentIndex already tracks here.
+  //  * runs only while the section is visible on screen (isVisibleOnScreen) and
+  //    the host is resumed (repeatOnLifecycle(RESUMED)).
+  //  * any touch on the carousel stops it for good (stopForUserAction sets
+  //    forcedStop) — there is no timed resume.
+  //  * that stop is cleared only by the section leaving the screen, so it
+  //    restarts when scrolled back into view.
+  //
+  // Android additionally gates on its PDP bottom sheet being EXPANDED; the
+  // Flutter PDP is a plain page, so that condition has no counterpart.
   static const _autoScrollInterval = Duration(seconds: 2);
-  static const _resumeAfterInteraction = Duration(seconds: 3);
-  static const _advanceDuration = Duration(milliseconds: 400);
+
+  // Advance timing taken from RecyclerView's LinearSmoothScroller, which is what
+  // smoothScrollToPosition drives: 25ms per inch of travel
+  // (calculateTimeForScrolling), stretched by 0.3356 for the decelerating
+  // approach onto the target (calculateTimeForDeceleration). Android measures in
+  // device px against densityDpi; expressed in logical px the device pixel ratio
+  // cancels, leaving 25/160 ms per logical px. A one-card advance lands near
+  // 135ms — far snappier than a fixed 400ms ease, which is what read as floaty.
+  static const _msPerLogicalPx = 25 / 160;
+  static const _decelerateFactor = 0.3356;
   Timer? _autoScrollTimer;
-  Timer? _resumeTimer;
-  bool _userInteracting = false;
+  bool _forcedStop = false;
+  bool _isVisible = false;
+  bool _isHostResumed = true;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _maybeStartAutoScroll();
-    });
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _autoScrollTimer?.cancel();
-    _resumeTimer?.cancel();
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
@@ -79,8 +127,26 @@ class _PdpOffersState extends State<PdpOffers> {
 
   // ── Auto-scroll ─────────────────────────────────────────────────────────────
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _isHostResumed = state == AppLifecycleState.resumed;
+    _maybeStartAutoScroll();
+  }
+
+  // Android's isVisibleOnScreen() is true when any part of the view intersects
+  // the screen, hence `> 0` rather than a fraction threshold.
+  void _onVisibilityChanged(VisibilityInfo info) {
+    if (!mounted) return;
+    final isVisible = info.visibleFraction > 0;
+    // Leaving the screen clears the user's stop — this is the only thing that
+    // does, and it is why scrolling away and back restarts the loop.
+    if (!isVisible) _forcedStop = false;
+    _isVisible = isVisible;
+    _maybeStartAutoScroll();
+  }
+
   void _maybeStartAutoScroll() {
-    if (widget.offers.length <= 1 || _userInteracting) {
+    if (widget.offers.length <= 1 || _forcedStop || !_isVisible || !_isHostResumed) {
       _stopAutoScroll();
       return;
     }
@@ -92,37 +158,51 @@ class _PdpOffersState extends State<PdpOffers> {
     _autoScrollTimer = null;
   }
 
+  // Any touch stops the loop permanently, as Android's per-item touch listener
+  // and its DRAGGING scroll state both do.
+  void _stopForUserAction() {
+    _forcedStop = true;
+    _stopAutoScroll();
+  }
+
+  // Pointer currently down on a Copy button, which is exempt from stopping the
+  // loop. On Android, `copy` is clickable and consumes ACTION_DOWN, so the
+  // card's own OnTouchListener — the thing that calls stopForUserAction — is
+  // never reached for that touch, and the copy click handler does not stop it
+  // either. A Flutter ancestor Listener has no such exemption (pointer events
+  // reach every hit-test entry regardless of who handles the gesture), so the
+  // pointer is tagged on the way in and skipped on the way out.
+  //
+  // Dispatch runs innermost first, so this always precedes
+  // _onCarouselPointerDown for the same pointer.
+  int? _copyPointer;
+
+  void _onCopyPointerDown(PointerDownEvent event) => _copyPointer = event.pointer;
+
+  void _onCarouselPointerDown(PointerDownEvent event) {
+    if (event.pointer == _copyPointer) {
+      _copyPointer = null;
+      return;
+    }
+    _stopForUserAction();
+  }
+
   void _advance() {
     if (!_scrollController.hasClients) return;
     final pos = _scrollController.position;
     if (pos.maxScrollExtent <= 0 || _snapItemStride <= 0) return;
-    final atEnd = pos.pixels >= pos.maxScrollExtent - 0.5;
-    // Wrap back to the first card after the last (matches Android).
-    final target = atEnd
-        ? 0.0
-        : (pos.pixels + _snapItemStride).clamp(0.0, pos.maxScrollExtent);
+    // Next index, wrapping past the last — mirrors getNextSnappedPosition().
+    final next = (_currentIndex.value + 1) % widget.offers.length;
+    final target = (next * _snapItemStride - _snapOrigin).clamp(0.0, pos.maxScrollExtent);
+    final distance = (target - pos.pixels).abs();
+    // Already there (sub-pixel) — animating would compute a 0ms duration.
+    if (distance < 0.5) return;
     _scrollController.animateTo(
       target,
-      duration: _advanceDuration,
-      curve: Curves.easeInOut,
+      duration: Duration(milliseconds: (distance * _msPerLogicalPx / _decelerateFactor).ceil()),
+      // DecelerateInterpolator, as LinearSmoothScroller uses onto its target.
+      curve: Curves.decelerate,
     );
-  }
-
-  // User drag pauses the loop; it resumes a few seconds after the drag ends.
-  bool _onUserScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollStartNotification &&
-        notification.dragDetails != null) {
-      _userInteracting = true;
-      _resumeTimer?.cancel();
-      _stopAutoScroll();
-    } else if (notification is ScrollEndNotification) {
-      _resumeTimer?.cancel();
-      _resumeTimer = Timer(_resumeAfterInteraction, () {
-        _userInteracting = false;
-        _maybeStartAutoScroll();
-      });
-    }
-    return false;
   }
 
   void _onScroll() {
@@ -132,11 +212,15 @@ class _PdpOffersState extends State<PdpOffers> {
     final cardCount = widget.offers.length;
     if (cardCount == 0) return;
 
+    // Inverse of the snap grid in build(): offset = k * stride - _snapOrigin.
+    // The end stops are clamped rather than exact, so they still resolve to the
+    // first and last index — 0 rounds down from a partial stride, and the last
+    // rounds up.
     int rounded;
     if (pos.maxScrollExtent > 0 && pos.pixels >= pos.maxScrollExtent - 0.5) {
       rounded = cardCount - 1;
     } else {
-      rounded = (pos.pixels / _snapItemStride).round().clamp(0, cardCount - 1);
+      rounded = ((pos.pixels + _snapOrigin) / _snapItemStride).round().clamp(0, cardCount - 1);
     }
 
     if (rounded != _currentIndex.value) {
@@ -146,18 +230,32 @@ class _PdpOffersState extends State<PdpOffers> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (widget.offers.isEmpty) return const SizedBox.shrink();
 
     final screenW = MediaQuery.sizeOf(context).width;
-    // Card fills the visible area minus padding, leaving a ~38px peek of the next card.
-    final cardWidth = (screenW - AppSpacing.sm * 2 - _kCardGap - 38).clamp(
-      200.0,
-      360.0,
-    );
+    // Sized so a card with neighbours on both sides shows a peek of each, which
+    // is how it pages one card per fling like Android's PagerSnapHelper.
+    final cardWidth = (screenW - (_kCardPeek + _kCardGap) * 2).clamp(200.0, 360.0);
     _snapItemStride = cardWidth + _kCardGap;
 
-    return Padding(
-      padding: EdgeInsets.zero,
+    // Where a card rests when it has a neighbour on each side: centred, so both
+    // peeks show. The list keeps ordinary edge padding, and the snap grid is
+    // shifted by the difference — offset for card k is k * stride - _snapOrigin,
+    // clamped to the scroll range.
+    //
+    // The clamp is the point: card 0's ideal offset is negative and the last
+    // card's overshoots maxScrollExtent, so both collapse to the range ends.
+    // The first card therefore sits flush at the leading padding with no dead
+    // space beside it, the last flush at the trailing padding with the previous
+    // card peeking on its left, and every card between them is centred.
+    _snapOrigin = (screenW - cardWidth) / 2 - AppSpacing.sm;
+
+    // Wraps the whole section, matching Android's gate on promoViewLayout's own
+    // on-screen visibility rather than just the card list's.
+    return VisibilityDetector(
+      key: const ValueKey(PdpTestStrings.offersSection),
+      onVisibilityChanged: _onVisibilityChanged,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -178,12 +276,28 @@ class _PdpOffersState extends State<PdpOffers> {
           AppSpacing.verticalGapLgMd,
 
           // ── Horizontal card list ──────────────────────────────────────────
+          // Two stop triggers, matching Android's two exactly:
+          //  * pointer down anywhere on a card, from the itemView touch
+          //    listener — except on Copy, see _onCarouselPointerDown;
+          //  * a drag beginning, from SCROLL_STATE_DRAGGING. This is what stops
+          //    the loop when the drag starts on Copy, where the pointer-down
+          //    itself is exempt.
           NotificationListener<ScrollNotification>(
-            onNotification: _onUserScrollNotification,
-            child: _OfferCardList(
-              offers: widget.offers,
-              scrollController: _scrollController,
-              cardWidth: cardWidth,
+            onNotification: (notification) {
+              if (notification is ScrollStartNotification && notification.dragDetails != null) {
+                _stopForUserAction();
+              }
+              return false;
+            },
+            child: Listener(
+              onPointerDown: _onCarouselPointerDown,
+              child: _OfferCardList(
+                offers: widget.offers,
+                scrollController: _scrollController,
+                cardWidth: cardWidth,
+                snapOrigin: _snapOrigin,
+                onCopyPointerDown: _onCopyPointerDown,
+              ),
             ),
           ),
 
@@ -215,11 +329,17 @@ class _OfferCardList extends StatelessWidget {
     required this.offers,
     required this.scrollController,
     required this.cardWidth,
+    required this.snapOrigin,
+    required this.onCopyPointerDown,
   });
 
   final List<OfferEntity> offers;
   final ScrollController scrollController;
   final double cardWidth;
+  final double snapOrigin;
+
+  // Tags a pointer as landing on Copy, exempting it from stopping auto-scroll.
+  final ValueChanged<PointerDownEvent> onCopyPointerDown;
 
   @override
   Widget build(BuildContext context) {
@@ -228,7 +348,7 @@ class _OfferCardList extends StatelessWidget {
       child: ListView.separated(
         controller: scrollController,
         scrollDirection: Axis.horizontal,
-        physics: _SnapScrollPhysics(itemStride: cardWidth + _kCardGap),
+        physics: _SnapScrollPhysics(itemStride: cardWidth + _kCardGap, snapOrigin: snapOrigin),
         padding: AppSpacing.paddingHorizontalSm,
         itemCount: offers.length,
         separatorBuilder: (_, _) => const SizedBox(width: _kCardGap),
@@ -239,6 +359,7 @@ class _OfferCardList extends StatelessWidget {
           ),
           offer: offers[index],
           width: cardWidth,
+          onCopyPointerDown: onCopyPointerDown,
         ),
       ),
     );
@@ -251,6 +372,7 @@ class _OfferCard extends StatelessWidget {
   const _OfferCard({
     required this.offer,
     required this.width,
+    required this.onCopyPointerDown,
     super.key,
     this.copyKey,
   });
@@ -258,6 +380,7 @@ class _OfferCard extends StatelessWidget {
   final OfferEntity offer;
   final double width;
   final Key? copyKey;
+  final ValueChanged<PointerDownEvent> onCopyPointerDown;
 
   @override
   Widget build(BuildContext context) {
@@ -321,18 +444,24 @@ class _OfferCard extends StatelessWidget {
           // Copy button — only if copyCoupon flag is set
           if (offer.copyCoupon && offer.couponCode != null) ...[
             // const SizedBox(height: 10),
-            GestureDetector(
-              key: copyKey,
-              onTap: () {
-                Clipboard.setData(ClipboardData(text: offer.couponCode!));
-                PdpSnackbar.show(context, '${offer.couponCode} copied!');
-              },
-              child: Text(
-                PdpStrings.copy,
-                style: AppTypographyV1.bodySmall.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: _kCopyColor,
-                  height: 1.0,
+            // Tags the pointer so the carousel's own listener leaves auto-scroll
+            // running for this touch — Android's `copy` consumes ACTION_DOWN, so
+            // the card touch listener that stops it never fires.
+            Listener(
+              onPointerDown: onCopyPointerDown,
+              child: GestureDetector(
+                key: copyKey,
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: offer.couponCode!));
+                  PdpSnackbar.showCouponCopied(context, offer.couponCode!);
+                },
+                child: Text(
+                  PdpStrings.copy,
+                  style: AppTypographyV1.bodySmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: _kCopyColor,
+                    height: 1.0,
+                  ),
                 ),
               ),
             ),
@@ -351,26 +480,28 @@ class _OfferCard extends StatelessWidget {
 class _SnapScrollPhysics extends ScrollPhysics {
   final double itemStride;
 
-  const _SnapScrollPhysics({required this.itemStride, super.parent});
+  // Offset of card k is k * itemStride - snapOrigin, clamped to the scroll
+  // range — see PdpOffers.build. The clamp is what lets the end cards sit flush
+  // against the screen edges while the cards between them stay centred.
+  final double snapOrigin;
+
+  const _SnapScrollPhysics({required this.itemStride, required this.snapOrigin, super.parent});
 
   @override
   _SnapScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return _SnapScrollPhysics(
       itemStride: itemStride,
+      snapOrigin: snapOrigin,
       parent: buildParent(ancestor),
     );
   }
 
-  double _getTargetPixels(
-    ScrollMetrics position,
-    Tolerance tolerance,
-    double velocity,
-  ) {
+  double _getTargetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
     final pixels = position.pixels;
     final maxExtent = position.maxScrollExtent;
     if (itemStride <= 0 || maxExtent <= 0) return pixels;
 
-    double page = pixels / itemStride;
+    double page = (pixels + snapOrigin) / itemStride;
     if (velocity < -tolerance.velocity) {
       page = page.floorToDouble();
     } else if (velocity > tolerance.velocity) {
@@ -378,23 +509,16 @@ class _SnapScrollPhysics extends ScrollPhysics {
     } else {
       page = page.roundToDouble();
     }
-    double target = page * itemStride;
 
-    if (target > maxExtent) {
-      target = maxExtent;
-    } else if (pixels > maxExtent - itemStride &&
-        (maxExtent - pixels).abs() < (target - pixels).abs()) {
-      target = maxExtent;
-    }
-
-    return target.clamp(0.0, maxExtent);
+    // Clamping is all that is needed to reach either end: card 0's stop is
+    // negative and the last card's overshoots maxExtent, so both land exactly on
+    // a range end. An earlier version instead pulled to maxExtent whenever it was
+    // the nearer of the two, which also hijacked backward flings near the end.
+    return (page * itemStride - snapOrigin).clamp(0.0, maxExtent);
   }
 
   @override
-  Simulation? createBallisticSimulation(
-    ScrollMetrics position,
-    double velocity,
-  ) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
         (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
       return super.createBallisticSimulation(position, velocity);
@@ -402,13 +526,21 @@ class _SnapScrollPhysics extends ScrollPhysics {
     final tolerance = toleranceFor(position);
     final target = _getTargetPixels(position, tolerance, velocity);
     if (target == position.pixels) return null;
-    return ScrollSpringSimulation(
+    // Clamped so the settle can only approach the target, never pass it. The
+    // spring is fed the fling's velocity, and even overdamped it overshoots once
+    // on a fast fling before coming back — that rebound is the bounce Android
+    // does not have: its SnapHelper aligns with a decelerating smoothScrollBy,
+    // which is monotone.
+    final simulation = ScrollSpringSimulation(
       spring,
       position.pixels,
       target,
       velocity,
       tolerance: tolerance,
     );
+    return target > position.pixels
+        ? ClampedSimulation(simulation, xMin: position.pixels, xMax: target)
+        : ClampedSimulation(simulation, xMin: target, xMax: position.pixels);
   }
 
   @override
@@ -425,10 +557,7 @@ class _CouponChip extends StatelessWidget {
     return CustomPaint(
       // Dashed border drawn on top of the fill — Flutter's BoxDecoration has no
       // dashed BorderStyle, so we stroke a dashed rounded-rect ourselves.
-      foregroundPainter: const _DashedRRectPainter(
-        color: _kChipBorder,
-        radius: 5,
-      ),
+      foregroundPainter: const _DashedRRectPainter(color: _kChipBorder, radius: 5),
       child: Container(
         padding: const EdgeInsets.all(6),
         decoration: const BoxDecoration(
@@ -470,34 +599,25 @@ class _DashedRRectPainter extends CustomPainter {
     final rect =
         const Offset(_strokeWidth / 2, _strokeWidth / 2) &
         Size(size.width - _strokeWidth, size.height - _strokeWidth);
-    final path = Path()
-      ..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)));
+    final path = Path()..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)));
 
     for (final metric in path.computeMetrics()) {
       var dist = 0.0;
       while (dist < metric.length) {
-        canvas.drawPath(
-          metric.extractPath(dist, (dist + _dash).clamp(0.0, metric.length)),
-          paint,
-        );
+        canvas.drawPath(metric.extractPath(dist, (dist + _dash).clamp(0.0, metric.length)), paint);
         dist += _dash + _gap;
       }
     }
   }
 
   @override
-  bool shouldRepaint(_DashedRRectPainter old) =>
-      old.color != color || old.radius != radius;
+  bool shouldRepaint(_DashedRRectPainter old) => old.color != color || old.radius != radius;
 }
 
 // ── Scroll indicator ──────────────────────────────────────────────────────────
 
 class _ScrollIndicator extends StatelessWidget {
-  const _ScrollIndicator({
-    required this.currentIndex,
-    required this.cardCount,
-    super.key,
-  });
+  const _ScrollIndicator({required this.currentIndex, required this.cardCount, super.key});
 
   final int currentIndex;
   final int cardCount;
@@ -510,57 +630,62 @@ class _ScrollIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     if (cardCount <= 1) return const SizedBox.shrink();
 
-    final screenW = MediaQuery.sizeOf(context).width;
-    // Indicator represents 1 card as a fraction of all cards (capped at 20% min).
-    final indicatorFraction = (1.0 / cardCount).clamp(0.1, 1.0);
-    final indicatorWidth = (screenW * indicatorFraction).clamp(40.0, screenW);
-    final maxTravel = screenW - indicatorWidth;
-    final progress = currentIndex / (cardCount - 1);
-    final indicatorOffset = progress.clamp(0.0, 1.0) * maxTravel;
+    // Measured, not taken from MediaQuery: this sits inside the section's
+    // horizontal padding, so the track is narrower than the screen. Sizing the
+    // thumb and its travel against the screen width overflowed the Stack by the
+    // padding, and Stack clips — which cut the right end off the thumb once it
+    // reached the far end, making it look shorter on the last card.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final trackWidth = constraints.maxWidth;
+        // Indicator represents 1 card as a fraction of all cards (capped at 20% min).
+        final indicatorFraction = (1.0 / cardCount).clamp(0.1, 1.0);
+        final indicatorWidth = (trackWidth * indicatorFraction).clamp(40.0, trackWidth);
+        final maxTravel = trackWidth - indicatorWidth;
+        final progress = currentIndex / (cardCount - 1);
+        final indicatorOffset = progress.clamp(0.0, 1.0) * maxTravel;
 
-    const activeHeight = 3.0;
-    const trackHeight = activeHeight / 3;
+        const activeHeight = 3.0;
+        const trackHeight = activeHeight / 3;
 
-    return SizedBox(
-      height: activeHeight,
-      width: screenW,
-      child: Stack(
-        children: [
-          // Track height is one third of the active thumb height, aligned to the same
-          // baseline so the thumb sits above the track instead of overlapping its middle.
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: trackHeight,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: _kIndicatorTrackColor.withValues(alpha: 0.2),
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(trackHeight / 2),
+        return SizedBox(
+          height: activeHeight,
+          width: trackWidth,
+          child: Stack(
+            children: [
+              // Track height is one third of the active thumb height, aligned to the same
+              // baseline so the thumb sits above the track instead of overlapping its middle.
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: trackHeight,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: _kIndicatorTrackColor.withValues(alpha: 0.2),
+                    borderRadius: const BorderRadius.all(Radius.circular(trackHeight / 2)),
+                  ),
                 ),
               ),
-            ),
-          ),
-          // Active indicator — eases to the snapped card's position.
-          AnimatedPositioned(
-            duration: _animDuration,
-            curve: Curves.easeOut,
-            left: indicatorOffset,
-            top: 0,
-            width: indicatorWidth,
-            height: activeHeight,
-            child: const DecoratedBox(
-              decoration: BoxDecoration(
-                color: _kIndicatorActiveColor,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(activeHeight / 2),
+              // Active indicator — eases to the snapped card's position.
+              AnimatedPositioned(
+                duration: _animDuration,
+                curve: Curves.easeOut,
+                left: indicatorOffset,
+                top: 0,
+                width: indicatorWidth,
+                height: activeHeight,
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: _kIndicatorActiveColor,
+                    borderRadius: BorderRadius.all(Radius.circular(activeHeight / 2)),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

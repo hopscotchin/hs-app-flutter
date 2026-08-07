@@ -61,10 +61,7 @@ void showPdpSizeChartBottomSheet(BuildContext context, {String? productName}) {
         curve: Curves.easeOutCubic,
         reverseCurve: Curves.easeInCubic,
       );
-      final slide = Tween<Offset>(
-        begin: const Offset(1, 0),
-        end: Offset.zero,
-      ).animate(curved);
+      final slide = Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero).animate(curved);
       return SlideTransition(
         position: slide,
         child: FadeTransition(opacity: curved, child: child),
@@ -92,9 +89,7 @@ class _SizeChartSheet extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  productName != null
-                      ? 'Size Chart For $productName'
-                      : 'Size Chart',
+                  productName != null ? 'Size Chart For $productName' : 'Size Chart',
                   key: const ValueKey(PdpTestStrings.sizeChartSheetTitle),
                   style: const TextStyle(
                     fontSize: 20,
@@ -105,6 +100,9 @@ class _SizeChartSheet extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              // Keeps a long, ellipsised title clear of the close icon — the
+              // Expanded above would otherwise run the "..." right up to it.
+              const SizedBox(width: 16),
               GestureDetector(
                 key: const ValueKey(PdpTestStrings.sizeChartSheetCloseButton),
                 onTap: () => AppNavigator.goBack(context),
@@ -145,10 +143,8 @@ class _SizeChartSheet extends StatelessWidget {
                 return ListView.builder(
                   padding: EdgeInsets.only(bottom: 24 + bottomInset),
                   itemCount: state.sizeChart!.charts.length,
-                  itemBuilder: (_, i) => _SizeChartDtoView(
-                    dto: state.sizeChart!.charts[i],
-                    chartIndex: i,
-                  ),
+                  itemBuilder: (_, i) =>
+                      _SizeChartDtoView(dto: state.sizeChart!.charts[i], chartIndex: i),
                 );
               }
               return const SizedBox.shrink();
@@ -184,11 +180,9 @@ class _SizeChartDtoViewState extends State<_SizeChartDtoView> {
 
   SizeChartDtoEntity get dto => widget.dto;
 
-  bool get _hasLength =>
-      dto.parameterMeasureTypes.contains('L') && dto.lengthUnit != null;
+  bool get _hasLength => dto.parameterMeasureTypes.contains('L') && dto.lengthUnit != null;
 
-  bool get _hasWeight =>
-      dto.parameterMeasureTypes.contains('W') && dto.weightUnit != null;
+  bool get _hasWeight => dto.parameterMeasureTypes.contains('W') && dto.weightUnit != null;
 
   @override
   void initState() {
@@ -222,9 +216,7 @@ class _SizeChartDtoViewState extends State<_SizeChartDtoView> {
     }
     final progress = (pos.pixels / max).clamp(0.0, 1.0);
     final total = pos.viewportDimension + max;
-    final fraction = total > 0
-        ? (pos.viewportDimension / total).clamp(0.15, 1.0)
-        : 1.0;
+    final fraction = total > 0 ? (pos.viewportDimension / total).clamp(0.15, 1.0) : 1.0;
     _lineState.value = (progress: progress, fraction: fraction);
   }
 
@@ -254,19 +246,43 @@ class _SizeChartDtoViewState extends State<_SizeChartDtoView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Illustration image
+        // Illustration image, with the measurement-cue layers stacked over it.
+        // Geometry copied from Android's SizeChartAdapter so the chest/length
+        // indicator lines land on the product outline exactly as they do there:
+        //
+        //  - sizeChartImageContainer is displayWidth x displayWidth, edge to
+        //    edge, so this is a full-bleed square with no horizontal padding.
+        //  - illustrationImage gets those square LayoutParams and keeps
+        //    ImageView's default FIT_CENTER  -> contain, centre-aligned.
+        //  - every cueImageUrl is added to cueLayout (also displayWidth tall)
+        //    as a MATCH_PARENT view with FIT_START -> contain, top-left aligned.
+        //
+        // The alignments differ between the base and the cues; that asymmetry is
+        // Android's and the artwork is authored against it, so it is reproduced
+        // rather than normalised.
         if (dto.illustrationImageUrl != null) ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-            child: CachedNetworkImage(
-              imageUrl: dto.illustrationImageUrl!,
-              width: double.infinity,
-              fit: BoxFit.contain,
-              placeholder: (_, url) => const SizedBox(
-                height: 160,
-                child: ColoredBox(color: Color(0xFFF6F6F6)),
-              ),
-              errorWidget: (_, url, error) => const SizedBox.shrink(),
+          AspectRatio(
+            aspectRatio: 1,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                CachedNetworkImage(
+                  imageUrl: dto.illustrationImageUrl!,
+                  fit: BoxFit.contain,
+                  placeholder: (_, url) => const ColoredBox(color: Color(0xFFF6F6F6)),
+                  errorWidget: (_, url, error) => const SizedBox.shrink(),
+                ),
+                // No placeholder — these are transparent overlays, so a grey box
+                // while loading would cover the illustration underneath.
+                for (final cueUrl in dto.cueImageUrlList)
+                  CachedNetworkImage(
+                    imageUrl: cueUrl,
+                    fit: BoxFit.contain,
+                    alignment: Alignment.topLeft,
+                    placeholder: (_, url) => const SizedBox.shrink(),
+                    errorWidget: (_, url, error) => const SizedBox.shrink(),
+                  ),
+              ],
             ),
           ),
         ],
@@ -307,11 +323,10 @@ class _SizeChartDtoViewState extends State<_SizeChartDtoView> {
           const SizedBox(height: 24),
           LayoutBuilder(
             builder: (context, constraints) {
-              final colWidth =
-                  (constraints.maxWidth / dto.parameterNames.length).clamp(
-                    _kColWidth,
-                    double.infinity,
-                  );
+              final colWidth = (constraints.maxWidth / dto.parameterNames.length).clamp(
+                _kColWidth,
+                double.infinity,
+              );
               return SingleChildScrollView(
                 controller: _tableController,
                 scrollDirection: Axis.horizontal,
@@ -331,9 +346,7 @@ class _SizeChartDtoViewState extends State<_SizeChartDtoView> {
           const SizedBox(height: 8),
           // Smooth horizontal scroll indicator — collapses when the table fits.
           _TableScrollIndicator(
-            key: ValueKey(
-              '${PdpTestStrings.sizeChartTableIndicator}_${widget.chartIndex}',
-            ),
+            key: ValueKey('${PdpTestStrings.sizeChartTableIndicator}_${widget.chartIndex}'),
             state: _lineState,
           ),
         ],
@@ -348,11 +361,7 @@ class _SizeChartDtoViewState extends State<_SizeChartDtoView> {
               children: [
                 const Text(
                   'Size notes and fitting tips:',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400, color: Colors.black),
                 ),
                 const SizedBox(height: 12),
                 ...dto.notesList.map(
@@ -361,10 +370,7 @@ class _SizeChartDtoViewState extends State<_SizeChartDtoView> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          '• ',
-                          style: TextStyle(fontSize: 12, color: Colors.black),
-                        ),
+                        const Text('• ', style: TextStyle(fontSize: 12, color: Colors.black)),
                         Expanded(
                           child: Text(
                             note,
@@ -416,12 +422,8 @@ class _TableScrollIndicator extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final trackWidth = constraints.maxWidth;
-              final thumbWidth = (trackWidth * s.fraction).clamp(
-                24.0,
-                trackWidth,
-              );
-              final left =
-                  s.progress.clamp(0.0, 1.0) * (trackWidth - thumbWidth);
+              final thumbWidth = (trackWidth * s.fraction).clamp(24.0, trackWidth);
+              final left = s.progress.clamp(0.0, 1.0) * (trackWidth - thumbWidth);
               return SizedBox(
                 height: _activeHeight,
                 width: trackWidth,
@@ -435,9 +437,7 @@ class _TableScrollIndicator extends StatelessWidget {
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                           color: _kIndicatorColor.withValues(alpha: 0.2),
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(_trackHeight / 2),
-                          ),
+                          borderRadius: const BorderRadius.all(Radius.circular(_trackHeight / 2)),
                         ),
                       ),
                     ),
@@ -449,9 +449,7 @@ class _TableScrollIndicator extends StatelessWidget {
                       child: const DecoratedBox(
                         decoration: BoxDecoration(
                           color: _kIndicatorColor,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(_activeHeight / 2),
-                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(_activeHeight / 2)),
                         ),
                       ),
                     ),
@@ -491,19 +489,13 @@ class _UnitToggleRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w400,
-            color: Colors.black,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400, color: Colors.black),
         ),
         const SizedBox(width: 8),
         for (int i = 0; i < options.length; i++) ...[
           if (i > 0) const SizedBox(width: 16),
           _UnitButton(
-            key: ValueKey(
-              '${PdpTestStrings.sizeChartUnitButton}_${chartIndex}_${options[i]}',
-            ),
+            key: ValueKey('${PdpTestStrings.sizeChartUnitButton}_${chartIndex}_${options[i]}'),
             label: options[i],
             isSelected: options[i] == selected,
             onTap: () => onChanged(options[i]),
@@ -583,9 +575,7 @@ class _SizeTable extends StatelessWidget {
           children: List.generate(
             colCount,
             (i) => _HeaderCell(
-              key: ValueKey(
-                '${PdpTestStrings.sizeChartHeader}_${chartIndex}_$i',
-              ),
+              key: ValueKey('${PdpTestStrings.sizeChartHeader}_${chartIndex}_$i'),
               text: headers[i],
               width: colWidth,
             ),
@@ -598,13 +588,9 @@ class _SizeTable extends StatelessWidget {
             color: rowIdx.isOdd ? _kRowAltBg : Colors.white,
             child: Row(
               children: List.generate(colCount, (colIdx) {
-                final raw = colIdx < row.values.length
-                    ? row.values[colIdx]
-                    : '';
+                final raw = colIdx < row.values.length ? row.values[colIdx] : '';
                 return _DataCell(
-                  key: ValueKey(
-                    '${PdpTestStrings.sizeChartCell}_${chartIndex}_${rowIdx}_$colIdx',
-                  ),
+                  key: ValueKey('${PdpTestStrings.sizeChartCell}_${chartIndex}_${rowIdx}_$colIdx'),
                   text: convertValue(raw, colIdx),
                   width: colWidth,
                 );
@@ -635,11 +621,7 @@ class _HeaderCell extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-          color: Colors.black,
-        ),
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -664,11 +646,7 @@ class _DataCell extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Text(
             text,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Colors.black,
-            ),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.black),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
