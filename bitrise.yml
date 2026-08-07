@@ -133,7 +133,7 @@ workflows:
       - file-downloader@1:
           title: Download release keystore zip from Bitrise Generic File Storage
           inputs:
-            - source: "BITRISEIO_ANDROID_KEYSTORE_ZIP_URL"
+            - source: "$BITRISEIO_ANDROID_KEYSTORE_ZIP_URL"
             - destination: "$BITRISE_SOURCE_DIR/android/keystore.zip"
       - script:
           title: Unzip keystore into android/

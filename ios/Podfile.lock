@@ -13,7 +13,7 @@ PODS:
   - HyperSDK (2.2.4):
     - HyperCore (= 0.0.10)
     - JuspaySafeBrowser (= 0.1.88)
-  - hypersdkflutter (4.0.57):
+  - hypersdkflutter (4.0.55):
     - Flutter
     - HyperSDK (= 2.2.4)
   - JuspaySafeBrowser (0.1.88)
@@ -61,7 +61,7 @@ SPEC CHECKSUMS:
   flutter_fgbg: d3da78df78454b1808f0829a5da9cd17dfe16444
   HyperCore: c4bd7222c69e3d68db8bb1ca2e40c43fd5f4127f
   HyperSDK: 891cfc69cf3befad4fd0951297a93801c4a6627d
-  hypersdkflutter: 901e34a3fd5e7ae0e35acbacf784147e502a0f12
+  hypersdkflutter: cd0dab8752650c09458e5436ef83f653f6108d13
   JuspaySafeBrowser: 04ad004fa85e9db766d4e2af45f60ac6b5eeba61
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   segment_analytics: 74650ab14e31db0a16a1599dbc11aabd644192a6
