@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -391,7 +392,14 @@ class _OfferCard extends StatelessWidget {
         color: _kCardBg,
         borderRadius: BorderRadius.all(Radius.circular(_kCardRadius)),
       ),
-      padding: AppSpacing.paddingMd,
+      // Bottom padding is omitted here and re-applied inside the Copy button so
+      // the strip below the label is tappable rather than dead space. Cards
+      // without a Copy button close the gap with their own bottom padding.
+      padding: const EdgeInsets.only(
+        left: AppSpacing.md,
+        right: AppSpacing.md,
+        top: AppSpacing.md,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -451,21 +459,43 @@ class _OfferCard extends StatelessWidget {
               onPointerDown: onCopyPointerDown,
               child: GestureDetector(
                 key: copyKey,
+                // The label alone is only ~53x13, well under a comfortable tap
+                // target. Padding grows the hit box to ~69x37 without shifting
+                // the text: bottom is the card's own bottom padding moved in
+                // here, top reclaims blank space the Expanded above never uses,
+                // and right extends past the left-aligned label. opaque is
+                // required — the default deferToChild would only hit the Text.
+                behavior: HitTestBehavior.opaque,
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: offer.couponCode!));
-                  PdpSnackbar.showCouponCopied(context, offer.couponCode!);
+                  // Android draws its own clipboard confirmation from 13 (API
+                  // 33) on, so ours would be a second popup for the same tap.
+                  // iOS has no system clipboard UI at all — without this
+                  // snackbar the copy would be silent there.
+                  if (!Platform.isAndroid) {
+                    PdpSnackbar.showCouponCopied(context, offer.couponCode!);
+                  }
                 },
-                child: Text(
-                  PdpStrings.copy,
-                  style: AppTypographyV1.bodySmall.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: _kCopyColor,
-                    height: 1.0,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: AppSpacing.xs,
+                    right: AppSpacing.md,
+                    bottom: AppSpacing.md,
+                  ),
+                  child: Text(
+                    PdpStrings.copy,
+                    style: AppTypographyV1.bodySmall.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: _kCopyColor,
+                      height: 1.0,
+                    ),
                   ),
                 ),
               ),
             ),
-          ],
+          ] else
+            // No Copy button to carry it, so restore the card's bottom padding.
+            const SizedBox(height: AppSpacing.md),
         ],
       ),
     );

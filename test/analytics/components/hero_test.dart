@@ -4,165 +4,157 @@ import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart'
 import 'package:hs_app_flutter/core/analytics/constants/analytics_events.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dart';
 import 'package:hs_app_flutter/core/analytics/home/home_component_click_handlers.dart';
-import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.dart';
-import 'package:hs_app_flutter/core/analytics/home/journey_worker.dart';
 import 'package:hs_app_flutter/features/discover/data/models/component_models.dart';
 import 'package:hs_app_flutter/features/discover/domain/entities/home_page_entity.dart';
 
-import '../support/analytics_test_harness.dart';
 import '../support/common_props_matchers.dart';
-import '../support/fixture_loader.dart';
+import '../support/home_analytics_harness.dart';
 
-/// Hero — chain per tile: root.trackingMeta + tile.trackingMeta +
-/// tileDetail.trackingMeta (may be absent) + tileGrid[0].trackingMeta.
-/// Component looked up by `type == 'Hero'` — no position hardcoded.
-///
-/// If the current `home_page_all.json` fixture doesn't contain a Hero, every
-/// test in this file skips gracefully with a clear reason. Capture a
-/// Hero-bearing response into the fixture to enable them.
+/// Hero — one `banner_impression` per tile the user ACTUALLY saw. A Hero
+/// carousel shows a single tile at a time, so emitting all `hero.tiles` on
+/// component-visibility (the pre-fix behaviour) massively over-reported.
+/// The Hero widget now records tile visibility through
+/// `notifyHeroTileVisible` on its own VisibilityDetector rising edge and
+/// each `onPageChanged`; the tracker emits one event per recorded tile.
+/// Payload: root.trackingMeta + tile.trackingMeta merged (non-null).
+/// Skipped when the fixture has no clean Hero component.
 void main() {
-  final fx = HomeFixture.load();
-  final skipIfMissing = fx.firstOfType(PageComponentType.hero) == null
-      ? 'no Hero component in current fixture — capture a Hero-bearing '
-          'homepage response into home_page_all.json'
-      : null;
-
-  late AnalyticsTestHarness h;
-  late HomeTrackAnalyticManager tracker;
-  late PageComponent hero;
-  late int heroIndex;
+  final skipReason = HomeAnalyticsHarness.skipReasonFor(PageComponentType.hero);
+  late HomeAnalyticsHarness harness;
 
   setUp(() async {
-    h = await AnalyticsTestHarness.build();
-    tracker = HomeTrackAnalyticManager(
-      analytics: h.analytics,
-      orderAttribution: h.orderAttribution,
-      lpAttribution: h.lpAttribution,
-      journeyWorker: JourneyWorker(h.analytics),
-    );
-    tracker.extraData = const ExtraData(fromHomePage: true);
-    tracker.sortBarName = AnalyticsDefaults.sortBarAll;
-    tracker.pageComponents = fx.components;
-
-    // Random Hero per test.
-    heroIndex = fx.randomIndexOfType(PageComponentType.hero);
-    hero = fx.components[heroIndex];
-    printOnFailure('picked Hero at index=$heroIndex, position=${hero.position}');
-    expectNoLpPrefixedTrackingMetaKeys(fx.rootTrackingMetaAt(heroIndex));
-
-    await h.orderAttribution.setFunnel(AnalyticsDefaults.discover);
-    await h.orderAttribution.setSortBar(AnalyticsDefaults.sortBarAll);
+    harness = await HomeAnalyticsHarness.setUp(PageComponentType.hero);
   });
-  tearDown(() => h.tearDown());
+  tearDown(() => harness.tearDown());
 
-  // ─── banner_impression ─────────────────────────────────────────────
+  // ─── banner_impression (per Hero tile) ─────────────────────────────
 
   group('banner_impression', () {
-    test('fires once with client keys + full root trackingMeta (no nulls)', () async {
-      tracker.notifyVisible(heroIndex);
-      await tracker.flushJourney();
-
-      final payload = h.singleEvent(AnalyticsEvents.bannerImpression);
-      expectTimeBuckets(payload);
-      expectTimestamp(payload);
-      expectNoNullFields(payload);
-
-      expect(payload[AnalyticsProperties.type], PageComponentType.hero);
-      expect(payload[AnalyticsProperties.position], hero.position);
-      expect(payload[AnalyticsProperties.funnel], AnalyticsDefaults.discover);
-      expect(payload[AnalyticsProperties.sortbar], AnalyticsDefaults.sortBarAll);
-
-      final root = fx.rootTrackingMetaAt(heroIndex);
-      for (final entry in root.entries) {
-        expect(payload[entry.key], entry.value,
-            reason: 'root trackingMeta.${entry.key} lost');
-      }
-    }, skip: skipIfMissing);
-
-    test('required keys are all present, non-null, non-empty (home context)',
+    test('component-visibility ALONE emits nothing — tile visibility required',
         () async {
-      tracker.notifyVisible(heroIndex);
-      await tracker.flushJourney();
-      final payload = h.singleEvent(AnalyticsEvents.bannerImpression);
-      expectRequiredNonEmpty(payload, requiredKeysBannerImpressionHome);
-    }, skip: skipIfMissing);
-  });
+      // Regression pin. Before the fix, Hero flushed one event per
+      // fixture tile the moment the outer widget became visible; the
+      // user would only see one at a time and the rest were phantoms.
+      // Now `notifyVisible(componentIndex)` alone must emit zero.
+      final ctx = harness;
+      ctx.tracker.notifyVisible(ctx.componentIndex);
+      await ctx.tracker.flushJourney();
 
-  // ─── tile_impression ────────────────────────────────────────────────
+      expect(ctx.h.hasEvent(AnalyticsEvents.bannerImpression), isFalse,
+          reason: 'Hero must not emit until specific tiles are recorded '
+              'as visible via notifyHeroTileVisible');
+    }, skip: skipReason);
 
-  group('tile_impression', () {
-    test('fires one tile_impression per Hero tile (no null fields)', () async {
-      tracker.notifyVisible(heroIndex);
-      await tracker.flushJourney();
+    test('one banner_impression per recorded tile — no more, no less',
+        () async {
+      // User swipes tile 0 → tile 1 (or auto-scrolls the same). Only
+      // those two tiles are seen; only those two should ship.
+      final ctx = harness;
+      final tileCount = (ctx.component.data!['tiles'] as List).length;
+      if (tileCount < 2) return; // skip on single-tile fixture
+      ctx.tracker.notifyHeroTileVisible(ctx.componentIndex, 0);
+      ctx.tracker.notifyHeroTileVisible(ctx.componentIndex, 1);
+      await ctx.tracker.flushJourney();
 
-      final events = h.eventsNamed(AnalyticsEvents.tileImpression);
-      final tileCount = (hero.data!['tiles'] as List).length;
-      expect(events, hasLength(tileCount));
-      for (final e in events) {
+      expect(ctx.h.eventsNamed(AnalyticsEvents.bannerImpression), hasLength(2));
+    }, skip: skipReason);
+
+    test('re-recorded tile emits again — each view is its own impression',
+        () async {
+      // User cycles the whole carousel (say 10 tiles) then swipes back to
+      // 1, 2, 3 → 13 recorded views → 13 events on flush. Auto-scroll
+      // wrap counts too.
+      final ctx = harness;
+      final tileCount = (ctx.component.data!['tiles'] as List).length;
+      // Full pass 0..N-1, plus a partial re-visit of 0..2 (or as many as
+      // fit — single-tile fixture short-circuits).
+      final revisit = tileCount >= 3 ? 3 : tileCount;
+      for (var i = 0; i < tileCount; i++) {
+        ctx.tracker.notifyHeroTileVisible(ctx.componentIndex, i);
+      }
+      for (var i = 0; i < revisit; i++) {
+        ctx.tracker.notifyHeroTileVisible(ctx.componentIndex, i);
+      }
+      await ctx.tracker.flushJourney();
+
+      expect(ctx.h.eventsNamed(AnalyticsEvents.bannerImpression),
+          hasLength(tileCount + revisit));
+    }, skip: skipReason);
+
+    test('every recorded tile ships with root+tile merged and required keys',
+        () async {
+      // Simulates the exhaustive "user cycled through every tile" case —
+      // the same coverage the old always-emit-everything path had.
+      final ctx = harness;
+      await ctx.makeAllHeroTilesVisibleAndFlush();
+
+      final events = ctx.h.eventsNamed(AnalyticsEvents.bannerImpression);
+      final tiles = ctx.component.data!['tiles'] as List;
+      expect(events, hasLength(tiles.length));
+      for (var i = 0; i < tiles.length; i++) {
+        final e = events[i];
         expectNoNullFields(e);
+        expectTimeBuckets(e);
+        expectTimestamp(e);
+        expectRequiredNonEmpty(e, requiredKeysBannerImpressionHome);
         expect(e[AnalyticsProperties.type], PageComponentType.hero);
-        expect(e[AnalyticsProperties.position], hero.position);
+        expect(e[AnalyticsProperties.position], ctx.position);
         expect(e[AnalyticsProperties.funnel], AnalyticsDefaults.discover);
-      }
-    }, skip: skipIfMissing);
 
-    test('funnel_tile values are unique per tile', () async {
-      tracker.notifyVisible(heroIndex);
-      await tracker.flushJourney();
-      final funnelTiles = h
-          .eventsNamed(AnalyticsEvents.tileImpression)
-          .map((e) => e['funnel_tile'])
-          .toList();
-      expect(funnelTiles.toSet(), hasLength(funnelTiles.length),
-          reason: 'each hero tile must have a unique funnel_tile');
-    }, skip: skipIfMissing);
-
-    test('required keys on every tile_impression (home context)', () async {
-      tracker.notifyVisible(heroIndex);
-      await tracker.flushJourney();
-      for (final e in h.eventsNamed(AnalyticsEvents.tileImpression)) {
-        expectRequiredNonEmpty(e, requiredKeysTileImpressionHome);
+        final tileMeta =
+            (tiles[i] as Map<String, dynamic>)['trackingMeta'] as Map<String, dynamic>? ??
+                const <String, dynamic>{};
+        expectRootMerged(e, ctx.rootMeta, override: tileMeta.keys.toSet());
+        for (final entry in tileMeta.entries) {
+          if (entry.value == null) continue;
+          if (attributionOwnedKeys.contains(entry.key)) continue;
+          expect(e[entry.key], entry.value,
+              reason: 'tile[$i] lost tile.${entry.key}');
+        }
       }
-    }, skip: skipIfMissing);
+    }, skip: skipReason);
   });
+
+  // ─── tile_impression: retired ──────────────────────────────────────
+
+  test('tile_impression is retired — never fires',
+      () async => harness.expectTileImpressionRetired(),
+      skip: skipReason);
 
   // ─── tile_clicked ──────────────────────────────────────────────────
 
   group('tile_clicked (via onHeroTileTapped)', () {
     test('fires with root + tile + first-detail + first-image chain', () async {
-      final heroData = ComponentDataParser.parseHero(hero.data!);
-      await tracker.onHeroTileTapped(heroData, heroData.tiles.first);
+      final ctx = harness;
+      final heroData = ComponentDataParser.parseHero(ctx.component.data!);
+      await ctx.tracker.onHeroTileTapped(heroData, heroData.tiles.first);
 
-      final payload = h.singleEvent(AnalyticsEvents.tileClicked);
+      final payload = ctx.h.singleEvent(AnalyticsEvents.tileClicked);
       expectTimestamp(payload);
       expectNoNullFields(payload);
       expect(payload[AnalyticsProperties.funnel], AnalyticsDefaults.discover);
       expect(payload[AnalyticsProperties.sortbar], AnalyticsDefaults.sortBarAll);
-    }, skip: skipIfMissing);
+    }, skip: skipReason);
 
     test('attribution carries forward to next-screen event', () async {
-      final heroData = ComponentDataParser.parseHero(hero.data!);
-      await tracker.onHeroTileTapped(heroData, heroData.tiles.first);
-      h.clear();
+      final ctx = harness;
+      final heroData = ComponentDataParser.parseHero(ctx.component.data!);
+      await ctx.tracker.onHeroTileTapped(heroData, heroData.tiles.first);
+      ctx.h.clear();
 
-      await h.analytics.logEvent(
+      await ctx.h.analytics.logEvent(
         AnalyticsEvents.productViewed,
-        <String, Object?>{AnalyticsProperties.productId: 12115},
+        const <String, Object?>{},
         attribution: true,
       );
 
-      final payload = h.singleEvent(AnalyticsEvents.productViewed);
+      final payload = ctx.h.singleEvent(AnalyticsEvents.productViewed);
       expectNoNullFields(payload);
-      // Whatever tile keys landed on the click should reappear on PDP event.
-      final firstTileJson =
-          (hero.data!['tiles'] as List).first as Map<String, dynamic>;
       final tileMeta =
-          firstTileJson['trackingMeta'] as Map<String, dynamic>? ?? {};
-      for (final entry in tileMeta.entries) {
-        expect(payload[entry.key], entry.value,
-            reason: 'attribution.${entry.key} lost between click and PDP');
-      }
-    }, skip: skipIfMissing);
+          (ctx.component.data!['tiles'] as List).first['trackingMeta']
+              as Map<String, dynamic>? ??
+              const <String, dynamic>{};
+      expectAttributionCarriedForward(payload, tileMeta);
+    }, skip: skipReason);
   });
-
 }

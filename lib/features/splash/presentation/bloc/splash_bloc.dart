@@ -53,7 +53,8 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
     // `SplashActivity.java:151` — `OrderAttributionHelper.clearAttributionData()`
     // followed by a fresh empty struct. Without this, a funnel set in the
     // previous app session bleeds into the first tile click of this session.
-    await _orderAttribution.clear();
+    // (Attribution is memory-only; this survives only if the isolate did.)
+    _orderAttribution.clear();
     // Show the environment picker only in debug builds AND only when the
     // user isn't already signed in.
     if (!kReleaseMode && !_prefManager.isLoggedIn) {

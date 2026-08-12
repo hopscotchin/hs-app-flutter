@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_events.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dart';
+import 'package:hs_app_flutter/core/analytics/constants/funnel.dart';
 import 'package:hs_app_flutter/core/constants/route_names.dart';
 import 'package:hs_app_flutter/core/constants/storage_keys.dart';
 
@@ -176,12 +177,12 @@ void main() {
   // OrderAttribution merged. This test pins current behaviour.
   test('currently merges OrderAttribution (Flutter/Android divergence)', () async {
     await build();
-    await h.orderAttribution.setFunnel('Search');
+    h.orderAttribution.setFunnel(Funnel.search);
 
     await h.analytics.logAppLaunched(FromScreens.discover);
 
     final payload = h.singleEvent(AnalyticsEvents.appLaunched);
-    expect(payload[AnalyticsProperties.funnel], 'Search');
+    expect(payload[AnalyticsProperties.funnel], Funnel.search.wire);
   });
 
   test('applicationStatusFlag=true drives a follow-up application_opened even '

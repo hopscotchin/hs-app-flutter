@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/core/constants/route_names.dart';
 import 'package:hs_app_flutter/core/di/injection.dart';
 import 'package:hs_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:hs_app_flutter/features/dashboard/back_to_exit_scope.dart';
 
 import 'pages/account_page.dart';
 
@@ -14,7 +15,7 @@ class AccountRoute {
         name: 'account',
         builder: (context, state) => BlocProvider(
           create: (_) => sl<AuthBloc>(),
-          child: const AccountPage(),
+          child: const BackToExitScope(child: AccountPage()),
         ),
       ),
     ],

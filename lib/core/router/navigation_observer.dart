@@ -5,9 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 
+import '../analytics/attribution/attribution_data.dart';
 import '../analytics/attribution/order_attribution_helper.dart';
 import '../analytics/constants/analytics_defaults.dart';
 import '../analytics/constants/analytics_properties.dart';
+import '../analytics/constants/funnel.dart';
 import '../analytics/home/home_track_analytic_manager.dart';
 import '../analytics/state/launch_timer.dart';
 import '../constants/route_names.dart';
@@ -15,12 +17,14 @@ import '../di/injection.dart';
 
 /// Route observer that owns *all* navigation-driven analytics state:
 ///
-///   1. **Funnel switching** — entering a funnel-owning screen clears the
-///      OrderAttribution `trackingMeta` blob + LP attribution deque and pins
-///      `funnel` to that screen's value. Two entry paths:
-///        * Out-of-shell funnel routes (cart, search) — handled by [didPush].
+///   1. **Funnel switching** — entering a funnel-owning screen wipes the
+///      OrderAttribution slice, wipes the LP attribution deque, and pins
+///      `funnel` to the new value. Two entry paths:
+///        * Out-of-shell funnel routes (`cart`, `search`) — handled by
+///          [didPush], which consults [_funnelRoutes] to map the pushed
+///          route name to a [Funnel].
 ///        * Shell tabs (Discover, Categories, Account) — handled by
-///          [setActiveFunnel] called from `Dashboard` on tab select /
+///          [setShellFunnel] called from `Dashboard` on tab select /
 ///          initial mount, because `StatefulShellRoute.indexedStack` swaps
 ///          child widgets *without* pushing named routes through observers.
 ///   2. **LP context stack** — each `landingPage` push adds a fresh entry.
@@ -28,14 +32,37 @@ import '../di/injection.dart';
 ///      the response arrives. On pop, the entry is removed and the new top
 ///      (if any) is reapplied so LP2 → back → LP1 restores LP1's identity
 ///      without any per-bloc resume hook.
-///   3. **Automatic back-to-shell restore** — pop that leaves us underneath
-///      the shell (previousRoute has no name) reapplies whichever funnel
-///      the Dashboard last declared active via [setActiveFunnel].
+///   3. **Automatic back-to-shell restore** — a pop that leaves us
+///      underneath the shell (previousRoute nameless or one of the shell
+///      branches) reapplies whichever [Funnel] the Dashboard last declared
+///      active via [setShellFunnel].
 ///   4. **Navigation breadcrumb** — a bounded, most-recent-first ring of
 ///      five route names, stamped as a JSON array `nav_screens` on **every**
 ///      analytics event.
+///   5. **LIFO attribution restore** — each `_funnelRoutes` push snapshots
+///      the current [AttributionData] BEFORE the wipe; the matching pop
+///      restores it. Fixes `PLP → Search → back → PLP → PDP`: without the
+///      restore, the Search push would clear the HP click context and the
+///      PDP click on the resurfaced PLP would ship without HP attribution.
+///      `setShellFunnel` clears the stack (tab-switch is explicit intent,
+///      not a resume).
 ///
-/// Does NOT fire Segment `*_viewed` events — those stay explicit in Blocs.
+/// A single private worker — [_applyFunnel] — runs every funnel transition:
+/// it delegates to `OrderAttributionHelper.setFunnel`, wipes the LP deque,
+/// resets visibility bookkeeping, updates the tracker's [ExtraData], and
+/// notifies [onFunnelActivated] listeners.
+///
+/// Two callers reach it:
+///   * [setShellFunnel] — public. Called by `Dashboard` on tab tap. Also
+///     updates [_currentShellFunnel] (the "which shell tab am I on?"
+///     memory used by back-to-shell restore).
+///   * [_onActive] — private. Called from [didPush] for `cart` / `search`
+///     etc. — leaves [_currentShellFunnel] alone since the shell tab
+///     didn't actually change.
+///
+/// The old `setActiveFunnel(String)` API has been renamed to
+/// [setShellFunnel] with the [Funnel] type for stricter call-site checks
+/// and to distinguish "declare shell tab" from "apply funnel side-effects".
 @lazySingleton
 class AppNavigationObserver extends NavigatorObserver {
   AppNavigationObserver(this._orderAttribution, this._launchTimer);
@@ -51,29 +78,29 @@ class AppNavigationObserver extends NavigatorObserver {
   static const String _splashRoute = RouteNames.splashName;
   static const int _maxStackEntries = 5;
 
-  /// Route names that resolve to a shell tab. If `didPop`'s previousRoute
-  /// carries one of these (as opposed to a null-name shell page), treat
-  /// it the same as "back on shell" so the funnel/attribution reset
-  /// still fires. Defensive against GoRouter versions that name the shell
-  /// branch page instead of leaving it anonymous.
-  static const Set<String> _shellBranchRoutes = {
-    RouteNames.homeName,
-    RouteNames.categoriesName,
-    RouteNames.accountName,
+  /// Route names that resolve to a shell tab, mapped to their [Funnel].
+  /// Used both to detect "back to shell" pops (previousRoute is one of
+  /// these names) and — if we ever needed it — to answer "which funnel
+  /// is that shell branch". `StatefulShellRoute` versions that name the
+  /// shell branch page instead of leaving it nameless are handled here.
+  static const Map<String, Funnel> _shellBranchToFunnel = {
+    RouteNames.homeName: Funnel.discover,
+    RouteNames.categoriesName: Funnel.categories,
+    RouteNames.accountName: Funnel.account,
   };
 
-  /// Out-of-shell funnel routes. Shell tabs (Discover/Categories/Account)
-  /// don't push a named route on switch — [setActiveFunnel] drives those.
-  static const Map<String, String> _funnelRoutes = {
-    RouteNames.cartName: FromScreens.shoppingCart,
-    RouteNames.searchName: FromScreens.searchResult,
+  /// Out-of-shell funnel routes pushed via `context.pushNamed`. Shell tabs
+  /// don't push a named route on switch — [setShellFunnel] drives those.
+  static const Map<String, Funnel> _funnelRoutes = {
+    RouteNames.cartName: Funnel.cart,
+    RouteNames.searchName: Funnel.search,
   };
 
   /// Route name → analytics-friendly screen label. Only routes present in
   /// this map contribute an entry to `nav_screens`. Shell-branch routes
   /// are deliberately excluded — the Dashboard publishes those via
-  /// [setActiveFunnel] to avoid duplicate entries between the branch
-  /// push and the tab-switch signal.
+  /// [setShellFunnel] to avoid duplicate entries between the branch push
+  /// and the tab-switch signal.
   static const Map<String, String> _routeToScreenLabel = {
     RouteNames.splashName: FromScreens.splash,
     RouteNames.landingPageName: FromScreens.landingPage,
@@ -91,43 +118,55 @@ class AppNavigationObserver extends NavigatorObserver {
   /// Navigator. Top holds the currently visible LP's identity.
   final List<_LpContext> _lpContextStack = <_LpContext>[];
 
+  /// Route-scoped [AttributionData] snapshots — one entry per live
+  /// [_funnelRoutes] push on the Navigator. Top holds the pre-push state
+  /// of the topmost funnel route. Popped and restored to
+  /// [OrderAttributionHelper] on pop/remove of the matching route. See
+  /// the class docstring for the flagship scenario.
+  final List<AttributionData?> _attributionSnapshotStack =
+      <AttributionData?>[];
+
   /// Whichever shell tab is currently active — the target we restore to
-  /// when a pushed route pops back to the shell. `Dashboard` publishes it.
-  String _currentShellFunnel = FromScreens.discover;
+  /// when a pushed route pops back to the shell. Written by
+  /// [setShellFunnel] from the Dashboard.
+  Funnel _currentShellFunnel = Funnel.discover;
 
   String? _currentRoute;
   String? get currentRoute => _currentRoute;
 
-  /// Fires every time a funnel context is (re)applied — funnel push, back
-  /// to shell, or tab switch. Consumers (e.g. `DiscoverPage`) use this to
-  /// re-hydrate the shared tracker's `pageComponents` from their bloc
-  /// state, since the tracker is a shared singleton and the outgoing
-  /// screen's writes are still sitting on it.
-  void Function(String funnel)? onFunnelActivated;
+  /// Fires every time a funnel is (re)applied — shell tab switch, back to
+  /// shell, or out-of-shell funnel push. Consumers (e.g. `DiscoverPage`)
+  /// use this to re-hydrate the shared tracker's `pageComponents` and
+  /// re-seed the sortbar from their local tab-selection state.
+  void Function(Funnel funnel)? onFunnelActivated;
 
-  /// Called by `Dashboard` on initial mount and every tab switch. Applies
-  /// the funnel exactly like an out-of-shell funnel push would — clears
-  /// trackingMeta + LP deque, sets funnel, sets `fromHomePage` based on
-  /// whether we're on Discover.
-  void setActiveFunnel(String funnel) {
+  /// Called by `Dashboard` on initial mount and every tab switch — this is
+  /// how the shell-tab funnel becomes known to the observer. Updates
+  /// [_currentShellFunnel] (the back-to-shell restore target) AND runs the
+  /// funnel-transition side-effects via [_applyFunnel].
+  void setShellFunnel(Funnel funnel) {
     _currentShellFunnel = funnel;
+    // Tab switch is an explicit context change — the user isn't intending
+    // to resume any pushed funnel route, so drop any pending snapshots.
+    // GoRouter typically pops pushed routes when a tab switches; if a
+    // stale `didPop` fires after this, the empty stack just no-ops.
+    _attributionSnapshotStack.clear();
     // Flush any pending carousel scrolls from the outgoing tab before we
-    // switch attribution — otherwise a scroll queued on Discover would ship
-    // stamped with the incoming tab's funnel.
+    // switch attribution — otherwise a scroll queued on Discover would
+    // ship stamped with the incoming tab's funnel.
     unawaited(_homeTrack.flushCarouselScrolls());
-    _pushScreen(funnel);
+    _pushScreen(funnel.wire);
     _applyFunnel(funnel);
   }
 
-  /// Called by `LandingPageBloc` once the LP response arrives. Fills the top
-  /// LP context entry so downstream events emit `lp_id` / `lp_name`, and
-  /// re-writes `extraData` for the immediate follow-up impressions.
+  /// Called by `LandingPageBloc` once the LP response arrives. Fills the
+  /// top LP context entry so downstream events emit `lp_id` / `lp_name`,
+  /// and re-writes `extraData` for the immediate follow-up impressions.
   ///
   /// **Does NOT touch attribution.** LP-attribution promotion happens on
-  /// tile CLICK inside the LP (via
-  /// `OrderAttributionHelper.applyLpPromotion`), not on LP open — matches
-  /// Android's `LPAttributionHelper.addLPAttributionData` call sites, all
-  /// of which are click handlers.
+  /// tile CLICK inside the LP, not on LP open — matches Android's
+  /// `LPAttributionHelper.addLPAttributionData` call sites, all of which
+  /// are click handlers.
   void setLandingPageContext({required String? name, required String? id}) {
     if (_lpContextStack.isEmpty) {
       // Defensive — LP bloc emitted before push observer callback. Push a
@@ -174,6 +213,7 @@ class AppNavigationObserver extends NavigatorObserver {
       // starts clean.
       _screenStack.clear();
       _lpContextStack.clear();
+      _attributionSnapshotStack.clear();
     } else {
       // First non-splash route commits to the Navigator — Android's
       // `Activity.onCreate` equivalent. LaunchTimer.logTtl is idempotent
@@ -182,6 +222,11 @@ class AppNavigationObserver extends NavigatorObserver {
       _launchTimer.logTtl();
       if (name == _lpRoute) {
         _lpContextStack.add(_LpContext());
+      }
+      // Snapshot BEFORE `_onActive` fires — otherwise the funnel-switch
+      // wipe inside `_applyFunnel` overwrites the state we want to save.
+      if (_funnelRoutes.containsKey(name)) {
+        _attributionSnapshotStack.add(_orderAttribution.getCurrent());
       }
     }
     _onActive(name);
@@ -192,9 +237,11 @@ class AppNavigationObserver extends NavigatorObserver {
     if (route is! PageRoute) return;
     _logDebug('pop', route);
     unawaited(_homeTrack.flushCarouselScrolls());
-    if (route.settings.name == _lpRoute && _lpContextStack.isNotEmpty) {
+    final name = route.settings.name;
+    if (name == _lpRoute && _lpContextStack.isNotEmpty) {
       _lpContextStack.removeLast();
     }
+    _restoreAttributionIfFunnelRoute(name);
     _onPopBack(previousRoute?.settings.name);
   }
 
@@ -210,6 +257,7 @@ class AppNavigationObserver extends NavigatorObserver {
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is! PageRoute) return;
     _logDebug('remove', route);
+    _restoreAttributionIfFunnelRoute(route.settings.name);
     _onPopBack(previousRoute?.settings.name);
   }
 
@@ -220,8 +268,13 @@ class AppNavigationObserver extends NavigatorObserver {
   /// means the underlying shell just surfaced — reapply the active shell
   /// funnel. On push, use [_onActive] directly.
   void _onPopBack(String? name) {
-    if (name == null || _shellBranchRoutes.contains(name)) {
+    if (name == null || _shellBranchToFunnel.containsKey(name)) {
       _currentRoute = name;
+      // Record the back-to-shell in the nav breadcrumb so `nav_screens`
+      // reflects the return trip. Dedupe (`_pushScreen`) skips the append
+      // if the trail already ends on the same funnel, so a shell → shell
+      // no-op won't duplicate.
+      _pushScreen(_currentShellFunnel.wire);
       _applyFunnel(_currentShellFunnel);
       return;
     }
@@ -264,23 +317,41 @@ class AppNavigationObserver extends NavigatorObserver {
     // logTileClick.
   }
 
-  void _applyFunnel(String funnel) {
-    // Two-store attribution:
-    //   • OrderAttribution: `setFunnel` updates funnel identity only —
-    //     HP click trackingMeta persists across funnel switch (matches
-    //     Android null-preserves-fields behavior).
-    //   • LpAttribution: `clearLpAttribution` wipes the LP click deque
-    //     (matches Android `CollectionsFragment.onResume`).
-    unawaited(_orderAttribution.setFunnel(funnel));
-    unawaited(_homeTrack.clearLpAttribution());
-    // Wipe the previous screen's visible-set / scroll snapshots so the
-    // incoming screen re-fires impressions from a clean slate. Preserves
-    // pageComponents — the callback below hydrates them.
+  /// Run the funnel-transition side-effects. Called by [setShellFunnel]
+  /// (tab switch), [_onPopBack] (back-to-shell), and [_onActive] (funnel-
+  /// owning route push).
+  ///
+  ///   • `OrderAttributionHelper.setFunnel` — resets HP slice, keeps only
+  ///     the new funnel (see helper docstring).
+  ///   • `_homeTrack.clearLpAttribution` — wipes the LP click deque.
+  ///   • `_homeTrack.resetVisibilityState` — clears per-screen scroll /
+  ///     visible-set bookkeeping so the incoming screen re-fires
+  ///     impressions from a clean slate.
+  ///   • `_homeTrack.extraData` — sets `fromHomePage` per funnel identity.
+  ///   • `onFunnelActivated` — hooks for screens that need to hydrate on
+  ///     activation (DiscoverPage re-loads pageComponents + sortbar).
+  void _applyFunnel(Funnel funnel) {
+    _orderAttribution.setFunnel(funnel);
+    _homeTrack.clearLpAttribution();
     _homeTrack.resetVisibilityState();
     _homeTrack.extraData = ExtraData(
-      fromHomePage: funnel == FromScreens.discover,
+      fromHomePage: funnel == Funnel.discover,
     );
     onFunnelActivated?.call(funnel);
+  }
+
+  /// Pop the top attribution snapshot and restore it. Called from
+  /// `didPop` / `didRemove` when the outgoing route is a funnel-owning
+  /// push (see [_funnelRoutes]).
+  ///
+  /// The restore happens BEFORE `_onPopBack` so that a subsequent
+  /// `_applyFunnel(_currentShellFunnel)` triggered by a back-to-shell
+  /// finds the funnel already matching (setFunnel early-returns) and
+  /// preserves the restored `trackingMeta` / `sortBar`.
+  void _restoreAttributionIfFunnelRoute(String? name) {
+    if (name == null || !_funnelRoutes.containsKey(name)) return;
+    if (_attributionSnapshotStack.isEmpty) return;
+    _orderAttribution.restore(_attributionSnapshotStack.removeLast());
   }
 
   void _pushScreen(String name) {

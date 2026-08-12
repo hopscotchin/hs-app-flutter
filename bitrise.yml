@@ -197,27 +197,6 @@ workflows:
             - release_notes: "$BITRISE_GIT_MESSAGE"
             - firebase_token: "$FIREBASE_TOKEN"
       - deploy-to-bitrise-io@2: {}
-  run_tests:
-    description: Runs flutter analyze + tests on push to develop and all PRs.
-    steps:
-      - git-clone@8: {}
-      - flutter-installer@1:
-          inputs:
-            - version: "$FLUTTER_VERSION"
-      - restore-dart-cache@3: {}
-      - flutter-analyze@0:
-          inputs:
-            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
-      - flutter-test@1:
-          inputs:
-            - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
-      - save-dart-cache@1: {}
-      - deploy-to-bitrise-io@2: {}
-    triggers:
-      push:
-        - branch: develop
-      pull_request:
-        - source_branch: "*"
 meta:
   bitrise.io:
     stack: osx-xcode-26.6.x

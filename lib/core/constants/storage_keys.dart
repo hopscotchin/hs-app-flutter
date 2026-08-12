@@ -97,10 +97,9 @@ class StorageKeys {
   // Analytics — post-order suppression flag (set by CheckoutObserver)
   static const String isOrderPaid = 'hs_is_order_paid';
 
-  // Analytics — attribution
-  static const String currentAttributionData = 'hs_current_attribution_data';
+  // Analytics — attribution (only the scroll snapshot lives on disk;
+  // OrderAttribution + LpAttribution are in-memory only)
   static const String attributionSnapshotForScroll = 'hs_attribution_snapshot_for_scroll';
-  static const String lpAttributionData = 'hs_lp_attribution_data';
 
   // Analytics — UTM (in-memory + disk mirror; UtmHeaderUtil owns)
   static const String utmSource = 'hs_utm_source';

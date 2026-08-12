@@ -2,15 +2,27 @@ import 'dart:async';
 
 import 'package:injectable/injectable.dart';
 
+import '../../../features/discover/data/models/component_models.dart';
 import '../../../features/discover/domain/entities/home_page_entity.dart';
 import '../constants/analytics_defaults.dart';
 import '../constants/analytics_events.dart';
 import '../constants/analytics_properties.dart';
 import '../events/analytics_helper.dart';
+import 'home_component_click_handlers.dart';
 
 /// Turns the impression journey (a set of visible-component indices
 /// collected on the scroll frame) into enriched Segment
-/// `tile_impression` / `banner_impression` events.
+/// `banner_impression` events.
+///
+/// Emission rules:
+/// - Hero → one `banner_impression` per tile the user ACTUALLY saw. The
+///   Hero widget records tile visibility on VisibilityDetector edges +
+///   `onPageChanged`; only recorded (component-index, tile-index) pairs
+///   emit — a full-width Hero carousel shows one tile at a time, so
+///   emitting all `hero.tiles` when the outer widget crossed the
+///   visibility threshold vastly over-reported.
+/// - CustomTiles / PageCarousel / ProductGrid → one `banner_impression`
+///   per component (root trackingMeta only).
 ///
 /// Runs on the main isolate; every event goes through the injected
 /// [AnalyticsHelper] — the same code path every other single-event
@@ -73,72 +85,113 @@ class JourneyWorker {
   /// destroy and dispatch.
   Future<void> flushImpressions({
     required List<int> indices,
+    required Map<int, List<int>> heroTiles,
     required JourneySeed seed,
   }) async {
-    if (indices.isEmpty || _components.isEmpty) return;
-    final events = buildImpressions(_components, indices, seed);
+    if (_components.isEmpty) return;
+    if (indices.isEmpty && heroTiles.isEmpty) return;
+    final events = buildImpressions(_components, indices, heroTiles, seed);
     await Future.wait(
-      events.map((entry) => _analytics.logEvent(entry.$1, entry.$2)),
+      events.map((entry) => _analytics.logEvent(entry.$1, entry.$2, attribution: !seed.fromHomePage)),
     );
   }
 }
 
 // ─── Pure builders (shared with the isolate worker) ───────────────────
 
-/// Compact the live entity list down to the fields the walk actually
-/// reads. Also drops components whose `type` has no walk descriptor —
-/// they wouldn't produce impressions anyway, and dropping them here
+/// Compact the live entity list down to the fields the impression builder
+/// reads. Also drops components whose `type` isn't tracked as an impression
+/// (CTA_BUTTON, etc.) — they wouldn't emit anyway, and dropping them here
 /// shrinks the isolate transfer payload.
 List<ComponentSnapshot> snapshotComponents(List<PageComponent> components) {
   final out = <ComponentSnapshot>[];
   for (final c in components) {
     if (c.type.isEmpty || c.data == null) continue;
-    if (!tilePaths.containsKey(c.type)) continue;
+    if (!impressionTypes.contains(c.type)) continue;
     out.add((type: c.type, position: c.position, data: c.data!));
   }
   return out;
 }
 
+/// Component types that emit `banner_impression` events.
+const Set<String> impressionTypes = <String>{
+  PageComponentType.hero,
+  PageComponentType.customTiles,
+  PageComponentType.pageCarousel,
+  PageComponentType.productGrid,
+};
+
 /// Build every enriched event for the given [indices]. Pure — no
 /// analytics-helper access, no globals; can run on any isolate.
+///
+/// Hero emits one `banner_impression` PER tile (root + tile meta merged);
+/// every other component emits one `banner_impression` at the root level.
+/// `tile_impression` was retired — it doubled up with banner_impression on
+/// the wire and no dashboard consumed it separately.
 List<EmitEntry> buildImpressions(
   List<ComponentSnapshot> snapshots,
   List<int> indices,
+  Map<int, List<int>> heroTiles,
   JourneySeed seed,
 ) {
   final out = <EmitEntry>[];
   final bannerEvent = seed.fromHomePage
       ? AnalyticsEvents.bannerImpression
       : AnalyticsEvents.lpBannerImpression;
-  final tileEvent = seed.fromHomePage
-      ? AnalyticsEvents.tileImpression
-      : AnalyticsEvents.lpTileImpression;
 
   for (final i in indices) {
     if (i < 0 || i >= snapshots.length) continue;
     final snap = snapshots[i];
-    final path = tilePaths[snap.type];
-    if (path == null) continue;
+    // Hero is per-tile — emitted from `heroTiles` below. Component-level
+    // visibility is not sufficient because only one tile is visible at a
+    // time in the carousel.
+    if (snap.type == PageComponentType.hero) continue;
 
     final rootMeta = snap.data['trackingMeta'];
     final rootMetaMap = rootMeta is Map<String, dynamic>
         ? rootMeta
         : const <String, dynamic>{};
-
-    final banner = buildSeed(snap, seed);
-    if (rootMetaMap.isNotEmpty) banner.addAll(rootMetaMap);
-    out.add((bannerEvent, banner));
-
-    for (final chain in _walkTileChains(snap.data, path)) {
-      final props = buildSeed(snap, seed);
-      for (final meta in chain) {
-        props.addAll(meta);
-      }
-      out.add((tileEvent, props));
-    }
+    final props = buildSeed(snap, seed);
+    mergeMetaNonNull(props, rootMetaMap);
+    out.add((bannerEvent, props));
   }
+
+  heroTiles.forEach((componentIndex, tileIndices) {
+    if (componentIndex < 0 || componentIndex >= snapshots.length) return;
+    final snap = snapshots[componentIndex];
+    if (snap.type != PageComponentType.hero) return;
+    // Reuse the click-path chain builder — same code path for both events,
+    // no separate JSON walker to keep in sync with entity fields.
+    final hero = ComponentDataParser.parseHero(snap.data);
+    for (final tileIndex in tileIndices) {
+      if (tileIndex < 0 || tileIndex >= hero.tiles.length) continue;
+      final tile = hero.tiles[tileIndex];
+      final props = buildSeed(snap, seed);
+      for (final meta in heroTileTrackingMetaChain(hero, tile)) {
+        if (meta == null) continue;
+        mergeMetaNonNull(props, meta);
+      }
+      out.add((bannerEvent, props));
+    }
+  });
+
   return out;
 }
+
+/// Merge [meta] into [into], skipping null values. `addAll` overwrites with
+/// nulls; a deeper level's null shouldn't wipe a parent's non-null value —
+/// that's how the wire ended up shipping bare nulls for keys the backend
+/// only set on some levels.
+void mergeMetaNonNull(
+  Map<String, Object?> into,
+  Map<String, dynamic> meta,
+) {
+  for (final entry in meta.entries) {
+    if (entry.value == null) continue;
+    into[entry.key] = entry.value;
+  }
+}
+
 
 /// Per-impression seed: shared base (funnel/sortbar OR lp_id/lp_name)
 /// plus the component's `type` + `position`. Same shape both isolates
@@ -190,69 +243,3 @@ Map<String, dynamic> stripLpPrefixed(Map<String, dynamic> meta) {
   return out;
 }
 
-// ─── Walk internals ───────────────────────────────────────────────────
-
-/// Per-type walk descriptor. Each step is a list of alternate JSON keys
-/// (accept both camelCase and snake_case). Last entry is the innermost
-/// tile level; deeper `trackingMeta` wins.
-const Map<String, List<List<String>>> tilePaths = {
-  PageComponentType.hero: [
-    ['tiles'],
-    ['tile_details', 'tileDetails'],
-    ['tileGrid'],
-  ],
-  PageComponentType.customTiles: [
-    ['tiles', 'tile_details', 'tileDetails'],
-    ['tileGrid'],
-  ],
-  PageComponentType.pageCarousel: [
-    ['tiles'],
-  ],
-  PageComponentType.productGrid: [
-    ['tiles'],
-  ],
-};
-
-/// Yields root-first chains of `trackingMeta` per innermost leaf. At the
-/// leaf, absorbs `trackingMeta` from immediate Map children too (e.g.
-/// `tile.product.trackingMeta`) but not from intermediate-level peers
-/// like `ctaButton` / `title` (those own their own analytics).
-Iterable<List<Map<String, dynamic>>> _walkTileChains(
-  Map<String, dynamic> data,
-  List<List<String>> path,
-) sync* {
-  final chain = <Map<String, dynamic>>[];
-  final selfMeta = data['trackingMeta'];
-  if (selfMeta is Map<String, dynamic>) chain.add(selfMeta);
-
-  if (path.isEmpty) {
-    for (final entry in data.entries) {
-      if (entry.key == 'trackingMeta') continue;
-      final v = entry.value;
-      if (v is Map<String, dynamic>) {
-        final childMeta = v['trackingMeta'];
-        if (childMeta is Map<String, dynamic>) chain.add(childMeta);
-      }
-    }
-    yield chain;
-    return;
-  }
-
-  final keys = path.first;
-  final rest = path.sublist(1);
-  List<dynamic>? list;
-  for (final k in keys) {
-    final v = data[k];
-    if (v is List) {
-      list = v;
-      break;
-    }
-  }
-  if (list == null) return;
-  for (final item in list) {
-    if (item is! Map<String, dynamic>) continue;
-    for (final subChain in _walkTileChains(item, rest)) {
-      yield <Map<String, dynamic>>[...chain, ...subChain];
-    }
-  }
-}

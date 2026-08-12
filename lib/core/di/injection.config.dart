@@ -268,6 +268,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.packageInfo,
       preResolve: true,
     );
+    gh.lazySingleton<_i233.LpAttributionHelper>(
+      () => _i233.LpAttributionHelper(),
+    );
+    gh.lazySingleton<_i179.OrderAttributionHelper>(
+      () => _i179.OrderAttributionHelper(),
+    );
     gh.lazySingleton<_i516.CheckoutTimer>(() => _i516.CheckoutTimer());
     gh.lazySingleton<_i773.LaunchTimer>(() => _i773.LaunchTimer());
     gh.lazySingleton<_i833.DeviceInfoPlugin>(() => registerModule.deviceInfo);
@@ -296,6 +302,12 @@ extension GetItInjectableX on _i174.GetIt {
     await gh.lazySingletonAsync<_i384.AnalyticsService>(
       () => registerModule.analyticsService(gh<_i818.PrefManager>()),
       preResolve: true,
+    );
+    gh.lazySingleton<_i93.AppNavigationObserver>(
+      () => _i93.AppNavigationObserver(
+        gh<_i179.OrderAttributionHelper>(),
+        gh<_i773.LaunchTimer>(),
+      ),
     );
     gh.lazySingleton<_i361.Dio>(
       () => registerModule.dio(gh<_i81.NetworkClient>()),
@@ -327,12 +339,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i818.PrefManager>(),
         gh<_i833.DeviceInfoPlugin>(),
       ),
-    );
-    gh.lazySingleton<_i233.LpAttributionHelper>(
-      () => _i233.LpAttributionHelper(gh<_i818.PrefManager>()),
-    );
-    gh.lazySingleton<_i179.OrderAttributionHelper>(
-      () => _i179.OrderAttributionHelper(gh<_i818.PrefManager>()),
     );
     gh.lazySingleton<_i469.UtmHeaderUtil>(
       () => _i469.UtmHeaderUtil(gh<_i818.PrefManager>()),
@@ -397,12 +403,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i730.CategoriesRemoteDataSource>(
       () => _i730.CategoriesRemoteDataSourceImpl(
         apiClient: gh<_i930.ApiClient>(),
-      ),
-    );
-    gh.lazySingleton<_i93.AppNavigationObserver>(
-      () => _i93.AppNavigationObserver(
-        gh<_i179.OrderAttributionHelper>(),
-        gh<_i773.LaunchTimer>(),
       ),
     );
     gh.lazySingleton<_i799.PincodeRepository>(

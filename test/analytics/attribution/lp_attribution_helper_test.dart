@@ -1,11 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:hs_app_flutter/core/analytics/attribution/lp_attribution_helper.dart';
-import 'package:hs_app_flutter/core/services/pref_manager.dart';
 
-/// LP deque behaviors + wire-key contract. Backed by real prefs (mock
-/// values) so the disk-write path is exercised.
+/// LP deque behaviors + wire-key contract. In-memory only — no prefs
+/// setup needed.
 ///
 /// Contract:
 /// - `pushTileMeta(meta, name, id)` inserts at front (newest → `lp1_*`).
@@ -18,10 +16,8 @@ import 'package:hs_app_flutter/core/services/pref_manager.dart';
 void main() {
   late LpAttributionHelper lp;
 
-  setUp(() async {
-    SharedPreferences.setMockInitialValues({});
-    final prefs = PrefManager(await SharedPreferences.getInstance());
-    lp = LpAttributionHelper(prefs);
+  setUp(() {
+    lp = LpAttributionHelper();
   });
 
   group('pushTileMeta', () {
@@ -29,9 +25,8 @@ void main() {
       expect(lp.segmentParams, isEmpty);
     });
 
-    test('single push emits lp1_* with 5 attribution keys + name + id',
-        () async {
-      await lp.pushTileMeta(
+    test('single push emits lp1_* with 5 attribution keys + name + id', () {
+      lp.pushTileMeta(
         meta: const {
           'slice_id': 'sl-1',
           'property_type': 'CT',
@@ -57,13 +52,13 @@ void main() {
       });
     });
 
-    test('nested push — newest at lp1_, older shifted to lp2_', () async {
-      await lp.pushTileMeta(
+    test('nested push — newest at lp1_, older shifted to lp2_', () {
+      lp.pushTileMeta(
         meta: const {'banner_name': 'LP1 banner'},
         landingPageName: 'LP1',
         landingPageId: '1',
       );
-      await lp.pushTileMeta(
+      lp.pushTileMeta(
         meta: const {'banner_name': 'LP2 banner'},
         landingPageName: 'LP2',
         landingPageId: '2',
@@ -75,9 +70,9 @@ void main() {
       expect(lp.segmentParams['lp2_name'], 'LP1');
     });
 
-    test('capped at 5 — oldest evicted on 6th push', () async {
+    test('capped at 5 — oldest evicted on 6th push', () {
       for (var i = 1; i <= 6; i++) {
-        await lp.pushTileMeta(
+        lp.pushTileMeta(
           meta: {'banner_name': 'LP$i banner'},
           landingPageName: 'LP$i',
           landingPageId: '$i',
@@ -94,8 +89,8 @@ void main() {
       expect(params.values.contains('LP1'), isFalse); // evicted
     });
 
-    test('null identity → lp{n}_name / lp{n}_id omitted', () async {
-      await lp.pushTileMeta(
+    test('null identity → lp{n}_name / lp{n}_id omitted', () {
+      lp.pushTileMeta(
         meta: const {'banner_name': 'LP banner'},
         landingPageName: null,
         landingPageId: null,
@@ -108,8 +103,8 @@ void main() {
   });
 
   group('_pickLp alias precedence', () {
-    test('lp_<key> wins when both aliases present in meta', () async {
-      await lp.pushTileMeta(
+    test('lp_<key> wins when both aliases present in meta', () {
+      lp.pushTileMeta(
         meta: const {
           'lp_banner_name': 'LP variant',
           'banner_name': 'plain', // shadowed
@@ -120,8 +115,8 @@ void main() {
       expect(lp.segmentParams['lp1_banner_name'], 'LP variant');
     });
 
-    test('plain <key> used when no lp_-aliased value', () async {
-      await lp.pushTileMeta(
+    test('plain <key> used when no lp_-aliased value', () {
+      lp.pushTileMeta(
         meta: const {'banner_name': 'plain only'},
         landingPageName: 'LP1',
         landingPageId: '1',
@@ -129,8 +124,8 @@ void main() {
       expect(lp.segmentParams['lp1_banner_name'], 'plain only');
     });
 
-    test('missing both → key omitted from segmentParams', () async {
-      await lp.pushTileMeta(
+    test('missing both → key omitted from segmentParams', () {
+      lp.pushTileMeta(
         meta: const {'banner_name': 'only banner'}, // no slice_id at all
         landingPageName: 'LP1',
         landingPageId: '1',
@@ -140,15 +135,15 @@ void main() {
   });
 
   group('clear', () {
-    test('wipes deque — segmentParams empty afterwards', () async {
-      await lp.pushTileMeta(
+    test('wipes deque — segmentParams empty afterwards', () {
+      lp.pushTileMeta(
         meta: const {'banner_name': 'LP1'},
         landingPageName: 'LP1',
         landingPageId: '1',
       );
       expect(lp.segmentParams, isNotEmpty);
 
-      await lp.clear();
+      lp.clear();
 
       expect(lp.segmentParams, isEmpty);
     });

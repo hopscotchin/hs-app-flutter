@@ -330,28 +330,12 @@ class PrefManager {
   Future<void> setIsOrderPaid(bool value) =>
       _prefs.setBool(StorageKeys.isOrderPaid, value);
 
-  // ─── Analytics: attribution ───────────────────────────────────────
-
-  /// Order-funnel JSON blob (AttributionData). Written by
-  /// OrderAttributionHelper on every tile click / sort change / deeplink.
-  /// Cleared only on cold start (Splash).
-  String? get currentAttributionData =>
-      _prefs.getString(StorageKeys.currentAttributionData);
-  Future<void> setCurrentAttributionData(String? value) =>
-      _setStringOrRemove(StorageKeys.currentAttributionData, value);
-
   /// Snapshot of attribution params taken at shell mount / tab change /
   /// app resume, used by `logScrollEvent(useSavedAttribution: true)`.
   String? get attributionSnapshotForScroll =>
       _prefs.getString(StorageKeys.attributionSnapshotForScroll);
   Future<void> setAttributionSnapshotForScroll(String? value) =>
       _setStringOrRemove(StorageKeys.attributionSnapshotForScroll, value);
-
-  /// Bounded deque (max 5) of LP attribution entries, JSON-encoded.
-  /// Owned by LPAttributionHelper.
-  String? get lpAttributionData => _prefs.getString(StorageKeys.lpAttributionData);
-  Future<void> setLpAttributionData(String? value) =>
-      _setStringOrRemove(StorageKeys.lpAttributionData, value);
 
   // ─── Analytics: UTM disk mirror (UtmHeaderUtil) ───────────────────
 

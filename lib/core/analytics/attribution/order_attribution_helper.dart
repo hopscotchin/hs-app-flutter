@@ -1,15 +1,14 @@
-import 'dart:convert';
-
 import 'package:injectable/injectable.dart';
 
-import '../../services/pref_manager.dart';
 import '../constants/analytics_properties.dart';
+import '../constants/funnel.dart';
 import 'attribution_data.dart';
 
-/// Disk-backed HP-attribution slice. Persists across navigation until
-/// either a next HP tile click overwrites specific keys via
-/// [mergeTrackingMeta] or the whole record is dropped ([clear]) on cold
-/// start / logout.
+/// HP-attribution slice — **in-memory only**. Lives for the app session;
+/// wiped on process death. Cross-session attribution is server-side (the
+/// cart API echoes the HP click's tracking blob), so persisting client-side
+/// bought us nothing and cost a `SharedPreferences` MethodChannel roundtrip
+/// on every hot-path write.
 ///
 /// **Scope:** HP click chain only. LP click chain lives in
 /// `LpAttributionHelper` (deque, emits `lp{n}_*`). Two stores compose
@@ -21,74 +20,77 @@ import 'attribution_data.dart';
 /// as typed setters.
 @lazySingleton
 class OrderAttributionHelper {
-  OrderAttributionHelper(this._prefs);
-
-  final PrefManager _prefs;
+  OrderAttributionHelper();
 
   AttributionData? _cached;
-  bool _cacheHydrated = false;
 
-  AttributionData? getCurrent() {
-    if (_cacheHydrated) return _cached;
-    _cacheHydrated = true;
-    final raw = _prefs.currentAttributionData;
-    if (raw == null || raw.isEmpty) return null;
-    try {
-      final decoded = jsonDecode(raw);
-      if (decoded is Map<String, dynamic>) {
-        _cached = AttributionData.fromJson(decoded);
-      }
-    } catch (_) {
-      // corrupt blob — treat as empty
-    }
-    return _cached;
-  }
+  AttributionData? getCurrent() => _cached;
 
-  Future<void> setCurrent(AttributionData data) async {
+  void clear() => _cached = null;
+
+  /// **HP tile click.** Wipes the prior click's `trackingMeta` and installs
+  /// [partial] as the new blob. Funnel + sortBar (screen-level) are
+  /// preserved.
+  ///
+  /// Why replace, not merge: the map is opaque, so a key absent in
+  /// [partial] is indistinguishable from a key the backend intentionally
+  /// omitted. Merging preserves stale keys from the previous tile —
+  /// e.g. Hero ships `{banner_name, funnel_row, funnel_tile, slice_id}`,
+  /// CustomTile ships `{banner_name, funnel_row}`, and post-merge the
+  /// CustomTile click looks like it carried Hero's `funnel_tile` +
+  /// `slice_id` on the wire.
+  AttributionData replaceTrackingMeta(Map<String, dynamic> partial) {
+    final base = _cached ?? AttributionData.empty();
+    final data = base.copyWith(
+      trackingMeta: Map<String, dynamic>.of(partial),
+    );
     _cached = data;
-    _cacheHydrated = true;
-    try {
-      await _prefs.setCurrentAttributionData(jsonEncode(data.toJson()));
-    } catch (_) {
-      await _prefs.setCurrentAttributionData('');
-    }
-  }
-
-  Future<void> clear() {
-    _cached = null;
-    _cacheHydrated = true;
-    return _prefs.setCurrentAttributionData('');
-  }
-
-  /// **HP tile click.** Merge the tile's innermost trackingMeta into the
-  /// accumulated attribution — new keys shadow prior same-name keys; other
-  /// keys persist. Only called for `_fromHomePage=true` clicks.
-  Future<AttributionData> mergeTrackingMeta(Map<String, dynamic> partial) async {
-    if (partial.isEmpty) return getCurrent() ?? AttributionData.empty();
-    final data = (getCurrent() ?? AttributionData.empty()).mergeTrackingMeta(partial);
-    await setCurrent(data);
     return data;
   }
 
-  /// Update the funnel identity (`Discover`, `Search`, `Cart`, …). Does
-  /// NOT clear `trackingMeta` — HP attribution persists across funnel
-  /// switch. LP click chain clearing is `LpAttributionHelper.clear`'s job.
-  Future<AttributionData> setFunnel(String funnel) async {
-    final data = (getCurrent() ?? AttributionData.empty()).applyFunnel(funnel);
-    await setCurrent(data);
+  /// Additive-merge variant — last-write-wins on collision,
+  /// preserve-on-absence. Kept for non-hot-path callers (server-side
+  /// trait patches, backfills). **Do not use on the HP click hot path
+  /// — that's [replaceTrackingMeta].**
+  AttributionData mergeTrackingMeta(Map<String, dynamic> partial) {
+    if (partial.isEmpty) return _cached ?? AttributionData.empty();
+    final data =
+        (_cached ?? AttributionData.empty()).mergeTrackingMeta(partial);
+    _cached = data;
     return data;
   }
 
-  Future<AttributionData> setSortBar(String sortBar) async {
-    final data = (getCurrent() ?? AttributionData.empty()).applySortBar(sortBar);
-    await setCurrent(data);
-    return data;
+  /// Building a fresh `AttributionData` (rather than field-by-field
+  /// clearing) is deliberate: if `AttributionData` grows a new field
+  /// later (any new session-scoped attribution key), it gets defaulted
+  /// automatically on funnel change — no per-field wipe list to remember
+  /// to update.
+  ///
+  /// LP chain clearing on back-to-shell is `LpAttributionHelper.clear`'s
+  /// job, not this method's.
+  void setFunnel(Funnel funnel) {
+    if (_cached?.funnel == funnel.wire) return;
+    // Reset every field — keep only the new funnel. See method docstring.
+    _cached = AttributionData.empty().applyFunnel(funnel.wire);
+  }
+
+  void setSortBar(String sortBar) {
+    _cached = (_cached ?? AttributionData.empty()).applySortBar(sortBar);
+  }
+
+  /// Overwrite the cached slice with [snapshot]. Called by
+  /// [AppNavigationObserver] on pop of a funnel-owning route to undo the
+  /// funnel-switch wipe that happened on push, so a `PLP → Search → back
+  /// → PLP → PDP` flow preserves whatever HP click context the user had
+  /// accumulated before opening Search. `null` restores to "nothing cached".
+  void restore(AttributionData? snapshot) {
+    _cached = snapshot;
   }
 
   /// HTTP request-body keys for ATC / wishlist-add / cart-update. Server
   /// accepts the trackingMeta snake_case keys back verbatim.
   Map<String, Object?> get requestParams {
-    final data = getCurrent();
+    final data = _cached;
     if (data == null) return const <String, Object?>{};
     final params = <String, Object?>{...data.trackingMeta};
     if (_nonEmpty(data.funnel)) params[AnalyticsProperties.funnel] = data.funnel;
@@ -98,7 +100,7 @@ class OrderAttributionHelper {
 
   /// Segment event-payload keys. Merged into events fired with `attribution: true`.
   Map<String, Object?> get segmentParams {
-    final data = getCurrent();
+    final data = _cached;
     if (data == null) return const <String, Object?>{};
     final params = <String, Object?>{...data.trackingMeta};
     if (_nonEmpty(data.funnel)) params[AnalyticsProperties.funnel] = data.funnel;

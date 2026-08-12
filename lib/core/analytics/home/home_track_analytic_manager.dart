@@ -68,6 +68,15 @@ class HomeTrackAnalyticManager with WidgetsBindingObserver {
   /// flush. Bookkeeping-only on the scroll frame; the worker drains it.
   final Set<int> _journey = <int>{};
 
+  /// Hero-tile visibility journey — component-index → ordered list of tile
+  /// indices the user actually saw between flushes. Duplicates are kept:
+  /// if the user saw tiles 1→10 then swiped back to 1, 2, 3, the list is
+  /// [1..10, 1, 2, 3] and flush emits 13 events — each unique VIEW of a
+  /// tile is a distinct impression. Populated by [notifyHeroTileVisible]
+  /// from the Hero widget on VisibilityDetector rising edge + each
+  /// `onPageChanged`. Drained by [flushJourney].
+  final Map<int, List<int>> _heroTileJourney = <int, List<int>>{};
+
   /// Per-carousel key → captured `trackingMeta`. Last-write-wins per
   /// key; events fire on [flushJourney] via [_fireCarouselScrolls].
   final Map<Object, Map<String, dynamic>> _carouselScrollDepth =
@@ -152,6 +161,18 @@ class HomeTrackAnalyticManager with WidgetsBindingObserver {
     _currentlyVisible.remove(index);
   }
 
+  /// Record that Hero tile [tileIndex] inside the component at
+  /// [componentIndex] was actually seen (VisibilityDetector rising edge on
+  /// the carousel + each `onPageChanged` fires this). NOT deduped —
+  /// re-swipes to the same tile emit again on flush (matches the "each
+  /// view is a distinct impression" contract). Cleared on [flushJourney]
+  /// and [_resetScrollState].
+  void notifyHeroTileVisible(int componentIndex, int tileIndex) {
+    _heroTileJourney
+        .putIfAbsent(componentIndex, () => <int>[])
+        .add(tileIndex);
+  }
+
   // ─── Click tracking ────────────────────────────────────────────────
 
   /// Fires `tile_clicked` / `lp_tile_clicked` AND writes attribution.
@@ -164,68 +185,104 @@ class HomeTrackAnalyticManager with WidgetsBindingObserver {
   /// Bare `lp_*` keys are stripped from the click payload — they'll
   /// re-emit as `lp1_*` from the deque; leaving them here would
   /// double-count.
+  ///
+  /// Returns [Future] for tests that need to observe post-dispatch state
+  /// (`await tracker.logTileClick(...)` in a test still waits for the
+  /// deferred work). Production callers **must not await** — nav has to
+  /// start on the same frame as the tap.
   Future<void> logTileClick({
     List<Map<String, dynamic>?> trackingMetaChain = const [],
     String? sortBar,
-  }) async {
-    // Snapshot source-page context BEFORE any await. The widget's
-    // `ActionUrlHandler.navigate(...)` runs right after
-    // `unawaited(logTileClick(...))` and synchronously drives
-    // `AppNavigationObserver.didPush`, which flips `extraData` to
-    // the destination screen's context (LP if opening a landing
-    // page). Reading `_fromHomePage` / `extraData` after any of the
-    // awaits below would emit `lp_tile_clicked` for a click that
-    // actually happened on the homepage.
+  }) {
+    // ── Sync section: everything the next screen depends on ──
+    //
+    // Snapshot source-page context before any deferral. `ActionUrlHandler.
+    // navigate(...)` runs synchronously right after this returns and drives
+    // `AppNavigationObserver.didPush`, which flips `extraData` to the
+    // destination screen's context. Reading `_fromHomePage` / `extraData`
+    // later would misclassify the click as `lp_tile_clicked`.
     final fromHomePage = _fromHomePage;
     final lpName = extraData?.landingPageName;
     final lpId = extraData?.landingPageId;
 
-    // Ship every pending impression BEFORE the click event fires so
-    // the wire order reads "user saw X, saw Y, then clicked Z".
-    // Impressions carry attribution as it stands right now (pre-click);
-    // the merge below updates attribution so the click + every event on
-    // the next screen get the new state. This also means the nav
-    // observer's own `flushCarouselScrolls` on `didPush` sees an empty
-    // journey and no-ops — no double emission.
-    await flushJourney();
-
+    // Build merged chain — root → leaf, deeper keys win, nulls skipped.
     final merged = <String, dynamic>{};
     for (final meta in trackingMetaChain) {
       if (meta == null || meta.isEmpty) continue;
-      merged.addAll(meta);
+      for (final entry in meta.entries) {
+        if (entry.value == null) continue;
+        merged[entry.key] = entry.value;
+      }
     }
 
+    // In-memory attribution write — the ONLY thing on the click frame.
+    // Attribution stores are session-scoped memory only (no disk); the
+    // next screen reads `orderAttribution.segmentParams` /
+    // `lpAttribution.segmentParams` and sees the merged data immediately.
+    //
+    // HP branch uses REPLACE (not merge) so keys from a previous Hero
+    // click can't leak onto a subsequent CustomTile click whose payload
+    // ships a smaller key set. See `OrderAttributionHelper.replaceTrackingMeta`.
     if (fromHomePage) {
-      await orderAttribution.mergeTrackingMeta(merged);
+      orderAttribution.replaceTrackingMeta(merged);
     } else {
-      await lpAttribution.pushTileMeta(
+      lpAttribution.pushTileMeta(
         meta: merged,
         landingPageName: lpName,
         landingPageId: lpId,
       );
     }
-
     if (sortBar != null && sortBar.isNotEmpty) {
       sortBarName = sortBar;
-      await orderAttribution.setSortBar(sortBar);
+      orderAttribution.setSortBar(sortBar);
     }
 
+    //
+    // The click event dispatches inside the deferred block below, AFTER
+    // `await flushJourney()`. That yield gives `didPush → _applyFunnel`
+    // (cart/search destinations) or a subsequent rapid tap's
+    // `replaceTrackingMeta` a chance to mutate the store before the click
+    // is composed. A live read at dispatch would ship the destination's
+    // funnel or the newer tap's identity on THIS click.
+    //
+    // Snapshotting here — after this tap's own writes committed — pins
+    // the click's payload to the tap that owns it. Passing
+    // `attribution: false` to `logEvent` skips the live merge and uses
+    // only what we've baked into `props`.
+    final attributionSnapShot = <String, Object?>{
+      ...orderAttribution.segmentParams,
+      ...lpAttribution.segmentParams,
+    };
+
+    // Pre-compute the click event's payload NOW. Merge order:
+    //   buildBaseSeed (funnel/sortbar/lp_id/lp_name) →
+    //   frozenAttribution (T=0 snapshot: trackingMeta + funnel + sortbar
+    //     + lp{n}_*) →
+    //   clickMeta (client-owned override).
     final clickMeta = fromHomePage ? merged : stripLpPrefixed(merged);
     final props = buildBaseSeed(
       fromHomePage: fromHomePage,
       sortBarName: sortBarName,
       landingPageId: lpId,
       landingPageName: lpName,
-    )..addAll(clickMeta);
+    )
+      ..addAll(attributionSnapShot)
+      ..addAll(clickMeta);
     final event = fromHomePage
         ? AnalyticsEvents.tileClicked
         : AnalyticsEvents.lpTileClicked;
-    await analytics.logEvent(event, props, attribution: true);
+
+    // Impressions fire first (order-preserving on the wire), then the
+    // click with `attribution: false` — payload is frozen at T=0.
+    return Future.delayed(Duration.zero, () async {
+      await flushJourney();
+      await analytics.logEvent(event, props, attribution: false);
+    });
   }
 
   /// Wipe the LP attribution deque. Called when Discover becomes active
   /// again (cold start, tab-tap-to-Discover, back-nav from LP depth N).
-  Future<void> clearLpAttribution() => lpAttribution.clear();
+  void clearLpAttribution() => lpAttribution.clear();
 
   // ─── Carousel scroll ───────────────────────────────────────────────
 
@@ -250,7 +307,7 @@ class HomeTrackAnalyticManager with WidgetsBindingObserver {
         landingPageId: seed.landingPageId,
         landingPageName: seed.landingPageName,
       );
-      if (entry.value.isNotEmpty) props.addAll(entry.value);
+      if (entry.value.isNotEmpty) mergeMetaNonNull(props, entry.value);
       futures.add(analytics.logEvent(carouselEvent, props));
     }
     await Future.wait(futures);
@@ -273,10 +330,22 @@ class HomeTrackAnalyticManager with WidgetsBindingObserver {
     // LP than the one they were journey'd on.
     final indices = _journey.toList(growable: false);
     _journey.clear();
+    // Snapshot & clear the hero-tile map SYNC too (same rationale as
+    // `_journey` above — a mid-flush LP-route push wipes it via
+    // `resetVisibilityState`).
+    final heroTiles = <int, List<int>>{};
+    for (final entry in _heroTileJourney.entries) {
+      heroTiles[entry.key] = List<int>.of(entry.value, growable: false);
+    }
+    _heroTileJourney.clear();
     final seed = _seed();
     await _fireCarouselScrolls(seed);
-    if (indices.isEmpty) return;
-    await _worker.flushImpressions(indices: indices, seed: seed);
+    if (indices.isEmpty && heroTiles.isEmpty) return;
+    await _worker.flushImpressions(
+      indices: indices,
+      heroTiles: heroTiles,
+      seed: seed,
+    );
   }
 
   /// Alias so existing call sites (bloc close, nav observer, tab
@@ -322,6 +391,7 @@ class HomeTrackAnalyticManager with WidgetsBindingObserver {
     _lastDirection = _ScrollDir.none;
     _carouselScrollDepth.clear();
     _journey.clear();
+    _heroTileJourney.clear();
   }
 }
 

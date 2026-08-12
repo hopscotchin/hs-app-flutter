@@ -40,7 +40,10 @@ void main() {
   });
 
   group('applyFunnel', () {
-    test('updates funnel identity but preserves trackingMeta + sortBar', () {
+    // Pure primitive — funnel field only. Cross-funnel wipe semantics
+    // live in `OrderAttributionHelper.setFunnel` and are covered in
+    // `event_merge_test.dart` at the helper level.
+    test('updates the funnel field, leaves other fields untouched', () {
       final base = AttributionData.empty()
           .mergeTrackingMeta({'banner_name': 'HP', 'funnel_row': 1})
           .applySortBar('Girl');

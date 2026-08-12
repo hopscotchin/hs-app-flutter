@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/components/spring/spring_bottom_nav_bar.dart';
-import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
+import 'package:hs_app_flutter/core/analytics/constants/funnel.dart';
 import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.dart';
 import 'package:hs_app_flutter/core/analytics/state/checkout_timer.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
@@ -75,12 +75,12 @@ class _DashboardPageState extends State<DashboardPage>
     WidgetsBinding.instance.addObserver(this);
     // Publish the initial funnel so the nav observer knows what to restore
     // to when a pushed route (LP/PDP/cart/…) later pops back to the shell.
-    _publishActiveFunnel(_navIndex);
+    _publishCurrentFunnel(_navIndex);
   }
 
-  void _publishActiveFunnel(int navIndex) {
+  void _publishCurrentFunnel(int navIndex) {
     final funnel = _funnelForNavIndex(navIndex);
-    if (funnel != null) sl<AppNavigationObserver>().setActiveFunnel(funnel);
+    if (funnel != null) sl<AppNavigationObserver>().setShellFunnel(funnel);
   }
 
   @override
@@ -106,12 +106,14 @@ class _DashboardPageState extends State<DashboardPage>
     unawaited(sl<HomeTrackAnalyticManager>().flushCarouselScrolls());
   }
 
-  /// Map nav-bar index → funnel value. Search (nav 2) opens a pushed route
-  /// so the observer handles its funnel on push — Dashboard skips it here.
-  String? _funnelForNavIndex(int navIndex) => switch (navIndex) {
-    0 => FromScreens.discover,
-    1 => FromScreens.categories,
-    3 => FromScreens.account,
+  /// Map nav-bar index → [Funnel]. Nav 2 & 3 currently mirrors Categories —
+  /// Search opens as a pushed route from within Categories, so the observer
+  /// handles its funnel on `didPush` — Dashboard skips it here.
+  Funnel? _funnelForNavIndex(int navIndex) => switch (navIndex) {
+    0 => Funnel.discover,
+    1 => Funnel.categories,
+    2 => Funnel.categories,
+    3 => Funnel.account,
     _ => null,
   };
 
@@ -244,7 +246,7 @@ class _DashboardPageState extends State<DashboardPage>
     // Publish the new funnel — the observer flushes pending carousel scrolls
     // and clears LP attribution as part of applying it, so no explicit calls
     // are needed here.
-    _publishActiveFunnel(navIndex);
+    _publishCurrentFunnel(navIndex);
     final branchIndex = _navToBranchIndex(navIndex);
     widget.navigationShell.goBranch(
       branchIndex,

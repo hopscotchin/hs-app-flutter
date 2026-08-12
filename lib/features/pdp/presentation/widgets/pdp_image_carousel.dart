@@ -140,9 +140,7 @@ class _PdpImageCarouselState extends State<PdpImageCarousel> {
     _velocityTracker = null;
     drag.end(
       DragEndDetails(
-        velocity: Velocity(
-          pixelsPerSecond: Offset(0, velocity.pixelsPerSecond.dy),
-        ),
+        velocity: Velocity(pixelsPerSecond: Offset(0, velocity.pixelsPerSecond.dy)),
         primaryVelocity: velocity.pixelsPerSecond.dy,
       ),
     );
@@ -171,9 +169,7 @@ class _PdpImageCarouselState extends State<PdpImageCarousel> {
             PageView.builder(
               controller: _pageController,
               scrollDirection: Axis.vertical,
-              physics: _CarouselCoordinationPhysics(
-                suppressPaging: () => _suppressImagePaging,
-              ),
+              physics: _CarouselCoordinationPhysics(suppressPaging: () => _suppressImagePaging),
               itemCount: widget.media.length,
               allowImplicitScrolling: true,
               onPageChanged: (index) => setState(() => _currentPage = index),
@@ -220,18 +216,10 @@ class _PdpImageCarouselState extends State<PdpImageCarousel> {
             if (widget.visualCue != null)
               Positioned(
                 left: 12,
-                bottom:
-                    PdpStrings.sheetCarouselOverlap +
-                    PdpStrings.visualCueBottomGap,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: 120,
-                    maxHeight: 26,
-                  ),
-                  child: _VisualCueBadge(
-                    key: const ValueKey(PdpTestStrings.visualCueBadge),
-                    cue: widget.visualCue!,
-                  ),
+                bottom: PdpStrings.sheetCarouselOverlap + PdpStrings.visualCueBottomGap,
+                child: _VisualCueBadge(
+                  key: const ValueKey(PdpTestStrings.visualCueBadge),
+                  cue: widget.visualCue!,
                 ),
               ),
           ],
@@ -244,9 +232,7 @@ class _PdpImageCarouselState extends State<PdpImageCarousel> {
     aspectRatio: PdpStrings.imageAspectRatio,
     child: ColoredBox(
       color: Color(0xFFF5F5F5),
-      child: Center(
-        child: Icon(Icons.image_outlined, size: 48, color: Colors.grey),
-      ),
+      child: Center(child: Icon(Icons.image_outlined, size: 48, color: Colors.grey)),
     ),
   );
 }
@@ -274,12 +260,7 @@ class _VisualCueBadge extends StatelessWidget {
       // assets (e.g. trending.svg) are vectors, not raster images. Explicit
       // size so BoxFit.contain has a box to scale within — the enclosing
       // ConstrainedBox alone won't make an unbounded SvgPicture respect a max.
-      return CustomImage(
-        path: cue.imageUrl!,
-        width: 120,
-        height: 26,
-        fit: BoxFit.contain,
-      );
+      return CustomImage(path: cue.imageUrl!, fit: BoxFit.contain);
     }
 
     // TEXT (default)
@@ -290,14 +271,8 @@ class _VisualCueBadge extends StatelessWidget {
     final fg = _parseColor(cue.textColor) ?? AppColors.brandDefault;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xs,
-        vertical: AppSpacing.xxs,
-      ),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: AppSpacing.borderRadiusXs,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xxs),
+      decoration: BoxDecoration(color: bg, borderRadius: AppSpacing.borderRadiusXs),
       child: Text(
         text,
         style: AppTypographyV1.labelMedium.copyWith(
@@ -318,19 +293,13 @@ class _VisualCueBadge extends StatelessWidget {
 // swiping). suppressPaging reads the page's scroll position, so it stays true
 // through the fling that follows a drag — not just during the drag itself.
 class _CarouselCoordinationPhysics extends ClampingScrollPhysics {
-  const _CarouselCoordinationPhysics({
-    required this.suppressPaging,
-    super.parent,
-  });
+  const _CarouselCoordinationPhysics({required this.suppressPaging, super.parent});
 
   final bool Function() suppressPaging;
 
   @override
   _CarouselCoordinationPhysics applyTo(ScrollPhysics? ancestor) =>
-      _CarouselCoordinationPhysics(
-        suppressPaging: suppressPaging,
-        parent: buildParent(ancestor),
-      );
+      _CarouselCoordinationPhysics(suppressPaging: suppressPaging, parent: buildParent(ancestor));
 
   // Always accept the drag. With a single image the PageView has zero scroll
   // extent (minScrollExtent == maxScrollExtent) and the default implementation
@@ -342,9 +311,8 @@ class _CarouselCoordinationPhysics extends ClampingScrollPhysics {
   // An unreachable velocity threshold means no fling ever advances an image —
   // the carousel stays put while the page scrolls, including after release.
   @override
-  Tolerance toleranceFor(ScrollMetrics metrics) => suppressPaging()
-      ? const Tolerance(velocity: double.infinity)
-      : super.toleranceFor(metrics);
+  Tolerance toleranceFor(ScrollMetrics metrics) =>
+      suppressPaging() ? const Tolerance(velocity: double.infinity) : super.toleranceFor(metrics);
 
   // Consume the whole drag so the PageView never moves; the page is scrolled by
   // the forwarded drag instead. Otherwise page images normally.

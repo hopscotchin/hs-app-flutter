@@ -24,8 +24,8 @@ class PdpRecentlyViewed extends StatelessWidget {
       minTilesToShow: cfg?.minTilesToShow ?? 3,
       imageCornerRadius: cfg?.imageCornerRadius ?? 4.0,
       navigation: cfg?.navigation ?? false,
-      snapping: true,
-      showPageIndicators: true,
+      snapping: cfg?.snapping ?? false,
+      showPageIndicators: cfg?.showPageIndicators ?? false,
       peepingFactor: cfg?.peepingFactor ?? 0,
     );
 

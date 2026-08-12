@@ -75,6 +75,34 @@ class HomeFixture {
     return indices[rng.nextInt(indices.length)];
   }
 
+  /// Random index for a component of [type] whose root trackingMeta
+  /// satisfies [predicate]. Returns -1 when no matching component exists.
+  ///
+  /// Used to skip fixture entries the homepage contract disallows (e.g.
+  /// LP-variant CustomTiles that ship `lp_*`-prefixed keys — those leak
+  /// into the home feed and pollute the random pick).
+  int randomIndexOfTypeMatching(
+    String type,
+    bool Function(Map<String, dynamic> rootTrackingMeta) predicate, {
+    Random? random,
+  }) {
+    final candidates = <int>[];
+    for (final i in allIndicesOfType(type)) {
+      if (predicate(rootTrackingMetaAt(i))) candidates.add(i);
+    }
+    if (candidates.isEmpty) return -1;
+    final rng = random ?? Random();
+    return candidates[rng.nextInt(candidates.length)];
+  }
+
+  /// Convenience predicate — root has no `lp_*`-prefixed keys.
+  static bool rootHasNoLpKeys(Map<String, dynamic> meta) {
+    for (final key in meta.keys) {
+      if (key.startsWith('lp_')) return false;
+    }
+    return true;
+  }
+
   /// Picks a random component of [type]. Returns `null` when none.
   PageComponent? randomOfType(String type, {Random? random}) {
     final idx = randomIndexOfType(type, random: random);

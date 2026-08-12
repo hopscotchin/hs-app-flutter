@@ -9,7 +9,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../router/navigation_observer.dart';
 import '../../services/pref_manager.dart';
 import '../analytics_service.dart';
-import '../debug/analytics_debug_log.dart';
 import '../attribution/lp_attribution_helper.dart';
 import '../attribution/order_attribution_helper.dart';
 import '../attribution/utm_header_util.dart';

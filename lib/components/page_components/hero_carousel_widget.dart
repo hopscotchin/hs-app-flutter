@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../core/analytics/home/home_component_click_handlers.dart';
 import '../../core/analytics/home/home_track_analytic_manager.dart';
@@ -12,6 +13,11 @@ import '../../core/constants/strings/auto_test_strings.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../atoms/cached_image_widget.dart';
 
+/// Minimum visible fraction that counts as "the user is seeing this tile" —
+/// matches [PageComponentRenderer]'s outer threshold so the two detectors
+/// stay in phase.
+const double _kHeroVisibilityThreshold = 0.5;
+
 class HeroCarouselWidget extends StatefulWidget {
   final HeroCarouselData heroData;
   final ComponentMargins? margins;
@@ -19,11 +25,19 @@ class HeroCarouselWidget extends StatefulWidget {
   /// Component-level automation key prefix, e.g. `hp_hero_0`. Null → unkeyed.
   final String? keyPrefix;
 
+  /// This component's index in `pageComponents`. Passed through so the
+  /// tracker can key tile impressions per Hero (e.g. two Heros on one
+  /// page → separate journeys). `-1` means "unknown; tile impressions
+  /// will not be recorded" — set by non-analytics call sites and by tests
+  /// that don't care about visibility.
+  final int componentIndex;
+
   const HeroCarouselWidget({
     super.key,
     required this.heroData,
     this.margins,
     this.keyPrefix,
+    this.componentIndex = -1,
   });
 
   @override
@@ -39,6 +53,13 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
   /// timer wiring. Big win when the discover scroll view is repainting.
   final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
   Timer? _timer;
+
+  /// Whether the carousel is currently at least [_kHeroVisibilityThreshold]
+  /// visible on screen. Gates BOTH auto-scroll (paused while off-screen so
+  /// the carousel doesn't advance behind an overlaying route / a scrolled-
+  /// away homepage) and impression recording (a page change while off-
+  /// screen must not record a banner_impression the user didn't see).
+  bool _isVisible = false;
 
   // Left-scroll budget — same pattern as PageCarouselWidget.
   static const int _leftScrollBudget = 100;
@@ -69,7 +90,6 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _startAutoScroll();
   }
 
   @override
@@ -85,6 +105,8 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // Guard on `_isVisible`: resuming to a screen where Hero is off-
+      // screen (e.g. app resumed on PLP) must NOT restart the ticker.
       _startAutoScroll();
     } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       _cancelTimer();
@@ -92,6 +114,7 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
   }
 
   void _startAutoScroll() {
+    if (!_isVisible) return;
     if (_tiles.length <= 1) return;
     _cancelTimer();
     _timer = Timer.periodic(Duration(milliseconds: _durationMs), (_) {
@@ -108,6 +131,35 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
   void _cancelTimer() {
     _timer?.cancel();
     _timer = null;
+  }
+
+  /// VisibilityDetector callback for the carousel itself (nested inside
+  /// [PageComponentRenderer]'s outer detector). Rising edge → start auto-
+  /// scroll and record the current tile as seen. Falling edge → cancel
+  /// the ticker so a hidden carousel doesn't tick behind an overlay.
+  void _onVisibilityChanged(VisibilityInfo info) {
+    final isAbove = info.visibleFraction > _kHeroVisibilityThreshold;
+    if (isAbove == _isVisible) return;
+    _isVisible = isAbove;
+    if (isAbove) {
+      _recordCurrentTileImpression();
+      _startAutoScroll();
+    } else {
+      _cancelTimer();
+    }
+  }
+
+  /// Record the currently-shown tile as an impression IFF the widget is
+  /// currently visible. Called from the visibility rising edge and from
+  /// `onPageChanged`. `componentIndex < 0` gates out non-analytics call
+  /// sites (previews, direct-widget tests).
+  void _recordCurrentTileImpression() {
+    if (!_isVisible) return;
+    if (widget.componentIndex < 0) return;
+    if (_tiles.isEmpty) return;
+    final tileIndex = _currentPage.value % _tiles.length;
+    sl<HomeTrackAnalyticManager>()
+        .notifyHeroTileVisible(widget.componentIndex, tileIndex);
   }
 
   @override
@@ -150,7 +202,12 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
       // from the parent CustomScrollView so a hero ticking through pages
       // doesn't re-rasterise the whole homepage.
       child: RepaintBoundary(
-        child: Stack(
+        child: VisibilityDetector(
+          // Key: componentIndex is unique per Hero on the page; the
+          // parent-owned outer key is unrelated.
+          key: Key('hero-carousel-${widget.componentIndex}'),
+          onVisibilityChanged: _onVisibilityChanged,
+          child: Stack(
           children: [
             NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification notification) {
@@ -163,7 +220,14 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
                 controller: _controller!,
                 itemCount: null,
                 allowImplicitScrolling: true,
-                onPageChanged: (int index) => _currentPage.value = index,
+                onPageChanged: (int index) {
+                  _currentPage.value = index;
+                  // Record only when the carousel itself is on-screen —
+                  // an auto-scroll tick fired just before we cancelled
+                  // (e.g. rapid nav-away) must not stamp an impression
+                  // for a tile the user didn't see.
+                  _recordCurrentTileImpression();
+                },
                 itemBuilder: (BuildContext context, int index) {
                   final int tileIndex = index % tiles.length;
                   final HeroTile tile = tiles[tileIndex];
@@ -204,6 +268,7 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
                 ),
               ),
           ],
+        ),
         ),
       ),
     );

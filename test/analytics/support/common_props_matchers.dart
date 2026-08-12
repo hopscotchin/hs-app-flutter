@@ -17,12 +17,15 @@ import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dar
 //     → `lp_banner_impression` / `lp_tile_impression` events. LP-page
 //     response is the ONLY place `lp_*`-prefixed keys are allowed.
 
+// property_type is a leaf-level backend attribute, not a component-root one —
+// so it's only guaranteed on Hero (per-tile banner_impression). Non-Hero
+// components emit one banner_impression at the root, where property_type is
+// absent by backend contract.
 const requiredKeysBannerImpressionHome = <String>[
   AnalyticsProperties.funnel,
   AnalyticsProperties.bannerName,
   AnalyticsProperties.funnelRow,
   AnalyticsProperties.position,
-  AnalyticsProperties.propertyType,
 ];
 
 // LP-variant required key lists — reserved for a future
@@ -125,4 +128,50 @@ void expectNoLpPrefixedTrackingMetaKeys(Map<String, dynamic> meta) {
           'lp_* keys are Landing-Page-response only and must never appear on '
           'the homepage feed. Backend should ship this component with the '
           'unprefixed variant.');
+}
+
+/// Attribution-owned keys that live in `OrderAttribution.segmentParams` and
+/// override caller-seeded root trackingMeta. Callers checking "root
+/// trackingMeta survived on the wire" must skip these — they intentionally
+/// come from the attribution store, not the component's own blob.
+const Set<String> attributionOwnedKeys = {
+  AnalyticsProperties.funnel,
+  AnalyticsProperties.sortbar,
+};
+
+/// For every non-null, non-attribution-owned key in [root], assert the
+/// payload has the same value. Used by both banner_impression and
+/// tile_clicked "root trackingMeta merged verbatim" assertions. Optional
+/// [override] lets a caller exempt keys that a deeper level (tile / leaf)
+/// intentionally overwrites.
+void expectRootMerged(
+  Map<String, Object?> payload,
+  Map<String, dynamic> root, {
+  Set<String> override = const <String>{},
+}) {
+  for (final entry in root.entries) {
+    if (entry.value == null) continue;
+    if (attributionOwnedKeys.contains(entry.key)) continue;
+    if (override.contains(entry.key)) continue;
+    expect(payload[entry.key], entry.value, reason: 'root.${entry.key} lost');
+  }
+}
+
+/// For every non-null, non-attribution-owned key in [sourceMeta], assert
+/// the payload of a downstream event (PDP viewed after a tile click)
+/// carries the same value. Encapsulates the "attribution carries forward
+/// home→PDP" invariant. Callers may pass [ignoreKeys] to exempt keys the
+/// downstream event's own caller-seeded props override (e.g. product_id).
+void expectAttributionCarriedForward(
+  Map<String, Object?> payload,
+  Map<String, dynamic> sourceMeta, {
+  Set<String> ignoreKeys = const <String>{},
+}) {
+  for (final entry in sourceMeta.entries) {
+    if (entry.value == null) continue;
+    if (attributionOwnedKeys.contains(entry.key)) continue;
+    if (ignoreKeys.contains(entry.key)) continue;
+    expect(payload[entry.key], entry.value,
+        reason: 'attribution.${entry.key} lost between click and downstream event');
+  }
 }

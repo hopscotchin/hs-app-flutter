@@ -1,6 +1,7 @@
 import '../../constants/analytics_defaults.dart';
 import '../../constants/analytics_events.dart';
 import '../../constants/analytics_properties.dart';
+import '../../constants/funnel.dart';
 import '../analytics_helper.dart';
 
 /// Home / Discover events. `logHomePageViewed` drives the cold-start chain
@@ -15,8 +16,8 @@ extension HomeEvents on AnalyticsHelper {
     await logAppLaunched(FromScreens.discover);
 
     // Seed funnel + sortbar so the attribution merge picks them up.
-    await orderAttribution.setFunnel(AnalyticsDefaults.discover);
-    await orderAttribution.setSortBar(AnalyticsDefaults.sortBarAll);
+    orderAttribution.setFunnel(Funnel.discover);
+    orderAttribution.setSortBar(AnalyticsDefaults.sortBarAll);
 
     final props = <String, Object?>{
       if (fromLocation != null && fromLocation.isNotEmpty)

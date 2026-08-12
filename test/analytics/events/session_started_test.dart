@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:hs_app_flutter/core/analytics/constants/analytics_events.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dart';
+import 'package:hs_app_flutter/core/analytics/constants/funnel.dart';
 
 import '../support/analytics_test_harness.dart';
 import '../support/common_props_matchers.dart';
@@ -76,13 +77,13 @@ void main() {
   // behaviour so any silent change fires a red — if you fix Flutter to match
   // Android, flip this to `isFalse`.
   test('currently merges OrderAttribution (Flutter/Android divergence)', () async {
-    await h.orderAttribution.setFunnel('Search');
-    await h.orderAttribution.setSortBar('Girl');
+    h.orderAttribution.setFunnel(Funnel.search);
+    h.orderAttribution.setSortBar('Girl');
 
     await h.analytics.fireSessionStartedEvent();
 
     final payload = h.singleEvent(AnalyticsEvents.sessionStarted);
-    expect(payload[AnalyticsProperties.funnel], 'Search');
+    expect(payload[AnalyticsProperties.funnel], Funnel.search.wire);
     expect(payload[AnalyticsProperties.sortbar], 'Girl');
   });
 }

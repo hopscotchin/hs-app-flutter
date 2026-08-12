@@ -105,8 +105,8 @@ class AnalyticsTestHarness {
     final launchTimer = LaunchTimer();
     final checkoutTimer = CheckoutTimer();
     final experiments = ExperimentsUtil(prefs);
-    final orderAttribution = OrderAttributionHelper(prefs);
-    final lpAttribution = LpAttributionHelper(prefs);
+    final orderAttribution = OrderAttributionHelper();
+    final lpAttribution = LpAttributionHelper();
     final utm = UtmHeaderUtil(prefs);
     // Empty stack by default → contributes no `nav_screen_*` keys. Tests that
     // want nav stamping fire `observer.didPush(...)` manually.

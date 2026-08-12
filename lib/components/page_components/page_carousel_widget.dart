@@ -56,14 +56,20 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   // font metrics plus the AppSpacing gaps between them. The previous 68/84
   // values overflowed by ~9px on devices where the font's intrinsic line
   // height is on the taller side.
-  static const double _productInfoHeight = 80;
-  static const double _productInfoHeightNarrow = 96;
+  static const double _productInfoHeight = 60;
+  static const double _productInfoHeightNarrow = 76;
+  static const double _colorVariantsBuffer = 20;
   static const double _narrowScreenThreshold = 370;
 
   static const _initialLineState = (progress: 0.0, fraction: 0.3);
+  // 32ms ≈ 2 frames. Smooths jitter from tiny dx wobble while
+  // staying close enough to feel in sync. Raise if it still jitters, lower
+  // if it visibly lags.
+  static const _lineUpdateThrottle = Duration(milliseconds: 32);
 
   final ScrollController _listController = ScrollController();
   final ValueNotifier<_LineState> _lineState = ValueNotifier(_initialLineState);
+  Timer? _lineUpdatePending;
 
   final ScrollController _snapController = ScrollController();
 
@@ -87,6 +93,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   /// not the snapping list and its layout math above.
   final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
   late final bool _hasProducts;
+  late final bool _hasColorVariants;
 
   @override
   bool get wantKeepAlive => true;
@@ -106,15 +113,18 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   void initState() {
     super.initState();
     _hasProducts = widget.carouselData.tiles.any((tile) => tile.product != null);
+    _hasColorVariants = widget.carouselData.tiles
+        .any((tile) => tile.product?.colorVariants?.isNotEmpty ?? false);
     _listController.addListener(_onListScroll);
     _snapController.addListener(_onSnapScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _onListScroll();
+      if (mounted) _flushLineState();
     });
   }
 
   @override
   void dispose() {
+    _lineUpdatePending?.cancel();
     _listController
       ..removeListener(_onListScroll)
       ..dispose();
@@ -131,6 +141,16 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     final pos = _listController.position;
     _reportCarouselScroll(pos, _listItemStride, _prevListPixels);
     _prevListPixels = pos.pixels;
+    // Trailing throttle: coalesce bursts of scroll ticks into one indicator
+    // update per window. Timer reads the latest position when it fires, so
+    // the final resting spot always paints without a lingering stale value.
+    if (_lineUpdatePending?.isActive ?? false) return;
+    _lineUpdatePending = Timer(_lineUpdateThrottle, _flushLineState);
+  }
+
+  void _flushLineState() {
+    if (!mounted || !_listController.hasClients) return;
+    final pos = _listController.position;
     if (pos.maxScrollExtent <= 0) {
       _lineState.value = const (progress: 0.0, fraction: 1.0);
       return;
@@ -237,7 +257,8 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     final productInfoHeight = _hasProducts
         ? (screenWidth <= _narrowScreenThreshold ? _productInfoHeightNarrow : _productInfoHeight)
         : 0.0;
-    final carouselHeight = tileHeight + productInfoHeight;
+    final carouselHeight =
+        tileHeight + productInfoHeight + (_hasColorVariants ? _colorVariantsBuffer : 0);
 
     if (hasSnapping) {
       _snapItemStride = isFullWidth ? screenWidth : tileWidth + innerHorizontalMargin;
@@ -488,7 +509,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     return GestureDetector(
       key: _tileKey(index),
       onTap: () {
-        logClick();
+        unawaited(logClick());
         ActionUrlHandler.navigate(context, tapUri);
       },
       child: SizedBox(
@@ -566,12 +587,19 @@ class _ScrollLineIndicator extends StatelessWidget {
 
   final ValueListenable<_LineState> state;
 
+  // Longer than the scroll throttle so a new target always arrives mid-tween
+  // → the thumb glides continuously instead of stepping frame-by-frame.
+  static const _smoothing = Duration(milliseconds: 120);
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<_LineState>(
       valueListenable: state,
-      builder: (_, value, _) =>
-          _LineBar(progress: value.progress, fraction: value.fraction, animate: false),
+      builder: (_, value, _) => _LineBar(
+        progress: value.progress,
+        fraction: value.fraction,
+        duration: _smoothing,
+      ),
     );
   }
 }
@@ -591,26 +619,34 @@ class _PageLineIndicator extends StatelessWidget {
       valueListenable: currentPage,
       builder: (_, page, _) {
         final activeIndex = page % count;
-        return _LineBar(progress: activeIndex / (count - 1), fraction: fraction, animate: true);
+        return _LineBar(
+          progress: activeIndex / (count - 1),
+          fraction: fraction,
+          duration: _LineBar._pageSnapDuration,
+        );
       },
     );
   }
 }
 
 class _LineBar extends StatelessWidget {
-  const _LineBar({required this.progress, required this.fraction, required this.animate});
+  const _LineBar({
+    required this.progress,
+    required this.fraction,
+    required this.duration,
+  });
 
   final double progress;
   final double fraction;
-  final bool animate;
+  final Duration duration;
 
   static const double _trackWidth = 250;
   static const double _thumbHeight = 3.5;
   static const double _trackHeight = 2;
   static const _trackRadius = BorderRadius.all(Radius.circular(_trackHeight / 2));
   static const _thumbRadius = BorderRadius.all(Radius.circular(_thumbHeight / 2));
-  static const _padding = EdgeInsets.symmetric(vertical: 14);
-  static const _animDuration = Duration(milliseconds: 200);
+  static const _padding = EdgeInsets.only(top: 29);
+  static const _pageSnapDuration = Duration(milliseconds: 200);
   static const _trackDecoration = BoxDecoration(
     color: AppColors.lineIndicator,
     borderRadius: _trackRadius,
@@ -624,11 +660,6 @@ class _LineBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final thumbWidth = _trackWidth * fraction;
     final left = progress.clamp(0.0, 1.0) * (_trackWidth - thumbWidth);
-    final thumb = SizedBox(
-      width: thumbWidth,
-      height: _thumbHeight,
-      child: const DecoratedBox(decoration: _thumbDecoration),
-    );
 
     return Padding(
       padding: _padding,
@@ -644,17 +675,18 @@ class _LineBar extends StatelessWidget {
                 height: _trackHeight,
                 child: DecoratedBox(decoration: _trackDecoration),
               ),
-              if (animate)
-                AnimatedPositioned(
-                  duration: _animDuration,
-                  curve: Curves.easeOut,
-                  left: left,
-                  top: 0,
-                  bottom: 0,
-                  child: thumb,
-                )
-              else
-                Positioned(left: left, top: 0, bottom: 0, child: thumb),
+              AnimatedPositioned(
+                duration: duration,
+                curve: Curves.easeOut,
+                left: left,
+                top: 0,
+                bottom: 0,
+                child: SizedBox(
+                  width: thumbWidth,
+                  height: _thumbHeight,
+                  child: const DecoratedBox(decoration: _thumbDecoration),
+                ),
+              ),
             ],
           ),
         ),

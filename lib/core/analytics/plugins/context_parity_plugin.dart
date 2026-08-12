@@ -5,8 +5,11 @@ import 'package:segment_analytics/plugin.dart';
 import '../../services/pref_manager.dart';
 
 /// Aligns Flutter Segment SDK's `context` block with Android Java SDK's
-/// wire format: refreshes `context.traits` per event and mirrors trait
-/// `advertisingId` into `context.device`.
+/// wire format: refreshes `context.traits` per event, mirrors trait
+/// `advertisingId` into `context.device`, and rewrites `context.library.name`
+/// so the proxy interceptor sees `analytics-android` / `analytics-ios` instead
+/// of the Flutter SDK's default `analytics-flutter` (dashboards downstream
+/// key off library name for platform splits).
 class ContextParityPlugin extends EventPlugin {
   ContextParityPlugin(this._prefs) : super(PluginType.enrichment);
 
@@ -24,6 +27,13 @@ class ContextParityPlugin extends EventPlugin {
     }
 
     final isAndroid = defaultTargetPlatform == TargetPlatform.android;
+    final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    context.library.name = isAndroid
+        ? 'analytics-android'
+        : isIOS
+            ? 'analytics-ios'
+            : 'analytics-web';
+
     final adId = _prefs.advertisingId;
     if (adId != null && adId.isNotEmpty) {
       context.device.advertisingId = adId;

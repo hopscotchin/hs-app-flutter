@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_events.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dart';
+import 'package:hs_app_flutter/core/analytics/constants/funnel.dart';
 import 'package:hs_app_flutter/core/analytics/events/modules/home_events.dart';
 
 import '../support/analytics_test_harness.dart';
@@ -34,8 +35,8 @@ void main() {
   });
 
   test('merges OrderAttribution when caller has seeded funnel + sortbar', () async {
-    await h.orderAttribution.setFunnel(AnalyticsDefaults.discover);
-    await h.orderAttribution.setSortBar('Girl');
+    h.orderAttribution.setFunnel(Funnel.discover);
+    h.orderAttribution.setSortBar('Girl');
 
     await h.analytics.logSortbarChanged(sortBar: 'Girl');
 
@@ -47,7 +48,7 @@ void main() {
   test('caller-supplied sortbar wins over stale attribution sortbar', () async {
     // Attribution says 'Girl' but caller passes 'Boy' — the event payload
     // must reflect the caller's intent for this specific track call.
-    await h.orderAttribution.setSortBar('Girl');
+    h.orderAttribution.setSortBar('Girl');
 
     await h.analytics.logSortbarChanged(sortBar: 'Boy');
 

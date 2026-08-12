@@ -167,7 +167,12 @@ class _PageComponentRendererState extends State<PageComponentRenderer> {
         ? ComponentDataParser.parseHero(widget.component.data!)
         : null;
     if (data == null) return const SizedBox.shrink();
-    return HeroCarouselWidget(heroData: data, margins: margins, keyPrefix: keyPrefix);
+    return HeroCarouselWidget(
+      heroData: data,
+      margins: margins,
+      keyPrefix: keyPrefix,
+      componentIndex: widget.index,
+    );
   }
 
   Widget _buildCustomTiles(Object? parsed, ComponentMargins? margins, String? keyPrefix) {

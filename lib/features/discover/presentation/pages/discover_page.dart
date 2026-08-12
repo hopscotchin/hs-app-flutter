@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
-import '../../../../core/analytics/constants/analytics_defaults.dart';
+import '../../../../core/analytics/constants/funnel.dart';
 import '../../../../core/analytics/events/modules/home_events.dart';
 import '../../../../core/analytics/home/home_track_analytic_manager.dart';
 import '../../../../core/di/injection.dart';
@@ -70,11 +70,16 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     super.dispose();
   }
 
-  void _onFunnelActivated(String funnel) {
-    if (funnel != FromScreens.discover) return;
+  void _onFunnelActivated(Funnel funnel) {
+    if (funnel != Funnel.discover) return;
     final components = context.read<HomeBloc>().state.homePage?.pageComponents;
     if (components == null || components.isEmpty) return;
     sl<HomeTrackAnalyticManager>().pageComponents = components;
+    // `OrderAttributionHelper.setFunnel` builds a fresh AttributionData on
+    // cross-funnel change, which wipes sortBar too (Discover-only field).
+    // Re-seed it from the currently-selected tab so downstream events on
+    // Discover carry the correct sortbar.
+    _syncSortbarOnTracker();
   }
 
   @override
@@ -242,7 +247,7 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     final label = _labels[_selectedTabIndex];
     final tracker = sl<HomeTrackAnalyticManager>();
     tracker.sortBarName = label;
-    unawaited(tracker.orderAttribution.setSortBar(label));
+    tracker.orderAttribution.setSortBar(label);
   }
 
   Widget _buildContentSliver(BuildContext context, HomeState state) {
