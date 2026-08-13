@@ -1,2 +1,7 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
 #include "Generated.xcconfig"
+
+// CleverTap production workspace — mirrors Android release `manifestPlaceholders`
+// in `android/app/build.gradle.kts`. Consumed by Info.plist.
+CLEVERTAP_ACCOUNT_ID = WW4-64W-955Z
+CLEVERTAP_TOKEN = 046-400
