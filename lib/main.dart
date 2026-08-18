@@ -35,11 +35,13 @@ void main() async {
   // _DriverBinding's constructor throws '_debugInitializedType == null'.
   // Only automation builds need the driver extension; normal debug/release use
   // the standard binding.
-  if (kIsAutomation && kDebugMode) {
-    enableFlutterDriverExtension(silenceErrors: true);
-  } else {
-    WidgetsFlutterBinding.ensureInitialized();
-  }
+  // if (kIsAutomation && kDebugMode) {
+  //   enableFlutterDriverExtension(silenceErrors: true);
+  // } else {
+  //   WidgetsFlutterBinding.ensureInitialized();
+  // }
+  enableFlutterDriverExtension(silenceErrors: true);
+  WidgetsFlutterBinding.ensureInitialized();
   // debugPaintBaselinesEnabled = true;
 
   // Tighten VisibilityDetector callback cadence for home-page analytics.
