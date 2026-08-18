@@ -51,11 +51,11 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
   static const double _defaultInnerHorizontalMargin = 8;
   static const double _defaultTitleHorizontalMargin = 16;
 
-  // Vertical space reserved under each tile for brand + name + price.
-  // Sized to fit Satoshi labelLarge (12pt) + bodySmall (13pt) at default
-  // font metrics plus the AppSpacing gaps between them. The previous 68/84
-  // values overflowed by ~9px on devices where the font's intrinsic line
-  // height is on the taller side.
+  // Vertical space reserved under each tile for brand + name + price on
+  // banner-only carousels (no product info, so no wrap risk). Product
+  // carousels no longer use a fixed reserve — they let a Row auto-size
+  // to the tallest tile so a wrapping discount fits without whitespace
+  // when it doesn't wrap.
   static const double _productInfoHeight = 60;
   static const double _productInfoHeightNarrow = 76;
   static const double _colorVariantsBuffer = 20;
@@ -352,27 +352,52 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
       double.infinity,
     );
 
-    final snappingList = SizedBox(
-      height: carouselHeight,
-      child: RepaintBoundary(
-        child: ListView.builder(
-          controller: _snapController,
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.only(left: horizontalMargin, right: trailingListPadding),
-          physics: _SnapScrollPhysics(itemStride: itemStride),
-          itemExtent: itemStride,
-          itemCount: effectiveCount,
-          itemBuilder: (_, index) => Padding(
-            padding: EdgeInsets.only(right: innerHorizontalMargin),
-            child: _buildTile(tiles[index % tileCount], index % tileCount, tileWidth,
-              tileHeight,
-              imageCornerRadius,
-              index % tileCount,
+    // Product carousels use an intrinsic-height Row so a wrapping discount
+    // label sizes the row to the tallest tile — no font measurement, no
+    // whitespace when nothing wraps. Banner-only carousels keep the
+    // ListView.builder path so the 1000× cycle budget stays lazy.
+    final snappingList = _hasProducts
+        ? RepaintBoundary(
+            child: SingleChildScrollView(
+              controller: _snapController,
+              scrollDirection: Axis.horizontal,
+              physics: _SnapScrollPhysics(itemStride: itemStride),
+              padding: EdgeInsets.only(left: horizontalMargin, right: trailingListPadding),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var i = 0; i < tileCount; i++)
+                    Padding(
+                      padding: EdgeInsets.only(right: innerHorizontalMargin),
+                      child: _buildTile(
+                        tiles[i], i, tileWidth, tileHeight, imageCornerRadius, i,
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ),
-      ),
-    );
+          )
+        : SizedBox(
+            height: carouselHeight,
+            child: RepaintBoundary(
+              child: ListView.builder(
+                controller: _snapController,
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.only(left: horizontalMargin, right: trailingListPadding),
+                physics: _SnapScrollPhysics(itemStride: itemStride),
+                itemExtent: itemStride,
+                itemCount: effectiveCount,
+                itemBuilder: (_, index) => Padding(
+                  padding: EdgeInsets.only(right: innerHorizontalMargin),
+                  child: _buildTile(
+                    tiles[index % tileCount], index % tileCount, tileWidth,
+                    tileHeight, imageCornerRadius, index % tileCount,
+                  ),
+                ),
+              ),
+            ),
+          );
 
     if (!showIndicators || tileCount <= 1 || !hasScrollScope) {
       return snappingList;
@@ -407,19 +432,40 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     required bool showIndicators,
     required double imageCornerRadius,
   }) {
-    final tileList = SizedBox(
-      height: carouselHeight,
-      child: RepaintBoundary(
-        child: ListView.separated(
-          controller: _listController,
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
-          itemCount: tiles.length,
-          separatorBuilder: (_, _) => SizedBox(width: innerHorizontalMargin),
-          itemBuilder: (_, i) => _buildTile(tiles[i], i, tileWidth, tileHeight, imageCornerRadius, i),
-        ),
-      ),
-    );
+    // Same intrinsic-height treatment as the snapping variant — product
+    // carousels use a Row so a wrapping discount label sizes the row to
+    // the tallest tile with no static reservation.
+    final tileList = _hasProducts
+        ? RepaintBoundary(
+            child: SingleChildScrollView(
+              controller: _listController,
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var i = 0; i < tiles.length; i++) ...[
+                    if (i > 0) SizedBox(width: innerHorizontalMargin),
+                    _buildTile(tiles[i], i, tileWidth, tileHeight, imageCornerRadius, i),
+                  ],
+                ],
+              ),
+            ),
+          )
+        : SizedBox(
+            height: carouselHeight,
+            child: RepaintBoundary(
+              child: ListView.separated(
+                controller: _listController,
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
+                itemCount: tiles.length,
+                separatorBuilder: (_, _) => SizedBox(width: innerHorizontalMargin),
+                itemBuilder: (_, i) => _buildTile(tiles[i], i, tileWidth, tileHeight, imageCornerRadius, i),
+              ),
+            ),
+          );
 
     // The horizontal ListView is unindexed by snapping, so the full-width dot
     // indicator just shows the first tile (pre-existing behaviour).

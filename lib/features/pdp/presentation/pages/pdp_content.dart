@@ -218,7 +218,7 @@ class _PdpContentState extends State<PdpContent> {
                         if (product.soldOut != true)
                           PdpDeliveryInfo(
                             eddInfo:
-                                widget.state.selectedSku?.eddInfo ??
+                            widget.state.selectedSku?.eddInfo ??
                                 product.eddInfo,
                             serviceGuarantees: product.serviceGuarantee,
                             pinCode: widget.state.verifiedPincode,
@@ -233,7 +233,7 @@ class _PdpContentState extends State<PdpContent> {
                               // The tick bumps once verify completes (success or
                               // failure); the error is null only on success.
                               final settled = await bloc.stream.firstWhere(
-                                (s) => s.pincodeVerifyTick != startTick,
+                                    (s) => s.pincodeVerifyTick != startTick,
                               );
                               final error = settled.pincodeVerifyError;
                               return error == null
@@ -250,7 +250,7 @@ class _PdpContentState extends State<PdpContent> {
                         if (widget.state.productDetail?.recentlyViewed != null)
                           PdpRecentlyViewed(
                             recentlyViewed:
-                                widget.state.productDetail!.recentlyViewed!,
+                            widget.state.productDetail!.recentlyViewed!,
                           ),
                       ]),
                     ),
@@ -260,7 +260,7 @@ class _PdpContentState extends State<PdpContent> {
                       PdpRecommendedProducts(
                         recommendations: widget.state.recommendations!,
                         isLoadingMore:
-                            widget.state.isLoadingMoreRecommendations,
+                        widget.state.isLoadingMoreRecommendations,
                       ),
                   ],
                 ),
@@ -308,7 +308,7 @@ class _PdpContentState extends State<PdpContent> {
                 // Content starts at carouselH in scroll space; lift the lip
                 // sheetCarouselOverlap above it so it overlaps the image bottom.
                 dyForOffset: (offset) =>
-                    carouselH - PdpStrings.sheetCarouselOverlap - offset,
+                carouselH - PdpStrings.sheetCarouselOverlap - offset,
                 child: const _SheetLip(key: ValueKey(PdpTestStrings.sheetLip)),
               ),
               PdpAppBar(

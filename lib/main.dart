@@ -67,10 +67,6 @@ void main() async {
 
   await _runPostInitBootstrapping();
 
-  // Increase image cache limits so decoded images survive scrolling.
-  PaintingBinding.instance.imageCache.maximumSize = 200;
-  PaintingBinding.instance.imageCache.maximumSizeBytes = 200 << 20; // 200 MB
-
   // Initialize Firebase (not supported on web without firebase_options.dart)
   if (!kIsWeb) {
     // Crashlytics: catch all Flutter framework errors (not supported on web)

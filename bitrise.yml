@@ -15,6 +15,17 @@ workflows:
       - flutter-installer@1:
           inputs:
             - version: "$FLUTTER_VERSION"
+      - script:
+          title: Compute dynamic build number (YYYYMMDD + run%100)
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -ex
+                DATE=$(date +%Y%m%d)
+                SUFFIX=$(printf '%02d' $((BITRISE_BUILD_NUMBER % 100)))
+                FLUTTER_BUILD_NUM="${DATE}${SUFFIX}"
+                echo "FLUTTER_BUILD_NUM=$FLUTTER_BUILD_NUM"
+                envman add --key FLUTTER_BUILD_NUM --value "$FLUTTER_BUILD_NUM"
   _test:
     before_run:
       - _setup
@@ -40,7 +51,7 @@ workflows:
             - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
             - platform: android
             - android_output_type: apk
-            - android_additional_params: "--debug"
+            - android_additional_params: "--debug --build-number=$FLUTTER_BUILD_NUM"
       - firebase-app-distribution@0:
           title: Firebase Deployment - Debug APK
           inputs:
@@ -80,7 +91,7 @@ workflows:
                 flutter pub get
                 dart pub global activate flutterfire_cli
                 envman add --key PATH --value "$HOME/.pub-cache/bin:$PATH"
-                flutter build ios --config-only --profile
+                flutter build ios --config-only --profile --build-number=$FLUTTER_BUILD_NUM
       - manage-ios-code-signing@2:
           inputs:
             - distribution_method: development
@@ -94,6 +105,24 @@ workflows:
             - configuration: Profile
             - distribution_method: development
             - automatic_code_signing: api-key
+      - script:
+          title: Upload dSYMs to Firebase Crashlytics
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -ex
+                GSP="$BITRISE_SOURCE_DIR/ios/Runner/GoogleService-Info.plist"
+                # upload-symbols ships in either the Pods dir or the SwiftPM checkout under DerivedData.
+                UPLOAD_SCRIPT=$(find \
+                  "$BITRISE_SOURCE_DIR/ios/Pods/FirebaseCrashlytics" \
+                  "$BITRISE_SOURCE_DIR/ios/build" \
+                  "$HOME/Library/Developer/Xcode/DerivedData" \
+                  -type f -name upload-symbols 2>/dev/null | head -1)
+                if [ -z "$UPLOAD_SCRIPT" ]; then
+                  echo "upload-symbols not found — dSYM upload skipped"
+                  exit 1
+                fi
+                "$UPLOAD_SCRIPT" -gsp "$GSP" -p ios "$BITRISE_DSYM_PATH"
       - firebase-app-distribution@0:
           title: Firebase Deployment - Debug IPA
           inputs:
@@ -130,12 +159,26 @@ workflows:
       - set-java-version@1:
           inputs:
             - set_java_version: 21
+      - file-downloader@1:
+          title: Download release keystore zip from Bitrise Generic File Storage
+          inputs:
+            - source: "$BITRISEIO_ANDROID_KEYSTORE_ZIP_URL"
+            - destination: "$BITRISE_SOURCE_DIR/android/keystore.zip"
+      - script:
+          title: Unzip keystore into android/
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -ex
+                unzip -o "$BITRISE_SOURCE_DIR/android/keystore.zip" -d "$BITRISE_SOURCE_DIR/android/"
+                rm "$BITRISE_SOURCE_DIR/android/keystore.zip"
       - flutter-build@0:
           title: Build release APK (universal)
           inputs:
             - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
             - platform: android
             - android_output_type: apk
+            - android_additional_params: "--build-number=$FLUTTER_BUILD_NUM"
       - firebase-app-distribution@0:
           title: Firebase Deployment - Release APK
           inputs:
@@ -150,6 +193,7 @@ workflows:
             - project_location: "$BITRISE_FLUTTER_PROJECT_LOCATION"
             - platform: android
             - android_output_type: appbundle
+            - android_additional_params: "--build-number=$FLUTTER_BUILD_NUM"
       - firebase-app-distribution@0:
           title: Firebase Deployment - Release AAB
           inputs:
@@ -174,7 +218,7 @@ workflows:
                 flutter pub get
                 dart pub global activate flutterfire_cli
                 envman add --key PATH --value "$HOME/.pub-cache/bin:$PATH"
-                flutter build ios --config-only --release
+                flutter build ios --config-only --release --build-number=$FLUTTER_BUILD_NUM
       - manage-ios-code-signing@2:
           inputs:
             - distribution_method: ad-hoc
@@ -188,6 +232,23 @@ workflows:
             - configuration: Release
             - distribution_method: ad-hoc
             - automatic_code_signing: api-key
+      - script:
+          title: Upload dSYMs to Firebase Crashlytics
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -ex
+                GSP="$BITRISE_SOURCE_DIR/ios/Runner/GoogleService-Info.plist"
+                UPLOAD_SCRIPT=$(find \
+                  "$BITRISE_SOURCE_DIR/ios/Pods/FirebaseCrashlytics" \
+                  "$BITRISE_SOURCE_DIR/ios/build" \
+                  "$HOME/Library/Developer/Xcode/DerivedData" \
+                  -type f -name upload-symbols 2>/dev/null | head -1)
+                if [ -z "$UPLOAD_SCRIPT" ]; then
+                  echo "upload-symbols not found — dSYM upload skipped"
+                  exit 1
+                fi
+                "$UPLOAD_SCRIPT" -gsp "$GSP" -p ios "$BITRISE_DSYM_PATH"
       - firebase-app-distribution@0:
           title: Firebase Deployment - Release IPA
           inputs:

@@ -8,7 +8,15 @@ import '../../../../core/theme/typography/typography_v1.dart';
 import '../../domain/entities/sku_entity.dart';
 
 // Design tokens from spec
-const _kChipWidth = 89.0;
+//
+// 89 is the *floor*, not the width: apparel sizes ("3-6Y", "XL") sit well
+// inside it, but footwear ships labels like "Euro 26 (2.5 UK/US)" that ran past
+// it and ellipsised, so the selected chip couldn't be read back. The chip grows
+// with its label up to _kChipMaxWidth, past which ellipsis is still the lesser
+// evil — a single chip wider than that pushes the rest of the row off-screen.
+const _kChipMinWidth = 89.0;
+const _kChipMaxWidth = 180.0;
+const _kChipHPadding = 10.0;
 const _kChipHeight = 47.0;
 const _kChipGap = 9.0;
 const _kSelectedBg = Color(0xFFF4E6F5); // #F4E6F5
@@ -153,20 +161,37 @@ class PdpSizeChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: _kChipWidth,
+      // IntrinsicWidth so the chip and the stock label under it share one
+      // width driven by whichever is wider — without it the Column sits in
+      // the row's unbounded horizontal space and the label would lay out at
+      // its full text width, unclipped and detached from the box above it.
+      child: IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Chip box
             Container(
-              width: _kChipWidth,
-              height: _kChipHeight,
+              constraints: const BoxConstraints(
+                minWidth: _kChipMinWidth,
+                maxWidth: _kChipMaxWidth,
+                minHeight: _kChipHeight,
+                maxHeight: _kChipHeight,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: _kChipHPadding),
               decoration: BoxDecoration(
                 color: isSelected ? _kSelectedBg : _kNormalBg,
-                border: isSelected
-                    ? Border.all(color: AppColors.brandDefault, width: 1)
-                    : null,
+                // Always bordered, transparent when unselected. A border is
+                // inset padding, so a border that only exists on the selected
+                // chip made it 2px wider than the others — invisible when the
+                // width was fixed at 89, but now that the chip sizes to its
+                // label it would nudge the whole row sideways on every tap.
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.brandDefault
+                      : Colors.transparent,
+                  width: 1,
+                ),
                 borderRadius: AppSpacing.borderRadiusXs,
               ),
               child: Column(
@@ -212,11 +237,23 @@ class PdpSizeChip extends StatelessWidget {
 
   Widget _buildStockLabel() {
     const labelHeight = 14.0;
+    // The label shares the chip's IntrinsicWidth, so left unbounded a long
+    // "Only 2 left in size 26" would widen the box above it — the size, not
+    // the stock note, decides how wide a chip is. Capping the label's *max
+    // intrinsic* width at the floor keeps it out of that negotiation entirely:
+    // 89 is a width the chip is guaranteed anyway, so it can never be the one
+    // asking for more. At layout the enclosing tight width still wins, so the
+    // label spans the full chip and ellipsises only against the real edge.
+    const labelConstraints = BoxConstraints(
+      maxWidth: _kChipMinWidth,
+      minHeight: labelHeight,
+      maxHeight: labelHeight,
+    );
 
     if (!_isEnabled) {
       final label = sku.info?.text ?? PdpStrings.outOfStock;
-      return SizedBox(
-        height: labelHeight,
+      return ConstrainedBox(
+        constraints: labelConstraints,
         child: Text(
           label,
           style: AppTypographyV1.labelMedium.copyWith(
@@ -233,8 +270,8 @@ class PdpSizeChip extends StatelessWidget {
 
     if (sku.info?.text != null) {
       final color = _parseColor(sku.info!.textColor) ?? AppColors.error;
-      return SizedBox(
-        height: labelHeight,
+      return ConstrainedBox(
+        constraints: labelConstraints,
         child: Text(
           sku.info!.text!,
           style: AppTypographyV1.labelMedium.copyWith(

@@ -154,6 +154,7 @@ class ProductTile extends StatelessWidget {
       key: tileKey,
       onTap: onTap,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildImage(effectiveRatio),
@@ -259,47 +260,40 @@ class ProductTile extends StatelessWidget {
   }
 
   Widget _buildPriceRow() {
+    final priceStyle = isSoldOut
+        ? AppTypographyV1.bodySmall.bold.copyWith(color: Colors.black.withValues(alpha: 0.5))
+        : AppTypographyV1.bodySmall.bold.textPrimary();
+    final mrpStyle = AppTypographyV1.labelMedium.regular.neutralGrey5();
+    final discountStyle = isSoldOut
+        ? AppTypographyV1.labelMedium.regular.copyWith(color: Colors.black.withValues(alpha: 0.5))
+        : AppTypographyV1.labelMedium.regular.brandSecondary();
+
+    // Wrap so a long discount label drops to a second line instead of
+    // clipping at the tile edge. price+MRP stay together as one chunk;
+    // only the discount can move to the next line.
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs, vertical: 0),
-      // Single-line + clip — longer mrp strings like "MRP:₹2,665" would
-      // otherwise wrap and blow the carousel's fixed product-info reserve.
-      child: RichText(
+      child: Wrap(
         key: priceKey,
-        maxLines: 1,
-        overflow: TextOverflow.clip,
-        softWrap: false,
-        text: TextSpan(
-          text: '${priceText!}\t',
-          style: isSoldOut
-              ? AppTypographyV1.bodySmall.bold.copyWith(color: Colors.black.withValues(alpha: 0.5))
-              : AppTypographyV1.bodySmall.bold.textPrimary(),
-          children: [
-            if (originalPriceText.isNotNullOrEmpty) ...[
-              const WidgetSpan(child: SizedBox(width: 2)),
-              StrikethroughText.span(
-                originalPriceText ?? '',
-                style: AppTypographyV1.labelMedium.regular.neutralGrey5(),
-              ),
-            ],
-            if (discountText != null) ...[
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: Padding(
-                  padding: EdgeInsets.only(left: originalPriceText != null ? 8 : 4),
-                  child: Text(
-                    discountText!,
-                    key: discountKey,
-                    style: isSoldOut
-                        ? AppTypographyV1.labelMedium.regular.copyWith(
-                            color: Colors.black.withValues(alpha: 0.5),
-                          )
-                        : AppTypographyV1.labelMedium.regular.brandSecondary(),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 8,
+        runSpacing: 2,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: priceText!,
+              style: priceStyle,
+              children: [
+                if (originalPriceText.isNotNullOrEmpty) ...[
+                  const WidgetSpan(child: SizedBox(width: 6)),
+                  StrikethroughText.span(originalPriceText ?? '', style: mrpStyle),
+                ],
+              ],
+            ),
+          ),
+          if (discountText != null)
+            Text(discountText!, key: discountKey, style: discountStyle),
+        ],
       ),
     );
   }
