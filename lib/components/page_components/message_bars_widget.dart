@@ -188,22 +188,26 @@ class _MessageBarItemState extends State<_MessageBarItem> {
         children: [
           // Icon + message row
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+
             children: [
               if (showIcon) ...[
                 _buildIcon(bar, type, textColor, widget.iconSize),
                 const SizedBox(width: _kIconSpacing),
               ],
               Expanded(
-                child: hasTwoButtons
-                    ? _buildPlainMessage(bar, textColor, widget.textStyle)
-                    : _buildMessageWithInlineAction(bar, textColor, widget.textStyle),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    hasTwoButtons
+                        ? _buildPlainMessage(bar, textColor, widget.textStyle)
+                        : _buildMessageWithInlineAction(bar, textColor, widget.textStyle),
+                    if (hasTwoButtons) ...[const SizedBox(height: 20), _buildTwoButtons(bar)],
+                  ],
+                ),
               ),
             ],
           ),
-
-          // Two-button row (when both actionText and actionTextRight exist)
-          if (hasTwoButtons) ...[const SizedBox(height: 20), _buildTwoButtons(bar)],
         ],
       ),
     );

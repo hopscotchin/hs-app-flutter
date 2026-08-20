@@ -35,10 +35,30 @@ class ProductPriceRow extends StatelessWidget {
     // lets `PlaceholderAlignment.middle` centre them instead — which is what
     // the design asks for. Still one `RichText` rather than a `Row`, so long
     // strings clip instead of wrapping (see the class doc).
-    final mrpStyle = AppTypographyV1.labelMedium.regular.neutralGrey5();
-    final discountStyle = isSoldOut
-        ? AppTypographyV1.labelMedium.regular.copyWith(color: Colors.black.withValues(alpha: 0.5))
-        : AppTypographyV1.labelMedium.regular.brandSecondary();
+    // `height: 1` matters as much as the middle alignment. Without it each
+    // placeholder's box is the font's full line height — taller than the
+    // glyphs it holds — so centring the *box* still leaves the glyphs looking
+    // off. Collapsing the box to the glyph height is what actually lines the
+    // three parts up. (The ₹ also comes from a fallback font, whose metrics
+    // differ from Satoshi's, which compounds the effect.)
+    final mrpStyle = AppTypographyV1.labelMedium.regular.neutralGrey5().copyWith(height: 1);
+    final discountStyle =
+        (isSoldOut
+                ? AppTypographyV1.labelMedium.regular.copyWith(
+                    color: Colors.black.withValues(alpha: 0.5),
+                  )
+                : AppTypographyV1.labelMedium.regular.brandSecondary())
+            .copyWith(height: 1);
+    // Forcing the strut pins both boxes to the same height no matter which
+    // font supplied the glyphs. `MRP:₹799` pulls ₹ from a fallback font whose
+    // taller metrics would otherwise grow that box only, so the two spans
+    // would centre at different heights — which is why the discount still
+    // sat low with `height: 1` alone.
+    final smallStrut = StrutStyle.fromTextStyle(
+      AppTypographyV1.labelMedium,
+      height: 1,
+      forceStrutHeight: true,
+    );
 
     return Padding(
       padding: padding,
@@ -59,13 +79,18 @@ class ProductPriceRow extends StatelessWidget {
                 originalPriceText ?? '',
                 style: mrpStyle,
                 alignment: PlaceholderAlignment.middle,
+                strutStyle: smallStrut,
               ),
             ],
             if (discountText != null) ...[
               const WidgetSpan(child: SizedBox(width: AppSpacing.xs)),
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
-                child: Text(discountText!, style: discountStyle),
+                child: Text(
+                  discountText!,
+                  style: discountStyle,
+                  strutStyle: smallStrut,
+                ),
               ),
             ],
           ],

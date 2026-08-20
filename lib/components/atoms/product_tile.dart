@@ -277,10 +277,18 @@ class ProductTile extends StatelessWidget {
     final priceStyle = isSoldOut
         ? AppTypographyV1.bodySmall.bold.copyWith(color: Colors.black.withValues(alpha: 0.5))
         : AppTypographyV1.bodySmall.bold.textPrimary();
-    final mrpStyle = AppTypographyV1.labelMedium.regular.neutralGrey5();
-    final discountStyle = isSoldOut
-        ? AppTypographyV1.labelMedium.regular.copyWith(color: Colors.black.withValues(alpha: 0.5))
-        : AppTypographyV1.labelMedium.regular.brandSecondary();
+    // `height: 1` collapses each box to its glyph height. Without it the MRP's
+    // placeholder box is the font's full line height, so centring the box
+    // still reads as off-centre against the larger price. See
+    // ProductPriceRow, which hit the same thing.
+    final mrpStyle = AppTypographyV1.labelMedium.regular.neutralGrey5().copyWith(height: 1);
+    final discountStyle =
+        (isSoldOut
+                ? AppTypographyV1.labelMedium.regular.copyWith(
+                    color: Colors.black.withValues(alpha: 0.5),
+                  )
+                : AppTypographyV1.labelMedium.regular.brandSecondary())
+            .copyWith(height: 1);
 
     // Wrap so a long discount label drops to a second line instead of
     // clipping at the tile edge. price+MRP stay together as one chunk;

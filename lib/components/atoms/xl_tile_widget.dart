@@ -300,7 +300,12 @@ class _XLTileWidgetState extends State<XLTileWidget> {
                         // sits low against the taller glyphs.
                         StrikethroughText.span(
                           price.mrp ?? '',
-                          style: AppTypographyV1.labelMedium.regular.neutralGrey5(),
+                          // height: 1 — see ProductPriceRow; centring the
+                          // placeholder only reads right once its box is
+                          // collapsed to the glyph height.
+                          style: AppTypographyV1.labelMedium.regular
+                              .neutralGrey5()
+                              .copyWith(height: 1),
                           alignment: PlaceholderAlignment.middle,
                         ),
                       ],
@@ -313,7 +318,9 @@ class _XLTileWidgetState extends State<XLTileWidget> {
                             child: Text(
                               price.discountLabel!,
                               key: widget.discountKey,
-                              style: AppTypographyV1.labelMedium.medium.brandSecondary(),
+                              style: AppTypographyV1.labelMedium.medium
+                                  .brandSecondary()
+                                  .copyWith(height: 1),
                             ),
                           ),
                         ),

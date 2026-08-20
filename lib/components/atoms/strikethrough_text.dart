@@ -20,6 +20,7 @@ class StrikethroughText extends StatelessWidget {
     this.thickness = 1.0,
     this.maxLines,
     this.overflow,
+    this.strutStyle,
   });
 
   final String text;
@@ -30,6 +31,12 @@ class StrikethroughText extends StatelessWidget {
   final double thickness;
   final int? maxLines;
   final TextOverflow? overflow;
+
+  /// Forced strut, so the box height ignores which font actually supplied the
+  /// glyphs. Needed when this sits inline beside other text and must match its
+  /// height exactly — `₹` comes from a fallback font whose metrics would
+  /// otherwise make this box taller than its neighbours'.
+  final StrutStyle? strutStyle;
 
   /// Convenience for embedding inside a [RichText] / [Text.rich] as an inline
   /// span. Baseline-aligned by default so it flows like the surrounding text;
@@ -42,6 +49,7 @@ class StrikethroughText extends StatelessWidget {
     Color? lineColor,
     double thickness = 1.0,
     PlaceholderAlignment alignment = PlaceholderAlignment.baseline,
+    StrutStyle? strutStyle,
   }) {
     return WidgetSpan(
       alignment: alignment,
@@ -51,6 +59,7 @@ class StrikethroughText extends StatelessWidget {
         style: style,
         lineColor: lineColor,
         thickness: thickness,
+        strutStyle: strutStyle,
       ),
     );
   }
@@ -61,7 +70,13 @@ class StrikethroughText extends StatelessWidget {
         lineColor ?? style?.color ?? DefaultTextStyle.of(context).style.color ?? Colors.black;
     return CustomPaint(
       foregroundPainter: _StrikethroughPainter(color: resolvedColor, thickness: thickness),
-      child: Text(text, style: style, maxLines: maxLines, overflow: overflow),
+      child: Text(
+        text,
+        style: style,
+        maxLines: maxLines,
+        overflow: overflow,
+        strutStyle: strutStyle,
+      ),
     );
   }
 }
