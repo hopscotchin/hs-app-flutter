@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hs_app_flutter/core/constants/strings/login_redirects.dart';
-import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:hs_app_flutter/features/account/presentation/bloc/account_bloc.dart';
 import 'package:hs_app_flutter/features/cart/presentation/bloc/cart_bloc.dart';
 
@@ -31,7 +29,12 @@ import 'promo_offer_card.dart';
 /// closes the sheet, removing keeps it open and reloads the list so `isApplied`
 /// flips in place.
 class PromoOffersBottomSheet extends StatelessWidget {
-  const PromoOffersBottomSheet({super.key, this.onCartChanged, this.onAction, this.onActionSheet});
+  const PromoOffersBottomSheet({
+    super.key,
+    this.onCartChanged,
+    this.onAction,
+    this.onActionSheet,
+  });
 
   /// Called the first time an apply/remove lands server-side, so [show] can
   /// tell its caller the cart is stale.
@@ -52,10 +55,10 @@ class PromoOffersBottomSheet extends StatelessWidget {
   /// A CTA deeplink tapped inside the sheet is followed here, after the sheet
   /// has closed, so the pushed route doesn't end up stacked under it.
   static Future<bool> show(
-    BuildContext context, {
-    bool isDismissible = true,
-    bool enableDrag = true,
-  }) async {
+      BuildContext context, {
+        bool isDismissible = true,
+        bool enableDrag = true,
+      }) async {
     // Tracked outside the route: a drag/barrier dismiss never runs our own pop,
     // so the result can't be carried by the route's pop value.
     final outcome = _SheetOutcome();
@@ -75,7 +78,8 @@ class PromoOffersBottomSheet extends StatelessWidget {
       // The sheet has no GoRoute of its own (it is a modal shown over the
       // caller), so there is no route file to move this into.
       builder: (_) => BlocProvider(
-        create: (_) => sl<PromosOffersBloc>()..add(const PromosOffersEvent.load()),
+        create: (_) =>
+        sl<PromosOffersBloc>()..add(const PromosOffersEvent.load()),
         child: PromoOffersBottomSheet(
           onCartChanged: () => outcome.cartChanged = true,
           onAction: (actionUri) => outcome.deeplink = actionUri,
@@ -114,7 +118,7 @@ class PromoOffersBottomSheet extends StatelessWidget {
         // stacked on a route that's about to pop, so [show] presents it after.
         final isClosing =
             state.lastAction == PromoActionKind.apply &&
-            (state.actionError == null || state.actionError!.isEmpty);
+                (state.actionError == null || state.actionError!.isEmpty);
         final actionSheet = state.actionBottomSheet;
 
         if (isClosing) {
@@ -140,17 +144,27 @@ class PromoOffersBottomSheet extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.72),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.72,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Padding(
-                padding: EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.lg),
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  0,
+                  AppSpacing.md,
+                  AppSpacing.lg,
+                ),
                 child: _SheetHeading(),
               ),
               Flexible(
-                child: _SheetBody(bottomPadding: bottomPadding, onAction: onAction),
+                child: _SheetBody(
+                  bottomPadding: bottomPadding,
+                  onAction: onAction,
+                ),
               ),
             ],
           ),
@@ -194,9 +208,9 @@ class _SheetBody extends StatelessWidget {
         switch (state.status) {
           case PromosOffersStatus.initial:
           case PromosOffersStatus.loading:
-            // Card-shaped placeholders rather than a spinner, matching the
-            // home page. `listShimmer` already pads 16 horizontally, the same
-            // inset the real cards use.
+          // Card-shaped placeholders rather than a spinner, matching the
+          // home page. `listShimmer` already pads 16 horizontally, the same
+          // inset the real cards use.
             return LoadingShimmer.listShimmer(
               itemCount: 4,
               itemHeight: PromoOfferCard.approxHeight,
@@ -225,7 +239,8 @@ class _SheetBody extends StatelessWidget {
                 child: EmptyStateWidget(
                   key: const ValueKey(PromoOffersTestStrings.emptyStateButton),
                   type: EmptyStateType.promosOffers,
-                  onButtonTap: () => Navigator.of(context, rootNavigator: true).pop(),
+                  onButtonTap: () =>
+                      Navigator.of(context, rootNavigator: true).pop(),
                 ),
               );
             }
@@ -243,8 +258,15 @@ class _SheetBody extends StatelessWidget {
               padding: EdgeInsets.only(bottom: bottomPadding),
               itemCount: sections.length,
               separatorBuilder: (_, _) => const Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.md),
-                child: Divider(height: 1, thickness: 1, color: AppColors.border),
+                padding: EdgeInsets.symmetric(
+                  vertical: AppSpacing.md,
+                  horizontal: AppSpacing.md,
+                ),
+                child: Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: AppColors.border,
+                ),
               ),
               itemBuilder: (_, i) => _Section(
                 section: sections[i],
@@ -306,11 +328,11 @@ class _Section extends StatelessWidget {
   }
 
   Widget _card(
-    BuildContext context, {
-    required PromoOfferEntity offer,
-    required int index,
-    required bool isActionInProgress,
-  }) {
+      BuildContext context, {
+        required PromoOfferEntity offer,
+        required int index,
+        required bool isActionInProgress,
+      }) {
     final cardKey = '${PromoOffersTestStrings.card}_$index';
 
     return PromoOfferCard(
@@ -322,22 +344,34 @@ class _Section extends StatelessWidget {
         final cartBloc = context.read<CartBloc>();
         final loggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
         if (!loggedIn) {
-          cartBloc.setPendingPromo(offer.code);
-          AppNavigator.goBack(context);
-          AppNavigator.goToLogin(context, redirectType: LoginRedirects.typePromo);
+          //* this needs testing will add in next release
           return;
         }
-        context.read<PromosOffersBloc>().add(PromosOffersEvent.apply(offer.code));
+        context.read<PromosOffersBloc>().add(
+          PromosOffersEvent.apply(offer.code),
+        );
       },
-      onRemove: () => context.read<PromosOffersBloc>().add(PromosOffersEvent.remove(offer.code)),
-      onAction: offer.hasAction ? () => _openAction(context, offer.actionUri!) : null,
+      onRemove: () => context.read<PromosOffersBloc>().add(
+        PromosOffersEvent.remove(offer.code),
+      ),
+      onAction: offer.hasAction
+          ? () => _openAction(context, offer.actionUri!)
+          : null,
       // "See terms" is a deeplink to the promo details page, so it closes the
       // sheet on the way out exactly like the card's own CTA.
-      onViewTerms: offer.showTerms ? () => _openAction(context, offer.termsUri!) : null,
+      onViewTerms: offer.showTerms
+          ? () => _openAction(context, offer.termsUri!)
+          : null,
       codeKey: ValueKey('${cardKey}_${PromoOffersTestStrings.codeSuffix}'),
-      applyButtonKey: ValueKey('${cardKey}_${PromoOffersTestStrings.applyButtonSuffix}'),
-      removeButtonKey: ValueKey('${cardKey}_${PromoOffersTestStrings.removeButtonSuffix}'),
-      termsKey: ValueKey('${cardKey}_${PromoOffersTestStrings.termsButtonSuffix}'),
+      applyButtonKey: ValueKey(
+        '${cardKey}_${PromoOffersTestStrings.applyButtonSuffix}',
+      ),
+      removeButtonKey: ValueKey(
+        '${cardKey}_${PromoOffersTestStrings.removeButtonSuffix}',
+      ),
+      termsKey: ValueKey(
+        '${cardKey}_${PromoOffersTestStrings.termsButtonSuffix}',
+      ),
       ctaKey: ValueKey('${cardKey}_${PromoOffersTestStrings.ctaButtonSuffix}'),
     );
   }

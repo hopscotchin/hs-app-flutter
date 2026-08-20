@@ -95,14 +95,7 @@ class _CartPageState extends State<CartPage> {
   /// first and only consults the login status once it comes back successful, in
   /// `checkLoginAndCheckout`. See [_openCheckoutOrLogin], which is that gate.
   void _startCheckout() async {
-    final isLoggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
-    if (!isLoggedIn) {
-      final loggedIn = await AppNavigator.showMobileLoginFlow(context);
-      if (!loggedIn || !mounted) return;
-      _startCheckout();
-      return;
-    }
-    context.read<CartBloc>().add(const ProceedToCheckout());
+    //* this needs testing will add in next release
   }
 
   /// Buy Now hand-off from PDP: start checkout once the cart is loaded and
@@ -121,12 +114,15 @@ class _CartPageState extends State<CartPage> {
     return BlocListener<CartBloc, CartState>(
       // Buy Now hand-off from PDP — fires only on the first load thanks to the
       // one-shot latch.
-      listenWhen: (prev, curr) => widget.fromBuyNow && !_buyNowCheckoutStarted && curr.isLoaded,
+      listenWhen: (prev, curr) =>
+      widget.fromBuyNow && !_buyNowCheckoutStarted && curr.isLoaded,
       listener: (context, state) => _onCartLoadedForBuyNow(state),
       child: Stack(
         children: [
           Scaffold(
-            appBar: _CartAppBar(onEddPincodeTap: () => _onEddPincodeTap(context)),
+            appBar: _CartAppBar(
+              onEddPincodeTap: () => _onEddPincodeTap(context),
+            ),
             body: _CartBody(
               priceSummaryKey: _priceSummaryKey,
               onPullToRefresh: () => _onPullToRefresh(context),
@@ -167,10 +163,16 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
         onTap: () => Navigator.of(context).pop(),
         child: const Padding(
           padding: EdgeInsets.only(left: AppSpacing.lgMd, right: AppSpacing.md),
-          child: CustomImage(path: ImageConstants.arrowBack, fit: BoxFit.contain),
+          child: CustomImage(
+            path: ImageConstants.arrowBack,
+            fit: BoxFit.contain,
+          ),
         ),
       ),
-      title: Text(CartStrings.bag, style: AppTypographyV1.titleMedium.bold.textPrimary()),
+      title: Text(
+        CartStrings.bag,
+        style: AppTypographyV1.titleMedium.bold.textPrimary(),
+      ),
       actions: [
         // Only rebuilds when the pincode itself changes — not on every
         // cart mutation (loading flags, toasts, item updates, etc.).
@@ -184,7 +186,10 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
               onTap: onEddPincodeTap,
               child: Row(
                 children: [
-                  Text(label, style: AppTypographyV1.labelLarge.medium.neutralGrey6()),
+                  Text(
+                    label,
+                    style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
+                  ),
                   AppSpacing.horizontalGapXxs,
                   const CustomImage(
                     path: ImageConstants.arrowDown,
@@ -236,7 +241,7 @@ class _CartBody extends StatelessWidget {
       // if/else-if chain covers all three instead of three separate
       // BlocListeners each re-scanning every state change.
       listenWhen: (prev, curr) =>
-          curr.toastMessage != null || curr.promoActionSheet != null,
+      curr.toastMessage != null || curr.promoActionSheet != null,
       listener: (context, state) {
         final cartBloc = context.read<CartBloc>();
 
@@ -283,7 +288,8 @@ class _CartBody extends StatelessWidget {
           // suppressing the empty state then leaves a blank page: the item
           // list is empty and promo / summary / SLG are all gated on
           // `items.isNotEmpty`.
-          final hasMergePrompt = cart.isCartItemExistInTemp && cart.messageBars.isNotEmpty;
+          final hasMergePrompt =
+              cart.isCartItemExistInTemp && cart.messageBars.isNotEmpty;
           if (cart.items.isEmpty && !hasMergePrompt) {
             return EmptyStateWidget(
               type: EmptyStateType.cart,
@@ -309,7 +315,10 @@ class _CartCheckoutBar extends StatelessWidget {
   final VoidCallback? onDetailsTap;
   final VoidCallback onCheckout;
 
-  const _CartCheckoutBar({required this.onDetailsTap, required this.onCheckout});
+  const _CartCheckoutBar({
+    required this.onDetailsTap,
+    required this.onCheckout,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -362,7 +371,9 @@ class _CartUpdatingOverlay extends StatelessWidget {
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
                     strokeCap: StrokeCap.round,
-                    valueColor: AlwaysStoppedAnimation(AppColors.progressActive),
+                    valueColor: AlwaysStoppedAnimation(
+                      AppColors.progressActive,
+                    ),
                     backgroundColor: AppColors.progressTrack,
                   ),
                 ),
@@ -393,8 +404,7 @@ class _CartContent extends StatelessWidget {
     final cartBloc = context.read<CartBloc>();
     final loggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
     if (!loggedIn) {
-      cartBloc.setPendingPromo(code);
-      AppNavigator.goToLogin(context, redirectType: LoginRedirects.typePromo);
+      //* this needs testing will add in next release
       return;
     }
     cartBloc.add(ApplyPromoCode(promoCode: code));
@@ -413,7 +423,10 @@ class _CartContent extends StatelessWidget {
     final loggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
     if (!loggedIn) {
       cartBloc.setPendingMoveToWishlist(event);
-      AppNavigator.goToLogin(context, redirectType: LoginRedirects.typeAddToWishlist);
+      AppNavigator.goToLogin(
+        context,
+        redirectType: LoginRedirects.typeAddToWishlist,
+      );
       return;
     }
     cartBloc.add(event);
@@ -432,7 +445,9 @@ class _CartContent extends StatelessWidget {
       secondaryAction: AppBottomSheetAction(
         label: CommonStrings.remove,
         style: AppBottomSheetButtonStyle.outlined,
-        buttonKey: const ValueKey(CartTestStrings.removeItemBottomSheetRemoveButton),
+        buttonKey: const ValueKey(
+          CartTestStrings.removeItemBottomSheetRemoveButton,
+        ),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop();
           context.read<CartBloc>().add(RemoveCartItem(sku: sku));
@@ -458,7 +473,7 @@ class _CartContent extends StatelessWidget {
       child: Column(
         children: [
           if (cart.messageBars.isNotEmpty)
-            // Message bars with merge action support
+          // Message bars with merge action support
             Padding(
               padding: const EdgeInsets.only(
                 top: AppSpacing.sm,
@@ -468,14 +483,13 @@ class _CartContent extends StatelessWidget {
               child: MessageBarsWidget(
                 messageBars: cart.messageBars,
                 onAction: (actionLink, _) {
-                  if (actionLink != null && actionLink.toLowerCase().contains('merge')) {
-                    context.read<CartBloc>().add(const MergeCart());
-                  }
+                  //* this needs testing will add in next release
                 },
               ),
             ),
 
-          if (cart.giftCardItem != null) GiftCardBanner(giftCardItem: cart.giftCardItem!),
+          if (cart.giftCardItem != null)
+            GiftCardBanner(giftCardItem: cart.giftCardItem!),
           ListView.builder(
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
@@ -540,13 +554,14 @@ class _CartContent extends StatelessWidget {
               ),
             ),
           ],
-          if (cart.items.isNotEmpty && cart.serviceLevelGuarantee.isNotEmpty) ...{
+          if (cart.items.isNotEmpty &&
+              cart.serviceLevelGuarantee.isNotEmpty) ...{
             if (cart.bottomMessageBars.isEmpty) ...{
-              const SizedBox(height: AppSpacing.md)
+              const SizedBox(height: AppSpacing.md),
             },
             SlgWidget(items: cart.serviceLevelGuarantee),
             AppSpacing.verticalGapSm,
-          }
+          },
         ],
       ),
     );
