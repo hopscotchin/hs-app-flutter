@@ -136,7 +136,7 @@ aren't.
 | `_currentlyVisible`, `_snapshotAtDirectionChange`, `_journey`, `_carouselScrollDepth`, scroll-position listener | `HomeTrackAnalyticManager` | Per-screen, wiped by `resetVisibilityState` |
 | Cached component snapshots | `JourneyWorker` (`_components`) | Sole owner. Replaced whenever the tracker's `pageComponents` setter fires; the tracker doesn't retain its own copy. |
 | `extraData`, `sortBarName` | `HomeTrackAnalyticManager` | Set by `AppNavigationObserver` / `DiscoverPage` / LP flows |
-| Attribution stores | `OrderAttributionHelper`, `LpAttributionHelper` | Disk-backed, outlive individual screens |
+| Attribution stores | `OrderAttributionHelper`, `LpAttributionHelper` | In-memory (session-scoped), outlive individual screens |
 | Nav trail | `AppNavigationObserver` | Rebuilt from route stack on push/pop |
 
 ## Testing model

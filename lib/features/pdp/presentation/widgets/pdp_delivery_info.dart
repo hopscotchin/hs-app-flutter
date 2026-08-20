@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../components/atoms/auto_semantics.dart';
+import '../../../../components/page_components/icon_label_info_row.dart';
 import '../../../../core/constants/image_constants.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/pdp_strings.dart';
@@ -10,7 +12,6 @@ import '../../../../core/theme/typography/typography_v1.dart';
 import '../../../pincode/presentation/widgets/pincode_bottom_sheet.dart';
 import '../../domain/entities/edd_info_entity.dart';
 import '../../domain/entities/service_guarantee_entity.dart';
-import '../../../../components/page_components/icon_label_info_row.dart';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const _kCardBg = Color(0xFFF6F6F6);
@@ -23,6 +24,7 @@ class PdpDeliveryInfo extends StatelessWidget {
     this.serviceGuarantees = const [],
     this.pinCode,
     this.onVerifyPincode,
+    this.onSheetOpened,
     this.isSizeSelected = false,
     this.isSoldOut = false,
   });
@@ -31,6 +33,10 @@ class PdpDeliveryInfo extends StatelessWidget {
   final List<ServiceGuaranteeEntity> serviceGuarantees;
   final String? pinCode;
   final Future<PincodeVerifyResult> Function(String pincode)? onVerifyPincode;
+
+  /// Fires when the pincode sheet is opened — `pincode_form_opened`
+  /// (Android `EddInfoView.kt:37`).
+  final VoidCallback? onSheetOpened;
 
   /// Whether a size (SKU) has been chosen — drives the contextual delivery-date
   /// prompt, matching Android's isSkuSelected gate.
@@ -49,14 +55,13 @@ class PdpDeliveryInfo extends StatelessWidget {
   /// Mirrors Android EddInfoView.getMessage3.
   String get _deliveryPromptLine {
     if (isSizeSelected && _isPincodeSet) return eddInfo?.orderSla ?? '';
-    if (!isSizeSelected && !_isPincodeSet)
-      return PdpStrings.selectPincodeAndSize;
-    if (isSizeSelected && !_isPincodeSet)
-      return PdpStrings.enterPincodeForDelivery;
+    if (!isSizeSelected && !_isPincodeSet) return PdpStrings.selectPincodeAndSize;
+    if (isSizeSelected && !_isPincodeSet) return PdpStrings.enterPincodeForDelivery;
     return PdpStrings.selectSizeForDelivery;
   }
 
   Future<void> _openPincodeSheet(BuildContext context) async {
+    onSheetOpened?.call();
     // Apply: the sheet verifies in-place (loader) and pops with null.
     // Proceed/address selection: the sheet pops with the pincode, verified here.
     final result = await PincodeBottomSheet.show(
@@ -102,12 +107,7 @@ class PdpDeliveryInfo extends StatelessWidget {
               color: _kCardBg,
               borderRadius: BorderRadius.all(Radius.circular(_kCardRadius)),
             ),
-            padding: const EdgeInsets.only(
-              left: 20,
-              right: 20,
-              top: 18,
-              bottom: 16,
-            ),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 18, bottom: 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -134,24 +134,18 @@ class PdpDeliveryInfo extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: _hasDestination
                       ? _PincodeDisplay(
-                          rowKey: const ValueKey(
-                            PdpTestStrings.changePincodeButton,
-                          ),
+                          rowKey: const ValueKey(PdpTestStrings.changePincodeButton),
                           label: eddInfo!.destination!,
                           onTap: () => _openPincodeSheet(context),
                         )
                       : _hasPincode
                       ? _PincodeDisplay(
-                          rowKey: const ValueKey(
-                            PdpTestStrings.changePincodeButton,
-                          ),
+                          rowKey: const ValueKey(PdpTestStrings.changePincodeButton),
                           label: pinCode!,
                           onTap: () => _openPincodeSheet(context),
                         )
                       : _EnterPincodeRow(
-                          buttonKey: const ValueKey(
-                            PdpTestStrings.enterPincodeButton,
-                          ),
+                          buttonKey: const ValueKey(PdpTestStrings.enterPincodeButton),
                           onTap: () => _openPincodeSheet(context),
                         ),
                 ),
@@ -200,10 +194,7 @@ class _EddRow extends StatelessWidget {
               ImageConstants.pdpPincodeInfo,
               width: AppSpacing.iconMd,
               height: AppSpacing.iconMd,
-              colorFilter: const ColorFilter.mode(
-                AppColors.brandDefault,
-                BlendMode.srcIn,
-              ),
+              colorFilter: const ColorFilter.mode(AppColors.brandDefault, BlendMode.srcIn),
             ),
           ),
         ),
@@ -243,41 +234,44 @@ class _EddRow extends StatelessWidget {
 // ── Pincode display row ───────────────────────────────────────────────────────
 
 class _PincodeDisplay extends StatelessWidget {
-  const _PincodeDisplay({
-    required this.label,
-    required this.onTap,
-    this.rowKey,
-  });
+  const _PincodeDisplay({required this.label, required this.onTap, this.rowKey});
   final String label;
   final VoidCallback onTap;
   final Key? rowKey;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      key: rowKey,
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: AppTypographyV1.bodyRegular.copyWith(
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF000000),
-              height: 19 / 14,
+    // Same reasoning as _EnterPincodeRow: the delivery block merges into one
+    // node, so this needs its own or `pincode_form_opened` is undrivable once a
+    // pincode is already set.
+    return AutoSemantics.fromKey(
+      rowKey,
+      container: true,
+      child: GestureDetector(
+        key: rowKey,
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: AppTypographyV1.bodyRegular.copyWith(
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF000000),
+                height: 19 / 14,
+              ),
             ),
-          ),
-          Text(
-            PdpStrings.change,
-            style: AppTypographyV1.bodyRegular.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.brandDefault,
-              height: 19 / 14,
+            Text(
+              PdpStrings.change,
+              style: AppTypographyV1.bodyRegular.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.brandDefault,
+                height: 19 / 14,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -292,30 +286,39 @@ class _EnterPincodeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      key: buttonKey,
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            PdpStrings.enterPincode,
-            style: AppTypographyV1.bodyRegular.copyWith(
-              fontWeight: FontWeight.w400,
-              color: const Color(0x80000000),
-              height: 19 / 14,
+    // container: true — this row owns two labelled Texts ("Enter Pincode" and
+    // "Check"), and Android merges the whole delivery block into ONE node, which
+    // loses an annotated identifier. Without a dedicated node there is nothing
+    // addressable here at all: the merged label is the entire section, so
+    // `pincode_form_opened` and `pincode_change` cannot be driven.
+    return AutoSemantics.fromKey(
+      buttonKey,
+      container: true,
+      child: GestureDetector(
+        key: buttonKey,
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              PdpStrings.enterPincode,
+              style: AppTypographyV1.bodyRegular.copyWith(
+                fontWeight: FontWeight.w400,
+                color: const Color(0x80000000),
+                height: 19 / 14,
+              ),
             ),
-          ),
-          Text(
-            PdpStrings.check,
-            style: AppTypographyV1.bodyRegular.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.brandDefault,
-              height: 19 / 14,
+            Text(
+              PdpStrings.check,
+              style: AppTypographyV1.bodyRegular.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.brandDefault,
+                height: 19 / 14,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

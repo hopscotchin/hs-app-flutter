@@ -7,7 +7,9 @@ enum Environment { debug, debugVPN, release }
 class EnvironmentConfig {
   EnvironmentConfig._();
 
-  static Environment _currentEnvironment = kReleaseMode ? Environment.release : Environment.debug;
+  static Environment _currentEnvironment = kReleaseMode
+      ? Environment.release
+      : Environment.debug;
 
   static Environment get current => _currentEnvironment;
 
@@ -60,5 +62,6 @@ class EnvironmentConfig {
   static bool get isProduction => _currentEnvironment == Environment.release;
 
   static bool get isDebug =>
-      _currentEnvironment == Environment.debug || _currentEnvironment == Environment.debugVPN;
+      _currentEnvironment == Environment.debug ||
+      _currentEnvironment == Environment.debugVPN;
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show VoidCallback;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -21,10 +22,22 @@ class WishlistSeed {
 /// A wishlist toggle deferred because the user was logged out. Replayed by
 /// [WishlistCubit.resumePending] after a successful login.
 class _PendingWishlist {
-  const _PendingWishlist({required this.productId, required this.price, this.sku});
+  const _PendingWishlist({
+    required this.productId,
+    required this.price,
+    this.sku,
+    this.onAdded,
+    this.onRemoved,
+  });
   final String productId;
   final int price;
   final String? sku;
+
+  /// Carried through the login detour. Without these the replayed toggle
+  /// succeeds and reports nothing — the surface fired no event at tap time
+  /// (correctly, nothing had happened yet) and would never get another chance.
+  final VoidCallback? onAdded;
+  final VoidCallback? onRemoved;
 }
 
 /// Global single source of truth for "is this product wishlisted". Every screen
@@ -32,8 +45,7 @@ class _PendingWishlist {
 /// so a change on one screen is reflected on all of them.
 @singleton
 class WishlistCubit extends Cubit<WishlistState> {
-  WishlistCubit(this._addToWishlist, this._removeFromWishlist)
-    : super(const WishlistState());
+  WishlistCubit(this._addToWishlist, this._removeFromWishlist) : super(const WishlistState());
 
   final AddToWishlistUseCase _addToWishlist;
   final RemoveFromWishlistUseCase _removeFromWishlist;
@@ -73,8 +85,20 @@ class WishlistCubit extends Cubit<WishlistState> {
   }
 
   /// Store a toggle to replay after login (user tapped while logged out).
-  void setPending({required String productId, required int price, String? sku}) {
-    _pending = _PendingWishlist(productId: productId, price: price, sku: sku);
+  void setPending({
+    required String productId,
+    required int price,
+    String? sku,
+    VoidCallback? onAdded,
+    VoidCallback? onRemoved,
+  }) {
+    _pending = _PendingWishlist(
+      productId: productId,
+      price: price,
+      sku: sku,
+      onAdded: onAdded,
+      onRemoved: onRemoved,
+    );
   }
 
   /// Replay the toggle captured in [setPending], if any.
@@ -82,7 +106,13 @@ class WishlistCubit extends Cubit<WishlistState> {
     final p = _pending;
     _pending = null;
     if (p == null) return;
-    toggle(productId: p.productId, price: p.price, sku: p.sku);
+    toggle(
+      productId: p.productId,
+      price: p.price,
+      sku: p.sku,
+      onAdded: p.onAdded,
+      onRemoved: p.onRemoved,
+    );
   }
 
   /// Drop the previous user's state on login/logout so we never briefly show
@@ -92,7 +122,13 @@ class WishlistCubit extends Cubit<WishlistState> {
     emit(state.copyWith(items: const <String, String?>{}, inFlight: const <String>{}));
   }
 
-  Future<void> toggle({required String productId, required int price, String? sku}) async {
+  Future<void> toggle({
+    required String productId,
+    required int price,
+    String? sku,
+    VoidCallback? onAdded,
+    VoidCallback? onRemoved,
+  }) async {
     if (state.isInFlight(productId)) return;
 
     // The user acted on this product — local state now wins over any later seed.
@@ -110,13 +146,18 @@ class WishlistCubit extends Cubit<WishlistState> {
     emit(state.copyWith(items: optimistic, inFlight: {...state.inFlight, productId}));
 
     if (wasWishlisted) {
-      await _remove(productId: productId, wishlistItemId: existingItemId);
+      await _remove(productId: productId, wishlistItemId: existingItemId, onRemoved: onRemoved);
     } else {
-      await _add(productId: productId, price: price, sku: sku);
+      await _add(productId: productId, price: price, sku: sku, onAdded: onAdded);
     }
   }
 
-  Future<void> _add({required String productId, required int price, String? sku}) async {
+  Future<void> _add({
+    required String productId,
+    required int price,
+    String? sku,
+    VoidCallback? onAdded,
+  }) async {
     final result = await _addToWishlist(
       AddToWishlistParams(productId: productId, price: price, skuId: sku),
     );
@@ -132,11 +173,18 @@ class WishlistCubit extends Cubit<WishlistState> {
           ..[productId] = response.wishlistItemId;
         emit(_clearInFlight(productId, items: updated));
         _emitFeedback('Added to wishlist', isError: false);
+        // Analytics fires HERE — the server confirmed. Never on tap: `toggle`
+        // emits optimistically and the failure branch above reverts it.
+        onAdded?.call();
       },
     );
   }
 
-  Future<void> _remove({required String productId, required String? wishlistItemId}) async {
+  Future<void> _remove({
+    required String productId,
+    required String? wishlistItemId,
+    VoidCallback? onRemoved,
+  }) async {
     if (wishlistItemId == null || wishlistItemId.isEmpty) {
       // Membership known but no item id to delete with — restore and report.
       final reverted = Map<String, String?>.from(state.items)..[productId] = wishlistItemId;
@@ -144,9 +192,7 @@ class WishlistCubit extends Cubit<WishlistState> {
       _emitFeedback("Couldn't remove from wishlist", isError: true);
       return;
     }
-    final result = await _removeFromWishlist(
-      RemoveFromWishlistParams(wishlistId: wishlistItemId),
-    );
+    final result = await _removeFromWishlist(RemoveFromWishlistParams(wishlistId: wishlistItemId));
     result.fold(
       (failure) {
         if (failure is RequestCancelledFailure) return;
@@ -157,6 +203,7 @@ class WishlistCubit extends Cubit<WishlistState> {
       (_) {
         emit(_clearInFlight(productId));
         _emitFeedback('Removed from wishlist', isError: false);
+        onRemoved?.call();
       },
     );
   }

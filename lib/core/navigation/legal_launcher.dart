@@ -16,7 +16,8 @@ class LegalLauncher {
 
   static void open(BuildContext context, LegalTouchPoint touchPoint) {
     final site = Platform.isIOS ? 'ios' : 'android';
-    final url = '${EnvironmentConfig.webBaseUrl}/${touchPoint.path}?id=app&site=$site';
+    final url =
+        '${EnvironmentConfig.webBaseUrl}/${touchPoint.path}?id=app&site=$site';
     AppNavigator.goToWebView(context, url: url, title: touchPoint.title);
   }
 }

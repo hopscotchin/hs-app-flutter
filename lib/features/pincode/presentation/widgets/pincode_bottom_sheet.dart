@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hs_app_flutter/core/constants/strings/address_pincode_strings.dart';
+import 'package:hs_app_flutter/core/theme/colors.dart';
 
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/image_constants.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/entities/message_bar_entity.dart';
-import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
@@ -15,17 +15,15 @@ import '../../../../core/utils/snackbar_utils.dart';
 import '../../../address/domain/entities/address_entity.dart';
 import '../bloc/pincode_sheet_bloc.dart';
 import 'pincode_address_section.dart';
+import 'pincode_input_field.dart';
 
 export '../bloc/pincode_sheet_source.dart';
-import 'pincode_input_field.dart';
 
 /// Outcome of the PDP product-aware pincode verify (`onPdpVerify`). On failure
 /// the sheet stays open and shows [error] inline as a plain message instead of
 /// popping.
 class PincodeVerifyResult {
-  const PincodeVerifyResult.success()
-      : success = true,
-        error = null;
+  const PincodeVerifyResult.success() : success = true, error = null;
   const PincodeVerifyResult.failure(this.error) : success = false;
 
   final bool success;
@@ -56,8 +54,7 @@ class PincodeBottomSheet extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => BlocProvider(
-        create: (_) => sl<PincodeSheetBloc>()
-          ..add(PincodeSheetEvent.open(source: source)),
+        create: (_) => sl<PincodeSheetBloc>()..add(PincodeSheetEvent.open(source: source)),
         child: PincodeBottomSheet(onPdpVerify: onPdpVerify),
       ),
     );
@@ -132,8 +129,7 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
   // run the serviceability + selectAddress APIs and auto-close on success.
   void _onAddressSelected(int addressId) {
     final bloc = context.read<PincodeSheetBloc>();
-    if (bloc.state.source == PincodeSheetSource.pdp &&
-        widget.onPdpVerify != null) {
+    if (bloc.state.source == PincodeSheetSource.pdp && widget.onPdpVerify != null) {
       final addr = bloc.state.addresses.firstWhere(
         (a) => a.id == addressId,
         orElse: () => const AddressEntity(),
@@ -224,13 +220,11 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
                 ),
                 // Address list is checkout-only; cart and PDP are pincode-only.
                 Flexible(
-                  child: BlocSelector<PincodeSheetBloc, PincodeSheetState,
-                      PincodeSheetSource>(
+                  child: BlocSelector<PincodeSheetBloc, PincodeSheetState, PincodeSheetSource>(
                     selector: (s) => s.source,
-                    builder: (context, source) =>
-                        source == PincodeSheetSource.checkout
-                            ? _AddressList(onSelect: _onAddressSelected)
-                            : const SizedBox.shrink(),
+                    builder: (context, source) => source == PincodeSheetSource.checkout
+                        ? _AddressList(onSelect: _onAddressSelected)
+                        : const SizedBox.shrink(),
                   ),
                 ),
                 AppSpacing.verticalGapLg,
@@ -244,7 +238,8 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
                     builder: (context, state) {
                       // Disabled after a failed verify until the user edits the
                       // pincode (which clears pincodeError).
-                      final canApply = state.enteredPincode.length == 6 &&
+                      final canApply =
+                          state.enteredPincode.length == 6 &&
                           !state.isChecking &&
                           state.pincodeError == null;
                       return PincodeInputField(
@@ -276,9 +271,7 @@ class _AddressList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PincodeSheetBloc, PincodeSheetState>(
-      buildWhen: (p, c) =>
-          p.addresses != c.addresses ||
-          p.selectedAddressId != c.selectedAddressId,
+      buildWhen: (p, c) => p.addresses != c.addresses || p.selectedAddressId != c.selectedAddressId,
       builder: (context, state) {
         if (state.addresses.isEmpty) return const SizedBox.shrink();
         return SingleChildScrollView(
@@ -320,8 +313,7 @@ class _PdpErrorSlot extends StatelessWidget {
       builder: (context, error) {
         if (error == null || error.isEmpty) return const SizedBox.shrink();
         return Padding(
-          padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md + 2, AppSpacing.xs, AppSpacing.md, 0),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md + 2, AppSpacing.xs, AppSpacing.md, 0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -332,20 +324,12 @@ class _PdpErrorSlot extends StatelessWidget {
                   width: AppSpacing.iconXs,
                   height: AppSpacing.iconXs,
                   // Match the error text color beside it (.error()).
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.dangerDefault,
-                    BlendMode.srcIn,
-                  ),
+                  colorFilter: const ColorFilter.mode(AppColors.dangerDefault, BlendMode.srcIn),
                 ),
               ),
               AppSpacing.horizontalGapXs,
               // Wraps to the next line(s) when the message exceeds one line.
-              Expanded(
-                child: Text(
-                  error,
-                  style: AppTypographyV1.bodySmall.error(),
-                ),
-              ),
+              Expanded(child: Text(error, style: AppTypographyV1.bodySmall.error())),
             ],
           ),
         );
@@ -359,16 +343,13 @@ class _MessageBarsSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<PincodeSheetBloc, PincodeSheetState,
-        List<MessageBarEntity>>(
+    return BlocSelector<PincodeSheetBloc, PincodeSheetState, List<MessageBarEntity>>(
       selector: (s) => s.messageBars,
       builder: (context, bars) {
         if (bars.isEmpty) return const SizedBox.shrink();
         return Padding(
           padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
-          child: MessageBarsWidget(
-            messageBars: bars,
-          ),
+          child: MessageBarsWidget(messageBars: bars),
         );
       },
     );

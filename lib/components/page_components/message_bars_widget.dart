@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
+import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
+import 'package:hs_app_flutter/components/buttons/button_enums.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 
 import '../../core/constants/image_constants.dart';
 import '../../core/constants/strings/auto_test_strings.dart';
 import '../../core/entities/message_bar_entity.dart';
 import '../../core/theme/colors.dart';
-import '../../core/theme/typography.dart';
 import '../../core/theme/typography/text_style_extensions.dart';
 import '../../core/theme/typography/typography_v1.dart';
 
@@ -30,10 +31,12 @@ class MessageBarsWidget extends StatelessWidget {
 
   /// Optional callback when an action link is tapped.
   final MessageBarActionCallback? onAction;
+  final double spaceBetweenMessageBars;
 
   /// Screen-specific prefix for automation keys (e.g. `login`, `join_us`).
   /// When set, keys become `<keyPrefix>_<base>_<index>`.
   final String? keyPrefix;
+  final (double, double)? iconSize;
 
   const MessageBarsWidget({
     super.key,
@@ -41,6 +44,8 @@ class MessageBarsWidget extends StatelessWidget {
     this.cardStyle = false,
     this.onAction,
     this.keyPrefix,
+    this.spaceBetweenMessageBars = 10,
+    this.iconSize,
   });
 
   @override
@@ -55,12 +60,16 @@ class MessageBarsWidget extends StatelessWidget {
     return Column(
       children: [
         for (var i = 0; i < visibleBars.length; i++)
-          _MessageBarItem(
-            bar: visibleBars[i],
-            cardStyle: cardStyle,
-            onAction: onAction,
-            index: i,
-            keyPrefix: keyPrefix,
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: spaceBetweenMessageBars),
+            child: _MessageBarItem(
+              bar: visibleBars[i],
+              cardStyle: cardStyle,
+              onAction: onAction,
+              index: i,
+              keyPrefix: keyPrefix,
+              iconSize: iconSize,
+            ),
           ),
       ],
     );
@@ -103,6 +112,7 @@ String? _typeIconAsset(_MessageBarType type) {
     _MessageBarType.success => ImageConstants.messageBarSuccess,
     _MessageBarType.warning => ImageConstants.messageBarWarning,
     _MessageBarType.custom => null,
+    _ => ImageConstants.messageBarInfo,
   };
 }
 
@@ -114,6 +124,7 @@ class _MessageBarItem extends StatefulWidget {
   final MessageBarActionCallback? onAction;
   final int index;
   final String? keyPrefix;
+  final (double, double)? iconSize;
 
   const _MessageBarItem({
     required this.bar,
@@ -121,6 +132,7 @@ class _MessageBarItem extends StatefulWidget {
     required this.index,
     this.onAction,
     this.keyPrefix,
+    this.iconSize,
   });
 
   @override
@@ -154,7 +166,7 @@ class _MessageBarItemState extends State<_MessageBarItem> {
 
     // Resolve colors — API-provided values override type defaults.
     final bgColor = bar.bgColor?.toColor ?? _defaultBgColor(type);
-    final textColor = bar.textColor.toColor ?? AppColors.neutralBlack;
+    final textColor = bar.textColor.toColorOr(AppColors.neutralBlack);
 
     // Resolve icon visibility — typed bars always show their icon; custom bars
     // gate on the hasIcon flag and require a network icon to be present.
@@ -174,7 +186,7 @@ class _MessageBarItemState extends State<_MessageBarItem> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (showIcon) ...[
-                _buildIcon(bar, type, textColor),
+                _buildIcon(bar, type, textColor, widget.iconSize),
                 const SizedBox(width: _kIconSpacing),
               ],
               Expanded(
@@ -204,14 +216,33 @@ class _MessageBarItemState extends State<_MessageBarItem> {
 
   // ─── Icon ────────────────────────────────────────────────────────────────
 
-  Widget _buildIcon(MessageBarEntity bar, _MessageBarType type, Color tintColor) {
+  Widget _buildIcon(
+    MessageBarEntity bar,
+    _MessageBarType type,
+    Color tintColor,
+    (double, double)? iconSize,
+  ) {
     if (type == _MessageBarType.custom) {
-      return CustomImage(path: bar.icon!);
+      return (bar.icon ?? '').contains('http')
+          ? CustomImage(
+              height: iconSize?.$1,
+              width: iconSize?.$2,
+              path: bar.icon ?? '',
+              placeholder: const Icon(Icons.info),
+              errorWidget: const Icon(Icons.info),
+            )
+          : const Icon(Icons.info);
     }
 
     return Padding(
       padding: const EdgeInsets.only(top: 1),
-      child: CustomImage(path: _typeIconAsset(type)!, width: _kIconSize, height: _kIconSize),
+      child: CustomImage(
+        path: _typeIconAsset(type)!,
+        width: _kIconSize,
+        height: _kIconSize,
+        placeholder: const SizedBox.shrink(),
+        errorWidget: const CustomImage(path: ImageConstants.messageBarInfo),
+      ),
     );
   }
 
@@ -262,62 +293,24 @@ class _MessageBarItemState extends State<_MessageBarItem> {
       children: [
         // Left button — outlined (secondary color border)
         Expanded(
-          child: _outlineButton(
-            key: _key(MessageBarTestStrings.messageBarLeftButton),
+          child: SecondaryButton.defaultType(
+            size: ButtonSize.medium,
             text: bar.actionText!,
+            key: _key(MessageBarTestStrings.messageBarLeftButton),
             onTap: () => _handleAction(bar.actionLink),
           ),
         ),
         const SizedBox(width: 16),
         // Right button — filled (secondary color bg)
         Expanded(
-          child: _filledButton(
-            key: _key(MessageBarTestStrings.messageBarRightButton),
+          child: PrimaryButton.defaultType(
             text: bar.actionTextRight!,
+            size: ButtonSize.medium,
+            key: _key(MessageBarTestStrings.messageBarRightButton),
             onTap: () => _handleAction(bar.actionLinkRight),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _outlineButton({required String text, required VoidCallback onTap, Key? key}) {
-    return GestureDetector(
-      key: key,
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.secondary),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          text,
-          style: AppTypography.labelLarge.copyWith(color: AppColors.secondary, letterSpacing: 0.04),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
-  Widget _filledButton({required String text, required VoidCallback onTap, Key? key}) {
-    return GestureDetector(
-      key: key,
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.secondary,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          text,
-          style: AppTypography.labelLarge.copyWith(color: Colors.white, letterSpacing: 0.04),
-          textAlign: TextAlign.center,
-        ),
-      ),
     );
   }
 }

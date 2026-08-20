@@ -190,7 +190,10 @@ String _inferType(String pattern) {
   if (ends('_checkbox')) return 'Checkbox';
   if (ends('_radio')) return 'Radio';
   if (ends('_nav_item')) return 'Nav item';
-  if (ends('_menu_item') || ends('_item') || ends('_tile')) return 'List item';
+  if (ends('_menu_item') || ends('_item') || ends('_tile') || ends('_card')) {
+    return 'List item';
+  }
+  if (ends('_code') || ends('_question') || ends('_answer')) return 'Text';
   if (ends('_chip')) return 'Chip';
   if (ends('_visual_cue')) return 'Visual cue';
   if (ends('_badge')) return 'Badge';
@@ -211,9 +214,20 @@ String _inferType(String pattern) {
   if (ends('_wishlist') ||
       ends('_add_to_cart') ||
       ends('_edit') ||
-      ends('_remove')) {
+      ends('_remove') ||
+      ends('_copy')) {
     return 'Button';
   }
+  if (ends('_indicator')) return 'Indicator';
+  if (ends('_badge')) return 'Badge';
+  if (ends('_divider')) return 'Divider';
+  if (ends('_lip')) return 'Decoration';
+  if (ends('_loading')) return 'Loading';
+  if (ends('_header')) return 'Header';
+  if (ends('_cell')) return 'Cell';
+  if (ends('_variant')) return 'Tile';
+  if (ends('_card')) return 'Card';
+  if (ends('_view')) return 'View';
   if (k.contains('_text')) return 'Text';
   return 'Element';
 }

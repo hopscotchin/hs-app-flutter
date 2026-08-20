@@ -22,9 +22,12 @@ class StorageKeys {
 
   // Remote Config Flags
   static const String featureFlagInAppUpdate = 'hs_feature_flag_in_app_update';
-  static const String featureFlagRatingAfterShopping = 'hs_feature_flag_rating_after_shopping';
-  static const String featureFlagHomeAnalytics = 'hs_feature_flag_home_analytics';
-  static const String featureFlagDeleteAccount = 'hs_feature_flag_delete_account';
+  static const String featureFlagRatingAfterShopping =
+      'hs_feature_flag_rating_after_shopping';
+  static const String featureFlagHomeAnalytics =
+      'hs_feature_flag_home_analytics';
+  static const String featureFlagDeleteAccount =
+      'hs_feature_flag_delete_account';
 
   // Hard Update
   static const String isHardUpdate = 'hs_is_hard_update';
@@ -41,7 +44,8 @@ class StorageKeys {
   static const String persistentTicket = 'hs_persistent_ticket';
   static const String uuid = 'hs_uuid';
   static const String childCohorts = 'hs_child_cohorts';
-  static const String continueBrowsingEligibleVisitor = 'hs_continue_browsing_eligible_visitor';
+  static const String continueBrowsingEligibleVisitor =
+      'hs_continue_browsing_eligible_visitor';
   static const String productImageConfig = 'hs_product_image_config';
   static const String addressesJson = 'hs_addresses_json';
   static const String lastSelectedPincodeAddressId = 'hs_last_selected_pincode_address_id';

@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
@@ -15,16 +16,26 @@ class UpdateCartItemUseCase
 
   @override
   Future<Either<Failure, CartEntity>> call(UpdateCartItemParams params) {
-    return repository.updateCartItem(params.sku, params.quantity);
+    return repository.updateCartItem(
+      params.sku,
+      params.quantity,
+      cancelToken: params.cancelToken,
+    );
   }
 }
 
 class UpdateCartItemParams extends Equatable {
   final String sku;
   final int quantity;
+  final CancelToken? cancelToken;
 
-  const UpdateCartItemParams({required this.sku, required this.quantity});
+  const UpdateCartItemParams({
+    required this.sku,
+    required this.quantity,
+    this.cancelToken,
+  });
 
   @override
   List<Object?> get props => [sku, quantity];
+  // cancelToken intentionally excluded — not a semantic field
 }

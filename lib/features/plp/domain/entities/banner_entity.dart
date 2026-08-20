@@ -11,3 +11,9 @@ abstract class BannerEntity with _$BannerEntity {
     String? actionUri,
   }) = _BannerEntity;
 }
+
+extension BannerEntityX on BannerEntity? {
+  /// True when the backend attached a deeplink to this banner, so the UI knows
+  /// whether to make it tappable at all.
+  bool get hasAction => this?.actionUri?.isNotEmpty ?? false;
+}

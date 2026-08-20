@@ -14,8 +14,8 @@ class AutoLoginInterceptor extends QueuedInterceptor {
   AutoLoginInterceptor({
     required Dio mainDio,
     required AuthHeaderInterceptor authHeaderInterceptor,
-  })  : _mainDio = mainDio,
-        _authHeaderInterceptor = authHeaderInterceptor {
+  }) : _mainDio = mainDio,
+       _authHeaderInterceptor = authHeaderInterceptor {
     // Separate Dio for the auto-login call itself — shares AuthHeaderInterceptor
     // for device/client headers but intentionally excludes AutoLoginInterceptor
     // to prevent a deadlock when the queue is held.
@@ -29,8 +29,7 @@ class AutoLoginInterceptor extends QueuedInterceptor {
 
   PrefManager? _prefManager;
 
-  void bindPrefManager(PrefManager prefManager) =>
-      _prefManager = prefManager;
+  void bindPrefManager(PrefManager prefManager) => _prefManager = prefManager;
 
   /// Must be called alongside [NetworkClient.onEnvironmentChanged] so the
   /// auth Dio uses the correct base URL in non-production environments.
@@ -49,7 +48,8 @@ class AutoLoginInterceptor extends QueuedInterceptor {
 
     // No ticket stored — nothing we can do.
     final storedTicket =
-        _prefManager?.persistentTicket ?? _authHeaderInterceptor.persistentTicket;
+        _prefManager?.persistentTicket ??
+        _authHeaderInterceptor.persistentTicket;
     if (storedTicket == null || storedTicket.isEmpty) {
       return handler.next(err);
     }
@@ -96,18 +96,12 @@ class AutoLoginInterceptor extends QueuedInterceptor {
     }
   }
 
-  Future<void> _retry(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) async {
+  Future<void> _retry(DioException err, ErrorInterceptorHandler handler) async {
     try {
       final opts = err.requestOptions;
       final retryResponse = await _mainDio.fetch<dynamic>(
         opts.copyWith(
-          extra: <String, dynamic>{
-            ...opts.extra,
-            '_autoLoginRetried': true,
-          },
+          extra: <String, dynamic>{...opts.extra, '_autoLoginRetried': true},
         ),
       );
       handler.resolve(retryResponse);

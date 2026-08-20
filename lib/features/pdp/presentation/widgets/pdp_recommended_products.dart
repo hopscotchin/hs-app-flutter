@@ -44,10 +44,16 @@ class PdpRecommendedProducts extends StatelessWidget {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            // `Center` wraps the Text so the paragraph gets the full row width to
+            // align within — `textAlign` on its own leaves the title at the left
+            // edge, because the Text shrink-wraps to its own width under loose
+            // constraints.
             child: Center(
               child: Text(
-                recommendations.pageMeta?.pageTitle ?? PdpStrings.productsYouMayLike,
+                recommendations.pageMeta?.pageTitle ??
+                    PdpStrings.productsYouMayLike,
                 key: const ValueKey(PdpTestStrings.recommendedTitle),
+                textAlign: TextAlign.center,
                 style: AppTypographyV1.titleMedium.copyWith(
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF000000),
@@ -61,7 +67,9 @@ class PdpRecommendedProducts extends StatelessWidget {
         SliverList(
           delegate: SliverChildBuilderDelegate((context, rowIndex) {
             final start = rowIndex * _columns;
-            final end = start + _columns > records.length ? records.length : start + _columns;
+            final end = start + _columns > records.length
+                ? records.length
+                : start + _columns;
             // One row of the canonical grid — reused verbatim so tiles look and
             // behave exactly as in the eager grid, but built lazily per row.
             return ProductGridWidget(
@@ -69,7 +77,10 @@ class PdpRecommendedProducts extends StatelessWidget {
               // grid keys its tiles from 0, so a shared prefix would collide.
               keyPrefix: '${PdpTestStrings.recommendedPrefix}_row_$rowIndex',
               gridData: ProductGridData(
-                layoutInfo: const LayoutInfoData(columns: _columns, showProductInfo: true),
+                layoutInfo: const LayoutInfoData(
+                  columns: _columns,
+                  showProductInfo: true,
+                ),
                 tiles: records.sublist(start, end),
               ),
             );

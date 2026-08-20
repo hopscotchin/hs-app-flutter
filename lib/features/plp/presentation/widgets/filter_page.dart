@@ -610,7 +610,7 @@ class _FilterPageViewState extends State<_FilterPageView> {
     // Match Android: white tick on dark swatches, grey tick on light ones —
     // decided by the swatch's perceived luminance, not a colour-name list.
     final swatch = filter.colorHex.toColor;
-    final useWhiteTick = swatch == null || swatch.isDarkColor;
+    final useWhiteTick = swatch.isDarkColor;
 
     // Same constant vertical padding as _buildFilterItem so colour rows keep the
     // same spacing across single- and two-line labels.

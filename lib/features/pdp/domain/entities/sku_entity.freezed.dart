@@ -16,7 +16,13 @@ mixin _$SkuEntity {
 
  String? get skuId; String? get title; String? get subTitle; ProductPriceEntity? get priceInfo; bool? get enable; EddInfoEntity? get eddInfo; WarningEntity? get info; bool get isSelected; bool get isAddedToBag;/// Raw key→value map from API (e.g. {"skuMrp": "₹1,149"}).
 /// Used to resolve `skuValue` type detail items via fieldPath.
- Map<String, dynamic>? get skuAttributes;
+ Map<String, dynamic>? get skuAttributes;/// Per-SKU analytics block from the backend, carrying `sku`, `sku_size`,
+/// `pdt_size`, `available_quantity` and `low_inventory`.
+///
+/// This is the ONLY source for the selected size's id and stock wording — analytics
+/// never falls back to [skuId], and `low_inventory` has nothing to derive it from on
+/// the client, since "Sold out" needs `canWishList` rather than a count.
+ Map<String, dynamic>? get trackingMeta;
 /// Create a copy of SkuEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,16 +33,16 @@ $SkuEntityCopyWith<SkuEntity> get copyWith => _$SkuEntityCopyWithImpl<SkuEntity>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SkuEntity&&(identical(other.skuId, skuId) || other.skuId == skuId)&&(identical(other.title, title) || other.title == title)&&(identical(other.subTitle, subTitle) || other.subTitle == subTitle)&&(identical(other.priceInfo, priceInfo) || other.priceInfo == priceInfo)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&(identical(other.info, info) || other.info == info)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isAddedToBag, isAddedToBag) || other.isAddedToBag == isAddedToBag)&&const DeepCollectionEquality().equals(other.skuAttributes, skuAttributes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SkuEntity&&(identical(other.skuId, skuId) || other.skuId == skuId)&&(identical(other.title, title) || other.title == title)&&(identical(other.subTitle, subTitle) || other.subTitle == subTitle)&&(identical(other.priceInfo, priceInfo) || other.priceInfo == priceInfo)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&(identical(other.info, info) || other.info == info)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isAddedToBag, isAddedToBag) || other.isAddedToBag == isAddedToBag)&&const DeepCollectionEquality().equals(other.skuAttributes, skuAttributes)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,skuId,title,subTitle,priceInfo,enable,eddInfo,info,isSelected,isAddedToBag,const DeepCollectionEquality().hash(skuAttributes));
+int get hashCode => Object.hash(runtimeType,skuId,title,subTitle,priceInfo,enable,eddInfo,info,isSelected,isAddedToBag,const DeepCollectionEquality().hash(skuAttributes),const DeepCollectionEquality().hash(trackingMeta));
 
 @override
 String toString() {
-  return 'SkuEntity(skuId: $skuId, title: $title, subTitle: $subTitle, priceInfo: $priceInfo, enable: $enable, eddInfo: $eddInfo, info: $info, isSelected: $isSelected, isAddedToBag: $isAddedToBag, skuAttributes: $skuAttributes)';
+  return 'SkuEntity(skuId: $skuId, title: $title, subTitle: $subTitle, priceInfo: $priceInfo, enable: $enable, eddInfo: $eddInfo, info: $info, isSelected: $isSelected, isAddedToBag: $isAddedToBag, skuAttributes: $skuAttributes, trackingMeta: $trackingMeta)';
 }
 
 
@@ -47,7 +53,7 @@ abstract mixin class $SkuEntityCopyWith<$Res>  {
   factory $SkuEntityCopyWith(SkuEntity value, $Res Function(SkuEntity) _then) = _$SkuEntityCopyWithImpl;
 @useResult
 $Res call({
- String? skuId, String? title, String? subTitle, ProductPriceEntity? priceInfo, bool? enable, EddInfoEntity? eddInfo, WarningEntity? info, bool isSelected, bool isAddedToBag, Map<String, dynamic>? skuAttributes
+ String? skuId, String? title, String? subTitle, ProductPriceEntity? priceInfo, bool? enable, EddInfoEntity? eddInfo, WarningEntity? info, bool isSelected, bool isAddedToBag, Map<String, dynamic>? skuAttributes, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -64,7 +70,7 @@ class _$SkuEntityCopyWithImpl<$Res>
 
 /// Create a copy of SkuEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? skuId = freezed,Object? title = freezed,Object? subTitle = freezed,Object? priceInfo = freezed,Object? enable = freezed,Object? eddInfo = freezed,Object? info = freezed,Object? isSelected = null,Object? isAddedToBag = null,Object? skuAttributes = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? skuId = freezed,Object? title = freezed,Object? subTitle = freezed,Object? priceInfo = freezed,Object? enable = freezed,Object? eddInfo = freezed,Object? info = freezed,Object? isSelected = null,Object? isAddedToBag = null,Object? skuAttributes = freezed,Object? trackingMeta = freezed,}) {
   return _then(_self.copyWith(
 skuId: freezed == skuId ? _self.skuId : skuId // ignore: cast_nullable_to_non_nullable
 as String?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -76,6 +82,7 @@ as EddInfoEntity?,info: freezed == info ? _self.info : info // ignore: cast_null
 as WarningEntity?,isSelected: null == isSelected ? _self.isSelected : isSelected // ignore: cast_nullable_to_non_nullable
 as bool,isAddedToBag: null == isAddedToBag ? _self.isAddedToBag : isAddedToBag // ignore: cast_nullable_to_non_nullable
 as bool,skuAttributes: freezed == skuAttributes ? _self.skuAttributes : skuAttributes // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>?,
   ));
 }
@@ -197,10 +204,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? skuId,  String? title,  String? subTitle,  ProductPriceEntity? priceInfo,  bool? enable,  EddInfoEntity? eddInfo,  WarningEntity? info,  bool isSelected,  bool isAddedToBag,  Map<String, dynamic>? skuAttributes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? skuId,  String? title,  String? subTitle,  ProductPriceEntity? priceInfo,  bool? enable,  EddInfoEntity? eddInfo,  WarningEntity? info,  bool isSelected,  bool isAddedToBag,  Map<String, dynamic>? skuAttributes,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SkuEntity() when $default != null:
-return $default(_that.skuId,_that.title,_that.subTitle,_that.priceInfo,_that.enable,_that.eddInfo,_that.info,_that.isSelected,_that.isAddedToBag,_that.skuAttributes);case _:
+return $default(_that.skuId,_that.title,_that.subTitle,_that.priceInfo,_that.enable,_that.eddInfo,_that.info,_that.isSelected,_that.isAddedToBag,_that.skuAttributes,_that.trackingMeta);case _:
   return orElse();
 
 }
@@ -218,10 +225,10 @@ return $default(_that.skuId,_that.title,_that.subTitle,_that.priceInfo,_that.ena
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? skuId,  String? title,  String? subTitle,  ProductPriceEntity? priceInfo,  bool? enable,  EddInfoEntity? eddInfo,  WarningEntity? info,  bool isSelected,  bool isAddedToBag,  Map<String, dynamic>? skuAttributes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? skuId,  String? title,  String? subTitle,  ProductPriceEntity? priceInfo,  bool? enable,  EddInfoEntity? eddInfo,  WarningEntity? info,  bool isSelected,  bool isAddedToBag,  Map<String, dynamic>? skuAttributes,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _SkuEntity():
-return $default(_that.skuId,_that.title,_that.subTitle,_that.priceInfo,_that.enable,_that.eddInfo,_that.info,_that.isSelected,_that.isAddedToBag,_that.skuAttributes);case _:
+return $default(_that.skuId,_that.title,_that.subTitle,_that.priceInfo,_that.enable,_that.eddInfo,_that.info,_that.isSelected,_that.isAddedToBag,_that.skuAttributes,_that.trackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -238,10 +245,10 @@ return $default(_that.skuId,_that.title,_that.subTitle,_that.priceInfo,_that.ena
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? skuId,  String? title,  String? subTitle,  ProductPriceEntity? priceInfo,  bool? enable,  EddInfoEntity? eddInfo,  WarningEntity? info,  bool isSelected,  bool isAddedToBag,  Map<String, dynamic>? skuAttributes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? skuId,  String? title,  String? subTitle,  ProductPriceEntity? priceInfo,  bool? enable,  EddInfoEntity? eddInfo,  WarningEntity? info,  bool isSelected,  bool isAddedToBag,  Map<String, dynamic>? skuAttributes,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _SkuEntity() when $default != null:
-return $default(_that.skuId,_that.title,_that.subTitle,_that.priceInfo,_that.enable,_that.eddInfo,_that.info,_that.isSelected,_that.isAddedToBag,_that.skuAttributes);case _:
+return $default(_that.skuId,_that.title,_that.subTitle,_that.priceInfo,_that.enable,_that.eddInfo,_that.info,_that.isSelected,_that.isAddedToBag,_that.skuAttributes,_that.trackingMeta);case _:
   return null;
 
 }
@@ -253,7 +260,7 @@ return $default(_that.skuId,_that.title,_that.subTitle,_that.priceInfo,_that.ena
 
 
 class _SkuEntity implements SkuEntity {
-  const _SkuEntity({this.skuId, this.title, this.subTitle, this.priceInfo, this.enable, this.eddInfo, this.info, this.isSelected = false, this.isAddedToBag = false, final  Map<String, dynamic>? skuAttributes}): _skuAttributes = skuAttributes;
+  const _SkuEntity({this.skuId, this.title, this.subTitle, this.priceInfo, this.enable, this.eddInfo, this.info, this.isSelected = false, this.isAddedToBag = false, final  Map<String, dynamic>? skuAttributes, final  Map<String, dynamic>? trackingMeta}): _skuAttributes = skuAttributes,_trackingMeta = trackingMeta;
   
 
 @override final  String? skuId;
@@ -278,6 +285,27 @@ class _SkuEntity implements SkuEntity {
   return EqualUnmodifiableMapView(value);
 }
 
+/// Per-SKU analytics block from the backend, carrying `sku`, `sku_size`,
+/// `pdt_size`, `available_quantity` and `low_inventory`.
+///
+/// This is the ONLY source for the selected size's id and stock wording — analytics
+/// never falls back to [skuId], and `low_inventory` has nothing to derive it from on
+/// the client, since "Sold out" needs `canWishList` rather than a count.
+ final  Map<String, dynamic>? _trackingMeta;
+/// Per-SKU analytics block from the backend, carrying `sku`, `sku_size`,
+/// `pdt_size`, `available_quantity` and `low_inventory`.
+///
+/// This is the ONLY source for the selected size's id and stock wording — analytics
+/// never falls back to [skuId], and `low_inventory` has nothing to derive it from on
+/// the client, since "Sold out" needs `canWishList` rather than a count.
+@override Map<String, dynamic>? get trackingMeta {
+  final value = _trackingMeta;
+  if (value == null) return null;
+  if (_trackingMeta is EqualUnmodifiableMapView) return _trackingMeta;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of SkuEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -289,16 +317,16 @@ _$SkuEntityCopyWith<_SkuEntity> get copyWith => __$SkuEntityCopyWithImpl<_SkuEnt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SkuEntity&&(identical(other.skuId, skuId) || other.skuId == skuId)&&(identical(other.title, title) || other.title == title)&&(identical(other.subTitle, subTitle) || other.subTitle == subTitle)&&(identical(other.priceInfo, priceInfo) || other.priceInfo == priceInfo)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&(identical(other.info, info) || other.info == info)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isAddedToBag, isAddedToBag) || other.isAddedToBag == isAddedToBag)&&const DeepCollectionEquality().equals(other._skuAttributes, _skuAttributes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SkuEntity&&(identical(other.skuId, skuId) || other.skuId == skuId)&&(identical(other.title, title) || other.title == title)&&(identical(other.subTitle, subTitle) || other.subTitle == subTitle)&&(identical(other.priceInfo, priceInfo) || other.priceInfo == priceInfo)&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&(identical(other.info, info) || other.info == info)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isAddedToBag, isAddedToBag) || other.isAddedToBag == isAddedToBag)&&const DeepCollectionEquality().equals(other._skuAttributes, _skuAttributes)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,skuId,title,subTitle,priceInfo,enable,eddInfo,info,isSelected,isAddedToBag,const DeepCollectionEquality().hash(_skuAttributes));
+int get hashCode => Object.hash(runtimeType,skuId,title,subTitle,priceInfo,enable,eddInfo,info,isSelected,isAddedToBag,const DeepCollectionEquality().hash(_skuAttributes),const DeepCollectionEquality().hash(_trackingMeta));
 
 @override
 String toString() {
-  return 'SkuEntity(skuId: $skuId, title: $title, subTitle: $subTitle, priceInfo: $priceInfo, enable: $enable, eddInfo: $eddInfo, info: $info, isSelected: $isSelected, isAddedToBag: $isAddedToBag, skuAttributes: $skuAttributes)';
+  return 'SkuEntity(skuId: $skuId, title: $title, subTitle: $subTitle, priceInfo: $priceInfo, enable: $enable, eddInfo: $eddInfo, info: $info, isSelected: $isSelected, isAddedToBag: $isAddedToBag, skuAttributes: $skuAttributes, trackingMeta: $trackingMeta)';
 }
 
 
@@ -309,7 +337,7 @@ abstract mixin class _$SkuEntityCopyWith<$Res> implements $SkuEntityCopyWith<$Re
   factory _$SkuEntityCopyWith(_SkuEntity value, $Res Function(_SkuEntity) _then) = __$SkuEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String? skuId, String? title, String? subTitle, ProductPriceEntity? priceInfo, bool? enable, EddInfoEntity? eddInfo, WarningEntity? info, bool isSelected, bool isAddedToBag, Map<String, dynamic>? skuAttributes
+ String? skuId, String? title, String? subTitle, ProductPriceEntity? priceInfo, bool? enable, EddInfoEntity? eddInfo, WarningEntity? info, bool isSelected, bool isAddedToBag, Map<String, dynamic>? skuAttributes, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -326,7 +354,7 @@ class __$SkuEntityCopyWithImpl<$Res>
 
 /// Create a copy of SkuEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? skuId = freezed,Object? title = freezed,Object? subTitle = freezed,Object? priceInfo = freezed,Object? enable = freezed,Object? eddInfo = freezed,Object? info = freezed,Object? isSelected = null,Object? isAddedToBag = null,Object? skuAttributes = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? skuId = freezed,Object? title = freezed,Object? subTitle = freezed,Object? priceInfo = freezed,Object? enable = freezed,Object? eddInfo = freezed,Object? info = freezed,Object? isSelected = null,Object? isAddedToBag = null,Object? skuAttributes = freezed,Object? trackingMeta = freezed,}) {
   return _then(_SkuEntity(
 skuId: freezed == skuId ? _self.skuId : skuId // ignore: cast_nullable_to_non_nullable
 as String?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -338,6 +366,7 @@ as EddInfoEntity?,info: freezed == info ? _self.info : info // ignore: cast_null
 as WarningEntity?,isSelected: null == isSelected ? _self.isSelected : isSelected // ignore: cast_nullable_to_non_nullable
 as bool,isAddedToBag: null == isAddedToBag ? _self.isAddedToBag : isAddedToBag // ignore: cast_nullable_to_non_nullable
 as bool,skuAttributes: freezed == skuAttributes ? _self._skuAttributes : skuAttributes // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,trackingMeta: freezed == trackingMeta ? _self._trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>?,
   ));
 }

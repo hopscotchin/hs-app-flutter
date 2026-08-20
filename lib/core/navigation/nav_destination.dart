@@ -3,6 +3,7 @@ import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/entities/message_bar_entity.dart';
+import '../../features/pdp/domain/entities/pdp_entry_args.dart';
 import '../../features/plp/domain/entities/page_type.dart';
 
 /// Base class for navigation destinations.
@@ -42,11 +43,41 @@ class PdpDestination extends NavDestination {
 
   const PdpDestination({required this.productId});
 
+  /// Forwards [PdpEntryArgs] from [extra] when the caller supplied it.
+  ///
+  /// Without this, the two ways into PDP behave differently: a PLP tile calling
+  /// `goToPdp(args:)` carries entry context, while the same product opened
+  /// through an `actionUri` routes here and arrives with none — so `from_screen`,
+  /// `from_page`, `from_feed_size` and `position` go missing on all 22 PDP events
+  /// and `source_tile_type` reports its `'other'` default.
+  ///
+  /// Per-tile context cannot travel any other way. Attribution is persisted and
+  /// merged, so it has no notion of "this hop"; the navigation observer is
+  /// route-derived, so it knows *PLP* but not *tile 7 of 164*. Mirrors Android's
+  /// intent extras (`IntentHelper.buildNewPDPAnalyticsData`).
   @override
   void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
-    AppNavigator.goToPdp(context, productId);
+    final args = extra?[pdpEntryArgsKey];
+    AppNavigator.goToPdp(context, productId, args: args is PdpEntryArgs ? args : null);
   }
 }
+
+class PromoDetailsDestination extends NavDestination {
+  final int promoId;
+
+  const PromoDetailsDestination({required this.promoId});
+
+  @override
+  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+    AppNavigator.goToPromoDetails(context, promoId);
+  }
+}
+
+/// Key under which [PdpEntryArgs] travels in a [NavDestination] `extra` map.
+///
+/// A constant rather than a literal so the producer and consumer cannot drift —
+/// a typo would silently drop the entry context with nothing to catch it.
+const String pdpEntryArgsKey = 'pdpEntryArgs';
 
 class HomeDestination extends NavDestination {
   const HomeDestination();

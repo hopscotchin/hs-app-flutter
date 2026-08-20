@@ -81,7 +81,15 @@ class PlpProductSliver extends StatelessWidget {
           if (product.isCPT) {
             ActionUrlHandler.navigate(context, product.actionUri, title: product.name);
           } else {
-            AppNavigator.goToPdp(context, id);
+            // Entry context, or PDP loses from_screen / from_page /
+            // from_feed_size / position on all 22 of its events. Read at tap
+            // time so a listing that paged in since build reports the new size.
+            final plp = context.read<PlpBloc>().state;
+            AppNavigator.goToPdp(
+              context,
+              id,
+              args: plp.pdpEntryArgs(product, index),
+            );
           }
         },
         onWishlistTap: () => _toggleWishlist(context, product),
@@ -158,7 +166,14 @@ class PlpProductSliver extends StatelessWidget {
                       priceKey: _priceKey(productStart),
                       discountKey: _discountKey(productStart),
                       colorVariantsKey: _colorVariantsKey(productStart),
-                      onTap: () => AppNavigator.goToPdp(context, product.id.toString()),
+                      onTap: () {
+                        final plp = context.read<PlpBloc>().state;
+                        AppNavigator.goToPdp(
+                          context,
+                          product.id.toString(),
+                          args: plp.pdpEntryArgs(product, productStart),
+                        );
+                      },
                       onWishlistTap: () => _toggleWishlist(context, product),
                       onAddToCartTap: () {},
                     ),

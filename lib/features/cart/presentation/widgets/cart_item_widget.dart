@@ -1,653 +1,378 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../components/atoms/product_card.dart';
+import '../../../../components/action_trigger.dart';
+import '../../../../components/atoms/cached_image_widget.dart';
+import '../../../../components/atoms/custom_chip_widget.dart';
+import '../../../../components/atoms/custom_image.dart';
+import '../../../../components/atoms/product_price_row.dart';
+import '../../../../core/constants/image_constants.dart';
+import '../../../../core/constants/strings/cart_strings.dart';
+import '../../../../core/entities/visual_cue_entity.dart';
+import '../../../../core/extensions/string_extensions.dart';
+import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography/text_style_extensions.dart';
+import '../../../../core/theme/typography/typography_v1.dart';
+import '../../domain/entities/cart_item_detail_entity.dart';
 import '../../domain/entities/cart_item_entity.dart';
+import '../bloc/cart_bloc.dart';
 
-/// Dark accessory panel colors matching Android CartProductAdapter.
-const _kPanelColor = Color(0xFF3C3C3E);
-const _kFooterColor = Color(0xFF2E2E30);
-const _kAccentColor = Color(0xFF00D9A6);
-
-enum _PanelView { options, changeQuantity, removeConfirm }
-
-class CartItemWidget extends StatefulWidget {
+/// Cart line-item card.
+///
+/// Layout:
+///   ┌────────────────────────────────────────────┐
+///   │ [image]  Product name                    ✕ │
+///   │          ₹499  ₹999  50% off               │
+///   │          Price dropped by ₹100             │
+///   │          Qty:  1                           │
+///   │          Size: 8-9 Years   3 left          │
+///   │ Arrives 6 Jul            ↗ Move To Wishlist│
+///   └────────────────────────────────────────────┘
+class CartItemWidget extends StatelessWidget {
   final CartItemEntity item;
   final bool isLoading;
-  final bool forceClose;
   final ValueChanged<int>? onQuantityChanged;
   final VoidCallback? onRemove;
   final VoidCallback? onMoveToWishlist;
-  final VoidCallback? onPanelOpened;
 
   const CartItemWidget({
     super.key,
     required this.item,
     this.isLoading = false,
-    this.forceClose = false,
     this.onQuantityChanged,
     this.onRemove,
     this.onMoveToWishlist,
-    this.onPanelOpened,
   });
 
-  @override
-  State<CartItemWidget> createState() => _CartItemWidgetState();
-}
-
-class _CartItemWidgetState extends State<CartItemWidget>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _slideController;
-
-  _PanelView _panelView = _PanelView.options;
-  bool _isOpen = false;
-  int _editingQuantity = 1;
-  bool _wasLoading = false;
-  bool _actionInProgress = false;
-
-  static const double _slideRatio = 0.78;
-  static const Duration _slideDuration = Duration(milliseconds: 250);
-
-  @override
-  void initState() {
-    super.initState();
-    _slideController = AnimationController(
-      vsync: this,
-      duration: _slideDuration,
-    );
-    _editingQuantity = widget.item.quantity ?? 1;
-  }
-
-  @override
-  void didUpdateWidget(CartItemWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    // Force close from parent (another item opened)
-    if (widget.forceClose && !oldWidget.forceClose && _isOpen) {
-      _closePanel();
-    }
-
-    // Loading finished → close panel
-    if (_wasLoading && !widget.isLoading && _isOpen) {
-      _closePanel();
-      _actionInProgress = false;
-    }
-    if (widget.isLoading) _actionInProgress = false;
-    _wasLoading = widget.isLoading;
-
-    // Sync editing qty when not in edit mode
-    if (_panelView != _PanelView.changeQuantity) {
-      _editingQuantity = widget.item.quantity ?? 1;
-    }
-  }
-
-  @override
-  void dispose() {
-    _slideController.dispose();
-    super.dispose();
-  }
-
-  // ─── Panel control ───────────────────────────────────────────
-
-  void _openPanel() {
-    if (_isOpen) return;
-    setState(() {
-      _isOpen = true;
-      _panelView = _PanelView.options;
-    });
-    _slideController.animateTo(1.0, curve: Curves.easeOut);
-    widget.onPanelOpened?.call();
-  }
-
-  void _closePanel() {
-    if (!_isOpen) return;
-    _slideController.animateTo(0.0, curve: Curves.easeIn).then((_) {
-      if (mounted) {
-        setState(() {
-          _isOpen = false;
-          _panelView = _PanelView.options;
-          _editingQuantity = widget.item.quantity ?? 1;
-          _actionInProgress = false;
-        });
-      }
-    });
-  }
-
-  void _togglePanel() => _isOpen ? _closePanel() : _openPanel();
-
-  // ─── Drag handlers ──────────────────────────────────────────
-
-  void _onDragUpdate(DragUpdateDetails details, double maxSlide) {
-    if (_actionInProgress || widget.isLoading) return;
-    final delta = (details.primaryDelta ?? 0) / maxSlide;
-    _slideController.value = (_slideController.value - delta).clamp(0.0, 1.0);
-  }
-
-  void _onDragEnd(DragEndDetails details) {
-    if (_actionInProgress || widget.isLoading) return;
-    final velocity = details.primaryVelocity ?? 0;
-
-    if (velocity < -300) {
-      // Fast left swipe → open
-      _slideController.animateTo(1.0, curve: Curves.easeOut);
-      if (!_isOpen) {
-        setState(() {
-          _isOpen = true;
-          _panelView = _PanelView.options;
-        });
-        widget.onPanelOpened?.call();
-      }
-    } else if (velocity > 300) {
-      _closePanel();
-    } else if (_slideController.value > 0.5) {
-      _slideController.animateTo(1.0, curve: Curves.easeOut);
-      if (!_isOpen) {
-        setState(() {
-          _isOpen = true;
-          _panelView = _PanelView.options;
-        });
-        widget.onPanelOpened?.call();
-      }
-    } else {
-      _closePanel();
-    }
-  }
-
-  // ─── Action handlers ────────────────────────────────────────
-
-  void _onMoveToWishlist() {
-    setState(() => _actionInProgress = true);
-    widget.onMoveToWishlist?.call();
-  }
-
-  void _onConfirmQuantity() {
-    if (_editingQuantity == (widget.item.quantity ?? 1)) return;
-    setState(() => _actionInProgress = true);
-    widget.onQuantityChanged?.call(_editingQuantity);
-  }
-
-  void _onConfirmRemove() {
-    setState(() => _actionInProgress = true);
-    widget.onRemove?.call();
-  }
-
-  bool get _showPanelLoading =>
-      _isOpen && (_actionInProgress || widget.isLoading);
-
-  // ─── Build ──────────────────────────────────────────────────
+  bool get _isSoldOut => item.isCompletelySoldOut;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxSlide = constraints.maxWidth * _slideRatio;
-        return AnimatedBuilder(
-          animation: _slideController,
-          builder: (context, _) {
-            final slideValue = _slideController.value;
-            return Stack(
-              clipBehavior: Clip.hardEdge,
-              children: [
-                // Background: arrow area + dark panel
-                if (slideValue > 0)
-                  Positioned.fill(
-                    child: Row(
-                      children: [
-                        // Hidden area (behind content)
-                        SizedBox(
-                          width: constraints.maxWidth * (1 - _slideRatio) - 36,
-                        ),
-                        // Arrow button
-                        GestureDetector(
-                          onTap: _closePanel,
-                          behavior: HitTestBehavior.opaque,
-                          child: const SizedBox(
-                            width: 36,
-                            child: Center(
-                              child: Icon(
-                                Icons.arrow_forward_ios,
-                                size: 14,
-                                color: AppColors.textTertiary,
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Dark panel
-                        Expanded(
-                          child: _showPanelLoading
-                              ? _buildLoadingOverlay()
-                              : _buildPanelContent(),
-                        ),
-                      ],
-                    ),
-                  ),
-                // Foreground: slideable content
-                Transform.translate(
-                  offset: Offset(-maxSlide * slideValue, 0),
-                  child: GestureDetector(
-                    onHorizontalDragUpdate: (d) => _onDragUpdate(d, maxSlide),
-                    onHorizontalDragEnd: _onDragEnd,
-                    child: _buildContent(),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // ─── Content card ───────────────────────────────────────────
-
-  Widget _buildContent() {
     return Container(
-      color: AppColors.container,
-      child: ProductCard(
-        imageUrl: widget.item.imgSrc,
-        productName: widget.item.productName,
-        size: widget.item.size,
-        isSingleSize: widget.item.isSingleSize ?? false,
-        price: widget.item.price,
-        regularPrice: widget.item.regularPrice,
-        discount: widget.item.discount,
-        isSoldOut: widget.item.isSoldOut ?? false,
-        isSizeSoldOut: widget.item.isSizeSoldOut ?? false,
-        deliveryText: widget.item.productTileText,
-        lowInventoryText: widget.item.lowInventoryText,
-        promoDiscountMessage: widget.item.promoDiscountMessage,
-        visualCues: widget.item.visualCues,
-        isLoading: widget.isLoading && !_isOpen,
-        quantity: widget.item.quantity,
-        trailing: IconButton(
-          icon: const Icon(
-            Icons.more_horiz,
-            size: 20,
-            color: AppColors.textSecondary,
-          ),
-          onPressed: _togglePanel,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          iconSize: 20,
-        ),
-      ),
-    );
-  }
-
-  // ─── Panel content switcher ─────────────────────────────────
-
-  Widget _buildPanelContent() {
-    return switch (_panelView) {
-      _PanelView.options => _buildOptionsPanel(),
-      _PanelView.changeQuantity => _buildChangeQuantityPanel(),
-      _PanelView.removeConfirm => _buildRemoveConfirmPanel(),
-    };
-  }
-
-  // ─── Options panel ──────────────────────────────────────────
-
-  Widget _buildOptionsPanel() {
-    final isSoldOut = widget.item.isCompletelySoldOut;
-    final maxQty = widget.item.selectMaxValue ?? 10;
-    final qty = widget.item.quantity ?? 1;
-    final oneLeft = maxQty < 2 && qty <= maxQty;
-
-    return Container(
-      color: _kPanelColor,
-      child: Column(
-        children: [
-          if (oneLeft)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              color: const Color(0xFFFFEB3B),
-              child: const Text(
-                'Only 1 item left',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
-                ),
-              ),
-            ),
-          Expanded(
-            child: Row(
-              children: [
-                // Change Quantity
-                Expanded(
-                  child: _OptionButton(
-                    icon: _buildQuantityIcon(qty, !isSoldOut && !oneLeft),
-                    label: 'Change\nquantity',
-                    enabled: !isSoldOut && !oneLeft,
-                    onTap: () =>
-                        setState(() => _panelView = _PanelView.changeQuantity),
-                  ),
-                ),
-                Container(width: 1, color: Colors.white12),
-                // Move to Wishlist
-                Expanded(
-                  child: _OptionButton(
-                    icon: Icon(
-                      Icons.favorite_border,
-                      size: 28,
-                      color: isSoldOut ? Colors.white30 : Colors.white,
-                    ),
-                    label: 'Move to\nWishlist',
-                    enabled: !isSoldOut,
-                    onTap: _onMoveToWishlist,
-                  ),
-                ),
-                Container(width: 1, color: Colors.white12),
-                // Remove from bag
-                Expanded(
-                  child: _OptionButton(
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      size: 28,
-                      color: Colors.white,
-                    ),
-                    label: 'Remove from\nbag',
-                    enabled: true,
-                    onTap: () =>
-                        setState(() => _panelView = _PanelView.removeConfirm),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuantityIcon(int qty, bool enabled) {
-    final color = enabled ? Colors.white : Colors.white30;
-    return SizedBox(
-      width: 32,
-      height: 32,
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: color, width: 1.5),
-              borderRadius: BorderRadius.circular(6),
-            ),
-          ),
-          Positioned(
-            right: -2,
-            top: -2,
-            child: Container(
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(
-                color: enabled ? Colors.white : Colors.white30,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                '$qty',
-                style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                  color: enabled ? _kPanelColor : Colors.white54,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─── Change Quantity panel ──────────────────────────────────
-
-  Widget _buildChangeQuantityPanel() {
-    final unitPrice = widget.item.price ?? 0;
-    final maxQty = widget.item.selectMaxValue ?? 10;
-    final canDecrease = _editingQuantity > 1;
-    final canIncrease = _editingQuantity < maxQty;
-    final isChanged = _editingQuantity != (widget.item.quantity ?? 1);
-
-    final priceText = _editingQuantity > 1
-        ? '$_editingQuantity x \u20B9$unitPrice = \u20B9${_editingQuantity * unitPrice}'
-        : '\u20B9$unitPrice';
-
-    return Container(
-      color: _kPanelColor,
-      child: Column(
-        children: [
-          // Price per unit
-          Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Text(
-              priceText,
-              style: const TextStyle(fontSize: 13, color: Colors.white60),
-            ),
-          ),
-          // Quantity stepper
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _CircleButton(
-                  icon: Icons.remove,
-                  enabled: canDecrease,
-                  onTap: () => setState(() => _editingQuantity--),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28),
-                  child: Text(
-                    '$_editingQuantity',
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                _CircleButton(
-                  icon: Icons.add,
-                  enabled: canIncrease,
-                  onTap: () => setState(() => _editingQuantity++),
-                ),
-              ],
-            ),
-          ),
-          // Footer
-          _buildFooter(
-            onCancel: () => setState(() {
-              _panelView = _PanelView.options;
-              _editingQuantity = widget.item.quantity ?? 1;
-            }),
-            onConfirm: isChanged ? _onConfirmQuantity : null,
-            confirmColor: isChanged ? _kAccentColor : Colors.white30,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─── Remove Confirmation panel ──────────────────────────────
-
-  Widget _buildRemoveConfirmPanel() {
-    return Container(
-      color: _kPanelColor,
-      child: Column(
-        children: [
-          const Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.delete_outline, size: 36, color: Colors.white),
-                  SizedBox(height: 12),
-                  Text(
-                    'Are you sure you want to remove this item from bag?',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          _buildFooter(
-            onCancel: () => setState(() => _panelView = _PanelView.options),
-            onConfirm: _onConfirmRemove,
-            confirmColor: _kAccentColor,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ─── Footer (Cancel | Confirm) ──────────────────────────────
-
-  Widget _buildFooter({
-    required VoidCallback onCancel,
-    VoidCallback? onConfirm,
-    Color confirmColor = Colors.white30,
-  }) {
-    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
       decoration: const BoxDecoration(
-        color: _kFooterColor,
-        border: Border(top: BorderSide(color: Colors.white12)),
+        color: AppColors.neutralGrey1,
+        borderRadius: AppSpacing.borderRadiusXs,
       ),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: IntrinsicHeight(
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Expanded(flex: 1, child: _buildImageColumn(context)),
             Expanded(
-              child: TextButton(
-                onPressed: onCancel,
-                child: const Text(
-                  'CANCEL',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: AppSpacing.sm,
+                  top: AppSpacing.sm,
+                  right: AppSpacing.xs,
+                ),
+                // spaceBetween pins "Move To Wishlist" to the bottom of the
+                // taller side (IntrinsicHeight equalizes both columns) no
+                // matter how many optional rows (promo/coupon messages)
+                // render above it. It sits outside _greyedOut() — the
+                // "Move To Wishlist" action stays fully colored and tappable
+                // even when the rest of the card is greyed out for sold-out.
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [_buildDetails(), _buildWishlistRow()],
                 ),
               ),
             ),
-            const VerticalDivider(color: Colors.white12, width: 1),
-            Expanded(
-              child: TextButton(
-                onPressed: onConfirm,
-                child: Text(
-                  'CONFIRM',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: confirmColor,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  // ─── Loading overlay ────────────────────────────────────────
-
-  Widget _buildLoadingOverlay() {
-    return Container(
-      color: _kPanelColor,
-      child: const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 12),
-            Text(
-              'Updating your bag',
-              style: TextStyle(fontSize: 14, color: Colors.white70),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Extracted stateless helpers ────────────────────────────────
-
-class _OptionButton extends StatelessWidget {
-  final Widget icon;
-  final String label;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  const _OptionButton({
-    required this.icon,
-    required this.label,
-    required this.enabled,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: enabled ? onTap : null,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            icon,
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: enabled ? Colors.white : Colors.white30,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CircleButton extends StatelessWidget {
-  final IconData icon;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  const _CircleButton({
-    required this.icon,
-    required this.enabled,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: enabled ? Colors.white : Colors.white24,
-            width: 1.5,
+  // Sold-out items keep their real colors underneath — a translucent
+  // light-grey scrim sits on top instead of a color-matrix transform, so it
+  // reads as "disabled" rather than a recolored image. IgnorePointer keeps it
+  // purely visual so taps still reach the content underneath (e.g. the ✕
+  // remove button and item-detail tooltips).
+  Widget _greyedOut(Widget child) {
+    if (!_isSoldOut) return child;
+    return Stack(
+      children: [
+        child,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Container(color: AppColors.neutralGrey1.withValues(alpha: 0.3)),
           ),
         ),
-        child: Icon(
-          icon,
-          size: 22,
-          color: enabled ? Colors.white : Colors.white24,
+      ],
+    );
+  }
+
+  // ─── Image + delivery estimate ───────────────────────────────
+
+  // Awaits the PDP push and silently re-syncs the cart on return (e.g. the
+  // user changed quantity/size on PDP) — RefreshCart carries no loading flag
+  // of its own, so this never shows the full-page shimmer.
+  Future<void> _onImageTap(BuildContext context) async {
+    final productId = item.productId;
+    if (productId == null) return;
+    final cartBloc = context.read<CartBloc>();
+    await AppNavigator.goToPdp(context, productId.toString());
+    cartBloc.add(const RefreshCart());
+  }
+
+  Widget _buildImageColumn(BuildContext context) {
+    return _greyedOut(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          GestureDetector(
+            onTap: isLoading ? null : () => _onImageTap(context),
+            child: AspectRatio(
+              aspectRatio: 5 / 7,
+              child: CachedImageWidget(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusXxs),
+                imageUrl: item.imgSrc ?? '',
+                fit: BoxFit.cover,
+                width: 132,
+                height: 176,
+              ),
+            ),
+          ),
+          // v6 sends the sold-out item's own status ("Sold out") in this same
+          // field instead of an actual delivery estimate — showing it here
+          // would read as "Arrives Sold out", so it's suppressed once the
+          // item is flagged sold out (the greyed-out image already conveys
+          // that state).
+          if (!item.isCompletelySoldOut && item.estimatedDelivery.isNotNullOrEmpty) ...[
+            AppSpacing.verticalGapXs,
+            Text(
+              item.estimatedDelivery ?? '',
+              maxLines: 2,
+              style: AppTypographyV1.labelLarge.regular.textPrimary(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ─── Right-hand details column ──────────────────────────────
+
+  Widget _buildDetails() {
+    // When a visual cue is present (e.g. "Out Of Stock"), it takes the
+    // product name's usual top-line spot next to the close icon, and the
+    // product name drops to its own line underneath — matches PLP's tile
+    // layout (see ProductTile._buildVisualCueOverlay), which also lets a
+    // cue take priority over the plain name.
+    final visualCue = item.visualCue;
+    final hasVisualCue = visualCue?.text.isNotNullOrEmpty ?? false;
+
+    return Expanded(
+      child: _greyedOut(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (hasVisualCue)
+                  _buildVisualCueBadge(visualCue!)
+                else
+                  Expanded(
+                    child: Text(
+                      item.productName ?? '',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypographyV1.labelLarge.regular.textPrimary(),
+                    ),
+                  ),
+                if (hasVisualCue) const Spacer(),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: isLoading ? null : onRemove,
+                  child: const Padding(
+                    padding: EdgeInsets.only(left: AppSpacing.md),
+                    child: Icon(
+                      Icons.close,
+                      size: AppSpacing.iconMd,
+                      color: AppColors.neutralGrey6,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (hasVisualCue) ...[
+              AppSpacing.verticalGapSm,
+              Text(
+                item.productName ?? '',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypographyV1.labelLarge.regular.textPrimary(),
+              ),
+            ],
+
+            AppSpacing.verticalGapXs,
+            if (item.priceInfo != null)
+              ProductPriceRow(
+                padding: EdgeInsets.zero,
+                priceText: item.priceInfo!.sellingPrice ?? '',
+                originalPriceText: item.priceInfo!.hasDiscount ? item.priceInfo!.mrp : null,
+                discountText: item.priceInfo!.discount,
+                isSoldOut: false,
+              ),
+            for (final detail in item.cartItemDetails) ...[
+              AppSpacing.verticalGapXs,
+              _buildItemDetail(detail),
+            ],
+
+            AppSpacing.verticalGapSm,
+            _buildQuantityRow(),
+            AppSpacing.verticalGapXs,
+            _buildSizeRow(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVisualCueBadge(VisualCueEntity cue) {
+    final bgColor = cue.bgColor.toColorOr(AppColors.neutralGrey2);
+    final txtColor = cue.textColor.toColorOr(AppColors.textPrimary);
+
+    return cue.imageUrl.isNotNullOrEmpty
+        ? CustomImage(path: cue.imageUrl!, height: 15, width: 64)
+        : CustomChipWidget(
+            text: (cue.text ?? ''),
+            backgroundColor: bgColor,
+            borderColor: bgColor,
+            borderRadius: AppSpacing.radiusXs,
+            textStyle: AppTypographyV1.labelMedium.medium.copyWith(color: txtColor),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs, vertical: 0),
+          );
+  }
+
+  Widget _buildQuantityRow() {
+    final qty = item.quantity ?? 1;
+    final maxQty = item.selectMaxValue ?? 10;
+    // A single allowed quantity means there's nothing to step between — hide
+    // the +/- controls entirely rather than showing them permanently disabled.
+    final showStepper = maxQty > 1;
+    final canChange = !isLoading && !_isSoldOut && onQuantityChanged != null;
+    final canDecrease = canChange && qty > 1;
+    final canIncrease = canChange && qty < maxQty;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text(CartStrings.qty, style: AppTypographyV1.labelLarge.regular.neutralGrey6()),
+        AppSpacing.horizontalGapXxs,
+        if (showStepper)
+          InkWell(
+            onTap: canDecrease ? () => onQuantityChanged!(qty - 1) : null,
+            child: Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.xxs, right: AppSpacing.xs),
+              child: CustomImage(
+                path: ImageConstants.cartQuantityRemove,
+                width: AppSpacing.iconSm,
+                height: AppSpacing.iconSm,
+                color: canDecrease ? AppColors.textPrimary : AppColors.neutralGrey4,
+              ),
+            ),
+          ),
+        Text('\t\t$qty', style: AppTypographyV1.labelLarge.medium.neutralGrey6()),
+        if (showStepper)
+          InkWell(
+            onTap: canIncrease ? () => onQuantityChanged!(qty + 1) : null,
+            child: Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.lmd, right: AppSpacing.xsm),
+              child: CustomImage(
+                path: ImageConstants.cartQuantityAdd,
+                width: AppSpacing.iconSm,
+                height: AppSpacing.iconSm,
+                color: canIncrease ? AppColors.textPrimary : AppColors.neutralGrey4,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSizeRow() {
+    final stockColor = item.stockAvailabilityStatusColor.toColorOr(AppColors.dangerDefault);
+    return RichText(
+      text: TextSpan(
+        text: CartStrings.size,
+        style: AppTypographyV1.labelLarge.regular.neutralGrey6(),
+        children: [
+          TextSpan(
+            text: '\t\t${item.size ?? ''}',
+            style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
+          ),
+          if (item.stockAvailabilityStatus.isNotNullOrEmpty)
+            TextSpan(
+              text: '\t\t${item.stockAvailabilityStatus!}',
+              style: AppTypographyV1.labelMedium.regular.copyWith(color: AppColors.dangerDefault),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Item detail row (price drop / tooltip note / coupon savings) ──
+
+  Widget _buildItemDetail(CartItemDetailEntity detail) {
+    final textColor = detail.titleColor.toColorOr(AppColors.textPrimary);
+    final icon = detail.action?.iconUrl;
+    final label = Text(
+      detail.title ?? '',
+      maxLines: 2,
+      style: AppTypographyV1.labelMedium.medium.copyWith(color: textColor),
+    );
+
+    if (icon.isNotNullOrEmpty) {
+      // `child` is just the icon — that's where the tooltip's arrow anchors.
+      // `tooltipBuilder` wraps it together with the label into one tappable
+      // row, so tapping anywhere (not just the icon) opens the tooltip while
+      // the arrow still points precisely at the icon.
+      return ActionTrigger(
+        action: detail.action,
+        child: CustomImage(path: icon!, width: AppSpacing.iconXs, height: AppSpacing.iconXs),
+        tooltipBuilder: (anchor, showTooltip) => GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: showTooltip,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [anchor, AppSpacing.horizontalGapXxs, label],
+          ),
+        ),
+      );
+    }
+
+    return ActionTrigger(action: detail.action, child: label);
+  }
+
+  // ─── Footer ───────────────────────────────────────────────────
+
+  Widget _buildWishlistRow() {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: isLoading ? null : onMoveToWishlist,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            const CustomImage(path: ImageConstants.cartWishListArrow),
+            Text(
+              CartStrings.moveToWishlistLabel,
+              style: AppTypographyV1.labelLarge.medium.brandPrimary(),
+            ),
+          ],
         ),
       ),
     );

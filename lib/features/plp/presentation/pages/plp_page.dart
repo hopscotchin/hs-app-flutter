@@ -7,8 +7,8 @@ import 'package:hs_app_flutter/components/atoms/empty_state_widget.dart';
 import 'package:hs_app_flutter/components/page_components/message_bars_widget.dart';
 import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
+import 'package:hs_app_flutter/core/navigation/action_url_handler.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
-import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/floating_item_count.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/plp_applied_filters.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/plp_filter_header.dart';
@@ -261,7 +261,7 @@ class _PlpViewState extends State<_PlpView> {
           builder: (context, state) {
             final hasFilters = state.appliedFilters.isNotEmpty;
             return SafeArea(
-              top: widget.pageType != PageType.boutique || state.banners.isEmpty,
+              top: state.banners.isEmpty,
               bottom: false,
               child: NotificationListener<ScrollNotification>(
                 onNotification: _handleScroll,
@@ -325,14 +325,15 @@ class _PlpViewState extends State<_PlpView> {
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: state.messageBars.isNotEmpty
-                                ? const EdgeInsets.only(left: 24, right: 24, top: 16)
+                                ? const EdgeInsets.only(left: 24, right: 24)
                                 : EdgeInsets.zero,
                             child: MessageBarsWidget(
+                              spaceBetweenMessageBars: 5,
                               messageBars: state.messageBars,
                               cardStyle: true,
                               keyPrefix: PlpTestStrings.screen,
                               onAction: (v, e) {
-                                context.showSnack('ROUTING IS PENDING HERE');
+                                ActionUrlHandler.navigate(context, v);
                               },
                             ),
                           ),

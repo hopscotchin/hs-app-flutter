@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hs_app_flutter/components/atoms/auto_semantics.dart';
 import 'package:hs_app_flutter/components/atoms/custom_chip_widget.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
+import 'package:hs_app_flutter/components/atoms/strikethrough_text.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
@@ -12,7 +14,6 @@ import '../../core/theme/spacing.dart';
 import '../../features/plp/domain/entities/listing_product_entity.dart';
 import '../../features/plp/domain/entities/product_price_entity.dart';
 import 'cached_image_widget.dart';
-import 'strikethrough_text.dart';
 
 /// Default tile aspect ratio (image-only). Cards in 2-col grids and carousels
 /// fall back to this when no aspect ratio is supplied.
@@ -137,43 +138,51 @@ class ProductTile extends StatelessWidget {
     final effectiveRatio = imageAspectRatio ?? _kDefaultAspectRatio;
 
     if (isCPT) {
-      return GestureDetector(
-        key: tileKey,
-        onTap: onTap,
-        child: AspectRatio(
-          aspectRatio: effectiveRatio,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
-            child: CachedImageWidget(imageUrl: imageUrl ?? '', fit: BoxFit.fill),
+      return AutoSemantics.fromKey(
+        tileKey ?? key,
+        container: true,
+        child: GestureDetector(
+          key: tileKey,
+          onTap: onTap,
+          child: AspectRatio(
+            aspectRatio: effectiveRatio,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
+              child: CachedImageWidget(imageUrl: imageUrl ?? '', fit: BoxFit.fill),
+            ),
           ),
         ),
       );
     }
 
-    return GestureDetector(
-      key: tileKey,
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildImage(effectiveRatio),
-          if (showProductInfo) ...[
-            AppSpacing.verticalGapXsm,
-            if (productName.isNotNullOrEmpty) _buildBrandName(),
-            if (priceText.isNotNullOrEmpty) ...[AppSpacing.verticalGapXs, _buildPriceRow()],
-            if (_resolvedColorLabel.isNotNullOrEmpty) ...[
+    return AutoSemantics.fromKey(
+      tileKey ?? key,
+      container: true,
+      child: GestureDetector(
+        key: tileKey,
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildImage(effectiveRatio),
+            if (showProductInfo) ...[
               AppSpacing.verticalGapXsm,
-              Text(
-                _resolvedColorLabel ?? '',
-                key: colorVariantsKey,
-                style: AppTypographyV1.labelMedium.regular.copyWith(
-                  color: Colors.black.withValues(alpha: 0.5),
+              if (productName.isNotNullOrEmpty) _buildBrandName(),
+              if (priceText.isNotNullOrEmpty) ...[AppSpacing.verticalGapXs, _buildPriceRow()],
+              if (_resolvedColorLabel.isNotNullOrEmpty) ...[
+                AppSpacing.verticalGapXsm,
+                Text(
+                  _resolvedColorLabel ?? '',
+                  key: colorVariantsKey,
+                  style: AppTypographyV1.labelMedium.regular.copyWith(
+                    color: Colors.black.withValues(alpha: 0.5),
+                  ),
                 ),
-              ),
+              ],
             ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -204,8 +213,8 @@ class ProductTile extends StatelessWidget {
   }
 
   Widget _buildVisualCueOverlay(VisualCueEntity cue, int index) {
-    final bgColor = cue.bgColor.toColor ?? AppColors.neutralGrey2;
-    final txtColor = cue.textColor.toColor ?? AppColors.textPrimary;
+    final bgColor = cue.bgColor.toColorOr(AppColors.neutralGrey2);
+    final txtColor = cue.textColor.toColorOr(AppColors.textPrimary);
 
     final badge = cue.imageUrl.isNotNullOrEmpty
         ? CustomImage(path: cue.imageUrl!, height: 15, width: 64)
@@ -227,17 +236,22 @@ class ProductTile extends StatelessWidget {
   }
 
   Widget _buildWishlistIcon() {
+    // Wraps the IconButton, not the Positioned — a Positioned has to stay a
+    // direct child of its Stack.
     return Positioned(
       top: AppSpacing.xxs,
       right: AppSpacing.xxs,
-      child: IconButton(
-        key: wishlistKey,
-        icon: CustomImage(
-          path: isWishlisted ? ImageConstants.wishlistAdded : ImageConstants.addWishlist,
-          height: 16,
-          width: 16,
+      child: AutoSemantics.fromKey(
+        wishlistKey,
+        child: IconButton(
+          key: wishlistKey,
+          icon: CustomImage(
+            path: isWishlisted ? ImageConstants.wishlistAdded : ImageConstants.addWishlist,
+            height: 16,
+            width: 16,
+          ),
+          onPressed: onWishlistTap,
         ),
-        onPressed: onWishlistTap,
       ),
     );
   }
@@ -291,8 +305,7 @@ class ProductTile extends StatelessWidget {
               ],
             ),
           ),
-          if (discountText != null)
-            Text(discountText!, key: discountKey, style: discountStyle),
+          if (discountText != null) Text(discountText!, key: discountKey, style: discountStyle),
         ],
       ),
     );

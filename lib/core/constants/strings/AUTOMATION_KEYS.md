@@ -65,7 +65,7 @@ lists. **Examples** = concrete keys for dynamic patterns. **Widget file** = the
 | Title | `account_app_bar_title` | — | `account_page.dart` |
 | Text | `account_forget_dialog_title_text_field` | — | `account_page.dart` |
 | Text | `account_forget_dialog_description_text_field` | — | `account_page.dart` |
-| Button | `account_forget_dialog_cancel_button` | — | `account_page.dart` |
+| Button | `account_forget_dialog_cancel_button` | — | `account_page.dart`, `cart_page.dart` |
 | Button | `account_forget_dialog_confirm_button` | — | `account_page.dart` |
 
 ## Join Us
@@ -184,7 +184,7 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Title | `plp_appbar_collapsed_title` | — | `plp_sliver_app_bar.dart` |
 | Text | `plp_appbar_subtitle` | — | `plp_sliver_app_bar.dart` |
 | Button | `plp_appbar_search_button` | — | `plp_sliver_app_bar.dart` |
-| Button | `plp_appbar_wishlist_button` | — | `plp_sliver_app_bar.dart` |
+| Button | `plp_appbar_wishlist_button` | — | `cart_page.dart`, `plp_sliver_app_bar.dart` |
 | Button | `plp_appbar_cart_button` | — | `plp_sliver_app_bar.dart` |
 | Image | `plp_header_image` | — | `plp_sliver_app_bar.dart` |
 | Chip | `plp_applied_filter_chip_<i>` | `plp_applied_filter_chip_0`, `plp_applied_filter_chip_1` | `plp_applied_filters.dart` |
@@ -226,10 +226,10 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | List item | `plp_filter_breadcrumb_<i>` | `plp_filter_breadcrumb_0`, `plp_filter_breadcrumb_1` | `filter_tree_content.dart` |
 | Title | `plp_filter_section_sheet_title` | — | `filter_section_sheet.dart` |
 | Option | `plp_filter_section_sheet_option_<i>` | `plp_filter_section_sheet_option_0`, `plp_filter_section_sheet_option_1` | `filter_section_sheet.dart` |
-| Text | `plp_filter_section_sheet_option_<i>_label` | `plp_filter_section_sheet_option_0_label`, `plp_filter_section_sheet_option_1_label` | `filter_section_sheet.dart` |
-| Text | `plp_filter_section_sheet_option_<i>_count` | `plp_filter_section_sheet_option_0_count`, `plp_filter_section_sheet_option_1_count` | `filter_section_sheet.dart` |
 | Button | `plp_filter_section_sheet_clear_button` | — | `filter_section_sheet.dart` |
 | Button | `plp_filter_section_sheet_apply_button` | — | `filter_section_sheet.dart` |
+| Text | `plp_filter_section_sheet_option_<i>_label` | `plp_filter_section_sheet_option_0_label`, `plp_filter_section_sheet_option_1_label` | `filter_section_sheet.dart` |
+| Text | `plp_filter_section_sheet_option_<i>_count` | `plp_filter_section_sheet_option_0_count`, `plp_filter_section_sheet_option_1_count` | `filter_section_sheet.dart` |
 
 ## Address (list + add/edit form)
 
@@ -275,6 +275,56 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Button | `address_form_discard_bottomsheet_stay_button` | — | `add_address_page.dart` |
 | Button | `address_form_discard_bottomsheet_discard_button` | — | `add_address_page.dart` |
 
+## Promo Offers
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Title | `promo_offers_sheet_title` | — | `promo_offers_bottom_sheet.dart` |
+| Button | `promo_offers_empty_state_button` | — | `promo_offers_bottom_sheet.dart` |
+| List item | `promo_offers_card_<i>` | `promo_offers_card_0`, `promo_offers_card_1` | `promo_offers_bottom_sheet.dart` |
+| Text | `promo_offers_card_<i>_code` | `promo_offers_card_0_code`, `promo_offers_card_1_code` | `promo_offers_bottom_sheet.dart` |
+| Button | `promo_offers_card_<i>_apply_button` | `promo_offers_card_0_apply_button`, `promo_offers_card_1_apply_button` | `promo_offers_bottom_sheet.dart` |
+| Button | `promo_offers_card_<i>_remove_button` | `promo_offers_card_0_remove_button`, `promo_offers_card_1_remove_button` | `promo_offers_bottom_sheet.dart` |
+| Button | `promo_offers_card_<i>_terms_button` | `promo_offers_card_0_terms_button`, `promo_offers_card_1_terms_button` | `promo_offers_bottom_sheet.dart` |
+| Button | `promo_offers_card_<i>_cta_button` | `promo_offers_card_0_cta_button`, `promo_offers_card_1_cta_button` | `promo_offers_bottom_sheet.dart` |
+
+## Promo Details
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Title | `promo_details_app_bar_title` | — | `promo_details_page.dart` |
+| Button | `promo_details_back_button` | — | `promo_details_page.dart` |
+| Text | `promo_details_code` | — | `promo_details_page.dart` |
+| Title | `promo_details_title` | — | `promo_details_page.dart` |
+| Text | `promo_details_description` | — | `promo_details_page.dart` |
+| Text | `promo_details_validity_text_field` | — | `promo_details_page.dart` |
+| Text | `promo_details_savings_text_field` | — | `promo_details_page.dart` |
+| Button | `promo_details_cta_button` | — | `promo_details_page.dart` |
+| Title | `promo_details_about_title` | — | `promo_details_page.dart` |
+| Text | `promo_details_about_text_field` | — | `promo_details_page.dart` |
+| Title | `promo_details_terms_title` | — | `promo_details_page.dart` |
+| List item | `promo_details_terms_item_<i>` | `promo_details_terms_item_0`, `promo_details_terms_item_1` | `promo_details_page.dart` |
+| Title | `promo_details_faq_title` | — | `promo_details_page.dart` |
+| List item | `promo_details_faq_item_<i>` | `promo_details_faq_item_0`, `promo_details_faq_item_1` | `promo_details_page.dart` |
+| Text | `promo_details_faq_item_<i>_question` | `promo_details_faq_item_0_question`, `promo_details_faq_item_1_question` | `promo_details_page.dart` |
+| Text | `promo_details_faq_item_<i>_answer` | `promo_details_faq_item_0_answer`, `promo_details_faq_item_1_answer` | `promo_details_page.dart` |
+| Text | `promo_details_error_text_field` | — | `promo_details_page.dart` |
+
+## Cart
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Element | `cart_slg` | — | `cart_page.dart` |
+| Text field | `cart_promo_code_input` | — | `cart_promo_section.dart` |
+| Hint | `cart_promo_code_input_hint` | — | `cart_promo_section.dart` |
+| Button | `cart_promo_apply_button` | — | `cart_promo_section.dart` |
+| Button | `cart_promo_remove_button` | — | `cart_promo_section.dart` |
+| Button | `cart_promo_see_all_offers_button` | — | `cart_promo_section.dart` |
+| Element | `cart_checkout_bar_savings_banner` | — | `cart_checkout_bar.dart` |
+| Text | `cart_checkout_bar_item_count_text` | — | `cart_checkout_bar.dart` |
+| Text | `cart_checkout_bar_total_amount_text` | — | `cart_checkout_bar.dart` |
+| Button | `cart_checkout_bar_details_button` | — | `cart_checkout_bar.dart` |
+| Button | `cart_checkout_bar_proceed_button` | — | `cart_checkout_bar.dart` |
 ## Pdp
 
 | Type | Key | Examples | Widget file |

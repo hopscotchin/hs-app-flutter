@@ -28,9 +28,11 @@ class NetworkClient {
   final DeviceInfoPlugin _deviceInfo;
   final PackageInfo _packageInfo;
 
-  NetworkClient({required DeviceInfoPlugin deviceInfo, required PackageInfo packageInfo})
-    : _deviceInfo = deviceInfo,
-      _packageInfo = packageInfo;
+  NetworkClient({
+    required DeviceInfoPlugin deviceInfo,
+    required PackageInfo packageInfo,
+  }) : _deviceInfo = deviceInfo,
+       _packageInfo = packageInfo;
 
   Future<void> init() async {
     authHeaderInterceptor = AuthHeaderInterceptor(
@@ -54,7 +56,10 @@ class NetworkClient {
         // on GET requests. The interceptor sets it only for POST/PUT as needed.
         headers: kIsWeb
             ? {'Accept': 'application/json'}
-            : {'Content-Type': 'application/json', 'Accept': 'application/json'},
+            : {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
       ),
     );
 
@@ -70,9 +75,30 @@ class NetworkClient {
     //   dio.interceptors.add(LoggingInterceptor());
     // }
 
+    // Debug builds accept any certificate, whether or not a proxy is configured.
+    //
+    // This used to live *inside* the proxy branch below, which welded two unrelated
+    // switches together: `ENABLE_HTTP_TOOLKIT_PROXY` read as "use a debugging proxy"
+    // while its load-bearing effect was "stop verifying certificates". Turning the
+    // proxy off therefore broke every API on Android — not because the app needs a
+    // proxy, but because an interceptor was re-signing TLS with a CA that
+    // **Dart's bundled root store does not contain**. Dart ignores Android's user CA
+    // store entirely, so installing the interceptor's CA on the device does not help;
+    // only this callback does.
+    //
+    // Keeping it separate means the app works with the proxy off and no interceptor
+    // running, and still works with one running.
+    if (kDebugMode && !EnvConfig.enableHttpToolkitProxy) {
+      dio.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () =>
+            HttpClient()..badCertificateCallback = (_, _, _) => true,
+      );
+    }
+
     if (kDebugMode && EnvConfig.enableHttpToolkitProxy) {
       // enableProxy(host: EnvConfig.proxyHost, port: EnvConfig.proxyPort);
       dio.interceptors.add(_ProxyRetryInterceptor(dio));
+      // Replaces the adapter above, adding findProxy on top of the same callback.
       enableProxy();
       dio.options.connectTimeout = const Duration(minutes: 2);
       dio.options.receiveTimeout = const Duration(minutes: 2);
@@ -111,10 +137,17 @@ class NetworkClient {
     dio.close(force: true);
   }
 
-  /// Route all Dio traffic through an HTTP debugging proxy.
+  /// Route all Dio traffic through an HTTP debugging proxy, and accept any
+  /// certificate so the proxy can terminate TLS.
   ///
-  /// Only active on iOS Simulator — [host] defaults to `127.0.0.1`.
-  /// The [port] defaults to HTTP Toolkit's default (`8000`).
+  /// ⚠️ **Everything breaks if nothing is listening on [port].** All traffic is sent
+  /// there, so with the flag on and no proxy running, every request fails with a
+  /// connection error. Leave `ENABLE_HTTP_TOOLKIT_PROXY=false` unless a proxy is
+  /// actually up — debug builds trust bad certificates either way (see the caller).
+  ///
+  /// [host] defaults to `127.0.0.1`, which reaches the host machine on an Android
+  /// emulator via `adb reverse tcp:<port> tcp:<port>`. The [port] defaults to HTTP
+  /// Toolkit's `8000`.
   void enableProxy({String host = '127.0.0.1', int port = 8000}) {
     if (!kDebugMode) return;
 
@@ -155,7 +188,9 @@ class _ProxyRetryInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    debugPrint('[ProxyRetry] onError ${err.type} for ${err.requestOptions.uri}');
+    debugPrint(
+      '[ProxyRetry] onError ${err.type} for ${err.requestOptions.uri}',
+    );
     debugPrint('[ProxyRetry]   error=${err.error} (${err.error?.runtimeType})');
 
     final attempts = (err.requestOptions.extra[_retryFlag] as int?) ?? 0;
@@ -178,7 +213,8 @@ class _ProxyRetryInterceptor extends Interceptor {
   }
 
   bool _isTransientProxyError(DioException err) {
-    if (err.type != DioExceptionType.unknown && err.type != DioExceptionType.connectionError) {
+    if (err.type != DioExceptionType.unknown &&
+        err.type != DioExceptionType.connectionError) {
       return false;
     }
     final msg = err.error?.toString() ?? err.message ?? '';

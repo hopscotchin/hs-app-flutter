@@ -19,6 +19,7 @@ class PdpImageCarousel extends StatefulWidget {
     required this.media,
     required this.pageScrollPosition,
     this.visualCue,
+    this.onPageSettled,
   });
 
   final List<MediaEntity> media;
@@ -31,6 +32,14 @@ class PdpImageCarousel extends StatefulWidget {
   /// rest of the page scroll as one continuous, native scroll. Returns null
   /// until that scroll view has been laid out.
   final ScrollPosition? Function() pageScrollPosition;
+
+  /// Fires with the page index each time the carousel settles on a new page.
+  ///
+  /// Does **not** fire for the initial page — which is exactly Android's
+  /// behaviour, where `uniqueImagePositions` is only populated on
+  /// `SCROLL_STATE_IDLE` (`CarouselView.kt:293-305`). The analytics layer relies
+  /// on that: it adds the first image back with a `+ 1`.
+  final ValueChanged<int>? onPageSettled;
 
   @override
   State<PdpImageCarousel> createState() => _PdpImageCarouselState();
@@ -172,7 +181,10 @@ class _PdpImageCarouselState extends State<PdpImageCarousel> {
               physics: _CarouselCoordinationPhysics(suppressPaging: () => _suppressImagePaging),
               itemCount: widget.media.length,
               allowImplicitScrolling: true,
-              onPageChanged: (index) => setState(() => _currentPage = index),
+              onPageChanged: (index) {
+                setState(() => _currentPage = index);
+                widget.onPageSettled?.call(index);
+              },
               itemBuilder: (context, index) {
                 final url = widget.media[index].url;
                 if (url == null) return _emptySlot();

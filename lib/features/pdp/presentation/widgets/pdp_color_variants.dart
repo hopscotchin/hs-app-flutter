@@ -5,6 +5,7 @@ import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/color_variants_entity.dart';
+import '../../../../components/atoms/auto_semantics.dart';
 
 class PdpColorVariants extends StatelessWidget {
   final List<ColorVariantEntity> colorVariants;
@@ -42,43 +43,50 @@ class PdpColorVariants extends StatelessWidget {
                     variant.isSelected || variant.productId == currentProductId;
                 final inStock = variant.isStockAvailable;
 
-                return GestureDetector(
-                  key: ValueKey('${PdpTestStrings.colorVariant}_$index'),
-                  onTap: () {
-                    if (variant.productId != null && !isSelected) {
-                      onColorSelected(variant.productId!);
-                    }
-                  },
-                  child: Opacity(
-                    opacity: inStock ? 1.0 : 0.4,
-                    child: Container(
-                      width: 40,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.brandDefault
-                              : AppColors.transparent,
-                          width: 1,
+                final variantKey = ValueKey(
+                  '${PdpTestStrings.colorVariant}_$index',
+                );
+                return AutoSemantics.fromKey(
+                  variantKey,
+                  container: true,
+                  child: GestureDetector(
+                    key: variantKey,
+                    onTap: () {
+                      if (variant.productId != null && !isSelected) {
+                        onColorSelected(variant.productId!);
+                      }
+                    },
+                    child: Opacity(
+                      opacity: inStock ? 1.0 : 0.4,
+                      child: Container(
+                        width: 40,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.brandDefault
+                                : AppColors.transparent,
+                            width: 1,
+                          ),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(6),
+                          ),
                         ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6),
-                        ),
+                        child: variant.mediaUrl != null
+                            ? ClipRRect(
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(5),
+                                ),
+                                child: CachedNetworkImage(
+                                  imageUrl: variant.mediaUrl!,
+                                  fit: BoxFit.cover,
+                                  fadeInDuration: Duration.zero,
+                                  fadeOutDuration: Duration.zero,
+                                  errorWidget: (_, _, _) =>
+                                      _buildPlaceholder(inStock),
+                                ),
+                              )
+                            : _buildPlaceholder(inStock),
                       ),
-                      child: variant.mediaUrl != null
-                          ? ClipRRect(
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(5),
-                              ),
-                              child: CachedNetworkImage(
-                                imageUrl: variant.mediaUrl!,
-                                fit: BoxFit.cover,
-                                fadeInDuration: Duration.zero,
-                                fadeOutDuration: Duration.zero,
-                                errorWidget: (_, _, _) =>
-                                    _buildPlaceholder(inStock),
-                              ),
-                            )
-                          : _buildPlaceholder(inStock),
                     ),
                   ),
                 );

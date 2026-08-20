@@ -118,18 +118,16 @@ import 'package:hs_app_flutter/features/cart/domain/repositories/cart_repository
     as _i901;
 import 'package:hs_app_flutter/features/cart/domain/usecases/add_to_cart_usecase.dart'
     as _i163;
-import 'package:hs_app_flutter/features/cart/domain/usecases/apply_promo_code_usecase.dart'
-    as _i783;
 import 'package:hs_app_flutter/features/cart/domain/usecases/get_cart_usecase.dart'
     as _i242;
+import 'package:hs_app_flutter/features/cart/domain/usecases/get_static_message_bars_usecase.dart'
+    as _i168;
 import 'package:hs_app_flutter/features/cart/domain/usecases/merge_cart_usecase.dart'
     as _i576;
 import 'package:hs_app_flutter/features/cart/domain/usecases/move_to_wishlist_usecase.dart'
     as _i44;
 import 'package:hs_app_flutter/features/cart/domain/usecases/remove_cart_item_usecase.dart'
     as _i1036;
-import 'package:hs_app_flutter/features/cart/domain/usecases/remove_promo_code_usecase.dart'
-    as _i454;
 import 'package:hs_app_flutter/features/cart/domain/usecases/update_cart_item_usecase.dart'
     as _i231;
 import 'package:hs_app_flutter/features/cart/presentation/bloc/cart_bloc.dart'
@@ -208,6 +206,24 @@ import 'package:hs_app_flutter/features/plp/presentation/bloc/filter_bloc.dart'
     as _i113;
 import 'package:hs_app_flutter/features/plp/presentation/bloc/plp_bloc.dart'
     as _i643;
+import 'package:hs_app_flutter/features/promos_offers/data/datasources/remote/promos_offers_api.dart'
+    as _i458;
+import 'package:hs_app_flutter/features/promos_offers/data/repositories/promos_offers_repository_impl.dart'
+    as _i890;
+import 'package:hs_app_flutter/features/promos_offers/domain/repositories/promos_offers_repository.dart'
+    as _i585;
+import 'package:hs_app_flutter/features/promos_offers/domain/usecases/apply_promo_usecase.dart'
+    as _i982;
+import 'package:hs_app_flutter/features/promos_offers/domain/usecases/get_promo_details_usecase.dart'
+    as _i203;
+import 'package:hs_app_flutter/features/promos_offers/domain/usecases/get_promos_offers_usecase.dart'
+    as _i76;
+import 'package:hs_app_flutter/features/promos_offers/domain/usecases/remove_promo_usecase.dart'
+    as _i935;
+import 'package:hs_app_flutter/features/promos_offers/presentation/bloc/promo_details_bloc.dart'
+    as _i806;
+import 'package:hs_app_flutter/features/promos_offers/presentation/bloc/promos_offers_bloc.dart'
+    as _i316;
 import 'package:hs_app_flutter/features/search/data/datasources/remote/search_api.dart'
     as _i1058;
 import 'package:hs_app_flutter/features/search/data/repositories/search_repository_impl.dart'
@@ -371,6 +387,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i538.PincodeRemoteDatasource(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i13.PlpApi>(() => _i13.PlpApi(gh<_i361.Dio>()));
+    gh.lazySingleton<_i458.PromosOffersApi>(
+      () => _i458.PromosOffersApi(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i1058.SearchApi>(() => _i1058.SearchApi(gh<_i361.Dio>()));
     gh.lazySingleton<_i748.SplashRemoteDatasource>(
       () => _i748.SplashRemoteDatasource(gh<_i361.Dio>()),
@@ -405,6 +424,13 @@ extension GetItInjectableX on _i174.GetIt {
         apiClient: gh<_i930.ApiClient>(),
       ),
     );
+    gh.lazySingleton<_i901.CartRepository>(
+      () => _i77.CartRepositoryImpl(
+        remoteDataSource: gh<_i454.CartRemoteDataSource>(),
+        networkInfo: gh<_i351.NetworkInfo>(),
+        prefManager: gh<_i818.PrefManager>(),
+      ),
+    );
     gh.lazySingleton<_i799.PincodeRepository>(
       () => _i68.PincodeRepositoryImpl(
         gh<_i538.PincodeRemoteDatasource>(),
@@ -430,6 +456,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i842.PersistSessionUseCase>(
       () => _i842.PersistSessionUseCase(gh<_i626.SessionRepository>()),
+    );
+    gh.lazySingleton<_i585.PromosOffersRepository>(
+      () => _i890.PromosOffersRepositoryImpl(
+        gh<_i458.PromosOffersApi>(),
+        gh<_i351.NetworkInfo>(),
+      ),
     );
     gh.lazySingleton<_i127.AnalyticsHelper>(
       () => _i127.AnalyticsHelper(
@@ -473,11 +505,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i297.CheckDeliveryPincodeUseCase>(
       () => _i297.CheckDeliveryPincodeUseCase(gh<_i799.PincodeRepository>()),
     );
-    gh.lazySingleton<_i901.CartRepository>(
-      () => _i77.CartRepositoryImpl(
-        remoteDataSource: gh<_i454.CartRemoteDataSource>(),
-        networkInfo: gh<_i351.NetworkInfo>(),
-      ),
+    gh.lazySingleton<_i982.ApplyPromoUseCase>(
+      () => _i982.ApplyPromoUseCase(gh<_i585.PromosOffersRepository>()),
+    );
+    gh.lazySingleton<_i203.GetPromoDetailsUseCase>(
+      () => _i203.GetPromoDetailsUseCase(gh<_i585.PromosOffersRepository>()),
+    );
+    gh.lazySingleton<_i76.GetPromosOffersUseCase>(
+      () => _i76.GetPromosOffersUseCase(gh<_i585.PromosOffersRepository>()),
+    );
+    gh.lazySingleton<_i935.RemovePromoUseCase>(
+      () => _i935.RemovePromoUseCase(gh<_i585.PromosOffersRepository>()),
     );
     gh.lazySingleton<_i427.CheckPincodeUseCase>(
       () => _i427.CheckPincodeUseCase(gh<_i241.AddressRepository>()),
@@ -558,11 +596,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i163.AddToCartUseCase>(
       () => _i163.AddToCartUseCase(gh<_i901.CartRepository>()),
     );
-    gh.lazySingleton<_i783.ApplyPromoCodeUseCase>(
-      () => _i783.ApplyPromoCodeUseCase(gh<_i901.CartRepository>()),
-    );
     gh.lazySingleton<_i242.GetCartUseCase>(
       () => _i242.GetCartUseCase(gh<_i901.CartRepository>()),
+    );
+    gh.lazySingleton<_i168.GetStaticMessageBarsUseCase>(
+      () => _i168.GetStaticMessageBarsUseCase(gh<_i901.CartRepository>()),
     );
     gh.lazySingleton<_i576.MergeCartUseCase>(
       () => _i576.MergeCartUseCase(gh<_i901.CartRepository>()),
@@ -572,9 +610,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i1036.RemoveCartItemUseCase>(
       () => _i1036.RemoveCartItemUseCase(gh<_i901.CartRepository>()),
-    );
-    gh.lazySingleton<_i454.RemovePromoCodeUseCase>(
-      () => _i454.RemovePromoCodeUseCase(gh<_i901.CartRepository>()),
     );
     gh.lazySingleton<_i231.UpdateCartItemUseCase>(
       () => _i231.UpdateCartItemUseCase(gh<_i901.CartRepository>()),
@@ -590,6 +625,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i473.JourneyWorker>(
       () => _i473.JourneyWorker(gh<_i127.AnalyticsHelper>()),
+    );
+    gh.factory<_i806.PromoDetailsBloc>(
+      () => _i806.PromoDetailsBloc(gh<_i203.GetPromoDetailsUseCase>()),
     );
     gh.lazySingleton<_i705.GetAppConfigUseCase>(
       () => _i705.GetAppConfigUseCase(gh<_i68.SplashRepository>()),
@@ -626,6 +664,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i692.RemoveFromWishlistUseCase>(),
       ),
     );
+    gh.factory<_i672.CartBloc>(
+      () => _i672.CartBloc(
+        getCartUseCase: gh<_i242.GetCartUseCase>(),
+        removeCartItemUseCase: gh<_i1036.RemoveCartItemUseCase>(),
+        updateCartItemUseCase: gh<_i231.UpdateCartItemUseCase>(),
+        moveToWishlistUseCase: gh<_i44.MoveToWishlistUseCase>(),
+        applyPromoUseCase: gh<_i982.ApplyPromoUseCase>(),
+        removePromoUseCase: gh<_i935.RemovePromoUseCase>(),
+        mergeCartUseCase: gh<_i576.MergeCartUseCase>(),
+        getStaticMessageBarsUseCase: gh<_i168.GetStaticMessageBarsUseCase>(),
+      ),
+    );
     gh.factory<_i724.SearchBloc>(
       () => _i724.SearchBloc(gh<_i938.GetSearchSuggestionsUseCase>()),
     );
@@ -638,11 +688,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i79.GetAccountUseCase>(
       () => _i79.GetAccountUseCase(gh<_i532.AccountRepository>()),
     );
-    gh.factory<_i672.CartBloc>(
-      () => _i672.CartBloc(
-        getCartUseCase: gh<_i242.GetCartUseCase>(),
-        prefManager: gh<_i818.PrefManager>(),
-        cartCountCubit: gh<_i884.CartCountCubit>(),
+    gh.factory<_i316.PromosOffersBloc>(
+      () => _i316.PromosOffersBloc(
+        gh<_i76.GetPromosOffersUseCase>(),
+        gh<_i982.ApplyPromoUseCase>(),
+        gh<_i935.RemovePromoUseCase>(),
       ),
     );
     gh.factory<_i975.SplashBloc>(

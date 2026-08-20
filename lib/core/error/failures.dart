@@ -27,9 +27,7 @@ class TimeoutFailure extends Failure {
 }
 
 class ConnectionFailure extends Failure {
-  const ConnectionFailure({
-    super.message = DefaultErrorMessages.connection,
-  });
+  const ConnectionFailure({super.message = DefaultErrorMessages.connection});
 }
 
 class RequestCancelledFailure extends Failure {

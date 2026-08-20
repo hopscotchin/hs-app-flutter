@@ -13,6 +13,7 @@ import 'package:hs_app_flutter/features/legal/presentation/legal_route.dart';
 import 'package:hs_app_flutter/features/pdp/presentation/pdp_fullscreen_gallery_route.dart';
 import 'package:hs_app_flutter/features/pdp/presentation/pdp_route.dart';
 import 'package:hs_app_flutter/features/plp/presentation/plp_route.dart';
+import 'package:hs_app_flutter/features/promos_offers/presentation/promo_details_route.dart';
 import 'package:hs_app_flutter/features/search/presentation/search_route.dart';
 import 'package:hs_app_flutter/features/splash/presentation/splash_route.dart';
 
@@ -42,6 +43,7 @@ class AppRouter {
       SplashRoute.getRoute(),
       shellRoute,
       ...AuthRoute.getRoutes(_rootNavigatorKey),
+      CartRoute.getRoute(_rootNavigatorKey),
       PlpRoute.getRoute(_rootNavigatorKey),
       SearchRoute.getRoute(_rootNavigatorKey),
       PdpRoute.getRoute(_rootNavigatorKey),
@@ -50,6 +52,7 @@ class AppRouter {
       LandingPageRoute.getRoute(_rootNavigatorKey),
       AddressRoute.getRoute(_rootNavigatorKey),
       LegalRoute.getRoute(_rootNavigatorKey),
+      PromoDetailsRoute.getRoute(_rootNavigatorKey),
       if (kDebugMode) AnalyticsDebugRoute.getRoute(_rootNavigatorKey),
     ],
     errorBuilder: (context, state) =>

@@ -112,6 +112,15 @@ class AppColors {
 
   static const Color lineIndicator = Color(0x33070707);
 
+  //Progress indicator
+  static const Color progressActive = Color(0xFF5B1E90);
+  static const Color progressTrack = Color(0xFFF2F2F2);
+
+  //Surfaces
+  static const Color surfaceBorder = Color(0xFFE5E7EB);
+  static const Color surfaceHighlight = Color(0xFFEEEAFF);
+  static const Color surfaceHighlightAlt = Color(0xFFEFF6FF);
+
   /// Light color scheme for Material 3
   static ColorScheme get lightColorScheme => const ColorScheme.light(
     primary: primary,

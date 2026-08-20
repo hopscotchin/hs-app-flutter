@@ -32,5 +32,14 @@ abstract class ProductEntity with _$ProductEntity {
     @Default([]) List<ColorVariantEntity> colorVariants,
     WishlistInfoEntity? wishlistInfo,
     @Default(false) bool isGift,
+
+    /// Server-supplied analytics metadata, carried as a plain map — the same
+    /// shape homepage and PLP tile blocks use. Source of ~15 of the ~20
+    /// properties on every PDP event.
+    ///
+    /// Deliberately not modelled: a typed class can only carry fields someone has
+    /// declared, so every new backend tracking dimension would need an app
+    /// release. Read it through `PdpTrackingMeta` in the analytics layer.
+    Map<String, dynamic>? trackingMeta,
   }) = _ProductEntity;
 }

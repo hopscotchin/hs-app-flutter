@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hs_app_flutter/components/atoms/auto_semantics.dart';
 import 'package:hs_app_flutter/components/atoms/badge_icon.dart';
 import 'package:hs_app_flutter/components/atoms/circular_icon_button.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
+import 'package:hs_app_flutter/core/navigation/action_url_handler.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:hs_app_flutter/core/theme/theme.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
@@ -47,8 +49,7 @@ class PlpSliverAppBar extends StatelessWidget {
         }
         final bannerUrl = data.banner?.imageUrl;
 
-        final hasBanner =
-            pageType == PageType.boutique && bannerUrl != null && bannerUrl.isNotEmpty;
+        final hasBanner = bannerUrl != null && bannerUrl.isNotEmpty;
 
         final pageTitle = (data.screenName?.isNotEmpty ?? false) ? data.screenName! : title;
 
@@ -82,7 +83,7 @@ class _StandardSliverAppBar extends StatelessWidget {
         icon: const CustomImage(path: ImageConstants.arrowBack, height: 16),
         onPressed: () => Navigator.of(context).pop(),
       ),
-      titleSpacing: 2,
+      titleSpacing: AppSpacing.xxxs,
       primary: true,
       title: AbsorbVerticalDrag(
         child: Column(
@@ -120,11 +121,16 @@ class _StandardSliverAppBar extends StatelessWidget {
       toolbarHeight: 60,
       actions: [
         AbsorbVerticalDrag(
-          child: BadgeIcon(
-            key: const ValueKey(PlpTestStrings.appBarSearchButton),
-            iconSize: 18,
-            icon: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
-            onTap: () => AppNavigator.goToSearch(context),
+          // Published to the platform tree so automation can reach Search, which is
+          // the only route to a specific product: the app has no deep link.
+          child: AutoSemantics(
+            id: PlpTestStrings.appBarSearchButton,
+            child: BadgeIcon(
+              key: const ValueKey(PlpTestStrings.appBarSearchButton),
+              iconSize: 18,
+              icon: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
+              onTap: () => AppNavigator.goToSearch(context),
+            ),
           ),
         ),
         AbsorbVerticalDrag(
@@ -137,7 +143,7 @@ class _StandardSliverAppBar extends StatelessWidget {
             iconColor: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(width: 3),
+        AppSpacing.horizontalGapXxs,
         AbsorbVerticalDrag(
           child: BadgeIcon(
             key: const ValueKey(PlpTestStrings.appBarCartButton),
@@ -149,7 +155,7 @@ class _StandardSliverAppBar extends StatelessWidget {
           ),
         ),
       ],
-      actionsPadding: const EdgeInsets.only(right: 12),
+      actionsPadding: const EdgeInsets.only(right: AppSpacing.sm),
     );
   }
 }
@@ -273,12 +279,22 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
         fit: StackFit.expand,
         children: [
           /// IMAGE
+          ///
+          /// Tappable only when the backend supplies an `actionUri` (e.g. a
+          /// promo banner deeplinking to its offer-terms page). `onTap` alone
+          /// never claims the vertical drag gesture, so the header still
+          /// scrolls and collapses normally.
           Positioned.fill(
-            child: RepaintBoundary(
-              child: CustomImage(
-                key: const ValueKey(PlpTestStrings.headerImage),
-                path: banner?.imageUrl ?? '',
-                fit: BoxFit.cover,
+            child: GestureDetector(
+              onTap: banner.hasAction
+                  ? () => ActionUrlHandler.navigate(context, banner!.actionUri)
+                  : null,
+              child: RepaintBoundary(
+                child: CustomImage(
+                  key: const ValueKey(PlpTestStrings.headerImage),
+                  path: banner?.imageUrl ?? '',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -360,14 +376,14 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
             child: AbsorbVerticalDrag(
               child: Row(
                 children: [
-                  const SizedBox(width: 8),
+                  AppSpacing.horizontalGapXs,
                   CircleIconButton(
                     key: const ValueKey(PlpTestStrings.appBarBackButton),
                     onTap: () => Navigator.of(context).pop(),
                     child: const CustomImage(path: ImageConstants.arrowBack, height: 18),
                   ),
 
-                  const SizedBox(width: AppSpacing.xs),
+                  AppSpacing.horizontalGapXs,
 
                   // Collapsed title keeps its OWN opacity, independent of the
                   // header collapse — fades in as the large title fades out.
@@ -384,13 +400,18 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                     ),
                   ),
 
-                  CircleIconButton(
-                    key: const ValueKey(PlpTestStrings.appBarSearchButton),
-                    onTap: () => AppNavigator.goToSearch(context),
-                    child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
+                  // The boutique app bar's equivalent. Same id: only one of the two
+                  // app bars renders at a time, so a flow need not branch.
+                  AutoSemantics(
+                    id: PlpTestStrings.appBarSearchButton,
+                    child: CircleIconButton(
+                      key: const ValueKey(PlpTestStrings.appBarSearchButton),
+                      onTap: () => AppNavigator.goToSearch(context),
+                      child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
+                    ),
                   ),
 
-                  const SizedBox(width: 8),
+                  AppSpacing.horizontalGapXs,
 
                   CircleIconButton(
                     key: const ValueKey(PlpTestStrings.appBarWishlistButton),
@@ -398,7 +419,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                     child: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
                   ),
 
-                  const SizedBox(width: 8),
+                  AppSpacing.horizontalGapXs,
 
                   CircleIconButton(
                     key: const ValueKey(PlpTestStrings.appBarCartButton),
@@ -412,7 +433,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                       iconColor: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  AppSpacing.horizontalGapSm,
                 ],
               ),
             ),

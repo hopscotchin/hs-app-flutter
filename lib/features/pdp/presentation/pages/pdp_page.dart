@@ -16,8 +16,7 @@ class PdpPage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: BlocListener<PdpBloc, PdpState>(
         listenWhen: (prev, curr) =>
-            prev.snackBarTick != curr.snackBarTick &&
-            curr.snackBarMessage != null,
+            prev.snackBarTick != curr.snackBarTick && curr.snackBarMessage != null,
         listener: (context, state) {
           PdpSnackbar.show(context, state.snackBarMessage!);
         },

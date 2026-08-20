@@ -30,11 +30,9 @@ class WebViewRoute {
     final loggedIn = await AppNavigator.showMobileLoginFlow(context);
     if (!loggedIn || !context.mounted) return null;
 
-    final result =
-        await sl<GenerateLoginTicketUseCase>()(const GenerateLoginTicketParams());
-    return result.fold(
-      (_) => null,
-      (ticket) => ticket.isEmpty ? null : ticket,
+    final result = await sl<GenerateLoginTicketUseCase>()(
+      const GenerateLoginTicketParams(),
     );
+    return result.fold((_) => null, (ticket) => ticket.isEmpty ? null : ticket);
   }
 }

@@ -8,7 +8,7 @@ import '../core/theme/colors.dart';
 import '../core/theme/typography/text_style_extensions.dart';
 import '../core/theme/typography/typography_v1.dart';
 
-enum AppBottomSheetButtonStyle { outlined, filled }
+enum AppBottomSheetButtonStyle { outlined, filled, tertiary }
 
 class AppBottomSheetAction {
   const AppBottomSheetAction({
@@ -132,8 +132,13 @@ class _SheetButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFilled = action.style == AppBottomSheetButtonStyle.filled;
+    final isTertiary = action.style == AppBottomSheetButtonStyle.tertiary;
     final textStyle = AppTypographyV1.bodyLarge.bold.copyWith(
-      color: isFilled ? Colors.white : AppColors.primary,
+      color: isFilled
+          ? Colors.white
+          : isTertiary
+          ? AppColors.brandDefault
+          : AppColors.primary,
     );
     final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusXs));
     const padding = EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.sm);
@@ -145,6 +150,19 @@ class _SheetButton extends StatelessWidget {
         style: TextButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
+          shape: shape,
+          padding: padding,
+        ),
+        child: Text(action.label, style: textStyle),
+      );
+    }
+    if (isTertiary) {
+      return TextButton(
+        key: action.buttonKey,
+        onPressed: action.onPressed,
+        style: TextButton.styleFrom(
+          backgroundColor: AppColors.brandTertiary,
+          foregroundColor: AppColors.brandDefault,
           shape: shape,
           padding: padding,
         ),

@@ -15,4 +15,5 @@ SkuModel _$SkuModelFromJson(Map<String, dynamic> json) => SkuModel(
   eddInfo: _eddInfoFromJson(json['eddInfo']),
   info: _warningFromJson(json['info']),
   skuAttributes: json['skuAttributes'] as Map<String, dynamic>?,
+  trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
 );

@@ -28,6 +28,9 @@ class PageCarouselWidget extends StatefulWidget {
     required this.carouselData,
     this.margins,
     this.keyPrefix,
+    this.onTileTapLog,
+    this.onWishlistLog,
+    this.onScrollLog,
   });
 
   final PageCarouselData carouselData;
@@ -35,6 +38,35 @@ class PageCarouselWidget extends StatefulWidget {
 
   /// Component-level automation key prefix, e.g. `hp_pc_1`. Null → unkeyed.
   final String? keyPrefix;
+
+  /// Overrides the tile-tap analytics. Default (null) logs the homepage
+  /// `tile_clicked` / `lp_tile_clicked` and writes attribution.
+  ///
+  /// **Hosts outside Discover/LP must supply this.** PDP's recently-viewed rail
+  /// sends `recently_viewed_products_clicked` and writes no attribution —
+  /// matching Android, where the shared `CarouselView` has no analytics of its
+  /// own and the host injects the handler
+  /// (`RecentlyViewedProductsView.kt:69-81`).
+  final Future<void> Function(PageCarouselTile tile)? onTileTapLog;
+
+  /// Overrides the wishlist analytics, `added` distinguishing the two events.
+  ///
+  /// Separate from [onTileTapLog] because the two fire at different moments: a tap
+  /// logs immediately, while wishlist reports only once the server confirms — so a
+  /// failed request and a logged-out tap emit nothing.
+  ///
+  /// Default (null) is **silent**, not a homepage event. Android's home has no
+  /// wishlist control at all (`ProductCarouselViewHolder.kt:21` hides it), so there
+  /// is no default payload to match; a host that wants the event supplies this.
+  final void Function(PageCarouselTile tile, {required bool added})?
+      onWishlistLog;
+
+  /// Overrides the horizontal-scroll analytics. Default (null) buffers a
+  /// homepage `carousel_scrolled`.
+  ///
+  /// [target] is the index the carousel settled on. PDP records it and reports
+  /// once on exit rather than per scroll, so it passes a recorder here.
+  final void Function(int target)? onScrollLog;
 
   @override
   State<PageCarouselWidget> createState() => _PageCarouselWidgetState();
@@ -206,6 +238,11 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
       ...?widget.carouselData.trackingMeta,
       AnalyticsProperties.scrolledTiles: target.toString(),
     };
+    final override = widget.onScrollLog;
+    if (override != null) {
+      override(target);
+      return;
+    }
     sl<HomeTrackAnalyticManager>()
         .logCarouselScrolled(identityHashCode(widget.carouselData), meta);
   }
@@ -504,8 +541,12 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
     final product = tile.product;
     final tapUri = tile.actionUri ?? product?.actionUri;
 
-    Future<void> logClick() => sl<HomeTrackAnalyticManager>()
-        .onPageCarouselTileTapped(widget.carouselData, tile);
+    Future<void> logClick() =>
+        widget.onTileTapLog?.call(tile) ??
+        sl<HomeTrackAnalyticManager>().onPageCarouselTileTapped(
+          widget.carouselData,
+          tile,
+        );
 
     if (product != null) {
       return SizedBox(
@@ -533,6 +574,8 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
               context,
               productId: product.id.toString(),
               price: WishlistActions.priceToInt(product.price?.sellingPrice),
+              onAdded: () => widget.onWishlistLog?.call(tile, added: true),
+              onRemoved: () => widget.onWishlistLog?.call(tile, added: false),
               loggedOutMessageBars: const [
                 MessageBarEntity(
                   text: LoginRedirects.redirectAddToWishlist,

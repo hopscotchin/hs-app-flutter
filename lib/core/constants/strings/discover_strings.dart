@@ -23,8 +23,7 @@ class DiscoverStrings {
   // ─── App bar greeting ─────────────────────────────────────────────────────
   static const String greetingFallback = 'there';
 
-  static String hiGreeting(String? name) =>
-      'Hi ${name ?? greetingFallback} !';
+  static String hiGreeting(String? name) => 'Hi ${name ?? greetingFallback} !';
 
   static const String backButtonHit = 'Press Back again to exit';
 }

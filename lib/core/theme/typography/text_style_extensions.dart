@@ -40,7 +40,11 @@ extension TextStyleColorExtensions on TextStyle {
   TextStyle linkColor() => copyWith(color: AppColors.linkDefault);
 
   TextStyle textSecondary() => copyWith(color: AppColors.neutralGrey5);
-  TextStyle blackWithOpacity() => copyWith(color: AppColors.neutralBlack.withValues(alpha: 50));
+  TextStyle blackWithOpacity() =>
+      copyWith(color: AppColors.neutralBlack.withValues(alpha: 50));
+
+  //feedback
+  TextStyle feedback() => copyWith(color: AppColors.info);
 }
 
 /// ─────────────────────────────────────────────
@@ -48,7 +52,10 @@ extension TextStyleColorExtensions on TextStyle {
 /// ─────────────────────────────────────────────
 extension TextStyleBehaviorExtensions on TextStyle {
   /// Link behavior (no color here)
-  TextStyle link() => copyWith(decoration: TextDecoration.underline, color: AppColors.linkDefault);
+  TextStyle link() => copyWith(
+    decoration: TextDecoration.underline,
+    color: AppColors.linkDefault,
+  );
 
   /// Strike-through (e.g. old price)
   TextStyle strikeThrough() => copyWith(decoration: TextDecoration.lineThrough);

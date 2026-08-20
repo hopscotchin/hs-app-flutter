@@ -168,6 +168,16 @@ class FromScreens {
 class FromPage {
   FromPage._();
 
+  /// PLP → PDP. A literal on Android rather than a constant
+  /// (`ProductListPageActivity.java:794`), so this is the value it emits.
+  static const String plp = 'plp';
+
+  /// Search results → PDP. Android sends the **localised** string resource
+  /// (`ProductListPageActivity.java:796` → `R.string.search`), whose en value is
+  /// `"Search"` — capitalised, unlike every sibling here. Matching the literal is
+  /// what keeps the metric aligned; do not "fix" the casing.
+  static const String search = 'Search';
+
   static const String doorways = 'doorways';
   static const String cart = 'cart';
   static const String recommendation = 'recommendation';
@@ -187,6 +197,21 @@ class FromLocations {
   static const String addToCartButton = 'Add to cart button';
   static const String reminderButton = 'Reminder button';
   static const String wishlistButton = 'Wishlist button';
+
+  /// PDP's recommended rail. All three PDP wishlist surfaces report
+  /// `from_screen: "Product details"`, so `from_location` is the only thing
+  /// separating them.
+  ///
+  /// Deliberately not `FromScreens.similarProducts` — that names a whole screen,
+  /// and reusing it would make a rail tap indistinguishable from one there.
+  /// "Section" rather than "carousel" because the reco rail renders as rows, so
+  /// the name survives a layout change.
+  ///
+  /// ⚠️ New value — Android has no rail wishlist, so there is nothing to match.
+  static const String recoSection = 'Reco section';
+
+  /// PDP's recently-viewed rail. See [recoSection].
+  static const String recentlyViewedSection = 'Recently viewed section';
   static const String cartIcon = 'Cart icon';
   static const String likeButton = 'Like button';
   static const String signInButton = 'Sign in button';

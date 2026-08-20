@@ -18,6 +18,15 @@ abstract class PdpState with _$PdpState {
     @Default(0) int snackBarTick,
     String? snackBarMessage,
     @Default(false) bool snackBarIsError,
+    // Bumped only when an add-to-bag call comes back successful, so the PDP can
+    // play the fly-to-cart animation on a server-confirmed add and never on a
+    // failed one. A tick (not a bool) so consecutive adds each fire.
+    @Default(0) int addToBagSuccessTick,
+    // The buy-now equivalent: bumped only on a server-confirmed buy-now. It is a
+    // separate channel because the PDP does more with it — the same fly-to-cart
+    // animation, and then a hand-off to the cart in buy-now mode (Android's
+    // `AddToBagAnimationHandler` end-listener calling `goToCart(fromBuyNow)`).
+    @Default(0) int buyNowSuccessTick,
     String? errorMessage,
     RecommendationsEntity? recommendations,
     @Default(1) int recommendationsPage,

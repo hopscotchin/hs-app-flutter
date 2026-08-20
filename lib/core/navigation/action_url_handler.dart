@@ -177,6 +177,22 @@ class ActionUrlHandler {
             ? LandingPageDestination(pageName: id)
             : const HomeDestination();
 
+      // ── Promo details ──
+      // Two accepted spellings, because two backend surfaces emit them:
+      //   • `promoTermsLink` on an offer card → hopscotch://offers?id=<promoId>
+      //   • the PLP promo banner              → hopscotch://promo-details/<promoId>
+      // The id may ride in `?id=` or as the first path segment, so both are
+      // tried before giving up.
+      case DeeplinkHost.offers ||
+          DeeplinkHost.offersFromPdp ||
+          _Route.promoDetails ||
+          _Route.promoDetailsNoHyphen:
+        final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+        final promoId = _id(id.isNotEmpty ? id : segments.firstOrNull);
+        return promoId > 0
+            ? PromoDetailsDestination(promoId: promoId)
+            : const HomeDestination();
+
       // ── TODO: navigate to dedicated pages when built ──
       case DeeplinkHost.bestsellersPage ||
           DeeplinkHost.newPage ||
@@ -184,8 +200,6 @@ class ActionUrlHandler {
           DeeplinkHost.endingSoon ||
           DeeplinkHost.upcomingPage ||
           DeeplinkHost.wishlist ||
-          DeeplinkHost.offers ||
-          DeeplinkHost.offersFromPdp ||
           DeeplinkHost.productRatings ||
           DeeplinkHost.productRating ||
           DeeplinkHost.legal ||
@@ -234,6 +248,20 @@ class ActionUrlHandler {
             ? _id(segments[1])
             : _id(params['id'] ?? params['salePlanId']);
         return PlpDestination(pageType: PageType.boutique, plpId: id);
+
+      // ── Promo details: /promo-details/<promoId> ──
+      // Mirrors the app-link case so a web URL and its deeplink twin land on
+      // the same page.
+      // Deliberately does NOT claim bare `/offers` — that stays in the
+      // TODO fallback below, since there is no offers *listing* page (offers
+      // are a bottom sheet). Only the id-bearing detail path is routed here.
+      case _Route.promoDetails || _Route.promoDetailsNoHyphen:
+        final promoId = segments.length >= 2
+            ? _id(segments[1])
+            : _id(params['id']);
+        return promoId > 0
+            ? PromoDetailsDestination(promoId: promoId)
+            : const HomeDestination();
 
       // ── PDP: /product/<pid> ──
       case _Route.product:
@@ -351,4 +379,14 @@ abstract final class _Route {
   static const cart = 'cart';
   static const categories = 'categories';
   static const account = 'account';
+
+  /// Offer-terms page. Matches the app's own route path
+  /// (`/promo-details/:promoId`), so an in-app path, a web URL and a deeplink
+  /// all name the destination identically.
+  ///
+  /// Lowercase on purpose: `Uri.host` is normalised to lowercase by Dart and
+  /// web segments are lowercased before matching, so a camelCase spelling
+  /// could never match either parser.
+  static const promoDetails = 'promo-details';
+  static const promoDetailsNoHyphen = 'promodetails';
 }

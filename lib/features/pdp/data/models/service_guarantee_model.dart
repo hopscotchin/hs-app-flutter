@@ -18,6 +18,5 @@ class ServiceGuaranteeModel {
 }
 
 extension ServiceGuaranteeModelX on ServiceGuaranteeModel {
-  ServiceGuaranteeEntity toEntity() =>
-      ServiceGuaranteeEntity(icon: icon, label: label);
+  ServiceGuaranteeEntity toEntity() => ServiceGuaranteeEntity(icon: icon, label: label);
 }

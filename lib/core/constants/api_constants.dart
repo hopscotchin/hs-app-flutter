@@ -43,12 +43,15 @@ class ApiConstants {
   static const String momentsUpload = '/moments/photo';
 
   // Cart
-  static const String shoppingCart = '/shopping-cart/v5';
+  static const String shoppingCart = '/shopping-cart/v6';
   static const String addToCart = '/shopping-cart/add-product/v2';
   static const String removeFromCart = '/shopping-cart/v2';
   static const String updateCartItem = '/shopping-cart/v2';
   static const String mergeCart = '/shopping-cart/merge';
-  static const String promoCode = '/promotion/v2';
+  static const String promosOffers = '/v2/promotion/cart/offer-list';
+  static const String promoOfferTerms = '/v2/promotion/offerterms/{promoId}';
+  static const String promoApply = '/v3/promotion/apply';
+  static const String promoRemove = '/v3/promotion/remove';
   static const String buyNow = '/shopping-cart/instant-checkout';
   static const String orderNow = '/checkout/buy-now/v4';
 
@@ -84,8 +87,10 @@ class ApiConstants {
   static const String createAddressCart = '/delivery/v3/saveAddress';
   static const String updateAddress = '/customer/v3/updateAddress/{addressId}';
   static const String deleteAddress = '/customer/deleteAddress/{addressId}';
-  static const String checkPincode = '/delivery/pincode/v3/serviceability/{pincode}';
-  static const String checkPincodeExchange = '/delivery/pincode/v3/availability/{pincode}';
+  static const String checkPincode =
+      '/delivery/pincode/v3/serviceability/{pincode}';
+  static const String checkPincodeExchange =
+      '/delivery/pincode/v3/availability/{pincode}';
   static const String selectAddress = '/delivery/selectAddress/{addressId}';
 
   // Pincode (delivery serviceability bottom sheet)
@@ -110,7 +115,9 @@ class ApiConstants {
   static const String retryPlaceOrder = '/recovery/place-order';
   static const String initPayment = '/v2/init-payment';
   static const String paymentStatus = '/v1'; // append /{orderId}/payment-status
-  static const String paymentRetryDetail = '/re-attempt/detail'; // append /{orderId}
+  static const String paymentRetryDetail =
+      '/re-attempt/detail'; // append /{orderId}
   static const String markOrderFail = '/checkout/order-fail';
-  static const String orderConfirmation = '/v2/checkout'; // append /{orderId}/confirmation
+  static const String orderConfirmation =
+      '/v2/checkout'; // append /{orderId}/confirmation
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../components/atoms/auto_semantics.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/pdp_strings.dart';
 import '../../../../core/theme/colors.dart';
@@ -77,27 +78,34 @@ class _PdpSizeSelectorState extends State<PdpSizeSelector>
           if (widget.hasSizeChart)
             Align(
               alignment: Alignment.centerRight,
-              child: GestureDetector(
-                key: const ValueKey(PdpTestStrings.sizeChartButton),
-                onTap: widget.onSizeChartTap,
-                behavior: HitTestBehavior.opaque,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      PdpStrings.sizeChart,
-                      style: AppTypographyV1.bodyRegular.copyWith(
-                        color: _kTitleNormal,
-                        fontWeight: FontWeight.w400,
+              // Annotated, not a container: the id has to sit on the node that
+              // carries the tap. Without this the only a11y node here is the
+              // whole size section, whose centre is the gap between two chips —
+              // so a driver "taps Size Chart" and silently hits nothing.
+              child: AutoSemantics(
+                id: PdpTestStrings.sizeChartButton,
+                child: GestureDetector(
+                  key: const ValueKey(PdpTestStrings.sizeChartButton),
+                  onTap: widget.onSizeChartTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        PdpStrings.sizeChart,
+                        style: AppTypographyV1.bodyRegular.copyWith(
+                          color: _kTitleNormal,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
-                    ),
-                    AppSpacing.horizontalGapXs,
-                    const Icon(
-                      Icons.chevron_right,
-                      size: AppSpacing.iconXs,
-                      color: _kTitleNormal,
-                    ),
-                  ],
+                      AppSpacing.horizontalGapXs,
+                      const Icon(
+                        Icons.chevron_right,
+                        size: AppSpacing.iconXs,
+                        color: _kTitleNormal,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -158,78 +166,86 @@ class PdpSizeChip extends StatelessWidget {
         ? (isSelected ? const Color(0xFF070707) : _kTitleNormal)
         : _kDisabledColor;
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      // IntrinsicWidth so the chip and the stock label under it share one
-      // width driven by whichever is wider — without it the Column sits in
-      // the row's unbounded horizontal space and the label would lay out at
-      // its full text width, unclipped and detached from the box above it.
-      child: IntrinsicWidth(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Chip box
-            Container(
-              constraints: const BoxConstraints(
-                minWidth: _kChipMinWidth,
-                maxWidth: _kChipMaxWidth,
-                minHeight: _kChipHeight,
-                maxHeight: _kChipHeight,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: _kChipHPadding),
-              decoration: BoxDecoration(
-                color: isSelected ? _kSelectedBg : _kNormalBg,
-                // Always bordered, transparent when unselected. A border is
-                // inset padding, so a border that only exists on the selected
-                // chip made it 2px wider than the others — invisible when the
-                // width was fixed at 89, but now that the chip sizes to its
-                // label it would nudge the whole row sideways on every tap.
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.brandDefault
-                      : Colors.transparent,
-                  width: 1,
+    // Wrapped here rather than at the call sites so both the inline selector
+    // and the size bottom sheet get the identifier from whichever key they
+    // passed (`pdp_size_chip_<i>` / `pdp_size_sheet_chip_<i>`).
+    return AutoSemantics.fromKey(
+      key,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        // IntrinsicWidth so the chip and the stock label under it share one
+        // width driven by whichever is wider — without it the Column sits in
+        // the row's unbounded horizontal space and the label would lay out at
+        // its full text width, unclipped and detached from the box above it.
+        child: IntrinsicWidth(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Chip box
+              Container(
+                constraints: const BoxConstraints(
+                  minWidth: _kChipMinWidth,
+                  maxWidth: _kChipMaxWidth,
+                  minHeight: _kChipHeight,
+                  maxHeight: _kChipHeight,
                 ),
-                borderRadius: AppSpacing.borderRadiusXs,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Title (e.g. "3-6Y") — 13px w500
-                  Text(
-                    sku.title ?? '',
-                    style: AppTypographyV1.bodySmall.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: titleColor,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: _kChipHPadding,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected ? _kSelectedBg : _kNormalBg,
+                  // Always bordered, transparent when unselected. A border is
+                  // inset padding, so a border that only exists on the selected
+                  // chip made it 2px wider than the others — invisible when the
+                  // width was fixed at 89, but now that the chip sizes to its
+                  // label it would nudge the whole row sideways on every tap.
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.brandDefault
+                        : Colors.transparent,
+                    width: 1,
                   ),
-                  if (sku.subTitle != null) ...[
-                    const SizedBox(height: 4),
-                    // Subtitle (e.g. "Waist : 32cm") — 8px w500
+                  borderRadius: AppSpacing.borderRadiusXs,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Title (e.g. "3-6Y") — 13px w500
                     Text(
-                      sku.subTitle!,
-                      style: AppTypographyV1.caption.copyWith(
+                      sku.title ?? '',
+                      style: AppTypographyV1.bodySmall.copyWith(
                         fontWeight: FontWeight.w500,
-                        color: subtitleColor,
+                        color: titleColor,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                     ),
+                    if (sku.subTitle != null) ...[
+                      const SizedBox(height: 4),
+                      // Subtitle (e.g. "Waist : 32cm") — 8px w500
+                      Text(
+                        sku.subTitle!,
+                        style: AppTypographyV1.caption.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: subtitleColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            AppSpacing.verticalGapXs,
+              AppSpacing.verticalGapXs,
 
-            // Stock label below chip
-            _buildStockLabel(),
-          ],
+              // Stock label below chip
+              _buildStockLabel(),
+            ],
+          ),
         ),
       ),
     );

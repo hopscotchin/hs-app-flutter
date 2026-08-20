@@ -10,7 +10,9 @@ import 'package:hs_app_flutter/features/plp/domain/entities/page_type.dart';
 import '../../features/account/presentation/bloc/account_bloc.dart';
 import '../../features/auth/domain/entities/otp_config/otp_config_entity.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/cart/presentation/bloc/cart_bloc.dart';
 import '../../features/cart/presentation/cubit/cart_actions_cubit.dart';
+import '../../features/pdp/domain/entities/pdp_entry_args.dart';
 import '../../features/wishlist/presentation/cubit/wishlist_cubit.dart';
 import '../constants/route_names.dart';
 import '../constants/strings/auth_strings.dart';
@@ -29,7 +31,15 @@ abstract final class AppNavigator {
 
   static void goToAccount(BuildContext context) => context.go(RouteNames.account);
 
-  static void goToCart(BuildContext context) => context.pushNamed(RouteNames.cartName);
+  /// Opens the bag. [fromBuyNow] puts the cart in buy-now mode: it proceeds to
+  /// checkout on its own as soon as the cart loads, instead of waiting for the
+  /// checkout button — the Flutter equivalent of Android's
+  /// `Util.createBuyNowShoppingCartIntent` passing `IS_FROM_BUYNOW`.
+  static void goToCart(BuildContext context, {bool fromBuyNow = false}) =>
+      context.pushNamed(
+        RouteNames.cartName,
+        queryParameters: fromBuyNow ? const {'fromBuyNow': 'true'} : const {},
+      );
 
   /// Pops the current route / dismisses the top-most sheet or dialog.
   static void goBack(BuildContext context) => context.pop();
@@ -107,14 +117,16 @@ abstract final class AppNavigator {
   ///
   /// Two flavours:
   ///  - "resume-in-place" types ([LoginRedirects.typeAddToWishlist] /
-  ///    [LoginRedirects.typeAddToCart]) just pop the auth stack — the originating
-  ///    PLP/PDP/discover page is still mounted underneath — then replay the action
-  ///    the user attempted while logged out, so the UI updates on the same page.
+  ///    [LoginRedirects.typeAddToCart] / [LoginRedirects.typePromo]) just pop the
+  ///    auth stack — the originating PLP/PDP/discover/cart page is still mounted
+  ///    underneath — then replay the action the user attempted while logged out,
+  ///    so the UI updates on the same page.
   ///  - destination types (orders, addresses, …) navigate to a fixed screen.
   static void redirectAfterLogin(BuildContext context, String? redirectType) {
     // Capture singletons before popping — the popped context becomes defunct.
     final wishlistCubit = context.read<WishlistCubit>();
     final cartCubit = context.read<CartActionsCubit>();
+    final cartBloc = context.read<CartBloc>();
 
     // Local state was captured while logged out; re-seed with user-specific data.
     // (Both leave any pending action intact so resume below still fires.)
@@ -125,10 +137,20 @@ abstract final class AppNavigator {
 
     switch (redirectType) {
       case LoginRedirects.typeAddToWishlist:
+        // Two different stores can hold a pending wishlist add: the global
+        // WishlistCubit (a PLP/PDP heart tap) and CartBloc (a cart line's
+        // "Move To Wishlist", which is a different endpoint because it also
+        // removes the line). Only one is ever populated, and both are no-ops
+        // when empty, so resuming both keeps one redirect type covering both
+        // surfaces.
         wishlistCubit.resumePending();
+        cartBloc.resumePendingMoveToWishlist();
         return;
       case LoginRedirects.typeAddToCart:
         cartCubit.resumePending();
+        return;
+      case LoginRedirects.typePromo:
+        cartBloc.resumePendingPromo();
         return;
     }
 
@@ -174,8 +196,12 @@ abstract final class AppNavigator {
     context.pushNamed('plp', queryParameters: queryParams);
   }
 
-  static void goToPdp(BuildContext context, String productId) {
-    context.pushNamed('pdp', pathParameters: {'productId': productId});
+  /// [args] carries the analytics entry context (`from_screen`, `position`,
+  /// `source_tile_type`, …) — the Flutter equivalent of the Intent bundle
+  /// Android reads in `PDPAnalytics.setIntentData`. Omit it for a deeplink-style
+  /// open, which is what Android does too when nothing is passed.
+  static Future<void> goToPdp(BuildContext context, String productId, {PdpEntryArgs? args}) async {
+    await context.pushNamed('pdp', pathParameters: {'productId': productId}, extra: args);
   }
 
   /// Open the fullscreen product image gallery starting at [initialIndex].
@@ -204,17 +230,16 @@ abstract final class AppNavigator {
   }) {
     context.pushNamed(
       'webview',
-      extra: <String, dynamic>{
-        'url': url,
-        'title': title,
-        'fromNotification': fromNotification,
-      },
+      extra: <String, dynamic>{'url': url, 'title': title, 'fromNotification': fromNotification},
     );
   }
 
   static void goToOrders(BuildContext context) => context.pushNamed('orders');
 
   static void goToLegal(BuildContext context) => context.pushNamed('legal');
+
+  static void goToPromoDetails(BuildContext context, int promoId) =>
+      context.pushNamed('promoDetails', pathParameters: {'promoId': promoId.toString()});
 
   static void goToSearch(BuildContext context) => context.pushNamed('search');
   static void goToAddresses(

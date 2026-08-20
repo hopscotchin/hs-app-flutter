@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
@@ -19,6 +20,7 @@ class MoveToWishlistUseCase
       params.sku,
       productId: params.productId,
       price: params.price,
+      cancelToken: params.cancelToken,
     );
   }
 }
@@ -27,9 +29,16 @@ class MoveToWishlistParams extends Equatable {
   final String sku;
   final int? productId;
   final int? price;
+  final CancelToken? cancelToken;
 
-  const MoveToWishlistParams({required this.sku, this.productId, this.price});
+  const MoveToWishlistParams({
+    required this.sku,
+    this.productId,
+    this.price,
+    this.cancelToken,
+  });
 
   @override
   List<Object?> get props => [sku, productId, price];
+  // cancelToken intentionally excluded — not a semantic field
 }

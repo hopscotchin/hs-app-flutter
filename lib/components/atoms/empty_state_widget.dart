@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
+import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 
 import '../../core/theme/colors.dart';
@@ -19,6 +20,7 @@ enum EmptyStateType {
   orders,
   plp,
   discover,
+  promosOffers,
   generic,
   addAddresss,
   kidsProfile,
@@ -91,6 +93,13 @@ const _configs = <EmptyStateType, _EmptyStateConfig>{
     subtitle: 'Looks like there\'s nothing to show yet.',
     iconSize: (64, 40),
     buttonLabel: 'Try Again',
+  ),
+  EmptyStateType.promosOffers: _EmptyStateConfig(
+    icon: ImageConstants.noOffersIcon,
+    title: 'Oops! No Offers Right Now',
+    subtitle: 'Hop back later for exciting deals!',
+    buttonLabel: 'Keep Shopping',
+    iconSize: (81, 40),
   ),
   EmptyStateType.generic: _EmptyStateConfig(
     icon: '',

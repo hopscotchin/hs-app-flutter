@@ -818,7 +818,14 @@ mixin _$PdpState {
 // on every message so the UI re-fires even when the same message repeats —
 // mirrors WishlistState's feedbackTick pattern. (Pincode-verify failures use
 // the pincodeVerify* channel below so the sheet can show them inline.)
- int get snackBarTick; String? get snackBarMessage; bool get snackBarIsError; String? get errorMessage; RecommendationsEntity? get recommendations; int get recommendationsPage; bool get isLoadingMoreRecommendations; bool get isLoadingSizeChart; SizeChartEntity? get sizeChart; String? get sizeChartError; String? get verifiedPincode;// PDP pincode-verify outcome, consumed by the pincode sheet so it can stay
+ int get snackBarTick; String? get snackBarMessage; bool get snackBarIsError;// Bumped only when an add-to-bag call comes back successful, so the PDP can
+// play the fly-to-cart animation on a server-confirmed add and never on a
+// failed one. A tick (not a bool) so consecutive adds each fire.
+ int get addToBagSuccessTick;// The buy-now equivalent: bumped only on a server-confirmed buy-now. It is a
+// separate channel because the PDP does more with it — the same fly-to-cart
+// animation, and then a hand-off to the cart in buy-now mode (Android's
+// `AddToBagAnimationHandler` end-listener calling `goToCart(fromBuyNow)`).
+ int get buyNowSuccessTick; String? get errorMessage; RecommendationsEntity? get recommendations; int get recommendationsPage; bool get isLoadingMoreRecommendations; bool get isLoadingSizeChart; SizeChartEntity? get sizeChart; String? get sizeChartError; String? get verifiedPincode;// PDP pincode-verify outcome, consumed by the pincode sheet so it can stay
 // open and surface the failure inline. The tick bumps on every completion so
 // the awaiting caller resolves even when the same result repeats; the error
 // string is null on success and a plain message on failure.
@@ -833,16 +840,16 @@ $PdpStateCopyWith<PdpState> get copyWith => _$PdpStateCopyWithImpl<PdpState>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PdpState&&(identical(other.status, status) || other.status == status)&&(identical(other.productDetail, productDetail) || other.productDetail == productDetail)&&(identical(other.selectedSku, selectedSku) || other.selectedSku == selectedSku)&&(identical(other.expandedDetailTab, expandedDetailTab) || other.expandedDetailTab == expandedDetailTab)&&(identical(other.isAddingToBag, isAddingToBag) || other.isAddingToBag == isAddingToBag)&&(identical(other.isBuyingNow, isBuyingNow) || other.isBuyingNow == isBuyingNow)&&(identical(other.snackBarTick, snackBarTick) || other.snackBarTick == snackBarTick)&&(identical(other.snackBarMessage, snackBarMessage) || other.snackBarMessage == snackBarMessage)&&(identical(other.snackBarIsError, snackBarIsError) || other.snackBarIsError == snackBarIsError)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.recommendations, recommendations) || other.recommendations == recommendations)&&(identical(other.recommendationsPage, recommendationsPage) || other.recommendationsPage == recommendationsPage)&&(identical(other.isLoadingMoreRecommendations, isLoadingMoreRecommendations) || other.isLoadingMoreRecommendations == isLoadingMoreRecommendations)&&(identical(other.isLoadingSizeChart, isLoadingSizeChart) || other.isLoadingSizeChart == isLoadingSizeChart)&&(identical(other.sizeChart, sizeChart) || other.sizeChart == sizeChart)&&(identical(other.sizeChartError, sizeChartError) || other.sizeChartError == sizeChartError)&&(identical(other.verifiedPincode, verifiedPincode) || other.verifiedPincode == verifiedPincode)&&(identical(other.pincodeVerifyTick, pincodeVerifyTick) || other.pincodeVerifyTick == pincodeVerifyTick)&&(identical(other.pincodeVerifyError, pincodeVerifyError) || other.pincodeVerifyError == pincodeVerifyError));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PdpState&&(identical(other.status, status) || other.status == status)&&(identical(other.productDetail, productDetail) || other.productDetail == productDetail)&&(identical(other.selectedSku, selectedSku) || other.selectedSku == selectedSku)&&(identical(other.expandedDetailTab, expandedDetailTab) || other.expandedDetailTab == expandedDetailTab)&&(identical(other.isAddingToBag, isAddingToBag) || other.isAddingToBag == isAddingToBag)&&(identical(other.isBuyingNow, isBuyingNow) || other.isBuyingNow == isBuyingNow)&&(identical(other.snackBarTick, snackBarTick) || other.snackBarTick == snackBarTick)&&(identical(other.snackBarMessage, snackBarMessage) || other.snackBarMessage == snackBarMessage)&&(identical(other.snackBarIsError, snackBarIsError) || other.snackBarIsError == snackBarIsError)&&(identical(other.addToBagSuccessTick, addToBagSuccessTick) || other.addToBagSuccessTick == addToBagSuccessTick)&&(identical(other.buyNowSuccessTick, buyNowSuccessTick) || other.buyNowSuccessTick == buyNowSuccessTick)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.recommendations, recommendations) || other.recommendations == recommendations)&&(identical(other.recommendationsPage, recommendationsPage) || other.recommendationsPage == recommendationsPage)&&(identical(other.isLoadingMoreRecommendations, isLoadingMoreRecommendations) || other.isLoadingMoreRecommendations == isLoadingMoreRecommendations)&&(identical(other.isLoadingSizeChart, isLoadingSizeChart) || other.isLoadingSizeChart == isLoadingSizeChart)&&(identical(other.sizeChart, sizeChart) || other.sizeChart == sizeChart)&&(identical(other.sizeChartError, sizeChartError) || other.sizeChartError == sizeChartError)&&(identical(other.verifiedPincode, verifiedPincode) || other.verifiedPincode == verifiedPincode)&&(identical(other.pincodeVerifyTick, pincodeVerifyTick) || other.pincodeVerifyTick == pincodeVerifyTick)&&(identical(other.pincodeVerifyError, pincodeVerifyError) || other.pincodeVerifyError == pincodeVerifyError));
 }
 
 
 @override
-int get hashCode => Object.hashAll([runtimeType,status,productDetail,selectedSku,expandedDetailTab,isAddingToBag,isBuyingNow,snackBarTick,snackBarMessage,snackBarIsError,errorMessage,recommendations,recommendationsPage,isLoadingMoreRecommendations,isLoadingSizeChart,sizeChart,sizeChartError,verifiedPincode,pincodeVerifyTick,pincodeVerifyError]);
+int get hashCode => Object.hashAll([runtimeType,status,productDetail,selectedSku,expandedDetailTab,isAddingToBag,isBuyingNow,snackBarTick,snackBarMessage,snackBarIsError,addToBagSuccessTick,buyNowSuccessTick,errorMessage,recommendations,recommendationsPage,isLoadingMoreRecommendations,isLoadingSizeChart,sizeChart,sizeChartError,verifiedPincode,pincodeVerifyTick,pincodeVerifyError]);
 
 @override
 String toString() {
-  return 'PdpState(status: $status, productDetail: $productDetail, selectedSku: $selectedSku, expandedDetailTab: $expandedDetailTab, isAddingToBag: $isAddingToBag, isBuyingNow: $isBuyingNow, snackBarTick: $snackBarTick, snackBarMessage: $snackBarMessage, snackBarIsError: $snackBarIsError, errorMessage: $errorMessage, recommendations: $recommendations, recommendationsPage: $recommendationsPage, isLoadingMoreRecommendations: $isLoadingMoreRecommendations, isLoadingSizeChart: $isLoadingSizeChart, sizeChart: $sizeChart, sizeChartError: $sizeChartError, verifiedPincode: $verifiedPincode, pincodeVerifyTick: $pincodeVerifyTick, pincodeVerifyError: $pincodeVerifyError)';
+  return 'PdpState(status: $status, productDetail: $productDetail, selectedSku: $selectedSku, expandedDetailTab: $expandedDetailTab, isAddingToBag: $isAddingToBag, isBuyingNow: $isBuyingNow, snackBarTick: $snackBarTick, snackBarMessage: $snackBarMessage, snackBarIsError: $snackBarIsError, addToBagSuccessTick: $addToBagSuccessTick, buyNowSuccessTick: $buyNowSuccessTick, errorMessage: $errorMessage, recommendations: $recommendations, recommendationsPage: $recommendationsPage, isLoadingMoreRecommendations: $isLoadingMoreRecommendations, isLoadingSizeChart: $isLoadingSizeChart, sizeChart: $sizeChart, sizeChartError: $sizeChartError, verifiedPincode: $verifiedPincode, pincodeVerifyTick: $pincodeVerifyTick, pincodeVerifyError: $pincodeVerifyError)';
 }
 
 
@@ -853,7 +860,7 @@ abstract mixin class $PdpStateCopyWith<$Res>  {
   factory $PdpStateCopyWith(PdpState value, $Res Function(PdpState) _then) = _$PdpStateCopyWithImpl;
 @useResult
 $Res call({
- PdpStatus status, ProductDetailEntity? productDetail, SkuEntity? selectedSku, int expandedDetailTab, bool isAddingToBag, bool isBuyingNow, int snackBarTick, String? snackBarMessage, bool snackBarIsError, String? errorMessage, RecommendationsEntity? recommendations, int recommendationsPage, bool isLoadingMoreRecommendations, bool isLoadingSizeChart, SizeChartEntity? sizeChart, String? sizeChartError, String? verifiedPincode, int pincodeVerifyTick, String? pincodeVerifyError
+ PdpStatus status, ProductDetailEntity? productDetail, SkuEntity? selectedSku, int expandedDetailTab, bool isAddingToBag, bool isBuyingNow, int snackBarTick, String? snackBarMessage, bool snackBarIsError, int addToBagSuccessTick, int buyNowSuccessTick, String? errorMessage, RecommendationsEntity? recommendations, int recommendationsPage, bool isLoadingMoreRecommendations, bool isLoadingSizeChart, SizeChartEntity? sizeChart, String? sizeChartError, String? verifiedPincode, int pincodeVerifyTick, String? pincodeVerifyError
 });
 
 
@@ -870,7 +877,7 @@ class _$PdpStateCopyWithImpl<$Res>
 
 /// Create a copy of PdpState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? productDetail = freezed,Object? selectedSku = freezed,Object? expandedDetailTab = null,Object? isAddingToBag = null,Object? isBuyingNow = null,Object? snackBarTick = null,Object? snackBarMessage = freezed,Object? snackBarIsError = null,Object? errorMessage = freezed,Object? recommendations = freezed,Object? recommendationsPage = null,Object? isLoadingMoreRecommendations = null,Object? isLoadingSizeChart = null,Object? sizeChart = freezed,Object? sizeChartError = freezed,Object? verifiedPincode = freezed,Object? pincodeVerifyTick = null,Object? pincodeVerifyError = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? productDetail = freezed,Object? selectedSku = freezed,Object? expandedDetailTab = null,Object? isAddingToBag = null,Object? isBuyingNow = null,Object? snackBarTick = null,Object? snackBarMessage = freezed,Object? snackBarIsError = null,Object? addToBagSuccessTick = null,Object? buyNowSuccessTick = null,Object? errorMessage = freezed,Object? recommendations = freezed,Object? recommendationsPage = null,Object? isLoadingMoreRecommendations = null,Object? isLoadingSizeChart = null,Object? sizeChart = freezed,Object? sizeChartError = freezed,Object? verifiedPincode = freezed,Object? pincodeVerifyTick = null,Object? pincodeVerifyError = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as PdpStatus,productDetail: freezed == productDetail ? _self.productDetail : productDetail // ignore: cast_nullable_to_non_nullable
@@ -881,7 +888,9 @@ as bool,isBuyingNow: null == isBuyingNow ? _self.isBuyingNow : isBuyingNow // ig
 as bool,snackBarTick: null == snackBarTick ? _self.snackBarTick : snackBarTick // ignore: cast_nullable_to_non_nullable
 as int,snackBarMessage: freezed == snackBarMessage ? _self.snackBarMessage : snackBarMessage // ignore: cast_nullable_to_non_nullable
 as String?,snackBarIsError: null == snackBarIsError ? _self.snackBarIsError : snackBarIsError // ignore: cast_nullable_to_non_nullable
-as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as bool,addToBagSuccessTick: null == addToBagSuccessTick ? _self.addToBagSuccessTick : addToBagSuccessTick // ignore: cast_nullable_to_non_nullable
+as int,buyNowSuccessTick: null == buyNowSuccessTick ? _self.buyNowSuccessTick : buyNowSuccessTick // ignore: cast_nullable_to_non_nullable
+as int,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,recommendations: freezed == recommendations ? _self.recommendations : recommendations // ignore: cast_nullable_to_non_nullable
 as RecommendationsEntity?,recommendationsPage: null == recommendationsPage ? _self.recommendationsPage : recommendationsPage // ignore: cast_nullable_to_non_nullable
 as int,isLoadingMoreRecommendations: null == isLoadingMoreRecommendations ? _self.isLoadingMoreRecommendations : isLoadingMoreRecommendations // ignore: cast_nullable_to_non_nullable
@@ -1024,10 +1033,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PdpStatus status,  ProductDetailEntity? productDetail,  SkuEntity? selectedSku,  int expandedDetailTab,  bool isAddingToBag,  bool isBuyingNow,  int snackBarTick,  String? snackBarMessage,  bool snackBarIsError,  String? errorMessage,  RecommendationsEntity? recommendations,  int recommendationsPage,  bool isLoadingMoreRecommendations,  bool isLoadingSizeChart,  SizeChartEntity? sizeChart,  String? sizeChartError,  String? verifiedPincode,  int pincodeVerifyTick,  String? pincodeVerifyError)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PdpStatus status,  ProductDetailEntity? productDetail,  SkuEntity? selectedSku,  int expandedDetailTab,  bool isAddingToBag,  bool isBuyingNow,  int snackBarTick,  String? snackBarMessage,  bool snackBarIsError,  int addToBagSuccessTick,  int buyNowSuccessTick,  String? errorMessage,  RecommendationsEntity? recommendations,  int recommendationsPage,  bool isLoadingMoreRecommendations,  bool isLoadingSizeChart,  SizeChartEntity? sizeChart,  String? sizeChartError,  String? verifiedPincode,  int pincodeVerifyTick,  String? pincodeVerifyError)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PdpState() when $default != null:
-return $default(_that.status,_that.productDetail,_that.selectedSku,_that.expandedDetailTab,_that.isAddingToBag,_that.isBuyingNow,_that.snackBarTick,_that.snackBarMessage,_that.snackBarIsError,_that.errorMessage,_that.recommendations,_that.recommendationsPage,_that.isLoadingMoreRecommendations,_that.isLoadingSizeChart,_that.sizeChart,_that.sizeChartError,_that.verifiedPincode,_that.pincodeVerifyTick,_that.pincodeVerifyError);case _:
+return $default(_that.status,_that.productDetail,_that.selectedSku,_that.expandedDetailTab,_that.isAddingToBag,_that.isBuyingNow,_that.snackBarTick,_that.snackBarMessage,_that.snackBarIsError,_that.addToBagSuccessTick,_that.buyNowSuccessTick,_that.errorMessage,_that.recommendations,_that.recommendationsPage,_that.isLoadingMoreRecommendations,_that.isLoadingSizeChart,_that.sizeChart,_that.sizeChartError,_that.verifiedPincode,_that.pincodeVerifyTick,_that.pincodeVerifyError);case _:
   return orElse();
 
 }
@@ -1045,10 +1054,10 @@ return $default(_that.status,_that.productDetail,_that.selectedSku,_that.expande
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PdpStatus status,  ProductDetailEntity? productDetail,  SkuEntity? selectedSku,  int expandedDetailTab,  bool isAddingToBag,  bool isBuyingNow,  int snackBarTick,  String? snackBarMessage,  bool snackBarIsError,  String? errorMessage,  RecommendationsEntity? recommendations,  int recommendationsPage,  bool isLoadingMoreRecommendations,  bool isLoadingSizeChart,  SizeChartEntity? sizeChart,  String? sizeChartError,  String? verifiedPincode,  int pincodeVerifyTick,  String? pincodeVerifyError)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PdpStatus status,  ProductDetailEntity? productDetail,  SkuEntity? selectedSku,  int expandedDetailTab,  bool isAddingToBag,  bool isBuyingNow,  int snackBarTick,  String? snackBarMessage,  bool snackBarIsError,  int addToBagSuccessTick,  int buyNowSuccessTick,  String? errorMessage,  RecommendationsEntity? recommendations,  int recommendationsPage,  bool isLoadingMoreRecommendations,  bool isLoadingSizeChart,  SizeChartEntity? sizeChart,  String? sizeChartError,  String? verifiedPincode,  int pincodeVerifyTick,  String? pincodeVerifyError)  $default,) {final _that = this;
 switch (_that) {
 case _PdpState():
-return $default(_that.status,_that.productDetail,_that.selectedSku,_that.expandedDetailTab,_that.isAddingToBag,_that.isBuyingNow,_that.snackBarTick,_that.snackBarMessage,_that.snackBarIsError,_that.errorMessage,_that.recommendations,_that.recommendationsPage,_that.isLoadingMoreRecommendations,_that.isLoadingSizeChart,_that.sizeChart,_that.sizeChartError,_that.verifiedPincode,_that.pincodeVerifyTick,_that.pincodeVerifyError);case _:
+return $default(_that.status,_that.productDetail,_that.selectedSku,_that.expandedDetailTab,_that.isAddingToBag,_that.isBuyingNow,_that.snackBarTick,_that.snackBarMessage,_that.snackBarIsError,_that.addToBagSuccessTick,_that.buyNowSuccessTick,_that.errorMessage,_that.recommendations,_that.recommendationsPage,_that.isLoadingMoreRecommendations,_that.isLoadingSizeChart,_that.sizeChart,_that.sizeChartError,_that.verifiedPincode,_that.pincodeVerifyTick,_that.pincodeVerifyError);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1065,10 +1074,10 @@ return $default(_that.status,_that.productDetail,_that.selectedSku,_that.expande
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PdpStatus status,  ProductDetailEntity? productDetail,  SkuEntity? selectedSku,  int expandedDetailTab,  bool isAddingToBag,  bool isBuyingNow,  int snackBarTick,  String? snackBarMessage,  bool snackBarIsError,  String? errorMessage,  RecommendationsEntity? recommendations,  int recommendationsPage,  bool isLoadingMoreRecommendations,  bool isLoadingSizeChart,  SizeChartEntity? sizeChart,  String? sizeChartError,  String? verifiedPincode,  int pincodeVerifyTick,  String? pincodeVerifyError)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PdpStatus status,  ProductDetailEntity? productDetail,  SkuEntity? selectedSku,  int expandedDetailTab,  bool isAddingToBag,  bool isBuyingNow,  int snackBarTick,  String? snackBarMessage,  bool snackBarIsError,  int addToBagSuccessTick,  int buyNowSuccessTick,  String? errorMessage,  RecommendationsEntity? recommendations,  int recommendationsPage,  bool isLoadingMoreRecommendations,  bool isLoadingSizeChart,  SizeChartEntity? sizeChart,  String? sizeChartError,  String? verifiedPincode,  int pincodeVerifyTick,  String? pincodeVerifyError)?  $default,) {final _that = this;
 switch (_that) {
 case _PdpState() when $default != null:
-return $default(_that.status,_that.productDetail,_that.selectedSku,_that.expandedDetailTab,_that.isAddingToBag,_that.isBuyingNow,_that.snackBarTick,_that.snackBarMessage,_that.snackBarIsError,_that.errorMessage,_that.recommendations,_that.recommendationsPage,_that.isLoadingMoreRecommendations,_that.isLoadingSizeChart,_that.sizeChart,_that.sizeChartError,_that.verifiedPincode,_that.pincodeVerifyTick,_that.pincodeVerifyError);case _:
+return $default(_that.status,_that.productDetail,_that.selectedSku,_that.expandedDetailTab,_that.isAddingToBag,_that.isBuyingNow,_that.snackBarTick,_that.snackBarMessage,_that.snackBarIsError,_that.addToBagSuccessTick,_that.buyNowSuccessTick,_that.errorMessage,_that.recommendations,_that.recommendationsPage,_that.isLoadingMoreRecommendations,_that.isLoadingSizeChart,_that.sizeChart,_that.sizeChartError,_that.verifiedPincode,_that.pincodeVerifyTick,_that.pincodeVerifyError);case _:
   return null;
 
 }
@@ -1080,7 +1089,7 @@ return $default(_that.status,_that.productDetail,_that.selectedSku,_that.expande
 
 
 class _PdpState implements PdpState {
-  const _PdpState({this.status = PdpStatus.initial, this.productDetail, this.selectedSku, this.expandedDetailTab = 0, this.isAddingToBag = false, this.isBuyingNow = false, this.snackBarTick = 0, this.snackBarMessage, this.snackBarIsError = false, this.errorMessage, this.recommendations, this.recommendationsPage = 1, this.isLoadingMoreRecommendations = false, this.isLoadingSizeChart = false, this.sizeChart, this.sizeChartError, this.verifiedPincode, this.pincodeVerifyTick = 0, this.pincodeVerifyError});
+  const _PdpState({this.status = PdpStatus.initial, this.productDetail, this.selectedSku, this.expandedDetailTab = 0, this.isAddingToBag = false, this.isBuyingNow = false, this.snackBarTick = 0, this.snackBarMessage, this.snackBarIsError = false, this.addToBagSuccessTick = 0, this.buyNowSuccessTick = 0, this.errorMessage, this.recommendations, this.recommendationsPage = 1, this.isLoadingMoreRecommendations = false, this.isLoadingSizeChart = false, this.sizeChart, this.sizeChartError, this.verifiedPincode, this.pincodeVerifyTick = 0, this.pincodeVerifyError});
   
 
 @override@JsonKey() final  PdpStatus status;
@@ -1096,6 +1105,15 @@ class _PdpState implements PdpState {
 @override@JsonKey() final  int snackBarTick;
 @override final  String? snackBarMessage;
 @override@JsonKey() final  bool snackBarIsError;
+// Bumped only when an add-to-bag call comes back successful, so the PDP can
+// play the fly-to-cart animation on a server-confirmed add and never on a
+// failed one. A tick (not a bool) so consecutive adds each fire.
+@override@JsonKey() final  int addToBagSuccessTick;
+// The buy-now equivalent: bumped only on a server-confirmed buy-now. It is a
+// separate channel because the PDP does more with it — the same fly-to-cart
+// animation, and then a hand-off to the cart in buy-now mode (Android's
+// `AddToBagAnimationHandler` end-listener calling `goToCart(fromBuyNow)`).
+@override@JsonKey() final  int buyNowSuccessTick;
 @override final  String? errorMessage;
 @override final  RecommendationsEntity? recommendations;
 @override@JsonKey() final  int recommendationsPage;
@@ -1121,16 +1139,16 @@ _$PdpStateCopyWith<_PdpState> get copyWith => __$PdpStateCopyWithImpl<_PdpState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PdpState&&(identical(other.status, status) || other.status == status)&&(identical(other.productDetail, productDetail) || other.productDetail == productDetail)&&(identical(other.selectedSku, selectedSku) || other.selectedSku == selectedSku)&&(identical(other.expandedDetailTab, expandedDetailTab) || other.expandedDetailTab == expandedDetailTab)&&(identical(other.isAddingToBag, isAddingToBag) || other.isAddingToBag == isAddingToBag)&&(identical(other.isBuyingNow, isBuyingNow) || other.isBuyingNow == isBuyingNow)&&(identical(other.snackBarTick, snackBarTick) || other.snackBarTick == snackBarTick)&&(identical(other.snackBarMessage, snackBarMessage) || other.snackBarMessage == snackBarMessage)&&(identical(other.snackBarIsError, snackBarIsError) || other.snackBarIsError == snackBarIsError)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.recommendations, recommendations) || other.recommendations == recommendations)&&(identical(other.recommendationsPage, recommendationsPage) || other.recommendationsPage == recommendationsPage)&&(identical(other.isLoadingMoreRecommendations, isLoadingMoreRecommendations) || other.isLoadingMoreRecommendations == isLoadingMoreRecommendations)&&(identical(other.isLoadingSizeChart, isLoadingSizeChart) || other.isLoadingSizeChart == isLoadingSizeChart)&&(identical(other.sizeChart, sizeChart) || other.sizeChart == sizeChart)&&(identical(other.sizeChartError, sizeChartError) || other.sizeChartError == sizeChartError)&&(identical(other.verifiedPincode, verifiedPincode) || other.verifiedPincode == verifiedPincode)&&(identical(other.pincodeVerifyTick, pincodeVerifyTick) || other.pincodeVerifyTick == pincodeVerifyTick)&&(identical(other.pincodeVerifyError, pincodeVerifyError) || other.pincodeVerifyError == pincodeVerifyError));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PdpState&&(identical(other.status, status) || other.status == status)&&(identical(other.productDetail, productDetail) || other.productDetail == productDetail)&&(identical(other.selectedSku, selectedSku) || other.selectedSku == selectedSku)&&(identical(other.expandedDetailTab, expandedDetailTab) || other.expandedDetailTab == expandedDetailTab)&&(identical(other.isAddingToBag, isAddingToBag) || other.isAddingToBag == isAddingToBag)&&(identical(other.isBuyingNow, isBuyingNow) || other.isBuyingNow == isBuyingNow)&&(identical(other.snackBarTick, snackBarTick) || other.snackBarTick == snackBarTick)&&(identical(other.snackBarMessage, snackBarMessage) || other.snackBarMessage == snackBarMessage)&&(identical(other.snackBarIsError, snackBarIsError) || other.snackBarIsError == snackBarIsError)&&(identical(other.addToBagSuccessTick, addToBagSuccessTick) || other.addToBagSuccessTick == addToBagSuccessTick)&&(identical(other.buyNowSuccessTick, buyNowSuccessTick) || other.buyNowSuccessTick == buyNowSuccessTick)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.recommendations, recommendations) || other.recommendations == recommendations)&&(identical(other.recommendationsPage, recommendationsPage) || other.recommendationsPage == recommendationsPage)&&(identical(other.isLoadingMoreRecommendations, isLoadingMoreRecommendations) || other.isLoadingMoreRecommendations == isLoadingMoreRecommendations)&&(identical(other.isLoadingSizeChart, isLoadingSizeChart) || other.isLoadingSizeChart == isLoadingSizeChart)&&(identical(other.sizeChart, sizeChart) || other.sizeChart == sizeChart)&&(identical(other.sizeChartError, sizeChartError) || other.sizeChartError == sizeChartError)&&(identical(other.verifiedPincode, verifiedPincode) || other.verifiedPincode == verifiedPincode)&&(identical(other.pincodeVerifyTick, pincodeVerifyTick) || other.pincodeVerifyTick == pincodeVerifyTick)&&(identical(other.pincodeVerifyError, pincodeVerifyError) || other.pincodeVerifyError == pincodeVerifyError));
 }
 
 
 @override
-int get hashCode => Object.hashAll([runtimeType,status,productDetail,selectedSku,expandedDetailTab,isAddingToBag,isBuyingNow,snackBarTick,snackBarMessage,snackBarIsError,errorMessage,recommendations,recommendationsPage,isLoadingMoreRecommendations,isLoadingSizeChart,sizeChart,sizeChartError,verifiedPincode,pincodeVerifyTick,pincodeVerifyError]);
+int get hashCode => Object.hashAll([runtimeType,status,productDetail,selectedSku,expandedDetailTab,isAddingToBag,isBuyingNow,snackBarTick,snackBarMessage,snackBarIsError,addToBagSuccessTick,buyNowSuccessTick,errorMessage,recommendations,recommendationsPage,isLoadingMoreRecommendations,isLoadingSizeChart,sizeChart,sizeChartError,verifiedPincode,pincodeVerifyTick,pincodeVerifyError]);
 
 @override
 String toString() {
-  return 'PdpState(status: $status, productDetail: $productDetail, selectedSku: $selectedSku, expandedDetailTab: $expandedDetailTab, isAddingToBag: $isAddingToBag, isBuyingNow: $isBuyingNow, snackBarTick: $snackBarTick, snackBarMessage: $snackBarMessage, snackBarIsError: $snackBarIsError, errorMessage: $errorMessage, recommendations: $recommendations, recommendationsPage: $recommendationsPage, isLoadingMoreRecommendations: $isLoadingMoreRecommendations, isLoadingSizeChart: $isLoadingSizeChart, sizeChart: $sizeChart, sizeChartError: $sizeChartError, verifiedPincode: $verifiedPincode, pincodeVerifyTick: $pincodeVerifyTick, pincodeVerifyError: $pincodeVerifyError)';
+  return 'PdpState(status: $status, productDetail: $productDetail, selectedSku: $selectedSku, expandedDetailTab: $expandedDetailTab, isAddingToBag: $isAddingToBag, isBuyingNow: $isBuyingNow, snackBarTick: $snackBarTick, snackBarMessage: $snackBarMessage, snackBarIsError: $snackBarIsError, addToBagSuccessTick: $addToBagSuccessTick, buyNowSuccessTick: $buyNowSuccessTick, errorMessage: $errorMessage, recommendations: $recommendations, recommendationsPage: $recommendationsPage, isLoadingMoreRecommendations: $isLoadingMoreRecommendations, isLoadingSizeChart: $isLoadingSizeChart, sizeChart: $sizeChart, sizeChartError: $sizeChartError, verifiedPincode: $verifiedPincode, pincodeVerifyTick: $pincodeVerifyTick, pincodeVerifyError: $pincodeVerifyError)';
 }
 
 
@@ -1141,7 +1159,7 @@ abstract mixin class _$PdpStateCopyWith<$Res> implements $PdpStateCopyWith<$Res>
   factory _$PdpStateCopyWith(_PdpState value, $Res Function(_PdpState) _then) = __$PdpStateCopyWithImpl;
 @override @useResult
 $Res call({
- PdpStatus status, ProductDetailEntity? productDetail, SkuEntity? selectedSku, int expandedDetailTab, bool isAddingToBag, bool isBuyingNow, int snackBarTick, String? snackBarMessage, bool snackBarIsError, String? errorMessage, RecommendationsEntity? recommendations, int recommendationsPage, bool isLoadingMoreRecommendations, bool isLoadingSizeChart, SizeChartEntity? sizeChart, String? sizeChartError, String? verifiedPincode, int pincodeVerifyTick, String? pincodeVerifyError
+ PdpStatus status, ProductDetailEntity? productDetail, SkuEntity? selectedSku, int expandedDetailTab, bool isAddingToBag, bool isBuyingNow, int snackBarTick, String? snackBarMessage, bool snackBarIsError, int addToBagSuccessTick, int buyNowSuccessTick, String? errorMessage, RecommendationsEntity? recommendations, int recommendationsPage, bool isLoadingMoreRecommendations, bool isLoadingSizeChart, SizeChartEntity? sizeChart, String? sizeChartError, String? verifiedPincode, int pincodeVerifyTick, String? pincodeVerifyError
 });
 
 
@@ -1158,7 +1176,7 @@ class __$PdpStateCopyWithImpl<$Res>
 
 /// Create a copy of PdpState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? productDetail = freezed,Object? selectedSku = freezed,Object? expandedDetailTab = null,Object? isAddingToBag = null,Object? isBuyingNow = null,Object? snackBarTick = null,Object? snackBarMessage = freezed,Object? snackBarIsError = null,Object? errorMessage = freezed,Object? recommendations = freezed,Object? recommendationsPage = null,Object? isLoadingMoreRecommendations = null,Object? isLoadingSizeChart = null,Object? sizeChart = freezed,Object? sizeChartError = freezed,Object? verifiedPincode = freezed,Object? pincodeVerifyTick = null,Object? pincodeVerifyError = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? productDetail = freezed,Object? selectedSku = freezed,Object? expandedDetailTab = null,Object? isAddingToBag = null,Object? isBuyingNow = null,Object? snackBarTick = null,Object? snackBarMessage = freezed,Object? snackBarIsError = null,Object? addToBagSuccessTick = null,Object? buyNowSuccessTick = null,Object? errorMessage = freezed,Object? recommendations = freezed,Object? recommendationsPage = null,Object? isLoadingMoreRecommendations = null,Object? isLoadingSizeChart = null,Object? sizeChart = freezed,Object? sizeChartError = freezed,Object? verifiedPincode = freezed,Object? pincodeVerifyTick = null,Object? pincodeVerifyError = freezed,}) {
   return _then(_PdpState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as PdpStatus,productDetail: freezed == productDetail ? _self.productDetail : productDetail // ignore: cast_nullable_to_non_nullable
@@ -1169,7 +1187,9 @@ as bool,isBuyingNow: null == isBuyingNow ? _self.isBuyingNow : isBuyingNow // ig
 as bool,snackBarTick: null == snackBarTick ? _self.snackBarTick : snackBarTick // ignore: cast_nullable_to_non_nullable
 as int,snackBarMessage: freezed == snackBarMessage ? _self.snackBarMessage : snackBarMessage // ignore: cast_nullable_to_non_nullable
 as String?,snackBarIsError: null == snackBarIsError ? _self.snackBarIsError : snackBarIsError // ignore: cast_nullable_to_non_nullable
-as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as bool,addToBagSuccessTick: null == addToBagSuccessTick ? _self.addToBagSuccessTick : addToBagSuccessTick // ignore: cast_nullable_to_non_nullable
+as int,buyNowSuccessTick: null == buyNowSuccessTick ? _self.buyNowSuccessTick : buyNowSuccessTick // ignore: cast_nullable_to_non_nullable
+as int,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,recommendations: freezed == recommendations ? _self.recommendations : recommendations // ignore: cast_nullable_to_non_nullable
 as RecommendationsEntity?,recommendationsPage: null == recommendationsPage ? _self.recommendationsPage : recommendationsPage // ignore: cast_nullable_to_non_nullable
 as int,isLoadingMoreRecommendations: null == isLoadingMoreRecommendations ? _self.isLoadingMoreRecommendations : isLoadingMoreRecommendations // ignore: cast_nullable_to_non_nullable

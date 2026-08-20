@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../components/atoms/cached_image_widget.dart';
-import '../../../../core/constants/strings/pdp_strings.dart';
-import '../../../../core/theme/typography/typography_v1.dart';
 
 /// Fly-to-cart animation for the PDP add-to-bag action.
 ///
@@ -12,6 +10,11 @@ import '../../../../core/theme/typography/typography_v1.dart';
 /// scrim fades out. The cart badge count is updated independently by the bloc
 /// (via `CartCountCubit`), exactly as on Android where the badge is decoupled
 /// from the animation.
+///
+/// The flight always starts centered on the screen, never at the carousel's
+/// live position: the page scrolls, so by the time the add-to-bag call comes
+/// back the image can be anywhere — half off the top, or gone entirely — and
+/// the flight would appear to start from the top edge or not be visible at all.
 ///
 /// Presentation-only: [show] inserts a self-removing [OverlayEntry] — there is
 /// no bloc/state involvement.
@@ -23,26 +26,23 @@ class PdpFlyToCartOverlay {
   static const int _holdMs = 500; // pause with "Added to bag" label
   static const int _phase2Ms = 350; // fly to cart + scale 0.5 -> 0.05
 
-  /// Launches the flight. [sourceKey] must be attached to the product image
-  /// area, [targetKey] to the cart icon. No-op if either render box is missing
-  /// (e.g. sheet not laid out yet) or the product has no image.
+  /// Launches the flight. [sourceSizeKey] must be attached to the product image
+  /// area and supplies only the flying image's SIZE — the start position is
+  /// always the screen center, whatever the scroll offset. [targetKey] must be
+  /// on the cart icon. No-op if either render box is missing (e.g. not laid out
+  /// yet) or the product has no image.
   static void show(
     BuildContext context, {
     required String imageUrl,
-    required GlobalKey sourceKey,
+    required GlobalKey sourceSizeKey,
     required GlobalKey targetKey,
     VoidCallback? onComplete,
   }) {
     final overlay = Overlay.of(context, rootOverlay: true);
 
-    final sourceBox =
-        sourceKey.currentContext?.findRenderObject() as RenderBox?;
-    final targetBox =
-        targetKey.currentContext?.findRenderObject() as RenderBox?;
-    if (sourceBox == null ||
-        targetBox == null ||
-        !sourceBox.attached ||
-        !targetBox.attached) {
+    final sourceBox = sourceSizeKey.currentContext?.findRenderObject() as RenderBox?;
+    final targetBox = targetKey.currentContext?.findRenderObject() as RenderBox?;
+    if (sourceBox == null || targetBox == null || !sourceBox.attached || !targetBox.attached) {
       return;
     }
 
@@ -52,11 +52,16 @@ class PdpFlyToCartOverlay {
     Offset toOverlay(Offset global) =>
         overlayBox != null ? overlayBox.globalToLocal(global) : global;
 
-    final sourceTopLeft = toOverlay(sourceBox.localToGlobal(Offset.zero));
-    final sourceRect = sourceTopLeft & sourceBox.size;
-    final targetCenter = toOverlay(
-      targetBox.localToGlobal(targetBox.size.center(Offset.zero)),
+    // Centered in the overlay (i.e. on screen) rather than on the source widget:
+    // the product image scrolls, so its own position is not a stable — or even
+    // on-screen — place to start from. Only its size is taken from it.
+    final viewportSize = overlayBox?.size ?? MediaQuery.sizeOf(context);
+    final sourceRect = Rect.fromCenter(
+      center: viewportSize.center(Offset.zero),
+      width: sourceBox.size.width,
+      height: sourceBox.size.height,
     );
+    final targetCenter = toOverlay(targetBox.localToGlobal(targetBox.size.center(Offset.zero)));
 
     late final OverlayEntry entry;
     entry = OverlayEntry(
@@ -91,8 +96,7 @@ class _CartFlyAnimation extends StatefulWidget {
   State<_CartFlyAnimation> createState() => _CartFlyAnimationState();
 }
 
-class _CartFlyAnimationState extends State<_CartFlyAnimation>
-    with SingleTickerProviderStateMixin {
+class _CartFlyAnimationState extends State<_CartFlyAnimation> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scale;
   late final Animation<Offset> _offset;
@@ -114,22 +118,13 @@ class _CartFlyAnimationState extends State<_CartFlyAnimation>
     final decel = CurveTween(curve: Curves.decelerate);
 
     _scale = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween(begin: 1.0, end: 0.5).chain(decel),
-        weight: p1.toDouble(),
-      ),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.5).chain(decel), weight: p1.toDouble()),
       TweenSequenceItem(tween: ConstantTween(0.5), weight: hold.toDouble()),
-      TweenSequenceItem(
-        tween: Tween(begin: 0.5, end: 0.05).chain(decel),
-        weight: p2.toDouble(),
-      ),
+      TweenSequenceItem(tween: Tween(begin: 0.5, end: 0.05).chain(decel), weight: p2.toDouble()),
     ]).animate(_controller);
 
     _offset = TweenSequence<Offset>([
-      TweenSequenceItem(
-        tween: ConstantTween(Offset.zero),
-        weight: (p1 + hold).toDouble(),
-      ),
+      TweenSequenceItem(tween: ConstantTween(Offset.zero), weight: (p1 + hold).toDouble()),
       TweenSequenceItem(
         tween: Tween(begin: Offset.zero, end: delta).chain(decel),
         weight: p2.toDouble(),
@@ -138,15 +133,9 @@ class _CartFlyAnimationState extends State<_CartFlyAnimation>
 
     // Scrim fades in over phase one, holds, then fades out as the image flies.
     _scrim = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween(begin: 0.0, end: 1.0),
-        weight: p1.toDouble(),
-      ),
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: p1.toDouble()),
       TweenSequenceItem(tween: ConstantTween(1.0), weight: hold.toDouble()),
-      TweenSequenceItem(
-        tween: Tween(begin: 1.0, end: 0.0).chain(decel),
-        weight: p2.toDouble(),
-      ),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0).chain(decel), weight: p2.toDouble()),
     ]).animate(_controller);
 
     _controller.forward().whenCompleteOrCancel(widget.onComplete);
@@ -161,8 +150,6 @@ class _CartFlyAnimationState extends State<_CartFlyAnimation>
   @override
   Widget build(BuildContext context) {
     final rect = widget.sourceRect;
-    // Label sits just below the image at its held (0.5) scale.
-    final labelTop = rect.center.dy + (rect.height * 0.5) / 2 + 12;
 
     return AnimatedBuilder(
       animation: _controller,
@@ -171,9 +158,7 @@ class _CartFlyAnimationState extends State<_CartFlyAnimation>
           child: Stack(
             children: [
               Positioned.fill(
-                child: ColoredBox(
-                  color: Colors.black.withValues(alpha: 0.4 * _scrim.value),
-                ),
+                child: ColoredBox(color: Colors.black.withValues(alpha: 0.4 * _scrim.value)),
               ),
               Positioned(
                 left: rect.left,
@@ -192,23 +177,6 @@ class _CartFlyAnimationState extends State<_CartFlyAnimation>
                         width: rect.width,
                         height: rect.height,
                         fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                top: labelTop,
-                child: Opacity(
-                  opacity: _scrim.value,
-                  child: Center(
-                    child: Text(
-                      PdpStrings.addedToBag,
-                      style: AppTypographyV1.labelMedium.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

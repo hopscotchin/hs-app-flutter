@@ -132,7 +132,8 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
     if (current.status != PdpStatus.success) return;
     final skus = current.productDetail?.product?.skus ?? [];
     final sku = skus.where((s) => s.skuId == event.skuId).firstOrNull;
-    if (sku != null) emit(current.copyWith(selectedSku: sku));
+    if (sku == null) return;
+    emit(current.copyWith(selectedSku: sku));
   }
 
   Future<void> _onAddToBag(AddToBag event, Emitter<PdpState> emit) async {
@@ -166,6 +167,7 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
             snackBarTick: current.snackBarTick + 1,
             snackBarMessage: response.message ?? 'Added to bag',
             snackBarIsError: false,
+            addToBagSuccessTick: current.addToBagSuccessTick + 1,
           ),
         );
       },
@@ -197,12 +199,13 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
           cartCountCubit.set(response.cartItemQty!);
         }
         final updated = _markSkuAsAddedToBag(current, event.skuId);
+        // No success snackbar here (Android shows none for buy-now either): the
+        // page plays the fly-to-cart animation off this tick and then hands off
+        // to the cart, so a toast would surface on the wrong screen.
         emit(
           updated.copyWith(
             isBuyingNow: false,
-            snackBarTick: current.snackBarTick + 1,
-            snackBarMessage: response.message,
-            snackBarIsError: false,
+            buyNowSuccessTick: current.buyNowSuccessTick + 1,
           ),
         );
       },

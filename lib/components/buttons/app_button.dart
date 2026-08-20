@@ -43,18 +43,23 @@ class AppButton extends StatelessWidget {
     ButtonSize.small => AppSpacing.buttonHeightXs, // 28
     ButtonSize.medium => AppSpacing.buttonHeightBase, // 48
     ButtonSize.large => AppSpacing.buttonHeightLg, // 52
+    ButtonSize.regular => AppSpacing.buttonHeightLg, // 35
   };
 
   EdgeInsets get _padding => switch (size) {
     ButtonSize.small => const EdgeInsets.symmetric(horizontal: AppSpacing.sm), // 12
     ButtonSize.medium => const EdgeInsets.symmetric(horizontal: AppSpacing.lgMd), // 20
     ButtonSize.large => const EdgeInsets.symmetric(horizontal: AppSpacing.lg), // 24
+    ButtonSize.regular => const EdgeInsets.symmetric(
+      horizontal: AppSpacing.xs,
+      vertical: AppSpacing.xs,
+    ), // 24
   };
 
   double get _dotSize => switch (size) {
     ButtonSize.small => isFullWidth ? 8 : 6.0,
     ButtonSize.medium => isFullWidth ? 12 : 10.0,
-    ButtonSize.large => isFullWidth ? 14 : 12.0,
+    ButtonSize.large || ButtonSize.regular => isFullWidth ? 14 : 12.0,
   };
 
   TextStyle get _textStyle => switch (size) {
@@ -67,6 +72,7 @@ class AppButton extends StatelessWidget {
           ? AppTypographyV1.labelLarge.medium.linkColor()
           : AppTypographyV1.bodyLarge.semiBold, // 14px
     ButtonSize.large => AppTypographyV1.bodyLarge.semiBold, // 15px
+    ButtonSize.regular => AppTypographyV1.bodyLarge.bold, // 15px
   };
 
   // ── Build ──────────────────────────────────────────────────────────────

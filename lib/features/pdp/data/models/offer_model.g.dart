@@ -13,6 +13,7 @@ OffersListModel _$OffersListModelFromJson(Map<String, dynamic> json) =>
               ?.map((e) => OfferModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      trackingMeta: _mapOrNull(json['trackingMeta']),
     );
 
 OfferModel _$OfferModelFromJson(Map<String, dynamic> json) => OfferModel(

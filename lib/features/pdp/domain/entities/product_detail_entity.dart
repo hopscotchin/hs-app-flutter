@@ -16,6 +16,13 @@ abstract class ProductDetailEntity with _$ProductDetailEntity {
     ProductEntity? product,
     @Default([]) List<OfferEntity> offersList,
     RecentlyViewedEntity? recentlyViewed,
+
+    /// `offersList.trackingMeta`, carried as a plain map.
+    ///
+    /// Analytics-only — read it with `pdpCouponApplicable` to get
+    /// `coupon_applicable`. Kept unmodelled so a new promo tracking field needs no
+    /// app release.
+    Map<String, dynamic>? offersTrackingMeta,
   }) = _ProductDetailEntity;
 }
 

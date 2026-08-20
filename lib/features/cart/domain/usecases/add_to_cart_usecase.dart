@@ -8,13 +8,16 @@ import '../entities/add_to_cart_response_entity.dart';
 import '../repositories/cart_repository.dart';
 
 @lazySingleton
-class AddToCartUseCase implements UseCase<AddToCartResponseEntity, AddToCartParams> {
+class AddToCartUseCase
+    implements UseCase<AddToCartResponseEntity, AddToCartParams> {
   final CartRepository repository;
 
   AddToCartUseCase(this.repository);
 
   @override
-  Future<Either<Failure, AddToCartResponseEntity>> call(AddToCartParams params) {
+  Future<Either<Failure, AddToCartResponseEntity>> call(
+    AddToCartParams params,
+  ) {
     if (params.fromBuyNow) {
       return repository.buyNow(params.skuId, params.quantity);
     }
@@ -27,7 +30,11 @@ class AddToCartParams extends Equatable {
   final int quantity;
   final bool fromBuyNow;
 
-  const AddToCartParams({required this.skuId, this.quantity = 1, this.fromBuyNow = false});
+  const AddToCartParams({
+    required this.skuId,
+    this.quantity = 1,
+    this.fromBuyNow = false,
+  });
 
   @override
   List<Object?> get props => [skuId, quantity, fromBuyNow];

@@ -1,56 +1,40 @@
 part of 'cart_bloc.dart';
 
-abstract class CartState extends Equatable {
-  const CartState();
+enum CartStatus { initial, loading, loaded, error }
 
-  @override
-  List<Object?> get props => [];
+@freezed
+abstract class CartState with _$CartState {
+  const factory CartState({
+    @Default(CartStatus.initial) CartStatus status,
+    CartEntity? cart,
+    String? errorMessage,
+    String? loadingItemSku,
+    @Default(false) bool isCheckoutLoading,
+    @Default(false) bool isPromoLoading,
+    @Default(false) bool isMerging,
+    // Full-screen overlay flag — true while any cart mutation (quantity
+    // change, remove, move-to-wishlist, promo apply/remove, merge) is in
+    // flight, including its mandatory follow-up cart refresh. See
+    // CartBloc._refreshAfterMutation.
+    @Default(false) bool isCartUpdating,
+    @Default(<MessageBarEntity>[]) List<MessageBarEntity> staticMessageBars,
+    String? toastMessage,
+
+    /// Bumped every time a [RefreshCart] handler completes (success or
+    /// failure) — lets the pull-to-refresh indicator await exactly one
+    /// round-trip via `bloc.stream.firstWhere((s) => s.refreshTick != tick)`
+    /// without needing a dedicated loading flag (RefreshCart is otherwise a
+    /// silent background refresh).
+    @Default(0) int refreshTick,
+
+    /// Non-null when an apply/remove returned a backend-authored sheet — UI
+    /// shows it instead of [toastMessage].
+    BackendActionContentEntity? promoActionSheet,
+  }) = _CartState;
 }
 
-class CartInitial extends CartState {
-  const CartInitial();
-}
-
-class CartLoading extends CartState {
-  const CartLoading();
-}
-
-class CartLoaded extends CartState {
-  final CartEntity cart;
-  final String? loadingItemSku;
-  final bool isCheckoutLoading;
-  final bool isPromoLoading;
-  final bool isMerging;
-  final List<MessageBarEntity> staticMessageBars;
-  final String? toastMessage;
-
-  const CartLoaded({
-    required this.cart,
-    this.loadingItemSku,
-    this.isCheckoutLoading = false,
-    this.isPromoLoading = false,
-    this.isMerging = false,
-    this.staticMessageBars = const [],
-    this.toastMessage,
-  });
-
-  @override
-  List<Object?> get props => [
-    cart,
-    loadingItemSku,
-    isCheckoutLoading,
-    isPromoLoading,
-    isMerging,
-    staticMessageBars,
-    toastMessage,
-  ];
-}
-
-class CartError extends CartState {
-  final String message;
-
-  const CartError({required this.message});
-
-  @override
-  List<Object?> get props => [message];
+extension CartStateX on CartState {
+  bool get isLoading => status == CartStatus.loading;
+  bool get isLoaded => status == CartStatus.loaded && cart != null;
+  bool get isError => status == CartStatus.error;
 }

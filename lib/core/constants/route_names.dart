@@ -23,6 +23,7 @@ abstract final class RouteNames {
   static const String addresses = '/addresses';
   static const String addAddress = 'add';
   static const String legal = '/legal';
+  static const String promoDetails = '/promo-details/:promoId';
   static const String analyticsDebug = '/analytics-debug';
 
   // ─── GoRoute name identifiers ─────────────────────────────────────

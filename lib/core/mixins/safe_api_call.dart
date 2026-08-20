@@ -98,12 +98,24 @@ mixin SafeApiCall {
     final serverMessage = data is Map ? data['message'] as String? : null;
 
     return switch (statusCode) {
-      400 => BadRequestFailure(message: serverMessage ?? DefaultErrorMessages.badRequest),
-      401 => UnauthorizedFailure(message: serverMessage ?? DefaultErrorMessages.unauthorized),
-      403 => ForbiddenFailure(message: serverMessage ?? DefaultErrorMessages.forbidden),
-      404 => NotFoundFailure(message: serverMessage ?? DefaultErrorMessages.notFound),
-      409 => ConflictFailure(message: serverMessage ?? DefaultErrorMessages.conflict),
-      500 => InternalServerFailure(message: serverMessage ?? DefaultErrorMessages.internalServer),
+      400 => BadRequestFailure(
+        message: serverMessage ?? DefaultErrorMessages.badRequest,
+      ),
+      401 => UnauthorizedFailure(
+        message: serverMessage ?? DefaultErrorMessages.unauthorized,
+      ),
+      403 => ForbiddenFailure(
+        message: serverMessage ?? DefaultErrorMessages.forbidden,
+      ),
+      404 => NotFoundFailure(
+        message: serverMessage ?? DefaultErrorMessages.notFound,
+      ),
+      409 => ConflictFailure(
+        message: serverMessage ?? DefaultErrorMessages.conflict,
+      ),
+      500 => InternalServerFailure(
+        message: serverMessage ?? DefaultErrorMessages.internalServer,
+      ),
       503 => ServiceUnavailableFailure(
         message: serverMessage ?? DefaultErrorMessages.serviceUnavailable,
       ),

@@ -707,7 +707,13 @@ as String,
 /// @nodoc
 mixin _$PlpState {
 
- PlpStatus get status; List<ListingProductEntity> get products; List<PlpListItem> get listItems; int? get totalRecords; int get currentPage; bool get hasMore; bool get isLoadingMore; PlpFilterEntity? get plpFilter; List<BannerEntity> get banners; Map<String, String> get appliedFilters; String? get screenName; String? get screenSubtitle; String? get errorMessage; QueryCorrectionEntity? get queryCorrection; int? get currentOrderRule; List<MessageBarEntity> get messageBars;
+ PlpStatus get status; List<ListingProductEntity> get products; List<PlpListItem> get listItems; int? get totalRecords; int get currentPage; bool get hasMore; bool get isLoadingMore; PlpFilterEntity? get plpFilter; List<BannerEntity> get banners; Map<String, String> get appliedFilters; String? get screenName; String? get screenSubtitle; String? get errorMessage; QueryCorrectionEntity? get queryCorrection; int? get currentOrderRule; List<MessageBarEntity> get messageBars;/// Which kind of listing this is. Retained from [LoadPlpData] because
+/// analytics needs it: `from_page` on every PDP event is `"boutique"` for a
+/// boutique and `"plp"` for a category listing, and Android distinguishes
+/// them (`PLPProductViewModel.java:171` vs
+/// `ProductListPageActivity.java:794`). Nothing else reads it — the query
+/// builder keeps its own copy for endpoint selection.
+ PageType get pageType;
 /// Create a copy of PlpState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -718,16 +724,16 @@ $PlpStateCopyWith<PlpState> get copyWith => _$PlpStateCopyWithImpl<PlpState>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlpState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.products, products)&&const DeepCollectionEquality().equals(other.listItems, listItems)&&(identical(other.totalRecords, totalRecords) || other.totalRecords == totalRecords)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.plpFilter, plpFilter) || other.plpFilter == plpFilter)&&const DeepCollectionEquality().equals(other.banners, banners)&&const DeepCollectionEquality().equals(other.appliedFilters, appliedFilters)&&(identical(other.screenName, screenName) || other.screenName == screenName)&&(identical(other.screenSubtitle, screenSubtitle) || other.screenSubtitle == screenSubtitle)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.queryCorrection, queryCorrection) || other.queryCorrection == queryCorrection)&&(identical(other.currentOrderRule, currentOrderRule) || other.currentOrderRule == currentOrderRule)&&const DeepCollectionEquality().equals(other.messageBars, messageBars));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlpState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.products, products)&&const DeepCollectionEquality().equals(other.listItems, listItems)&&(identical(other.totalRecords, totalRecords) || other.totalRecords == totalRecords)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.plpFilter, plpFilter) || other.plpFilter == plpFilter)&&const DeepCollectionEquality().equals(other.banners, banners)&&const DeepCollectionEquality().equals(other.appliedFilters, appliedFilters)&&(identical(other.screenName, screenName) || other.screenName == screenName)&&(identical(other.screenSubtitle, screenSubtitle) || other.screenSubtitle == screenSubtitle)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.queryCorrection, queryCorrection) || other.queryCorrection == queryCorrection)&&(identical(other.currentOrderRule, currentOrderRule) || other.currentOrderRule == currentOrderRule)&&const DeepCollectionEquality().equals(other.messageBars, messageBars)&&(identical(other.pageType, pageType) || other.pageType == pageType));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(products),const DeepCollectionEquality().hash(listItems),totalRecords,currentPage,hasMore,isLoadingMore,plpFilter,const DeepCollectionEquality().hash(banners),const DeepCollectionEquality().hash(appliedFilters),screenName,screenSubtitle,errorMessage,queryCorrection,currentOrderRule,const DeepCollectionEquality().hash(messageBars));
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(products),const DeepCollectionEquality().hash(listItems),totalRecords,currentPage,hasMore,isLoadingMore,plpFilter,const DeepCollectionEquality().hash(banners),const DeepCollectionEquality().hash(appliedFilters),screenName,screenSubtitle,errorMessage,queryCorrection,currentOrderRule,const DeepCollectionEquality().hash(messageBars),pageType);
 
 @override
 String toString() {
-  return 'PlpState(status: $status, products: $products, listItems: $listItems, totalRecords: $totalRecords, currentPage: $currentPage, hasMore: $hasMore, isLoadingMore: $isLoadingMore, plpFilter: $plpFilter, banners: $banners, appliedFilters: $appliedFilters, screenName: $screenName, screenSubtitle: $screenSubtitle, errorMessage: $errorMessage, queryCorrection: $queryCorrection, currentOrderRule: $currentOrderRule, messageBars: $messageBars)';
+  return 'PlpState(status: $status, products: $products, listItems: $listItems, totalRecords: $totalRecords, currentPage: $currentPage, hasMore: $hasMore, isLoadingMore: $isLoadingMore, plpFilter: $plpFilter, banners: $banners, appliedFilters: $appliedFilters, screenName: $screenName, screenSubtitle: $screenSubtitle, errorMessage: $errorMessage, queryCorrection: $queryCorrection, currentOrderRule: $currentOrderRule, messageBars: $messageBars, pageType: $pageType)';
 }
 
 
@@ -738,7 +744,7 @@ abstract mixin class $PlpStateCopyWith<$Res>  {
   factory $PlpStateCopyWith(PlpState value, $Res Function(PlpState) _then) = _$PlpStateCopyWithImpl;
 @useResult
 $Res call({
- PlpStatus status, List<ListingProductEntity> products, List<PlpListItem> listItems, int? totalRecords, int currentPage, bool hasMore, bool isLoadingMore, PlpFilterEntity? plpFilter, List<BannerEntity> banners, Map<String, String> appliedFilters, String? screenName, String? screenSubtitle, String? errorMessage, QueryCorrectionEntity? queryCorrection, int? currentOrderRule, List<MessageBarEntity> messageBars
+ PlpStatus status, List<ListingProductEntity> products, List<PlpListItem> listItems, int? totalRecords, int currentPage, bool hasMore, bool isLoadingMore, PlpFilterEntity? plpFilter, List<BannerEntity> banners, Map<String, String> appliedFilters, String? screenName, String? screenSubtitle, String? errorMessage, QueryCorrectionEntity? queryCorrection, int? currentOrderRule, List<MessageBarEntity> messageBars, PageType pageType
 });
 
 
@@ -755,7 +761,7 @@ class _$PlpStateCopyWithImpl<$Res>
 
 /// Create a copy of PlpState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? products = null,Object? listItems = null,Object? totalRecords = freezed,Object? currentPage = null,Object? hasMore = null,Object? isLoadingMore = null,Object? plpFilter = freezed,Object? banners = null,Object? appliedFilters = null,Object? screenName = freezed,Object? screenSubtitle = freezed,Object? errorMessage = freezed,Object? queryCorrection = freezed,Object? currentOrderRule = freezed,Object? messageBars = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? products = null,Object? listItems = null,Object? totalRecords = freezed,Object? currentPage = null,Object? hasMore = null,Object? isLoadingMore = null,Object? plpFilter = freezed,Object? banners = null,Object? appliedFilters = null,Object? screenName = freezed,Object? screenSubtitle = freezed,Object? errorMessage = freezed,Object? queryCorrection = freezed,Object? currentOrderRule = freezed,Object? messageBars = null,Object? pageType = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as PlpStatus,products: null == products ? _self.products : products // ignore: cast_nullable_to_non_nullable
@@ -773,7 +779,8 @@ as String?,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMes
 as String?,queryCorrection: freezed == queryCorrection ? _self.queryCorrection : queryCorrection // ignore: cast_nullable_to_non_nullable
 as QueryCorrectionEntity?,currentOrderRule: freezed == currentOrderRule ? _self.currentOrderRule : currentOrderRule // ignore: cast_nullable_to_non_nullable
 as int?,messageBars: null == messageBars ? _self.messageBars : messageBars // ignore: cast_nullable_to_non_nullable
-as List<MessageBarEntity>,
+as List<MessageBarEntity>,pageType: null == pageType ? _self.pageType : pageType // ignore: cast_nullable_to_non_nullable
+as PageType,
   ));
 }
 /// Create a copy of PlpState
@@ -882,10 +889,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PlpStatus status,  List<ListingProductEntity> products,  List<PlpListItem> listItems,  int? totalRecords,  int currentPage,  bool hasMore,  bool isLoadingMore,  PlpFilterEntity? plpFilter,  List<BannerEntity> banners,  Map<String, String> appliedFilters,  String? screenName,  String? screenSubtitle,  String? errorMessage,  QueryCorrectionEntity? queryCorrection,  int? currentOrderRule,  List<MessageBarEntity> messageBars)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PlpStatus status,  List<ListingProductEntity> products,  List<PlpListItem> listItems,  int? totalRecords,  int currentPage,  bool hasMore,  bool isLoadingMore,  PlpFilterEntity? plpFilter,  List<BannerEntity> banners,  Map<String, String> appliedFilters,  String? screenName,  String? screenSubtitle,  String? errorMessage,  QueryCorrectionEntity? queryCorrection,  int? currentOrderRule,  List<MessageBarEntity> messageBars,  PageType pageType)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PlpState() when $default != null:
-return $default(_that.status,_that.products,_that.listItems,_that.totalRecords,_that.currentPage,_that.hasMore,_that.isLoadingMore,_that.plpFilter,_that.banners,_that.appliedFilters,_that.screenName,_that.screenSubtitle,_that.errorMessage,_that.queryCorrection,_that.currentOrderRule,_that.messageBars);case _:
+return $default(_that.status,_that.products,_that.listItems,_that.totalRecords,_that.currentPage,_that.hasMore,_that.isLoadingMore,_that.plpFilter,_that.banners,_that.appliedFilters,_that.screenName,_that.screenSubtitle,_that.errorMessage,_that.queryCorrection,_that.currentOrderRule,_that.messageBars,_that.pageType);case _:
   return orElse();
 
 }
@@ -903,10 +910,10 @@ return $default(_that.status,_that.products,_that.listItems,_that.totalRecords,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PlpStatus status,  List<ListingProductEntity> products,  List<PlpListItem> listItems,  int? totalRecords,  int currentPage,  bool hasMore,  bool isLoadingMore,  PlpFilterEntity? plpFilter,  List<BannerEntity> banners,  Map<String, String> appliedFilters,  String? screenName,  String? screenSubtitle,  String? errorMessage,  QueryCorrectionEntity? queryCorrection,  int? currentOrderRule,  List<MessageBarEntity> messageBars)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PlpStatus status,  List<ListingProductEntity> products,  List<PlpListItem> listItems,  int? totalRecords,  int currentPage,  bool hasMore,  bool isLoadingMore,  PlpFilterEntity? plpFilter,  List<BannerEntity> banners,  Map<String, String> appliedFilters,  String? screenName,  String? screenSubtitle,  String? errorMessage,  QueryCorrectionEntity? queryCorrection,  int? currentOrderRule,  List<MessageBarEntity> messageBars,  PageType pageType)  $default,) {final _that = this;
 switch (_that) {
 case _PlpState():
-return $default(_that.status,_that.products,_that.listItems,_that.totalRecords,_that.currentPage,_that.hasMore,_that.isLoadingMore,_that.plpFilter,_that.banners,_that.appliedFilters,_that.screenName,_that.screenSubtitle,_that.errorMessage,_that.queryCorrection,_that.currentOrderRule,_that.messageBars);case _:
+return $default(_that.status,_that.products,_that.listItems,_that.totalRecords,_that.currentPage,_that.hasMore,_that.isLoadingMore,_that.plpFilter,_that.banners,_that.appliedFilters,_that.screenName,_that.screenSubtitle,_that.errorMessage,_that.queryCorrection,_that.currentOrderRule,_that.messageBars,_that.pageType);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -923,10 +930,10 @@ return $default(_that.status,_that.products,_that.listItems,_that.totalRecords,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PlpStatus status,  List<ListingProductEntity> products,  List<PlpListItem> listItems,  int? totalRecords,  int currentPage,  bool hasMore,  bool isLoadingMore,  PlpFilterEntity? plpFilter,  List<BannerEntity> banners,  Map<String, String> appliedFilters,  String? screenName,  String? screenSubtitle,  String? errorMessage,  QueryCorrectionEntity? queryCorrection,  int? currentOrderRule,  List<MessageBarEntity> messageBars)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PlpStatus status,  List<ListingProductEntity> products,  List<PlpListItem> listItems,  int? totalRecords,  int currentPage,  bool hasMore,  bool isLoadingMore,  PlpFilterEntity? plpFilter,  List<BannerEntity> banners,  Map<String, String> appliedFilters,  String? screenName,  String? screenSubtitle,  String? errorMessage,  QueryCorrectionEntity? queryCorrection,  int? currentOrderRule,  List<MessageBarEntity> messageBars,  PageType pageType)?  $default,) {final _that = this;
 switch (_that) {
 case _PlpState() when $default != null:
-return $default(_that.status,_that.products,_that.listItems,_that.totalRecords,_that.currentPage,_that.hasMore,_that.isLoadingMore,_that.plpFilter,_that.banners,_that.appliedFilters,_that.screenName,_that.screenSubtitle,_that.errorMessage,_that.queryCorrection,_that.currentOrderRule,_that.messageBars);case _:
+return $default(_that.status,_that.products,_that.listItems,_that.totalRecords,_that.currentPage,_that.hasMore,_that.isLoadingMore,_that.plpFilter,_that.banners,_that.appliedFilters,_that.screenName,_that.screenSubtitle,_that.errorMessage,_that.queryCorrection,_that.currentOrderRule,_that.messageBars,_that.pageType);case _:
   return null;
 
 }
@@ -938,7 +945,7 @@ return $default(_that.status,_that.products,_that.listItems,_that.totalRecords,_
 
 
 class _PlpState implements PlpState {
-  const _PlpState({this.status = PlpStatus.initial, final  List<ListingProductEntity> products = const [], final  List<PlpListItem> listItems = const [], this.totalRecords, this.currentPage = 0, this.hasMore = false, this.isLoadingMore = false, this.plpFilter, final  List<BannerEntity> banners = const [], final  Map<String, String> appliedFilters = const {}, this.screenName, this.screenSubtitle, this.errorMessage, this.queryCorrection, this.currentOrderRule, final  List<MessageBarEntity> messageBars = const <MessageBarEntity>[]}): _products = products,_listItems = listItems,_banners = banners,_appliedFilters = appliedFilters,_messageBars = messageBars;
+  const _PlpState({this.status = PlpStatus.initial, final  List<ListingProductEntity> products = const [], final  List<PlpListItem> listItems = const [], this.totalRecords, this.currentPage = 0, this.hasMore = false, this.isLoadingMore = false, this.plpFilter, final  List<BannerEntity> banners = const [], final  Map<String, String> appliedFilters = const {}, this.screenName, this.screenSubtitle, this.errorMessage, this.queryCorrection, this.currentOrderRule, final  List<MessageBarEntity> messageBars = const <MessageBarEntity>[], this.pageType = PageType.plp}): _products = products,_listItems = listItems,_banners = banners,_appliedFilters = appliedFilters,_messageBars = messageBars;
   
 
 @override@JsonKey() final  PlpStatus status;
@@ -987,6 +994,13 @@ class _PlpState implements PlpState {
   return EqualUnmodifiableListView(_messageBars);
 }
 
+/// Which kind of listing this is. Retained from [LoadPlpData] because
+/// analytics needs it: `from_page` on every PDP event is `"boutique"` for a
+/// boutique and `"plp"` for a category listing, and Android distinguishes
+/// them (`PLPProductViewModel.java:171` vs
+/// `ProductListPageActivity.java:794`). Nothing else reads it — the query
+/// builder keeps its own copy for endpoint selection.
+@override@JsonKey() final  PageType pageType;
 
 /// Create a copy of PlpState
 /// with the given fields replaced by the non-null parameter values.
@@ -998,16 +1012,16 @@ _$PlpStateCopyWith<_PlpState> get copyWith => __$PlpStateCopyWithImpl<_PlpState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlpState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._products, _products)&&const DeepCollectionEquality().equals(other._listItems, _listItems)&&(identical(other.totalRecords, totalRecords) || other.totalRecords == totalRecords)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.plpFilter, plpFilter) || other.plpFilter == plpFilter)&&const DeepCollectionEquality().equals(other._banners, _banners)&&const DeepCollectionEquality().equals(other._appliedFilters, _appliedFilters)&&(identical(other.screenName, screenName) || other.screenName == screenName)&&(identical(other.screenSubtitle, screenSubtitle) || other.screenSubtitle == screenSubtitle)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.queryCorrection, queryCorrection) || other.queryCorrection == queryCorrection)&&(identical(other.currentOrderRule, currentOrderRule) || other.currentOrderRule == currentOrderRule)&&const DeepCollectionEquality().equals(other._messageBars, _messageBars));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlpState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._products, _products)&&const DeepCollectionEquality().equals(other._listItems, _listItems)&&(identical(other.totalRecords, totalRecords) || other.totalRecords == totalRecords)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.plpFilter, plpFilter) || other.plpFilter == plpFilter)&&const DeepCollectionEquality().equals(other._banners, _banners)&&const DeepCollectionEquality().equals(other._appliedFilters, _appliedFilters)&&(identical(other.screenName, screenName) || other.screenName == screenName)&&(identical(other.screenSubtitle, screenSubtitle) || other.screenSubtitle == screenSubtitle)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.queryCorrection, queryCorrection) || other.queryCorrection == queryCorrection)&&(identical(other.currentOrderRule, currentOrderRule) || other.currentOrderRule == currentOrderRule)&&const DeepCollectionEquality().equals(other._messageBars, _messageBars)&&(identical(other.pageType, pageType) || other.pageType == pageType));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_products),const DeepCollectionEquality().hash(_listItems),totalRecords,currentPage,hasMore,isLoadingMore,plpFilter,const DeepCollectionEquality().hash(_banners),const DeepCollectionEquality().hash(_appliedFilters),screenName,screenSubtitle,errorMessage,queryCorrection,currentOrderRule,const DeepCollectionEquality().hash(_messageBars));
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_products),const DeepCollectionEquality().hash(_listItems),totalRecords,currentPage,hasMore,isLoadingMore,plpFilter,const DeepCollectionEquality().hash(_banners),const DeepCollectionEquality().hash(_appliedFilters),screenName,screenSubtitle,errorMessage,queryCorrection,currentOrderRule,const DeepCollectionEquality().hash(_messageBars),pageType);
 
 @override
 String toString() {
-  return 'PlpState(status: $status, products: $products, listItems: $listItems, totalRecords: $totalRecords, currentPage: $currentPage, hasMore: $hasMore, isLoadingMore: $isLoadingMore, plpFilter: $plpFilter, banners: $banners, appliedFilters: $appliedFilters, screenName: $screenName, screenSubtitle: $screenSubtitle, errorMessage: $errorMessage, queryCorrection: $queryCorrection, currentOrderRule: $currentOrderRule, messageBars: $messageBars)';
+  return 'PlpState(status: $status, products: $products, listItems: $listItems, totalRecords: $totalRecords, currentPage: $currentPage, hasMore: $hasMore, isLoadingMore: $isLoadingMore, plpFilter: $plpFilter, banners: $banners, appliedFilters: $appliedFilters, screenName: $screenName, screenSubtitle: $screenSubtitle, errorMessage: $errorMessage, queryCorrection: $queryCorrection, currentOrderRule: $currentOrderRule, messageBars: $messageBars, pageType: $pageType)';
 }
 
 
@@ -1018,7 +1032,7 @@ abstract mixin class _$PlpStateCopyWith<$Res> implements $PlpStateCopyWith<$Res>
   factory _$PlpStateCopyWith(_PlpState value, $Res Function(_PlpState) _then) = __$PlpStateCopyWithImpl;
 @override @useResult
 $Res call({
- PlpStatus status, List<ListingProductEntity> products, List<PlpListItem> listItems, int? totalRecords, int currentPage, bool hasMore, bool isLoadingMore, PlpFilterEntity? plpFilter, List<BannerEntity> banners, Map<String, String> appliedFilters, String? screenName, String? screenSubtitle, String? errorMessage, QueryCorrectionEntity? queryCorrection, int? currentOrderRule, List<MessageBarEntity> messageBars
+ PlpStatus status, List<ListingProductEntity> products, List<PlpListItem> listItems, int? totalRecords, int currentPage, bool hasMore, bool isLoadingMore, PlpFilterEntity? plpFilter, List<BannerEntity> banners, Map<String, String> appliedFilters, String? screenName, String? screenSubtitle, String? errorMessage, QueryCorrectionEntity? queryCorrection, int? currentOrderRule, List<MessageBarEntity> messageBars, PageType pageType
 });
 
 
@@ -1035,7 +1049,7 @@ class __$PlpStateCopyWithImpl<$Res>
 
 /// Create a copy of PlpState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? products = null,Object? listItems = null,Object? totalRecords = freezed,Object? currentPage = null,Object? hasMore = null,Object? isLoadingMore = null,Object? plpFilter = freezed,Object? banners = null,Object? appliedFilters = null,Object? screenName = freezed,Object? screenSubtitle = freezed,Object? errorMessage = freezed,Object? queryCorrection = freezed,Object? currentOrderRule = freezed,Object? messageBars = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? products = null,Object? listItems = null,Object? totalRecords = freezed,Object? currentPage = null,Object? hasMore = null,Object? isLoadingMore = null,Object? plpFilter = freezed,Object? banners = null,Object? appliedFilters = null,Object? screenName = freezed,Object? screenSubtitle = freezed,Object? errorMessage = freezed,Object? queryCorrection = freezed,Object? currentOrderRule = freezed,Object? messageBars = null,Object? pageType = null,}) {
   return _then(_PlpState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as PlpStatus,products: null == products ? _self._products : products // ignore: cast_nullable_to_non_nullable
@@ -1053,7 +1067,8 @@ as String?,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMes
 as String?,queryCorrection: freezed == queryCorrection ? _self.queryCorrection : queryCorrection // ignore: cast_nullable_to_non_nullable
 as QueryCorrectionEntity?,currentOrderRule: freezed == currentOrderRule ? _self.currentOrderRule : currentOrderRule // ignore: cast_nullable_to_non_nullable
 as int?,messageBars: null == messageBars ? _self._messageBars : messageBars // ignore: cast_nullable_to_non_nullable
-as List<MessageBarEntity>,
+as List<MessageBarEntity>,pageType: null == pageType ? _self.pageType : pageType // ignore: cast_nullable_to_non_nullable
+as PageType,
   ));
 }
 

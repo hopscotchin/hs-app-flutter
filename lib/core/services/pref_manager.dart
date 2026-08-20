@@ -33,8 +33,7 @@ class PrefManager {
   // AppRecordData session-tracking fields written by CookiesBasedEventsUtil.
 
   int get sessionCount => _prefs.getInt(StorageKeys.sessionCount) ?? 0;
-  Future<void> setSessionCount(int value) =>
-      _prefs.setInt(StorageKeys.sessionCount, value);
+  Future<void> setSessionCount(int value) => _prefs.setInt(StorageKeys.sessionCount, value);
 
   String? get startSessionId => _prefs.getString(StorageKeys.startSessionId);
   Future<void> setStartSessionId(String? value) =>
@@ -45,6 +44,7 @@ class PrefManager {
       _setStringOrRemove(StorageKeys.currentUserType, value);
 
   String? get previousExperiments => _prefs.getString(StorageKeys.previousExperiments);
+
   Future<void> setPreviousExperiments(String? value) =>
       _setStringOrRemove(StorageKeys.previousExperiments, value);
 
@@ -198,20 +198,17 @@ class PrefManager {
   // ─── Analytics ────────────────────────────────────────────────────
 
   String? get cleverTapId => _prefs.getString(StorageKeys.cleverTapId);
-  Future<void> setCleverTapId(String? value) =>
-      _setStringOrRemove(StorageKeys.cleverTapId, value);
+  Future<void> setCleverTapId(String? value) => _setStringOrRemove(StorageKeys.cleverTapId, value);
 
   /// JSON blob of the accumulated identify-trait union. Read on
   /// `AnalyticsService` init to hydrate `_accumulatedTraits`; rewritten on
   /// every `identify()` call. Cleared by `reset()`.
-  String? get accumulatedTraits =>
-      _prefs.getString(StorageKeys.accumulatedTraits);
+  String? get accumulatedTraits => _prefs.getString(StorageKeys.accumulatedTraits);
   Future<void> setAccumulatedTraits(String? value) =>
       _setStringOrRemove(StorageKeys.accumulatedTraits, value);
 
   String? get hsDeviceId => _prefs.getString(StorageKeys.hsDeviceId);
-  Future<void> setHsDeviceId(String? value) =>
-      _setStringOrRemove(StorageKeys.hsDeviceId, value);
+  Future<void> setHsDeviceId(String? value) => _setStringOrRemove(StorageKeys.hsDeviceId, value);
 
   String? get advertisingId => _prefs.getString(StorageKeys.advertisingId);
   Future<void> setAdvertisingId(String? value) =>
@@ -225,8 +222,7 @@ class PrefManager {
   // is the change-detection cache.
 
   String? get userType => _prefs.getString(StorageKeys.userType);
-  Future<void> setUserType(String? value) =>
-      _setStringOrRemove(StorageKeys.userType, value);
+  Future<void> setUserType(String? value) => _setStringOrRemove(StorageKeys.userType, value);
 
   String? get segmentUserType => _prefs.getString(StorageKeys.segmentUserType);
   Future<void> setSegmentUserType(String? value) =>
@@ -235,8 +231,7 @@ class PrefManager {
   /// Set at ATC time by the cart repository. Survives `order_placed` (unlike
   /// [segmentUserType]) — see checkout_chain.md.
   String? get atcUserType => _prefs.getString(StorageKeys.atcUserType);
-  Future<void> setAtcUserType(String? value) =>
-      _setStringOrRemove(StorageKeys.atcUserType, value);
+  Future<void> setAtcUserType(String? value) => _setStringOrRemove(StorageKeys.atcUserType, value);
 
   /// Set during checkout flow. Survives `order_placed`.
   String? get checkoutFlowUserType => _prefs.getString(StorageKeys.checkoutFlowUserType);
@@ -254,22 +249,19 @@ class PrefManager {
   /// Defaults to true on a fresh install. Flipped to false after the first
   /// identify-on-session-change fires `visitor_type = "new visitor"`.
   bool get isNewVisitor => _prefs.getBool(StorageKeys.isNewVisitor) ?? true;
-  Future<void> setIsNewVisitor(bool value) =>
-      _prefs.setBool(StorageKeys.isNewVisitor, value);
+  Future<void> setIsNewVisitor(bool value) => _prefs.setBool(StorageKeys.isNewVisitor, value);
 
   // ─── Analytics: lifecycle / install detection ─────────────────────
 
   /// Defaults to true on fresh install. Flipped to false by
   /// AnalyticsHelper.fireLifeCycleEvents after deciding install_type = "New".
   bool get isFirstInstall => _prefs.getBool(StorageKeys.isFirstInstall) ?? true;
-  Future<void> setIsFirstInstall(bool value) =>
-      _prefs.setBool(StorageKeys.isFirstInstall, value);
+  Future<void> setIsFirstInstall(bool value) => _prefs.setBool(StorageKeys.isFirstInstall, value);
 
   /// Defaults to true so `application_opened` fires once on the first cold
   /// start of a session. Lifecycle observer sets true when app moves to
   /// foreground; fireApplicationOpenedEvent flips back to false after firing.
-  bool get applicationStatusFlag =>
-      _prefs.getBool(StorageKeys.applicationStatusFlag) ?? true;
+  bool get applicationStatusFlag => _prefs.getBool(StorageKeys.applicationStatusFlag) ?? true;
   Future<void> setApplicationStatusFlag(bool value) =>
       _prefs.setBool(StorageKeys.applicationStatusFlag, value);
 
@@ -282,8 +274,7 @@ class PrefManager {
       _prefs.setInt(StorageKeys.cachedVersionCode, value);
 
   bool get isUpdated => _prefs.getBool(StorageKeys.isUpdated) ?? false;
-  Future<void> setIsUpdated(bool value) =>
-      _prefs.setBool(StorageKeys.isUpdated, value);
+  Future<void> setIsUpdated(bool value) => _prefs.setBool(StorageKeys.isUpdated, value);
 
   // ─── Analytics: device probes (read by application_opened) ────────
 
@@ -291,8 +282,7 @@ class PrefManager {
   Future<void> setDeviceProfile(String? value) =>
       _setStringOrRemove(StorageKeys.deviceProfile, value);
 
-  bool get isDeviceProfileSet =>
-      _prefs.getBool(StorageKeys.isDeviceProfileSet) ?? false;
+  bool get isDeviceProfileSet => _prefs.getBool(StorageKeys.isDeviceProfileSet) ?? false;
   Future<void> setIsDeviceProfileSet(bool value) =>
       _prefs.setBool(StorageKeys.isDeviceProfileSet, value);
 
@@ -301,24 +291,19 @@ class PrefManager {
       _prefs.setBool(StorageKeys.pushEnabled, value);
 
   bool get isFbAvailable => _prefs.getBool(StorageKeys.isFbAvailable) ?? false;
-  Future<void> setIsFbAvailable(bool value) =>
-      _prefs.setBool(StorageKeys.isFbAvailable, value);
+  Future<void> setIsFbAvailable(bool value) => _prefs.setBool(StorageKeys.isFbAvailable, value);
 
   bool get isWaAvailable => _prefs.getBool(StorageKeys.isWaAvailable) ?? false;
-  Future<void> setIsWaAvailable(bool value) =>
-      _prefs.setBool(StorageKeys.isWaAvailable, value);
+  Future<void> setIsWaAvailable(bool value) => _prefs.setBool(StorageKeys.isWaAvailable, value);
 
   bool get isFcAvailable => _prefs.getBool(StorageKeys.isFcAvailable) ?? false;
-  Future<void> setIsFcAvailable(bool value) =>
-      _prefs.setBool(StorageKeys.isFcAvailable, value);
+  Future<void> setIsFcAvailable(bool value) => _prefs.setBool(StorageKeys.isFcAvailable, value);
 
   bool get isMyAvailable => _prefs.getBool(StorageKeys.isMyAvailable) ?? false;
-  Future<void> setIsMyAvailable(bool value) =>
-      _prefs.setBool(StorageKeys.isMyAvailable, value);
+  Future<void> setIsMyAvailable(bool value) => _prefs.setBool(StorageKeys.isMyAvailable, value);
 
   bool get isDeviceRooted => _prefs.getBool(StorageKeys.isDeviceRooted) ?? false;
-  Future<void> setIsDeviceRooted(bool value) =>
-      _prefs.setBool(StorageKeys.isDeviceRooted, value);
+  Future<void> setIsDeviceRooted(bool value) => _prefs.setBool(StorageKeys.isDeviceRooted, value);
 
   // ─── Analytics: misc ──────────────────────────────────────────────
 
@@ -327,8 +312,7 @@ class PrefManager {
       _setStringOrRemove(StorageKeys.homePageSkin, value);
 
   bool get isOrderPaid => _prefs.getBool(StorageKeys.isOrderPaid) ?? false;
-  Future<void> setIsOrderPaid(bool value) =>
-      _prefs.setBool(StorageKeys.isOrderPaid, value);
+  Future<void> setIsOrderPaid(bool value) => _prefs.setBool(StorageKeys.isOrderPaid, value);
 
   /// Snapshot of attribution params taken at shell mount / tab change /
   /// app resume, used by `logScrollEvent(useSavedAttribution: true)`.
@@ -340,32 +324,25 @@ class PrefManager {
   // ─── Analytics: UTM disk mirror (UtmHeaderUtil) ───────────────────
 
   String? get utmSource => _prefs.getString(StorageKeys.utmSource);
-  Future<void> setUtmSource(String? value) =>
-      _setStringOrRemove(StorageKeys.utmSource, value);
+  Future<void> setUtmSource(String? value) => _setStringOrRemove(StorageKeys.utmSource, value);
 
   String? get utmMedium => _prefs.getString(StorageKeys.utmMedium);
-  Future<void> setUtmMedium(String? value) =>
-      _setStringOrRemove(StorageKeys.utmMedium, value);
+  Future<void> setUtmMedium(String? value) => _setStringOrRemove(StorageKeys.utmMedium, value);
 
   String? get utmCampaign => _prefs.getString(StorageKeys.utmCampaign);
-  Future<void> setUtmCampaign(String? value) =>
-      _setStringOrRemove(StorageKeys.utmCampaign, value);
+  Future<void> setUtmCampaign(String? value) => _setStringOrRemove(StorageKeys.utmCampaign, value);
 
   String? get utmContent => _prefs.getString(StorageKeys.utmContent);
-  Future<void> setUtmContent(String? value) =>
-      _setStringOrRemove(StorageKeys.utmContent, value);
+  Future<void> setUtmContent(String? value) => _setStringOrRemove(StorageKeys.utmContent, value);
 
   String? get utmTerm => _prefs.getString(StorageKeys.utmTerm);
-  Future<void> setUtmTerm(String? value) =>
-      _setStringOrRemove(StorageKeys.utmTerm, value);
+  Future<void> setUtmTerm(String? value) => _setStringOrRemove(StorageKeys.utmTerm, value);
 
   String? get utmGender => _prefs.getString(StorageKeys.utmGender);
-  Future<void> setUtmGender(String? value) =>
-      _setStringOrRemove(StorageKeys.utmGender, value);
+  Future<void> setUtmGender(String? value) => _setStringOrRemove(StorageKeys.utmGender, value);
 
   String? get utmDeeplink => _prefs.getString(StorageKeys.utmDeeplink);
-  Future<void> setUtmDeeplink(String? value) =>
-      _setStringOrRemove(StorageKeys.utmDeeplink, value);
+  Future<void> setUtmDeeplink(String? value) => _setStringOrRemove(StorageKeys.utmDeeplink, value);
 
   // ─── Environment ──────────────────────────────────────────────────
 
@@ -381,8 +358,7 @@ class PrefManager {
 
   /// Id of the address last selected from the pincode bottom sheet. `null`
   /// when the user last applied a raw pincode instead of picking an address.
-  int? get lastSelectedPincodeAddressId =>
-      _prefs.getInt(StorageKeys.lastSelectedPincodeAddressId);
+  int? get lastSelectedPincodeAddressId => _prefs.getInt(StorageKeys.lastSelectedPincodeAddressId);
   Future<void> setLastSelectedPincodeAddressId(int? value) =>
       _setIntOrRemove(StorageKeys.lastSelectedPincodeAddressId, value);
 

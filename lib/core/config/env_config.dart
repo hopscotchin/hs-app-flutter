@@ -41,8 +41,12 @@ class EnvConfig {
   // Segment — ingestion endpoints (mirror Android APIConstants.SEGMENT_DEBUG /
   // SEGMENT_RELEASE). Stored hostname-only without scheme; the SDK prepends https.
   static String get segmentDebugUrl => dotenv.env['SEGMENT_DEBUG_URL'] ?? '';
-  static String get segmentReleaseUrl =>
-      dotenv.env['SEGMENT_RELEASE_URL'] ?? '';
+  static String get segmentReleaseUrl => dotenv.env['SEGMENT_RELEASE_URL'] ?? '';
+
+  // HTTP Toolkit Proxy
+  static bool get enableHttpToolkitProxy => dotenv.env['ENABLE_HTTP_TOOLKIT_PROXY'] == 'true';
+  // static String get proxyHost => dotenv.env['PROXY_HOST'] ?? '127.0.0.1';
+  // static int get proxyPort => int.parse(dotenv.env['PROXY_PORT'] ?? '8000');
 
   // Analytics — Segment write keys + computed per-build accessors.
   static String get analyticsDebugKey => dotenv.env['ANALYTICS_DEBUG'] ?? '';
@@ -50,13 +54,11 @@ class EnvConfig {
 
   /// Write key picked at runtime via kReleaseMode — debug keys go to the
   /// dev Segment workspace, release keys to production.
-  static String get segmentWriteKey =>
-      kReleaseMode ? analyticsReleaseKey : analyticsDebugKey;
+  static String get segmentWriteKey => kReleaseMode ? analyticsReleaseKey : analyticsDebugKey;
 
   /// Segment ingestion host (proxied through hopscotch.in to bypass ad-blockers).
   /// Returned as hostname + path with no scheme.
-  static String get segmentApiHost =>
-      kReleaseMode ? segmentReleaseUrl : segmentDebugUrl;
+  static String get segmentApiHost => kReleaseMode ? segmentReleaseUrl : segmentDebugUrl;
 
   // AppsFlyer — single dev key for both platforms (matches Android setup).
   static String get appsFlyerKey => dotenv.env['APPSFLYER_KEY'] ?? '';
@@ -86,7 +88,4 @@ class EnvConfig {
     final raw = dotenv.env['APPLE_APP_ID'] ?? '';
     return raw.startsWith('id') ? raw.substring(2) : raw;
   }
-
-  // HTTP Toolkit Proxy
-  static bool get enableHttpToolkitProxy => dotenv.env['ENABLE_HTTP_TOOLKIT_PROXY'] == 'true';
 }

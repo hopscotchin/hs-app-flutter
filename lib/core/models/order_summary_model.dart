@@ -1,4 +1,5 @@
 import '../entities/order_summary_entity.dart';
+import 'order_total_summary_model.dart';
 import 'pricing_item_model.dart';
 
 class OrderSummaryModel extends OrderSummaryEntity {
@@ -7,16 +8,12 @@ class OrderSummaryModel extends OrderSummaryEntity {
     super.subText,
     super.pricingData,
     super.totalOrderAmount,
-    super.totalAmount,
-    super.itemCount,
+    super.totalOrderSummary,
   });
 
-  factory OrderSummaryModel.fromJson(
-    Map<String, dynamic> json, {
-    int? itemCount,
-    int? totalAmount,
-  }) {
+  factory OrderSummaryModel.fromJson(Map<String, dynamic> json) {
     final totalOrderJson = json['totalOrderAmount'] as Map<String, dynamic>?;
+    final totalOrderSummaryJson = json['totalOrderSummary'] as Map<String, dynamic>?;
     return OrderSummaryModel(
       sectionTitle: json['sectionTitle'] as String?,
       subText: json['subText'] as String?,
@@ -25,16 +22,10 @@ class OrderSummaryModel extends OrderSummaryEntity {
               ?.map((e) => PricingItemModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
-      totalOrderAmount: totalOrderJson != null
-          ? PricingItemModel.fromJson(totalOrderJson)
+      totalOrderAmount: totalOrderJson != null ? PricingItemModel.fromJson(totalOrderJson) : null,
+      totalOrderSummary: totalOrderSummaryJson != null
+          ? OrderTotalSummaryModel.fromJson(totalOrderSummaryJson)
           : null,
-      totalAmount:
-          totalAmount ??
-          json['totalAmount'] as int? ??
-          json['grandTotal'] as int? ??
-          json['total'] as int?,
-      itemCount:
-          itemCount ?? json['itemCount'] as int? ?? json['totalItems'] as int?,
     );
   }
 }

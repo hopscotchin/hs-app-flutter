@@ -42,7 +42,9 @@ class AppTheme {
         backgroundColor: AppColors.baseDefault,
         foregroundColor: AppColors.neutralBlack,
         systemOverlayStyle: systemUiLight,
-        titleTextStyle: AppTypography.titleLarge.copyWith(color: AppColors.neutralBlack),
+        titleTextStyle: AppTypography.titleLarge.copyWith(
+          color: AppColors.neutralBlack,
+        ),
       ),
 
       // Bottom Navigation
@@ -60,9 +62,13 @@ class AppTheme {
         indicatorColor: AppColors.brandDefault.withValues(alpha: 0.2),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppTypography.labelMedium.copyWith(color: AppColors.brandDefault);
+            return AppTypography.labelMedium.copyWith(
+              color: AppColors.brandDefault,
+            );
           }
-          return AppTypography.labelMedium.copyWith(color: AppColors.neutralBlack);
+          return AppTypography.labelMedium.copyWith(
+            color: AppColors.neutralBlack,
+          );
         }),
       ),
 
@@ -125,9 +131,16 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.dangerSecondary),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.neutralGrey5),
-        labelStyle: AppTypography.bodyMedium.copyWith(color: AppColors.neutralGrey5),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        hintStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.neutralGrey5,
+        ),
+        labelStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.neutralGrey5,
+        ),
       ),
 
       // Card
@@ -150,8 +163,12 @@ class AppTheme {
         backgroundColor: AppColors.baseDefault,
         elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        titleTextStyle: AppTypography.headlineSmall.copyWith(color: AppColors.brandDefault),
-        contentTextStyle: AppTypography.bodyMedium.copyWith(color: AppColors.brandSecondary),
+        titleTextStyle: AppTypography.headlineSmall.copyWith(
+          color: AppColors.brandDefault,
+        ),
+        contentTextStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.brandSecondary,
+        ),
       ),
 
       // Bottom Sheet
@@ -161,20 +178,27 @@ class AppTheme {
         dragHandleSize: Size(24, 2),
         showDragHandle: true,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.radiusLg),
+          ),
         ),
       ),
 
       // Snackbar
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.neutralBlack,
-        contentTextStyle: AppTypography.bodyMedium.copyWith(color: AppColors.baseDefault),
+        contentTextStyle: AppTypography.bodyMedium.copyWith(
+          color: AppColors.baseDefault,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         behavior: SnackBarBehavior.floating,
       ),
 
       // Divider
-      dividerTheme: const DividerThemeData(color: AppColors.neutralGrey5, thickness: 1),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.neutralGrey5,
+        thickness: 1,
+      ),
 
       // Progress Indicator
       progressIndicatorTheme: const ProgressIndicatorThemeData(

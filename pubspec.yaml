@@ -11,6 +11,12 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Collection utilities (mapIndexed, firstWhereOrNull, groupBy, etc.)
+  collection: ^1.19.1
+
+  # Speech-bubble tooltips with a directional arrow/pointer
+  super_tooltip: ^2.0.9
+
   # State Management - BLoC
   flutter_bloc: ^9.1.1
 

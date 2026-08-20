@@ -14,7 +14,12 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProductDetailEntity {
 
- String? get action; String? get message; List<BannerEntity> get banners; ProductEntity? get product; List<OfferEntity> get offersList; RecentlyViewedEntity? get recentlyViewed;
+ String? get action; String? get message; List<BannerEntity> get banners; ProductEntity? get product; List<OfferEntity> get offersList; RecentlyViewedEntity? get recentlyViewed;/// `offersList.trackingMeta`, carried as a plain map.
+///
+/// Analytics-only — read it with `pdpCouponApplicable` to get
+/// `coupon_applicable`. Kept unmodelled so a new promo tracking field needs no
+/// app release.
+ Map<String, dynamic>? get offersTrackingMeta;
 /// Create a copy of ProductDetailEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +30,16 @@ $ProductDetailEntityCopyWith<ProductDetailEntity> get copyWith => _$ProductDetai
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductDetailEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other.banners, banners)&&(identical(other.product, product) || other.product == product)&&const DeepCollectionEquality().equals(other.offersList, offersList)&&(identical(other.recentlyViewed, recentlyViewed) || other.recentlyViewed == recentlyViewed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductDetailEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other.banners, banners)&&(identical(other.product, product) || other.product == product)&&const DeepCollectionEquality().equals(other.offersList, offersList)&&(identical(other.recentlyViewed, recentlyViewed) || other.recentlyViewed == recentlyViewed)&&const DeepCollectionEquality().equals(other.offersTrackingMeta, offersTrackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,action,message,const DeepCollectionEquality().hash(banners),product,const DeepCollectionEquality().hash(offersList),recentlyViewed);
+int get hashCode => Object.hash(runtimeType,action,message,const DeepCollectionEquality().hash(banners),product,const DeepCollectionEquality().hash(offersList),recentlyViewed,const DeepCollectionEquality().hash(offersTrackingMeta));
 
 @override
 String toString() {
-  return 'ProductDetailEntity(action: $action, message: $message, banners: $banners, product: $product, offersList: $offersList, recentlyViewed: $recentlyViewed)';
+  return 'ProductDetailEntity(action: $action, message: $message, banners: $banners, product: $product, offersList: $offersList, recentlyViewed: $recentlyViewed, offersTrackingMeta: $offersTrackingMeta)';
 }
 
 
@@ -45,7 +50,7 @@ abstract mixin class $ProductDetailEntityCopyWith<$Res>  {
   factory $ProductDetailEntityCopyWith(ProductDetailEntity value, $Res Function(ProductDetailEntity) _then) = _$ProductDetailEntityCopyWithImpl;
 @useResult
 $Res call({
- String? action, String? message, List<BannerEntity> banners, ProductEntity? product, List<OfferEntity> offersList, RecentlyViewedEntity? recentlyViewed
+ String? action, String? message, List<BannerEntity> banners, ProductEntity? product, List<OfferEntity> offersList, RecentlyViewedEntity? recentlyViewed, Map<String, dynamic>? offersTrackingMeta
 });
 
 
@@ -62,7 +67,7 @@ class _$ProductDetailEntityCopyWithImpl<$Res>
 
 /// Create a copy of ProductDetailEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? action = freezed,Object? message = freezed,Object? banners = null,Object? product = freezed,Object? offersList = null,Object? recentlyViewed = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? action = freezed,Object? message = freezed,Object? banners = null,Object? product = freezed,Object? offersList = null,Object? recentlyViewed = freezed,Object? offersTrackingMeta = freezed,}) {
   return _then(_self.copyWith(
 action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as String?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
@@ -70,7 +75,8 @@ as String?,banners: null == banners ? _self.banners : banners // ignore: cast_nu
 as List<BannerEntity>,product: freezed == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
 as ProductEntity?,offersList: null == offersList ? _self.offersList : offersList // ignore: cast_nullable_to_non_nullable
 as List<OfferEntity>,recentlyViewed: freezed == recentlyViewed ? _self.recentlyViewed : recentlyViewed // ignore: cast_nullable_to_non_nullable
-as RecentlyViewedEntity?,
+as RecentlyViewedEntity?,offersTrackingMeta: freezed == offersTrackingMeta ? _self.offersTrackingMeta : offersTrackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 /// Create a copy of ProductDetailEntity
@@ -179,10 +185,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? action,  String? message,  List<BannerEntity> banners,  ProductEntity? product,  List<OfferEntity> offersList,  RecentlyViewedEntity? recentlyViewed)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? action,  String? message,  List<BannerEntity> banners,  ProductEntity? product,  List<OfferEntity> offersList,  RecentlyViewedEntity? recentlyViewed,  Map<String, dynamic>? offersTrackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProductDetailEntity() when $default != null:
-return $default(_that.action,_that.message,_that.banners,_that.product,_that.offersList,_that.recentlyViewed);case _:
+return $default(_that.action,_that.message,_that.banners,_that.product,_that.offersList,_that.recentlyViewed,_that.offersTrackingMeta);case _:
   return orElse();
 
 }
@@ -200,10 +206,10 @@ return $default(_that.action,_that.message,_that.banners,_that.product,_that.off
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? action,  String? message,  List<BannerEntity> banners,  ProductEntity? product,  List<OfferEntity> offersList,  RecentlyViewedEntity? recentlyViewed)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? action,  String? message,  List<BannerEntity> banners,  ProductEntity? product,  List<OfferEntity> offersList,  RecentlyViewedEntity? recentlyViewed,  Map<String, dynamic>? offersTrackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _ProductDetailEntity():
-return $default(_that.action,_that.message,_that.banners,_that.product,_that.offersList,_that.recentlyViewed);case _:
+return $default(_that.action,_that.message,_that.banners,_that.product,_that.offersList,_that.recentlyViewed,_that.offersTrackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -220,10 +226,10 @@ return $default(_that.action,_that.message,_that.banners,_that.product,_that.off
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? action,  String? message,  List<BannerEntity> banners,  ProductEntity? product,  List<OfferEntity> offersList,  RecentlyViewedEntity? recentlyViewed)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? action,  String? message,  List<BannerEntity> banners,  ProductEntity? product,  List<OfferEntity> offersList,  RecentlyViewedEntity? recentlyViewed,  Map<String, dynamic>? offersTrackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _ProductDetailEntity() when $default != null:
-return $default(_that.action,_that.message,_that.banners,_that.product,_that.offersList,_that.recentlyViewed);case _:
+return $default(_that.action,_that.message,_that.banners,_that.product,_that.offersList,_that.recentlyViewed,_that.offersTrackingMeta);case _:
   return null;
 
 }
@@ -235,7 +241,7 @@ return $default(_that.action,_that.message,_that.banners,_that.product,_that.off
 
 
 class _ProductDetailEntity implements ProductDetailEntity {
-  const _ProductDetailEntity({this.action, this.message, final  List<BannerEntity> banners = const [], this.product, final  List<OfferEntity> offersList = const [], this.recentlyViewed}): _banners = banners,_offersList = offersList;
+  const _ProductDetailEntity({this.action, this.message, final  List<BannerEntity> banners = const [], this.product, final  List<OfferEntity> offersList = const [], this.recentlyViewed, final  Map<String, dynamic>? offersTrackingMeta}): _banners = banners,_offersList = offersList,_offersTrackingMeta = offersTrackingMeta;
   
 
 @override final  String? action;
@@ -256,6 +262,25 @@ class _ProductDetailEntity implements ProductDetailEntity {
 }
 
 @override final  RecentlyViewedEntity? recentlyViewed;
+/// `offersList.trackingMeta`, carried as a plain map.
+///
+/// Analytics-only — read it with `pdpCouponApplicable` to get
+/// `coupon_applicable`. Kept unmodelled so a new promo tracking field needs no
+/// app release.
+ final  Map<String, dynamic>? _offersTrackingMeta;
+/// `offersList.trackingMeta`, carried as a plain map.
+///
+/// Analytics-only — read it with `pdpCouponApplicable` to get
+/// `coupon_applicable`. Kept unmodelled so a new promo tracking field needs no
+/// app release.
+@override Map<String, dynamic>? get offersTrackingMeta {
+  final value = _offersTrackingMeta;
+  if (value == null) return null;
+  if (_offersTrackingMeta is EqualUnmodifiableMapView) return _offersTrackingMeta;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of ProductDetailEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -267,16 +292,16 @@ _$ProductDetailEntityCopyWith<_ProductDetailEntity> get copyWith => __$ProductDe
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductDetailEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other._banners, _banners)&&(identical(other.product, product) || other.product == product)&&const DeepCollectionEquality().equals(other._offersList, _offersList)&&(identical(other.recentlyViewed, recentlyViewed) || other.recentlyViewed == recentlyViewed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductDetailEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other._banners, _banners)&&(identical(other.product, product) || other.product == product)&&const DeepCollectionEquality().equals(other._offersList, _offersList)&&(identical(other.recentlyViewed, recentlyViewed) || other.recentlyViewed == recentlyViewed)&&const DeepCollectionEquality().equals(other._offersTrackingMeta, _offersTrackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,action,message,const DeepCollectionEquality().hash(_banners),product,const DeepCollectionEquality().hash(_offersList),recentlyViewed);
+int get hashCode => Object.hash(runtimeType,action,message,const DeepCollectionEquality().hash(_banners),product,const DeepCollectionEquality().hash(_offersList),recentlyViewed,const DeepCollectionEquality().hash(_offersTrackingMeta));
 
 @override
 String toString() {
-  return 'ProductDetailEntity(action: $action, message: $message, banners: $banners, product: $product, offersList: $offersList, recentlyViewed: $recentlyViewed)';
+  return 'ProductDetailEntity(action: $action, message: $message, banners: $banners, product: $product, offersList: $offersList, recentlyViewed: $recentlyViewed, offersTrackingMeta: $offersTrackingMeta)';
 }
 
 
@@ -287,7 +312,7 @@ abstract mixin class _$ProductDetailEntityCopyWith<$Res> implements $ProductDeta
   factory _$ProductDetailEntityCopyWith(_ProductDetailEntity value, $Res Function(_ProductDetailEntity) _then) = __$ProductDetailEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String? action, String? message, List<BannerEntity> banners, ProductEntity? product, List<OfferEntity> offersList, RecentlyViewedEntity? recentlyViewed
+ String? action, String? message, List<BannerEntity> banners, ProductEntity? product, List<OfferEntity> offersList, RecentlyViewedEntity? recentlyViewed, Map<String, dynamic>? offersTrackingMeta
 });
 
 
@@ -304,7 +329,7 @@ class __$ProductDetailEntityCopyWithImpl<$Res>
 
 /// Create a copy of ProductDetailEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? action = freezed,Object? message = freezed,Object? banners = null,Object? product = freezed,Object? offersList = null,Object? recentlyViewed = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? action = freezed,Object? message = freezed,Object? banners = null,Object? product = freezed,Object? offersList = null,Object? recentlyViewed = freezed,Object? offersTrackingMeta = freezed,}) {
   return _then(_ProductDetailEntity(
 action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as String?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
@@ -312,7 +337,8 @@ as String?,banners: null == banners ? _self._banners : banners // ignore: cast_n
 as List<BannerEntity>,product: freezed == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
 as ProductEntity?,offersList: null == offersList ? _self._offersList : offersList // ignore: cast_nullable_to_non_nullable
 as List<OfferEntity>,recentlyViewed: freezed == recentlyViewed ? _self.recentlyViewed : recentlyViewed // ignore: cast_nullable_to_non_nullable
-as RecentlyViewedEntity?,
+as RecentlyViewedEntity?,offersTrackingMeta: freezed == offersTrackingMeta ? _self._offersTrackingMeta : offersTrackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 

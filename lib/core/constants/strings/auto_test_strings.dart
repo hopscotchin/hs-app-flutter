@@ -22,17 +22,23 @@ class AccountTestStrings {
   static const String accountHelpItemRateButton = 'account_help_item_rate_button';
 
   // Sign-in header
-  static const String accountSignInHeaderGreetingTextField = 'account_sign_in_header_greeting_text_field';
-  static const String accountSignInHeaderContactTextField = 'account_sign_in_header_contact_text_field';
+  static const String accountSignInHeaderGreetingTextField =
+      'account_sign_in_header_greeting_text_field';
+  static const String accountSignInHeaderContactTextField =
+      'account_sign_in_header_contact_text_field';
   static const String accountSignInHeaderAvatarImage = 'account_sign_in_header_avatar_image';
   static const String accountSignInHeaderAvatarInitials = 'account_sign_in_header_avatar_initials';
 
   // Sign-out header
-  static const String accountSignOutHeaderTitleTextField = 'account_sign_out_header_title_text_field';
-  static const String accountSignOutHeaderSubtitleTextField = 'account_sign_out_header_subtitle_text_field';
-  static const String accountSignOutHeaderEraseMessageTextField = 'account_sign_out_header_erase_message_text_field';
+  static const String accountSignOutHeaderTitleTextField =
+      'account_sign_out_header_title_text_field';
+  static const String accountSignOutHeaderSubtitleTextField =
+      'account_sign_out_header_subtitle_text_field';
+  static const String accountSignOutHeaderEraseMessageTextField =
+      'account_sign_out_header_erase_message_text_field';
   static const String accountSignOutHeaderSignInButton = 'account_sign_out_header_sign_in_button';
-  static const String accountSignOutHeaderForgetMeButton = 'account_sign_out_header_forget_me_button';
+  static const String accountSignOutHeaderForgetMeButton =
+      'account_sign_out_header_forget_me_button';
   static const String accountSignOutHeaderJoinUsButton = 'account_sign_out_header_join_us_button';
 
   // Account menu items
@@ -49,7 +55,8 @@ class AccountTestStrings {
 
   // Forget-me dialog
   static const String accountForgetDialogTitleTextField = 'account_forget_dialog_title_text_field';
-  static const String accountForgetDialogDescriptionTextField = 'account_forget_dialog_description_text_field';
+  static const String accountForgetDialogDescriptionTextField =
+      'account_forget_dialog_description_text_field';
   static const String accountForgetDialogCancelButton = 'account_forget_dialog_cancel_button';
   static const String accountForgetDialogConfirmButton = 'account_forget_dialog_confirm_button';
 }
@@ -101,7 +108,8 @@ class OtpVerificationTestStrings {
   static const String otpVerificationChangeButton = 'otp_verification_change_button';
   static const String otpVerificationOtpInputField = 'otp_verification_otp_input_field';
   static const String otpVerificationOtpSlotRow = 'otp_verification_otp_slot_row';
-  static const String otpVerificationResendTimerTextField = 'otp_verification_resend_timer_text_field';
+  static const String otpVerificationResendTimerTextField =
+      'otp_verification_resend_timer_text_field';
   static const String otpVerificationResendButton = 'otp_verification_resend_button';
   static const String otpVerificationBackButton = 'otp_verification_back_button';
 }
@@ -222,7 +230,8 @@ class PlpTestStrings {
   static const String discountSuffix = 'discount'; // → `plp_tile_<i>_discount`
 
   // Floating filter tile (repeats → disambiguated by section position)
-  static const String floatingFilter = 'plp_floating_filter'; // + `_<pos>_chip_<i>` / `_<pos>_apply_button`
+  static const String floatingFilter =
+      'plp_floating_filter'; // + `_<pos>_chip_<i>` / `_<pos>_apply_button`
   static const String floatingFilterChipSuffix = 'chip';
   static const String floatingFilterApplySuffix = 'apply_button';
 
@@ -262,13 +271,13 @@ class PlpTestStrings {
   // Filter section sheet (opened by sticky chips)
   static const String filterSectionSheetTitle = 'plp_filter_section_sheet_title';
   static const String filterSectionSheetOption = 'plp_filter_section_sheet_option'; // + `_<i>`
+  static const String filterSectionSheetClearButton = 'plp_filter_section_sheet_clear_button';
+  static const String filterSectionSheetApplyButton = 'plp_filter_section_sheet_apply_button';
   // Label / count text inside each option row (nest under the option index).
   static const String filterSectionSheetOptionLabelSuffix =
       'label'; // → `plp_filter_section_sheet_option_<i>_label`
   static const String filterSectionSheetOptionCountSuffix =
       'count'; // → `plp_filter_section_sheet_option_<i>_count`
-  static const String filterSectionSheetClearButton = 'plp_filter_section_sheet_clear_button';
-  static const String filterSectionSheetApplyButton = 'plp_filter_section_sheet_apply_button';
 }
 
 /// Address feature — list page (`address_list_*`) and add/edit form
@@ -290,8 +299,10 @@ class AddressTestStrings {
   // Delete-confirm bottom sheet
   static const String deleteBottomSheetTitle = 'address_list_delete_bottomsheet_title';
   static const String deleteBottomSheetDescription = 'address_list_delete_bottomsheet_description';
-  static const String deleteBottomSheetCancelButton = 'address_list_delete_bottomsheet_cancel_button';
-  static const String deleteBottomSheetConfirmButton = 'address_list_delete_bottomsheet_confirm_button';
+  static const String deleteBottomSheetCancelButton =
+      'address_list_delete_bottomsheet_cancel_button';
+  static const String deleteBottomSheetConfirmButton =
+      'address_list_delete_bottomsheet_confirm_button';
 
   // ── Add / edit form ──
   /// Screen prefix for shared-component keys (message bars → `address_form_message_bar_*`).
@@ -324,9 +335,86 @@ class AddressTestStrings {
 
   // Discard-changes bottom sheet
   static const String discardBottomSheetTitle = 'address_form_discard_bottomsheet_title';
-  static const String discardBottomSheetDescription = 'address_form_discard_bottomsheet_description';
+  static const String discardBottomSheetDescription =
+      'address_form_discard_bottomsheet_description';
   static const String discardBottomSheetStayButton = 'address_form_discard_bottomsheet_stay_button';
-  static const String discardBottomSheetDiscardButton = 'address_form_discard_bottomsheet_discard_button';
+  static const String discardBottomSheetDiscardButton =
+      'address_form_discard_bottomsheet_discard_button';
+}
+
+/// Cart screen.
+class PromoOffersTestStrings {
+  PromoOffersTestStrings();
+
+  static const String sheetTitle = 'promo_offers_sheet_title';
+  static const String emptyStateButton = 'promo_offers_empty_state_button';
+
+  /// One card per offer, flat-indexed across both (applicable /
+  /// non-applicable) sections.
+  static const String card = 'promo_offers_card'; // + `_<i>`
+  static const String codeSuffix = 'code'; // → `promo_offers_card_<i>_code`
+  // Apply and Remove are mutually exclusive, but keyed separately on purpose:
+  // which one renders *is* the applied-state assertion.
+  static const String applyButtonSuffix = 'apply_button'; // → `promo_offers_card_<i>_apply_button`
+  static const String removeButtonSuffix =
+      'remove_button'; // → `promo_offers_card_<i>_remove_button`
+  static const String termsButtonSuffix = 'terms_button'; // → `promo_offers_card_<i>_terms_button`
+  /// Backend-driven deeplink CTA.
+  static const String ctaButtonSuffix = 'cta_button'; // → `promo_offers_card_<i>_cta_button`
+}
+
+class PromoDetailsTestStrings {
+  PromoDetailsTestStrings();
+
+  static const String appBarTitle = 'promo_details_app_bar_title';
+  static const String backButton = 'promo_details_back_button';
+  static const String code = 'promo_details_code';
+  static const String title = 'promo_details_title';
+  static const String description = 'promo_details_description';
+  static const String validityText = 'promo_details_validity_text_field';
+  static const String savingsText = 'promo_details_savings_text_field';
+
+  /// Backend-driven deeplink CTA.
+  static const String ctaButton = 'promo_details_cta_button';
+
+  static const String aboutTitle = 'promo_details_about_title';
+  static const String aboutText = 'promo_details_about_text_field';
+  static const String termsTitle = 'promo_details_terms_title';
+  static const String termsItem = 'promo_details_terms_item'; // + `_<i>`
+  static const String faqTitle = 'promo_details_faq_title';
+  static const String faqItem = 'promo_details_faq_item'; // + `_<i>`
+  static const String faqQuestionSuffix = 'question'; // → `promo_details_faq_item_<i>_question`
+  static const String faqAnswerSuffix = 'answer'; // → `promo_details_faq_item_<i>_answer`
+  static const String errorText = 'promo_details_error_text_field';
+}
+
+class CartTestStrings {
+  CartTestStrings();
+
+  // ── App bar ──
+  static const String appBarBackButton = 'cart_appbar_back_button';
+
+  /// Screen prefix for the shared `ServiceGuaranteeRow` (Genuine Products /
+  /// Easy Returns / Secure Payments) → `cart_slg_item_<i>_icon` / `_label`.
+  static const String slgScreen = 'cart_slg';
+
+  // ── Promo section ──
+  static const String promoCodeInput = 'cart_promo_code_input';
+  static const String promoCodeInputHint = 'cart_promo_code_input_hint';
+  static const String promoApplyButton = 'cart_promo_apply_button';
+  static const String promoRemoveButton = 'cart_promo_remove_button';
+  static const String promoSeeAllOffersButton = 'cart_promo_see_all_offers_button';
+
+  // ── Checkout bar ──
+  static const String checkoutBarSavingsBanner = 'cart_checkout_bar_savings_banner';
+  static const String checkoutBarItemCountText = 'cart_checkout_bar_item_count_text';
+  static const String checkoutBarTotalAmountText = 'cart_checkout_bar_total_amount_text';
+  static const String checkoutBarDetailsButton = 'cart_checkout_bar_details_button';
+  static const String checkoutBarProceedButton = 'cart_checkout_bar_proceed_button';
+
+  // ── Remove item confirmation bottom sheet ──
+  static const String removeItemBottomSheetRemoveButton =
+      'cart_remove_item_bottomsheet_remove_button';
 }
 
 /// Product detail page (PDP). Keys are `pdp_<element>[_<index>]`. Dynamic lists

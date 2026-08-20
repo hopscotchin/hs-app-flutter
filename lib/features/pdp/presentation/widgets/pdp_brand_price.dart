@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../components/atoms/auto_semantics.dart';
 import '../../../../components/atoms/custom_image.dart';
 import '../../../../core/constants/image_constants.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
@@ -142,14 +143,19 @@ class _ActionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: CustomImage(
-        path: path,
-        color: color,
-        width: width,
-        height: height,
+    // Icon-only button, so there is no label for Maestro to match on — the
+    // identifier from the caller's key is the only way to address it.
+    return AutoSemantics.fromKey(
+      key,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: CustomImage(
+          path: path,
+          color: color,
+          width: width,
+          height: height,
+        ),
       ),
     );
   }

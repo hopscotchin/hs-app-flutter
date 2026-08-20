@@ -28,7 +28,8 @@ class AuthStrings {
 
   // OTP screen
   static const String waitingForOtp = 'Waiting for OTP';
-  static const String enterOtpSentToNumber = 'Enter the OTP sent to your number';
+  static const String enterOtpSentToNumber =
+      'Enter the OTP sent to your number';
   static const String change = 'CHANGE?';
   static const String resendOtpIn = 'Resend OTP in';
   static const String signInReason = 'SIGN_IN';
@@ -36,7 +37,8 @@ class AuthStrings {
   static const String getAddressReason = 'GET_ADDRESS';
 
   // Hints & helper text
-  static const String verifyNumberHint = 'Verify your number to create your account';
+  static const String verifyNumberHint =
+      'Verify your number to create your account';
   static const String mobileShippingHint =
       'Your shipping and payment details will be associated with this number';
 
@@ -61,15 +63,18 @@ class AuthStrings {
   static const String haveAccount = 'Have an account?';
   static const String newToHopscotch = 'New to Hopscotch?';
   static const String heyThere = 'Hey there!';
-  static const String signInOrJoin = 'Sign in or join to do a lot more with your Hopscotch account';
+  static const String signInOrJoin =
+      'Sign in or join to do a lot more with your Hopscotch account';
   static const String doMoreWithAccount = 'Do more with your account';
 
   // Validators
   static const String validateFullName = 'Please enter your full name';
   static const String validateEmail = 'Please enter your email';
-  static const String validateEmailFormat = 'Please enter a valid email address';
+  static const String validateEmailFormat =
+      'Please enter a valid email address';
   static const String validateMobile = 'Please enter your mobile number';
-  static const String validateMobileFormat = 'Please enter a valid 10-digit mobile number';
+  static const String validateMobileFormat =
+      'Please enter a valid 10-digit mobile number';
   static const String enterValidMobileNumber =
       "Check if you've entered a 10 digit Indian mobile number";
 }

@@ -32,32 +32,61 @@ class AppSpacing {
   static const EdgeInsets paddingXl = EdgeInsets.all(xl);
 
   // Horizontal padding
-  static const EdgeInsets paddingHorizontalXs = EdgeInsets.symmetric(horizontal: xs);
-  static const EdgeInsets paddingHorizontalSm = EdgeInsets.symmetric(horizontal: sm);
-  static const EdgeInsets paddingHorizontalMd = EdgeInsets.symmetric(horizontal: md);
-  static const EdgeInsets paddingHorizontalLg = EdgeInsets.symmetric(horizontal: lg);
+  static const EdgeInsets paddingHorizontalXs = EdgeInsets.symmetric(
+    horizontal: xs,
+  );
+  static const EdgeInsets paddingHorizontalSm = EdgeInsets.symmetric(
+    horizontal: sm,
+  );
+  static const EdgeInsets paddingHorizontalMd = EdgeInsets.symmetric(
+    horizontal: md,
+  );
+  static const EdgeInsets paddingHorizontalLg = EdgeInsets.symmetric(
+    horizontal: lg,
+  );
 
   // Vertical padding
-  static const EdgeInsets paddingVerticalXs = EdgeInsets.symmetric(vertical: xs);
-  static const EdgeInsets paddingVerticalSm = EdgeInsets.symmetric(vertical: sm);
-  static const EdgeInsets paddingVerticalMd = EdgeInsets.symmetric(vertical: md);
-  static const EdgeInsets paddingVerticalLg = EdgeInsets.symmetric(vertical: lg);
-  static const EdgeInsets paddingVerticalLgMd = EdgeInsets.symmetric(vertical: lgMd);
+  static const EdgeInsets paddingVerticalXs = EdgeInsets.symmetric(
+    vertical: xs,
+  );
+  static const EdgeInsets paddingVerticalSm = EdgeInsets.symmetric(
+    vertical: sm,
+  );
+  static const EdgeInsets paddingVerticalMd = EdgeInsets.symmetric(
+    vertical: md,
+  );
+  static const EdgeInsets paddingVerticalLg = EdgeInsets.symmetric(
+    vertical: lg,
+  );
+  static const EdgeInsets paddingVerticalLgMd = EdgeInsets.symmetric(
+    vertical: lgMd,
+  );
 
   // Screen padding (standard page padding)
   static const EdgeInsets screenPadding = EdgeInsets.all(md);
-  static const EdgeInsets screenPaddingHorizontal = EdgeInsets.symmetric(horizontal: md);
+  static const EdgeInsets screenPaddingHorizontal = EdgeInsets.symmetric(
+    horizontal: md,
+  );
 
   // Card padding
   static const EdgeInsets cardPadding = EdgeInsets.all(md);
   static const EdgeInsets cardPaddingCompact = EdgeInsets.all(sm);
 
   // List item padding
-  static const EdgeInsets listItemPadding = EdgeInsets.symmetric(horizontal: md, vertical: sm);
+  static const EdgeInsets listItemPadding = EdgeInsets.symmetric(
+    horizontal: md,
+    vertical: sm,
+  );
 
   // Button padding
-  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(horizontal: lg, vertical: sm);
-  static const EdgeInsets buttonPaddingCompact = EdgeInsets.symmetric(horizontal: md, vertical: xs);
+  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
+    horizontal: lg,
+    vertical: sm,
+  );
+  static const EdgeInsets buttonPaddingCompact = EdgeInsets.symmetric(
+    horizontal: md,
+    vertical: xs,
+  );
 
   // Gap/SizedBox helpers
   static const SizedBox gapXxs = SizedBox(height: xxs, width: xxs);
@@ -68,6 +97,7 @@ class AppSpacing {
   static const SizedBox gapXl = SizedBox(height: xl, width: xl);
 
   // Vertical gaps
+  static const SizedBox verticalGapXxxs = SizedBox(height: xxxs);
   static const SizedBox verticalGapXxs = SizedBox(height: xxs);
   static const SizedBox verticalGapXs = SizedBox(height: xs);
   static const SizedBox verticalGapXsm = SizedBox(height: xsm);
@@ -96,13 +126,27 @@ class AppSpacing {
   static const double radiusXl = 24.0;
   static const double radiusFull = 999.0;
 
-  static const BorderRadius borderRadiusXxs = BorderRadius.all(Radius.circular(radiusXxs));
-  static const BorderRadius borderRadiusXs = BorderRadius.all(Radius.circular(radiusXs));
-  static const BorderRadius borderRadiusSm = BorderRadius.all(Radius.circular(radiusSm));
-  static const BorderRadius borderRadiusMd = BorderRadius.all(Radius.circular(radiusMd));
-  static const BorderRadius borderRadiusLg = BorderRadius.all(Radius.circular(radiusLg));
-  static const BorderRadius borderRadiusXl = BorderRadius.all(Radius.circular(radiusXl));
-  static const BorderRadius borderRadiusFull = BorderRadius.all(Radius.circular(radiusFull));
+  static const BorderRadius borderRadiusXxs = BorderRadius.all(
+    Radius.circular(radiusXxs),
+  );
+  static const BorderRadius borderRadiusXs = BorderRadius.all(
+    Radius.circular(radiusXs),
+  );
+  static const BorderRadius borderRadiusSm = BorderRadius.all(
+    Radius.circular(radiusSm),
+  );
+  static const BorderRadius borderRadiusMd = BorderRadius.all(
+    Radius.circular(radiusMd),
+  );
+  static const BorderRadius borderRadiusLg = BorderRadius.all(
+    Radius.circular(radiusLg),
+  );
+  static const BorderRadius borderRadiusXl = BorderRadius.all(
+    Radius.circular(radiusXl),
+  );
+  static const BorderRadius borderRadiusFull = BorderRadius.all(
+    Radius.circular(radiusFull),
+  );
 
   // Icon sizes
   static const double iconXs = 16.0;

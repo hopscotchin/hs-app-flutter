@@ -44,7 +44,9 @@ class CartActionsCubit extends Cubit<CartActionsState> {
   /// add-to-cart can still be replayed by [resumePending] right after login.
   void clearOnAuthChange() {
     if (state.addedSkus.isEmpty && state.inFlight.isEmpty) return;
-    emit(state.copyWith(addedSkus: const <String>{}, inFlight: const <String>{}));
+    emit(
+      state.copyWith(addedSkus: const <String>{}, inFlight: const <String>{}),
+    );
   }
 
   void setPending({required String skuId, int quantity = 1}) {
@@ -62,7 +64,9 @@ class CartActionsCubit extends Cubit<CartActionsState> {
     if (state.isInFlight(skuId)) return;
     emit(state.copyWith(inFlight: {...state.inFlight, skuId}));
 
-    final result = await _addToCart(AddToCartParams(skuId: skuId, quantity: quantity));
+    final result = await _addToCart(
+      AddToCartParams(skuId: skuId, quantity: quantity),
+    );
     result.fold(
       (failure) {
         if (failure is RequestCancelledFailure) {
@@ -73,9 +77,12 @@ class CartActionsCubit extends Cubit<CartActionsState> {
         _emitFeedback(failure.message, isError: true);
       },
       (response) {
-        if (response.cartItemQty != null) _cartCountCubit.set(response.cartItemQty!);
+        if (response.cartItemQty != null)
+          _cartCountCubit.set(response.cartItemQty!);
         emit(
-          _clearInFlight(skuId).copyWith(addedSkus: {...state.addedSkus, skuId}),
+          _clearInFlight(
+            skuId,
+          ).copyWith(addedSkus: {...state.addedSkus, skuId}),
         );
         _emitFeedback(response.message ?? 'Added to bag', isError: false);
       },
@@ -83,7 +90,9 @@ class CartActionsCubit extends Cubit<CartActionsState> {
   }
 
   CartActionsState _clearInFlight(String skuId) {
-    return state.copyWith(inFlight: state.inFlight.where((s) => s != skuId).toSet());
+    return state.copyWith(
+      inFlight: state.inFlight.where((s) => s != skuId).toSet(),
+    );
   }
 
   void _emitFeedback(String message, {required bool isError}) {

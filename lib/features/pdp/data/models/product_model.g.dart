@@ -44,4 +44,5 @@ ProductModel _$ProductModelFromJson(Map<String, dynamic> json) => ProductModel(
       [],
   visualCue: json['visualCue'] as Map<String, dynamic>?,
   isGift: json['isGift'] as bool? ?? false,
+  trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
 );

@@ -9,6 +9,7 @@ class CartRoute {
     path: RouteNames.cart,
     name: RouteNames.cartName,
     parentNavigatorKey: rootKey,
-    builder: (context, state) => const CartPage(),
+    builder: (context, state) =>
+        CartPage(fromBuyNow: state.uri.queryParameters['fromBuyNow'] == 'true'),
   );
 }

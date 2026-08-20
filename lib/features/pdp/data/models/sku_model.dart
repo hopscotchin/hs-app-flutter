@@ -18,6 +18,7 @@ class SkuModel {
     this.eddInfo,
     this.info,
     this.skuAttributes,
+    this.trackingMeta,
   });
 
   @JsonKey(defaultValue: null)
@@ -38,6 +39,11 @@ class SkuModel {
   /// Flat key→value attributes (e.g. {"skuMrp": "₹1,149"}).
   @JsonKey(defaultValue: null)
   final Map<String, dynamic>? skuAttributes;
+
+  /// Per-SKU analytics block from the backend. Untyped so a new backend key does
+  /// not need a release.
+  @JsonKey(defaultValue: null)
+  final Map<String, dynamic>? trackingMeta;
 
   factory SkuModel.fromJson(Map<String, dynamic> json) =>
       _$SkuModelFromJson(json);
@@ -62,5 +68,6 @@ extension SkuModelX on SkuModel {
     eddInfo: eddInfo?.toEntity(),
     info: info?.toEntity(),
     skuAttributes: skuAttributes,
+    trackingMeta: trackingMeta,
   );
 }

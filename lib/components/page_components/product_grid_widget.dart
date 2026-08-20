@@ -26,11 +26,38 @@ class ProductGridWidget extends StatelessWidget {
   /// Component-level automation key prefix, e.g. `hp_pg_2`. Null → unkeyed.
   final String? keyPrefix;
 
+  /// Overrides the tile-tap analytics.
+  ///
+  /// Default (null) logs the homepage `tile_clicked` and writes HP attribution,
+  /// which is correct on Discover/LP. **Hosts outside that context must supply
+  /// this**, or they emit homepage events for their own screen — PDP's reco grid
+  /// has to send `reco_product_clicked` instead, and must not touch attribution
+  /// at all (Android's `hspdp` makes zero attribution writes).
+  ///
+  /// Mirrors how Android keeps analytics out of shared views: the tile layout is
+  /// shared, but PDP owns its adapter and passes `pdpAnalytics` in
+  /// (`ProductListAdapter.kt:14-27`).
+  final Future<void> Function(ListingProductEntity item)? onTileTapLog;
+
+  /// Overrides the wishlist analytics, `added` distinguishing the two events.
+  ///
+  /// Separate from [onTileTapLog] because the two fire at different moments: a tap
+  /// logs immediately, while wishlist reports only once the server confirms — so a
+  /// failed request and a logged-out tap emit nothing.
+  ///
+  /// Default (null) is **silent**, not a homepage event. Android's home has no
+  /// wishlist control at all (`ProductCarouselViewHolder.kt:21` hides it), so there
+  /// is no default payload to match; a host that wants the event supplies this.
+  final void Function(ListingProductEntity item, {required bool added})?
+      onWishlistLog;
+
   const ProductGridWidget({
     super.key,
     required this.gridData,
     this.margins,
     this.keyPrefix,
+    this.onTileTapLog,
+    this.onWishlistLog,
   });
 
   Key? _key(String suffix) =>
@@ -118,14 +145,27 @@ class ProductGridWidget extends StatelessWidget {
         showProductInfo: showInfo,
         isWishlisted: wished,
         onTap: () {
-          unawaited(sl<HomeTrackAnalyticManager>()
-              .onProductGridTileTapped(gridData, item));
+          // `onTileTapLog` lets a host override the logging without forking the
+          // widget — PDP's reco grid routes to `reco_product_clicked` instead of
+          // `tile_clicked`, and must not write homepage attribution. Share the
+          // view, never the analytics.
+          //
+          // Not awaited: navigation should not wait on the analytics call.
+          unawaited(
+            onTileTapLog?.call(item) ??
+                sl<HomeTrackAnalyticManager>().onProductGridTileTapped(
+                  gridData,
+                  item,
+                ),
+          );
           ActionUrlHandler.navigate(context, item.actionUri, title: item.name);
         },
         onWishlistTap: () => WishlistActions.toggle(
           context,
           productId: item.id.toString(),
           price: WishlistActions.priceToInt(item.price?.sellingPrice),
+          onAdded: () => onWishlistLog?.call(item, added: true),
+          onRemoved: () => onWishlistLog?.call(item, added: false),
           loggedOutMessageBars: const [
             MessageBarEntity(
               text: LoginRedirects.redirectAddToWishlist,

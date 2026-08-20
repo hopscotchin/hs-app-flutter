@@ -32,7 +32,7 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
-.env
+
 # Symbolication related
 app.*.symbols
 
@@ -43,3 +43,23 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Environment files (never commit secrets)
+.env
+.cursor
+
+# FVM Version Cache
+.fvm/
+
+# Maestro / analytics-verification artefacts.
+#
+# `takeScreenshot: <name>` in a flow writes `<name>.png` to the workspace root, and
+# the capture proxy writes its JSONL wherever it is pointed — both are run output,
+# not source. Root-scoped so real assets under assets/ are unaffected. Maestro's own
+# debug bundles already live outside the repo, in ~/.maestro/tests/.
+/*.png
+/*.jsonl
+/*.mp4
+
+# verify_pdp_events.sh output: capture + per-flow logs.
+/.pdp-verify/

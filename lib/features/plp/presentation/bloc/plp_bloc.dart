@@ -2,9 +2,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/error/failures.dart';
+import '../../../pdp/domain/entities/pdp_entry_args.dart';
 import '../../domain/entities/banner_entity.dart';
 import '../../domain/entities/floating_filter_entity.dart';
 import '../../domain/entities/listing_data_entity.dart';
@@ -249,6 +251,7 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
               banners: data.banners,
               screenName: data.screenName,
               screenSubtitle: data.screenSubtitle,
+              pageType: _queryBuilder.pageType,
             ),
           );
           return;
@@ -297,6 +300,9 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
             queryCorrection: data.queryCorrection,
             currentOrderRule: _queryBuilder.orderRule,
             messageBars: data.messageBars,
+            // Analytics reads this for `from_page`; the load-more path inherits
+            // it through `base.copyWith`.
+            pageType: _queryBuilder.pageType,
           );
           _lastLoaded = loaded;
           emit(loaded);

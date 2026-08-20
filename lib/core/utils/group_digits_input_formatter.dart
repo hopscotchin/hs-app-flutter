@@ -23,7 +23,9 @@ class GroupDigitsInputFormatter extends TextInputFormatter {
 
     // Block insertion when already at max digits — prevents mid-field edits
     // from silently dropping the last digit.
-    if (maxDigits != null && oldDigits.length >= maxDigits! && digits.length > oldDigits.length) {
+    if (maxDigits != null &&
+        oldDigits.length >= maxDigits! &&
+        digits.length > oldDigits.length) {
       return oldValue;
     }
 
@@ -42,8 +44,10 @@ class GroupDigitsInputFormatter extends TextInputFormatter {
     // Preserve cursor: count digits before the cursor in newValue, then find
     // the matching offset in the formatted text (which may have extra spaces).
     final rawCursor = newValue.selection.end.clamp(0, newValue.text.length);
-    final digitsBeforeCursor =
-        newValue.text.substring(0, rawCursor).replaceAll(RegExp(r'\D'), '').length;
+    final digitsBeforeCursor = newValue.text
+        .substring(0, rawCursor)
+        .replaceAll(RegExp(r'\D'), '')
+        .length;
 
     var cursorOffset = text.length;
     var digitCount = 0;

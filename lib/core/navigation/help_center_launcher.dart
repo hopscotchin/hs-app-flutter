@@ -42,10 +42,7 @@ class HelpCenterLauncher {
       final result = await sl<GenerateLoginTicketUseCase>()(
         const GenerateLoginTicketParams(),
       );
-      final ticket = result.fold(
-        (_) => null,
-        (t) => t.isEmpty ? null : t,
-      );
+      final ticket = result.fold((_) => null, (t) => t.isEmpty ? null : t);
       if (ticket != null) query = 'loginTicket=$ticket&id=app&site=$site';
     }
 

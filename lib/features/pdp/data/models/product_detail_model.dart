@@ -50,5 +50,6 @@ extension ProductDetailModelX on ProductDetailModel {
     product: product?.toEntity(),
     offersList: offersList?.data.map((o) => o.toEntity()).toList() ?? [],
     recentlyViewed: recentlyViewed?.toEntity(),
+    offersTrackingMeta: offersList?.trackingMeta,
   );
 }

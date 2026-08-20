@@ -239,8 +239,8 @@ class _XLTileWidgetState extends State<XLTileWidget> {
     final isLeft = location.contains('left');
     final isTextType = (cue.uiType?.toUpperCase() ?? '') == 'TEXT';
     final edgeMargin = isTextType ? 12.0 : 8.0;
-    final bgColor = cue.bgColor.toColor ?? AppColors.neutralGrey2;
-    final txtColor = cue.textColor.toColor ?? AppColors.textPrimary;
+    final bgColor = cue.bgColor.toColorOr(AppColors.neutralGrey2);
+    final txtColor = cue.textColor.toColorOr(AppColors.textPrimary);
 
     return Positioned(
       key: widget.visualCueKeyBuilder?.call(index),

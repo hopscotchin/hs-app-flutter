@@ -16,7 +16,8 @@ abstract class DefaultErrorMessages {
   static const String forbidden =
       'Uh-oh! You don\'t have permission to access this resource.';
   static const String notFound = 'Uh-oh! The requested resource was not found.';
-  static const String conflict = 'Uh-oh! A conflict occurred. Please try again.';
+  static const String conflict =
+      'Uh-oh! A conflict occurred. Please try again.';
   static const String internalServer =
       'Something went wrong on our end. Please try again later.';
   static const String serviceUnavailable =

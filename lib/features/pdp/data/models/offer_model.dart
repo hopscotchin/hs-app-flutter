@@ -8,14 +8,25 @@ part 'offer_model.g.dart';
 /// `"offersList": { "data": [...], "trackingMeta": {...} }`
 @JsonSerializable(createToJson: false)
 class OffersListModel {
-  const OffersListModel({this.data = const []});
+  const OffersListModel({this.data = const [], this.trackingMeta});
 
   @JsonKey(defaultValue: [])
   final List<OfferModel> data;
 
+  /// Analytics-only. Supplies `coupon_applicable` on `product_viewed`.
+  ///
+  /// Kept a plain map, like every other `trackingMeta` block — the analytics
+  /// layer reads it via `pdpCouponApplicable`. A typed DTO here could only carry
+  /// fields someone has declared, so a new promo dimension would need a release.
+  @JsonKey(defaultValue: null, fromJson: _mapOrNull)
+  final Map<String, dynamic>? trackingMeta;
+
   factory OffersListModel.fromJson(Map<String, dynamic> json) =>
       _$OffersListModelFromJson(json);
 }
+
+Map<String, dynamic>? _mapOrNull(Object? json) =>
+    json is Map<String, dynamic> ? json : null;
 
 @JsonSerializable(createToJson: false)
 class OfferModel {

@@ -5,7 +5,7 @@ import '../core/theme/colors.dart';
 import '../core/theme/typography/text_style_extensions.dart';
 import '../core/theme/typography/typography_v1.dart';
 
-enum AppDialogButtonStyle { outlined, filled }
+enum AppDialogButtonStyle { outlined, filled, tertiary }
 
 class AppDialogAction {
   const AppDialogAction({
@@ -107,8 +107,13 @@ class _DialogButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFilled = action.style == AppDialogButtonStyle.filled;
+    final isTertiary = action.style == AppDialogButtonStyle.tertiary;
     final textStyle = AppTypographyV1.labelLarge.semiBold.copyWith(
-      color: isFilled ? Colors.white : AppColors.secondary,
+      color: isFilled
+          ? Colors.white
+          : isTertiary
+          ? AppColors.brandDefault
+          : AppColors.secondary,
     );
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(8),
@@ -121,6 +126,19 @@ class _DialogButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.secondary,
           foregroundColor: Colors.white,
+          elevation: 0,
+          shape: shape,
+          padding: padding,
+        ),
+        child: Text(action.label, style: textStyle),
+      );
+    }
+    if (isTertiary) {
+      return ElevatedButton(
+        onPressed: action.onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.brandTertiary,
+          foregroundColor: AppColors.brandDefault,
           elevation: 0,
           shape: shape,
           padding: padding,

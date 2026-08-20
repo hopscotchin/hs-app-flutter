@@ -34,6 +34,7 @@ class ProductModel {
     this.serviceGuarantee = const [],
     this.visualCue,
     this.isGift = false,
+    this.trackingMeta,
   });
 
   @JsonKey(defaultValue: null)
@@ -72,6 +73,14 @@ class ProductModel {
   final Map<String, dynamic>? visualCue;
   @JsonKey(defaultValue: false)
   final bool isGift;
+
+  /// Raw `trackingMeta` map, forwarded to the entity unchanged.
+  ///
+  /// Not modelled: the analytics layer reads it through `PdpTrackingMeta`, and
+  /// keeping it a map is what lets the backend add a tracking field without an
+  /// app release.
+  @JsonKey(defaultValue: null)
+  final Map<String, dynamic>? trackingMeta;
 
   factory ProductModel.fromJson(Map<String, dynamic> json) =>
       _$ProductModelFromJson(json);
@@ -136,6 +145,9 @@ extension ProductModelX on ProductModel {
       serviceGuarantee: serviceGuarantee.map((s) => s.toEntity()).toList(),
       visualCue: cue,
       isGift: isGift,
+      trackingMeta: (trackingMeta == null || trackingMeta!.isEmpty)
+          ? null
+          : trackingMeta,
     );
   }
 }

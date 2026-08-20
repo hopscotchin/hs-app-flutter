@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
 import 'package:hs_app_flutter/components/appbar/hs_appbar.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/cubits/cart_count_cubit.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
@@ -275,6 +276,7 @@ class _AccountContent extends StatelessWidget {
                       final homeBloc = context.read<HomeBloc>();
                       final wishlistCubit = context.read<WishlistCubit>();
                       final cartActionsCubit = context.read<CartActionsCubit>();
+                      final cartCountCubit = context.read<CartCountCubit>();
                       context.read<AuthBloc>().add(
                         AuthEvent.signOut(
                           onSuccess: () {
@@ -283,6 +285,10 @@ class _AccountContent extends StatelessWidget {
                             // logged-out (false) statuses.
                             wishlistCubit.invalidateOnAuthChange();
                             cartActionsCubit.clearOnAuthChange();
+                            // The badge is persisted (PrefManager.cartItemQty),
+                            // so without this the previous user's count would
+                            // survive sign-out and even an app restart.
+                            cartCountCubit.set(0);
                             homeBloc.add(const RefreshHomePage());
                           },
                         ),
