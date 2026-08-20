@@ -37,8 +37,23 @@ class ActionTrigger extends StatefulWidget {
   // ── Tooltip positioning/spacing — tunable per call site ──────────────────
   // The arrow's horizontal position is NOT one of these: super_tooltip always
   // points it at wherever [child] actually sits on screen. To move the
-  // arrow, change what you pass as [child] (see above) rather than these.
+  // arrow, change what you pass as [child] (see above), or use
+  // [alignTooltipLeftToAnchor] to move the bubble instead.
   final TooltipDirection tooltipDirection;
+
+  /// Pins the bubble's left edge to the anchor instead of centring the bubble
+  /// on it, so the tail ends up near the bubble's left corner and the bubble
+  /// grows rightwards.
+  ///
+  /// super_tooltip centres the bubble on the anchor and then clamps it to
+  /// `minimumOutsideMargin`. For a wide bubble over an anchor near the left
+  /// of the screen that pushes the bubble past the anchor, leaving the tail
+  /// stranded in the middle. Set this when the anchor is left-of-centre and
+  /// the tail should read as belonging to the bubble's leading edge.
+  ///
+  /// Measured on each tap rather than once at build, so it stays correct
+  /// while the anchor's list scrolls.
+  final bool alignTooltipLeftToAnchor;
   final double tooltipVerticalOffset;
   final double tooltipArrowLength;
   final double tooltipArrowBaseWidth;
@@ -54,6 +69,7 @@ class ActionTrigger extends StatefulWidget {
     this.tooltipArrowLength = 12,
     this.tooltipArrowBaseWidth = 16,
     this.tooltipMaxWidth,
+    this.alignTooltipLeftToAnchor = false,
   });
 
   @override
@@ -63,10 +79,44 @@ class ActionTrigger extends StatefulWidget {
 class _ActionTriggerState extends State<ActionTrigger> {
   SuperTooltipController? _controller;
 
+  /// Identifies the anchor so its on-screen x can be read at tap time. Only
+  /// attached when [ActionTrigger.alignTooltipLeftToAnchor] is set.
+  final _anchorKey = GlobalKey();
+
+  /// Distance from the screen's left edge to pin the bubble's left edge to.
+  /// Null until the first measured tap, which is why the show is deferred a
+  /// frame below — the overlay reads `positionConfig` as it builds.
+  double? _tooltipLeft;
+
   @override
   void dispose() {
     _controller?.dispose();
     super.dispose();
+  }
+
+  /// Measures the anchor, then opens the tooltip once the new left edge has
+  /// been committed. Without the deferral the first tap would build the
+  /// overlay against the previous (or null) offset.
+  void _showTooltip() {
+    if (!widget.alignTooltipLeftToAnchor) {
+      _controller?.showTooltip();
+      return;
+    }
+
+    final box = _anchorKey.currentContext?.findRenderObject() as RenderBox?;
+    // Pull back by half the arrow's base so the tail sits inside the bubble's
+    // rounded corner rather than flush against it.
+    final left = box == null
+        ? null
+        : (box.localToGlobal(Offset.zero).dx - widget.tooltipArrowBaseWidth / 2)
+              .clamp(0.0, double.infinity);
+
+    if (left == null || left == _tooltipLeft) {
+      _controller?.showTooltip();
+      return;
+    }
+    setState(() => _tooltipLeft = left);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _controller?.showTooltip());
   }
 
   @override
@@ -100,6 +150,7 @@ class _ActionTriggerState extends State<ActionTrigger> {
         positionConfig: PositionConfiguration(
           preferredDirection: widget.tooltipDirection,
           verticalOffset: widget.tooltipVerticalOffset,
+          left: widget.alignTooltipLeftToAnchor ? _tooltipLeft : null,
         ),
         barrierConfig: const BarrierConfiguration(color: Colors.transparent),
         // Tapping the anchor alone still works even with a builder — both
@@ -108,11 +159,13 @@ class _ActionTriggerState extends State<ActionTrigger> {
         constraints: BoxConstraints(
           maxWidth: widget.tooltipMaxWidth ?? MediaQuery.sizeOf(context).width - 64,
         ),
-        child: widget.child,
+        child: widget.alignTooltipLeftToAnchor
+            ? KeyedSubtree(key: _anchorKey, child: widget.child)
+            : widget.child,
       );
 
       if (!hasBuilder) return anchor;
-      return widget.tooltipBuilder!(anchor, () => _controller!.showTooltip());
+      return widget.tooltipBuilder!(anchor, _showTooltip);
     }
 
     if ((action.isBottomSheet || action.isDialog) && action.content?.description != null) {

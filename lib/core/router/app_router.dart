@@ -26,8 +26,7 @@ class AppRouter {
   /// The single observer instance is owned by DI (see
   /// `AppNavigationObserver`'s `@lazySingleton`) so `AnalyticsHelper` can
   /// inject the same instance for `navigationTrackerParams`.
-  static AppNavigationObserver get _navigationObserver =>
-      sl<AppNavigationObserver>();
+  static AppNavigationObserver get _navigationObserver => sl<AppNavigationObserver>();
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
   static GlobalKey<NavigatorState> get navigatorKey => _rootNavigatorKey;
 

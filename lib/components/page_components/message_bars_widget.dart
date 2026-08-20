@@ -37,6 +37,7 @@ class MessageBarsWidget extends StatelessWidget {
   /// When set, keys become `<keyPrefix>_<base>_<index>`.
   final String? keyPrefix;
   final (double, double)? iconSize;
+  final TextStyle? textStyle;
 
   const MessageBarsWidget({
     super.key,
@@ -46,6 +47,7 @@ class MessageBarsWidget extends StatelessWidget {
     this.keyPrefix,
     this.spaceBetweenMessageBars = 10,
     this.iconSize,
+    this.textStyle,
   });
 
   @override
@@ -69,6 +71,7 @@ class MessageBarsWidget extends StatelessWidget {
               index: i,
               keyPrefix: keyPrefix,
               iconSize: iconSize,
+              textStyle: textStyle,
             ),
           ),
       ],
@@ -125,6 +128,7 @@ class _MessageBarItem extends StatefulWidget {
   final int index;
   final String? keyPrefix;
   final (double, double)? iconSize;
+  final TextStyle? textStyle;
 
   const _MessageBarItem({
     required this.bar,
@@ -133,6 +137,7 @@ class _MessageBarItem extends StatefulWidget {
     this.onAction,
     this.keyPrefix,
     this.iconSize,
+    this.textStyle,
   });
 
   @override
@@ -191,8 +196,8 @@ class _MessageBarItemState extends State<_MessageBarItem> {
               ],
               Expanded(
                 child: hasTwoButtons
-                    ? _buildPlainMessage(bar, textColor)
-                    : _buildMessageWithInlineAction(bar, textColor),
+                    ? _buildPlainMessage(bar, textColor, widget.textStyle)
+                    : _buildMessageWithInlineAction(bar, textColor, widget.textStyle),
               ),
             ],
           ),
@@ -254,18 +259,22 @@ class _MessageBarItemState extends State<_MessageBarItem> {
   TextStyle get _actionTextStyle =>
       AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.brandSecondary);
 
-  Widget _buildPlainMessage(MessageBarEntity bar, Color textColor) {
+  Widget _buildPlainMessage(MessageBarEntity bar, Color textColor, TextStyle? textStyle) {
     return Text(
       bar.displayText!,
       key: _key(MessageBarTestStrings.messageBarMessageTextField),
-      style: _messageTextStyle(textColor),
+      style: textStyle ?? _messageTextStyle(textColor),
     );
   }
 
   /// Message with optional action text stacked below.
-  Widget _buildMessageWithInlineAction(MessageBarEntity bar, Color textColor) {
+  Widget _buildMessageWithInlineAction(
+    MessageBarEntity bar,
+    Color textColor,
+    TextStyle? textStyle,
+  ) {
     if (!bar.actionText.isNotNullOrEmpty) {
-      return _buildPlainMessage(bar, textColor);
+      return _buildPlainMessage(bar, textColor, textStyle);
     }
 
     return Column(
@@ -274,7 +283,7 @@ class _MessageBarItemState extends State<_MessageBarItem> {
         Text(
           bar.displayText!,
           key: _key(MessageBarTestStrings.messageBarMessageTextField),
-          style: _messageTextStyle(textColor),
+          style: textStyle ?? _messageTextStyle(textColor),
         ),
         const SizedBox(height: 4),
         GestureDetector(

@@ -37,9 +37,7 @@ class CartCheckoutBar extends StatelessWidget {
     final message = orderSummary?.savingsMessage;
     if (message != null) return message;
     final savings = orderSummary?.totalSavings ?? 0;
-    return savings > 0
-        ? '${CartStrings.youSaved} ₹$savings ${CartStrings.onThisOrder}'
-        : null;
+    return savings > 0 ? '${CartStrings.youSaved} ₹$savings ${CartStrings.onThisOrder}' : null;
   }
 
   @override
@@ -75,14 +73,10 @@ class CartCheckoutBar extends StatelessWidget {
                   Expanded(
                     flex: 4,
                     child: PrimaryButton.defaultType(
-                      key: const ValueKey(
-                        CartTestStrings.checkoutBarProceedButton,
-                      ),
+                      key: const ValueKey(CartTestStrings.checkoutBarProceedButton),
                       text: CartStrings.proceedToCheckout,
                       size: ButtonSize.large,
-                      state: isLoading
-                          ? ButtonState.loading
-                          : ButtonState.enabled,
+                      state: isLoading ? ButtonState.loading : ButtonState.enabled,
                       onTap: onCheckout,
                     ),
                   ),
@@ -117,8 +111,7 @@ class CartCheckoutBar extends StatelessWidget {
     final itemCountText =
         totalSummary?.itemCountText ??
         '$itemCount ${itemCount == 1 ? CartStrings.item : CartStrings.items}';
-    final totalAmountText =
-        totalSummary?.totalPrice ?? orderSummary?.totalOrderAmount?.value ?? '';
+    final totalAmountText = totalSummary?.totalPrice ?? orderSummary?.totalOrderAmount?.value ?? '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,18 +125,23 @@ class CartCheckoutBar extends StatelessWidget {
 
         Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              totalAmountText,
-              key: const ValueKey(CartTestStrings.checkoutBarTotalAmountText),
-              style: AppTypographyV1.bodySmall.bold.textPrimary(),
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                totalAmountText,
+                key: const ValueKey(CartTestStrings.checkoutBarTotalAmountText),
+                style: AppTypographyV1.bodySmall.bold.textPrimary(),
+              ),
             ),
             GestureDetector(
               key: const ValueKey(CartTestStrings.checkoutBarDetailsButton),
               behavior: HitTestBehavior.opaque,
               onTap: onDetailsTap,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                 child: Text(
                   CartStrings.details,
                   style: AppTypographyV1.bodyRegular.regular.brandPrimary(),

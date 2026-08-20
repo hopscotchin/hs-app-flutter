@@ -295,9 +295,13 @@ class _XLTileWidgetState extends State<XLTileWidget> {
                     style: AppTypographyV1.bodyRegular.bold.textPrimary(),
                     children: [
                       if (price.mrp.isNotNullOrEmpty) ...[
+                        // Centred to match the discount span below — the MRP
+                        // is smaller than the selling price, so its baseline
+                        // sits low against the taller glyphs.
                         StrikethroughText.span(
                           price.mrp ?? '',
                           style: AppTypographyV1.labelMedium.regular.neutralGrey5(),
+                          alignment: PlaceholderAlignment.middle,
                         ),
                       ],
 

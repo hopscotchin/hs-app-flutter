@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hs_app_flutter/features/cart/presentation/bloc/cart_bloc.dart';
 
 import '../../../../components/action_trigger.dart';
 import '../../../../components/atoms/cached_image_widget.dart';
@@ -17,7 +18,6 @@ import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 import '../../domain/entities/cart_item_detail_entity.dart';
 import '../../domain/entities/cart_item_entity.dart';
-import '../bloc/cart_bloc.dart';
 
 /// Cart line-item card.
 ///
@@ -51,7 +51,7 @@ class CartItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xsm),
       decoration: const BoxDecoration(
         color: AppColors.neutralGrey1,
         borderRadius: AppSpacing.borderRadiusXs,
@@ -111,9 +111,6 @@ class CartItemWidget extends StatelessWidget {
 
   // ─── Image + delivery estimate ───────────────────────────────
 
-  // Awaits the PDP push and silently re-syncs the cart on return (e.g. the
-  // user changed quantity/size on PDP) — RefreshCart carries no loading flag
-  // of its own, so this never shows the full-page shimmer.
   Future<void> _onImageTap(BuildContext context) async {
     final productId = item.productId;
     if (productId == null) return;
@@ -132,7 +129,7 @@ class CartItemWidget extends StatelessWidget {
             child: AspectRatio(
               aspectRatio: 5 / 7,
               child: CachedImageWidget(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusXxs),
+                borderRadius: AppSpacing.borderRadiusXs,
                 imageUrl: item.imgSrc ?? '',
                 fit: BoxFit.cover,
                 width: 132,
@@ -228,7 +225,7 @@ class CartItemWidget extends StatelessWidget {
               _buildItemDetail(detail),
             ],
 
-            AppSpacing.verticalGapSm,
+            AppSpacing.gapXxs,
             _buildQuantityRow(),
             AppSpacing.verticalGapXs,
             _buildSizeRow(),
@@ -265,7 +262,7 @@ class CartItemWidget extends StatelessWidget {
     final canIncrease = canChange && qty < maxQty;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Text(CartStrings.qty, style: AppTypographyV1.labelLarge.regular.neutralGrey6()),
@@ -274,7 +271,11 @@ class CartItemWidget extends StatelessWidget {
           InkWell(
             onTap: canDecrease ? () => onQuantityChanged!(qty - 1) : null,
             child: Padding(
-              padding: const EdgeInsets.only(left: AppSpacing.xxs, right: AppSpacing.xs),
+              padding: const EdgeInsets.only(
+                left: AppSpacing.xxs,
+                right: AppSpacing.xs,
+                top: AppSpacing.xs,
+              ),
               child: CustomImage(
                 path: ImageConstants.cartQuantityRemove,
                 width: AppSpacing.iconSm,
@@ -283,12 +284,19 @@ class CartItemWidget extends StatelessWidget {
               ),
             ),
           ),
-        Text('\t\t$qty', style: AppTypographyV1.labelLarge.medium.neutralGrey6()),
+        Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.xs),
+          child: Text('\t\t$qty', style: AppTypographyV1.labelLarge.medium.neutralGrey6()),
+        ),
         if (showStepper)
           InkWell(
             onTap: canIncrease ? () => onQuantityChanged!(qty + 1) : null,
             child: Padding(
-              padding: const EdgeInsets.only(left: AppSpacing.lmd, right: AppSpacing.xsm),
+              padding: const EdgeInsets.only(
+                left: AppSpacing.lmd,
+                right: AppSpacing.xsm,
+                top: AppSpacing.xs,
+              ),
               child: CustomImage(
                 path: ImageConstants.cartQuantityAdd,
                 width: AppSpacing.iconSm,
@@ -314,7 +322,7 @@ class CartItemWidget extends StatelessWidget {
           ),
           if (item.stockAvailabilityStatus.isNotNullOrEmpty)
             TextSpan(
-              text: '\t\t${item.stockAvailabilityStatus!}',
+              text: item.stockAvailabilityStatus!.padLeft(10),
               style: AppTypographyV1.labelMedium.regular.copyWith(color: AppColors.dangerDefault),
             ),
         ],
@@ -340,6 +348,10 @@ class CartItemWidget extends StatelessWidget {
       // the arrow still points precisely at the icon.
       return ActionTrigger(
         action: detail.action,
+        // The icon sits in the card's right-hand column, left of centre, so a
+        // wide bubble centred on it would spill past the card and leave the
+        // tail mid-bubble. Pin the bubble's left edge to the icon instead.
+        alignTooltipLeftToAnchor: true,
         child: CustomImage(path: icon!, width: AppSpacing.iconXs, height: AppSpacing.iconXs),
         tooltipBuilder: (anchor, showTooltip) => GestureDetector(
           behavior: HitTestBehavior.opaque,

@@ -16,6 +16,12 @@ const _kKeyColor = AppColors.neutralGrey5; // #AEAEB2
 const _kValueColor = Color(0xFF000000);
 const _kDividerColor = Color(0xFFD9D9D9); // #D9D9D9
 
+// Expand/collapse animation — mirrors Android's View.expand()/collapse()
+// (Extentions.kt): a 300ms height tween with AccelerateDecelerateInterpolator,
+// which maps to Curves.easeInOut here.
+const _kExpandDuration = Duration(milliseconds: 300);
+const _kExpandCurve = Curves.easeInOut;
+
 // Field within skuAttributes that falls back to the product-level MRP when
 // no SKU is selected yet, so the "MRP" row still has something to show.
 const _kSkuMrpField = 'skuMrp';
@@ -133,7 +139,7 @@ class PdpProductDetails extends StatelessWidget {
   }
 }
 
-class _DetailTab extends StatelessWidget {
+class _DetailTab extends StatefulWidget {
   const _DetailTab({
     required this.detail,
     required this.isExpanded,
@@ -153,6 +159,45 @@ class _DetailTab extends StatelessWidget {
   final ProductPriceEntity? productPriceInfo;
 
   @override
+  State<_DetailTab> createState() => _DetailTabState();
+}
+
+class _DetailTabState extends State<_DetailTab>
+    with SingleTickerProviderStateMixin {
+  // Driven explicitly instead of through an implicit animation so both
+  // directions are symmetric: forward() on expand, reverse() on collapse.
+  // Starts settled at its current state, so a tab that is already open on
+  // first build doesn't animate itself in on page load.
+  late final AnimationController _controller = AnimationController(
+    duration: _kExpandDuration,
+    vsync: this,
+    value: widget.isExpanded ? 1 : 0,
+  );
+
+  late final Animation<double> _reveal = CurvedAnimation(
+    parent: _controller,
+    curve: _kExpandCurve,
+    reverseCurve: _kExpandCurve.flipped,
+  );
+
+  @override
+  void didUpdateWidget(_DetailTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isExpanded == oldWidget.isExpanded) return;
+    if (widget.isExpanded) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,11 +206,11 @@ class _DetailTab extends StatelessWidget {
         // container: true — the header owns the tab name and the chevron, which
         // Android merges into one node, losing an annotated identifier.
         AutoSemantics.fromKey(
-          headerKey,
+          widget.headerKey,
           container: true,
           child: GestureDetector(
-            key: headerKey,
-            onTap: onTap,
+            key: widget.headerKey,
+            onTap: widget.onTap,
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: AppSpacing.paddingVerticalLg,
@@ -173,16 +218,16 @@ class _DetailTab extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    detail.tabName ?? '',
+                    widget.detail.tabName ?? '',
                     style: AppTypographyV1.bodyMedium.copyWith(
                       fontWeight: FontWeight.w500,
                       color: _kTabNameColor,
                     ),
                   ),
-                  // Chevron — 12×6, rotates up when expanded
-                  AnimatedRotation(
-                    turns: isExpanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 200),
+                  // Chevron — 12×6, rotates up as the body opens. Sharing the
+                  // body's animation keeps the two exactly in step.
+                  RotationTransition(
+                    turns: _reveal.drive(Tween<double>(begin: 0, end: 0.5)),
                     child: const _Chevron(),
                   ),
                 ],
@@ -192,20 +237,35 @@ class _DetailTab extends StatelessWidget {
         ),
 
         // ── Expanded content ─────────────────────────────────────────
-        AnimatedCrossFade(
-          firstChild: const SizedBox(width: double.infinity),
-          secondChild: isExpanded
-              ? _buildContent(detail.items, selectedSku, productPriceInfo)
-              : const SizedBox(width: double.infinity),
-          crossFadeState: isExpanded
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
-          duration: const Duration(milliseconds: 200),
+        // Like Android, the body stays laid out at its full height and is
+        // clipped from the bottom as the reveal factor animates 0 → 1, so both
+        // directions read as the content sliding in/out rather than a fade.
+        AnimatedBuilder(
+          animation: _reveal,
+          builder: (context, _) {
+            final revealFactor = _reveal.value;
+            // Fully collapsed: keep the body out of the tree entirely so its
+            // rows aren't hit-testable or exposed to accessibility.
+            if (revealFactor == 0) {
+              return const SizedBox(width: double.infinity);
+            }
+            return ClipRect(
+              child: Align(
+                alignment: Alignment.topCenter,
+                heightFactor: revealFactor,
+                child: _buildContent(
+                  widget.detail.items,
+                  widget.selectedSku,
+                  widget.productPriceInfo,
+                ),
+              ),
+            );
+          },
         ),
 
         // Border bottom
         Divider(
-          key: dividerKey,
+          key: widget.dividerKey,
           height: 1,
           thickness: 1,
           color: _kDividerColor,

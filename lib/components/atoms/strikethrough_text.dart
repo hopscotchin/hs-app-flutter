@@ -32,15 +32,19 @@ class StrikethroughText extends StatelessWidget {
   final TextOverflow? overflow;
 
   /// Convenience for embedding inside a [RichText] / [Text.rich] as an inline
-  /// span, baseline-aligned so it flows like the surrounding text.
+  /// span. Baseline-aligned by default so it flows like the surrounding text;
+  /// pass [PlaceholderAlignment.middle] when the span sits beside larger text
+  /// and should read as vertically centred against it rather than sharing its
+  /// baseline.
   static InlineSpan span(
     String text, {
     TextStyle? style,
     Color? lineColor,
     double thickness = 1.0,
+    PlaceholderAlignment alignment = PlaceholderAlignment.baseline,
   }) {
     return WidgetSpan(
-      alignment: PlaceholderAlignment.baseline,
+      alignment: alignment,
       baseline: TextBaseline.alphabetic,
       child: StrikethroughText(
         text,

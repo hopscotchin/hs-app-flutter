@@ -39,13 +39,10 @@ class PdpColorVariants extends StatelessWidget {
               itemBuilder: (context, index) {
                 final variant = colorVariants[index];
                 // Backend sends isSelected; also guard against current product match
-                final isSelected =
-                    variant.isSelected || variant.productId == currentProductId;
+                final isSelected = variant.isSelected || variant.productId == currentProductId;
                 final inStock = variant.isStockAvailable;
 
-                final variantKey = ValueKey(
-                  '${PdpTestStrings.colorVariant}_$index',
-                );
+                final variantKey = ValueKey('${PdpTestStrings.colorVariant}_$index');
                 return AutoSemantics.fromKey(
                   variantKey,
                   container: true,
@@ -62,27 +59,20 @@ class PdpColorVariants extends StatelessWidget {
                         width: 40,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: isSelected
-                                ? AppColors.brandDefault
-                                : AppColors.transparent,
+                            color: isSelected ? AppColors.brandDefault : AppColors.transparent,
                             width: 1,
                           ),
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(6),
-                          ),
+                          borderRadius: const BorderRadius.all(Radius.circular(6)),
                         ),
                         child: variant.mediaUrl != null
                             ? ClipRRect(
-                                borderRadius: const BorderRadius.all(
-                                  Radius.circular(5),
-                                ),
+                                borderRadius: const BorderRadius.all(Radius.circular(5)),
                                 child: CachedNetworkImage(
                                   imageUrl: variant.mediaUrl!,
                                   fit: BoxFit.cover,
                                   fadeInDuration: Duration.zero,
                                   fadeOutDuration: Duration.zero,
-                                  errorWidget: (_, _, _) =>
-                                      _buildPlaceholder(inStock),
+                                  errorWidget: (_, _, _) => _buildPlaceholder(inStock),
                                 ),
                               )
                             : _buildPlaceholder(inStock),
@@ -93,7 +83,7 @@ class PdpColorVariants extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
         ],
       ),
     );
@@ -105,9 +95,7 @@ class PdpColorVariants extends StatelessWidget {
       children: [
         Container(color: AppColors.secondary),
         if (!inStock)
-          const Positioned.fill(
-            child: CustomPaint(painter: _CrossLinePainter(AppColors.border)),
-          ),
+          const Positioned.fill(child: CustomPaint(painter: _CrossLinePainter(AppColors.border))),
       ],
     );
   }

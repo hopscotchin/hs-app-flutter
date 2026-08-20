@@ -300,7 +300,15 @@ class ProductTile extends StatelessWidget {
               children: [
                 if (originalPriceText.isNotNullOrEmpty) ...[
                   const WidgetSpan(child: SizedBox(width: 6)),
-                  StrikethroughText.span(originalPriceText ?? '', style: mrpStyle),
+                  // Centred, not baseline-aligned: the MRP is a smaller size
+                  // than the selling price, so sharing its baseline sits it
+                  // visibly low against the taller glyphs. The discount is
+                  // already centred by the Wrap's crossAxisAlignment.
+                  StrikethroughText.span(
+                    originalPriceText ?? '',
+                    style: mrpStyle,
+                    alignment: PlaceholderAlignment.middle,
+                  ),
                 ],
               ],
             ),

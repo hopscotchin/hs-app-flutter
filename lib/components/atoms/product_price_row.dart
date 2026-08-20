@@ -29,6 +29,17 @@ class ProductPriceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The MRP and discount are a smaller size than the selling price. Plain
+    // `TextSpan`s would share the selling price's *baseline*, which sits them
+    // visibly low against its taller glyphs; wrapping them as `WidgetSpan`s
+    // lets `PlaceholderAlignment.middle` centre them instead — which is what
+    // the design asks for. Still one `RichText` rather than a `Row`, so long
+    // strings clip instead of wrapping (see the class doc).
+    final mrpStyle = AppTypographyV1.labelMedium.regular.neutralGrey5();
+    final discountStyle = isSoldOut
+        ? AppTypographyV1.labelMedium.regular.copyWith(color: Colors.black.withValues(alpha: 0.5))
+        : AppTypographyV1.labelMedium.regular.brandSecondary();
+
     return Padding(
       padding: padding,
       child: RichText(
@@ -37,27 +48,26 @@ class ProductPriceRow extends StatelessWidget {
         softWrap: false,
         textAlign: TextAlign.start,
         text: TextSpan(
-          text: '$priceText\t',
+          text: priceText,
           style: isSoldOut
               ? AppTypographyV1.bodySmall.bold.copyWith(color: Colors.black.withValues(alpha: 0.5))
               : AppTypographyV1.bodySmall.bold.textPrimary(),
           children: [
             if (originalPriceText.isNotNullOrEmpty) ...[
-              const WidgetSpan(child: SizedBox(width: 2)),
+              const WidgetSpan(child: SizedBox(width: AppSpacing.xs)),
               StrikethroughText.span(
                 originalPriceText ?? '',
-                style: AppTypographyV1.labelMedium.regular.neutralGrey5(),
+                style: mrpStyle,
+                alignment: PlaceholderAlignment.middle,
               ),
             ],
-            if (discountText != null)
-              TextSpan(
-                text: originalPriceText != null ? '\t\t$discountText' : '\t$discountText',
-                style: isSoldOut
-                    ? AppTypographyV1.labelMedium.regular.copyWith(
-                        color: Colors.black.withValues(alpha: 0.5),
-                      )
-                    : AppTypographyV1.labelMedium.regular.brandSecondary(),
+            if (discountText != null) ...[
+              const WidgetSpan(child: SizedBox(width: AppSpacing.xs)),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: Text(discountText!, style: discountStyle),
               ),
+            ],
           ],
         ),
       ),
