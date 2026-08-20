@@ -153,9 +153,12 @@ class _ActionTriggerState extends State<ActionTrigger> {
           left: widget.alignTooltipLeftToAnchor ? _tooltipLeft : null,
         ),
         barrierConfig: const BarrierConfiguration(color: Colors.transparent),
-        // Tapping the anchor alone still works even with a builder — both
-        // paths drive the same controller, so either can open it.
-        interactionConfig: const InteractionConfiguration(showOnTap: true),
+        // With a builder, ALL taps must route through _showTooltip() so the
+        // anchor gets measured for alignTooltipLeftToAnchor — SuperTooltip's
+        // own showOnTap would bypass that measurement on icon taps and open
+        // the bubble at the wrong x. Without a builder, [child] is the whole
+        // tappable, and SuperTooltip's showOnTap is what makes it tap-open.
+        interactionConfig: InteractionConfiguration(showOnTap: !hasBuilder),
         constraints: BoxConstraints(
           maxWidth: widget.tooltipMaxWidth ?? MediaQuery.sizeOf(context).width - 64,
         ),
@@ -165,7 +168,11 @@ class _ActionTriggerState extends State<ActionTrigger> {
       );
 
       if (!hasBuilder) return anchor;
-      return widget.tooltipBuilder!(anchor, _showTooltip);
+      // SuperTooltip would otherwise swallow taps on its wrapped child before
+      // they reach the builder's outer GestureDetector, so icon taps would
+      // no-op. IgnorePointer lets every tap in the builder's row route
+      // through _showTooltip() — the anchor is still measured via its key.
+      return widget.tooltipBuilder!(IgnorePointer(child: anchor), _showTooltip);
     }
 
     if ((action.isBottomSheet || action.isDialog) && action.content?.description != null) {
