@@ -28,7 +28,7 @@ class SlgWidget extends StatelessWidget {
             child: Padding(
               key: ValueKey('${CartTestStrings.slgScreen}_item_$index'),
               padding: EdgeInsets.only(right: index == items.length - 1 ? 0 : AppSpacing.sm),
-              child: _buildItem(item, index),
+              child: _buildItem(item),
             ),
           );
         }).toList(),
@@ -36,7 +36,7 @@ class SlgWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildItem(ServiceGuaranteeEntity item, int index) {
+  Widget _buildItem(ServiceGuaranteeEntity item) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
