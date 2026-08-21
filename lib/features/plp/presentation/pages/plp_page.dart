@@ -325,7 +325,12 @@ class _PlpViewState extends State<_PlpView> {
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: state.messageBars.isNotEmpty
-                                ? const EdgeInsets.only(left: 24, right: 24)
+                                ? EdgeInsets.only(
+                                    left: 24,
+                                    right: 24,
+                                    bottom: 0,
+                                    top: state.appliedFilters.isNotEmpty ? 0 : 8,
+                                  )
                                 : EdgeInsets.zero,
                             child: MessageBarsWidget(
                               spaceBetweenMessageBars: 5,

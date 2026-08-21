@@ -85,11 +85,7 @@ class PlpProductSliver extends StatelessWidget {
             // from_feed_size / position on all 22 of its events. Read at tap
             // time so a listing that paged in since build reports the new size.
             final plp = context.read<PlpBloc>().state;
-            AppNavigator.goToPdp(
-              context,
-              id,
-              args: plp.pdpEntryArgs(product, index),
-            );
+            AppNavigator.goToPdp(context, id, args: plp.pdpEntryArgs(product, index));
           }
         },
         onWishlistTap: () => _toggleWishlist(context, product),
@@ -103,11 +99,7 @@ class PlpProductSliver extends StatelessWidget {
       productId: product.id.toString(),
       price: WishlistActions.priceToInt(product.price?.sellingPrice),
       loggedOutMessageBars: const [
-        MessageBarEntity(
-          text: LoginRedirects.redirectAddToWishlist,
-          type: 'info',
-          hasIcon: true,
-        ),
+        MessageBarEntity(text: LoginRedirects.redirectAddToWishlist, type: 'info', hasIcon: true),
       ],
     );
   }
@@ -142,9 +134,9 @@ class PlpProductSliver extends StatelessWidget {
               child: switch (item) {
                 ProductRowItem(:final left, :final right) => Padding(
                   key: ValueKey('row_${left.id}'),
-                  padding: EdgeInsets.fromLTRB(
+                  padding: const EdgeInsets.fromLTRB(
                     AppSpacing.sm,
-                    index == 0 && appliedFilters.isNotEmpty ? 0 : AppSpacing.xs,
+                    AppSpacing.xs,
                     AppSpacing.sm,
                     AppSpacing.xs,
                   ),
@@ -153,7 +145,12 @@ class PlpProductSliver extends StatelessWidget {
                 ),
                 ProductXLItem(:final product) => Padding(
                   key: ValueKey('xl_${product.id}'),
-                  padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: 0, right: 12, left: 12),
+                  padding: const EdgeInsets.only(
+                    top: AppSpacing.xs,
+                    bottom: 0,
+                    right: 12,
+                    left: 12,
+                  ),
                   child: BlocSelector<WishlistCubit, WishlistState, bool>(
                     selector: (s) => s.isWishlisted(product.id.toString()),
                     builder: (context, wished) => XLTileWidget.fromListingProduct(

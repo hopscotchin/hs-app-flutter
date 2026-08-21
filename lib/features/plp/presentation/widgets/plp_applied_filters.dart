@@ -71,16 +71,16 @@ class _AppliedFiltersPinnedDelegate extends SliverPersistentHeaderDelegate {
               SizedBox(
                 height: 26,
                 child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                children: [
-                  for (var i = 0; i < visibleFilters.length; i++)
-                    _buildFilterChip(visibleFilters[i], i, () {
-                      context.read<PlpBloc>().add(
-                        RemoveFilter(filterToRemove: visibleFilters[i]),
-                      );
-                    }),
-                ],
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  children: [
+                    for (var i = 0; i < visibleFilters.length; i++)
+                      _buildFilterChip(visibleFilters[i], i, () {
+                        context.read<PlpBloc>().add(
+                          RemoveFilter(filterToRemove: visibleFilters[i]),
+                        );
+                      }),
+                  ],
                 ),
               ),
             ],
