@@ -10,6 +10,7 @@ import '../../core/entities/message_bar_entity.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography/text_style_extensions.dart';
 import '../../core/theme/typography/typography_v1.dart';
+import '../../core/utils/html_text.dart';
 
 // ─── Compact style constants ─────────────────────────────────────────────────
 
@@ -46,7 +47,7 @@ class MessageBarsWidget extends StatelessWidget {
     this.onAction,
     this.keyPrefix,
     this.spaceBetweenMessageBars = 10,
-    this.iconSize,
+    this.iconSize = (_kIconSize, _kIconSize),
     this.textStyle,
   });
 
@@ -188,17 +189,28 @@ class _MessageBarItemState extends State<_MessageBarItem> {
         children: [
           // Icon + message row
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-
+            crossAxisAlignment: hasTwoButtons
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
             children: [
               if (showIcon) ...[
-                _buildIcon(bar, type, textColor, widget.iconSize),
+                Padding(
+                  padding: hasTwoButtons ? const EdgeInsets.only(top: 3) : EdgeInsets.zero,
+                  child: _buildIcon(bar, type, textColor, widget.iconSize),
+                ),
                 const SizedBox(width: _kIconSpacing),
               ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Sits inside the icon row's column, not above it, so the
+                    // icon stays vertically aligned with the whole text block
+                    // rather than just the message.
+                    if (bar.title.isNotNullOrEmpty) ...[
+                      _buildTitle(bar, textColor),
+                      const SizedBox(height: 2),
+                    ],
                     hasTwoButtons
                         ? _buildPlainMessage(bar, textColor, widget.textStyle)
                         : _buildMessageWithInlineAction(bar, textColor, widget.textStyle),
@@ -247,8 +259,8 @@ class _MessageBarItemState extends State<_MessageBarItem> {
       padding: const EdgeInsets.only(top: 1),
       child: CustomImage(
         path: _typeIconAsset(type)!,
-        width: _kIconSize,
-        height: _kIconSize,
+        height: iconSize?.$1,
+        width: iconSize?.$2,
         placeholder: const SizedBox.shrink(),
         errorWidget: const CustomImage(path: ImageConstants.messageBarInfo),
       ),
@@ -263,9 +275,28 @@ class _MessageBarItemState extends State<_MessageBarItem> {
   TextStyle get _actionTextStyle =>
       AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.brandSecondary);
 
+  /// Title is bolder and brand-coloured; the backend can still override the
+  /// colour for the whole bar via `textColor`, which is why that wins when set.
+  TextStyle _titleTextStyle(MessageBarEntity bar, Color textColor) => AppTypographyV1
+      .labelLarge
+      .bold
+      .copyWith(color: bar.textColor.isNotNullOrEmpty ? textColor : AppColors.brandPrimary);
+
+  Widget _buildTitle(MessageBarEntity bar, Color textColor) {
+    return Text.rich(
+      TextSpan(children: HtmlText.spans(bar.title)),
+      key: _key(MessageBarTestStrings.messageBarTitleTextField),
+      style: _titleTextStyle(bar, textColor),
+    );
+  }
+
+  /// `Text.rich` rather than `Text`: the same field arrives as plain text on
+  /// most bars and as a small HTML fragment on others (the cart credits bar
+  /// bolds its amount), and [HtmlText.spans] handles both — so this path also
+  /// decodes entities like `&amp;` that a plain `Text` would show raw.
   Widget _buildPlainMessage(MessageBarEntity bar, Color textColor, TextStyle? textStyle) {
-    return Text(
-      bar.displayText!,
+    return Text.rich(
+      TextSpan(children: HtmlText.spans(bar.displayText)),
       key: _key(MessageBarTestStrings.messageBarMessageTextField),
       style: textStyle ?? _messageTextStyle(textColor),
     );

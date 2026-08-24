@@ -323,7 +323,7 @@ class CartItemWidget extends StatelessWidget {
           if (item.stockAvailabilityStatus.isNotNullOrEmpty)
             TextSpan(
               text: item.stockAvailabilityStatus!.padLeft(10),
-              style: AppTypographyV1.labelMedium.regular.copyWith(color: AppColors.dangerDefault),
+              style: AppTypographyV1.labelMedium.regular.copyWith(color: stockColor),
             ),
         ],
       ),
@@ -370,21 +370,23 @@ class CartItemWidget extends StatelessWidget {
   // ─── Footer ───────────────────────────────────────────────────
 
   Widget _buildWishlistRow() {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.sm),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: isLoading ? null : onMoveToWishlist,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            const CustomImage(path: ImageConstants.cartWishListArrow),
-            Text(
-              CartStrings.moveToWishlistLabel,
-              style: AppTypographyV1.labelLarge.medium.brandPrimary(),
-            ),
-          ],
+    return GestureDetector(
+      onTap: isLoading ? null : onMoveToWishlist,
+      child: ColoredBox(
+        color: Colors.transparent,
+        child: Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.sm),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              const CustomImage(path: ImageConstants.cartWishListArrow),
+              Text(
+                CartStrings.moveToWishlistLabel,
+                style: AppTypographyV1.labelLarge.medium.brandPrimary(),
+              ),
+            ],
+          ),
         ),
       ),
     );

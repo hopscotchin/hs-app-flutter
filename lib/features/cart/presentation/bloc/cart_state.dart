@@ -20,6 +20,10 @@ abstract class CartState with _$CartState {
     @Default(<MessageBarEntity>[]) List<MessageBarEntity> staticMessageBars,
     String? toastMessage,
 
+    /// Whether [toastMessage] is a failure, so the snack can be styled the way
+    /// PLP/PDP style theirs (`WishlistState.feedbackIsError` is the same idea).
+    @Default(false) bool toastIsError,
+
     /// Bumped every time a [RefreshCart] handler completes (success or
     /// failure) — lets the pull-to-refresh indicator await exactly one
     /// round-trip via `bloc.stream.firstWhere((s) => s.refreshTick != tick)`

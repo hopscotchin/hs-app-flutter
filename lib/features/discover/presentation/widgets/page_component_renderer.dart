@@ -16,6 +16,14 @@ import '../../../../core/constants/strings/auto_test_strings.dart';
 /// anything less counts as peeking, not an impression.
 const double _kVisibilityThreshold = 0.5;
 
+/// Fallback for widgets taller than the viewport: `visibleFraction` is
+/// bounded by `viewport / widgetHeight`, so tall PRODUCT_GRIDs (20+ tiles ≈
+/// 10 rows, ~3000px) never approach [_kVisibilityThreshold]. Fire as soon
+/// as roughly one product row is on screen — small enough to catch tall
+/// grids on first scroll, large enough that a 1-pixel peek during scroll
+/// past a boundary doesn't count as an impression.
+const double _kViewportCoverageThreshold = 0.15;
+
 class PageComponentRenderer extends StatefulWidget {
   final PageComponent component;
 
@@ -67,6 +75,7 @@ class _PageComponentRendererState extends State<PageComponentRenderer> {
   bool _wasAboveThreshold = false;
 
   ScrollPosition? _scrollPosition;
+  double _viewportHeight = 0;
 
   @override
   void didChangeDependencies() {
@@ -80,6 +89,10 @@ class _PageComponentRendererState extends State<PageComponentRenderer> {
       _scrollPosition = position;
       sl<HomeTrackAnalyticManager>().attachScrollPosition(position);
     }
+    // Cache viewport height here (auto-refreshes on orientation / split-
+    // screen resize via didChangeDependencies) so the visibility callback
+    // is a field read, not an InheritedModel lookup.
+    _viewportHeight = MediaQuery.maybeSizeOf(context)?.height ?? 0;
   }
 
   @override
@@ -116,7 +129,11 @@ class _PageComponentRendererState extends State<PageComponentRenderer> {
   /// We only forward RISING and FALLING edges through the 0.5 threshold,
   /// so the tracker doesn't churn on tiny fraction wiggles during scroll.
   void _onVisibilityChanged(VisibilityInfo info) {
-    final isAbove = info.visibleFraction > _kVisibilityThreshold;
+    final viewportCoverage = _viewportHeight > 0
+        ? info.visibleBounds.height / _viewportHeight
+        : 0;
+    final isAbove = info.visibleFraction > _kVisibilityThreshold ||
+        viewportCoverage > _kViewportCoverageThreshold;
     if (isAbove == _wasAboveThreshold) return;
     final tracker = sl<HomeTrackAnalyticManager>();
     if (isAbove) {
@@ -146,9 +163,9 @@ class _PageComponentRendererState extends State<PageComponentRenderer> {
     final wrapped = margins == null
         ? child
         : Padding(
-            padding: EdgeInsets.only(top: margins.top, bottom: margins.bottom),
-            child: child,
-          );
+      padding: EdgeInsets.only(top: margins.top, bottom: margins.bottom),
+      child: child,
+    );
 
     return VisibilityDetector(
       // Key must be unique per slot AND stable across rebuilds. `index`

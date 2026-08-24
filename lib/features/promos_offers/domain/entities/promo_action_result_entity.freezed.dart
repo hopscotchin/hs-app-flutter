@@ -16,7 +16,10 @@ mixin _$PromoActionResultEntity {
 
  bool get success; String get message; String get promoCode;/// Backend-authored bottom sheet to show instead of the toast — sent on
 /// either outcome (e.g. "Invalid promotion" with a "Got It" button).
- BackendActionContentEntity? get bottomSheet;
+ BackendActionContentEntity? get bottomSheet;/// Bars the response carried, from `messageBar` and/or `messageBars`.
+/// Take priority over [message] when rendering a failure — the backend
+/// authored them, so they carry their own copy, colour and icon.
+ List<MessageBarEntity> get messageBars;
 /// Create a copy of PromoActionResultEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,16 +30,16 @@ $PromoActionResultEntityCopyWith<PromoActionResultEntity> get copyWith => _$Prom
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PromoActionResultEntity&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.promoCode, promoCode) || other.promoCode == promoCode)&&(identical(other.bottomSheet, bottomSheet) || other.bottomSheet == bottomSheet));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PromoActionResultEntity&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.promoCode, promoCode) || other.promoCode == promoCode)&&(identical(other.bottomSheet, bottomSheet) || other.bottomSheet == bottomSheet)&&const DeepCollectionEquality().equals(other.messageBars, messageBars));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,success,message,promoCode,bottomSheet);
+int get hashCode => Object.hash(runtimeType,success,message,promoCode,bottomSheet,const DeepCollectionEquality().hash(messageBars));
 
 @override
 String toString() {
-  return 'PromoActionResultEntity(success: $success, message: $message, promoCode: $promoCode, bottomSheet: $bottomSheet)';
+  return 'PromoActionResultEntity(success: $success, message: $message, promoCode: $promoCode, bottomSheet: $bottomSheet, messageBars: $messageBars)';
 }
 
 
@@ -47,7 +50,7 @@ abstract mixin class $PromoActionResultEntityCopyWith<$Res>  {
   factory $PromoActionResultEntityCopyWith(PromoActionResultEntity value, $Res Function(PromoActionResultEntity) _then) = _$PromoActionResultEntityCopyWithImpl;
 @useResult
 $Res call({
- bool success, String message, String promoCode, BackendActionContentEntity? bottomSheet
+ bool success, String message, String promoCode, BackendActionContentEntity? bottomSheet, List<MessageBarEntity> messageBars
 });
 
 
@@ -64,13 +67,14 @@ class _$PromoActionResultEntityCopyWithImpl<$Res>
 
 /// Create a copy of PromoActionResultEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? success = null,Object? message = null,Object? promoCode = null,Object? bottomSheet = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? success = null,Object? message = null,Object? promoCode = null,Object? bottomSheet = freezed,Object? messageBars = null,}) {
   return _then(_self.copyWith(
 success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
 as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,promoCode: null == promoCode ? _self.promoCode : promoCode // ignore: cast_nullable_to_non_nullable
 as String,bottomSheet: freezed == bottomSheet ? _self.bottomSheet : bottomSheet // ignore: cast_nullable_to_non_nullable
-as BackendActionContentEntity?,
+as BackendActionContentEntity?,messageBars: null == messageBars ? _self.messageBars : messageBars // ignore: cast_nullable_to_non_nullable
+as List<MessageBarEntity>,
   ));
 }
 
@@ -155,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool success,  String message,  String promoCode,  BackendActionContentEntity? bottomSheet)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool success,  String message,  String promoCode,  BackendActionContentEntity? bottomSheet,  List<MessageBarEntity> messageBars)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PromoActionResultEntity() when $default != null:
-return $default(_that.success,_that.message,_that.promoCode,_that.bottomSheet);case _:
+return $default(_that.success,_that.message,_that.promoCode,_that.bottomSheet,_that.messageBars);case _:
   return orElse();
 
 }
@@ -176,10 +180,10 @@ return $default(_that.success,_that.message,_that.promoCode,_that.bottomSheet);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool success,  String message,  String promoCode,  BackendActionContentEntity? bottomSheet)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool success,  String message,  String promoCode,  BackendActionContentEntity? bottomSheet,  List<MessageBarEntity> messageBars)  $default,) {final _that = this;
 switch (_that) {
 case _PromoActionResultEntity():
-return $default(_that.success,_that.message,_that.promoCode,_that.bottomSheet);case _:
+return $default(_that.success,_that.message,_that.promoCode,_that.bottomSheet,_that.messageBars);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +200,10 @@ return $default(_that.success,_that.message,_that.promoCode,_that.bottomSheet);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool success,  String message,  String promoCode,  BackendActionContentEntity? bottomSheet)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool success,  String message,  String promoCode,  BackendActionContentEntity? bottomSheet,  List<MessageBarEntity> messageBars)?  $default,) {final _that = this;
 switch (_that) {
 case _PromoActionResultEntity() when $default != null:
-return $default(_that.success,_that.message,_that.promoCode,_that.bottomSheet);case _:
+return $default(_that.success,_that.message,_that.promoCode,_that.bottomSheet,_that.messageBars);case _:
   return null;
 
 }
@@ -211,7 +215,7 @@ return $default(_that.success,_that.message,_that.promoCode,_that.bottomSheet);c
 
 
 class _PromoActionResultEntity implements PromoActionResultEntity {
-  const _PromoActionResultEntity({this.success = false, this.message = '', this.promoCode = '', this.bottomSheet});
+  const _PromoActionResultEntity({this.success = false, this.message = '', this.promoCode = '', this.bottomSheet, final  List<MessageBarEntity> messageBars = const <MessageBarEntity>[]}): _messageBars = messageBars;
   
 
 @override@JsonKey() final  bool success;
@@ -220,6 +224,19 @@ class _PromoActionResultEntity implements PromoActionResultEntity {
 /// Backend-authored bottom sheet to show instead of the toast — sent on
 /// either outcome (e.g. "Invalid promotion" with a "Got It" button).
 @override final  BackendActionContentEntity? bottomSheet;
+/// Bars the response carried, from `messageBar` and/or `messageBars`.
+/// Take priority over [message] when rendering a failure — the backend
+/// authored them, so they carry their own copy, colour and icon.
+ final  List<MessageBarEntity> _messageBars;
+/// Bars the response carried, from `messageBar` and/or `messageBars`.
+/// Take priority over [message] when rendering a failure — the backend
+/// authored them, so they carry their own copy, colour and icon.
+@override@JsonKey() List<MessageBarEntity> get messageBars {
+  if (_messageBars is EqualUnmodifiableListView) return _messageBars;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_messageBars);
+}
+
 
 /// Create a copy of PromoActionResultEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -231,16 +248,16 @@ _$PromoActionResultEntityCopyWith<_PromoActionResultEntity> get copyWith => __$P
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PromoActionResultEntity&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.promoCode, promoCode) || other.promoCode == promoCode)&&(identical(other.bottomSheet, bottomSheet) || other.bottomSheet == bottomSheet));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PromoActionResultEntity&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.promoCode, promoCode) || other.promoCode == promoCode)&&(identical(other.bottomSheet, bottomSheet) || other.bottomSheet == bottomSheet)&&const DeepCollectionEquality().equals(other._messageBars, _messageBars));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,success,message,promoCode,bottomSheet);
+int get hashCode => Object.hash(runtimeType,success,message,promoCode,bottomSheet,const DeepCollectionEquality().hash(_messageBars));
 
 @override
 String toString() {
-  return 'PromoActionResultEntity(success: $success, message: $message, promoCode: $promoCode, bottomSheet: $bottomSheet)';
+  return 'PromoActionResultEntity(success: $success, message: $message, promoCode: $promoCode, bottomSheet: $bottomSheet, messageBars: $messageBars)';
 }
 
 
@@ -251,7 +268,7 @@ abstract mixin class _$PromoActionResultEntityCopyWith<$Res> implements $PromoAc
   factory _$PromoActionResultEntityCopyWith(_PromoActionResultEntity value, $Res Function(_PromoActionResultEntity) _then) = __$PromoActionResultEntityCopyWithImpl;
 @override @useResult
 $Res call({
- bool success, String message, String promoCode, BackendActionContentEntity? bottomSheet
+ bool success, String message, String promoCode, BackendActionContentEntity? bottomSheet, List<MessageBarEntity> messageBars
 });
 
 
@@ -268,13 +285,14 @@ class __$PromoActionResultEntityCopyWithImpl<$Res>
 
 /// Create a copy of PromoActionResultEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? success = null,Object? message = null,Object? promoCode = null,Object? bottomSheet = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? success = null,Object? message = null,Object? promoCode = null,Object? bottomSheet = freezed,Object? messageBars = null,}) {
   return _then(_PromoActionResultEntity(
 success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
 as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,promoCode: null == promoCode ? _self.promoCode : promoCode // ignore: cast_nullable_to_non_nullable
 as String,bottomSheet: freezed == bottomSheet ? _self.bottomSheet : bottomSheet // ignore: cast_nullable_to_non_nullable
-as BackendActionContentEntity?,
+as BackendActionContentEntity?,messageBars: null == messageBars ? _self._messageBars : messageBars // ignore: cast_nullable_to_non_nullable
+as List<MessageBarEntity>,
   ));
 }
 

@@ -6,9 +6,11 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/entities/backend_action_entity.dart';
 import '../../../../core/entities/message_bar_entity.dart';
+import '../../../../core/constants/strings/cart_strings.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../../promos_offers/domain/entities/promo_action_result_entity.dart';
+import '../../../promos_offers/domain/entities/promo_offers_source.dart';
 import '../../../promos_offers/domain/usecases/apply_promo_usecase.dart';
 import '../../../promos_offers/domain/usecases/remove_promo_usecase.dart';
 import '../../domain/entities/cart_entity.dart';
@@ -146,6 +148,12 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
           cart: cart,
           staticMessageBars: staticBars,
           refreshTick: current.refreshTick + 1,
+          // A refresh that recovers from an error state must drop the message
+          // that state carried. Every other success path builds a fresh
+          // CartState (so errorMessage starts null); this one copyWiths the
+          // previous state to stay silent, and would otherwise carry a stale
+          // message into a loaded cart.
+          errorMessage: null,
         ),
       ),
     );
@@ -223,13 +231,26 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       (failure) {
         if (failure is RequestCancelledFailure) return;
         if (current.isLoaded) {
-          emit(current.copyWith(loadingItemSku: null, isCartUpdating: false));
+          // Feedback matters more here than on the other mutations: the row
+          // stays put on failure, so without a toast the tap looks ignored.
+          emit(
+            current.copyWith(
+              loadingItemSku: null,
+              isCartUpdating: false,
+              toastMessage: CartStrings.couldNotMoveToWishlist,
+              toastIsError: true,
+            ),
+          );
         } else {
           emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
         }
       },
       // Move-to-wishlist API doesn't return full cart data — re-fetch
-      (_) async => _refreshAfterMutation(emit, current),
+      (_) async => _refreshAfterMutation(
+        emit,
+        current,
+        toastMessage: CartStrings.movedToWishlist,
+      ),
     );
   }
 
@@ -247,7 +268,14 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
 
     final token = swapCancelToken();
     final result = await applyPromoUseCase(
-      ApplyPromoParams(promoCode: event.promoCode, cancelToken: token),
+      // Reached from the cart's own promo text field (and its post-login
+      // replay), never from the offers sheet — that path goes through
+      // PromosOffersBloc and reports `offer-list`.
+      ApplyPromoParams(
+        promoCode: event.promoCode,
+        fromLocation: PromoOffersSource.cart,
+        cancelToken: token,
+      ),
     );
 
     await result.fold((failure) async {
@@ -374,7 +402,9 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   }
 
   void _onClearToast(ClearToast event, Emitter<CartState> emit) {
-    emit(state.copyWith(toastMessage: null));
+    // Reset the status with the message, so a later success toast can't
+    // inherit a stale error styling.
+    emit(state.copyWith(toastMessage: null, toastIsError: false));
   }
 
   void _onClearPromoActionSheet(ClearPromoActionSheet event, Emitter<CartState> emit) {

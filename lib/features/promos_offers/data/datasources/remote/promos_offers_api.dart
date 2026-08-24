@@ -36,9 +36,14 @@ abstract class PromosOffersApi {
     @CancelRequest() CancelToken? cancelToken,
   });
 
+  /// `fromLocation` tells BE which surface applied the code — the cart's own
+  /// text field vs. an Apply tap in the offers sheet. Wire-level entry point;
+  /// callers should use [PromosOffersApiX.applyPromoFrom] so the surface stays
+  /// typed.
   @POST(ApiConstants.promoApply)
   Future<PromoActionResponseModel> applyPromo({
     @Body() required PromoApplyRequestModel request,
+    @Query('fromLocation') String fromLocation = 'cart',
     @CancelRequest() CancelToken? cancelToken,
   });
 
@@ -58,6 +63,19 @@ extension PromosOffersApiX on PromosOffersApi {
   }) => getPromosOffers(
     fromLocation: fromLocation.wireValue,
     productId: productId,
+    cancelToken: cancelToken,
+  );
+
+  /// Same mapping for apply. Retrofit would serialise a Dart enum via
+  /// `toString()` ("PromoOffersSource.cart"), so the enum is unwrapped here
+  /// rather than typed onto the generated method.
+  Future<PromoActionResponseModel> applyPromoFrom({
+    required PromoApplyRequestModel request,
+    PromoOffersSource fromLocation = PromoOffersSource.cart,
+    CancelToken? cancelToken,
+  }) => applyPromo(
+    request: request,
+    fromLocation: fromLocation.wireValue,
     cancelToken: cancelToken,
   );
 }

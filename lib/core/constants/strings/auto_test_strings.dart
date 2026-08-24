@@ -172,6 +172,7 @@ class MessageBarTestStrings {
   MessageBarTestStrings();
 
   static const String messageBarMessageTextField = 'message_bar_message_text_field';
+  static const String messageBarTitleTextField = 'message_bar_title_text_field';
   static const String messageBarActionButton = 'message_bar_action_button';
   static const String messageBarLeftButton = 'message_bar_left_button';
   static const String messageBarRightButton = 'message_bar_right_button';
@@ -345,6 +346,9 @@ class AddressTestStrings {
 /// Cart screen.
 class PromoOffersTestStrings {
   PromoOffersTestStrings();
+
+  /// Inline rejection bar shown under the sheet title on a failed apply.
+  static const String actionErrorBar = 'promo_offers_action_error_bar';
 
   static const String sheetTitle = 'promo_offers_sheet_title';
   static const String emptyStateButton = 'promo_offers_empty_state_button';

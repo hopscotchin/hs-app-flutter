@@ -8,6 +8,14 @@ class MessageBarEntity extends Equatable {
   final String? message;
   final String? alertMessage;
   final String? messageType;
+
+  /// Optional heading rendered above [displayText]. May be plain text or the
+  /// same small HTML subset as the message.
+  ///
+  /// Not simply `json['title']`: several live payloads (the cart credits bar
+  /// among them) send `"title": "custom"` as a duplicate of [messageType], so
+  /// the model filters those out. See `MessageBarModel.fromJson`.
+  final String? title;
   final String? actionLink;
   final String? actionText;
   final String? actionTextRight;
@@ -25,6 +33,7 @@ class MessageBarEntity extends Equatable {
     this.message,
     this.alertMessage,
     this.messageType,
+    this.title,
     this.actionLink,
     this.actionText,
     this.actionTextRight,
@@ -47,6 +56,7 @@ class MessageBarEntity extends Equatable {
     message,
     alertMessage,
     messageType,
+    title,
     actionLink,
     actionText,
     actionTextRight,

@@ -6,6 +6,7 @@ import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/atoms/empty_state_widget.dart';
 import 'package:hs_app_flutter/components/atoms/price_summary_widget.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/colors.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
@@ -245,8 +246,11 @@ class _CartBody extends StatelessWidget {
       listener: (context, state) {
         final cartBloc = context.read<CartBloc>();
 
-        if (state.toastMessage != null) {
-          context.showSnack(state.toastMessage!);
+        if (state.toastMessage.isNotNullOrEmpty) {
+          context.showSnack(
+            state.toastMessage!,
+            status: state.toastIsError ? SnackStatus.error : SnackStatus.success,
+          );
           cartBloc.add(const ClearToast());
           return;
         }

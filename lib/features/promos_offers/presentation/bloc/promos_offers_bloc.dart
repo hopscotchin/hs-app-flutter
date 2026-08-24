@@ -7,9 +7,11 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/constants/strings/promos_offers_strings.dart';
 import '../../../../core/entities/backend_action_entity.dart';
+import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/promo_action_result_entity.dart';
 import '../../domain/entities/promo_offers_entity.dart';
+import '../../domain/entities/promo_offers_source.dart';
 import '../../domain/usecases/apply_promo_usecase.dart';
 import '../../domain/usecases/get_promos_offers_usecase.dart';
 import '../../domain/usecases/remove_promo_usecase.dart';
@@ -46,9 +48,7 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
   CancelToken? _actionCancelToken;
 
   CancelToken _swapActionCancelToken() {
-    _actionCancelToken?.cancel(
-      'Cancelled by bloc: a newer promo action superseded it.',
-    );
+    _actionCancelToken?.cancel('Cancelled by bloc: a newer promo action superseded it.');
     final token = CancelToken();
     _actionCancelToken = token;
     return token;
@@ -61,63 +61,47 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
     return super.close();
   }
 
-  Future<void> _onLoad(
-    LoadPromosOffers event,
-    Emitter<PromosOffersState> emit,
-  ) async {
+  Future<void> _onLoad(LoadPromosOffers event, Emitter<PromosOffersState> emit) async {
     emit(const PromosOffersState(status: PromosOffersStatus.loading));
     final token = swapCancelToken();
 
-    final result = await _getPromosOffers(
-      GetPromosOffersParams(cancelToken: token),
-    );
+    final result = await _getPromosOffers(GetPromosOffersParams(cancelToken: token));
 
-    result.fold(
-      (failure) {
-        if (failure is RequestCancelledFailure) return;
-        emit(
-          PromosOffersState(
-            status: PromosOffersStatus.error,
-            errorMessage: failure.message,
-          ),
-        );
-      },
-      (offers) => emit(
-        PromosOffersState(status: PromosOffersStatus.success, offers: offers),
-      ),
-    );
+    result.fold((failure) {
+      if (failure is RequestCancelledFailure) return;
+      emit(PromosOffersState(status: PromosOffersStatus.error, errorMessage: failure.message));
+    }, (offers) => emit(PromosOffersState(status: PromosOffersStatus.success, offers: offers)));
   }
 
-  Future<void> _onRefresh(
-    RefreshPromosOffers event,
-    Emitter<PromosOffersState> emit,
-  ) async {
+  Future<void> _onRefresh(RefreshPromosOffers event, Emitter<PromosOffersState> emit) async {
     add(const LoadPromosOffers());
   }
 
-  Future<void> _onApply(ApplyPromo event, Emitter<PromosOffersState> emit) =>
-      _runAction(
-        emit,
-        kind: PromoActionKind.apply,
+  Future<void> _onApply(ApplyPromo event, Emitter<PromosOffersState> emit) => _runAction(
+    emit,
+    kind: PromoActionKind.apply,
+    promoCode: event.promoCode,
+    run: (token) => _applyPromo(
+      // This bloc only ever backs the offers sheet, so every apply from
+      // here is an Apply tap on a listed offer.
+      ApplyPromoParams(
         promoCode: event.promoCode,
-        run: (token) => _applyPromo(
-          ApplyPromoParams(promoCode: event.promoCode, cancelToken: token),
-        ),
-        fallbackSuccess: PromosOffersStrings.offerApplied,
-        fallbackError: PromosOffersStrings.couldNotApplyOffer,
-      );
+        fromLocation: PromoOffersSource.offerList,
+        cancelToken: token,
+      ),
+    ),
+    fallbackSuccess: PromosOffersStrings.offerApplied,
+    fallbackError: PromosOffersStrings.couldNotApplyOffer,
+  );
 
-  Future<void> _onRemove(RemovePromo event, Emitter<PromosOffersState> emit) =>
-      _runAction(
-        emit,
-        kind: PromoActionKind.remove,
-        promoCode: event.promoCode,
-        run: (token) => _removePromo(
-          RemovePromoParams(promoCode: event.promoCode, cancelToken: token),
-        ),
-        fallbackSuccess: PromosOffersStrings.offerRemoved,
-        fallbackError: PromosOffersStrings.couldNotRemoveOffer,
-      );
+  Future<void> _onRemove(RemovePromo event, Emitter<PromosOffersState> emit) => _runAction(
+    emit,
+    kind: PromoActionKind.remove,
+    promoCode: event.promoCode,
+    run: (token) => _removePromo(RemovePromoParams(promoCode: event.promoCode, cancelToken: token)),
+    fallbackSuccess: PromosOffersStrings.offerRemoved,
+    fallbackError: PromosOffersStrings.couldNotRemoveOffer,
+  );
 
   /// Shared apply/remove flow: lock the buttons, hit the endpoint, then — for a
   /// remove, which leaves the sheet open — re-fetch the list so `isApplied`
@@ -126,23 +110,14 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
     Emitter<PromosOffersState> emit, {
     required PromoActionKind kind,
     required String promoCode,
-    required Future<Either<Failure, PromoActionResultEntity>> Function(
-      CancelToken token,
-    )
-    run,
+    required Future<Either<Failure, PromoActionResultEntity>> Function(CancelToken token) run,
     required String fallbackSuccess,
     required String fallbackError,
   }) async {
     final current = state;
     if (current.isActionInProgress || promoCode.isEmpty) return;
 
-    emit(
-      current.copyWith(
-        pendingActionCode: promoCode,
-        actionMessage: null,
-        actionError: null,
-      ),
-    );
+    emit(current.copyWith(pendingActionCode: promoCode, actionMessage: null, actionError: null));
 
     final result = await run(_swapActionCancelToken());
 
@@ -153,8 +128,14 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
           current.copyWith(
             pendingActionCode: '',
             actionError: failure.message,
+            // ApiFailure is the only Failure that carries bars — an
+            // `action: "failure"` body packs them onto the exception.
+            actionMessageBars: failure is ApiFailure
+                ? failure.messageBars
+                : const <MessageBarEntity>[],
             actionNonce: current.actionNonce + 1,
             lastAction: kind,
+            actionSucceeded: false,
           ),
         );
       },
@@ -164,14 +145,14 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
           emit(
             current.copyWith(
               pendingActionCode: '',
-              // A backend sheet carries its own copy, so don't also raise an
-              // error toast behind it.
-              actionError: sheet != null
-                  ? null
-                  : (action.hasMessage ? action.message : fallbackError),
-              actionBottomSheet: sheet,
+              // Always carried: the sheet stays open on a rejection and shows
+              // this inline under its title, so there is no stacked sheet for
+              // the copy to duplicate.
+              actionError: action.hasMessage ? action.message : fallbackError,
+              actionMessageBars: action.messageBars,
               actionNonce: current.actionNonce + 1,
               lastAction: kind,
+              actionSucceeded: false,
             ),
           );
           return;
@@ -188,6 +169,10 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
               actionNonce: current.actionNonce + 1,
               lastAction: kind,
               cartChanged: true,
+              actionSucceeded: true,
+              // Clear any rejection still showing from a previous attempt.
+              actionError: null,
+              actionMessageBars: const <MessageBarEntity>[],
             ),
           );
           return;
@@ -212,9 +197,7 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
     required String actionMessage,
     BackendActionContentEntity? bottomSheet,
   }) async {
-    final result = await _getPromosOffers(
-      GetPromosOffersParams(cancelToken: swapCancelToken()),
-    );
+    final result = await _getPromosOffers(GetPromosOffersParams(cancelToken: swapCancelToken()));
 
     result.fold(
       (failure) {
@@ -229,6 +212,7 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
             actionNonce: base.actionNonce + 1,
             lastAction: kind,
             cartChanged: true,
+            actionSucceeded: true,
           ),
         );
       },
@@ -242,6 +226,7 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
           actionNonce: base.actionNonce + 1,
           lastAction: kind,
           cartChanged: true,
+          actionSucceeded: true,
         ),
       ),
     );

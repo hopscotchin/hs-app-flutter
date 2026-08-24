@@ -9,6 +9,7 @@ class MessageBarModel extends MessageBarEntity {
     super.message,
     super.alertMessage,
     super.messageType,
+    super.title,
     super.actionLink,
     super.actionText,
     super.actionTextRight,
@@ -28,6 +29,10 @@ class MessageBarModel extends MessageBarEntity {
       message: json['message'] as String?,
       alertMessage: json['alertMessage'] as String?,
       messageType: json['messageType'] as String?,
+      // Passed through as-is. Note some payloads echo the type marker here
+      // (`"title": "custom"` beside `"messageType": "custom"`); those render
+      // as a heading. Filter in the widget if that shows up in a design.
+      title: json['title'] as String?,
       actionLink: json['actionLink'] as String?,
       actionText: json['actionText'] as String?,
       actionTextRight: json['actionTextRight'] as String?,
@@ -37,5 +42,23 @@ class MessageBarModel extends MessageBarEntity {
       icon: json['icon'] as String?,
       redirectLink: json['redirectLink'] as String?,
     );
+  }
+
+  /// Collects the bars a response carries, from **either** wire key.
+  ///
+  /// Endpoints are inconsistent: some send a single `messageBar` object, some a
+  /// `messageBars` array, a few send both. `messageBar` is taken first so the
+  /// primary bar leads. Mirrors the order `ActionResponse.validate` uses when
+  /// it packs bars onto an `ApiFailureException`, so an error surfaced through
+  /// either route reads the same.
+  static List<MessageBarEntity> collectFrom(Map<String, dynamic> json) {
+    final bars = <MessageBarEntity>[];
+    final single = json['messageBar'];
+    if (single is Map<String, dynamic>) bars.add(MessageBarModel.fromJson(single));
+    final many = json['messageBars'];
+    if (many is List) {
+      bars.addAll(many.whereType<Map<String, dynamic>>().map(MessageBarModel.fromJson));
+    }
+    return bars;
   }
 }

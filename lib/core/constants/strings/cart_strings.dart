@@ -3,8 +3,7 @@ class CartStrings {
 
   static const String bag = 'Bag';
   static const String emptyCart = 'Your bag is empty';
-  static const String emptyCartSubtitle =
-      "Looks like you haven't added anything to your bag yet";
+  static const String emptyCartSubtitle = "Looks like you haven't added anything to your bag yet";
   static const String startShopping = 'START SHOPPING';
   static const String total = 'Total';
   static const String removeFromCart = 'Remove';
@@ -22,6 +21,12 @@ class CartStrings {
   // App bar
   static const String enterPincodeForEdd = 'Enter pincode for EDD';
   static const String deliverTo = 'Deliver to';
+
+  // Move to wishlist — mirrors the wording WishlistCubit uses on PLP/PDP,
+  // but says "moved" rather than "added": the cart action also drops the line
+  // from the bag, which the PLP heart tap does not.
+  static const String movedToWishlist = 'Moved to wishlist';
+  static const String couldNotMoveToWishlist = "Couldn't move to wishlist";
 
   // Remove item confirmation sheet
   static const String removeItemsTitle = 'Remove Item(s)';
