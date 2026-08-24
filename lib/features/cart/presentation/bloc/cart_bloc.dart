@@ -4,9 +4,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/base/base_bloc.dart';
+import '../../../../core/constants/strings/cart_strings.dart';
 import '../../../../core/entities/backend_action_entity.dart';
 import '../../../../core/entities/message_bar_entity.dart';
-import '../../../../core/constants/strings/cart_strings.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../../promos_offers/domain/entities/promo_action_result_entity.dart';
@@ -121,15 +121,25 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     result.fold(
       (failure) {
         if (failure is RequestCancelledFailure) return;
-        emit(CartState(status: CartStatus.error, errorMessage: failure.message));
+        emit(
+          CartState(status: CartStatus.error, errorMessage: failure.message),
+        );
       },
-      (cart) =>
-          emit(CartState(status: CartStatus.loaded, cart: cart, staticMessageBars: staticBars)),
+      (cart) => emit(
+        CartState(
+          status: CartStatus.loaded,
+          cart: cart,
+          staticMessageBars: staticBars,
+        ),
+      ),
     );
   }
 
   /// Silent refresh — keeps current UI visible while fetching fresh data.
-  Future<void> _onRefreshCart(RefreshCart event, Emitter<CartState> emit) async {
+  Future<void> _onRefreshCart(
+    RefreshCart event,
+    Emitter<CartState> emit,
+  ) async {
     final current = state;
     final token = swapCancelToken();
     final staticBars = await _staticMessageBars();
@@ -165,7 +175,10 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     return result.fold((_) => const [], (bars) => bars);
   }
 
-  Future<void> _onRemoveCartItem(RemoveCartItem event, Emitter<CartState> emit) async {
+  Future<void> _onRemoveCartItem(
+    RemoveCartItem event,
+    Emitter<CartState> emit,
+  ) async {
     final current = state;
     if (current.isLoaded) {
       emit(current.copyWith(loadingItemSku: event.sku, isCartUpdating: true));
@@ -180,7 +193,12 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
         if (current.isLoaded) {
           emit(current.copyWith(loadingItemSku: null, isCartUpdating: false));
         } else {
-          emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
+          emit(
+            current.copyWith(
+              status: CartStatus.error,
+              errorMessage: failure.message,
+            ),
+          );
         }
       },
       // Remove API doesn't return full cart data — re-fetch
@@ -188,14 +206,21 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     );
   }
 
-  Future<void> _onUpdateCartItem(UpdateCartItemQuantity event, Emitter<CartState> emit) async {
+  Future<void> _onUpdateCartItem(
+    UpdateCartItemQuantity event,
+    Emitter<CartState> emit,
+  ) async {
     final current = state;
     if (current.isLoaded) {
       emit(current.copyWith(loadingItemSku: event.sku, isCartUpdating: true));
     }
     final token = swapCancelToken();
     final result = await updateCartItemUseCase(
-      UpdateCartItemParams(sku: event.sku, quantity: event.quantity, cancelToken: token),
+      UpdateCartItemParams(
+        sku: event.sku,
+        quantity: event.quantity,
+        cancelToken: token,
+      ),
     );
     await result.fold(
       (failure) {
@@ -203,7 +228,12 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
         if (current.isLoaded) {
           emit(current.copyWith(loadingItemSku: null, isCartUpdating: false));
         } else {
-          emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
+          emit(
+            current.copyWith(
+              status: CartStatus.error,
+              errorMessage: failure.message,
+            ),
+          );
         }
       },
       // Update-quantity API doesn't return full cart data — re-fetch
@@ -211,7 +241,10 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     );
   }
 
-  Future<void> _onMoveToWishlist(MoveToWishlist event, Emitter<CartState> emit) async {
+  Future<void> _onMoveToWishlist(
+    MoveToWishlist event,
+    Emitter<CartState> emit,
+  ) async {
     final current = event.reloadCartFirst
         ? await _reloadCartBeforeMutation(emit)
         : state;
@@ -242,7 +275,12 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
             ),
           );
         } else {
-          emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
+          emit(
+            current.copyWith(
+              status: CartStatus.error,
+              errorMessage: failure.message,
+            ),
+          );
         }
       },
       // Move-to-wishlist API doesn't return full cart data — re-fetch
@@ -258,7 +296,10 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// endpoint the offers bottom sheet uses. That endpoint answers with only
   /// `{success, message}` — no cart — so the cart is re-read afterwards to pick
   /// up the new totals.
-  Future<void> _onApplyPromoCode(ApplyPromoCode event, Emitter<CartState> emit) async {
+  Future<void> _onApplyPromoCode(
+    ApplyPromoCode event,
+    Emitter<CartState> emit,
+  ) async {
     final current = event.reloadCartFirst
         ? await _reloadCartBeforeMutation(emit)
         : state;
@@ -278,40 +319,43 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       ),
     );
 
-    await result.fold((failure) async {
-      if (failure is RequestCancelledFailure) return;
-      _emitPromoActionFailed(emit, current, failure.message);
-    }, (action) async {
-      final sheet = action.hasBottomSheet ? action.bottomSheet : null;
-      if (!action.success) {
-        // A rejected code (mistyped, expired, cart not eligible) is still a
-        // 200 — surface the server's reason instead of silently clearing the
-        // spinner, which is how the old endpoint behaved. When the backend
-        // doesn't send its own sheet, fall back to a client-authored one so
-        // the user still sees the "Invalid Promo Code" sheet rather than a
-        // toast.
-        _emitPromoActionFailed(
+    await result.fold(
+      (failure) async {
+        if (failure is RequestCancelledFailure) return;
+        _emitPromoActionFailed(emit, current, failure.message);
+      },
+      (action) async {
+        final sheet = action.hasBottomSheet ? action.bottomSheet : null;
+        if (!action.success) {
+          // A rejected code (mistyped, expired, cart not eligible) is still a
+          // 200 — surface the server's reason instead of silently clearing the
+          // spinner, which is how the old endpoint behaved. When the backend
+          // doesn't send its own sheet, fall back to a client-authored one so
+          // the user still sees the "Invalid Promo Code" sheet rather than a
+          // toast.
+          _emitPromoActionFailed(
+            emit,
+            current,
+            action.hasMessage ? action.message : 'Could not apply this offer',
+            sheet:
+                sheet ??
+                BackendActionContentEntity(
+                  title: 'Invalid Promo Code',
+                  description: action.hasMessage
+                      ? action.message
+                      : 'This promo code is invalid or expired. Try another',
+                ),
+          );
+          return;
+        }
+        await _refreshAfterMutation(
           emit,
           current,
-          action.hasMessage ? action.message : 'Could not apply this offer',
-          sheet:
-              sheet ??
-              BackendActionContentEntity(
-                title: 'Invalid Promo Code',
-                description: action.hasMessage
-                    ? action.message
-                    : 'This promo code is invalid or expired. Try another',
-              ),
+          toastMessage: action.hasMessage ? action.message : null,
+          promoActionSheet: sheet,
         );
-        return;
-      }
-      await _refreshAfterMutation(
-        emit,
-        current,
-        toastMessage: action.hasMessage ? action.message : null,
-        promoActionSheet: sheet,
-      );
-    });
+      },
+    );
   }
 
   /// Shared by apply and remove: keep the loaded cart visible, drop the
@@ -339,7 +383,10 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
 
   /// Removes through `DELETE /v3/promotion/remove`, pairing with the apply
   /// above. Same `{success, message}` shape, so the cart is re-read afterwards.
-  Future<void> _onRemovePromoCode(RemovePromoCode event, Emitter<CartState> emit) async {
+  Future<void> _onRemovePromoCode(
+    RemovePromoCode event,
+    Emitter<CartState> emit,
+  ) async {
     final current = state;
     if (current.isLoaded) {
       emit(current.copyWith(isPromoLoading: true, isCartUpdating: true));
@@ -350,27 +397,30 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       RemovePromoParams(promoCode: event.promoCode, cancelToken: token),
     );
 
-    await result.fold((failure) async {
-      if (failure is RequestCancelledFailure) return;
-      _emitPromoActionFailed(emit, current, failure.message);
-    }, (action) async {
-      final sheet = action.hasBottomSheet ? action.bottomSheet : null;
-      if (!action.success) {
-        _emitPromoActionFailed(
+    await result.fold(
+      (failure) async {
+        if (failure is RequestCancelledFailure) return;
+        _emitPromoActionFailed(emit, current, failure.message);
+      },
+      (action) async {
+        final sheet = action.hasBottomSheet ? action.bottomSheet : null;
+        if (!action.success) {
+          _emitPromoActionFailed(
+            emit,
+            current,
+            action.hasMessage ? action.message : 'Could not remove this offer',
+            sheet: sheet,
+          );
+          return;
+        }
+        await _refreshAfterMutation(
           emit,
           current,
-          action.hasMessage ? action.message : 'Could not remove this offer',
-          sheet: sheet,
+          toastMessage: action.hasMessage ? action.message : null,
+          promoActionSheet: sheet,
         );
-        return;
-      }
-      await _refreshAfterMutation(
-        emit,
-        current,
-        toastMessage: action.hasMessage ? action.message : null,
-        promoActionSheet: sheet,
-      );
-    });
+      },
+    );
   }
 
   Future<void> _onMergeCart(MergeCart event, Emitter<CartState> emit) async {
@@ -384,10 +434,19 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       if (failure is RequestCancelledFailure) return;
       if (current.isLoaded) {
         emit(
-          current.copyWith(isMerging: false, isCartUpdating: false, toastMessage: failure.message),
+          current.copyWith(
+            isMerging: false,
+            isCartUpdating: false,
+            toastMessage: failure.message,
+          ),
         );
       } else {
-        emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
+        emit(
+          current.copyWith(
+            status: CartStatus.error,
+            errorMessage: failure.message,
+          ),
+        );
       }
     }, (_) async => _refreshAfterMutation(emit, current, isMergeCall: true));
   }
@@ -397,9 +456,10 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// 2. action == SUCCESS → open checkout bottom sheet
   /// 3. messageBars present → show them on cart
   /// 4. else → show error
-  Future<void> _onProceedToCheckout(ProceedToCheckout event, Emitter<CartState> emit) async {
-
-  }
+  Future<void> _onProceedToCheckout(
+    ProceedToCheckout event,
+    Emitter<CartState> emit,
+  ) async {}
 
   void _onClearToast(ClearToast event, Emitter<CartState> emit) {
     // Reset the status with the message, so a later success toast can't
@@ -407,13 +467,19 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     emit(state.copyWith(toastMessage: null, toastIsError: false));
   }
 
-  void _onClearPromoActionSheet(ClearPromoActionSheet event, Emitter<CartState> emit) {
+  void _onClearPromoActionSheet(
+    ClearPromoActionSheet event,
+    Emitter<CartState> emit,
+  ) {
     emit(state.copyWith(promoActionSheet: null));
   }
 
   /// Locally updates the delivery pincode — no backend endpoint exists for
   /// this yet, so it just patches the currently-loaded cart entity.
-  void _onUpdateDeliveryPincode(UpdateDeliveryPincode event, Emitter<CartState> emit) {
+  void _onUpdateDeliveryPincode(
+    UpdateDeliveryPincode event,
+    Emitter<CartState> emit,
+  ) {
     final current = state;
     if (!current.isLoaded) return;
     emit(
@@ -477,7 +543,12 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
             ),
           );
         } else {
-          emit(previousState.copyWith(status: CartStatus.error, errorMessage: failure.message));
+          emit(
+            previousState.copyWith(
+              status: CartStatus.error,
+              errorMessage: failure.message,
+            ),
+          );
         }
       },
       (cart) {

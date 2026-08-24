@@ -18,7 +18,9 @@ mixin _$CartState {
 // change, remove, move-to-wishlist, promo apply/remove, merge) is in
 // flight, including its mandatory follow-up cart refresh. See
 // CartBloc._refreshAfterMutation.
- bool get isCartUpdating; List<MessageBarEntity> get staticMessageBars; String? get toastMessage;/// Bumped every time a [RefreshCart] handler completes (success or
+ bool get isCartUpdating; List<MessageBarEntity> get staticMessageBars; String? get toastMessage;/// Whether [toastMessage] is a failure, so the snack can be styled the way
+/// PLP/PDP style theirs (`WishlistState.feedbackIsError` is the same idea).
+ bool get toastIsError;/// Bumped every time a [RefreshCart] handler completes (success or
 /// failure) — lets the pull-to-refresh indicator await exactly one
 /// round-trip via `bloc.stream.firstWhere((s) => s.refreshTick != tick)`
 /// without needing a dedicated loading flag (RefreshCart is otherwise a
@@ -36,16 +38,16 @@ $CartStateCopyWith<CartState> get copyWith => _$CartStateCopyWithImpl<CartState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CartState&&(identical(other.status, status) || other.status == status)&&(identical(other.cart, cart) || other.cart == cart)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.loadingItemSku, loadingItemSku) || other.loadingItemSku == loadingItemSku)&&(identical(other.isCheckoutLoading, isCheckoutLoading) || other.isCheckoutLoading == isCheckoutLoading)&&(identical(other.isPromoLoading, isPromoLoading) || other.isPromoLoading == isPromoLoading)&&(identical(other.isMerging, isMerging) || other.isMerging == isMerging)&&(identical(other.isCartUpdating, isCartUpdating) || other.isCartUpdating == isCartUpdating)&&const DeepCollectionEquality().equals(other.staticMessageBars, staticMessageBars)&&(identical(other.toastMessage, toastMessage) || other.toastMessage == toastMessage)&&(identical(other.refreshTick, refreshTick) || other.refreshTick == refreshTick)&&(identical(other.promoActionSheet, promoActionSheet) || other.promoActionSheet == promoActionSheet));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CartState&&(identical(other.status, status) || other.status == status)&&(identical(other.cart, cart) || other.cart == cart)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.loadingItemSku, loadingItemSku) || other.loadingItemSku == loadingItemSku)&&(identical(other.isCheckoutLoading, isCheckoutLoading) || other.isCheckoutLoading == isCheckoutLoading)&&(identical(other.isPromoLoading, isPromoLoading) || other.isPromoLoading == isPromoLoading)&&(identical(other.isMerging, isMerging) || other.isMerging == isMerging)&&(identical(other.isCartUpdating, isCartUpdating) || other.isCartUpdating == isCartUpdating)&&const DeepCollectionEquality().equals(other.staticMessageBars, staticMessageBars)&&(identical(other.toastMessage, toastMessage) || other.toastMessage == toastMessage)&&(identical(other.toastIsError, toastIsError) || other.toastIsError == toastIsError)&&(identical(other.refreshTick, refreshTick) || other.refreshTick == refreshTick)&&(identical(other.promoActionSheet, promoActionSheet) || other.promoActionSheet == promoActionSheet));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,cart,errorMessage,loadingItemSku,isCheckoutLoading,isPromoLoading,isMerging,isCartUpdating,const DeepCollectionEquality().hash(staticMessageBars),toastMessage,refreshTick,promoActionSheet);
+int get hashCode => Object.hash(runtimeType,status,cart,errorMessage,loadingItemSku,isCheckoutLoading,isPromoLoading,isMerging,isCartUpdating,const DeepCollectionEquality().hash(staticMessageBars),toastMessage,toastIsError,refreshTick,promoActionSheet);
 
 @override
 String toString() {
-  return 'CartState(status: $status, cart: $cart, errorMessage: $errorMessage, loadingItemSku: $loadingItemSku, isCheckoutLoading: $isCheckoutLoading, isPromoLoading: $isPromoLoading, isMerging: $isMerging, isCartUpdating: $isCartUpdating, staticMessageBars: $staticMessageBars, toastMessage: $toastMessage, refreshTick: $refreshTick, promoActionSheet: $promoActionSheet)';
+  return 'CartState(status: $status, cart: $cart, errorMessage: $errorMessage, loadingItemSku: $loadingItemSku, isCheckoutLoading: $isCheckoutLoading, isPromoLoading: $isPromoLoading, isMerging: $isMerging, isCartUpdating: $isCartUpdating, staticMessageBars: $staticMessageBars, toastMessage: $toastMessage, toastIsError: $toastIsError, refreshTick: $refreshTick, promoActionSheet: $promoActionSheet)';
 }
 
 
@@ -56,7 +58,7 @@ abstract mixin class $CartStateCopyWith<$Res>  {
   factory $CartStateCopyWith(CartState value, $Res Function(CartState) _then) = _$CartStateCopyWithImpl;
 @useResult
 $Res call({
- CartStatus status, CartEntity? cart, String? errorMessage, String? loadingItemSku, bool isCheckoutLoading, bool isPromoLoading, bool isMerging, bool isCartUpdating, List<MessageBarEntity> staticMessageBars, String? toastMessage, int refreshTick, BackendActionContentEntity? promoActionSheet
+ CartStatus status, CartEntity? cart, String? errorMessage, String? loadingItemSku, bool isCheckoutLoading, bool isPromoLoading, bool isMerging, bool isCartUpdating, List<MessageBarEntity> staticMessageBars, String? toastMessage, bool toastIsError, int refreshTick, BackendActionContentEntity? promoActionSheet
 });
 
 
@@ -73,7 +75,7 @@ class _$CartStateCopyWithImpl<$Res>
 
 /// Create a copy of CartState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? cart = freezed,Object? errorMessage = freezed,Object? loadingItemSku = freezed,Object? isCheckoutLoading = null,Object? isPromoLoading = null,Object? isMerging = null,Object? isCartUpdating = null,Object? staticMessageBars = null,Object? toastMessage = freezed,Object? refreshTick = null,Object? promoActionSheet = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? cart = freezed,Object? errorMessage = freezed,Object? loadingItemSku = freezed,Object? isCheckoutLoading = null,Object? isPromoLoading = null,Object? isMerging = null,Object? isCartUpdating = null,Object? staticMessageBars = null,Object? toastMessage = freezed,Object? toastIsError = null,Object? refreshTick = null,Object? promoActionSheet = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as CartStatus,cart: freezed == cart ? _self.cart : cart // ignore: cast_nullable_to_non_nullable
@@ -85,7 +87,8 @@ as bool,isMerging: null == isMerging ? _self.isMerging : isMerging // ignore: ca
 as bool,isCartUpdating: null == isCartUpdating ? _self.isCartUpdating : isCartUpdating // ignore: cast_nullable_to_non_nullable
 as bool,staticMessageBars: null == staticMessageBars ? _self.staticMessageBars : staticMessageBars // ignore: cast_nullable_to_non_nullable
 as List<MessageBarEntity>,toastMessage: freezed == toastMessage ? _self.toastMessage : toastMessage // ignore: cast_nullable_to_non_nullable
-as String?,refreshTick: null == refreshTick ? _self.refreshTick : refreshTick // ignore: cast_nullable_to_non_nullable
+as String?,toastIsError: null == toastIsError ? _self.toastIsError : toastIsError // ignore: cast_nullable_to_non_nullable
+as bool,refreshTick: null == refreshTick ? _self.refreshTick : refreshTick // ignore: cast_nullable_to_non_nullable
 as int,promoActionSheet: freezed == promoActionSheet ? _self.promoActionSheet : promoActionSheet // ignore: cast_nullable_to_non_nullable
 as BackendActionContentEntity?,
   ));
@@ -172,10 +175,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( CartStatus status,  CartEntity? cart,  String? errorMessage,  String? loadingItemSku,  bool isCheckoutLoading,  bool isPromoLoading,  bool isMerging,  bool isCartUpdating,  List<MessageBarEntity> staticMessageBars,  String? toastMessage,  int refreshTick,  BackendActionContentEntity? promoActionSheet)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( CartStatus status,  CartEntity? cart,  String? errorMessage,  String? loadingItemSku,  bool isCheckoutLoading,  bool isPromoLoading,  bool isMerging,  bool isCartUpdating,  List<MessageBarEntity> staticMessageBars,  String? toastMessage,  bool toastIsError,  int refreshTick,  BackendActionContentEntity? promoActionSheet)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CartState() when $default != null:
-return $default(_that.status,_that.cart,_that.errorMessage,_that.loadingItemSku,_that.isCheckoutLoading,_that.isPromoLoading,_that.isMerging,_that.isCartUpdating,_that.staticMessageBars,_that.toastMessage,_that.refreshTick,_that.promoActionSheet);case _:
+return $default(_that.status,_that.cart,_that.errorMessage,_that.loadingItemSku,_that.isCheckoutLoading,_that.isPromoLoading,_that.isMerging,_that.isCartUpdating,_that.staticMessageBars,_that.toastMessage,_that.toastIsError,_that.refreshTick,_that.promoActionSheet);case _:
   return orElse();
 
 }
@@ -193,10 +196,10 @@ return $default(_that.status,_that.cart,_that.errorMessage,_that.loadingItemSku,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( CartStatus status,  CartEntity? cart,  String? errorMessage,  String? loadingItemSku,  bool isCheckoutLoading,  bool isPromoLoading,  bool isMerging,  bool isCartUpdating,  List<MessageBarEntity> staticMessageBars,  String? toastMessage,  int refreshTick,  BackendActionContentEntity? promoActionSheet)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( CartStatus status,  CartEntity? cart,  String? errorMessage,  String? loadingItemSku,  bool isCheckoutLoading,  bool isPromoLoading,  bool isMerging,  bool isCartUpdating,  List<MessageBarEntity> staticMessageBars,  String? toastMessage,  bool toastIsError,  int refreshTick,  BackendActionContentEntity? promoActionSheet)  $default,) {final _that = this;
 switch (_that) {
 case _CartState():
-return $default(_that.status,_that.cart,_that.errorMessage,_that.loadingItemSku,_that.isCheckoutLoading,_that.isPromoLoading,_that.isMerging,_that.isCartUpdating,_that.staticMessageBars,_that.toastMessage,_that.refreshTick,_that.promoActionSheet);case _:
+return $default(_that.status,_that.cart,_that.errorMessage,_that.loadingItemSku,_that.isCheckoutLoading,_that.isPromoLoading,_that.isMerging,_that.isCartUpdating,_that.staticMessageBars,_that.toastMessage,_that.toastIsError,_that.refreshTick,_that.promoActionSheet);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -213,10 +216,10 @@ return $default(_that.status,_that.cart,_that.errorMessage,_that.loadingItemSku,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( CartStatus status,  CartEntity? cart,  String? errorMessage,  String? loadingItemSku,  bool isCheckoutLoading,  bool isPromoLoading,  bool isMerging,  bool isCartUpdating,  List<MessageBarEntity> staticMessageBars,  String? toastMessage,  int refreshTick,  BackendActionContentEntity? promoActionSheet)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( CartStatus status,  CartEntity? cart,  String? errorMessage,  String? loadingItemSku,  bool isCheckoutLoading,  bool isPromoLoading,  bool isMerging,  bool isCartUpdating,  List<MessageBarEntity> staticMessageBars,  String? toastMessage,  bool toastIsError,  int refreshTick,  BackendActionContentEntity? promoActionSheet)?  $default,) {final _that = this;
 switch (_that) {
 case _CartState() when $default != null:
-return $default(_that.status,_that.cart,_that.errorMessage,_that.loadingItemSku,_that.isCheckoutLoading,_that.isPromoLoading,_that.isMerging,_that.isCartUpdating,_that.staticMessageBars,_that.toastMessage,_that.refreshTick,_that.promoActionSheet);case _:
+return $default(_that.status,_that.cart,_that.errorMessage,_that.loadingItemSku,_that.isCheckoutLoading,_that.isPromoLoading,_that.isMerging,_that.isCartUpdating,_that.staticMessageBars,_that.toastMessage,_that.toastIsError,_that.refreshTick,_that.promoActionSheet);case _:
   return null;
 
 }
@@ -228,7 +231,7 @@ return $default(_that.status,_that.cart,_that.errorMessage,_that.loadingItemSku,
 
 
 class _CartState implements CartState {
-  const _CartState({this.status = CartStatus.initial, this.cart, this.errorMessage, this.loadingItemSku, this.isCheckoutLoading = false, this.isPromoLoading = false, this.isMerging = false, this.isCartUpdating = false, final  List<MessageBarEntity> staticMessageBars = const <MessageBarEntity>[], this.toastMessage, this.refreshTick = 0, this.promoActionSheet}): _staticMessageBars = staticMessageBars;
+  const _CartState({this.status = CartStatus.initial, this.cart, this.errorMessage, this.loadingItemSku, this.isCheckoutLoading = false, this.isPromoLoading = false, this.isMerging = false, this.isCartUpdating = false, final  List<MessageBarEntity> staticMessageBars = const <MessageBarEntity>[], this.toastMessage, this.toastIsError = false, this.refreshTick = 0, this.promoActionSheet}): _staticMessageBars = staticMessageBars;
   
 
 @override@JsonKey() final  CartStatus status;
@@ -251,6 +254,9 @@ class _CartState implements CartState {
 }
 
 @override final  String? toastMessage;
+/// Whether [toastMessage] is a failure, so the snack can be styled the way
+/// PLP/PDP style theirs (`WishlistState.feedbackIsError` is the same idea).
+@override@JsonKey() final  bool toastIsError;
 /// Bumped every time a [RefreshCart] handler completes (success or
 /// failure) — lets the pull-to-refresh indicator await exactly one
 /// round-trip via `bloc.stream.firstWhere((s) => s.refreshTick != tick)`
@@ -271,16 +277,16 @@ _$CartStateCopyWith<_CartState> get copyWith => __$CartStateCopyWithImpl<_CartSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CartState&&(identical(other.status, status) || other.status == status)&&(identical(other.cart, cart) || other.cart == cart)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.loadingItemSku, loadingItemSku) || other.loadingItemSku == loadingItemSku)&&(identical(other.isCheckoutLoading, isCheckoutLoading) || other.isCheckoutLoading == isCheckoutLoading)&&(identical(other.isPromoLoading, isPromoLoading) || other.isPromoLoading == isPromoLoading)&&(identical(other.isMerging, isMerging) || other.isMerging == isMerging)&&(identical(other.isCartUpdating, isCartUpdating) || other.isCartUpdating == isCartUpdating)&&const DeepCollectionEquality().equals(other._staticMessageBars, _staticMessageBars)&&(identical(other.toastMessage, toastMessage) || other.toastMessage == toastMessage)&&(identical(other.refreshTick, refreshTick) || other.refreshTick == refreshTick)&&(identical(other.promoActionSheet, promoActionSheet) || other.promoActionSheet == promoActionSheet));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CartState&&(identical(other.status, status) || other.status == status)&&(identical(other.cart, cart) || other.cart == cart)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.loadingItemSku, loadingItemSku) || other.loadingItemSku == loadingItemSku)&&(identical(other.isCheckoutLoading, isCheckoutLoading) || other.isCheckoutLoading == isCheckoutLoading)&&(identical(other.isPromoLoading, isPromoLoading) || other.isPromoLoading == isPromoLoading)&&(identical(other.isMerging, isMerging) || other.isMerging == isMerging)&&(identical(other.isCartUpdating, isCartUpdating) || other.isCartUpdating == isCartUpdating)&&const DeepCollectionEquality().equals(other._staticMessageBars, _staticMessageBars)&&(identical(other.toastMessage, toastMessage) || other.toastMessage == toastMessage)&&(identical(other.toastIsError, toastIsError) || other.toastIsError == toastIsError)&&(identical(other.refreshTick, refreshTick) || other.refreshTick == refreshTick)&&(identical(other.promoActionSheet, promoActionSheet) || other.promoActionSheet == promoActionSheet));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,cart,errorMessage,loadingItemSku,isCheckoutLoading,isPromoLoading,isMerging,isCartUpdating,const DeepCollectionEquality().hash(_staticMessageBars),toastMessage,refreshTick,promoActionSheet);
+int get hashCode => Object.hash(runtimeType,status,cart,errorMessage,loadingItemSku,isCheckoutLoading,isPromoLoading,isMerging,isCartUpdating,const DeepCollectionEquality().hash(_staticMessageBars),toastMessage,toastIsError,refreshTick,promoActionSheet);
 
 @override
 String toString() {
-  return 'CartState(status: $status, cart: $cart, errorMessage: $errorMessage, loadingItemSku: $loadingItemSku, isCheckoutLoading: $isCheckoutLoading, isPromoLoading: $isPromoLoading, isMerging: $isMerging, isCartUpdating: $isCartUpdating, staticMessageBars: $staticMessageBars, toastMessage: $toastMessage, refreshTick: $refreshTick, promoActionSheet: $promoActionSheet)';
+  return 'CartState(status: $status, cart: $cart, errorMessage: $errorMessage, loadingItemSku: $loadingItemSku, isCheckoutLoading: $isCheckoutLoading, isPromoLoading: $isPromoLoading, isMerging: $isMerging, isCartUpdating: $isCartUpdating, staticMessageBars: $staticMessageBars, toastMessage: $toastMessage, toastIsError: $toastIsError, refreshTick: $refreshTick, promoActionSheet: $promoActionSheet)';
 }
 
 
@@ -291,7 +297,7 @@ abstract mixin class _$CartStateCopyWith<$Res> implements $CartStateCopyWith<$Re
   factory _$CartStateCopyWith(_CartState value, $Res Function(_CartState) _then) = __$CartStateCopyWithImpl;
 @override @useResult
 $Res call({
- CartStatus status, CartEntity? cart, String? errorMessage, String? loadingItemSku, bool isCheckoutLoading, bool isPromoLoading, bool isMerging, bool isCartUpdating, List<MessageBarEntity> staticMessageBars, String? toastMessage, int refreshTick, BackendActionContentEntity? promoActionSheet
+ CartStatus status, CartEntity? cart, String? errorMessage, String? loadingItemSku, bool isCheckoutLoading, bool isPromoLoading, bool isMerging, bool isCartUpdating, List<MessageBarEntity> staticMessageBars, String? toastMessage, bool toastIsError, int refreshTick, BackendActionContentEntity? promoActionSheet
 });
 
 
@@ -308,7 +314,7 @@ class __$CartStateCopyWithImpl<$Res>
 
 /// Create a copy of CartState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? cart = freezed,Object? errorMessage = freezed,Object? loadingItemSku = freezed,Object? isCheckoutLoading = null,Object? isPromoLoading = null,Object? isMerging = null,Object? isCartUpdating = null,Object? staticMessageBars = null,Object? toastMessage = freezed,Object? refreshTick = null,Object? promoActionSheet = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? cart = freezed,Object? errorMessage = freezed,Object? loadingItemSku = freezed,Object? isCheckoutLoading = null,Object? isPromoLoading = null,Object? isMerging = null,Object? isCartUpdating = null,Object? staticMessageBars = null,Object? toastMessage = freezed,Object? toastIsError = null,Object? refreshTick = null,Object? promoActionSheet = freezed,}) {
   return _then(_CartState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as CartStatus,cart: freezed == cart ? _self.cart : cart // ignore: cast_nullable_to_non_nullable
@@ -320,7 +326,8 @@ as bool,isMerging: null == isMerging ? _self.isMerging : isMerging // ignore: ca
 as bool,isCartUpdating: null == isCartUpdating ? _self.isCartUpdating : isCartUpdating // ignore: cast_nullable_to_non_nullable
 as bool,staticMessageBars: null == staticMessageBars ? _self._staticMessageBars : staticMessageBars // ignore: cast_nullable_to_non_nullable
 as List<MessageBarEntity>,toastMessage: freezed == toastMessage ? _self.toastMessage : toastMessage // ignore: cast_nullable_to_non_nullable
-as String?,refreshTick: null == refreshTick ? _self.refreshTick : refreshTick // ignore: cast_nullable_to_non_nullable
+as String?,toastIsError: null == toastIsError ? _self.toastIsError : toastIsError // ignore: cast_nullable_to_non_nullable
+as bool,refreshTick: null == refreshTick ? _self.refreshTick : refreshTick // ignore: cast_nullable_to_non_nullable
 as int,promoActionSheet: freezed == promoActionSheet ? _self.promoActionSheet : promoActionSheet // ignore: cast_nullable_to_non_nullable
 as BackendActionContentEntity?,
   ));

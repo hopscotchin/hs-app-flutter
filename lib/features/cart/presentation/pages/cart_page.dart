@@ -116,7 +116,7 @@ class _CartPageState extends State<CartPage> {
       // Buy Now hand-off from PDP — fires only on the first load thanks to the
       // one-shot latch.
       listenWhen: (prev, curr) =>
-      widget.fromBuyNow && !_buyNowCheckoutStarted && curr.isLoaded,
+          widget.fromBuyNow && !_buyNowCheckoutStarted && curr.isLoaded,
       listener: (context, state) => _onCartLoadedForBuyNow(state),
       child: Stack(
         children: [
@@ -242,14 +242,16 @@ class _CartBody extends StatelessWidget {
       // if/else-if chain covers all three instead of three separate
       // BlocListeners each re-scanning every state change.
       listenWhen: (prev, curr) =>
-      curr.toastMessage != null || curr.promoActionSheet != null,
+          curr.toastMessage != null || curr.promoActionSheet != null,
       listener: (context, state) {
         final cartBloc = context.read<CartBloc>();
 
         if (state.toastMessage.isNotNullOrEmpty) {
           context.showSnack(
             state.toastMessage!,
-            status: state.toastIsError ? SnackStatus.error : SnackStatus.success,
+            status: state.toastIsError
+                ? SnackStatus.error
+                : SnackStatus.success,
           );
           cartBloc.add(const ClearToast());
           return;
@@ -477,7 +479,7 @@ class _CartContent extends StatelessWidget {
       child: Column(
         children: [
           if (cart.messageBars.isNotEmpty)
-          // Message bars with merge action support
+            // Message bars with merge action support
             Padding(
               padding: const EdgeInsets.only(
                 top: AppSpacing.sm,
