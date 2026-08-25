@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/address_entity.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/manage_address_args.dart';
 import 'package:hs_app_flutter/features/address/presentation/widgets/address_item_card.dart';
+import 'package:hs_app_flutter/features/kids/domain/entities/child_entity.dart';
 import 'package:hs_app_flutter/features/pdp/domain/entities/media_entity.dart';
 import 'package:hs_app_flutter/features/plp/domain/entities/page_type.dart';
 
@@ -108,6 +109,7 @@ abstract final class AppNavigator {
   static final _redirectNavMap = <String, void Function(BuildContext)>{
     LoginRedirects.typeOrders: goToOrders,
     LoginRedirects.typeAddresses: goToAddresses,
+    LoginRedirects.typeKids: goToKids,
   };
 
   /// Navigate to the appropriate screen after a successful login based on [redirectType].
@@ -242,6 +244,18 @@ abstract final class AppNavigator {
       context.pushNamed('promoDetails', pathParameters: {'promoId': promoId.toString()});
 
   static void goToSearch(BuildContext context) => context.pushNamed('search');
+
+  static void goToKids(BuildContext context) => context.pushNamed('kids');
+
+  /// Push the add/edit child screen. Pass [existing] to enter edit mode.
+  /// Returns the saved [ChildEntity] on success, or `null` on cancel.
+  static Future<ChildEntity?> goToAddKid(BuildContext context, {ChildEntity? existing}) {
+    return context.pushNamed<ChildEntity>(
+      'addKid',
+      extra: <String, dynamic>{'existing': existing},
+    );
+  }
+
   static void goToAddresses(
     BuildContext context, {
     AddressListMode mode = AddressListMode.normal,

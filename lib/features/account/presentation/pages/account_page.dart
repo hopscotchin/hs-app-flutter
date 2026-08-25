@@ -247,7 +247,7 @@ class _AccountContent extends StatelessWidget {
                     title: AccountStrings.myKids,
                     subtitle: isLoggedIn ? null : AccountStrings.myKidsSubtitle,
                     onTap: () => isLoggedIn
-                        ? AppNavigator.goToHome(context)
+                        ? AppNavigator.goToKids(context)
                         : AppNavigator.goToLogin(
                             context,
                             redirectType: LoginRedirects.typeKids,

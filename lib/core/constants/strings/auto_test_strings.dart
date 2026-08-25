@@ -526,3 +526,56 @@ class PdpTestStrings {
   // Recommendations pagination
   static const String recommendedLoading = 'pdp_recommended_loading';
 }
+
+class KidsTestStrings {
+  KidsTestStrings();
+
+  // ── List ──
+  static const String listAppBarTitle = 'kids_list_app_bar_title';
+  static const String listBackButton = 'kids_list_back_button';
+  static const String listBannerTitle = 'kids_list_banner_title';
+  static const String listBannerSubtitle = 'kids_list_banner_subtitle';
+  static const String listItem = 'kids_list_item'; // card → + `_<i>`
+  static const String listItemNameSuffix = 'name'; // → `kids_list_item_<i>_name`
+  static const String listItemEditSuffix = 'edit'; // → `kids_list_item_<i>_edit`
+  static const String listItemRemoveSuffix = 'remove'; // → `kids_list_item_<i>_remove`
+  static const String listAddButton = 'kids_list_add_button';
+  static const String listEmptyTitle = 'kids_list_empty_title';
+  static const String listEmptySubtitle = 'kids_list_empty_subtitle';
+
+  // Delete-confirm bottom sheet
+  static const String deleteBottomSheetTitle = 'kids_list_delete_bottomsheet_title';
+  static const String deleteBottomSheetDescription = 'kids_list_delete_bottomsheet_description';
+  static const String deleteBottomSheetCancelButton = 'kids_list_delete_bottomsheet_cancel_button';
+  static const String deleteBottomSheetConfirmButton = 'kids_list_delete_bottomsheet_confirm_button';
+
+  // ── Add / edit form ──
+  static const String formScreen = 'kids_form';
+  static const String formAppBarTitle = 'kids_form_app_bar_title';
+  static const String formBackButton = 'kids_form_back_button';
+  static const String formNameInput = 'kids_form_name_input';
+  static const String formNameInputHint = 'kids_form_name_input_hint';
+  static const String formDobInput = 'kids_form_dob_input';
+  static const String formDobInputHint = 'kids_form_dob_input_hint';
+  static const String formGenderBoyRadio = 'kids_form_gender_boy_radio';
+  static const String formGenderGirlRadio = 'kids_form_gender_girl_radio';
+  static const String formPhotoUpload = 'kids_form_photo_upload';
+  static const String formPhotoImage = 'kids_form_photo_image';
+
+  // Photo source bottom sheet
+  static const String photoSheetTitle = 'kids_photo_sheet_title';
+  static const String photoSheetSubtitle = 'kids_photo_sheet_subtitle';
+  static const String photoSheetAvatar = 'kids_photo_sheet_avatar'; // + `_<i>`
+  static const String photoSheetTakePhoto = 'kids_photo_sheet_take_photo';
+  static const String photoSheetChooseGallery = 'kids_photo_sheet_choose_gallery';
+  static const String photoSheetRemovePhoto = 'kids_photo_sheet_remove_photo';
+  static const String formConsentCheckbox = 'kids_form_consent_checkbox';
+  static const String formConsentPrivacyLink = 'kids_form_consent_privacy_link';
+  static const String formSaveButton = 'kids_form_save_button';
+
+  // Discard-changes bottom sheet
+  static const String discardBottomSheetTitle = 'kids_form_discard_bottomsheet_title';
+  static const String discardBottomSheetDescription = 'kids_form_discard_bottomsheet_description';
+  static const String discardBottomSheetConfirmButton = 'kids_form_discard_bottomsheet_confirm_button';
+  static const String discardBottomSheetCancelButton = 'kids_form_discard_bottomsheet_cancel_button';
+}

@@ -80,6 +80,21 @@ class ApiConstants {
   static const String logout = '/customer/logout';
   static const String forgetGuestUser = '/customer/flush-data/guestuser';
 
+  // My Kids (child profiles)
+  static const String kidsList = '/questionnaire/list';
+  static const String kidsDelete = '/questionnaire/delete/{kidId}';
+  static const String kidsSave = '/v2/questionnaire/save-and-update';
+  // NEW — no existing precedent for a screen-scoped content/config endpoint
+  // anywhere in either app (confirmed by audit); this is a newly-proposed
+  // contract, not yet implemented by backend. Add/Edit Kid screen falls back
+  // to local defaults (KidFormConfigEntity.fallback()) until it exists.
+  static const String kidsFormConfig = '/v2/questionnaire/form-config';
+  // PLACEHOLDER — no confirmed Flutter-reachable upload endpoint exists yet.
+  // Android's kids-photo flow goes through S3Uploader.uploadImage(path,
+  // CHILD_PROFILE), which is not a plain app-backend POST; this path needs
+  // backend confirmation before shipping. See KidsRemoteDataSource.uploadPhoto.
+  static const String kidsPhotoUpload = '/questionnaire/upload-photo';
+
   // Address Management
   static const String addresses = '/delivery/addresses/v3';
   static const String customerAddresses = '/customer/v2/addresses';
