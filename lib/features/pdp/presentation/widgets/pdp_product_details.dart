@@ -22,15 +22,55 @@ const _kDividerColor = Color(0xFFD9D9D9); // #D9D9D9
 const _kExpandDuration = Duration(milliseconds: 300);
 const _kExpandCurve = Curves.easeInOut;
 
-// Field within skuAttributes that falls back to the product-level MRP when
-// no SKU is selected yet, so the "MRP" row still has something to show.
+// Field within skuAttributes that falls back to the product-level MRP when no
+// SKU is selected yet and the SKUs themselves carry no MRP — a last resort
+// behind the cheapest-SKU fallback below.
 const _kSkuMrpField = 'skuMrp';
+const _kSectionBottomSpacing = 28.0;
 
 // ── Top-level helpers ────────────────────────────────────────────────────────
+
+/// The backend signals a range-priced product by putting the span in
+/// `sellingPrice` ("₹1,199-₹1,299") rather than in a separate type field, so a
+/// hyphen is the only marker there is. Amounts are comma-grouped and never
+/// hyphenated, so this cannot false-positive on a single price.
+bool _isRangePrice(ProductPriceEntity? productPriceInfo) {
+  final sellingPrice = productPriceInfo?.sellingPrice;
+  if (sellingPrice == null) return false;
+  return sellingPrice.contains('-') || sellingPrice.contains('–');
+}
+
+/// Attributes that `skuValue` rows resolve against before a size is picked.
+///
+/// Mirrors Android's `GetDefaultSkuUseCase`: fall back to the cheapest SKU's
+/// attributes so rows like "MRP" still have something to show on open. Range
+/// priced products are excluded exactly as Android excludes `type == "range"`
+/// — there the cheapest SKU does not speak for the product, so the row stays
+/// hidden until a size is chosen.
+Map<String, dynamic>? defaultSkuAttributesFor(
+  List<SkuEntity> skus,
+  ProductPriceEntity? productPriceInfo,
+) {
+  if (skus.isEmpty || _isRangePrice(productPriceInfo)) return null;
+
+  // Matches Kotlin's `minByOrNull { it.price?.absoluteValue ?: MAX_VALUE }`:
+  // priceless SKUs sort last, and a tie keeps the first one listed.
+  var cheapest = skus.first;
+  var cheapestValue = cheapest.priceInfo?.absoluteValue ?? double.infinity;
+  for (final sku in skus.skip(1)) {
+    final value = sku.priceInfo?.absoluteValue ?? double.infinity;
+    if (value < cheapestValue) {
+      cheapest = sku;
+      cheapestValue = value;
+    }
+  }
+  return cheapest.skuAttributes;
+}
 
 List<String> _resolveSkuValues(
   String? fieldPath,
   SkuEntity? sku,
+  Map<String, dynamic>? defaultSkuAttributes,
   ProductPriceEntity? productPriceInfo,
 ) {
   if (fieldPath == null) return [];
@@ -46,9 +86,18 @@ List<String> _resolveSkuValues(
   }
   if (key == null) return [];
 
-  final val = sku?.skuAttributes?[key];
+  // Once a size is picked its own map is authoritative — a key it happens to
+  // omit reads as empty rather than borrowing another SKU's value.
+  final attributes = sku != null ? sku.skuAttributes : defaultSkuAttributes;
+  final val = attributes?[key];
   if (val != null) return [val.toString()];
-  if (key == _kSkuMrpField && productPriceInfo?.mrp != null) {
+  // Product-level MRP is a pre-selection aid too, so it obeys the same rules as
+  // the cheapest-SKU fallback: silent once a size is picked, silent on a
+  // range-priced product.
+  if (sku == null &&
+      key == _kSkuMrpField &&
+      !_isRangePrice(productPriceInfo) &&
+      productPriceInfo?.mrp != null) {
     return [productPriceInfo!.mrp!];
   }
   return [];
@@ -57,11 +106,17 @@ List<String> _resolveSkuValues(
 bool _itemHasData(
   DetailItemEntity item,
   SkuEntity? sku,
+  Map<String, dynamic>? defaultSkuAttributes,
   ProductPriceEntity? productPriceInfo,
 ) {
   final type = item.type ?? 'keyValue';
   if (type == 'skuValue') {
-    return _resolveSkuValues(item.fieldPath, sku, productPriceInfo).isNotEmpty;
+    return _resolveSkuValues(
+      item.fieldPath,
+      sku,
+      defaultSkuAttributes,
+      productPriceInfo,
+    ).isNotEmpty;
   }
   return item.values.any((v) => v.isNotEmpty);
 }
@@ -75,6 +130,7 @@ class PdpProductDetails extends StatelessWidget {
     required this.expandedTabIndex,
     required this.onTabTapped,
     this.selectedSku,
+    this.skus = const [],
     this.productPriceInfo,
   });
 
@@ -84,6 +140,13 @@ class PdpProductDetails extends StatelessWidget {
 
   /// Needed to resolve skuValue fieldPath (e.g. "skuAttributes.skuMrp").
   final SkuEntity? selectedSku;
+
+  /// All SKUs, so sku-scoped rows can fall back to the cheapest one's
+  /// attributes before a size is picked. Deliberately separate from
+  /// [selectedSku], which stays null until the shopper actually chooses —
+  /// the size chips, the price, the EDD and the add-to-bag CTA all read it
+  /// as "a size has been selected".
+  final List<SkuEntity> skus;
 
   /// Product-level price, used as a fallback for the MRP row before a SKU
   /// is selected.
@@ -96,6 +159,8 @@ class PdpProductDetails extends StatelessWidget {
     // skuValue field before a SKU is selected) still renders — header stays,
     // its expanded body just ends up empty — instead of disappearing.
     if (details.isEmpty) return const SizedBox.shrink();
+
+    final defaultSkuAttributes = defaultSkuAttributesFor(skus, productPriceInfo);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -128,11 +193,12 @@ class PdpProductDetails extends StatelessWidget {
                   isExpanded: expandedTabIndex == i,
                   onTap: () => onTabTapped(i),
                   selectedSku: selectedSku,
+                  defaultSkuAttributes: defaultSkuAttributes,
                   productPriceInfo: productPriceInfo,
                 ),
             ],
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: _kSectionBottomSpacing),
         ],
       ),
     );
@@ -145,6 +211,7 @@ class _DetailTab extends StatefulWidget {
     required this.isExpanded,
     required this.onTap,
     this.selectedSku,
+    this.defaultSkuAttributes,
     this.productPriceInfo,
     this.headerKey,
     this.dividerKey,
@@ -156,14 +223,14 @@ class _DetailTab extends StatefulWidget {
   final Key? headerKey;
   final Key? dividerKey;
   final SkuEntity? selectedSku;
+  final Map<String, dynamic>? defaultSkuAttributes;
   final ProductPriceEntity? productPriceInfo;
 
   @override
   State<_DetailTab> createState() => _DetailTabState();
 }
 
-class _DetailTabState extends State<_DetailTab>
-    with SingleTickerProviderStateMixin {
+class _DetailTabState extends State<_DetailTab> with SingleTickerProviderStateMixin {
   // Driven explicitly instead of through an implicit animation so both
   // directions are symmetric: forward() on expand, reverse() on collapse.
   // Starts settled at its current state, so a tab that is already open on
@@ -256,6 +323,7 @@ class _DetailTabState extends State<_DetailTab>
                 child: _buildContent(
                   widget.detail.items,
                   widget.selectedSku,
+                  widget.defaultSkuAttributes,
                   widget.productPriceInfo,
                 ),
               ),
@@ -264,12 +332,7 @@ class _DetailTabState extends State<_DetailTab>
         ),
 
         // Border bottom
-        Divider(
-          key: widget.dividerKey,
-          height: 1,
-          thickness: 1,
-          color: _kDividerColor,
-        ),
+        Divider(key: widget.dividerKey, height: 1, thickness: 1, color: _kDividerColor),
       ],
     );
   }
@@ -277,12 +340,13 @@ class _DetailTabState extends State<_DetailTab>
   Widget _buildContent(
     List<DetailItemEntity> items,
     SkuEntity? sku,
+    Map<String, dynamic>? defaultSkuAttributes,
     ProductPriceEntity? productPriceInfo,
   ) {
     // Drop items with no resolvable data (e.g. a sku-only field before a
     // SKU has been selected) so they don't leave a blank row behind.
     final visibleItems = items
-        .where((item) => _itemHasData(item, sku, productPriceInfo))
+        .where((item) => _itemHasData(item, sku, defaultSkuAttributes, productPriceInfo))
         .toList();
     if (visibleItems.isEmpty) return const SizedBox.shrink();
 
@@ -316,7 +380,7 @@ class _DetailTabState extends State<_DetailTab>
         children: [
           for (int i = 0; i < rows.length; i++) ...[
             if (i > 0) AppSpacing.verticalGapLg,
-            _buildRow(rows[i], sku, productPriceInfo),
+            _buildRow(rows[i], sku, defaultSkuAttributes, productPriceInfo),
           ],
         ],
       ),
@@ -326,10 +390,17 @@ class _DetailTabState extends State<_DetailTab>
   Widget _buildRow(
     List<DetailItemEntity> rowItems,
     SkuEntity? sku,
+    Map<String, dynamic>? defaultSkuAttributes,
     ProductPriceEntity? productPriceInfo,
   ) {
     if (rowItems.length == 1) {
-      return _buildItem(rowItems.first, sku, productPriceInfo, fullWidth: true);
+      return _buildItem(
+        rowItems.first,
+        sku,
+        defaultSkuAttributes,
+        productPriceInfo,
+        fullWidth: true,
+      );
     }
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,6 +409,7 @@ class _DetailTabState extends State<_DetailTab>
           child: _buildItem(
             rowItems[0],
             sku,
+            defaultSkuAttributes,
             productPriceInfo,
             fullWidth: false,
           ),
@@ -347,6 +419,7 @@ class _DetailTabState extends State<_DetailTab>
           child: _buildItem(
             rowItems[1],
             sku,
+            defaultSkuAttributes,
             productPriceInfo,
             fullWidth: false,
           ),
@@ -358,6 +431,7 @@ class _DetailTabState extends State<_DetailTab>
   Widget _buildItem(
     DetailItemEntity item,
     SkuEntity? sku,
+    Map<String, dynamic>? defaultSkuAttributes,
     ProductPriceEntity? productPriceInfo, {
     required bool fullWidth,
   }) {
@@ -368,7 +442,7 @@ class _DetailTabState extends State<_DetailTab>
     }
 
     final resolvedValues = type == 'skuValue'
-        ? _resolveSkuValues(item.fieldPath, sku, productPriceInfo)
+        ? _resolveSkuValues(item.fieldPath, sku, defaultSkuAttributes, productPriceInfo)
         : item.values;
 
     return _KeyValueItem(
@@ -439,10 +513,7 @@ class _KeyValueItem extends StatelessWidget {
             child: Container(
               width: 4,
               height: 4,
-              decoration: const BoxDecoration(
-                color: _kValueColor,
-                shape: BoxShape.circle,
-              ),
+              decoration: const BoxDecoration(color: _kValueColor, shape: BoxShape.circle),
             ),
           ),
         ],
@@ -492,11 +563,16 @@ class _Chevron extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(size: const Size(12, 6), painter: _ChevronPainter());
+    return const CustomPaint(
+      size: Size(12, 6),
+      painter: _ChevronPainter(),
+    );
   }
 }
 
 class _ChevronPainter extends CustomPainter {
+  const _ChevronPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()

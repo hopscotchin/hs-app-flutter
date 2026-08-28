@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -30,6 +31,7 @@ const _kCardGap = 8.0;
 // How much of each neighbouring card shows alongside the current one — the
 // previous card on the left, the next on the right.
 const _kCardPeek = 38.0;
+const _kSectionBottomSpacing = 60.0;
 
 class PdpOffers extends StatefulWidget {
   const PdpOffers({super.key, required this.offers});
@@ -91,6 +93,10 @@ class _PdpOffersState extends State<PdpOffers>
   //  * that stop is cleared only by the section leaving the screen, so it
   //    restarts when scrolled back into view.
   //
+  //  * pauses while the PDP page itself is scrolling, resuming when it settles.
+  //    Flutter-only, and the one rule with no Android counterpart — see
+  //    _isPageScrolling for why sharing a UI thread forces it.
+  //
   // Android additionally gates on its PDP bottom sheet being EXPANDED; the
   // Flutter PDP is a plain page, so that condition has no counterpart.
   static const _autoScrollInterval = Duration(seconds: 2);
@@ -109,6 +115,21 @@ class _PdpOffersState extends State<PdpOffers>
   bool _isVisible = false;
   bool _isHostResumed = true;
 
+  // The enclosing PDP page scroll, and whether it is currently moving.
+  //
+  // A departure from Android, which has no equivalent gate: there, the promo
+  // RecyclerView's smooth scroll and the parent scroll are separate native
+  // animators. Here both are Flutter scroll simulations sharing one UI thread,
+  // so an advance landing mid-fling costs the page frames — a hitch roughly
+  // every 2s while the section is on screen, which is the visible half of the
+  // PDP's scroll jitter.
+  //
+  // This is a transient pause, deliberately NOT _forcedStop: the loop resumes
+  // on its own once the page settles, so scrolling past the rail and stopping
+  // leaves it advancing as before.
+  ScrollPosition? _pageScrollPosition;
+  bool _isPageScrolling = false;
+
   @override
   void initState() {
     super.initState();
@@ -116,10 +137,31 @@ class _PdpOffersState extends State<PdpOffers>
     WidgetsBinding.instance.addObserver(this);
   }
 
+  // Resolves the enclosing page scroll. Scrollable.maybeOf walks up from this
+  // context, so it finds the PDP's CustomScrollView rather than this section's
+  // own horizontal list, which is a descendant. maybeOf (not of) because the
+  // section renders fine with no enclosing scrollable — widget tests mount it
+  // bare, and it simply keeps advancing there, as it did before.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final position = Scrollable.maybeOf(context)?.position;
+    if (position == _pageScrollPosition) return;
+    _pageScrollPosition?.isScrollingNotifier.removeListener(_onPageScrollActivityChanged);
+    _pageScrollPosition = position;
+    _pageScrollPosition?.isScrollingNotifier.addListener(_onPageScrollActivityChanged);
+    _isPageScrolling = position?.isScrollingNotifier.value ?? false;
+    _maybeStartAutoScroll();
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _pageScrollPosition?.isScrollingNotifier.removeListener(_onPageScrollActivityChanged);
     _autoScrollTimer?.cancel();
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(_scrollController.offset);
+    }
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
@@ -147,17 +189,32 @@ class _PdpOffersState extends State<PdpOffers>
     _maybeStartAutoScroll();
   }
 
+  // True through both a drag on the page and the fling that follows it —
+  // ScrollPosition flips this off only once it lands on an idle activity.
+  void _onPageScrollActivityChanged() {
+    final isScrolling = _pageScrollPosition?.isScrollingNotifier.value ?? false;
+    if (isScrolling == _isPageScrolling) return;
+    _isPageScrolling = isScrolling;
+    _maybeStartAutoScroll();
+  }
+
   void _maybeStartAutoScroll() {
     if (widget.offers.length <= 1 ||
         _forcedStop ||
         !_isVisible ||
-        !_isHostResumed) {
+        !_isHostResumed ||
+        _isPageScrolling) {
       _stopAutoScroll();
       return;
     }
     _autoScrollTimer ??= Timer.periodic(_autoScrollInterval, (_) => _advance());
   }
 
+  // Stops scheduling advances. An advance already in flight is left to finish —
+  // it is ~135ms, and killing it (jumpTo the live offset) would strand the rail
+  // between two cards, where nothing re-snaps it until the next interaction.
+  // So the first advance after a page scroll begins can still cost frames; every
+  // one after it is suppressed.
   void _stopAutoScroll() {
     _autoScrollTimer?.cancel();
     _autoScrollTimer = null;
@@ -191,6 +248,10 @@ class _PdpOffersState extends State<PdpOffers>
       return;
     }
     _stopForUserAction();
+  }
+
+  void _onCarouselPointerUpOrCancel(PointerEvent event) {
+    if (event.pointer == _copyPointer) _copyPointer = null;
   }
 
   void _advance() {
@@ -309,6 +370,8 @@ class _PdpOffersState extends State<PdpOffers>
             },
             child: Listener(
               onPointerDown: _onCarouselPointerDown,
+              onPointerUp: _onCarouselPointerUpOrCancel,
+              onPointerCancel: _onCarouselPointerUpOrCancel,
               child: _OfferCardList(
                 offers: widget.offers,
                 scrollController: _scrollController,
@@ -333,7 +396,7 @@ class _PdpOffersState extends State<PdpOffers>
               ),
             ),
           ),
-          const SizedBox(height: 60),
+          const SizedBox(height: _kSectionBottomSpacing),
         ],
       ),
     );
@@ -471,7 +534,6 @@ class _OfferCard extends StatelessWidget {
 
           // Copy button — only if copyCoupon flag is set
           if (offer.copyCoupon && offer.couponCode != null) ...[
-            // const SizedBox(height: 10),
             // Tags the pointer so the carousel's own listener leaves auto-scroll
             // running for this touch — Android's `copy` consumes ACTION_DOWN, so
             // the card touch listener that stops it never fires.
@@ -497,7 +559,8 @@ class _OfferCard extends StatelessWidget {
                     // 33) on, so ours would be a second popup for the same tap.
                     // iOS has no system clipboard UI at all — without this
                     // snackbar the copy would be silent there.
-                    if (!Platform.isAndroid) {
+                    if (defaultTargetPlatform !=
+                        TargetPlatform.android) {
                       PdpSnackbar.showCouponCopied(context, offer.couponCode!);
                     }
                   },

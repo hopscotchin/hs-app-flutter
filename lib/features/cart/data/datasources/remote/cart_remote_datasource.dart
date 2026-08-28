@@ -9,13 +9,31 @@ import 'package:injectable/injectable.dart';
 abstract class CartRemoteDataSource {
   Future<AddToCartResponseModel> addToCart(String skuId, int quantity);
   Future<AddToCartResponseModel> buyNow(String skuId, int quantity);
-  Future<CartModel> getCart({bool isMergeCall = false, CancelToken? cancelToken});
-  Future<CartModel> removeCartItem(String sku, {CancelToken? cancelToken});
-  Future<CartModel> updateCartItem(String sku, int quantity, {CancelToken? cancelToken});
+
+  /// [instantCheckout] scopes every cart call to the single buy-now item: the
+  /// backend answers with just that line rather than the whole bag. Android
+  /// sends the same `instantCheckout` flag from `CartViewModel.isFromBuyNow`.
+  Future<CartModel> getCart({
+    bool isMergeCall = false,
+    bool instantCheckout = false,
+    CancelToken? cancelToken,
+  });
+  Future<CartModel> removeCartItem(
+    String sku, {
+    bool instantCheckout = false,
+    CancelToken? cancelToken,
+  });
+  Future<CartModel> updateCartItem(
+    String sku,
+    int quantity, {
+    bool instantCheckout = false,
+    CancelToken? cancelToken,
+  });
   Future<CartModel> moveToWishlist(
     String sku, {
     int? productId,
     int? price,
+    bool instantCheckout = false,
     CancelToken? cancelToken,
   });
   Future<CartModel> mergeCart({CancelToken? cancelToken});
@@ -33,9 +51,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       ApiConstants.addToCart,
       data: {'sku': skuId, 'quantity': '$quantity'},
     );
-    return AddToCartResponseModel.fromJson(
-      response.data as Map<String, dynamic>,
-    );
+    return AddToCartResponseModel.fromJson(response.data as Map<String, dynamic>);
   }
 
   @override
@@ -44,16 +60,18 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       ApiConstants.buyNow,
       data: {'sku': skuId, 'quantity': '$quantity'},
     );
-    return AddToCartResponseModel.fromJson(
-      response.data as Map<String, dynamic>,
-    );
+    return AddToCartResponseModel.fromJson(response.data as Map<String, dynamic>);
   }
 
   @override
-  Future<CartModel> getCart({bool isMergeCall = false, CancelToken? cancelToken}) async {
+  Future<CartModel> getCart({
+    bool isMergeCall = false,
+    bool instantCheckout = false,
+    CancelToken? cancelToken,
+  }) async {
     final response = await apiClient.get(
       ApiConstants.shoppingCart,
-      queryParameters: {'isMergeCall': isMergeCall, 'instantCheckout': false},
+      queryParameters: {'isMergeCall': isMergeCall, 'instantCheckout': instantCheckout},
       cancelToken: cancelToken,
     );
     // v6 returns the response in the app's native shape already.
@@ -61,10 +79,14 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   }
 
   @override
-  Future<CartModel> removeCartItem(String sku, {CancelToken? cancelToken}) async {
+  Future<CartModel> removeCartItem(
+    String sku, {
+    bool instantCheckout = false,
+    CancelToken? cancelToken,
+  }) async {
     final response = await apiClient.delete(
       '${ApiConstants.removeFromCart}/$sku',
-      queryParameters: {'instantCheckout': false},
+      queryParameters: {'instantCheckout': instantCheckout},
       cancelToken: cancelToken,
     );
     return CartModel.fromJson(response.data as Map<String, dynamic>);
@@ -74,11 +96,12 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   Future<CartModel> updateCartItem(
     String sku,
     int quantity, {
+    bool instantCheckout = false,
     CancelToken? cancelToken,
   }) async {
     final response = await apiClient.put(
       '${ApiConstants.updateCartItem}/$sku',
-      queryParameters: {'instantCheckout': false},
+      queryParameters: {'instantCheckout': instantCheckout},
       data: {'sku': sku, 'quantity': quantity},
       cancelToken: cancelToken,
     );
@@ -90,11 +113,12 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     String sku, {
     int? productId,
     int? price,
+    bool instantCheckout = false,
     CancelToken? cancelToken,
   }) async {
     final response = await apiClient.put(
       ApiConstants.moveToWishlistFromCart,
-      queryParameters: {'instantCheckout': false},
+      queryParameters: {'instantCheckout': instantCheckout},
       data: {
         'sku': sku,
         if (productId != null) 'productId': productId,
@@ -107,10 +131,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
   @override
   Future<CartModel> mergeCart({CancelToken? cancelToken}) async {
-    final response = await apiClient.post(
-      ApiConstants.mergeCart,
-      cancelToken: cancelToken,
-    );
+    final response = await apiClient.post(ApiConstants.mergeCart, cancelToken: cancelToken);
     return CartModel.fromJson(response.data as Map<String, dynamic>);
   }
 }

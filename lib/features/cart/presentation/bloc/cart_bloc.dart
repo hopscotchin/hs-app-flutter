@@ -63,6 +63,25 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     on<UpdateDeliveryPincode>(_onUpdateDeliveryPincode);
   }
 
+  /// Buy-now mode. While set, every cart call carries `instantCheckout=true`
+  /// and the backend answers with the buy-now line alone instead of the whole
+  /// bag — mirroring Android's `CartViewModel.isFromBuyNow`, which feeds the
+  /// same flag into its cart, remove, update and move-to-wishlist calls.
+  ///
+  /// The cart page sets it on entry and clears it via [exitBuyNowMode] when the
+  /// user leaves the checkout flow, which is where Android clears its own flag
+  /// (`CartFragment.onResume`, guarded by `exitedBuyNowFlow`).
+  bool instantCheckout = false;
+
+  /// Leaves buy-now mode so the next fetch returns the full bag again.
+  /// Returns whether the mode was actually on, so the caller can skip a
+  /// needless refetch.
+  bool exitBuyNowMode() {
+    if (!instantCheckout) return false;
+    instantCheckout = false;
+    return true;
+  }
+
   /// Offer code captured when the user tapped Apply while logged out —
   /// [AppNavigator.redirectAfterLogin] replays it via [resumePendingPromo]
   /// once login completes, mirroring CartActionsCubit/WishlistCubit's
@@ -83,8 +102,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// through the wishlist store.
   MoveToWishlist? _pendingMoveToWishlist;
 
-  void setPendingMoveToWishlist(MoveToWishlist event) =>
-      _pendingMoveToWishlist = event;
+  void setPendingMoveToWishlist(MoveToWishlist event) => _pendingMoveToWishlist = event;
 
   void resumePendingMoveToWishlist() {
     final event = _pendingMoveToWishlist;
@@ -117,7 +135,9 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     emit(const CartState(status: CartStatus.loading));
     final token = swapCancelToken();
     final staticBars = await _staticMessageBars();
-    final result = await getCartUseCase(GetCartParams(cancelToken: token));
+    final result = await getCartUseCase(
+      GetCartParams(instantCheckout: instantCheckout, cancelToken: token),
+    );
     result.fold(
       (failure) {
         if (failure is RequestCancelledFailure) return;
@@ -143,7 +163,9 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     final current = state;
     final token = swapCancelToken();
     final staticBars = await _staticMessageBars();
-    final result = await getCartUseCase(GetCartParams(cancelToken: token));
+    final result = await getCartUseCase(
+      GetCartParams(instantCheckout: instantCheckout, cancelToken: token),
+    );
     result.fold(
       // Silently ignore the failure — keep current cart data visible — but
       // still bump refreshTick so a pull-to-refresh spinner awaiting it stops.
@@ -185,7 +207,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     }
     final token = swapCancelToken();
     final result = await removeCartItemUseCase(
-      RemoveCartItemParams(sku: event.sku, cancelToken: token),
+      RemoveCartItemParams(sku: event.sku, instantCheckout: instantCheckout, cancelToken: token),
     );
     await result.fold(
       (failure) {
@@ -219,6 +241,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       UpdateCartItemParams(
         sku: event.sku,
         quantity: event.quantity,
+        instantCheckout: instantCheckout,
         cancelToken: token,
       ),
     );
@@ -245,9 +268,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     MoveToWishlist event,
     Emitter<CartState> emit,
   ) async {
-    final current = event.reloadCartFirst
-        ? await _reloadCartBeforeMutation(emit)
-        : state;
+    final current = event.reloadCartFirst ? await _reloadCartBeforeMutation(emit) : state;
     if (current.isLoaded) {
       emit(current.copyWith(loadingItemSku: event.sku, isCartUpdating: true));
     }
@@ -257,6 +278,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
         sku: event.sku,
         productId: event.productId,
         price: event.price,
+        instantCheckout: instantCheckout,
         cancelToken: token,
       ),
     );
@@ -284,11 +306,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
         }
       },
       // Move-to-wishlist API doesn't return full cart data — re-fetch
-      (_) async => _refreshAfterMutation(
-        emit,
-        current,
-        toastMessage: CartStrings.movedToWishlist,
-      ),
+      (_) async => _refreshAfterMutation(emit, current, toastMessage: CartStrings.movedToWishlist),
     );
   }
 
@@ -300,9 +318,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     ApplyPromoCode event,
     Emitter<CartState> emit,
   ) async {
-    final current = event.reloadCartFirst
-        ? await _reloadCartBeforeMutation(emit)
-        : state;
+    final current = event.reloadCartFirst ? await _reloadCartBeforeMutation(emit) : state;
     if (current.isLoaded) {
       emit(current.copyWith(isPromoLoading: true, isCartUpdating: true));
     }
@@ -505,7 +521,9 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// final authority on whether it is valid.
   Future<CartState> _reloadCartBeforeMutation(Emitter<CartState> emit) async {
     final token = swapCancelToken();
-    final result = await getCartUseCase(GetCartParams(cancelToken: token));
+    final result = await getCartUseCase(
+      GetCartParams(instantCheckout: instantCheckout, cancelToken: token),
+    );
     return result.fold((_) => state, (cart) {
       final reloaded = CartState(
         status: CartStatus.loaded,
@@ -526,7 +544,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   }) async {
     final token = swapCancelToken();
     final result = await getCartUseCase(
-      GetCartParams(isMergeCall: isMergeCall, cancelToken: token),
+      GetCartParams(isMergeCall: isMergeCall, instantCheckout: instantCheckout, cancelToken: token),
     );
     result.fold(
       (failure) {

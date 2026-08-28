@@ -56,10 +56,23 @@ class _CartPageState extends State<CartPage> {
   /// the first load.
   bool _buyNowCheckoutStarted = false;
 
+  /// Held rather than read from `context` so [dispose] can still reach it.
+  late final CartBloc _cartBloc = context.read<CartBloc>();
+
   @override
   void initState() {
     super.initState();
-    context.read<CartBloc>().add(const LoadCart());
+    // CartBloc lives for the whole app, so buy-now mode is scoped to this
+    // page: set on entry, cleared in dispose. Leaving it set would keep every
+    // later cart fetch — from anywhere — showing the buy-now item alone.
+    _cartBloc.instantCheckout = widget.fromBuyNow;
+    _cartBloc.add(const LoadCart());
+  }
+
+  @override
+  void dispose() {
+    _cartBloc.exitBuyNowMode();
+    super.dispose();
   }
 
   void _scrollToPriceSummary() {
@@ -97,6 +110,10 @@ class _CartPageState extends State<CartPage> {
   /// `checkLoginAndCheckout`. See [_openCheckoutOrLogin], which is that gate.
   void _startCheckout() async {
     //* this needs testing will add in next release
+    context.showSnack(
+      'Thanks for testing this but checkout is not for this release',
+      status: SnackStatus.error,
+    );
   }
 
   /// Buy Now hand-off from PDP: start checkout once the cart is loaded and

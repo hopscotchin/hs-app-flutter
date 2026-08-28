@@ -10,7 +10,7 @@ part 'recommendations_model.g.dart';
 class RecommendationsModel {
   const RecommendationsModel({this.records = const [], this.pageMeta});
 
-  @JsonKey(defaultValue: [])
+  @JsonKey(defaultValue: [], fromJson: _recordsFromJson)
   final List<ListingProductModel> records;
 
   @JsonKey(defaultValue: null, fromJson: _pageMetaFromJson)
@@ -18,6 +18,20 @@ class RecommendationsModel {
 
   factory RecommendationsModel.fromJson(Map<String, dynamic> json) =>
       _$RecommendationsModelFromJson(json);
+}
+
+List<ListingProductModel> _recordsFromJson(Object? json) {
+  if (json is! List) return [];
+  return json
+      .whereType<Map<String, dynamic>>()
+      .map((e) {
+        final product = e['product'];
+        if (product is Map<String, dynamic>) {
+          return ListingProductModel.fromJson(product);
+        }
+        return ListingProductModel.fromJson(e);
+      })
+      .toList();
 }
 
 PageMetaModel? _pageMetaFromJson(Object? json) =>

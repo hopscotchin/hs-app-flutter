@@ -8,8 +8,7 @@ import '../repositories/cart_repository.dart';
 import 'package:injectable/injectable.dart';
 
 @lazySingleton
-class MoveToWishlistUseCase
-    implements UseCase<CartEntity, MoveToWishlistParams> {
+class MoveToWishlistUseCase implements UseCase<CartEntity, MoveToWishlistParams> {
   final CartRepository repository;
 
   MoveToWishlistUseCase(this.repository);
@@ -20,6 +19,7 @@ class MoveToWishlistUseCase
       params.sku,
       productId: params.productId,
       price: params.price,
+      instantCheckout: params.instantCheckout,
       cancelToken: params.cancelToken,
     );
   }
@@ -29,16 +29,18 @@ class MoveToWishlistParams extends Equatable {
   final String sku;
   final int? productId;
   final int? price;
+  final bool instantCheckout;
   final CancelToken? cancelToken;
 
   const MoveToWishlistParams({
     required this.sku,
     this.productId,
     this.price,
+    this.instantCheckout = false,
     this.cancelToken,
   });
 
   @override
-  List<Object?> get props => [sku, productId, price];
+  List<Object?> get props => [sku, productId, price, instantCheckout];
   // cancelToken intentionally excluded — not a semantic field
 }

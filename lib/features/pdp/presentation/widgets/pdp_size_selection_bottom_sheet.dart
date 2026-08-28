@@ -22,10 +22,7 @@ const _kPriceStripBg = AppColors.borderSecondary; // rgba(109, 89, 215, 0.1)
 const _kSellingPriceColor = Color(0xFF333333);
 const _kDiscountColor = AppColors.secondary;
 
-void showPdpSizeSelectionBottomSheet(
-  BuildContext context, {
-  required bool fromBuyNow,
-}) {
+void showPdpSizeSelectionBottomSheet(BuildContext context, {required bool fromBuyNow}) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -33,23 +30,15 @@ void showPdpSizeSelectionBottomSheet(
     showDragHandle: false,
     builder: (_) => BlocProvider.value(
       value: context.read<PdpBloc>(),
-      // pageContext is the PDP page context — valid after this sheet is popped.
-      child: _PdpSizeSelectionBottomSheet(
-        fromBuyNow: fromBuyNow,
-        pageContext: context,
-      ),
+      child: _PdpSizeSelectionBottomSheet(fromBuyNow: fromBuyNow),
     ),
   );
 }
 
 class _PdpSizeSelectionBottomSheet extends StatelessWidget {
-  const _PdpSizeSelectionBottomSheet({
-    required this.fromBuyNow,
-    required this.pageContext,
-  });
+  const _PdpSizeSelectionBottomSheet({required this.fromBuyNow});
 
   final bool fromBuyNow;
-  final BuildContext pageContext;
 
   @override
   Widget build(BuildContext context) {
@@ -100,22 +89,15 @@ class _PdpSizeSelectionBottomSheet extends StatelessWidget {
                   Text(
                     PdpStrings.selectSize,
                     key: const ValueKey(PdpTestStrings.sizeSheetTitle),
-                    style: AppTypographyV1.titleMedium.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: AppTypographyV1.titleMedium.copyWith(fontWeight: FontWeight.w700),
                   ),
                   if (product.hasSizeChart == true)
                     GestureDetector(
-                      key: const ValueKey(
-                        PdpTestStrings.sizeSheetSizeChartButton,
-                      ),
-                      onTap: () {
-                        AppNavigator.goBack(context);
-                        showPdpSizeChartBottomSheet(
-                          pageContext,
-                          productName: product.name,
-                        );
-                      },
+                      key: const ValueKey(PdpTestStrings.sizeSheetSizeChartButton),
+                      // The chart stacks on top of this sheet instead of
+                      // replacing it, so device back pops only the chart and
+                      // lands back here with the size selection intact.
+                      onTap: () => showPdpSizeChartBottomSheet(context, productName: product.name),
                       behavior: HitTestBehavior.opaque,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -126,10 +108,7 @@ class _PdpSizeSelectionBottomSheet extends StatelessWidget {
                               fontWeight: FontWeight.w400,
                             ),
                           ),
-                          const Icon(
-                            Icons.chevron_right,
-                            size: AppSpacing.iconXs,
-                          ),
+                          const Icon(Icons.chevron_right, size: AppSpacing.iconXs),
                         ],
                       ),
                     ),
@@ -147,9 +126,7 @@ class _PdpSizeSelectionBottomSheet extends StatelessWidget {
                       key: ValueKey('${PdpTestStrings.sizeSheetChip}_$i'),
                       sku: product.skus[i],
                       isSelected: selectedSku?.skuId == product.skus[i].skuId,
-                      onTap:
-                          product.skus[i].enable == true &&
-                              product.skus[i].skuId != null
+                      onTap: product.skus[i].enable == true && product.skus[i].skuId != null
                           ? () => context.read<PdpBloc>().add(
                               PdpEvent.selectSku(skuId: product.skus[i].skuId!),
                             )
@@ -173,9 +150,7 @@ class _PdpSizeSelectionBottomSheet extends StatelessWidget {
                   text: fromBuyNow ? PdpStrings.buyNow : PdpStrings.addToBag,
                   variant: ButtonVariant.primary,
                   isFullWidth: true,
-                  state: selectedSku == null
-                      ? ButtonState.disabled
-                      : ButtonState.enabled,
+                  state: selectedSku == null ? ButtonState.disabled : ButtonState.enabled,
                   onTap: selectedSku == null
                       ? null
                       : () {
@@ -209,19 +184,14 @@ class _PriceStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xs,
-        vertical: AppSpacing.xs,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xs),
       decoration: BoxDecoration(
         color: _kPriceStripBg,
         borderRadius: BorderRadius.circular(AppSpacing.xs),
       ),
       child: PriceInfoRow(
         price: price,
-        sellingPriceKey: const ValueKey(
-          PdpTestStrings.sizeSheetSellingPriceText,
-        ),
+        sellingPriceKey: const ValueKey(PdpTestStrings.sizeSheetSellingPriceText),
         mrpKey: const ValueKey(PdpTestStrings.sizeSheetMrpText),
         discountKey: const ValueKey(PdpTestStrings.sizeSheetDiscountText),
         mainAxisAlignment: MainAxisAlignment.center,

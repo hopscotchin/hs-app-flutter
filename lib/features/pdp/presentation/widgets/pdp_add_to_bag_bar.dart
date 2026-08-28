@@ -49,11 +49,7 @@ class PdpAddToBagBar extends StatelessWidget {
           borderRadius: AppSpacing.borderRadiusSm,
           border: Border.all(color: const Color(0xFFF6F6F6)),
           boxShadow: const [
-            BoxShadow(
-              color: Color(0x05000000),
-              blurRadius: 37.7,
-              offset: Offset(0, 25),
-            ),
+            BoxShadow(color: Color(0x05000000), blurRadius: 37.7, offset: Offset(0, 25)),
           ],
         ),
         child: Row(
@@ -64,7 +60,10 @@ class PdpAddToBagBar extends StatelessWidget {
                 buyNowKey,
                 child: AppButton(
                   key: buyNowKey,
-                  text: soldOut ? PdpStrings.soldOut : PdpStrings.buyNow,
+                  // Label stays "Buy Now" whatever the inventory — sold out
+                  // is communicated by the disabled state, not by swapping the
+                  // CTA out for a different one.
+                  text: PdpStrings.buyNow,
                   variant: ButtonVariant.tertiary,
                   isFullWidth: true,
                   state: _stateFor(loading: isBuyingNow),

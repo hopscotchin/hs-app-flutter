@@ -19,9 +19,24 @@ class PdpColorVariants extends StatelessWidget {
     required this.onColorSelected,
   });
 
+  /// Swatch box width — also the decode target, see [build].
+  static const double _kSwatchWidth = 40.0;
+
   @override
   Widget build(BuildContext context) {
     if (colorVariants.isEmpty) return const SizedBox.shrink();
+
+    // Decode the swatches at the 40px box they are painted into instead of at
+    // full product-image resolution. Untouched, every variant decoded a
+    // full-size JPEG and uploaded a full-size GPU texture for a 40x48 thumbnail,
+    // which the raster thread then had to downsample on each paint.
+    //
+    // Width only, deliberately: ResizeImage uses ResizeImagePolicy.exact, so
+    // passing both dimensions decodes to exactly that box and stretches the
+    // image instead of letting BoxFit.cover crop it. One dimension keeps the
+    // aspect ratio, and allowUpscaling defaults to false, so a source narrower
+    // than the target is left at its native size.
+    final swatchCacheWidth = (_kSwatchWidth * MediaQuery.devicePixelRatioOf(context)).round();
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -56,7 +71,7 @@ class PdpColorVariants extends StatelessWidget {
                     child: Opacity(
                       opacity: inStock ? 1.0 : 0.4,
                       child: Container(
-                        width: 40,
+                        width: _kSwatchWidth,
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: isSelected ? AppColors.brandDefault : AppColors.transparent,
@@ -70,6 +85,7 @@ class PdpColorVariants extends StatelessWidget {
                                 child: CachedNetworkImage(
                                   imageUrl: variant.mediaUrl!,
                                   fit: BoxFit.cover,
+                                  memCacheWidth: swatchCacheWidth,
                                   fadeInDuration: Duration.zero,
                                   fadeOutDuration: Duration.zero,
                                   errorWidget: (_, _, _) => _buildPlaceholder(inStock),

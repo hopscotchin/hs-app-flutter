@@ -38,6 +38,16 @@ class PdpRecommendedProducts extends StatelessWidget {
 
     final rowCount = (records.length / _columns).ceil();
 
+    // The PDP's SafeArea has `bottom: false`, so the scroll view runs under the
+    // system nav/gesture bar. The trailing spacer has to clear it, and its
+    // height is device-dependent — roughly 34 for an iPhone home indicator, 24
+    // for Android gesture nav, ~48 for 3-button nav — so a fixed value either
+    // wastes space or clips the last row. `viewPadding` rather than `padding`:
+    // it reports the inset even when something else (a keyboard) is covering
+    // it. Same source as PdpContent's `_bottomInset`, which positions the
+    // floating bar, so the two can't disagree.
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+
     return SliverMainAxisGroup(
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
@@ -50,8 +60,7 @@ class PdpRecommendedProducts extends StatelessWidget {
             // constraints.
             child: Center(
               child: Text(
-                recommendations.pageMeta?.pageTitle ??
-                    PdpStrings.productsYouMayLike,
+                recommendations.pageMeta?.pageTitle ?? PdpStrings.productsYouMayLike,
                 key: const ValueKey(PdpTestStrings.recommendedTitle),
                 textAlign: TextAlign.center,
                 style: AppTypographyV1.titleMedium.copyWith(
@@ -67,9 +76,7 @@ class PdpRecommendedProducts extends StatelessWidget {
         SliverList(
           delegate: SliverChildBuilderDelegate((context, rowIndex) {
             final start = rowIndex * _columns;
-            final end = start + _columns > records.length
-                ? records.length
-                : start + _columns;
+            final end = start + _columns > records.length ? records.length : start + _columns;
             // One row of the canonical grid — reused verbatim so tiles look and
             // behave exactly as in the eager grid, but built lazily per row.
             return ProductGridWidget(
@@ -77,10 +84,7 @@ class PdpRecommendedProducts extends StatelessWidget {
               // grid keys its tiles from 0, so a shared prefix would collide.
               keyPrefix: '${PdpTestStrings.recommendedPrefix}_row_$rowIndex',
               gridData: ProductGridData(
-                layoutInfo: const LayoutInfoData(
-                  columns: _columns,
-                  showProductInfo: true,
-                ),
+                layoutInfo: const LayoutInfoData(columns: _columns, showProductInfo: true),
                 tiles: records.sublist(start, end),
               ),
             );
@@ -99,7 +103,7 @@ class PdpRecommendedProducts extends StatelessWidget {
               ),
             ),
           ),
-        const SliverToBoxAdapter(child: SizedBox(height: 150)),
+        SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg + bottomInset)),
       ],
     );
   }

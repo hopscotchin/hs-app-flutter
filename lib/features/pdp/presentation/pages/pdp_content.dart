@@ -76,6 +76,14 @@ class _PdpContentState extends State<PdpContent> {
   final _carouselKey = GlobalKey();
   final _cartIconKey = GlobalKey();
 
+  // System nav/gesture inset, read once per dependency change instead of on
+  // every scroll tick. _updateDockedBarVisibility runs on each tick and used to
+  // do a MediaQuery lookup there; the value only changes when MediaQuery does,
+  // which is exactly when didChangeDependencies fires. The floating bar's
+  // resting position is derived from the same field so the two can never
+  // disagree — that identity is what makes the docked/floating swap seamless.
+  double _bottomInset = 0.0;
+
   @override
   void initState() {
     super.initState();
@@ -86,6 +94,12 @@ class _PdpContentState extends State<PdpContent> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _updateDockedBarVisibility();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _bottomInset = MediaQuery.viewPaddingOf(context).bottom;
   }
 
   @override
@@ -174,9 +188,8 @@ class _PdpContentState extends State<PdpContent> {
     // inside its measured box, so offset the top edge past that padding to land
     // on the actual button row.
     final screenH = stackBox.size.height;
-    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     final barHeight = dockedBox.size.height - AppSpacing.md * 2;
-    final floatingTopY = screenH - bottomInset - AppSpacing.sm - barHeight;
+    final floatingTopY = screenH - _bottomInset - AppSpacing.sm - barHeight;
     // dockedTopY is the padded box top; the button row starts one md below it.
     final dockedContentTopY = dockedTopY + AppSpacing.md;
 
@@ -281,12 +294,16 @@ class _PdpContentState extends State<PdpContent> {
           }
         },
         onBuyNow: () {
-          final skuId = state.selectedSku?.skuId;
-          if (skuId != null) {
-            context.read<PdpBloc>().add(PdpEvent.buyNow(skuId: skuId));
-          } else {
-            showPdpSizeSelectionBottomSheet(context, fromBuyNow: true);
-          }
+          // Fires on tap, BEFORE any network call, and even when this only opens
+          // the size sheet — matching Android, where `sendEventBuyNowClicked`
+          // runs before `addToCart` (`ProductDetailActivity.kt:205`).
+          // context.read<PdpAnalyticsTracker>().onBuyNowTapped();
+          // final skuId = state.selectedSku?.skuId;
+          // if (skuId != null) {
+          //   context.read<PdpBloc>().add(PdpEvent.buyNow(skuId: skuId));
+          // } else {
+          //   showPdpSizeSelectionBottomSheet(context, fromBuyNow: true);
+          // }
         },
       ),
     );
@@ -319,8 +336,9 @@ class _PdpContentState extends State<PdpContent> {
           final whiteThreshold = (carouselH - PdpStrings.appBarHeight).clamp(0.0, carouselH);
 
           // Outer SafeArea has bottom: false, so lift the floating bar and
-          // scroll-to-top pill above the system nav/gesture inset.
-          final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+          // scroll-to-top pill above the system nav/gesture inset. Same cached
+          // value _updateDockedBarVisibility measures against.
+          final bottomInset = _bottomInset;
 
           return Stack(
             key: _stackKey,
@@ -330,133 +348,168 @@ class _PdpContentState extends State<PdpContent> {
               // controller, single continuous scroll). No overscroll bounce.
               ColoredBox(
                 color: AppColors.baseDefault,
-                child: CustomScrollView(
-                  controller: _pageScroll,
-                  physics: const ClampingScrollPhysics(),
-                  slivers: [
-                    // Space reserved for the carousel, which is layered on top
-                    // of this scroll view rather than being a sliver in it (see
-                    // the carousel overlay below). Childless, so it has no hit
-                    // target of its own.
-                    SliverToBoxAdapter(child: SizedBox(height: carouselH)),
-                    // Content — the fixed sections build eagerly in a list
-                    // delegate; recommendations follow as a lazy sliver.
-                    SliverList(
-                      delegate: SliverChildListDelegate([
-                        BlocSelector<WishlistCubit, WishlistState, bool>(
-                          selector: (s) => s.isWishlisted(productId),
-                          builder: (context, wished) => PdpBrandPrice(
-                            product: product,
-                            skuPrice: widget.state.selectedSku?.priceInfo,
-                            isWishlisted: wished,
-                            onWishlistTap: toggleWishlist,
-                            onShareTap: () => AppShareLauncher.shareProduct(product),
-                          ),
-                        ),
-                        if (product.colorVariants.isNotEmpty)
-                          PdpColorVariants(
-                            colorVariants: product.colorVariants,
-                            currentProductId: product.id,
-                            onColorSelected: (productId) => context.read<PdpBloc>().add(
-                              PdpEvent.selectColorVariant(productId: productId),
+                // The docked/floating swap depends on where the docked slot
+                // sits, which content above it can move WITHOUT any scrolling —
+                // collapsing a product-details tab pulls it up by the tab's
+                // whole height. Scroll ticks alone would miss that and leave the
+                // floating bar painted over the gap until the next drag, which
+                // then looked like the bar jumping. ScrollMetricsNotification
+                // fires whenever the metrics change without a scroll, including
+                // on every frame of the 300ms expand/collapse, so the swap
+                // tracks the animation instead of trailing it.
+                child: NotificationListener<ScrollMetricsNotification>(
+                  onNotification: (notification) {
+                    if (notification.depth != 0) return false;
+                    _updateDockedBarVisibility();
+                    return false;
+                  },
+                  child: CustomScrollView(
+                    controller: _pageScroll,
+                    physics: const ClampingScrollPhysics(),
+                    slivers: [
+                      // Space reserved for the carousel, which is layered on top
+                      // of this scroll view rather than being a sliver in it (see
+                      // the carousel overlay below). Childless, so it has no hit
+                      // target of its own.
+                      SliverToBoxAdapter(child: SizedBox(height: carouselH)),
+                      // Content — the fixed sections build eagerly in a list
+                      // delegate; recommendations follow as a lazy sliver.
+                      SliverList(
+                        delegate: SliverChildListDelegate([
+                          BlocSelector<WishlistCubit, WishlistState, bool>(
+                            selector: (s) => s.isWishlisted(productId),
+                            builder: (context, wished) => PdpBrandPrice(
+                              product: product,
+                              skuPrice: widget.state.selectedSku?.priceInfo,
+                              isWishlisted: wished,
+                              onWishlistTap: toggleWishlist,
+                              onShareTap: () => AppShareLauncher.shareProduct(product),
                             ),
                           ),
-                        if (product.skus.isNotEmpty)
-                          PdpSizeSelector(
-                            skus: product.skus,
-                            selectedSku: widget.state.selectedSku,
-                            hasSizeChart: product.hasSizeChart == true,
-                            onSizeSelected: (skuId) => context
-                                .read<PdpBloc>()
-                                .add(PdpEvent.selectSku(skuId: skuId)),
-                            onSizeChartTap: () => showPdpSizeChartBottomSheet(
-                              context,
-                              productName: product.name,
+                          if (product.colorVariants.isNotEmpty)
+                            PdpColorVariants(
+                              colorVariants: product.colorVariants,
+                              currentProductId: product.id,
+                              onColorSelected: (productId) => context.read<PdpBloc>().add(
+                                PdpEvent.selectColorVariant(productId: productId),
+                              ),
                             ),
-                          ),
-                        // Delivery + EDD info are hidden when the product is
-                        // sold out — mirrors Android (DeliveryInfoView / EddInfoView
-                        // both gate on soldOut).
-                        if (product.soldOut != true)
-                          PdpDeliveryInfo(
-                            eddInfo: widget.state.selectedSku?.eddInfo ?? product.eddInfo,
-                            serviceGuarantees: product.serviceGuarantee,
-                            pinCode: widget.state.verifiedPincode,
-                            isSizeSelected: widget.state.selectedSku != null,
-                            isSoldOut: product.soldOut == true,
-                            onVerifyPincode: (pincode) async {
-                              final bloc = context.read<PdpBloc>();
-                              final startTick = bloc.state.pincodeVerifyTick;
-                              bloc.add(PdpEvent.verifyPincode(pincode: pincode));
-                              // The tick bumps once verify completes (success or
-                              // failure); the error is null only on success.
-                              final settled = await bloc.stream.firstWhere(
-                                (s) => s.pincodeVerifyTick != startTick,
-                              );
-                              final error = settled.pincodeVerifyError;
-                              return error == null
-                                  ? const PincodeVerifyResult.success()
-                                  : PincodeVerifyResult.failure(error);
-                            },
-                          ),
-                        if (widget.state.productDetail?.offersList.isNotEmpty == true)
-                          PdpOffers(offers: widget.state.productDetail!.offersList),
+                          if (product.skus.isNotEmpty)
+                            PdpSizeSelector(
+                              skus: product.skus,
+                              selectedSku: widget.state.selectedSku,
+                              hasSizeChart: product.hasSizeChart == true,
+                              onSizeSelected: (skuId) =>
+                                  context.read<PdpBloc>().add(PdpEvent.selectSku(skuId: skuId)),
+                              onSizeChartTap: () =>
+                                  showPdpSizeChartBottomSheet(context, productName: product.name),
+                            ),
+                          // Delivery + EDD info are hidden when the product is
+                          // sold out — mirrors Android (DeliveryInfoView / EddInfoView
+                          // both gate on soldOut).
+                          if (product.soldOut != true)
+                            PdpDeliveryInfo(
+                              eddInfo: widget.state.selectedSku?.eddInfo ?? product.eddInfo,
+                              serviceGuarantees: product.serviceGuarantee,
+                              pinCode: widget.state.verifiedPincode,
+                              isSizeSelected: widget.state.selectedSku != null,
+                              isSoldOut: product.soldOut == true,
+                              onVerifyPincode: (pincode) async {
+                                final bloc = context.read<PdpBloc>();
+                                final startTick = bloc.state.pincodeVerifyTick;
+                                bloc.add(PdpEvent.verifyPincode(pincode: pincode));
+                                // The tick bumps once verify completes (success or
+                                // failure); the error is null only on success.
+                                final settled = await bloc.stream.firstWhere(
+                                  (s) => s.pincodeVerifyTick != startTick,
+                                );
+                                final error = settled.pincodeVerifyError;
+                                return error == null
+                                    ? const PincodeVerifyResult.success()
+                                    : PincodeVerifyResult.failure(error);
+                              },
+                            ),
+                          if (widget.state.productDetail?.offersList.isNotEmpty == true)
+                            PdpOffers(offers: widget.state.productDetail!.offersList),
 
-                        if (product.details.isNotEmpty)
-                          PdpProductDetails(
-                            details: product.details,
-                            expandedTabIndex: widget.state.expandedDetailTab,
-                            selectedSku: widget.state.selectedSku,
-                            productPriceInfo: product.priceInfo,
-                            onTabTapped: (index) => context.read<PdpBloc>().add(
-                              PdpEvent.expandDetailTab(tabIndex: index),
-                            ),
-                          ),
-                        // Docked bar — same widget, always occupying its slot in
-                        // the flow right below product details (independent of
-                        // whether the tabs rendered) so there's always a docking
-                        // spot AND a stable box to measure. It only PAINTS once
-                        // docked; Visibility.maintainSize keeps the slot reserved
-                        // while hidden so measuring it stays valid and swapping in
-                        // never shifts surrounding content. Exactly one of this and
-                        // the floating overlay is ever painted (both gated on the
-                        // same _isBarDocked flag), so the two are never on screen
-                        // together.
-                        KeyedSubtree(
-                          key: _dockedBarKey,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                            child: ValueListenableBuilder<bool>(
-                              valueListenable: _isBarDocked,
-                              builder: (context, isDocked, child) => Visibility(
-                                visible: isDocked,
-                                maintainSize: true,
-                                maintainAnimation: true,
-                                maintainState: true,
-                                child: child!,
-                              ),
-                              child: _buildAddToBagBar(
-                                product,
-                                addToBagKey: const ValueKey(PdpTestStrings.dockedAddToBagButton),
-                                buyNowKey: const ValueKey(PdpTestStrings.dockedBuyNowButton),
+                          if (product.details.isNotEmpty)
+                            PdpProductDetails(
+                              details: product.details,
+                              expandedTabIndex: widget.state.expandedDetailTab,
+                              selectedSku: widget.state.selectedSku,
+                              skus: product.skus,
+                              productPriceInfo: product.priceInfo,
+                              onTabTapped: (index) => context.read<PdpBloc>().add(
+                                PdpEvent.expandDetailTab(tabIndex: index),
                               ),
                             ),
+                          // Docked bar — same widget, always occupying its slot in
+                          // the flow right below product details (independent of
+                          // whether the tabs rendered) so there's always a docking
+                          // spot AND a stable box to measure. It only PAINTS once
+                          // docked; Visibility.maintainSize keeps the slot reserved
+                          // while hidden so measuring it stays valid and swapping in
+                          // never shifts surrounding content. Exactly one of this and
+                          // the floating overlay is ever painted (both gated on the
+                          // same _isBarDocked flag), so the two are never on screen
+                          // together.
+                          KeyedSubtree(
+                            key: _dockedBarKey,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                              child: ValueListenableBuilder<bool>(
+                                valueListenable: _isBarDocked,
+                                builder: (context, isDocked, child) => Visibility(
+                                  visible: isDocked,
+                                  maintainSize: true,
+                                  maintainAnimation: true,
+                                  maintainState: true,
+                                  child: child!,
+                                ),
+                                child: _buildAddToBagBar(
+                                  product,
+                                  addToBagKey: const ValueKey(PdpTestStrings.dockedAddToBagButton),
+                                  buyNowKey: const ValueKey(PdpTestStrings.dockedBuyNowButton),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        if (widget.state.productDetail?.recentlyViewed != null)
-                          PdpRecentlyViewed(
-                            recentlyViewed: widget.state.productDetail!.recentlyViewed!,
-                          ),
-                      ]),
-                    ),
-                    // Recommendations render as their own sliver so the
-                    // grid builds lazily, one row at a time.
-                    if (widget.state.recommendations != null)
-                      PdpRecommendedProducts(
-                        recommendations: widget.state.recommendations!,
-                        isLoadingMore: widget.state.isLoadingMoreRecommendations,
+                          if (widget.state.productDetail?.recentlyViewed != null)
+                            PdpRecentlyViewed(
+                              recentlyViewed: widget.state.productDetail!.recentlyViewed!,
+                            ),
+                        ]),
                       ),
-                  ],
+                      // Recommendations render as their own sliver so the
+                      // grid builds lazily, one row at a time.
+                      //
+                      // Subscribed here rather than read off widget.state so that
+                      // load-more — which fires from the scroll listener 300px
+                      // before the bottom, i.e. mid-fling — rebuilds only this
+                      // sliver. Taken off the page-level state it re-created every
+                      // fixed section above (offers, details, delivery, recently
+                      // viewed) in the middle of a scroll, twice per page: once for
+                      // the spinner and once for the response. Null recommendations
+                      // yield a zero-height sliver, which is what the absent
+                      // conditional produced before and what PdpRecommendedProducts
+                      // itself returns for an empty record list.
+                      BlocBuilder<PdpBloc, PdpState>(
+                        buildWhen: (prev, curr) =>
+                            prev.recommendations != curr.recommendations ||
+                            prev.isLoadingMoreRecommendations != curr.isLoadingMoreRecommendations,
+                        builder: (context, state) {
+                          final recommendations = state.recommendations;
+                          if (recommendations == null) {
+                            return const SliverToBoxAdapter(child: SizedBox.shrink());
+                          }
+                          return PdpRecommendedProducts(
+                            recommendations: recommendations,
+                            isLoadingMore: state.isLoadingMoreRecommendations,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
               // Carousel — layered ON TOP of the scroll view, not inside it.
@@ -546,10 +599,16 @@ class _PdpContentState extends State<PdpContent> {
                   valueListenable: _isBarDocked,
                   builder: (context, isDocked, child) =>
                       isDocked ? const SizedBox.shrink() : child!,
-                  child: _buildAddToBagBar(
-                    product,
-                    addToBagKey: const ValueKey(PdpTestStrings.addToBagButton),
-                    buyNowKey: const ValueKey(PdpTestStrings.buyNowButton),
+                  // The bar carries a 37.7px blur shadow and sits in the same
+                  // layer as the scroll view, so it was re-rastering on every
+                  // scroll tick along with the page. Caching it as its own layer
+                  // is layout-neutral.
+                  child: RepaintBoundary(
+                    child: _buildAddToBagBar(
+                      product,
+                      addToBagKey: const ValueKey(PdpTestStrings.addToBagButton),
+                      buyNowKey: const ValueKey(PdpTestStrings.buyNowButton),
+                    ),
                   ),
                 ),
               ),
@@ -602,17 +661,32 @@ class _PageScrollOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget tree = ClipRect(
-      child: AnimatedBuilder(
-        animation: scroll,
-        builder: (context, child) => Align(
-          alignment: alignment,
-          child: Transform.translate(
-            offset: Offset(0, dyForOffset(scroll.hasClients ? scroll.offset : 0.0)),
-            child: child,
+    // Both RepaintBoundaries are load-bearing for scroll smoothness; neither
+    // affects layout (RenderRepaintBoundary is a proxy box) or hit testing.
+    //
+    // OUTER: Transform's offset setter calls markNeedsPaint, which dirties the
+    // nearest enclosing repaint boundary. Without one here that is the route
+    // itself, so every scroll tick re-rastered the whole PDP. This confines the
+    // per-tick repaint to the overlay.
+    //
+    // INNER: Transform only allocates a TransformLayer when a descendant needs
+    // compositing. A plain image/DecoratedBox does not, so the child was being
+    // re-painted into the parent canvas each tick — for the sheet lip that meant
+    // re-rasterising an 18.5px blur every frame. A boundary below the transform
+    // makes the child a cached layer that the transform merely re-offsets.
+    Widget tree = RepaintBoundary(
+      child: ClipRect(
+        child: AnimatedBuilder(
+          animation: scroll,
+          builder: (context, child) => Align(
+            alignment: alignment,
+            child: Transform.translate(
+              offset: Offset(0, dyForOffset(scroll.hasClients ? scroll.offset : 0.0)),
+              child: child,
+            ),
           ),
+          child: RepaintBoundary(child: child),
         ),
-        child: child,
       ),
     );
     if (ignorePointer) tree = IgnorePointer(child: tree);

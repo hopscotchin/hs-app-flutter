@@ -9,10 +9,6 @@ part of 'recommendations_model.dart';
 RecommendationsModel _$RecommendationsModelFromJson(
   Map<String, dynamic> json,
 ) => RecommendationsModel(
-  records:
-      (json['records'] as List<dynamic>?)
-          ?.map((e) => ListingProductModel.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      [],
+  records: json['records'] == null ? [] : _recordsFromJson(json['records']),
   pageMeta: _pageMetaFromJson(json['pageMeta']),
 );
