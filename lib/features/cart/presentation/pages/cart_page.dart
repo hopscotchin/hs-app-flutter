@@ -110,10 +110,10 @@ class _CartPageState extends State<CartPage> {
   /// `checkLoginAndCheckout`. See [_openCheckoutOrLogin], which is that gate.
   void _startCheckout() async {
     //* this needs testing will add in next release
-    context.showSnack(
-      'Thanks for testing this but checkout is not for this release',
-      status: SnackStatus.error,
-    );
+//     context.showSnack(
+//       'Thanks for testing this but checkout is not for this release',
+//       status: SnackStatus.error,
+//     );
   }
 
   /// Buy Now hand-off from PDP: start checkout once the cart is loaded and
