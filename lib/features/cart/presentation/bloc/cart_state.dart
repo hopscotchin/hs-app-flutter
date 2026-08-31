@@ -59,7 +59,9 @@ extension CartStateX on CartState {
   bool isItemBusy(String? sku) => sku != null && pendingItemAction?.sku == sku;
 
   bool _isPending(String? sku, CartItemAction action) =>
-      sku != null && pendingItemAction?.sku == sku && pendingItemAction?.action == action;
+      sku != null &&
+      pendingItemAction?.sku == sku &&
+      pendingItemAction?.action == action;
 
   /// Drives the spinner on the confirmation sheet's Remove button; its
   /// transition back to false is what closes the sheet, success or failure.
@@ -67,7 +69,8 @@ extension CartStateX on CartState {
 
   /// Greys out and disables that row's "Move to Wishlist" action so it can't
   /// be tapped twice.
-  bool isMovingToWishlist(String? sku) => _isPending(sku, CartItemAction.moveToWishlist);
+  bool isMovingToWishlist(String? sku) =>
+      _isPending(sku, CartItemAction.moveToWishlist);
   bool get isLoaded => status == CartStatus.loaded && cart != null;
   bool get isError => status == CartStatus.error;
 }

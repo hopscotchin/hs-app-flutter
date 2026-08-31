@@ -68,9 +68,16 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
     }
   }
 
-  static void _showActionSnack(BuildContext context, String? message, bool isError) {
+  static void _showActionSnack(
+    BuildContext context,
+    String? message,
+    bool isError,
+  ) {
     if (message == null || message.isEmpty) return;
-    context.showSnack(message, status: isError ? SnackStatus.error : SnackStatus.success);
+    context.showSnack(
+      message,
+      status: isError ? SnackStatus.error : SnackStatus.success,
+    );
   }
 
   @override
@@ -106,7 +113,9 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
               // server's `cartItemQty` (total units) — reconciling those two
               // is tracked separately.
               BlocListener<CartBloc, CartState>(
-                listenWhen: (a, b) => a.cart?.items.length != b.cart?.items.length,
+                listenWhen: (a, b) =>
+                    b.cart != null &&
+                    a.cart?.items.length != b.cart?.items.length,
                 listener: (context, state) {
                   // Buy-now mode is the exception: that cart response is scoped
                   // to the single item being bought, so `items.length` is 1 no
@@ -115,18 +124,26 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
                   // (PdpBloc._onBuyNow), and leaving the mode refetches the full
                   // bag, which lands here and corrects the count.
                   if (context.read<CartBloc>().instantCheckout) return;
-                  context.read<CartCountCubit>().set(state.cart?.items.length ?? 0);
+                  context.read<CartCountCubit>().set(
+                    state.cart?.items.length ?? 0,
+                  );
                 },
               ),
               BlocListener<WishlistCubit, WishlistState>(
                 listenWhen: (a, b) => a.feedbackTick != b.feedbackTick,
-                listener: (context, state) =>
-                    _showActionSnack(context, state.feedbackMessage, state.feedbackIsError),
+                listener: (context, state) => _showActionSnack(
+                  context,
+                  state.feedbackMessage,
+                  state.feedbackIsError,
+                ),
               ),
               BlocListener<CartActionsCubit, CartActionsState>(
                 listenWhen: (a, b) => a.feedbackTick != b.feedbackTick,
-                listener: (context, state) =>
-                    _showActionSnack(context, state.feedbackMessage, state.feedbackIsError),
+                listener: (context, state) => _showActionSnack(
+                  context,
+                  state.feedbackMessage,
+                  state.feedbackIsError,
+                ),
               ),
             ],
             // `automation_build` is a marker, not a target: it proves to a

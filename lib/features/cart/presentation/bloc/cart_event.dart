@@ -29,7 +29,11 @@ class UpdateCartItemQuantity extends CartEvent {
   /// the bloc falls back to a sku lookup if it no longer points at [sku].
   final int? itemIndex;
 
-  const UpdateCartItemQuantity({required this.sku, required this.quantity, this.itemIndex});
+  const UpdateCartItemQuantity({
+    required this.sku,
+    required this.quantity,
+    this.itemIndex,
+  });
 
   @override
   List<Object?> get props => [sku, quantity, itemIndex];

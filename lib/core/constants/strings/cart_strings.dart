@@ -3,7 +3,8 @@ class CartStrings {
 
   static const String bag = 'Bag';
   static const String emptyCart = 'Your bag is empty';
-  static const String emptyCartSubtitle = "Looks like you haven't added anything to your bag yet";
+  static const String emptyCartSubtitle =
+      "Looks like you haven't added anything to your bag yet";
   static const String startShopping = 'START SHOPPING';
   static const String total = 'Total';
   static const String removeFromCart = 'Remove';

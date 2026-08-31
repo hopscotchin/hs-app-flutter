@@ -77,23 +77,33 @@ class _RemoveCartItemSheet extends StatelessWidget {
                 AppSpacing.verticalGapMd,
                 Text(
                   CartStrings.removeItemsDescription,
-                  style: AppTypographyV1.bodyRegular.regular.textPrimary().copyWith(height: 1.5),
+                  style: AppTypographyV1.bodyRegular.regular
+                      .textPrimary()
+                      .copyWith(height: 1.5),
                 ),
                 const SizedBox(height: 28),
                 Row(
                   children: [
                     Expanded(
                       child: TertiaryButton.defaultType(
-                        key: const ValueKey(CartTestStrings.removeItemBottomSheetRemoveButton),
+                        key: const ValueKey(
+                          CartTestStrings.removeItemBottomSheetRemoveButton,
+                        ),
                         text: CommonStrings.remove,
-                        state: isRemoving ? ButtonState.loading : ButtonState.enabled,
-                        onTap: () => context.read<CartBloc>().add(RemoveCartItem(sku: sku)),
+                        state: isRemoving
+                            ? ButtonState.loading
+                            : ButtonState.enabled,
+                        onTap: () => context.read<CartBloc>().add(
+                          RemoveCartItem(sku: sku),
+                        ),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: PrimaryButton.defaultType(
-                        key: const ValueKey(CartTestStrings.removeItemBottomSheetNoButton),
+                        key: const ValueKey(
+                          CartTestStrings.removeItemBottomSheetNoButton,
+                        ),
                         text: CartStrings.no,
                         state: ButtonState.enabled,
                         onTap: () => Navigator.of(context).maybePop(),

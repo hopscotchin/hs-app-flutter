@@ -114,13 +114,19 @@ class AppBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (title.isNotNullOrEmpty) ...[
-              Text(title!, key: titleKey, style: AppTypographyV1.titleSmall.bold.textPrimary()),
+              Text(
+                title!,
+                key: titleKey,
+                style: AppTypographyV1.titleSmall.bold.textPrimary(),
+              ),
               AppSpacing.verticalGapMd,
             ],
             Text(
               description,
               key: descriptionKey,
-              style: AppTypographyV1.bodyRegular.regular.textPrimary().copyWith(height: 1.5),
+              style: AppTypographyV1.bodyRegular.regular.textPrimary().copyWith(
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 28),
             if (hasSecondary)
@@ -159,8 +165,13 @@ class _SheetButton extends StatelessWidget {
           ? AppColors.brandDefault
           : AppColors.primary,
     );
-    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusXs));
-    const padding = EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.sm);
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
+    );
+    const padding = EdgeInsets.symmetric(
+      vertical: AppSpacing.md,
+      horizontal: AppSpacing.sm,
+    );
 
     if (isFilled) {
       return TextButton(
