@@ -33,17 +33,25 @@ import '../../domain/entities/cart_item_entity.dart';
 class CartItemWidget extends StatelessWidget {
   final CartItemEntity item;
   final bool isLoading;
+
+  /// This row's move-to-wishlist call is in flight — the action greys out and
+  /// stops responding until it lands, so it can't be fired twice. Mirrors
+  /// Android, which locks the row for the same window.
+  final bool isMovingToWishlist;
   final ValueChanged<int>? onQuantityChanged;
   final VoidCallback? onRemove;
   final VoidCallback? onMoveToWishlist;
+  final bool hasMessageBars;
 
   const CartItemWidget({
     super.key,
     required this.item,
     this.isLoading = false,
+    this.isMovingToWishlist = false,
     this.onQuantityChanged,
     this.onRemove,
     this.onMoveToWishlist,
+    this.hasMessageBars = false,
   });
 
   bool get _isSoldOut => item.isCompletelySoldOut;
@@ -51,7 +59,12 @@ class CartItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xsm),
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.sm,
+        AppSpacing.xsm,
+        AppSpacing.sm,
+        AppSpacing.xsm,
+      ),
       decoration: const BoxDecoration(
         color: AppColors.neutralGrey1,
         borderRadius: AppSpacing.borderRadiusXs,
@@ -65,23 +78,10 @@ class CartItemWidget extends StatelessWidget {
             Expanded(flex: 1, child: _buildImageColumn(context)),
             Expanded(
               flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: AppSpacing.sm,
-                  top: AppSpacing.sm,
-                  right: AppSpacing.xs,
-                ),
-                // spaceBetween pins "Move To Wishlist" to the bottom of the
-                // taller side (IntrinsicHeight equalizes both columns) no
-                // matter how many optional rows (promo/coupon messages)
-                // render above it. It sits outside _greyedOut() — the
-                // "Move To Wishlist" action stays fully colored and tappable
-                // even when the rest of the card is greyed out for sold-out.
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [_buildDetails(), _buildWishlistRow()],
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [_buildDetails(), _buildWishlistRow()],
               ),
             ),
           ],
@@ -102,7 +102,7 @@ class CartItemWidget extends StatelessWidget {
         child,
         Positioned.fill(
           child: IgnorePointer(
-            child: Container(color: AppColors.neutralGrey1.withValues(alpha: 0.3)),
+            child: Container(color: AppColors.neutralGrey1.withValues(alpha: 0.4)),
           ),
         ),
       ],
@@ -166,71 +166,94 @@ class CartItemWidget extends StatelessWidget {
     final visualCue = item.visualCue;
     final hasVisualCue = visualCue?.text.isNotNullOrEmpty ?? false;
 
+    // The grey scrim is applied per-block rather than over the whole column:
+    // the visual cue badge carries its own server-driven colors and must stay
+    // at full strength, so it is deliberately left outside _greyedOut().
     return Expanded(
-      child: _greyedOut(
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.sm, top: AppSpacing.sm),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (hasVisualCue)
                   _buildVisualCueBadge(visualCue!)
                 else
                   Expanded(
-                    child: Text(
-                      item.productName ?? '',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypographyV1.labelLarge.regular.textPrimary(),
+                    child: _greyedOut(
+                      Text(
+                        item.productName ?? '',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypographyV1.labelLarge.regular.textPrimary(),
+                      ),
                     ),
                   ),
                 if (hasVisualCue) const Spacer(),
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: isLoading ? null : onRemove,
-                  child: const Padding(
-                    padding: EdgeInsets.only(left: AppSpacing.md),
-                    child: Icon(
-                      Icons.close,
-                      size: AppSpacing.iconMd,
-                      color: AppColors.neutralGrey6,
+                  child: _greyedOut(
+                    const ColoredBox(
+                      color: Colors.transparent,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: AppSpacing.md,
+                          right: AppSpacing.md,
+                          bottom: 2,
+                          top: 5,
+                        ),
+                        child: CustomImage(path: ImageConstants.closeIcon, height: 11, width: 11),
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-            if (hasVisualCue) ...[
-              AppSpacing.verticalGapSm,
-              Text(
-                item.productName ?? '',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypographyV1.labelLarge.regular.textPrimary(),
-              ),
-            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.sm, right: AppSpacing.xs),
+            child: _greyedOut(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (hasVisualCue) ...[
+                    AppSpacing.verticalGapSm,
+                    Text(
+                      item.productName ?? '',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypographyV1.labelLarge.regular.textPrimary(),
+                    ),
+                  ],
 
-            AppSpacing.verticalGapXs,
-            if (item.priceInfo != null)
-              ProductPriceRow(
-                padding: EdgeInsets.zero,
-                priceText: item.priceInfo!.sellingPrice ?? '',
-                originalPriceText: item.priceInfo!.hasDiscount ? item.priceInfo!.mrp : null,
-                discountText: item.priceInfo!.discount,
-                isSoldOut: false,
-              ),
-            for (final detail in item.cartItemDetails) ...[
-              AppSpacing.verticalGapXs,
-              _buildItemDetail(detail),
-            ],
+                  AppSpacing.verticalGapXs,
+                  if (item.priceInfo != null)
+                    ProductPriceRow(
+                      padding: EdgeInsets.zero,
+                      priceText: item.priceInfo!.sellingPrice ?? '',
+                      originalPriceText: item.priceInfo!.hasDiscount ? item.priceInfo!.mrp : null,
+                      discountText: item.priceInfo!.discount,
+                      isSoldOut: false,
+                    ),
+                  for (final detail in item.cartItemDetails) ...[
+                    AppSpacing.verticalGapXs,
+                    _buildItemDetail(detail),
+                  ],
 
-            AppSpacing.gapXxs,
-            _buildQuantityRow(),
-            AppSpacing.verticalGapXs,
-            _buildSizeRow(),
-          ],
-        ),
+                  AppSpacing.gapXxs,
+                  _buildQuantityRow(),
+                  AppSpacing.verticalGapXs,
+                  _buildSizeRow(),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -370,22 +393,33 @@ class CartItemWidget extends StatelessWidget {
   // ─── Footer ───────────────────────────────────────────────────
 
   Widget _buildWishlistRow() {
+    final isBusy = isLoading || isMovingToWishlist;
     return GestureDetector(
-      onTap: isLoading ? null : onMoveToWishlist,
-      child: ColoredBox(
-        color: Colors.transparent,
-        child: Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.sm),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              const CustomImage(path: ImageConstants.cartWishListArrow),
-              Text(
-                CartStrings.moveToWishlistLabel,
-                style: AppTypographyV1.labelLarge.medium.brandPrimary(),
-              ),
-            ],
+      onTap: isBusy ? null : onMoveToWishlist,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          left: AppSpacing.sm,
+          top: AppSpacing.sm,
+          right: AppSpacing.xs,
+        ),
+        child: ColoredBox(
+          color: Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            // Greyed rather than spinner-swapped: the row is about to disappear
+            // on success, and a spinner appearing then vanishing with the row
+            // reads as a flicker.
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const CustomImage(path: ImageConstants.cartWishListArrow),
+                Text(
+                  CartStrings.moveToWishlistLabel,
+                  style: AppTypographyV1.labelLarge.medium.brandPrimary(),
+                ),
+              ],
+            ),
           ),
         ),
       ),

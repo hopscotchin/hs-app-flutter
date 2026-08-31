@@ -36,6 +36,8 @@ class CartPromoSection extends StatefulWidget {
 }
 
 class _CartPromoSectionState extends State<CartPromoSection> {
+  static const int _maxCodeLength = 100;
+
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   bool _hasText = false;
@@ -130,6 +132,11 @@ class _CartPromoSectionState extends State<CartPromoSection> {
           // is stricter than trimming on submit: the field can never hold a
           // value that looks applied but isn't.
           inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
+          // Real codes are a handful of characters; the cap is only there to
+          // stop a paste of arbitrary length reaching the API. Enforced without
+          // `maxLength` so the field doesn't grow a counter under it.
+          maxLength: _maxCodeLength,
+          buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
           enabled: !widget.isLoading,
           style: AppTypographyV1.bodyRegular.regular.textPrimary(),
           onFieldSubmitted: (_) => _submit(),

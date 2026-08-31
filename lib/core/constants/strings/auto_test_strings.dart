@@ -419,6 +419,7 @@ class CartTestStrings {
   // ── Remove item confirmation bottom sheet ──
   static const String removeItemBottomSheetRemoveButton =
       'cart_remove_item_bottomsheet_remove_button';
+  static const String removeItemBottomSheetNoButton = 'cart_remove_item_bottomsheet_no_button';
 }
 
 /// Product detail page (PDP). Keys are `pdp_<element>[_<index>]`. Dynamic lists
