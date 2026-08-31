@@ -88,7 +88,7 @@ class _CartPageState extends State<CartPage> {
   Future<void> _onEddPincodeTap(BuildContext context) async {
     final result = await PincodeBottomSheet.show(context);
     if (result != null && context.mounted) {
-      context.read<CartBloc>().add(UpdateDeliveryPincode(pincode: result));
+       context.read<CartBloc>().add(const RefreshCart());
     }
   }
 
