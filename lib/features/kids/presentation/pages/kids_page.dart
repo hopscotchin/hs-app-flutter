@@ -97,15 +97,20 @@ class KidsPage extends StatelessWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _KidsBanner(
-                          title: content.bannerTitle,
-                          subtitle: content.bannerSubtitle,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                          child: _KidsBanner(
+                            title: content.bannerTitle,
+                            subtitle: content.bannerSubtitle,
+                          ),
                         ),
                         Expanded(
                           child: ListView.builder(
                             padding: const EdgeInsets.only(
                               top: AppSpacing.sm,
                               bottom: AppSpacing.md,
+                              left: AppSpacing.xxs,
+                              right: AppSpacing.xxs,
                             ),
                             itemCount: state.children.length,
                             itemBuilder: (context, i) {
@@ -216,8 +221,8 @@ class _KidsBanner extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.neutralGrey1,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        color: AppColors.neutralGrey2,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
         border: Border.all(color: AppColors.baseDefault, width: 0.1),
       ),
       child: Column(
@@ -226,9 +231,7 @@ class _KidsBanner extends StatelessWidget {
           Text(
             title,
             key: const ValueKey(KidsTestStrings.listBannerTitle),
-            style: AppTypographyV1.bodyRegular.bold.copyWith(
-              color: AppColors.primary,
-            ),
+            style: AppTypographyV1.bodyRegular.bold.textPrimary(),
           ),
           const SizedBox(height: 4),
           Text(
@@ -276,7 +279,7 @@ class _AddChildFooter extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: AppColors.neutralGrey1,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             ),
             child: Row(
               children: [

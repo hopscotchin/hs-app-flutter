@@ -66,4 +66,9 @@ class ImageConstants {
   static const String promoOffer = 'assets/icons/promo_offer.svg';
   static const String cartQuantityAdd = 'assets/icons/add.svg';
   static const String cartQuantityRemove = 'assets/icons/remove.svg';
+
+  // Kids
+  static const String editIcon = 'assets/icons/edit.svg';
+  static const String deleteIcon = 'assets/icons/delete.svg';
+  static const String shieldIcon = 'assets/icons/shield.svg';
 }

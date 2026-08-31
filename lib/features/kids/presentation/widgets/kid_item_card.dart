@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../components/atoms/circular_icon_button.dart';
 import '../../../../components/atoms/custom_image.dart';
+import '../../../../core/constants/image_constants.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
@@ -39,7 +40,7 @@ class KidItemCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: AppColors.neutralGrey1,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
         border: Border.all(color: AppColors.neutralGrey2, width: 0.5),
       ),
       child: Row(
@@ -48,13 +49,13 @@ class KidItemCard extends StatelessWidget {
             child: child.imageUrl != null && child.imageUrl!.isNotEmpty
                 ? CustomImage(
                     path: child.imageUrl!,
-                    width: 56,
-                    height: 56,
+                    width: 64,
+                    height: 64,
                     fit: BoxFit.cover,
                   )
                 : Container(
-                    width: 56,
-                    height: 56,
+                    width: 64,
+                    height: 64,
                     color: AppColors.neutralGrey2,
                     child: const Icon(
                       Icons.person_outline,
@@ -72,7 +73,7 @@ class KidItemCard extends StatelessWidget {
                   key: nameKey,
                   style: AppTypographyV1.bodyRegular.bold.textPrimary(),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   '${child.gender.displayLabel}  •  ${child.ageDisplay}',
                   style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
@@ -88,8 +89,8 @@ class KidItemCard extends StatelessWidget {
           AppSpacing.horizontalGapSm,
           isRemoving
               ? const SizedBox(
-                  width: 38,
-                  height: 38,
+                  width: 36,
+                  height: 36,
                   child: Padding(
                     padding: EdgeInsets.all(10),
                     child: CircularProgressIndicator(strokeWidth: 2),
@@ -98,20 +99,20 @@ class KidItemCard extends StatelessWidget {
               : CircleIconButton(
                   key: removeKey,
                   onTap: onRemove ?? () {},
-                  child: const Icon(
-                    Icons.delete_outline,
-                    color: AppColors.primary,
-                    size: 20,
+                  child: const CustomImage(
+                    path: ImageConstants.deleteIcon,
+                    width: 18,
+                    height: 18,
                   ),
                 ),
           AppSpacing.horizontalGapXs,
           CircleIconButton(
             key: editKey,
             onTap: onEdit ?? () {},
-            child: const Icon(
-              Icons.edit_outlined,
-              color: AppColors.primary,
-              size: 20,
+            child: const CustomImage(
+              path: ImageConstants.editIcon,
+              width: 18,
+              height: 18,
             ),
           ),
         ],

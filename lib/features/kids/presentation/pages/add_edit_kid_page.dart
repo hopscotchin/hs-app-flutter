@@ -6,11 +6,13 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../components/appbar/hs_appbar.dart';
+import '../../../../components/atoms/custom_image.dart';
 import '../../../../components/atoms/outlined_text_field.dart';
 import '../../../../components/buttons/app_button_named.dart';
 import '../../../../components/buttons/button_enums.dart';
 import '../../../../components/form/app_checkbox.dart';
 import '../../../../components/form/app_radio.dart';
+import '../../../../core/constants/image_constants.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/kids_strings.dart';
@@ -171,13 +173,17 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                               padding: const EdgeInsets.all(AppSpacing.sm),
                               decoration: BoxDecoration(
                                 color: config.bannerBackgroundColor,
-                                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                                borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
                                 border: Border.all(color: AppColors.neutralGrey2, width: 0.5),
                               ),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.shield_outlined, size: 20, color: AppColors.primary),
+                                  const CustomImage(
+                                    path: ImageConstants.shieldIcon,
+                                    width: 24,
+                                    height: 24,
+                                  ),
                                   AppSpacing.horizontalGapSm,
                                   Expanded(
                                     child: Text(
@@ -320,7 +326,7 @@ class _GenderOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.neutralGrey3,
             width: isSelected ? 1.5 : 1,
