@@ -354,8 +354,18 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       (failure) {
         if (failure is RequestCancelledFailure) return;
         if (current.isLoaded) {
+          // A rejected step (cart item-limit, sold out, qty cap) must leave the
+          // row on its OLD quantity and say why — silently dropping the spinner
+          // reads as "nothing happened". `current` is pre-mutation state, so the
+          // stepper snaps back on its own.
           emit(
-            current.copyWith(pendingItemAction: null, isCartUpdating: false),
+            current.copyWith(
+              pendingItemAction: null,
+              isCartUpdating: false,
+              toastMessage: failure.message,
+              toastIsError: true,
+              toastDuration: const Duration(seconds: 7),
+            ),
           );
         } else {
           emit(
@@ -634,9 +644,15 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   }
 
   void _onClearToast(ClearToast event, Emitter<CartState> emit) {
-    // Reset the status with the message, so a later success toast can't
-    // inherit a stale error styling.
-    emit(state.copyWith(toastMessage: null, toastIsError: false));
+    // Reset the status and duration with the message, so a later toast can't
+    // inherit stale error styling or the 10s hold.
+    emit(
+      state.copyWith(
+        toastMessage: null,
+        toastIsError: false,
+        toastDuration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   void _onClearPromoActionSheet(

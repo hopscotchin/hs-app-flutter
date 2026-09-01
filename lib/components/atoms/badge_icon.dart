@@ -26,8 +26,7 @@ class BadgeIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayText = count > 99 ? '99+' : '$count';
-    final hasMoreCount = count > 99;
+    final displayText = count > 9 ? '9+' : '$count';
 
     return GestureDetector(
       onTap: onTap,
@@ -35,11 +34,16 @@ class BadgeIcon extends StatelessWidget {
         padding: padding,
         child: Badge(
           isLabelVisible: count > 0,
-          offset: Offset(hasMoreCount ? 2 : 6, -8),
+          offset: const Offset(6, -8),
           backgroundColor: badgeColor,
-          label: Text(displayText, style: TextStyle(fontSize: 10, color: badgeTextColor)),
+          label: Text(
+            displayText,
+            style: TextStyle(fontSize: 10, color: badgeTextColor),
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-          child: icon is IconData ? Icon(icon, size: iconSize, color: iconColor) : icon,
+          child: icon is IconData
+              ? Icon(icon, size: iconSize, color: iconColor)
+              : icon,
         ),
       ),
     );

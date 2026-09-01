@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 
-import '../../../../../core/network/api_client.dart';
 import '../../../../../core/constants/api_constants.dart';
+import '../../../../../core/network/api_client.dart';
+import '../../../../../core/network/models/action_response.dart';
 import '../../models/add_to_cart_response_model.dart';
 import '../../models/cart_model.dart';
-import 'package:injectable/injectable.dart';
 
 abstract class CartRemoteDataSource {
   Future<AddToCartResponseModel> addToCart(String skuId, int quantity);
@@ -45,13 +46,24 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
   CartRemoteDataSourceImpl({required this.apiClient});
 
+  /// The cart BFF answers HTTP 200 even when it rejects a mutation, signalling
+  /// it only with `action: "failure"` plus a `message`/`messageBars` and no
+  /// `cartItems` (e.g. "Cart limit of 100 items exceeded!"). Parsing that
+  /// straight into a [CartModel] yields an EMPTY, apparently-successful cart —
+  /// so every mutation runs the body through [ActionResponse.validate] first,
+  /// which raises `ApiFailureException` and lands on `SafeApiCall`'s
+  /// `ApiFailure` branch with the message bars attached.
+  Map<String, dynamic> _validated(Object? data) =>
+      // ignore: deprecated_member_use_from_same_package
+      ActionResponse.validate(data as Map<String, dynamic>);
+
   @override
   Future<AddToCartResponseModel> addToCart(String skuId, int quantity) async {
     final response = await apiClient.post(
       ApiConstants.addToCart,
       data: {'sku': skuId, 'quantity': '$quantity'},
     );
-    return AddToCartResponseModel.fromJson(response.data as Map<String, dynamic>);
+    return AddToCartResponseModel.fromJson(_validated(response.data));
   }
 
   @override
@@ -60,7 +72,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       ApiConstants.buyNow,
       data: {'sku': skuId, 'quantity': '$quantity'},
     );
-    return AddToCartResponseModel.fromJson(response.data as Map<String, dynamic>);
+    return AddToCartResponseModel.fromJson(_validated(response.data));
   }
 
   @override
@@ -71,7 +83,10 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   }) async {
     final response = await apiClient.get(
       ApiConstants.shoppingCart,
-      queryParameters: {'isMergeCall': isMergeCall, 'instantCheckout': instantCheckout},
+      queryParameters: {
+        'isMergeCall': isMergeCall,
+        'instantCheckout': instantCheckout,
+      },
       cancelToken: cancelToken,
     );
     // v6 returns the response in the app's native shape already.
@@ -89,7 +104,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       queryParameters: {'instantCheckout': instantCheckout},
       cancelToken: cancelToken,
     );
-    return CartModel.fromJson(response.data as Map<String, dynamic>);
+    return CartModel.fromJson(_validated(response.data));
   }
 
   @override
@@ -105,7 +120,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       data: {'sku': sku, 'quantity': quantity},
       cancelToken: cancelToken,
     );
-    return CartModel.fromJson(response.data as Map<String, dynamic>);
+    return CartModel.fromJson(_validated(response.data));
   }
 
   @override
@@ -119,19 +134,18 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     final response = await apiClient.put(
       ApiConstants.moveToWishlistFromCart,
       queryParameters: {'instantCheckout': instantCheckout},
-      data: {
-        'sku': sku,
-        if (productId != null) 'productId': productId,
-        if (price != null) 'price': price,
-      },
+      data: {'sku': sku, 'productId': ?productId, 'price': ?price},
       cancelToken: cancelToken,
     );
-    return CartModel.fromJson(response.data as Map<String, dynamic>);
+    return CartModel.fromJson(_validated(response.data));
   }
 
   @override
   Future<CartModel> mergeCart({CancelToken? cancelToken}) async {
-    final response = await apiClient.post(ApiConstants.mergeCart, cancelToken: cancelToken);
-    return CartModel.fromJson(response.data as Map<String, dynamic>);
+    final response = await apiClient.post(
+      ApiConstants.mergeCart,
+      cancelToken: cancelToken,
+    );
+    return CartModel.fromJson(_validated(response.data));
   }
 }

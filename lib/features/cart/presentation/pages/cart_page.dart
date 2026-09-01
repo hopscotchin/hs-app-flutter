@@ -338,6 +338,7 @@ class _CartBody extends StatelessWidget {
             status: state.toastIsError
                 ? SnackStatus.error
                 : SnackStatus.success,
+            duration: state.toastDuration,
           );
           cartBloc.add(const ClearToast());
         }
