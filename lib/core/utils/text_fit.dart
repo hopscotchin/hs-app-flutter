@@ -28,12 +28,16 @@ double sharedTextFitScale({
   int maxLines = 1,
   double minScale = 0.1,
 }) {
-  if (maxWidth <= 0 || style.fontSize == null || style.fontSize! <= 0) return 1.0;
+  if (maxWidth <= 0 || style.fontSize == null || style.fontSize! <= 0)
+    return 1.0;
 
   var scale = 1.0;
   for (final text in texts) {
     if (text.isEmpty) continue;
-    scale = math.min(scale, _fitScaleFor(text, style, maxWidth, textScaler, maxLines, minScale));
+    scale = math.min(
+      scale,
+      _fitScaleFor(text, style, maxWidth, textScaler, maxLines, minScale),
+    );
     if (scale <= minScale) return minScale;
   }
   return scale;
@@ -43,9 +47,20 @@ double sharedTextFitScale({
 ///
 /// For a caller that sizes itself to its content and needs to know, before
 /// building, how much room that content will ask for.
-double textWidth({required String text, required TextStyle style, required TextScaler textScaler}) {
+double textWidth({
+  required String text,
+  required TextStyle style,
+  required TextScaler textScaler,
+}) {
   if (text.isEmpty || style.fontSize == null) return 0;
-  return _painter(text, style, 1.0, textScaler, maxLines: null, maxWidth: double.infinity).width;
+  return _painter(
+    text,
+    style,
+    1.0,
+    textScaler,
+    maxLines: null,
+    maxWidth: double.infinity,
+  ).width;
 }
 
 double _fitScaleFor(
@@ -97,7 +112,14 @@ bool _overflows(
   TextScaler textScaler,
   int maxLines,
 ) {
-  final painter = _painter(text, style, scale, textScaler, maxLines: maxLines, maxWidth: maxWidth);
+  final painter = _painter(
+    text,
+    style,
+    scale,
+    textScaler,
+    maxLines: maxLines,
+    maxWidth: maxWidth,
+  );
   // didExceedMaxLines covers wrapping past the line budget; the width check
   // catches a single unbreakable word wider than the box, which does not
   // register as exceeding the line count.

@@ -64,7 +64,8 @@ class PdpAddToBagBar extends StatelessWidget {
   /// Fixed width the bar spends regardless of the labels: the 6px frame on each
   /// side, the 6px gap between the buttons, and AppButton's own 20px of hugging
   /// padding plus the slack on both sides of each of the two labels.
-  static const double _barChrome = 6 * 2 + 6 + (AppSpacing.lgMd * 2) * 2 + _labelSlack * 2;
+  static const double _barChrome =
+      6 * 2 + 6 + (AppSpacing.lgMd * 2) * 2 + _labelSlack * 2;
 
   /// Least gap left between the bar and the screen edge in the extreme case
   /// where the labels are long enough that the bar would otherwise overflow.
@@ -83,54 +84,114 @@ class PdpAddToBagBar extends StatelessWidget {
     // AppButton's design padding, so nothing is ever squeezed and the labels sit
     // at their spec size in every ordinary case.
     return Center(
-      child: Container(
-        width: 296,
-        height: PdpStrings.addToBagBarHeight,
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: AppColors.baseDefault,
-          borderRadius: AppSpacing.borderRadiusSm,
-          border: Border.all(color: const Color(0xFFF6F6F6)),
-          boxShadow: const [
-            BoxShadow(color: Color(0x05000000), blurRadius: 37.7, offset: Offset(0, 25)),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Buy Now — light purple
-            Expanded(
-              child: AutoSemantics.fromKey(
-                buyNowKey,
-                child: AppButton(
-                  key: buyNowKey,
-                  // Label stays "Buy Now" whatever the inventory — sold out
-                  // is communicated by the disabled state, not by swapping the
-                  // CTA out for a different one.
-                  text: PdpStrings.buyNow,
-                  variant: ButtonVariant.tertiary,
-                  isFullWidth: true,
-                  state: _stateFor(loading: isBuyingNow),
-                  onTap: onBuyNow,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final textScaler = MediaQuery.textScalerOf(context);
+
+          // Both buttons take the width of the WIDEST label in the set, so they
+          // are always equal to each other and the bar keeps one width across
+          // every state. The bar then hugs that: no side padding, no fixed 296,
+          // no splitting of the screen.
+          //
+          // Measured in the style the label is actually PAINTED in, not the bare
+          // typography token: Text merges its style over the ambient
+          // DefaultTextStyle, so the theme contributes letterSpacing and the
+          // like. Measuring without it underestimated every label by a pixel or
+          // two, which a zero-slack box turned straight into an ellipsis.
+          final measuredStyle = DefaultTextStyle.of(
+            context,
+          ).style.merge(_ctaBaseStyle);
+          var widestLabel = 0.0;
+          for (final label in _ctaLabels) {
+            final width = textWidth(
+              text: label,
+              style: measuredStyle,
+              textScaler: textScaler,
+            );
+            if (width > widestLabel) widestLabel = width;
+          }
+
+          // Only binds when the labels are long enough that the bar would run
+          // off the screen. Both labels then take ONE shared size, so a long
+          // label shrinks the pair rather than being cut, and the two are never
+          // rendered at different sizes.
+          final available =
+              constraints.maxWidth - _barChrome - _minScreenMargin * 2;
+          final scale = widestLabel * 2 <= available || widestLabel <= 0
+              ? 1.0
+              : available / (widestLabel * 2);
+          final ctaLabelStyle = TextStyle(
+            fontSize: _ctaBaseStyle.fontSize! * scale,
+          );
+          final buttonWidth =
+              widestLabel * scale + _labelSlack + AppSpacing.lgMd * 2;
+
+          return Container(
+            // Height stays fixed — pdp_content measures the docked copy against
+            // PdpStrings.addToBagBarHeight to swap it with the floating one, so
+            // a variable height would desync that.
+            height: PdpStrings.addToBagBarHeight,
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: AppColors.baseDefault,
+              borderRadius: AppSpacing.borderRadiusSm,
+              border: Border.all(color: const Color(0xFFF6F6F6)),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x05000000),
+                  blurRadius: 37.7,
+                  offset: Offset(0, 25),
                 ),
-              ),
+              ],
             ),
-            const SizedBox(width: 6),
-            // Add to Bag — dark purple filled
-            Expanded(
-              child: AutoSemantics.fromKey(
-                addToBagKey,
-                child: AppButton(
-                  key: addToBagKey,
-                  text: isAddedToBag ? PdpStrings.goToBag : PdpStrings.addToBag,
-                  variant: ButtonVariant.primary,
-                  isFullWidth: true,
-                  state: _stateFor(loading: isAddingToBag),
-                  onTap: onAddToBag,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Buy Now — light purple
+                SizedBox(
+                  width: buttonWidth,
+                  child: AutoSemantics.fromKey(
+                    buyNowKey,
+                    child: AppButton(
+                      key: buyNowKey,
+                      // Label stays "Buy Now" whatever the inventory — sold out is
+                      // communicated by the disabled state, not by swapping the
+                      // CTA out for a different one.
+                      text: PdpStrings.buyNow,
+                      variant: ButtonVariant.tertiary,
+                      isFullWidth: true,
+                      textStyle: ctaLabelStyle,
+                      state: _stateFor(loading: isBuyingNow),
+                      onTap: onBuyNow,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 6),
+                // Add to Bag — dark purple filled
+                SizedBox(
+                  width: buttonWidth,
+                  child: AutoSemantics.fromKey(
+                    addToBagKey,
+                    child: AppButton(
+                      key: addToBagKey,
+                      text: isAddedToBag
+                          ? PdpStrings.goToBag
+                          : PdpStrings.addToBag,
+                      variant: ButtonVariant.primary,
+                      isFullWidth: true,
+                      textStyle: ctaLabelStyle,
+                      // #F4E6F5 from the design, not the shared primary
+                      // variant's white.
+                      // foregroundColor: AppColors.brandTertiary,
+                      state: _stateFor(loading: isAddingToBag),
+                      onTap: onAddToBag,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

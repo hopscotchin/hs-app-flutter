@@ -2,10 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../atoms/custom_image.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography/typography_v1.dart';
 import '../../core/utils/text_fit.dart';
+import '../atoms/custom_image.dart';
 
 /// Presentation-owned data for a single [IconLabelInfoItem].
 ///
@@ -54,11 +54,12 @@ class IconLabelInfoRow extends StatelessWidget {
 
   /// The label style when a caller supplies none. Lives here rather than in
   /// [IconLabelInfoItem] so the row can measure the labels before building them.
-  static TextStyle get defaultLabelStyle => AppTypographyV1.labelMedium.copyWith(
-    fontWeight: FontWeight.w700,
-    color: const Color(0x80000000),
-    height: 14 / 10,
-  );
+  static TextStyle get defaultLabelStyle =>
+      AppTypographyV1.labelMedium.copyWith(
+        fontWeight: FontWeight.w700,
+        color: const Color(0x80000000),
+        height: 14 / 10,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +77,9 @@ class IconLabelInfoRow extends StatelessWidget {
         // paints with: the theme contributes letterSpacing and the like, so
         // measuring the bare token underestimates every label and the shared
         // size comes out slightly too large.
-        final baseStyle = DefaultTextStyle.of(context).style.merge(labelStyle ?? defaultLabelStyle);
+        final baseStyle = DefaultTextStyle.of(
+          context,
+        ).style.merge(labelStyle ?? defaultLabelStyle);
         // Row splits into equal slots; an item is capped by itemMaxWidth, and
         // the icon tile takes its share before the label sees any.
         final slotWidth = constraints.maxWidth / items.length;
@@ -88,7 +91,9 @@ class IconLabelInfoRow extends StatelessWidget {
           textScaler: MediaQuery.textScalerOf(context),
           maxLines: _labelMaxLines,
         );
-        final resolvedLabelStyle = baseStyle.copyWith(fontSize: baseStyle.fontSize! * scale);
+        final resolvedLabelStyle = baseStyle.copyWith(
+          fontSize: baseStyle.fontSize! * scale,
+        );
 
         return Row(
           children: [
@@ -139,14 +144,6 @@ class IconLabelInfoItem extends StatelessWidget {
   final IconData fallbackIcon;
   final Color fallbackIconColor;
 
-  /// The label style when a caller supplies none. Lives here rather than in
-  /// [IconLabelInfoItem] so the row can measure the labels before building them.
-  static TextStyle get defaultLabelStyle => AppTypographyV1.labelMedium.copyWith(
-    fontWeight: FontWeight.w700,
-    color: const Color(0x80000000),
-    height: 14 / 10,
-  );
-
   @override
   Widget build(BuildContext context) {
     final resolvedLabelStyle = labelStyle ?? IconLabelInfoRow.defaultLabelStyle;
@@ -175,7 +172,11 @@ class IconLabelInfoItem extends StatelessWidget {
                       height: iconSize,
                       fit: BoxFit.contain,
                     )
-                  : Icon(fallbackIcon, size: iconSize, color: fallbackIconColor),
+                  : Icon(
+                      fallbackIcon,
+                      size: iconSize,
+                      color: fallbackIconColor,
+                    ),
             ),
           ),
           // Flexible, not a bare Text: a Row lays non-flex children out with

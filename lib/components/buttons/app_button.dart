@@ -55,7 +55,8 @@ class AppButton extends StatelessWidget {
   bool get _isLoading => state == ButtonState.loading;
   bool get _isDisabled => state == ButtonState.disabled;
   bool get _isInteractive => !_isDisabled && !_isLoading && onTap != null;
-  bool get _isTextOnly => variant == ButtonVariant.link || variant == ButtonVariant.linksmall;
+  bool get _isTextOnly =>
+      variant == ButtonVariant.link || variant == ButtonVariant.linksmall;
 
   // ── Size tokens ────────────────────────────────────────────────────────
 
@@ -69,9 +70,15 @@ class AppButton extends StatelessWidget {
   EdgeInsets get _padding =>
       padding ??
       switch (size) {
-        ButtonSize.small => const EdgeInsets.symmetric(horizontal: AppSpacing.sm), // 12
-        ButtonSize.medium => const EdgeInsets.symmetric(horizontal: AppSpacing.lgMd), // 20
-        ButtonSize.large => const EdgeInsets.symmetric(horizontal: AppSpacing.lg), // 24
+        ButtonSize.small => const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+        ), // 12
+        ButtonSize.medium => const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lgMd,
+        ), // 20
+        ButtonSize.large => const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+        ), // 24
         ButtonSize.regular => const EdgeInsets.symmetric(
           horizontal: AppSpacing.xs,
           vertical: AppSpacing.xs,
@@ -103,7 +110,10 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolved = AppButtonTheme.resolve(variant: variant, styleType: styleType);
+    final resolved = AppButtonTheme.resolve(
+      variant: variant,
+      styleType: styleType,
+    );
     final style = foregroundColor == null
         ? resolved
         : AppButtonStyle(
@@ -122,14 +132,19 @@ class AppButton extends StatelessWidget {
       ),
     );
 
-    return isFullWidth ? SizedBox(width: double.infinity, child: button) : button;
+    return isFullWidth
+        ? SizedBox(width: double.infinity, child: button)
+        : button;
   }
 
   // ── Box button (defaultType / hover / inactive) ────────────────────────
 
   Widget _buildBoxButton(AppButtonStyle style) {
     final List<Widget> rowChildren = [
-      if (leadingIcon != null) ...[leadingIcon!, const SizedBox(width: AppSpacing.xs)],
+      if (leadingIcon != null) ...[
+        leadingIcon!,
+        const SizedBox(width: AppSpacing.xs),
+      ],
       // One line, ellipsised past it. Not shrink-to-fit: a FittedBox scales each
       // button independently, so a pair would render its two labels at different
       // sizes — and scaling and wrapping are mutually exclusive anyway, since a
@@ -142,11 +157,17 @@ class AppButton extends StatelessWidget {
           maxLines: 1,
         ),
       ),
-      if (trailingIcon != null) ...[const SizedBox(width: AppSpacing.xs), trailingIcon!],
+      if (trailingIcon != null) ...[
+        const SizedBox(width: AppSpacing.xs),
+        trailingIcon!,
+      ],
     ];
 
     final Widget row = isFullWidth
-        ? Row(mainAxisAlignment: MainAxisAlignment.center, children: rowChildren)
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: rowChildren,
+          )
         : Row(mainAxisSize: MainAxisSize.min, children: rowChildren);
 
     return Container(
@@ -195,6 +216,10 @@ class AppButton extends StatelessWidget {
   // ── Shared loader ──────────────────────────────────────────────────────
 
   Widget _buildLoader(AppButtonStyle style) {
-    return DotsLoader(dotSize: _dotSize, color: style.foregroundColor, spacing: 3.0);
+    return DotsLoader(
+      dotSize: _dotSize,
+      color: style.foregroundColor,
+      spacing: 3.0,
+    );
   }
 }
