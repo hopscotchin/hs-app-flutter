@@ -41,8 +41,9 @@ class KidsStrings {
   static const String chooseFromGallery = 'Choose from Gallery';
   static const String removeCurrentPhoto = 'Remove Current Photo';
 
-  static const String whyWeAskBannerText =
-      "Why we ask for this? We'll show sizes, styles and collections that suit your child's age.";
+  static const String whyWeAskBannerTitle = 'Why we ask for this?';
+  static const String whyWeAskBannerSubtitle =
+      "We'll show sizes, styles and collections that suit your child's age.";
   static const String consentText =
       "I consent to sharing my child's name, birth date, gender and photo so this app can "
       'personalize their shopping experience. This info is stored securely and never sold.';

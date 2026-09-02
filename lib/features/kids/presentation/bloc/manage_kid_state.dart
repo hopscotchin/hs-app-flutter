@@ -23,10 +23,9 @@ abstract class ManageKidState with _$ManageKidState {
     // clears the others). See PhotoSourceBottomSheet's placeholder-icon
     // note: no real illustrated avatar assets exist yet.
     int? avatarId,
-    // Pre-checked by default (matches the design — the checkbox starts
-    // checked, the user unchecks it to withhold consent) on both create
-    // and edit.
-    @Default(true) bool consentGiven,
+    // Unchecked by default — consent must be an explicit opt-in action by
+    // the user, not a pre-ticked box, on both create and edit.
+    @Default(false) bool consentGiven,
     @Default(false) bool isSubmitting,
     String? submitError,
     ChildEntity? saved,
@@ -48,9 +47,4 @@ extension ManageKidStateX on ManageKidState {
   }
 
   String? get photoPreviewPath => photoFile?.path;
-
-  /// Never null in practice (set synchronously in _onInit before the UI
-  /// ever builds), but this keeps the UI from needing null-checks in the
-  /// brief window before the first ManageKidState.init lands.
-  KidFormConfigEntity get effectiveConfig => config ?? KidFormConfigEntity.fallback();
 }

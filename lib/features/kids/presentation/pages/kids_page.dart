@@ -56,7 +56,7 @@ class KidsPage extends StatelessWidget {
                     if (state.status == KidsStatus.loading ||
                         state.status == KidsStatus.initial) {
                       return LoadingShimmer.listShimmer(
-                        itemCount: 5,
+                        itemCount: 8,
                         itemHeight: 88,
                       );
                     }

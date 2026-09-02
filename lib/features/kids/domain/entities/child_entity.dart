@@ -25,6 +25,7 @@ abstract class ChildEntity with _$ChildEntity {
     @Default(ChildGender.boy) ChildGender gender,
     DateTime? dob,
     String? imageUrl,
+    @Default(false) bool consent,
   }) = _ChildEntity;
 }
 

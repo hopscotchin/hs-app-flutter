@@ -119,7 +119,7 @@ const _configs = <EmptyStateType, _EmptyStateConfig>{
     title: 'Tell Us About Your Li’l Ones',
     subtitle: "We'll help you find their next fave styles.",
     buttonLabel: 'Add kids\' profile',
-    iconSize: (60, 40),
+    iconSize: (90, 65),
   ),
   EmptyStateType.payments: _EmptyStateConfig(
     icon: 'assets/icons/empty_states/no_payment_details.svg',

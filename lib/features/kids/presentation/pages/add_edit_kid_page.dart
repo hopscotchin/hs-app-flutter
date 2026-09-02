@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/atoms/custom_image.dart';
+import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../components/atoms/outlined_text_field.dart';
 import '../../../../components/buttons/app_button_named.dart';
 import '../../../../components/buttons/button_enums.dart';
@@ -90,7 +91,10 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
             top: false,
             child: BlocBuilder<ManageKidBloc, ManageKidState>(
               builder: (context, state) {
-                final config = state.effectiveConfig;
+                if (state.config == null) {
+                  return const _FormShimmer();
+                }
+                final config = state.config!;
                 final selectedAvatar = state.avatarId == null
                     ? null
                     : config.avatars.where((a) => a.id == state.avatarId).firstOrNull;
@@ -177,7 +181,7 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                                 border: Border.all(color: AppColors.neutralGrey2, width: 0.5),
                               ),
                               child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   const CustomImage(
                                     path: ImageConstants.shieldIcon,
@@ -186,9 +190,18 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                                   ),
                                   AppSpacing.horizontalGapSm,
                                   Expanded(
-                                    child: Text(
-                                      config.bannerText,
-                                      style: AppTypographyV1.labelLarge.regular.neutralGrey6(),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          config.bannerTitle,
+                                          style: AppTypographyV1.labelLarge.bold.neutralGrey6(),
+                                        ),
+                                        Text(
+                                          config.bannerSubtitle,
+                                          style: AppTypographyV1.labelLarge.regular.neutralGrey6(),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -300,6 +313,51 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
       confirmKey: const ValueKey(KidsTestStrings.discardBottomSheetConfirmButton),
     );
     if (discard == true && context.mounted) Navigator.of(context).pop();
+  }
+}
+
+/// Skeleton shown while `state.config` is loading — shaped to roughly
+/// mirror the real form below it, matching the shimmer convention used
+/// elsewhere in the app (e.g. KidsPage's list loading state) instead of a
+/// bare spinner.
+class _FormShimmer extends StatelessWidget {
+  const _FormShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const LoadingShimmer(height: 20, width: 220),
+          const SizedBox(height: 10),
+          const LoadingShimmer(height: 16, width: 280),
+          AppSpacing.verticalGapLg,
+          const LoadingShimmer(height: 52),
+          AppSpacing.verticalGapMd,
+          const LoadingShimmer(height: 52),
+          AppSpacing.verticalGapMd,
+          Row(
+            children: [
+              Expanded(child: LoadingShimmer(height: 48, borderRadius: BorderRadius.circular(8))),
+              AppSpacing.horizontalGapSm,
+              Expanded(child: LoadingShimmer(height: 48, borderRadius: BorderRadius.circular(8))),
+            ],
+          ),
+          AppSpacing.verticalGapLg,
+          const Center(
+            child: LoadingShimmer(
+              height: 80,
+              width: 80,
+              borderRadius: BorderRadius.all(Radius.circular(40)),
+            ),
+          ),
+          AppSpacing.verticalGapLg,
+          const LoadingShimmer(height: 64),
+        ],
+      ),
+    );
   }
 }
 
@@ -495,25 +553,34 @@ class _ConsentRow extends StatelessWidget {
             ),
             AppSpacing.horizontalGapSm,
             Expanded(
-              child: Wrap(
-                children: [
-                  Text(
-                    '$consentText ',
-                    style: AppTypographyV1.labelLarge.regular.textPrimary(),
-                  ),
-                  GestureDetector(
-                    key: const ValueKey(KidsTestStrings.formConsentPrivacyLink),
-                    onTap: () => AppNavigator.goToWebView(
-                      context,
-                      url: privacyPolicyUrl,
-                      title: AuthStrings.privacyPolicy,
+              // Text.rich instead of Wrap: the privacy-policy link needs to
+              // flow inline as part of the same paragraph (joining the last
+              // line of the consent text when there's room), not sit as its
+              // own atomic block that Wrap can drop to a separate line.
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '$consentText ',
+                      style: AppTypographyV1.bodyRegular.regular.textPrimary(),
                     ),
-                    child: Text(
-                      privacyPolicyLabel,
-                      style: AppTypographyV1.labelLarge.bold.copyWith(color: AppColors.secondary),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: GestureDetector(
+                        key: const ValueKey(KidsTestStrings.formConsentPrivacyLink),
+                        onTap: () => AppNavigator.goToWebView(
+                          context,
+                          url: privacyPolicyUrl,
+                          title: AuthStrings.privacyPolicy,
+                        ),
+                        child: Text(
+                          privacyPolicyLabel,
+                          style: AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.secondary),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
       ],

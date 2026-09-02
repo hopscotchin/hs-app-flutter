@@ -763,9 +763,8 @@ mixin _$ManageKidState {
 // mutually exclusive with photoFile/existingImageUrl (selecting one
 // clears the others). See PhotoSourceBottomSheet's placeholder-icon
 // note: no real illustrated avatar assets exist yet.
- int? get avatarId;// Pre-checked by default (matches the design — the checkbox starts
-// checked, the user unchecks it to withhold consent) on both create
-// and edit.
+ int? get avatarId;// Unchecked by default — consent must be an explicit opt-in action by
+// the user, not a pre-ticked box, on both create and edit.
  bool get consentGiven; bool get isSubmitting; String? get submitError; ChildEntity? get saved;
 /// Create a copy of ManageKidState
 /// with the given fields replaced by the non-null parameter values.
@@ -1006,7 +1005,7 @@ return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_
 
 
 class _ManageKidState implements ManageKidState {
-  const _ManageKidState({this.mode = ManageKidMode.create, this.original, this.config, this.name = '', this.gender, this.dob, this.photoFile, this.existingImageUrl, this.avatarId, this.consentGiven = true, this.isSubmitting = false, this.submitError, this.saved});
+  const _ManageKidState({this.mode = ManageKidMode.create, this.original, this.config, this.name = '', this.gender, this.dob, this.photoFile, this.existingImageUrl, this.avatarId, this.consentGiven = false, this.isSubmitting = false, this.submitError, this.saved});
   
 
 @override@JsonKey() final  ManageKidMode mode;
@@ -1027,9 +1026,8 @@ class _ManageKidState implements ManageKidState {
 // clears the others). See PhotoSourceBottomSheet's placeholder-icon
 // note: no real illustrated avatar assets exist yet.
 @override final  int? avatarId;
-// Pre-checked by default (matches the design — the checkbox starts
-// checked, the user unchecks it to withhold consent) on both create
-// and edit.
+// Unchecked by default — consent must be an explicit opt-in action by
+// the user, not a pre-ticked box, on both create and edit.
 @override@JsonKey() final  bool consentGiven;
 @override@JsonKey() final  bool isSubmitting;
 @override final  String? submitError;

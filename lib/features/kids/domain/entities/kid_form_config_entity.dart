@@ -24,7 +24,8 @@ abstract class KidFormConfigEntity with _$KidFormConfigEntity {
   const factory KidFormConfigEntity({
     required String heading,
     required String subheading,
-    required String bannerText,
+    required String bannerTitle,
+    required String bannerSubtitle,
     required Color bannerBackgroundColor,
     required String consentText,
     required String viewPrivacyPolicyLabel,
@@ -41,7 +42,8 @@ abstract class KidFormConfigEntity with _$KidFormConfigEntity {
   factory KidFormConfigEntity.fallback() => KidFormConfigEntity(
     heading: KidsStrings.formHeading,
     subheading: KidsStrings.formSubheading,
-    bannerText: KidsStrings.whyWeAskBannerText,
+    bannerTitle: KidsStrings.whyWeAskBannerTitle,
+    bannerSubtitle: KidsStrings.whyWeAskBannerSubtitle,
     bannerBackgroundColor: AppColors.neutralGrey1,
     consentText: KidsStrings.consentText,
     viewPrivacyPolicyLabel: KidsStrings.viewPrivacyPolicy,

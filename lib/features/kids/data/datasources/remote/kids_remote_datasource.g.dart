@@ -30,7 +30,7 @@ class _KidsRemoteDatasource implements KidsRemoteDatasource {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/questionnaire/list',
+            '/v2/questionnaire/list',
             queryParameters: queryParameters,
             data: _data,
             cancelToken: cancelToken,
@@ -63,7 +63,7 @@ class _KidsRemoteDatasource implements KidsRemoteDatasource {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/v2/questionnaire/save-and-update',
+            '/v3/questionnaire/save-and-update',
             queryParameters: queryParameters,
             data: _data,
             cancelToken: cancelToken,
@@ -95,7 +95,7 @@ class _KidsRemoteDatasource implements KidsRemoteDatasource {
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/questionnaire/delete/${kidId}',
+            '/v2/questionnaire/${kidId}',
             queryParameters: queryParameters,
             data: _data,
             cancelToken: cancelToken,

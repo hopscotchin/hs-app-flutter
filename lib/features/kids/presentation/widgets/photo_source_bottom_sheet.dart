@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../components/atoms/custom_image.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/kids_strings.dart';
 import '../../../../core/theme/colors.dart';
@@ -55,8 +56,8 @@ abstract final class KidAvatarCatalog {
 /// Avatar circle — reused both inside the picker sheet and wherever a
 /// selected avatar needs to render (e.g. the form's photo preview).
 ///
-/// Renders [imageUrl] (real artwork) if present, else falls back to
-/// [KidAvatarCatalog]'s local Material-icon placeholder for [avatarId].
+/// Renders [imageUrl] (real artwork, served as `.svg`) if present, else falls
+/// back to [KidAvatarCatalog]'s local Material-icon placeholder for [avatarId].
 class KidAvatarCircle extends StatelessWidget {
   const KidAvatarCircle({super.key, required this.avatarId, this.imageUrl, this.size = 48});
 
@@ -67,8 +68,21 @@ class KidAvatarCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
-      return CircleAvatar(radius: size / 2, backgroundImage: NetworkImage(imageUrl!));
+      return ClipOval(
+        child: CustomImage(
+          path: imageUrl!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          placeholder: _fallback(),
+          errorWidget: _fallback(),
+        ),
+      );
     }
+    return _fallback();
+  }
+
+  Widget _fallback() {
     return CircleAvatar(
       radius: size / 2,
       backgroundColor: KidAvatarCatalog.colorFor(avatarId),

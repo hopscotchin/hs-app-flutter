@@ -14,7 +14,8 @@ class KidFormConfigModel {
     return KidFormConfigEntity(
       heading: json['heading'] as String? ?? fallback.heading,
       subheading: json['subheading'] as String? ?? fallback.subheading,
-      bannerText: json['bannerText'] as String? ?? fallback.bannerText,
+      bannerTitle: json['bannerTitle'] as String? ?? fallback.bannerTitle,
+      bannerSubtitle: json['bannerSubtitle'] as String? ?? fallback.bannerSubtitle,
       bannerBackgroundColor: (json['bannerBackgroundColor'] as String?).toColorOr(
         fallback.bannerBackgroundColor,
       ),

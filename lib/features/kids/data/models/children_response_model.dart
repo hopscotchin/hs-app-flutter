@@ -2,10 +2,8 @@ import '../../domain/entities/kids_list_content_entity.dart';
 import 'child_model.dart';
 import 'kids_list_content_model.dart';
 
-/// `GET questionnaire/list` response. The live envelope wraps the array
-/// under the business-named `questionnaireApiList` key rather than a plain
-/// `data`/`children` key — see PROFILE_KIDS_API_CONTRACT.md §3, proposed to
-/// change, not yet shipped, so this model reads today's real key.
+/// `GET v2/questionnaire/list` response. The live envelope wraps the array
+/// under a `children` key.
 ///
 /// `content` is a newly-proposed sibling object (not yet shipped either —
 /// see §3) carrying the My Kids list screen's backend-driven copy + footer
@@ -27,7 +25,7 @@ class ChildrenResponseModel {
   bool get isSuccessful => action?.toLowerCase() == 'success';
 
   factory ChildrenResponseModel.fromJson(Map<String, dynamic> json) {
-    final list = (json['questionnaireApiList'] as List<dynamic>?) ?? const [];
+    final list = (json['children'] as List<dynamic>?) ?? const [];
     return ChildrenResponseModel(
       action: json['action'] as String?,
       message: json['message'] as String?,

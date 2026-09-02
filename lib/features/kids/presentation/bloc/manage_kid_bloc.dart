@@ -39,10 +39,10 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
 
   Future<void> _onInit(InitManageKid event, Emitter<ManageKidState> emit) async {
     final existing = event.existing;
-    // Fallback-first: the screen renders immediately with today's hardcoded
-    // copy, never blocking on the config network call. If the endpoint
-    // responds (or once backend ships it), the second emit quietly swaps in
-    // the real content — see KidsRepositoryImpl.getFormConfig.
+    // `config` starts null so the UI can show a real loading state — see
+    // KidsRepositoryImpl.getFormConfig, which only resolves to the local
+    // fallback copy if the fetch genuinely fails; on success it carries the
+    // live backend content.
     emit(
       ManageKidState(
         mode: existing == null ? ManageKidMode.create : ManageKidMode.update,
@@ -51,7 +51,6 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
         gender: existing?.gender,
         dob: existing?.dob,
         existingImageUrl: existing?.imageUrl,
-        config: KidFormConfigEntity.fallback(),
       ),
     );
 
@@ -122,6 +121,7 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
       // identifier scheme before this ships, rather than sending a URL they
       // can't resolve.
       imageUrl: state.avatarId != null ? 'asset://avatar/${state.avatarId}' : state.existingImageUrl,
+      consent: state.consentGiven,
     );
 
     final result = await _saveChild(
