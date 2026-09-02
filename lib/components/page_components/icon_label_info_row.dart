@@ -139,6 +139,14 @@ class IconLabelInfoItem extends StatelessWidget {
   final IconData fallbackIcon;
   final Color fallbackIconColor;
 
+  /// The label style when a caller supplies none. Lives here rather than in
+  /// [IconLabelInfoItem] so the row can measure the labels before building them.
+  static TextStyle get defaultLabelStyle => AppTypographyV1.labelMedium.copyWith(
+    fontWeight: FontWeight.w700,
+    color: const Color(0x80000000),
+    height: 14 / 10,
+  );
+
   @override
   Widget build(BuildContext context) {
     final resolvedLabelStyle = labelStyle ?? IconLabelInfoRow.defaultLabelStyle;
