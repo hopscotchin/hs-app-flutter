@@ -8,11 +8,12 @@ import 'package:hs_app_flutter/features/cart/presentation/bloc/cart_bloc.dart';
 
 import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
+import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
-import '../../../../core/constants/strings/common_strings.dart';
 import '../../../../core/constants/strings/promos_offers_strings.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/entities/backend_action_entity.dart';
+import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/navigation/action_url_handler.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -132,26 +133,28 @@ class PromoOffersBottomSheet extends StatelessWidget {
       listener: (context, state) {
         if (state.cartChanged) onCartChanged?.call();
 
-        // Applying is terminal for this sheet — a backend sheet would be
-        // stacked on a route that's about to pop, so [show] presents it after.
+        // Only a *successful* apply is terminal for this sheet. A rejection is
+        // an HTTP 200 with `success: false`, so success is read from
+        // `actionSucceeded` rather than inferred from the absence of an error
+        // — inferring would pop the sheet on a bad code and force the user to
+        // reopen it to try another.
         final isClosing =
-            state.lastAction == PromoActionKind.apply &&
-            (state.actionError == null || state.actionError!.isEmpty);
+            state.lastAction == PromoActionKind.apply && state.actionSucceeded;
         final actionSheet = state.actionBottomSheet;
 
         if (isClosing) {
           if (actionSheet != null) onActionSheet?.call(actionSheet);
         } else if (actionSheet != null) {
-          // Failure, or a remove that leaves the list open: stack it on top.
+          // A remove that leaves the list open can still stack its sheet.
           showPromoActionSheet(context, actionSheet);
           return;
         }
 
-        final error = state.actionError;
-        if (error != null && error.isNotEmpty) {
-          context.showSnack(error, status: SnackStatus.error);
-          return;
-        }
+        // Rejections are rendered inline by [_ActionErrorBar] instead of a
+        // snack, so they sit under the title where the design puts them and
+        // stay visible while the user picks another offer.
+        if (state.actionError?.isNotEmpty ?? false) return;
+
         final message = state.actionMessage;
         if (message != null && message.isNotEmpty) {
           context.showSnack(message, status: SnackStatus.success);
@@ -174,10 +177,11 @@ class PromoOffersBottomSheet extends StatelessWidget {
                   AppSpacing.md,
                   0,
                   AppSpacing.md,
-                  AppSpacing.lg,
+                  AppSpacing.sm,
                 ),
                 child: _SheetHeading(),
               ),
+              const _ActionErrorBar(),
               Flexible(
                 child: _SheetBody(
                   bottomPadding: bottomPadding,
@@ -214,6 +218,59 @@ class _SheetHeading extends StatelessWidget {
   }
 }
 
+/// Rejection feedback shown under the sheet's title — the sheet stays open on a
+/// failed apply so the user can try another offer without reopening it.
+///
+/// Mirrors how `ActionResponse.validate` packages a failure: the response may
+/// carry backend-authored bars (`messageBar` / `messageBars`) *or* a plain
+/// `message`. **Bars win** — they already carry their own copy, colour and
+/// icon, so rendering the message alongside would say the same thing twice.
+/// The message is only synthesised into a bar when none were sent.
+class _ActionErrorBar extends StatelessWidget {
+  const _ActionErrorBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<
+      PromosOffersBloc,
+      PromosOffersState,
+      ({List<MessageBarEntity> bars, String? message})
+    >(
+      selector: (state) =>
+          (bars: state.actionMessageBars, message: state.actionError),
+      builder: (context, feedback) {
+        final bars = feedback.bars.isNotEmpty
+            ? feedback.bars
+            : _fallbackBar(feedback.message);
+        if (bars.isEmpty) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            0,
+            AppSpacing.md,
+            AppSpacing.sm,
+          ),
+          child: MessageBarsWidget(
+            spaceBetweenMessageBars: 0,
+            key: const ValueKey(PromoOffersTestStrings.actionErrorBar),
+            messageBars: bars,
+            cardStyle: true,
+          ),
+        );
+      },
+    );
+  }
+
+  /// A plain `message` rendered through the same widget as a real bar, so
+  /// either shape looks identical in the sheet. `error` picks up the app's
+  /// lavender [AppColors.brandTertiary] ground.
+  List<MessageBarEntity> _fallbackBar(String? message) =>
+      (message == null || message.isEmpty)
+      ? const []
+      : [MessageBarEntity(text: message, messageType: 'error', hasIcon: true)];
+}
+
 class _SheetBody extends StatelessWidget {
   const _SheetBody({required this.bottomPadding, this.onAction});
 
@@ -236,20 +293,16 @@ class _SheetBody extends StatelessWidget {
             );
           case PromosOffersStatus.error:
             return Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md,
-                AppSpacing.md,
-                AppSpacing.md,
-                AppSpacing.xl,
-              ),
-              child: Center(
-                child: Text(
-                  state.errorMessage ?? CommonStrings.somethingWentWrong,
-                  textAlign: TextAlign.center,
-                  style: AppTypographyV1.bodySmall.regular.textSecondary(),
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+              child: EmptyStateWidget(
+                key: const ValueKey(PromoOffersTestStrings.emptyStateButton),
+                type: EmptyStateType.serverError,
+                onButtonTap: () => context.read<PromosOffersBloc>().add(
+                  const PromosOffersEvent.load(),
                 ),
               ),
             );
+
           case PromosOffersStatus.success:
             final sections = state.sections;
             if (sections.isEmpty) {
