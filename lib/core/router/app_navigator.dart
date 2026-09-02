@@ -7,6 +7,7 @@ import 'package:hs_app_flutter/features/address/presentation/widgets/address_ite
 import 'package:hs_app_flutter/features/pdp/domain/entities/media_entity.dart';
 import 'package:hs_app_flutter/features/plp/domain/entities/page_type.dart';
 
+import '../navigation/nav_destination.dart';
 import '../../features/account/presentation/bloc/account_bloc.dart';
 import '../../features/auth/domain/entities/otp_config/otp_config_entity.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
@@ -21,15 +22,21 @@ import '../entities/message_bar_entity.dart';
 
 abstract final class AppNavigator {
   static bool _isRouteInStack(BuildContext context, String routeName) {
-    final matches = GoRouter.of(context).routerDelegate.currentConfiguration.matches;
-    return matches.whereType<RouteMatch>().any((m) => m.route.name == routeName);
+    final matches = GoRouter.of(
+      context,
+    ).routerDelegate.currentConfiguration.matches;
+    return matches.whereType<RouteMatch>().any(
+      (m) => m.route.name == routeName,
+    );
   }
 
   static void goToHome(BuildContext context) => context.go(RouteNames.home);
 
-  static void goToCategories(BuildContext context) => context.go(RouteNames.categories);
+  static void goToCategories(BuildContext context) =>
+      context.go(RouteNames.categories);
 
-  static void goToAccount(BuildContext context) => context.go(RouteNames.account);
+  static void goToAccount(BuildContext context) =>
+      context.go(RouteNames.account);
 
   /// Opens the bag. [fromBuyNow] puts the cart in buy-now mode: it proceeds to
   /// checkout on its own as soon as the cart loads, instead of waiting for the
@@ -54,7 +61,10 @@ abstract final class AppNavigator {
       context.pop();
       return;
     }
-    final hasData = initialMobile != null || initialMessageBars.isNotEmpty || redirectType != null;
+    final hasData =
+        initialMobile != null ||
+        initialMessageBars.isNotEmpty ||
+        redirectType != null;
     final extra = hasData
         ? <String, dynamic>{
             'initialMobile': initialMobile,
@@ -65,14 +75,21 @@ abstract final class AppNavigator {
     context.pushNamed(RouteNames.login, extra: extra);
   }
 
-  static void goToJoinUs(BuildContext context, {String? initialMobile, String? redirectType}) {
+  static void goToJoinUs(
+    BuildContext context, {
+    String? initialMobile,
+    String? redirectType,
+  }) {
     if (_isRouteInStack(context, RouteNames.joinUs)) {
       context.pop();
       return;
     }
     final hasData = initialMobile != null || redirectType != null;
     final extra = hasData
-        ? <String, dynamic>{'initialMobile': initialMobile, 'redirectType': redirectType}
+        ? <String, dynamic>{
+            'initialMobile': initialMobile,
+            'redirectType': redirectType,
+          }
         : null;
     context.pushNamed(RouteNames.joinUs, extra: extra);
   }
@@ -159,8 +176,14 @@ abstract final class AppNavigator {
   }
 
   static void _clearAuthStack(BuildContext context) {
-    const authRoutes = {RouteNames.login, RouteNames.joinUs, RouteNames.otpVerification};
-    final matches = GoRouter.of(context).routerDelegate.currentConfiguration.matches;
+    const authRoutes = {
+      RouteNames.login,
+      RouteNames.joinUs,
+      RouteNames.otpVerification,
+    };
+    final matches = GoRouter.of(
+      context,
+    ).routerDelegate.currentConfiguration.matches;
     final authCount = matches
         .whereType<RouteMatch>()
         .where((m) => authRoutes.contains(m.route.name))
@@ -189,10 +212,14 @@ abstract final class AppNavigator {
     String? searchQuery,
     String? rawSearchParams,
   }) {
-    final queryParams = <String, String>{'pageType': pageType.name, 'plpId': plpId.toString()};
+    final queryParams = <String, String>{
+      'pageType': pageType.name,
+      'plpId': plpId.toString(),
+    };
     if (categoryName != null) queryParams['categoryName'] = categoryName;
     if (searchQuery != null) queryParams['searchQuery'] = searchQuery;
-    if (rawSearchParams != null) queryParams['rawSearchParams'] = rawSearchParams;
+    if (rawSearchParams != null)
+      queryParams['rawSearchParams'] = rawSearchParams;
     context.pushNamed('plp', queryParameters: queryParams);
   }
 
@@ -200,8 +227,16 @@ abstract final class AppNavigator {
   /// `source_tile_type`, …) — the Flutter equivalent of the Intent bundle
   /// Android reads in `PDPAnalytics.setIntentData`. Omit it for a deeplink-style
   /// open, which is what Android does too when nothing is passed.
-  static Future<void> goToPdp(BuildContext context, String productId, {PdpEntryArgs? args}) async {
-    await context.pushNamed('pdp', pathParameters: {'productId': productId}, extra: args);
+  static Future<void> goToPdp(
+    BuildContext context,
+    String productId, {
+    PdpEntryArgs? args,
+  }) async {
+    await context.pushNamed(
+      'pdp',
+      pathParameters: {'productId': productId},
+      extra: args,
+    );
   }
 
   /// Open the fullscreen product image gallery starting at [initialIndex].
@@ -216,7 +251,11 @@ abstract final class AppNavigator {
     );
   }
 
-  static void goToLandingPage(BuildContext context, {required String pageName, String? title}) {
+  static void goToLandingPage(
+    BuildContext context, {
+    required String pageName,
+    String? title,
+  }) {
     final queryParams = <String, String>{'pageName': pageName};
     if (title != null) queryParams['title'] = title;
     context.pushNamed('landingPage', queryParameters: queryParams);
@@ -230,7 +269,11 @@ abstract final class AppNavigator {
   }) {
     context.pushNamed(
       'webview',
-      extra: <String, dynamic>{'url': url, 'title': title, 'fromNotification': fromNotification},
+      extra: <String, dynamic>{
+        'url': url,
+        'title': title,
+        'fromNotification': fromNotification,
+      },
     );
   }
 
@@ -238,8 +281,26 @@ abstract final class AppNavigator {
 
   static void goToLegal(BuildContext context) => context.pushNamed('legal');
 
-  static void goToPromoDetails(BuildContext context, int promoId) =>
-      context.pushNamed('promoDetails', pathParameters: {'promoId': promoId.toString()});
+  /// [savingsTextFromCart] is the cart's "You saved ₹X" line, shown on the
+  /// detail page when the user arrives from the cart's offer sheet.
+  ///
+  /// It travels in `extra`, not in the URL: `RouteNames.promoDetails` declares
+  /// exactly one path parameter (`:promoId`), so passing a second one trips
+  /// go_router's `paramNames.contains(key)` assertion. It is also display
+  /// copy — free text with spaces, ₹ and commas — which has no business in a
+  /// path segment even if the route did accept it.
+  static void goToPromoDetails(
+    BuildContext context,
+    int promoId, {
+    String? savingsTextFromCart,
+  }) => context.pushNamed(
+    'promoDetails',
+    pathParameters: {'promoId': promoId.toString()},
+    extra: <String, dynamic>{
+      if (savingsTextFromCart != null && savingsTextFromCart.isNotEmpty)
+        PromoDetailsDestination.savingsTextExtraKey: savingsTextFromCart,
+    },
+  );
 
   static void goToSearch(BuildContext context) => context.pushNamed('search');
   static void goToAddresses(

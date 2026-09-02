@@ -43,7 +43,10 @@ class PlpPage extends StatelessWidget {
   });
 
   Map<String, dynamic> get _baseQueryParams {
-    final params = <String, dynamic>{'pageNo': 1, 'pageSize': PlpQueryBuilder.pageSize};
+    final params = <String, dynamic>{
+      'pageNo': 1,
+      'pageSize': PlpQueryBuilder.pageSize,
+    };
     switch (pageType) {
       case PageType.plp:
         params['id'] = plpId;
@@ -183,7 +186,8 @@ class _PlpViewState extends State<_PlpView> {
     if (renderObject.geometry?.visible != true) return null;
 
     final constraints = renderObject.constraints;
-    final viewportBottom = constraints.scrollOffset + constraints.remainingPaintExtent;
+    final viewportBottom =
+        constraints.scrollOffset + constraints.remainingPaintExtent;
 
     int? lastIndex;
     RenderBox? child = renderObject.firstChild;
@@ -248,8 +252,10 @@ class _PlpViewState extends State<_PlpView> {
           // so the heart reflects server truth and stays in sync everywhere.
           BlocListener<PlpBloc, PlpState>(
             listenWhen: (prev, curr) =>
-                prev.listItems.length != curr.listItems.length || prev.status != curr.status,
-            listener: (context, state) => _seedWishlist(context, state.listItems),
+                prev.listItems.length != curr.listItems.length ||
+                prev.status != curr.status,
+            listener: (context, state) =>
+                _seedWishlist(context, state.listItems),
           ),
           BlocListener<PlpBloc, PlpState>(
             listenWhen: (prev, curr) => curr.status == PlpStatus.loading,
@@ -270,8 +276,11 @@ class _PlpViewState extends State<_PlpView> {
                   slivers: [
                     PlpSliverAppBar(pageType: widget.pageType, title: _title),
                     ...switch (state.status) {
-                      PlpStatus.initial ||
-                      PlpStatus.loading => const [SliverFillRemaining(child: PlpShimmerLoading())],
+                      PlpStatus.initial || PlpStatus.loading => [
+                        SliverFillRemaining(
+                          child: PlpShimmerLoading(pageType: widget.pageType),
+                        ),
+                      ],
                       PlpStatus.error => [
                         SliverFillRemaining(
                           child: Center(
@@ -279,9 +288,15 @@ class _PlpViewState extends State<_PlpView> {
                               padding: const EdgeInsets.only(bottom: 50),
                               child: EmptyStateWidget(
                                 type: EmptyStateType.serverError,
-                                titleKey: const ValueKey(PlpTestStrings.errorStateTitle),
-                                subtitleKey: const ValueKey(PlpTestStrings.errorStateSubtitle),
-                                buttonKey: const ValueKey(PlpTestStrings.errorStateButton),
+                                titleKey: const ValueKey(
+                                  PlpTestStrings.errorStateTitle,
+                                ),
+                                subtitleKey: const ValueKey(
+                                  PlpTestStrings.errorStateSubtitle,
+                                ),
+                                buttonKey: const ValueKey(
+                                  PlpTestStrings.errorStateButton,
+                                ),
                                 onButtonTap: () => _retry(context),
                               ),
                             ),
@@ -293,7 +308,9 @@ class _PlpViewState extends State<_PlpView> {
                         // filter bar + applied-filter chips visible so the user
                         // can loosen/remove them instead of being stuck.
                         if (hasFilters) ...[
-                          PlpFilterHeader(baseQueryParams: widget.baseQueryParams),
+                          PlpFilterHeader(
+                            baseQueryParams: widget.baseQueryParams,
+                          ),
                           const PlpAppliedFilters(),
                         ],
                         SliverFillRemaining(
@@ -302,14 +319,22 @@ class _PlpViewState extends State<_PlpView> {
                               padding: const EdgeInsets.only(bottom: 50),
                               child: EmptyStateWidget(
                                 type: EmptyStateType.plp,
-                                titleKey: const ValueKey(PlpTestStrings.emptyStateTitle),
-                                subtitleKey: const ValueKey(PlpTestStrings.emptyStateSubtitle),
-                                buttonKey: const ValueKey(PlpTestStrings.emptyStateButton),
+                                titleKey: const ValueKey(
+                                  PlpTestStrings.emptyStateTitle,
+                                ),
+                                subtitleKey: const ValueKey(
+                                  PlpTestStrings.emptyStateSubtitle,
+                                ),
+                                buttonKey: const ValueKey(
+                                  PlpTestStrings.emptyStateButton,
+                                ),
                                 subtitle: hasFilters
                                     ? PlpStrings.noProductsFiltered
                                     : PlpStrings.tryAgainAndKeepExploring,
                                 onButtonTap: hasFilters
-                                    ? () => context.read<PlpBloc>().add(const ClearAllFilters())
+                                    ? () => context.read<PlpBloc>().add(
+                                        const ClearAllFilters(),
+                                      )
                                     : () => _retry(context),
                               ),
                             ),
@@ -318,10 +343,15 @@ class _PlpViewState extends State<_PlpView> {
                       ],
                       PlpStatus.loaded => [
                         if (state.plpFilter != null) ...[
-                          PlpFilterHeader(baseQueryParams: widget.baseQueryParams),
+                          PlpFilterHeader(
+                            baseQueryParams: widget.baseQueryParams,
+                          ),
                           const PlpAppliedFilters(),
                         ],
-                        PlpQueryCorrectionSliver(pageType: widget.pageType, plpId: widget.plpId),
+                        PlpQueryCorrectionSliver(
+                          pageType: widget.pageType,
+                          plpId: widget.plpId,
+                        ),
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: state.messageBars.isNotEmpty
@@ -329,7 +359,9 @@ class _PlpViewState extends State<_PlpView> {
                                     left: 24,
                                     right: 24,
                                     bottom: 0,
-                                    top: state.appliedFilters.isNotEmpty ? 0 : 8,
+                                    top: state.appliedFilters.isNotEmpty
+                                        ? 0
+                                        : 8,
                                   )
                                 : EdgeInsets.zero,
                             child: MessageBarsWidget(
@@ -354,14 +386,20 @@ class _PlpViewState extends State<_PlpView> {
                                       child: SizedBox(
                                         width: AppSpacing.lg,
                                         height: AppSpacing.lg,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 )
-                              : const SliverToBoxAdapter(child: SizedBox.shrink()),
+                              : const SliverToBoxAdapter(
+                                  child: SizedBox.shrink(),
+                                ),
                         ),
-                        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: AppSpacing.xxl),
+                        ),
                       ],
                     },
                   ],
@@ -378,10 +416,14 @@ class _PlpViewState extends State<_PlpView> {
 
   bool _handleScroll(ScrollNotification notification) {
     final metrics = notification.metrics;
-    if (metrics.axis != Axis.vertical || metrics.maxScrollExtent <= 0) return false;
-    if (metrics.pixels >= metrics.maxScrollExtent * _paginationTriggerFraction) {
+    if (metrics.axis != Axis.vertical || metrics.maxScrollExtent <= 0)
+      return false;
+    if (metrics.pixels >=
+        metrics.maxScrollExtent * _paginationTriggerFraction) {
       final state = context.read<PlpBloc>().state;
-      if (state.status == PlpStatus.loaded && state.hasMore && !state.isLoadingMore) {
+      if (state.status == PlpStatus.loaded &&
+          state.hasMore &&
+          !state.isLoadingMore) {
         context.read<PlpBloc>().add(const LoadMorePlpData());
       }
     }

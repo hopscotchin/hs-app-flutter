@@ -31,13 +31,19 @@ class PlpSliverAppBar extends StatelessWidget {
   final PageType pageType;
   final String title;
 
-  const PlpSliverAppBar({super.key, required this.pageType, required this.title});
+  const PlpSliverAppBar({
+    super.key,
+    required this.pageType,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocSelector<PlpBloc, PlpState, _AppBarData>(
       selector: (state) => (
-        totalRecords: state.status == PlpStatus.loaded ? state.totalRecords : null,
+        totalRecords: state.status == PlpStatus.loaded
+            ? state.totalRecords
+            : null,
         screenName: state.screenName,
         screenSubtitle: state.screenSubtitle,
         banner: state.banners.isNotEmpty ? state.banners.first : null,
@@ -51,12 +57,20 @@ class PlpSliverAppBar extends StatelessWidget {
 
         final hasBanner = bannerUrl != null && bannerUrl.isNotEmpty;
 
-        final pageTitle = (data.screenName?.isNotEmpty ?? false) ? data.screenName! : title;
+        final pageTitle = (data.screenName?.isNotEmpty ?? false)
+            ? data.screenName!
+            : title;
 
-        final pageSubtitle = (data.screenSubtitle?.isNotEmpty ?? false) ? data.screenSubtitle! : '';
+        final pageSubtitle = (data.screenSubtitle?.isNotEmpty ?? false)
+            ? data.screenSubtitle!
+            : '';
 
         if (hasBanner) {
-          return PlpSliverHeader(title: pageTitle, subtitle: pageSubtitle, banner: data.banner);
+          return PlpSliverHeader(
+            title: pageTitle,
+            subtitle: pageSubtitle,
+            banner: data.banner,
+          );
         }
 
         return _StandardSliverAppBar(title: pageTitle, subtitle: pageSubtitle);
@@ -128,7 +142,11 @@ class _StandardSliverAppBar extends StatelessWidget {
             child: BadgeIcon(
               key: const ValueKey(PlpTestStrings.appBarSearchButton),
               iconSize: 18,
-              icon: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
+              icon: const CustomImage(
+                path: ImageConstants.search,
+                width: 20,
+                height: 20,
+              ),
               onTap: () => AppNavigator.goToSearch(context),
             ),
           ),
@@ -137,7 +155,11 @@ class _StandardSliverAppBar extends StatelessWidget {
           child: BadgeIcon(
             key: const ValueKey(PlpTestStrings.appBarWishlistButton),
             iconSize: 18,
-            icon: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
+            icon: const CustomImage(
+              path: ImageConstants.heart,
+              width: 20,
+              height: 20,
+            ),
             count: 0,
             onTap: () {},
             iconColor: AppColors.textPrimary,
@@ -148,7 +170,11 @@ class _StandardSliverAppBar extends StatelessWidget {
           child: BadgeIcon(
             key: const ValueKey(PlpTestStrings.appBarCartButton),
             iconSize: 18,
-            icon: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
+            icon: const CustomImage(
+              path: ImageConstants.bag,
+              width: 20,
+              height: 20,
+            ),
             count: context.watch<CartCountCubit>().state,
             onTap: () => AppNavigator.goToCart(context),
             iconColor: AppColors.textPrimary,
@@ -235,14 +261,19 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
   static const _largeTitleScaleReduction = 0.025;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     /// Header collapse progress:
     /// 0.0 -> fully expanded
     /// 1.0 -> fully collapsed
     final progress = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
 
     final largeTitleOpacity = Curves.easeIn.transform(
-      ((_largeTitleFadeOutEnd - progress) / (_largeTitleFadeOutEnd - _largeTitleFadeOutStart))
+      ((_largeTitleFadeOutEnd - progress) /
+              (_largeTitleFadeOutEnd - _largeTitleFadeOutStart))
           .clamp(0.0, 1.0),
     );
 
@@ -265,12 +296,17 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
 
     /// Prefer banner alt text when available.
-    final displayTitle = (banner?.altText?.isNotEmpty ?? false) ? banner!.altText! : title;
+    final displayTitle = (banner?.altText?.isNotEmpty ?? false)
+        ? banner!.altText!
+        : title;
 
     /// Safe-area white background opacity.
     /// Appears only very close to full collapse.
     final safeAreaOpacity = Curves.easeOut.transform(
-      ((progress - _overlayFadeDivider) / _safeAreaFadeDuration).clamp(0.0, 1.0),
+      ((progress - _overlayFadeDivider) / _safeAreaFadeDuration).clamp(
+        0.0,
+        1.0,
+      ),
     );
 
     return Material(
@@ -329,7 +365,9 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
             height: topPadding,
             child: AbsorbVerticalDrag(
               child: IgnorePointer(
-                child: ColoredBox(color: Colors.white.withValues(alpha: safeAreaOpacity)),
+                child: ColoredBox(
+                  color: Colors.white.withValues(alpha: safeAreaOpacity),
+                ),
               ),
             ),
           ),
@@ -380,7 +418,10 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                   CircleIconButton(
                     key: const ValueKey(PlpTestStrings.appBarBackButton),
                     onTap: () => Navigator.of(context).pop(),
-                    child: const CustomImage(path: ImageConstants.arrowBack, height: 18),
+                    child: const CustomImage(
+                      path: ImageConstants.arrowBack,
+                      height: 18,
+                    ),
                   ),
 
                   AppSpacing.horizontalGapXs,
@@ -392,7 +433,9 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                       opacity: collapsedTitleOpacity,
                       child: Text(
                         displayTitle,
-                        key: const ValueKey(PlpTestStrings.appBarCollapsedTitle),
+                        key: const ValueKey(
+                          PlpTestStrings.appBarCollapsedTitle,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypographyV1.bodySmall.bold.textSeconday(),
@@ -407,7 +450,11 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                     child: CircleIconButton(
                       key: const ValueKey(PlpTestStrings.appBarSearchButton),
                       onTap: () => AppNavigator.goToSearch(context),
-                      child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
+                      child: const CustomImage(
+                        path: ImageConstants.search,
+                        width: 20,
+                        height: 20,
+                      ),
                     ),
                   ),
 
@@ -416,7 +463,11 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                   CircleIconButton(
                     key: const ValueKey(PlpTestStrings.appBarWishlistButton),
                     onTap: () {},
-                    child: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
+                    child: const CustomImage(
+                      path: ImageConstants.heart,
+                      width: 20,
+                      height: 20,
+                    ),
                   ),
 
                   AppSpacing.horizontalGapXs,
@@ -427,7 +478,11 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                     child: BadgeIcon(
                       padding: EdgeInsets.zero,
                       iconSize: 18,
-                      icon: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
+                      icon: const CustomImage(
+                        path: ImageConstants.bag,
+                        width: 20,
+                        height: 20,
+                      ),
                       count: context.watch<CartCountCubit>().state,
                       onTap: () => AppNavigator.goToCart(context),
                       iconColor: AppColors.textPrimary,

@@ -3,6 +3,7 @@ import 'package:hs_app_flutter/components/atoms/dotted_border_box.dart';
 import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
 import 'package:hs_app_flutter/components/buttons/button_enums.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
+import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/colors.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
@@ -35,6 +36,7 @@ class PromoOfferCard extends StatelessWidget {
     this.removeButtonKey,
     this.termsKey,
     this.ctaKey,
+    this.savingsTextFromCart,
   });
 
   final PromoOfferEntity offer;
@@ -64,6 +66,7 @@ class PromoOfferCard extends StatelessWidget {
   final Key? removeButtonKey;
   final Key? termsKey;
   final Key? ctaKey;
+  final String? savingsTextFromCart;
 
   bool get _enabled => offer.isApplicable;
 
@@ -88,7 +91,10 @@ class PromoOfferCard extends StatelessWidget {
         borderRadius: AppSpacing.borderRadiusXs,
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.sm,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -119,7 +125,9 @@ class PromoOfferCard extends StatelessWidget {
             key: descriptionKey,
             TextSpan(
               text: offer.description,
-              style: AppTypographyV1.labelLarge.regular.copyWith(color: _textColor),
+              style: AppTypographyV1.labelLarge.regular.copyWith(
+                color: _textColor,
+              ),
               children: [
                 if (offer.showTerms) ...[
                   const TextSpan(text: ' '),
@@ -143,7 +151,9 @@ class PromoOfferCard extends StatelessWidget {
           Text(
             offer.validityText!,
             key: validityKey,
-            style: AppTypographyV1.labelLarge.regular.copyWith(color: _textColor),
+            style: AppTypographyV1.labelLarge.regular.copyWith(
+              color: _textColor,
+            ),
           ),
         ],
         if (offer.showSavings) ...[const SizedBox(height: 6), _savingsRow()],
@@ -170,7 +180,9 @@ class PromoOfferCard extends StatelessWidget {
             ),
             AppSpacing.horizontalGapXxs,
             Text(
-              offer.savingsText!,
+              savingsTextFromCart.isNotNullOrEmpty
+                  ? savingsTextFromCart ?? ''
+                  : offer.savingsText ?? '',
               key: savingsKey,
               style: AppTypographyV1.labelLarge.semiBold.linkColor(),
             ),
@@ -246,7 +258,11 @@ class _CodeBadge extends StatelessWidget {
     const textColor = AppColors.brandPrimary;
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: _width, maxWidth: _width, minHeight: _minHeight),
+      constraints: const BoxConstraints(
+        minWidth: _width,
+        maxWidth: _width,
+        minHeight: _minHeight,
+      ),
       child: DottedBorderBox(
         color: borderColor,
         child: ColoredBox(
@@ -260,7 +276,9 @@ class _CodeBadge extends StatelessWidget {
               child: Text(
                 code,
                 textAlign: TextAlign.center,
-                style: AppTypographyV1.labelLarge.bold.copyWith(color: textColor),
+                style: AppTypographyV1.labelLarge.bold.copyWith(
+                  color: textColor,
+                ),
               ),
             ),
           ),

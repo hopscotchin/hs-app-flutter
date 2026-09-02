@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/features/account/presentation/bloc/account_bloc.dart';
 import 'package:hs_app_flutter/features/cart/presentation/bloc/cart_bloc.dart';
 
@@ -47,7 +48,7 @@ class PromoOffersBottomSheet extends StatelessWidget {
   /// Called with a card's backend deeplink when its CTA is tapped. The sheet
   /// closes itself; the actual navigation is left to [show] so it runs against
   /// the caller's context rather than this dying route's.
-  final ValueChanged<String>? onAction;
+  final ValueChanged<(String, String?)>? onAction;
 
   /// Returns true only if a promo was actually applied or removed — a plain
   /// dismiss returns false, so the caller can skip reloading the cart.
@@ -55,10 +56,10 @@ class PromoOffersBottomSheet extends StatelessWidget {
   /// A CTA deeplink tapped inside the sheet is followed here, after the sheet
   /// has closed, so the pushed route doesn't end up stacked under it.
   static Future<bool> show(
-      BuildContext context, {
-        bool isDismissible = true,
-        bool enableDrag = true,
-      }) async {
+    BuildContext context, {
+    bool isDismissible = true,
+    bool enableDrag = true,
+  }) async {
     // Tracked outside the route: a drag/barrier dismiss never runs our own pop,
     // so the result can't be carried by the route's pop value.
     final outcome = _SheetOutcome();
@@ -79,10 +80,13 @@ class PromoOffersBottomSheet extends StatelessWidget {
       // caller), so there is no route file to move this into.
       builder: (_) => BlocProvider(
         create: (_) =>
-        sl<PromosOffersBloc>()..add(const PromosOffersEvent.load()),
+            sl<PromosOffersBloc>()..add(const PromosOffersEvent.load()),
         child: PromoOffersBottomSheet(
           onCartChanged: () => outcome.cartChanged = true,
-          onAction: (actionUri) => outcome.deeplink = actionUri,
+          onAction: (offer) {
+            outcome.deeplink = offer.$1;
+            outcome.savingsText = offer.$2;
+          },
           onActionSheet: (sheet) => outcome.actionSheet = sheet,
         ),
       ),
@@ -95,8 +99,22 @@ class PromoOffersBottomSheet extends StatelessWidget {
     }
 
     final deeplink = outcome.deeplink;
+    final savingsText = outcome.savingsText;
     if (deeplink != null && context.mounted) {
-      ActionUrlHandler.navigate(context, deeplink);
+      // Passed as `extra` rather than spliced onto the deeplink string. The
+      // old `'$deeplink&savingsTextFromCart=$savingsText'` produced a broken
+      // URL whenever the deeplink had no query part yet (`&` with no `?`, as
+      // in `hopscotch://promo-details/123`), and never percent-encoded the
+      // text — which is display copy containing spaces, ₹ and commas.
+      ActionUrlHandler.navigate(
+        context,
+        deeplink,
+        extra: savingsText.isNotNullOrEmpty
+            ? <String, dynamic>{
+                PromoDetailsDestination.savingsTextExtraKey: savingsText!,
+              }
+            : null,
+      );
     }
 
     return outcome.cartChanged;
@@ -118,7 +136,7 @@ class PromoOffersBottomSheet extends StatelessWidget {
         // stacked on a route that's about to pop, so [show] presents it after.
         final isClosing =
             state.lastAction == PromoActionKind.apply &&
-                (state.actionError == null || state.actionError!.isEmpty);
+            (state.actionError == null || state.actionError!.isEmpty);
         final actionSheet = state.actionBottomSheet;
 
         if (isClosing) {
@@ -180,6 +198,7 @@ class _SheetOutcome {
   bool cartChanged = false;
   String? deeplink;
   BackendActionContentEntity? actionSheet;
+  String? savingsText;
 }
 
 class _SheetHeading extends StatelessWidget {
@@ -199,7 +218,7 @@ class _SheetBody extends StatelessWidget {
   const _SheetBody({required this.bottomPadding, this.onAction});
 
   final double bottomPadding;
-  final ValueChanged<String>? onAction;
+  final ValueChanged<(String, String?)>? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -208,9 +227,9 @@ class _SheetBody extends StatelessWidget {
         switch (state.status) {
           case PromosOffersStatus.initial:
           case PromosOffersStatus.loading:
-          // Card-shaped placeholders rather than a spinner, matching the
-          // home page. `listShimmer` already pads 16 horizontally, the same
-          // inset the real cards use.
+            // Card-shaped placeholders rather than a spinner, matching the
+            // home page. `listShimmer` already pads 16 horizontally, the same
+            // inset the real cards use.
             return LoadingShimmer.listShimmer(
               itemCount: 4,
               itemHeight: PromoOfferCard.approxHeight,
@@ -294,13 +313,17 @@ class _Section extends StatelessWidget {
   /// Flat index of this section's first offer, for automation keys.
   final int startIndex;
   final String pendingActionCode;
-  final ValueChanged<String>? onAction;
+  final ValueChanged<(String, String?)>? onAction;
 
   /// Hand the deeplink to [PromoOffersBottomSheet.show] and close the sheet — it
   /// navigates once the route is gone, matching how home-page components hand
   /// their `actionUri` to `ActionUrlHandler`.
-  void _openAction(BuildContext context, String actionUri) {
-    onAction?.call(actionUri);
+  void _openAction(
+    BuildContext context,
+    String actionUri,
+    String? savingsText,
+  ) {
+    onAction?.call((actionUri, savingsText));
     Navigator.of(context, rootNavigator: true).pop();
   }
 
@@ -328,11 +351,11 @@ class _Section extends StatelessWidget {
   }
 
   Widget _card(
-      BuildContext context, {
-        required PromoOfferEntity offer,
-        required int index,
-        required bool isActionInProgress,
-      }) {
+    BuildContext context, {
+    required PromoOfferEntity offer,
+    required int index,
+    required bool isActionInProgress,
+  }) {
     final cardKey = '${PromoOffersTestStrings.card}_$index';
 
     return PromoOfferCard(
@@ -355,12 +378,12 @@ class _Section extends StatelessWidget {
         PromosOffersEvent.remove(offer.code),
       ),
       onAction: offer.hasAction
-          ? () => _openAction(context, offer.actionUri!)
+          ? () => _openAction(context, offer.actionUri!, offer.savingsText)
           : null,
       // "See terms" is a deeplink to the promo details page, so it closes the
       // sheet on the way out exactly like the card's own CTA.
       onViewTerms: offer.showTerms
-          ? () => _openAction(context, offer.termsUri!)
+          ? () => _openAction(context, offer.termsUri!, offer.savingsText)
           : null,
       codeKey: ValueKey('${cardKey}_${PromoOffersTestStrings.codeSuffix}'),
       applyButtonKey: ValueKey(

@@ -25,13 +25,18 @@ class FloatingFilterRow extends StatefulWidget {
   final FloatingFilterSectionEntity section;
   final void Function(String key, String value) onFiltersApplied;
 
-  const FloatingFilterRow({super.key, required this.section, required this.onFiltersApplied});
+  const FloatingFilterRow({
+    super.key,
+    required this.section,
+    required this.onFiltersApplied,
+  });
 
   @override
   State<FloatingFilterRow> createState() => _FloatingFilterRowState();
 }
 
-class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKeepAliveClientMixin {
+class _FloatingFilterRowState extends State<FloatingFilterRow>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -109,17 +114,37 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
   /// Width of the swatch — square for COLOUR, from API tileWidth for IMAGE.
   double get _swatchWidth {
     if (_chipType == 'COLOUR') return _swatchHeight;
-    return (widget.section.tileWidth?.toDouble() ?? _swatchHeight).clamp(36.0, 48.0);
+    return (widget.section.tileWidth?.toDouble() ?? _swatchHeight).clamp(
+      36.0,
+      48.0,
+    );
   }
 
-  /// Total row height for the horizontal ListView:
-  ///   TEXT   → 32 (chip height; label lives inside the chip)
-  ///   IMAGE / COLOUR → swatch + 4 gap + 16 label
-  double get _rowHeight {
-    if (_chipType == 'IMAGE' || _chipType == 'COLOUR') {
-      return _swatchHeight + 20;
-    }
-    return 27;
+  /// Cell width for IMAGE / COLOUR chips — the swatch width, unchanged. The
+  /// label wraps inside it rather than widening the cell, so the strip keeps
+  /// its original density and chip pitch.
+  double get _cellWidth => _swatchWidth;
+
+  /// Labels wrap to at most two lines (design spec) and ellipsise beyond that.
+  static const int _labelMaxLines = 2;
+
+  /// Gap between the swatch and its label.
+  static const double _labelGap = 4;
+
+  /// Label under an IMAGE / COLOUR swatch. Constrained to the cell width so a
+  /// long label wraps instead of stretching the chip; its HEIGHT is left to
+  /// the text layout, which is what lets the strip size itself (see [build]).
+  Widget _buildChipLabel(String label) {
+    return SizedBox(
+      width: _cellWidth,
+      child: Text(
+        label,
+        style: AppTypographyV1.labelMedium.medium.textPrimary(),
+        maxLines: _labelMaxLines,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
@@ -148,21 +173,41 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
         children: [
           if (section.title.isNotNullOrEmpty)
             Padding(
-              padding: const EdgeInsets.only(left: AppSpacing.lgMd, bottom: AppSpacing.md),
+              padding: const EdgeInsets.only(
+                left: AppSpacing.lgMd,
+                bottom: AppSpacing.md,
+              ),
               child: Text(
                 section.title ?? '',
                 style: AppTypographyV1.titleMedium.bold.textPrimary(),
               ),
             ),
 
-          SizedBox(
-            height: _rowHeight,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lgMd),
-              itemCount: section.chips.length,
-              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
-              itemBuilder: (_, index) => _buildChip(section.chips[index], index),
+          // Self-sizing strip: the height comes from the tallest chip, so a
+          // label that wraps to two lines simply makes the row taller instead
+          // of being clipped. The alternative — a `SizedBox` of a height
+          // computed from font size x line height x line count — has to
+          // predict text metrics the framework hasn't measured yet, and gets
+          // it wrong whenever the font file, the type ramp or the platform
+          // text scale changes.
+          //
+          // A `Row` inside a scroll view (rather than a lazy horizontal
+          // `ListView`, which cannot size to its children on the cross axis)
+          // is the right trade here: a floating-filter section carries a
+          // handful of chips, all of which are on screen or one flick away,
+          // so there is nothing for laziness to save.
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lgMd),
+            child: Row(
+              // Top-aligned so every swatch sits on one line and only the
+              // labels below them differ in height.
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: AppSpacing.xs,
+              children: [
+                for (final (index, chip) in section.chips.indexed)
+                  _buildChip(chip, index),
+              ],
             ),
           ),
 
@@ -175,7 +220,9 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
               child: SecondaryButton.defaultType(
                 key: _key(PlpTestStrings.floatingFilterApplySuffix),
                 text: PlpStrings.applyFilter,
-                state: _selectedValues.isNotEmpty ? ButtonState.enabled : ButtonState.disabled,
+                state: _selectedValues.isNotEmpty
+                    ? ButtonState.enabled
+                    : ButtonState.disabled,
                 onTap: _applyFilter,
                 size: ButtonSize.small,
               ),
@@ -210,8 +257,10 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
   Widget _buildTextChip(FloatingFilterChipEntity chip, bool isSelected) {
     const brand = AppColors.brandPrimary;
     return CustomChipWidget(
-      text: (chip.label ?? '').toUpperCase(),
-      backgroundColor: isSelected ? brand.withValues(alpha: 0.07) : Colors.transparent,
+      text: chip.label ?? '',
+      backgroundColor: isSelected
+          ? brand.withValues(alpha: 0.07)
+          : Colors.transparent,
       borderRadius: 2,
       borderColor: isSelected ? brand : AppColors.neutralGrey1,
       textStyle: AppTypographyV1.labelMedium.bold.copyWith(
@@ -254,17 +303,8 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
             ),
           ),
         ),
-        const SizedBox(height: 4),
-        SizedBox(
-          width: _swatchWidth,
-          child: Text(
-            chip.label ?? '',
-            style: AppTypographyV1.labelMedium.medium.textPrimary(),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
+        const SizedBox(height: 3),
+        _buildChipLabel(chip.label ?? ''),
       ],
     );
   }
@@ -283,7 +323,9 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
           decoration: BoxDecoration(
             color: Colors.transparent,
             border: Border.all(
-              color: isSelected ? AppColors.brandPrimary : AppColors.transparent,
+              color: isSelected
+                  ? AppColors.brandPrimary
+                  : AppColors.transparent,
               width: 1,
             ),
             borderRadius: BorderRadius.circular(4),
@@ -298,14 +340,10 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
             ),
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          (chip.label ?? '').truncate(7),
-          style: AppTypographyV1.labelMedium.medium.textPrimary(),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-        ),
+        const SizedBox(height: _labelGap),
+        // Was `truncate(7)` + a single line, which cut "Multicolour" to
+        // "Multico…" even when there was room; two lines hold the real name.
+        _buildChipLabel(chip.label ?? ''),
       ],
     );
   }

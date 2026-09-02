@@ -10,7 +10,11 @@ import '../../features/plp/domain/entities/page_type.dart';
 sealed class NavDestination {
   const NavDestination();
 
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra});
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  });
 }
 
 class PlpDestination extends NavDestination {
@@ -27,7 +31,11 @@ class PlpDestination extends NavDestination {
   });
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
     AppNavigator.goToPlp(
       context,
       pageType: pageType,
@@ -56,20 +64,51 @@ class PdpDestination extends NavDestination {
   /// route-derived, so it knows *PLP* but not *tile 7 of 164*. Mirrors Android's
   /// intent extras (`IntentHelper.buildNewPDPAnalyticsData`).
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
     final args = extra?[pdpEntryArgsKey];
-    AppNavigator.goToPdp(context, productId, args: args is PdpEntryArgs ? args : null);
+    AppNavigator.goToPdp(
+      context,
+      productId,
+      args: args is PdpEntryArgs ? args : null,
+    );
   }
 }
 
 class PromoDetailsDestination extends NavDestination {
+  /// Key under which the cart's savings line travels in a [navigate] `extra`
+  /// map — and the query parameter a deeplink may carry it in.
+  static const String savingsTextExtraKey = 'savingsTextFromCart';
+
   final int promoId;
 
-  const PromoDetailsDestination({required this.promoId});
+  /// Set when the URL itself carried `?savingsTextFromCart=…`. A caller that
+  /// has the text in hand (the cart's offer sheet) passes it through
+  /// [navigate]'s `extra` instead, which takes precedence.
+  final String? savingsTextFromCart;
+
+  const PromoDetailsDestination({
+    required this.promoId,
+    this.savingsTextFromCart,
+  });
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
-    AppNavigator.goToPromoDetails(context, promoId);
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
+    final fromExtra = extra?[savingsTextExtraKey] as String?;
+    AppNavigator.goToPromoDetails(
+      context,
+      promoId,
+      savingsTextFromCart: (fromExtra?.isNotEmpty ?? false)
+          ? fromExtra
+          : savingsTextFromCart,
+    );
   }
 }
 
@@ -83,7 +122,11 @@ class HomeDestination extends NavDestination {
   const HomeDestination();
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
     AppNavigator.goToHome(context);
   }
 }
@@ -92,7 +135,11 @@ class CartDestination extends NavDestination {
   const CartDestination();
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
     AppNavigator.goToCart(context);
   }
 }
@@ -101,7 +148,11 @@ class CategoriesDestination extends NavDestination {
   const CategoriesDestination();
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
     AppNavigator.goToCategories(context);
   }
 }
@@ -110,7 +161,11 @@ class AccountDestination extends NavDestination {
   const AccountDestination();
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
     AppNavigator.goToAccount(context);
   }
 }
@@ -121,7 +176,11 @@ class ExternalDestination extends NavDestination {
   const ExternalDestination({required this.url});
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
     launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 }
@@ -130,7 +189,11 @@ class RateAppDestination extends NavDestination {
   const RateAppDestination();
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
     launchUrl(
       Uri.parse('market://details?id=in.hopscotch.android'),
       mode: LaunchMode.externalApplication,
@@ -145,8 +208,16 @@ class LandingPageDestination extends NavDestination {
   const LandingPageDestination({required this.pageName, this.pageTitle});
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
-    AppNavigator.goToLandingPage(context, pageName: pageName, title: title ?? pageTitle);
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
+    AppNavigator.goToLandingPage(
+      context,
+      pageName: pageName,
+      title: title ?? pageTitle,
+    );
   }
 }
 
@@ -156,7 +227,11 @@ class JoinUsDestination extends NavDestination {
   final String? mobile;
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
     AppNavigator.goToJoinUs(
       context,
       initialMobile: mobile,
@@ -172,8 +247,13 @@ class LoginDestination extends NavDestination {
   final List<MessageBarEntity> messageBars;
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
-    final extraBars = extra?['messageBars'] as List<MessageBarEntity>? ?? const [];
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
+    final extraBars =
+        extra?['messageBars'] as List<MessageBarEntity>? ?? const [];
     AppNavigator.goToLogin(
       context,
       initialMobile: mobile,
@@ -189,7 +269,11 @@ class WebViewDestination extends NavDestination {
   const WebViewDestination({required this.url, this.pageTitle});
 
   @override
-  void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
+  void navigate(
+    BuildContext context, {
+    String? title,
+    Map<String, dynamic>? extra,
+  }) {
     AppNavigator.goToWebView(context, url: url, title: title ?? pageTitle);
   }
 }
