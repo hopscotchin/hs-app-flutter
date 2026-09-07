@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/kids_events.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/constants/strings/kids_strings.dart';
 import '../../../../core/error/failures.dart';
@@ -16,7 +20,7 @@ part 'kids_state.dart';
 
 @injectable
 class KidsBloc extends BaseBloc<KidsEvent, KidsState> {
-  KidsBloc(this._getChildren, this._deleteChild) : super(const KidsState()) {
+  KidsBloc(this._getChildren, this._deleteChild, this._analytics) : super(const KidsState()) {
     on<LoadChildren>(_onLoad);
     on<RefreshChildren>(_onRefresh);
     on<DeleteChild>(_onDelete);
@@ -25,6 +29,7 @@ class KidsBloc extends BaseBloc<KidsEvent, KidsState> {
 
   final GetChildrenUseCase _getChildren;
   final DeleteChildUseCase _deleteChild;
+  final AnalyticsHelper _analytics;
 
   Future<void> _onLoad(LoadChildren event, Emitter<KidsState> emit) async {
     emit(state.copyWith(status: KidsStatus.loading));
@@ -60,6 +65,10 @@ class KidsBloc extends BaseBloc<KidsEvent, KidsState> {
         emit(state.copyWith(deletingId: null, deleteError: failure.message));
       },
       (message) {
+        final matches = state.children.where((c) => c.id == event.childId);
+        if (matches.isNotEmpty) {
+          unawaited(_analytics.logChildProfileDeleted(matches.first));
+        }
         emit(
           state.copyWith(
             deletingId: null,

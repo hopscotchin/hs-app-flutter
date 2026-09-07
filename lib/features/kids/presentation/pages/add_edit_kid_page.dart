@@ -1,9 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/atoms/custom_image.dart';
@@ -24,10 +20,8 @@ import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../domain/entities/child_entity.dart';
-import '../../domain/entities/kid_form_config_entity.dart';
 import '../bloc/manage_kid_bloc.dart';
 import '../widgets/kids_confirm_sheet.dart';
-import '../widgets/photo_source_bottom_sheet.dart';
 
 class AddEditKidPage extends StatefulWidget {
   const AddEditKidPage({super.key, this.existing});
@@ -95,9 +89,6 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                   return const _FormShimmer();
                 }
                 final config = state.config!;
-                final selectedAvatar = state.avatarId == null
-                    ? null
-                    : config.avatars.where((a) => a.id == state.avatarId).firstOrNull;
                 return Column(
                   children: [
                     Expanded(
@@ -161,16 +152,6 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                                   ),
                                 ),
                               ],
-                            ),
-                            AppSpacing.verticalGapLg,
-                            Center(
-                              child: _PhotoPicker(
-                                filePath: state.photoFile?.path,
-                                existingUrl: state.existingImageUrl,
-                                avatarOption: selectedAvatar,
-                                placeholderImage: config.placeholderImage,
-                                onTap: () => _openPhotoSource(context, config.avatars),
-                              ),
                             ),
                             AppSpacing.verticalGapLg,
                             Container(
@@ -254,47 +235,6 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
     );
   }
 
-  Future<void> _openPhotoSource(BuildContext context, List<KidAvatarOptionEntity> avatars) async {
-    final bloc = context.read<ManageKidBloc>();
-    final state = bloc.state;
-    final hasPhoto = state.photoFile != null || state.avatarId != null || state.existingImageUrl != null;
-
-    final result = await PhotoSourceBottomSheet.show(
-      context,
-      hasPhoto: hasPhoto,
-      avatars: avatars,
-    );
-    if (result == null || !context.mounted) return;
-
-    switch (result) {
-      case PhotoSourceAvatarResult(avatarId: final id):
-        bloc.add(ManageKidEvent.avatarSelected(id));
-      case PhotoSourceActionResult(action: PhotoSourceAction.removePhoto):
-        bloc.add(const ManageKidEvent.photoRemoved());
-      case PhotoSourceActionResult(action: PhotoSourceAction.takePhoto):
-        await _pickPhoto(context, source: ImageSource.camera);
-      case PhotoSourceActionResult(action: PhotoSourceAction.chooseFromGallery):
-        await _pickPhoto(context, source: ImageSource.gallery);
-    }
-  }
-
-  Future<void> _pickPhoto(BuildContext context, {required ImageSource source}) async {
-    final picked = await ImagePicker().pickImage(source: source, imageQuality: 90);
-    if (picked == null || !context.mounted) return;
-
-    final cropped = await ImageCropper().cropImage(
-      sourcePath: picked.path,
-      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-      uiSettings: [
-        AndroidUiSettings(toolbarTitle: KidsStrings.uploadPicture, lockAspectRatio: true),
-        IOSUiSettings(aspectRatioLockEnabled: true, title: KidsStrings.uploadPicture),
-      ],
-    );
-    if (cropped == null || !context.mounted) return;
-
-    context.read<ManageKidBloc>().add(ManageKidEvent.photoPicked(File(cropped.path)));
-  }
-
   Future<void> _handleBack(BuildContext context) async {
     final isDirty = context.read<ManageKidBloc>().state.isDirty;
     if (!isDirty) {
@@ -344,14 +284,6 @@ class _FormShimmer extends StatelessWidget {
               AppSpacing.horizontalGapSm,
               Expanded(child: LoadingShimmer(height: 48, borderRadius: BorderRadius.circular(8))),
             ],
-          ),
-          AppSpacing.verticalGapLg,
-          const Center(
-            child: LoadingShimmer(
-              height: 80,
-              width: 80,
-              borderRadius: BorderRadius.all(Radius.circular(40)),
-            ),
           ),
           AppSpacing.verticalGapLg,
           const LoadingShimmer(height: 64),
@@ -448,80 +380,6 @@ class _DobField extends StatelessWidget {
               );
               if (picked != null) onPicked(picked);
             },
-    );
-  }
-}
-
-class _PhotoPicker extends StatelessWidget {
-  const _PhotoPicker({
-    this.filePath,
-    this.existingUrl,
-    this.avatarOption,
-    this.placeholderImage,
-    required this.onTap,
-  });
-
-  final String? filePath;
-  final String? existingUrl;
-  final KidAvatarOptionEntity? avatarOption;
-
-  /// The screen-level empty-state image (`KidFormConfigEntity.placeholderImage`)
-  /// — shown on this trigger circle only when nothing has been picked yet
-  /// (no file, no existing photo, no avatar). Distinct from an avatar
-  /// option's own `imageUrl` inside the bottom sheet.
-  final String? placeholderImage;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    ImageProvider? provider;
-    if (filePath != null) {
-      provider = FileImage(File(filePath!));
-    } else if (existingUrl != null && existingUrl!.isNotEmpty) {
-      provider = NetworkImage(existingUrl!);
-    } else if (avatarOption == null && placeholderImage != null && placeholderImage!.isNotEmpty) {
-      provider = NetworkImage(placeholderImage!);
-    }
-
-    return GestureDetector(
-      key: const ValueKey(KidsTestStrings.formPhotoUpload),
-      onTap: onTap,
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              if (avatarOption != null)
-                KidAvatarCircle(
-                  key: const ValueKey(KidsTestStrings.formPhotoImage),
-                  avatarId: avatarOption!.id,
-                  imageUrl: avatarOption!.imageUrl,
-                  size: 80,
-                )
-              else
-                CircleAvatar(
-                  key: const ValueKey(KidsTestStrings.formPhotoImage),
-                  radius: 40,
-                  backgroundColor: AppColors.neutralGrey2,
-                  backgroundImage: provider,
-                  child: provider == null
-                      ? const Icon(Icons.person_outline, size: 36, color: AppColors.neutralGrey4)
-                      : null,
-                ),
-              Positioned(
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                  child: const Icon(Icons.camera_alt, size: 14, color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(KidsStrings.uploadPicture, style: AppTypographyV1.labelLarge.medium.neutralGrey6()),
-        ],
-      ),
     );
   }
 }

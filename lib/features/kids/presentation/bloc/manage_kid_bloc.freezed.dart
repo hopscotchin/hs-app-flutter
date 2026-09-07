@@ -55,17 +55,14 @@ extension ManageKidEventPatterns on ManageKidEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( InitManageKid value)?  init,TResult Function( NameChanged value)?  nameChanged,TResult Function( DobChanged value)?  dobChanged,TResult Function( GenderChanged value)?  genderChanged,TResult Function( PhotoPicked value)?  photoPicked,TResult Function( AvatarSelected value)?  avatarSelected,TResult Function( PhotoRemoved value)?  photoRemoved,TResult Function( ConsentChanged value)?  consentChanged,TResult Function( SubmitKid value)?  submit,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( InitManageKid value)?  init,TResult Function( NameChanged value)?  nameChanged,TResult Function( DobChanged value)?  dobChanged,TResult Function( GenderChanged value)?  genderChanged,TResult Function( ConsentChanged value)?  consentChanged,TResult Function( SubmitKid value)?  submit,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case InitManageKid() when init != null:
 return init(_that);case NameChanged() when nameChanged != null:
 return nameChanged(_that);case DobChanged() when dobChanged != null:
 return dobChanged(_that);case GenderChanged() when genderChanged != null:
-return genderChanged(_that);case PhotoPicked() when photoPicked != null:
-return photoPicked(_that);case AvatarSelected() when avatarSelected != null:
-return avatarSelected(_that);case PhotoRemoved() when photoRemoved != null:
-return photoRemoved(_that);case ConsentChanged() when consentChanged != null:
+return genderChanged(_that);case ConsentChanged() when consentChanged != null:
 return consentChanged(_that);case SubmitKid() when submit != null:
 return submit(_that);case _:
   return orElse();
@@ -85,17 +82,14 @@ return submit(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( InitManageKid value)  init,required TResult Function( NameChanged value)  nameChanged,required TResult Function( DobChanged value)  dobChanged,required TResult Function( GenderChanged value)  genderChanged,required TResult Function( PhotoPicked value)  photoPicked,required TResult Function( AvatarSelected value)  avatarSelected,required TResult Function( PhotoRemoved value)  photoRemoved,required TResult Function( ConsentChanged value)  consentChanged,required TResult Function( SubmitKid value)  submit,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( InitManageKid value)  init,required TResult Function( NameChanged value)  nameChanged,required TResult Function( DobChanged value)  dobChanged,required TResult Function( GenderChanged value)  genderChanged,required TResult Function( ConsentChanged value)  consentChanged,required TResult Function( SubmitKid value)  submit,}){
 final _that = this;
 switch (_that) {
 case InitManageKid():
 return init(_that);case NameChanged():
 return nameChanged(_that);case DobChanged():
 return dobChanged(_that);case GenderChanged():
-return genderChanged(_that);case PhotoPicked():
-return photoPicked(_that);case AvatarSelected():
-return avatarSelected(_that);case PhotoRemoved():
-return photoRemoved(_that);case ConsentChanged():
+return genderChanged(_that);case ConsentChanged():
 return consentChanged(_that);case SubmitKid():
 return submit(_that);}
 }
@@ -111,17 +105,14 @@ return submit(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( InitManageKid value)?  init,TResult? Function( NameChanged value)?  nameChanged,TResult? Function( DobChanged value)?  dobChanged,TResult? Function( GenderChanged value)?  genderChanged,TResult? Function( PhotoPicked value)?  photoPicked,TResult? Function( AvatarSelected value)?  avatarSelected,TResult? Function( PhotoRemoved value)?  photoRemoved,TResult? Function( ConsentChanged value)?  consentChanged,TResult? Function( SubmitKid value)?  submit,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( InitManageKid value)?  init,TResult? Function( NameChanged value)?  nameChanged,TResult? Function( DobChanged value)?  dobChanged,TResult? Function( GenderChanged value)?  genderChanged,TResult? Function( ConsentChanged value)?  consentChanged,TResult? Function( SubmitKid value)?  submit,}){
 final _that = this;
 switch (_that) {
 case InitManageKid() when init != null:
 return init(_that);case NameChanged() when nameChanged != null:
 return nameChanged(_that);case DobChanged() when dobChanged != null:
 return dobChanged(_that);case GenderChanged() when genderChanged != null:
-return genderChanged(_that);case PhotoPicked() when photoPicked != null:
-return photoPicked(_that);case AvatarSelected() when avatarSelected != null:
-return avatarSelected(_that);case PhotoRemoved() when photoRemoved != null:
-return photoRemoved(_that);case ConsentChanged() when consentChanged != null:
+return genderChanged(_that);case ConsentChanged() when consentChanged != null:
 return consentChanged(_that);case SubmitKid() when submit != null:
 return submit(_that);case _:
   return null;
@@ -140,16 +131,13 @@ return submit(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( ChildEntity? existing)?  init,TResult Function( String name)?  nameChanged,TResult Function( DateTime dob)?  dobChanged,TResult Function( ChildGender gender)?  genderChanged,TResult Function( File file)?  photoPicked,TResult Function( int avatarId)?  avatarSelected,TResult Function()?  photoRemoved,TResult Function( bool given)?  consentChanged,TResult Function()?  submit,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( ChildEntity? existing)?  init,TResult Function( String name)?  nameChanged,TResult Function( DateTime dob)?  dobChanged,TResult Function( ChildGender gender)?  genderChanged,TResult Function( bool given)?  consentChanged,TResult Function()?  submit,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case InitManageKid() when init != null:
 return init(_that.existing);case NameChanged() when nameChanged != null:
 return nameChanged(_that.name);case DobChanged() when dobChanged != null:
 return dobChanged(_that.dob);case GenderChanged() when genderChanged != null:
-return genderChanged(_that.gender);case PhotoPicked() when photoPicked != null:
-return photoPicked(_that.file);case AvatarSelected() when avatarSelected != null:
-return avatarSelected(_that.avatarId);case PhotoRemoved() when photoRemoved != null:
-return photoRemoved();case ConsentChanged() when consentChanged != null:
+return genderChanged(_that.gender);case ConsentChanged() when consentChanged != null:
 return consentChanged(_that.given);case SubmitKid() when submit != null:
 return submit();case _:
   return orElse();
@@ -169,16 +157,13 @@ return submit();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( ChildEntity? existing)  init,required TResult Function( String name)  nameChanged,required TResult Function( DateTime dob)  dobChanged,required TResult Function( ChildGender gender)  genderChanged,required TResult Function( File file)  photoPicked,required TResult Function( int avatarId)  avatarSelected,required TResult Function()  photoRemoved,required TResult Function( bool given)  consentChanged,required TResult Function()  submit,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( ChildEntity? existing)  init,required TResult Function( String name)  nameChanged,required TResult Function( DateTime dob)  dobChanged,required TResult Function( ChildGender gender)  genderChanged,required TResult Function( bool given)  consentChanged,required TResult Function()  submit,}) {final _that = this;
 switch (_that) {
 case InitManageKid():
 return init(_that.existing);case NameChanged():
 return nameChanged(_that.name);case DobChanged():
 return dobChanged(_that.dob);case GenderChanged():
-return genderChanged(_that.gender);case PhotoPicked():
-return photoPicked(_that.file);case AvatarSelected():
-return avatarSelected(_that.avatarId);case PhotoRemoved():
-return photoRemoved();case ConsentChanged():
+return genderChanged(_that.gender);case ConsentChanged():
 return consentChanged(_that.given);case SubmitKid():
 return submit();}
 }
@@ -194,16 +179,13 @@ return submit();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( ChildEntity? existing)?  init,TResult? Function( String name)?  nameChanged,TResult? Function( DateTime dob)?  dobChanged,TResult? Function( ChildGender gender)?  genderChanged,TResult? Function( File file)?  photoPicked,TResult? Function( int avatarId)?  avatarSelected,TResult? Function()?  photoRemoved,TResult? Function( bool given)?  consentChanged,TResult? Function()?  submit,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( ChildEntity? existing)?  init,TResult? Function( String name)?  nameChanged,TResult? Function( DateTime dob)?  dobChanged,TResult? Function( ChildGender gender)?  genderChanged,TResult? Function( bool given)?  consentChanged,TResult? Function()?  submit,}) {final _that = this;
 switch (_that) {
 case InitManageKid() when init != null:
 return init(_that.existing);case NameChanged() when nameChanged != null:
 return nameChanged(_that.name);case DobChanged() when dobChanged != null:
 return dobChanged(_that.dob);case GenderChanged() when genderChanged != null:
-return genderChanged(_that.gender);case PhotoPicked() when photoPicked != null:
-return photoPicked(_that.file);case AvatarSelected() when avatarSelected != null:
-return avatarSelected(_that.avatarId);case PhotoRemoved() when photoRemoved != null:
-return photoRemoved();case ConsentChanged() when consentChanged != null:
+return genderChanged(_that.gender);case ConsentChanged() when consentChanged != null:
 return consentChanged(_that.given);case SubmitKid() when submit != null:
 return submit();case _:
   return null;
@@ -492,170 +474,6 @@ as ChildGender,
 /// @nodoc
 
 
-class PhotoPicked implements ManageKidEvent {
-  const PhotoPicked(this.file);
-  
-
- final  File file;
-
-/// Create a copy of ManageKidEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$PhotoPickedCopyWith<PhotoPicked> get copyWith => _$PhotoPickedCopyWithImpl<PhotoPicked>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PhotoPicked&&(identical(other.file, file) || other.file == file));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,file);
-
-@override
-String toString() {
-  return 'ManageKidEvent.photoPicked(file: $file)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $PhotoPickedCopyWith<$Res> implements $ManageKidEventCopyWith<$Res> {
-  factory $PhotoPickedCopyWith(PhotoPicked value, $Res Function(PhotoPicked) _then) = _$PhotoPickedCopyWithImpl;
-@useResult
-$Res call({
- File file
-});
-
-
-
-
-}
-/// @nodoc
-class _$PhotoPickedCopyWithImpl<$Res>
-    implements $PhotoPickedCopyWith<$Res> {
-  _$PhotoPickedCopyWithImpl(this._self, this._then);
-
-  final PhotoPicked _self;
-  final $Res Function(PhotoPicked) _then;
-
-/// Create a copy of ManageKidEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? file = null,}) {
-  return _then(PhotoPicked(
-null == file ? _self.file : file // ignore: cast_nullable_to_non_nullable
-as File,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class AvatarSelected implements ManageKidEvent {
-  const AvatarSelected(this.avatarId);
-  
-
- final  int avatarId;
-
-/// Create a copy of ManageKidEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$AvatarSelectedCopyWith<AvatarSelected> get copyWith => _$AvatarSelectedCopyWithImpl<AvatarSelected>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AvatarSelected&&(identical(other.avatarId, avatarId) || other.avatarId == avatarId));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,avatarId);
-
-@override
-String toString() {
-  return 'ManageKidEvent.avatarSelected(avatarId: $avatarId)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $AvatarSelectedCopyWith<$Res> implements $ManageKidEventCopyWith<$Res> {
-  factory $AvatarSelectedCopyWith(AvatarSelected value, $Res Function(AvatarSelected) _then) = _$AvatarSelectedCopyWithImpl;
-@useResult
-$Res call({
- int avatarId
-});
-
-
-
-
-}
-/// @nodoc
-class _$AvatarSelectedCopyWithImpl<$Res>
-    implements $AvatarSelectedCopyWith<$Res> {
-  _$AvatarSelectedCopyWithImpl(this._self, this._then);
-
-  final AvatarSelected _self;
-  final $Res Function(AvatarSelected) _then;
-
-/// Create a copy of ManageKidEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? avatarId = null,}) {
-  return _then(AvatarSelected(
-null == avatarId ? _self.avatarId : avatarId // ignore: cast_nullable_to_non_nullable
-as int,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class PhotoRemoved implements ManageKidEvent {
-  const PhotoRemoved();
-  
-
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PhotoRemoved);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'ManageKidEvent.photoRemoved()';
-}
-
-
-}
-
-
-
-
-/// @nodoc
-
-
 class ConsentChanged implements ManageKidEvent {
   const ConsentChanged(this.given);
   
@@ -759,11 +577,7 @@ mixin _$ManageKidState {
 // swapped for backend-sourced content once the fetch resolves.
  KidFormConfigEntity? get config; String get name;// Nullable and unset by default — neither Boy nor Girl is pre-selected;
 // the user must actively choose one (checked in validation before submit).
- ChildGender? get gender; DateTime? get dob; File? get photoFile; String? get existingImageUrl;// Set when the user picks a preset avatar instead of a real photo —
-// mutually exclusive with photoFile/existingImageUrl (selecting one
-// clears the others). See PhotoSourceBottomSheet's placeholder-icon
-// note: no real illustrated avatar assets exist yet.
- int? get avatarId;// Unchecked by default — consent must be an explicit opt-in action by
+ ChildGender? get gender; DateTime? get dob;// Unchecked by default — consent must be an explicit opt-in action by
 // the user, not a pre-ticked box, on both create and edit.
  bool get consentGiven; bool get isSubmitting; String? get submitError; ChildEntity? get saved;
 /// Create a copy of ManageKidState
@@ -776,16 +590,16 @@ $ManageKidStateCopyWith<ManageKidState> get copyWith => _$ManageKidStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ManageKidState&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.original, original) || other.original == original)&&(identical(other.config, config) || other.config == config)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.photoFile, photoFile) || other.photoFile == photoFile)&&(identical(other.existingImageUrl, existingImageUrl) || other.existingImageUrl == existingImageUrl)&&(identical(other.avatarId, avatarId) || other.avatarId == avatarId)&&(identical(other.consentGiven, consentGiven) || other.consentGiven == consentGiven)&&(identical(other.isSubmitting, isSubmitting) || other.isSubmitting == isSubmitting)&&(identical(other.submitError, submitError) || other.submitError == submitError)&&(identical(other.saved, saved) || other.saved == saved));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ManageKidState&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.original, original) || other.original == original)&&(identical(other.config, config) || other.config == config)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.consentGiven, consentGiven) || other.consentGiven == consentGiven)&&(identical(other.isSubmitting, isSubmitting) || other.isSubmitting == isSubmitting)&&(identical(other.submitError, submitError) || other.submitError == submitError)&&(identical(other.saved, saved) || other.saved == saved));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,mode,original,config,name,gender,dob,photoFile,existingImageUrl,avatarId,consentGiven,isSubmitting,submitError,saved);
+int get hashCode => Object.hash(runtimeType,mode,original,config,name,gender,dob,consentGiven,isSubmitting,submitError,saved);
 
 @override
 String toString() {
-  return 'ManageKidState(mode: $mode, original: $original, config: $config, name: $name, gender: $gender, dob: $dob, photoFile: $photoFile, existingImageUrl: $existingImageUrl, avatarId: $avatarId, consentGiven: $consentGiven, isSubmitting: $isSubmitting, submitError: $submitError, saved: $saved)';
+  return 'ManageKidState(mode: $mode, original: $original, config: $config, name: $name, gender: $gender, dob: $dob, consentGiven: $consentGiven, isSubmitting: $isSubmitting, submitError: $submitError, saved: $saved)';
 }
 
 
@@ -796,7 +610,7 @@ abstract mixin class $ManageKidStateCopyWith<$Res>  {
   factory $ManageKidStateCopyWith(ManageKidState value, $Res Function(ManageKidState) _then) = _$ManageKidStateCopyWithImpl;
 @useResult
 $Res call({
- ManageKidMode mode, ChildEntity? original, KidFormConfigEntity? config, String name, ChildGender? gender, DateTime? dob, File? photoFile, String? existingImageUrl, int? avatarId, bool consentGiven, bool isSubmitting, String? submitError, ChildEntity? saved
+ ManageKidMode mode, ChildEntity? original, KidFormConfigEntity? config, String name, ChildGender? gender, DateTime? dob, bool consentGiven, bool isSubmitting, String? submitError, ChildEntity? saved
 });
 
 
@@ -813,7 +627,7 @@ class _$ManageKidStateCopyWithImpl<$Res>
 
 /// Create a copy of ManageKidState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? mode = null,Object? original = freezed,Object? config = freezed,Object? name = null,Object? gender = freezed,Object? dob = freezed,Object? photoFile = freezed,Object? existingImageUrl = freezed,Object? avatarId = freezed,Object? consentGiven = null,Object? isSubmitting = null,Object? submitError = freezed,Object? saved = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? mode = null,Object? original = freezed,Object? config = freezed,Object? name = null,Object? gender = freezed,Object? dob = freezed,Object? consentGiven = null,Object? isSubmitting = null,Object? submitError = freezed,Object? saved = freezed,}) {
   return _then(_self.copyWith(
 mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
 as ManageKidMode,original: freezed == original ? _self.original : original // ignore: cast_nullable_to_non_nullable
@@ -821,10 +635,7 @@ as ChildEntity?,config: freezed == config ? _self.config : config // ignore: cas
 as KidFormConfigEntity?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,gender: freezed == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
 as ChildGender?,dob: freezed == dob ? _self.dob : dob // ignore: cast_nullable_to_non_nullable
-as DateTime?,photoFile: freezed == photoFile ? _self.photoFile : photoFile // ignore: cast_nullable_to_non_nullable
-as File?,existingImageUrl: freezed == existingImageUrl ? _self.existingImageUrl : existingImageUrl // ignore: cast_nullable_to_non_nullable
-as String?,avatarId: freezed == avatarId ? _self.avatarId : avatarId // ignore: cast_nullable_to_non_nullable
-as int?,consentGiven: null == consentGiven ? _self.consentGiven : consentGiven // ignore: cast_nullable_to_non_nullable
+as DateTime?,consentGiven: null == consentGiven ? _self.consentGiven : consentGiven // ignore: cast_nullable_to_non_nullable
 as bool,isSubmitting: null == isSubmitting ? _self.isSubmitting : isSubmitting // ignore: cast_nullable_to_non_nullable
 as bool,submitError: freezed == submitError ? _self.submitError : submitError // ignore: cast_nullable_to_non_nullable
 as String?,saved: freezed == saved ? _self.saved : saved // ignore: cast_nullable_to_non_nullable
@@ -949,10 +760,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ManageKidMode mode,  ChildEntity? original,  KidFormConfigEntity? config,  String name,  ChildGender? gender,  DateTime? dob,  File? photoFile,  String? existingImageUrl,  int? avatarId,  bool consentGiven,  bool isSubmitting,  String? submitError,  ChildEntity? saved)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ManageKidMode mode,  ChildEntity? original,  KidFormConfigEntity? config,  String name,  ChildGender? gender,  DateTime? dob,  bool consentGiven,  bool isSubmitting,  String? submitError,  ChildEntity? saved)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ManageKidState() when $default != null:
-return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_that.dob,_that.photoFile,_that.existingImageUrl,_that.avatarId,_that.consentGiven,_that.isSubmitting,_that.submitError,_that.saved);case _:
+return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_that.dob,_that.consentGiven,_that.isSubmitting,_that.submitError,_that.saved);case _:
   return orElse();
 
 }
@@ -970,10 +781,10 @@ return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ManageKidMode mode,  ChildEntity? original,  KidFormConfigEntity? config,  String name,  ChildGender? gender,  DateTime? dob,  File? photoFile,  String? existingImageUrl,  int? avatarId,  bool consentGiven,  bool isSubmitting,  String? submitError,  ChildEntity? saved)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ManageKidMode mode,  ChildEntity? original,  KidFormConfigEntity? config,  String name,  ChildGender? gender,  DateTime? dob,  bool consentGiven,  bool isSubmitting,  String? submitError,  ChildEntity? saved)  $default,) {final _that = this;
 switch (_that) {
 case _ManageKidState():
-return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_that.dob,_that.photoFile,_that.existingImageUrl,_that.avatarId,_that.consentGiven,_that.isSubmitting,_that.submitError,_that.saved);case _:
+return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_that.dob,_that.consentGiven,_that.isSubmitting,_that.submitError,_that.saved);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -990,10 +801,10 @@ return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ManageKidMode mode,  ChildEntity? original,  KidFormConfigEntity? config,  String name,  ChildGender? gender,  DateTime? dob,  File? photoFile,  String? existingImageUrl,  int? avatarId,  bool consentGiven,  bool isSubmitting,  String? submitError,  ChildEntity? saved)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ManageKidMode mode,  ChildEntity? original,  KidFormConfigEntity? config,  String name,  ChildGender? gender,  DateTime? dob,  bool consentGiven,  bool isSubmitting,  String? submitError,  ChildEntity? saved)?  $default,) {final _that = this;
 switch (_that) {
 case _ManageKidState() when $default != null:
-return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_that.dob,_that.photoFile,_that.existingImageUrl,_that.avatarId,_that.consentGiven,_that.isSubmitting,_that.submitError,_that.saved);case _:
+return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_that.dob,_that.consentGiven,_that.isSubmitting,_that.submitError,_that.saved);case _:
   return null;
 
 }
@@ -1005,7 +816,7 @@ return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_
 
 
 class _ManageKidState implements ManageKidState {
-  const _ManageKidState({this.mode = ManageKidMode.create, this.original, this.config, this.name = '', this.gender, this.dob, this.photoFile, this.existingImageUrl, this.avatarId, this.consentGiven = false, this.isSubmitting = false, this.submitError, this.saved});
+  const _ManageKidState({this.mode = ManageKidMode.create, this.original, this.config, this.name = '', this.gender, this.dob, this.consentGiven = false, this.isSubmitting = false, this.submitError, this.saved});
   
 
 @override@JsonKey() final  ManageKidMode mode;
@@ -1019,13 +830,6 @@ class _ManageKidState implements ManageKidState {
 // the user must actively choose one (checked in validation before submit).
 @override final  ChildGender? gender;
 @override final  DateTime? dob;
-@override final  File? photoFile;
-@override final  String? existingImageUrl;
-// Set when the user picks a preset avatar instead of a real photo —
-// mutually exclusive with photoFile/existingImageUrl (selecting one
-// clears the others). See PhotoSourceBottomSheet's placeholder-icon
-// note: no real illustrated avatar assets exist yet.
-@override final  int? avatarId;
 // Unchecked by default — consent must be an explicit opt-in action by
 // the user, not a pre-ticked box, on both create and edit.
 @override@JsonKey() final  bool consentGiven;
@@ -1043,16 +847,16 @@ _$ManageKidStateCopyWith<_ManageKidState> get copyWith => __$ManageKidStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ManageKidState&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.original, original) || other.original == original)&&(identical(other.config, config) || other.config == config)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.photoFile, photoFile) || other.photoFile == photoFile)&&(identical(other.existingImageUrl, existingImageUrl) || other.existingImageUrl == existingImageUrl)&&(identical(other.avatarId, avatarId) || other.avatarId == avatarId)&&(identical(other.consentGiven, consentGiven) || other.consentGiven == consentGiven)&&(identical(other.isSubmitting, isSubmitting) || other.isSubmitting == isSubmitting)&&(identical(other.submitError, submitError) || other.submitError == submitError)&&(identical(other.saved, saved) || other.saved == saved));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ManageKidState&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.original, original) || other.original == original)&&(identical(other.config, config) || other.config == config)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.consentGiven, consentGiven) || other.consentGiven == consentGiven)&&(identical(other.isSubmitting, isSubmitting) || other.isSubmitting == isSubmitting)&&(identical(other.submitError, submitError) || other.submitError == submitError)&&(identical(other.saved, saved) || other.saved == saved));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,mode,original,config,name,gender,dob,photoFile,existingImageUrl,avatarId,consentGiven,isSubmitting,submitError,saved);
+int get hashCode => Object.hash(runtimeType,mode,original,config,name,gender,dob,consentGiven,isSubmitting,submitError,saved);
 
 @override
 String toString() {
-  return 'ManageKidState(mode: $mode, original: $original, config: $config, name: $name, gender: $gender, dob: $dob, photoFile: $photoFile, existingImageUrl: $existingImageUrl, avatarId: $avatarId, consentGiven: $consentGiven, isSubmitting: $isSubmitting, submitError: $submitError, saved: $saved)';
+  return 'ManageKidState(mode: $mode, original: $original, config: $config, name: $name, gender: $gender, dob: $dob, consentGiven: $consentGiven, isSubmitting: $isSubmitting, submitError: $submitError, saved: $saved)';
 }
 
 
@@ -1063,7 +867,7 @@ abstract mixin class _$ManageKidStateCopyWith<$Res> implements $ManageKidStateCo
   factory _$ManageKidStateCopyWith(_ManageKidState value, $Res Function(_ManageKidState) _then) = __$ManageKidStateCopyWithImpl;
 @override @useResult
 $Res call({
- ManageKidMode mode, ChildEntity? original, KidFormConfigEntity? config, String name, ChildGender? gender, DateTime? dob, File? photoFile, String? existingImageUrl, int? avatarId, bool consentGiven, bool isSubmitting, String? submitError, ChildEntity? saved
+ ManageKidMode mode, ChildEntity? original, KidFormConfigEntity? config, String name, ChildGender? gender, DateTime? dob, bool consentGiven, bool isSubmitting, String? submitError, ChildEntity? saved
 });
 
 
@@ -1080,7 +884,7 @@ class __$ManageKidStateCopyWithImpl<$Res>
 
 /// Create a copy of ManageKidState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? mode = null,Object? original = freezed,Object? config = freezed,Object? name = null,Object? gender = freezed,Object? dob = freezed,Object? photoFile = freezed,Object? existingImageUrl = freezed,Object? avatarId = freezed,Object? consentGiven = null,Object? isSubmitting = null,Object? submitError = freezed,Object? saved = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? mode = null,Object? original = freezed,Object? config = freezed,Object? name = null,Object? gender = freezed,Object? dob = freezed,Object? consentGiven = null,Object? isSubmitting = null,Object? submitError = freezed,Object? saved = freezed,}) {
   return _then(_ManageKidState(
 mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
 as ManageKidMode,original: freezed == original ? _self.original : original // ignore: cast_nullable_to_non_nullable
@@ -1088,10 +892,7 @@ as ChildEntity?,config: freezed == config ? _self.config : config // ignore: cas
 as KidFormConfigEntity?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,gender: freezed == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
 as ChildGender?,dob: freezed == dob ? _self.dob : dob // ignore: cast_nullable_to_non_nullable
-as DateTime?,photoFile: freezed == photoFile ? _self.photoFile : photoFile // ignore: cast_nullable_to_non_nullable
-as File?,existingImageUrl: freezed == existingImageUrl ? _self.existingImageUrl : existingImageUrl // ignore: cast_nullable_to_non_nullable
-as String?,avatarId: freezed == avatarId ? _self.avatarId : avatarId // ignore: cast_nullable_to_non_nullable
-as int?,consentGiven: null == consentGiven ? _self.consentGiven : consentGiven // ignore: cast_nullable_to_non_nullable
+as DateTime?,consentGiven: null == consentGiven ? _self.consentGiven : consentGiven // ignore: cast_nullable_to_non_nullable
 as bool,isSubmitting: null == isSubmitting ? _self.isSubmitting : isSubmitting // ignore: cast_nullable_to_non_nullable
 as bool,submitError: freezed == submitError ? _self.submitError : submitError // ignore: cast_nullable_to_non_nullable
 as String?,saved: freezed == saved ? _self.saved : saved // ignore: cast_nullable_to_non_nullable

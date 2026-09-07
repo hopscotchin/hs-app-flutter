@@ -428,9 +428,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i454.CartRemoteDataSource>(
       () => _i454.CartRemoteDataSourceImpl(apiClient: gh<_i930.ApiClient>()),
     );
-    gh.lazySingleton<_i359.KidsPhotoUploader>(
-      () => _i359.KidsPhotoUploader(gh<_i361.Dio>()),
-    );
     gh.lazySingleton<_i359.KidsFormConfigFetcher>(
       () => _i359.KidsFormConfigFetcher(gh<_i361.Dio>()),
     );
@@ -456,14 +453,6 @@ extension GetItInjectableX on _i174.GetIt {
         remoteDataSource: gh<_i454.CartRemoteDataSource>(),
         networkInfo: gh<_i351.NetworkInfo>(),
         prefManager: gh<_i818.PrefManager>(),
-      ),
-    );
-    gh.lazySingleton<_i970.KidsRepository>(
-      () => _i634.KidsRepositoryImpl(
-        gh<_i359.KidsRemoteDatasource>(),
-        gh<_i359.KidsPhotoUploader>(),
-        gh<_i359.KidsFormConfigFetcher>(),
-        gh<_i351.NetworkInfo>(),
       ),
     );
     gh.lazySingleton<_i799.PincodeRepository>(
@@ -604,6 +593,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i938.GetSearchSuggestionsUseCase>(
       () => _i938.GetSearchSuggestionsUseCase(gh<_i283.SearchRepository>()),
     );
+    gh.lazySingleton<_i970.KidsRepository>(
+      () => _i634.KidsRepositoryImpl(
+        gh<_i359.KidsRemoteDatasource>(),
+        gh<_i359.KidsFormConfigFetcher>(),
+        gh<_i351.NetworkInfo>(),
+      ),
+    );
     gh.lazySingleton<_i766.CheckMobileUseCase>(
       () => _i766.CheckMobileUseCase(gh<_i476.AuthRepository>()),
     );
@@ -705,6 +701,13 @@ extension GetItInjectableX on _i174.GetIt {
         getSizeChartUseCase: gh<_i1001.GetSizeChartUseCase>(),
       ),
     );
+    gh.factory<_i17.KidsBloc>(
+      () => _i17.KidsBloc(
+        gh<_i1052.GetChildrenUseCase>(),
+        gh<_i465.DeleteChildUseCase>(),
+        gh<_i127.AnalyticsHelper>(),
+      ),
+    );
     gh.singleton<_i938.WishlistCubit>(
       () => _i938.WishlistCubit(
         gh<_i363.AddToWishlistUseCase>(),
@@ -799,12 +802,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i283.CheckPincodeUseCase>(
       () => _i283.CheckPincodeUseCase(gh<_i760.PlpRepository>()),
-    );
-    gh.factory<_i17.KidsBloc>(
-      () => _i17.KidsBloc(
-        gh<_i1052.GetChildrenUseCase>(),
-        gh<_i465.DeleteChildUseCase>(),
-      ),
     );
     gh.factory<_i512.ManageKidBloc>(
       () => _i512.ManageKidBloc(

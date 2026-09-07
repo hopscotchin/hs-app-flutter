@@ -31,21 +31,12 @@ class KidsStrings {
   static const String dobLabel = 'DD - MM - YYYY';
   static const String genderBoy = 'Boy';
   static const String genderGirl = 'Girl';
-  static const String uploadPicture = 'Upload picture';
-
-  // ── Photo source bottom sheet ──
-  static const String uploadPictureSheetTitle = 'Upload picture';
-  static const String uploadPictureSheetSubtitle = 'Choose a photo source or select an avatar below';
-  static const String chooseAnAvatar = 'Choose an Avatar';
-  static const String takePhoto = 'Take Photo';
-  static const String chooseFromGallery = 'Choose from Gallery';
-  static const String removeCurrentPhoto = 'Remove Current Photo';
 
   static const String whyWeAskBannerTitle = 'Why we ask for this?';
   static const String whyWeAskBannerSubtitle =
       "We'll show sizes, styles and collections that suit your child's age.";
   static const String consentText =
-      "I consent to sharing my child's name, birth date, gender and photo so this app can "
+      "I consent to sharing my child's name, birth date and gender so this app can "
       'personalize their shopping experience. This info is stored securely and never sold.';
   static const String viewPrivacyPolicy = 'View Privacy Policy';
   static const String consentRequiredError = "Consent is required to add your child's information";

@@ -22,22 +22,6 @@ class KidFormConfigModel {
       consentText: json['consentText'] as String? ?? fallback.consentText,
       viewPrivacyPolicyLabel: json['viewPrivacyPolicyLabel'] as String? ?? fallback.viewPrivacyPolicyLabel,
       viewPrivacyPolicyUrl: json['viewPrivacyPolicyUrl'] as String? ?? fallback.viewPrivacyPolicyUrl,
-      placeholderImage: json['placeholderImage'] as String? ?? fallback.placeholderImage,
-      avatars: _avatarsFromJson(json['avatars'] as List<dynamic>?) ?? fallback.avatars,
     );
-  }
-
-  static List<KidAvatarOptionEntity>? _avatarsFromJson(List<dynamic>? json) {
-    if (json == null || json.isEmpty) return null;
-    return json
-        .whereType<Map<String, dynamic>>()
-        .map(
-          (e) => KidAvatarOptionEntity(
-            id: (e['id'] as num?)?.toInt() ?? 0,
-            imageUrl: e['imageUrl'] as String?,
-          ),
-        )
-        .where((a) => a.id != 0)
-        .toList();
   }
 }

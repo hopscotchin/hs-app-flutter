@@ -89,11 +89,6 @@ class ApiConstants {
   // contract, not yet implemented by backend. Add/Edit Kid screen falls back
   // to local defaults (KidFormConfigEntity.fallback()) until it exists.
   static const String kidsFormConfig = '/v2/questionnaire/form-config';
-  // PLACEHOLDER — no confirmed Flutter-reachable upload endpoint exists yet.
-  // Android's kids-photo flow goes through S3Uploader.uploadImage(path,
-  // CHILD_PROFILE), which is not a plain app-backend POST; this path needs
-  // backend confirmation before shipping. See KidsRemoteDataSource.uploadPhoto.
-  static const String kidsPhotoUpload = '/questionnaire/upload-photo';
 
   // Address Management
   static const String addresses = '/delivery/addresses/v3';

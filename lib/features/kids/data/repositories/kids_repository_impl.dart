@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
@@ -19,10 +17,9 @@ import '../models/kid_form_config_model.dart';
 
 @LazySingleton(as: KidsRepository)
 class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
-  KidsRepositoryImpl(this._api, this._photoUploader, this._formConfigFetcher, this._networkInfo);
+  KidsRepositoryImpl(this._api, this._formConfigFetcher, this._networkInfo);
 
   final KidsRemoteDatasource _api;
-  final KidsPhotoUploader _photoUploader;
   final KidsFormConfigFetcher _formConfigFetcher;
   final NetworkInfo _networkInfo;
 
@@ -43,16 +40,10 @@ class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
   @override
   Future<Either<Failure, ChildEntity>> saveChild({
     required ChildEntity child,
-    File? photoFile,
     CancelToken? cancelToken,
   }) {
     return safeApiCall(_networkInfo, () async {
-      var toSave = child;
-      if (photoFile != null) {
-        final url = await _photoUploader.upload(photoFile.path, cancelToken: cancelToken);
-        toSave = child.copyWith(imageUrl: url);
-      }
-      final response = await _api.saveChild(body: toSave.toRequestJson(), cancelToken: cancelToken);
+      final response = await _api.saveChild(body: child.toRequestJson(), cancelToken: cancelToken);
       if (!response.isSuccessful || response.child == null) {
         throw ApiFailureException(message: response.message ?? 'Something went wrong');
       }

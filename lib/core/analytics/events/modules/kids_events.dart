@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../../../features/kids/domain/entities/child_entity.dart';
 import '../../constants/analytics_events.dart';
 import '../../constants/analytics_properties.dart';
@@ -8,38 +10,59 @@ import '../analytics_helper.dart';
 /// into `AnalyticsEvents`/`AnalyticsProperties` ahead of this feature
 /// existing. This module is what finally wires them up.
 extension KidsEvents on AnalyticsHelper {
-  Future<void> logChildProfileAdded(ChildEntity child) =>
-      logEvent(AnalyticsEvents.childProfileAdded, _childProps(child));
+  Future<void> logChildProfileAdded(ChildEntity child) async {
+    await _adjustChildCohort(child, delta: 1);
+    await logEvent(AnalyticsEvents.childProfileAdded, _childProps(child));
+  }
 
   Future<void> logChildProfileEdited(ChildEntity child) =>
       logEvent(AnalyticsEvents.childProfileEdited, _childProps(child));
 
-  Future<void> logChildProfileDeleted(ChildEntity child) =>
-      logEvent(AnalyticsEvents.childProfileDeleted, _childProps(child));
+  Future<void> logChildProfileDeleted(ChildEntity child) async {
+    await _adjustChildCohort(child, delta: -1);
+    await logEvent(AnalyticsEvents.childProfileDeleted, _childProps(child));
+  }
 
   Future<void> logChildProfileSelected(ChildEntity child) =>
       logEvent(AnalyticsEvents.childProfileSelected, _childProps(child));
 
   Map<String, Object?> _childProps(ChildEntity child) => <String, Object?>{
     AnalyticsProperties.childProfileName: child.name,
-    AnalyticsProperties.childProfileGender: child.gender.wireValue,
+    AnalyticsProperties.childProfileGender: child.gender.displayLabel,
     if (child.dob != null)
-      AnalyticsProperties.childProfileDob: child.dobDisplay,
+      AnalyticsProperties.childProfileDob: child.dobWireValue,
     if (child.dob != null) AnalyticsProperties.childProfileAge: child.ageInMonths,
     if (child.dob != null) AnalyticsProperties.childProfileCohort: child.cohortKey,
   };
 
-  /// Recomputes the full cohort-count snapshot from the current children
-  /// list and identifies it — call this after any successful list load, not
-  /// per add/edit/delete, so cohort counts are always derived fresh from the
-  /// source of truth rather than incrementally tracked (avoiding Android's
-  /// two-writer disagreement risk documented in PROFILE_KIDS_MIGRATION.md §2).
-  Future<void> identifyChildCohorts(List<ChildEntity> children) {
-    final counts = <String, int>{};
-    for (final child in children) {
-      if (child.dob == null) continue;
-      counts[child.cohortKey] = (counts[child.cohortKey] ?? 0) + 1;
+  /// Increments (add) or decrements/removes (delete) this child's cohort
+  /// bucket in the persisted counter cache and re-identifies the full
+  /// snapshot. Mirrors Android `ChildProfileAnalyticsHelper.getChildCohortsMap`
+  /// exactly: counts are adjusted incrementally off a local cache
+  /// (`PrefManager.childCohorts`, Android's `PrefUtils.childCohorts`), never
+  /// recomputed from the full children list, and an edit does **not** adjust
+  /// counts even though the edited child's own cohort may have changed —
+  /// that is a known, preserved Android gap, not something to fix here.
+  Future<void> _adjustChildCohort(ChildEntity child, {required int delta}) async {
+    if (child.dob == null) return;
+    final raw = prefs.childCohorts;
+    final counts = raw == null
+        ? <String, int>{}
+        : (jsonDecode(raw) as Map<String, dynamic>).map(
+            (key, value) => MapEntry(key, value as int),
+          );
+    final key = child.cohortKey;
+    if (delta > 0) {
+      counts[key] = (counts[key] ?? 0) + 1;
+    } else {
+      final current = counts[key];
+      if (current != null && current > 1) {
+        counts[key] = current - 1;
+      } else {
+        counts.remove(key);
+      }
     }
-    return identifyForChildCohorts(counts);
+    await prefs.setChildCohorts(jsonEncode(counts));
+    await identifyForChildCohorts(counts);
   }
 }

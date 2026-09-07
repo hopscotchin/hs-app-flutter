@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 
@@ -25,14 +23,9 @@ abstract class KidsRepository {
   Future<Either<Failure, KidFormConfigEntity>> getFormConfig({CancelToken? cancelToken});
 
   /// Creates a new child when [child.isNew], otherwise updates the existing
-  /// one. [photoFile] is optional — when present it's sent as part of the
-  /// same multipart request (see PROFILE_KIDS_MIGRATION.md §7 note on the
-  /// live app's two-step upload-then-save flow; simplified here to one call
-  /// since Flutter has no existing generic S3-upload endpoint to reuse — flag
-  /// this with backend before relying on it in production).
+  /// one.
   Future<Either<Failure, ChildEntity>> saveChild({
     required ChildEntity child,
-    File? photoFile,
     CancelToken? cancelToken,
   });
 

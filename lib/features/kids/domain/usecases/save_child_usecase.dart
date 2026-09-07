@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
@@ -18,20 +16,15 @@ class SaveChildUseCase implements UseCase<ChildEntity, SaveChildParams> {
 
   @override
   Future<Either<Failure, ChildEntity>> call(SaveChildParams params) =>
-      _repository.saveChild(
-        child: params.child,
-        photoFile: params.photoFile,
-        cancelToken: params.cancelToken,
-      );
+      _repository.saveChild(child: params.child, cancelToken: params.cancelToken);
 }
 
 class SaveChildParams extends Equatable {
-  const SaveChildParams({required this.child, this.photoFile, this.cancelToken});
+  const SaveChildParams({required this.child, this.cancelToken});
 
   final ChildEntity child;
-  final File? photoFile;
   final CancelToken? cancelToken;
 
   @override
-  List<Object?> get props => [child, photoFile?.path];
+  List<Object?> get props => [child];
 }

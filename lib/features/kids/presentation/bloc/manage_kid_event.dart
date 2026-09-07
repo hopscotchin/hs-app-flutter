@@ -6,9 +6,6 @@ sealed class ManageKidEvent with _$ManageKidEvent {
   const factory ManageKidEvent.nameChanged(String name) = NameChanged;
   const factory ManageKidEvent.dobChanged(DateTime dob) = DobChanged;
   const factory ManageKidEvent.genderChanged(ChildGender gender) = GenderChanged;
-  const factory ManageKidEvent.photoPicked(File file) = PhotoPicked;
-  const factory ManageKidEvent.avatarSelected(int avatarId) = AvatarSelected;
-  const factory ManageKidEvent.photoRemoved() = PhotoRemoved;
   const factory ManageKidEvent.consentChanged(bool given) = ConsentChanged;
   const factory ManageKidEvent.submit() = SubmitKid;
 }

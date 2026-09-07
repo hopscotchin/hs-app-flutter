@@ -16,13 +16,6 @@ abstract class ManageKidState with _$ManageKidState {
     // the user must actively choose one (checked in validation before submit).
     ChildGender? gender,
     DateTime? dob,
-    File? photoFile,
-    String? existingImageUrl,
-    // Set when the user picks a preset avatar instead of a real photo —
-    // mutually exclusive with photoFile/existingImageUrl (selecting one
-    // clears the others). See PhotoSourceBottomSheet's placeholder-icon
-    // note: no real illustrated avatar assets exist yet.
-    int? avatarId,
     // Unchecked by default — consent must be an explicit opt-in action by
     // the user, not a pre-ticked box, on both create and edit.
     @Default(false) bool consentGiven,
@@ -35,16 +28,10 @@ abstract class ManageKidState with _$ManageKidState {
 extension ManageKidStateX on ManageKidState {
   bool get isDirty {
     if (mode == ManageKidMode.create) {
-      return name.isNotEmpty || dob != null || photoFile != null || avatarId != null || consentGiven;
+      return name.isNotEmpty || dob != null || consentGiven;
     }
     final o = original;
     if (o == null) return false;
-    return name != o.name ||
-        gender != o.gender ||
-        dob != o.dob ||
-        photoFile != null ||
-        avatarId != null;
+    return name != o.name || gender != o.gender || dob != o.dob;
   }
-
-  String? get photoPreviewPath => photoFile?.path;
 }

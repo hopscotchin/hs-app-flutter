@@ -30,32 +30,7 @@ abstract class KidsRemoteDatasource {
   });
 }
 
-/// Photo upload is NOT part of the generated Retrofit interface above — it's
-/// a raw multipart call against a placeholder endpoint (see ApiConstants.
-/// kidsPhotoUpload) because no confirmed upload contract exists yet. Kept as
-/// a plain injectable class so the repository can call it without depending
-/// on Retrofit codegen for something this provisional.
-@lazySingleton
-class KidsPhotoUploader {
-  KidsPhotoUploader(this._dio);
-
-  final Dio _dio;
-
-  Future<String> upload(String filePath, {CancelToken? cancelToken}) async {
-    final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(filePath),
-    });
-    final response = await _dio.post<Map<String, dynamic>>(
-      ApiConstants.kidsPhotoUpload,
-      data: formData,
-      cancelToken: cancelToken,
-    );
-    return response.data?['imageUrl'] as String? ?? '';
-  }
-}
-
-/// Also raw Dio rather than generated Retrofit — same reasoning as
-/// [KidsPhotoUploader]: ApiConstants.kidsFormConfig is a newly-proposed
+/// Raw Dio rather than generated Retrofit: ApiConstants.kidsFormConfig is a newly-proposed
 /// contract with no fixed shape backend has committed to yet, so this
 /// returns the raw decoded map for KidFormConfigModel to parse defensively,
 /// rather than binding to a strict generated response type.

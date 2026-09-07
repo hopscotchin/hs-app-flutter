@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -26,9 +24,6 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
     on<NameChanged>(_onNameChanged);
     on<DobChanged>(_onDobChanged);
     on<GenderChanged>(_onGenderChanged);
-    on<PhotoPicked>(_onPhotoPicked);
-    on<AvatarSelected>(_onAvatarSelected);
-    on<PhotoRemoved>(_onPhotoRemoved);
     on<ConsentChanged>(_onConsentChanged);
     on<SubmitKid>(_onSubmit);
   }
@@ -50,7 +45,6 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
         name: existing?.name ?? '',
         gender: existing?.gender,
         dob: existing?.dob,
-        existingImageUrl: existing?.imageUrl,
       ),
     );
 
@@ -68,18 +62,6 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
 
   void _onGenderChanged(GenderChanged event, Emitter<ManageKidState> emit) {
     emit(state.copyWith(gender: event.gender));
-  }
-
-  void _onPhotoPicked(PhotoPicked event, Emitter<ManageKidState> emit) {
-    emit(state.copyWith(photoFile: event.file, avatarId: null));
-  }
-
-  void _onAvatarSelected(AvatarSelected event, Emitter<ManageKidState> emit) {
-    emit(state.copyWith(avatarId: event.avatarId, photoFile: null, existingImageUrl: null));
-  }
-
-  void _onPhotoRemoved(PhotoRemoved event, Emitter<ManageKidState> emit) {
-    emit(state.copyWith(photoFile: null, avatarId: null, existingImageUrl: null));
   }
 
   void _onConsentChanged(ConsentChanged event, Emitter<ManageKidState> emit) {
@@ -113,20 +95,11 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
       name: state.name.trim(),
       gender: state.gender!, // validated non-null above
       dob: state.dob,
-      // OPEN QUESTION — flagging rather than guessing: an avatar pick has no
-      // real uploaded file, so there's nothing for KidsPhotoUploader to send.
-      // This "asset://" identifier is a placeholder only the client
-      // understands; backend has no defined contract for preset avatars at
-      // all yet. Confirm with backend whether avatars need a real, agreed
-      // identifier scheme before this ships, rather than sending a URL they
-      // can't resolve.
-      imageUrl: state.avatarId != null ? 'asset://avatar/${state.avatarId}' : state.existingImageUrl,
+      imageUrl: state.original?.imageUrl,
       consent: state.consentGiven,
     );
 
-    final result = await _saveChild(
-      SaveChildParams(child: child, photoFile: state.photoFile),
-    );
+    final result = await _saveChild(SaveChildParams(child: child));
 
     result.fold(
       (failure) {
