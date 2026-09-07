@@ -42,12 +42,11 @@ void main() async {
   }
   // debugPaintBaselinesEnabled = true;
 
-  // Tighten VisibilityDetector callback cadence for home-page analytics.
-  // Default is 500ms — long enough that initial-fold components can be
-  // scrolled past before their first callback fires. 250ms is snappy
-  // enough to catch fast opens without pounding the intersection-check
-  // path 10x/sec per detector during a scroll (100ms was measurably
-  // janky with 6+ components mounted).
+  // VisibilityDetector callback cadence for home-page analytics. 500ms is also
+  // the package default, so this is a pin rather than a change: tighter values
+  // pound the intersection-check path once per detector per interval during a
+  // scroll, and 100ms was measurably janky with 6+ components mounted. Stated
+  // explicitly so the cost is visible before anyone lowers it.
   VisibilityDetectorController.instance.updateInterval =
       const Duration(milliseconds: 500);
 

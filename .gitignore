@@ -43,6 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+# Gradle's own build dir for the android root project. `/build/` above only
+# covers the Flutter one at the repo root, so this appeared as untracked the
+# first time a Gradle build ran here.
+/android/build/
 
 # Environment files (never commit secrets)
 .env

@@ -37,7 +37,9 @@ class CartCheckoutBar extends StatelessWidget {
     final message = orderSummary?.savingsMessage;
     if (message != null) return message;
     final savings = orderSummary?.totalSavings ?? 0;
-    return savings > 0 ? '${CartStrings.youSaved} ₹$savings ${CartStrings.onThisOrder}' : null;
+    return savings > 0
+        ? '${CartStrings.youSaved} ₹$savings ${CartStrings.onThisOrder}'
+        : null;
   }
 
   @override
@@ -65,18 +67,23 @@ class CartCheckoutBar extends StatelessWidget {
               ),
               padding: AppSpacing.paddingXs,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(flex: 2, child: _buildSummary()),
+                  Expanded(flex: 3, child: _buildSummary()),
                   // Flexible (not a bare child) so on narrow screens the button
                   // shrinks — and its own internal Text ellipsizes — instead of
                   // forcing a RenderFlex overflow next to the summary column.
                   Expanded(
-                    flex: 4,
+                    flex: 5,
                     child: PrimaryButton.defaultType(
-                      key: const ValueKey(CartTestStrings.checkoutBarProceedButton),
+                      key: const ValueKey(
+                        CartTestStrings.checkoutBarProceedButton,
+                      ),
                       text: CartStrings.proceedToCheckout,
                       size: ButtonSize.large,
-                      state: isLoading ? ButtonState.loading : ButtonState.enabled,
+                      state: isLoading
+                          ? ButtonState.loading
+                          : ButtonState.enabled,
                       onTap: onCheckout,
                     ),
                   ),
@@ -111,7 +118,8 @@ class CartCheckoutBar extends StatelessWidget {
     final itemCountText =
         totalSummary?.itemCountText ??
         '$itemCount ${itemCount == 1 ? CartStrings.item : CartStrings.items}';
-    final totalAmountText = totalSummary?.totalPrice ?? orderSummary?.totalOrderAmount?.value ?? '';
+    final totalAmountText =
+        totalSummary?.totalPrice ?? orderSummary?.totalOrderAmount?.value ?? '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,14 +134,23 @@ class CartCheckoutBar extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                totalAmountText,
-                key: const ValueKey(CartTestStrings.checkoutBarTotalAmountText),
-                style: AppTypographyV1.bodySmall.bold.textPrimary(),
+            // Flexible + ellipsis: a large total (or a long backend-formatted
+            // string) must eat into its own width rather than push "Details"
+            // past the column's right edge and overflow the row.
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  totalAmountText,
+                  key: const ValueKey(
+                    CartTestStrings.checkoutBarTotalAmountText,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypographyV1.bodySmall.bold.textPrimary(),
+                ),
               ),
             ),
             GestureDetector(
@@ -153,6 +170,4 @@ class CartCheckoutBar extends StatelessWidget {
       ],
     );
   }
-
-  /// Formats a number in Indian numbering system (e.g. 4293 → 4,293).
 }

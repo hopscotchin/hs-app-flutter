@@ -23,11 +23,22 @@ class CartStrings {
   static const String enterPincodeForEdd = 'Enter pincode for EDD';
   static const String deliverTo = 'Deliver to';
 
+  // Move to wishlist — mirrors the wording WishlistCubit uses on PLP/PDP,
+  // but says "moved" rather than "added": the cart action also drops the line
+  // from the bag, which the PLP heart tap does not.
+  static const String movedToWishlist = 'Moved to wishlist';
+  static const String couldNotMoveToWishlist = "Couldn't move to wishlist";
+
   // Remove item confirmation sheet
   static const String removeItemsTitle = 'Remove Item(s)';
   static const String removeItemsDescription =
       'Are you sure you want to remove this item from bag?';
   static const String no = 'No';
+
+  // Fallbacks for the server-returned `message` on remove / move-to-wishlist
+  // (Android toasts the API message; these cover an empty one).
+  static const String itemRemoved = 'Item removed from bag';
+  static const String couldNotRemoveItem = "Couldn't remove this item";
 
   // Checkout bar
   static const String proceedToCheckout = 'Proceed To Checkout';

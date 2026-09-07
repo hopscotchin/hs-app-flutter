@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/entities/backend_action_entity.dart';
+import '../../../../core/entities/message_bar_entity.dart';
 
 part 'promo_action_result_entity.freezed.dart';
 
@@ -15,11 +16,18 @@ abstract class PromoActionResultEntity with _$PromoActionResultEntity {
     /// Backend-authored bottom sheet to show instead of the toast — sent on
     /// either outcome (e.g. "Invalid promotion" with a "Got It" button).
     BackendActionContentEntity? bottomSheet,
+
+    /// Bars the response carried, from `messageBar` and/or `messageBars`.
+    /// Take priority over [message] when rendering a failure — the backend
+    /// authored them, so they carry their own copy, colour and icon.
+    @Default(<MessageBarEntity>[]) List<MessageBarEntity> messageBars,
   }) = _PromoActionResultEntity;
 }
 
 extension PromoActionResultEntityX on PromoActionResultEntity {
   bool get hasMessage => message.isNotEmpty;
+
+  bool get hasMessageBars => messageBars.isNotEmpty;
 
   /// A sheet is only renderable with body copy — `AppBottomSheet` requires it.
   bool get hasBottomSheet =>

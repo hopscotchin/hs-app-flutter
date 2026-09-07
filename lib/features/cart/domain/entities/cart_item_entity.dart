@@ -75,6 +75,38 @@ class CartItemEntity extends Equatable {
 
   bool get isCompletelySoldOut => isSoldOut || isSizeSoldOut;
 
+  /// Same item with a new quantity. Deliberately narrower than a general
+  /// `copyWith`: the only field the app ever changes locally is the quantity,
+  /// applied optimistically while the authoritative cart is re-read in the
+  /// background (see `CartBloc._onUpdateCartItem`).
+  CartItemEntity withQuantity(int newQuantity) => CartItemEntity(
+    sku: sku,
+    brandId: brandId,
+    brandName: brandName,
+    size: size,
+    productId: productId,
+    wishlistInfo: wishlistInfo,
+    shoppingCartItemId: shoppingCartItemId,
+    media: media,
+    selectMaxValue: selectMaxValue,
+    priceInfo: priceInfo,
+    quantity: newQuantity,
+    productName: productName,
+    isSoldOut: isSoldOut,
+    isSizeSoldOut: isSizeSoldOut,
+    estimatedDelivery: estimatedDelivery,
+    stockAvailabilityStatus: stockAvailabilityStatus,
+    stockAvailabilityStatusColor: stockAvailabilityStatusColor,
+    createdDate: createdDate,
+    isSingleSize: isSingleSize,
+    visualCue: visualCue,
+    cartItemDetails: cartItemDetails,
+    categoryName: categoryName,
+    crmProductName: crmProductName,
+    slug: slug,
+    trackingMeta: trackingMeta,
+  );
+
   /// First IMAGE-type media URL, falling back to the first media item of any
   /// type when none is explicitly tagged IMAGE.
   String? get imgSrc {

@@ -25,6 +25,7 @@ abstract class PromosOffersRepository {
 
   Future<Either<Failure, PromoActionResultEntity>> applyPromo({
     required String promoCode,
+    PromoOffersSource fromLocation = PromoOffersSource.cart,
     CancelToken? cancelToken,
   });
 

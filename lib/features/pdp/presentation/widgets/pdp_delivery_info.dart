@@ -55,8 +55,14 @@ class PdpDeliveryInfo extends StatelessWidget {
   /// Mirrors Android EddInfoView.getMessage3.
   String get _deliveryPromptLine {
     if (isSizeSelected && _isPincodeSet) return eddInfo?.orderSla ?? '';
-    if (!isSizeSelected && !_isPincodeSet) return PdpStrings.selectPincodeAndSize;
-    if (isSizeSelected && !_isPincodeSet) return PdpStrings.enterPincodeForDelivery;
+    if (!isSizeSelected && !_isPincodeSet) {
+      return PdpStrings.selectPincodeAndSize;
+    }
+
+    if (isSizeSelected && !_isPincodeSet) {
+      return PdpStrings.enterPincodeForDelivery;
+    }
+
     return PdpStrings.selectSizeForDelivery;
   }
 
@@ -107,7 +113,12 @@ class PdpDeliveryInfo extends StatelessWidget {
               color: _kCardBg,
               borderRadius: BorderRadius.all(Radius.circular(_kCardRadius)),
             ),
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 18, bottom: 16),
+            padding: const EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 18,
+              bottom: 16,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -134,18 +145,24 @@ class PdpDeliveryInfo extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: _hasDestination
                       ? _PincodeDisplay(
-                          rowKey: const ValueKey(PdpTestStrings.changePincodeButton),
+                          rowKey: const ValueKey(
+                            PdpTestStrings.changePincodeButton,
+                          ),
                           label: eddInfo!.destination!,
                           onTap: () => _openPincodeSheet(context),
                         )
                       : _hasPincode
                       ? _PincodeDisplay(
-                          rowKey: const ValueKey(PdpTestStrings.changePincodeButton),
+                          rowKey: const ValueKey(
+                            PdpTestStrings.changePincodeButton,
+                          ),
                           label: pinCode!,
                           onTap: () => _openPincodeSheet(context),
                         )
                       : _EnterPincodeRow(
-                          buttonKey: const ValueKey(PdpTestStrings.enterPincodeButton),
+                          buttonKey: const ValueKey(
+                            PdpTestStrings.enterPincodeButton,
+                          ),
                           onTap: () => _openPincodeSheet(context),
                         ),
                 ),
@@ -156,7 +173,14 @@ class PdpDeliveryInfo extends StatelessWidget {
           // ── Service guarantees ─────────────────────────────────────────────
           if (serviceGuarantees.isNotEmpty) ...[
             AppSpacing.verticalGapLgMd,
+            // Uncapped: the default 90px cap was narrower than the 98.7px slot
+            // the Row already hands each item, so it was throwing away 8.7px of
+            // label width for nothing. The row measures the three labels and
+            // gives them one shared size, so a long guarantee shrinks the set
+            // rather than being cut — no text-scale ceiling and no shrunken icon
+            // tile needed to make them fit.
             IconLabelInfoRow(
+              itemMaxWidth: double.infinity,
               items: [
                 for (final g in serviceGuarantees.take(3))
                   IconLabelInfo(icon: g.icon, label: g.label),
@@ -194,7 +218,10 @@ class _EddRow extends StatelessWidget {
               ImageConstants.pdpPincodeInfo,
               width: AppSpacing.iconMd,
               height: AppSpacing.iconMd,
-              colorFilter: const ColorFilter.mode(AppColors.brandDefault, BlendMode.srcIn),
+              colorFilter: const ColorFilter.mode(
+                AppColors.brandDefault,
+                BlendMode.srcIn,
+              ),
             ),
           ),
         ),
@@ -234,7 +261,11 @@ class _EddRow extends StatelessWidget {
 // ── Pincode display row ───────────────────────────────────────────────────────
 
 class _PincodeDisplay extends StatelessWidget {
-  const _PincodeDisplay({required this.label, required this.onTap, this.rowKey});
+  const _PincodeDisplay({
+    required this.label,
+    required this.onTap,
+    this.rowKey,
+  });
   final String label;
   final VoidCallback onTap;
   final Key? rowKey;
@@ -254,14 +285,29 @@ class _PincodeDisplay extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: AppTypographyV1.bodyRegular.copyWith(
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF000000),
-                height: 19 / 14,
+            // A Row lays non-flex children out with unbounded width, so a plain
+            // Text here never wraps — it just overflows the card. On a 320pt
+            // screen the row is only 216px wide, ~55px of it taken by "Change".
+            //
+            // Flexible with no maxLines, so the label is shown in full: it wraps
+            // onto a second line rather than being cut or ellipsised. Destinations
+            // are short enough that this is the rare case, and nothing here is
+            // height-constrained — the card grows, which is the right answer for
+            // body copy. That is the opposite of the CTA labels, which are pinned
+            // to one line inside fixed geometry and so scale instead.
+            Flexible(
+              child: Text(
+                label,
+                style: AppTypographyV1.bodyRegular.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF000000),
+                  height: 19 / 14,
+                ),
               ),
             ),
+            AppSpacing.horizontalGapXs,
+            // Never flexed: "Change" is the affordance, so it stays whole and
+            // the label gives up room instead.
             Text(
               PdpStrings.change,
               style: AppTypographyV1.bodyRegular.copyWith(
@@ -301,14 +347,22 @@ class _EnterPincodeRow extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              PdpStrings.enterPincode,
-              style: AppTypographyV1.bodyRegular.copyWith(
-                fontWeight: FontWeight.w400,
-                color: const Color(0x80000000),
-                height: 19 / 14,
+            // Both strings are static and fit at the default text size, but the
+            // Row has the same unbounded-child hole as _PincodeDisplay: at a
+            // raised system text size "Enter Pincode" + "Check" outgrows the
+            // 216px row. Flexible lets it wrap instead of overflowing, with the
+            // full string always shown.
+            Flexible(
+              child: Text(
+                PdpStrings.enterPincode,
+                style: AppTypographyV1.bodyRegular.copyWith(
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0x80000000),
+                  height: 19 / 14,
+                ),
               ),
             ),
+            AppSpacing.horizontalGapXs,
             Text(
               PdpStrings.check,
               style: AppTypographyV1.bodyRegular.copyWith(

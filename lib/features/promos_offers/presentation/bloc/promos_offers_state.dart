@@ -21,12 +21,25 @@ abstract class PromosOffersState with _$PromosOffersState {
     String? actionMessage,
     String? actionError,
 
+    /// Backend-authored bars for the latest action. Rendered **in preference
+    /// to** [actionError] — they carry their own copy, colour and icon, so
+    /// showing both would duplicate the message.
+    @Default(<MessageBarEntity>[]) List<MessageBarEntity> actionMessageBars,
+
     /// Backend-authored sheet for the latest action; takes the place of the
     /// toast when present.
     BackendActionContentEntity? actionBottomSheet,
 
     /// Mutation behind the latest [actionNonce]; null until one completes.
     PromoActionKind? lastAction,
+
+    /// Whether that mutation actually succeeded server-side.
+    ///
+    /// Needed as its own flag rather than inferring from [actionError]: a
+    /// rejection is an HTTP 200 with `success: false`, and the sheet must stay
+    /// open for it. Inferring would let a rejection read as success and pop the
+    /// sheet out from under the user.
+    @Default(false) bool actionSucceeded,
 
     /// Sticky once any apply/remove succeeds server-side, so the sheet's caller
     /// knows the cart needs a re-read even when the sheet is dismissed later.

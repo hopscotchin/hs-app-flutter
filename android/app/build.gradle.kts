@@ -46,6 +46,23 @@ android {
             manifestPlaceholders["CLEVERTAP_ACCOUNT_ID"] = "WW4-64W-955Z"
             manifestPlaceholders["CLEVERTAP_TOKEN"] = "046-400"
         }
+        // Flutter's third variant. Its Gradle plugin registers this build type
+        // with `initWith debug`, but it does so while applying the plugin —
+        // before this block runs — so the placeholders set on `debug` above are
+        // not there to copy and profile inherits none. Without them the manifest
+        // merger fails on the CleverTap meta-data and `flutter run --profile`
+        // cannot build at all, which is what the profile launch config in
+        // .vscode/launch.json hits. maybeCreate fills in the existing build type
+        // rather than replacing it, so the signing config it took from debug
+        // stays intact.
+        //
+        // TEST creds, matching debug rather than release: a profile build is for
+        // measuring, and pointing it at the production CleverTap workspace would
+        // put profiling runs into real analytics.
+        maybeCreate("profile").apply {
+            manifestPlaceholders["CLEVERTAP_ACCOUNT_ID"] = "TEST-ZW4-64W-955Z"
+            manifestPlaceholders["CLEVERTAP_TOKEN"] = "TEST-046-401"
+        }
     }
 }
 

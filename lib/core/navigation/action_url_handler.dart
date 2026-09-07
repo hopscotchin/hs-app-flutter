@@ -80,6 +80,10 @@ class ActionUrlHandler {
     final route = uri.host;
     final params = uri.queryParameters;
     final id = params['id'] ?? '';
+    // Only the promo-details routes read this; `Uri.queryParameters` has
+    // already percent-decoded it.
+    final savingsTextFromCart =
+        params[PromoDetailsDestination.savingsTextExtraKey] ?? '';
 
     switch (route) {
       // ── Home ──
@@ -190,7 +194,10 @@ class ActionUrlHandler {
         final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
         final promoId = _id(id.isNotEmpty ? id : segments.firstOrNull);
         return promoId > 0
-            ? PromoDetailsDestination(promoId: promoId)
+            ? PromoDetailsDestination(
+                promoId: promoId,
+                savingsTextFromCart: savingsTextFromCart,
+              )
             : const HomeDestination();
 
       // ── TODO: navigate to dedicated pages when built ──
@@ -260,7 +267,11 @@ class ActionUrlHandler {
             ? _id(segments[1])
             : _id(params['id']);
         return promoId > 0
-            ? PromoDetailsDestination(promoId: promoId)
+            ? PromoDetailsDestination(
+                promoId: promoId,
+                savingsTextFromCart:
+                    params[PromoDetailsDestination.savingsTextExtraKey] ?? '',
+              )
             : const HomeDestination();
 
       // ── PDP: /product/<pid> ──

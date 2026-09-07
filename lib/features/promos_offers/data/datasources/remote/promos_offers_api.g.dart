@@ -90,10 +90,11 @@ class _PromosOffersApi implements PromosOffersApi {
   @override
   Future<PromoActionResponseModel> applyPromo({
     required PromoApplyRequestModel request,
+    String fromLocation = 'cart',
     CancelToken? cancelToken,
   }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'fromLocation': fromLocation};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};

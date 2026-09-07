@@ -8,8 +8,7 @@ import '../repositories/cart_repository.dart';
 import 'package:injectable/injectable.dart';
 
 @lazySingleton
-class UpdateCartItemUseCase
-    implements UseCase<CartEntity, UpdateCartItemParams> {
+class UpdateCartItemUseCase implements UseCase<CartEntity, UpdateCartItemParams> {
   final CartRepository repository;
 
   UpdateCartItemUseCase(this.repository);
@@ -19,6 +18,7 @@ class UpdateCartItemUseCase
     return repository.updateCartItem(
       params.sku,
       params.quantity,
+      instantCheckout: params.instantCheckout,
       cancelToken: params.cancelToken,
     );
   }
@@ -27,15 +27,17 @@ class UpdateCartItemUseCase
 class UpdateCartItemParams extends Equatable {
   final String sku;
   final int quantity;
+  final bool instantCheckout;
   final CancelToken? cancelToken;
 
   const UpdateCartItemParams({
     required this.sku,
     required this.quantity,
+    this.instantCheckout = false,
     this.cancelToken,
   });
 
   @override
-  List<Object?> get props => [sku, quantity];
+  List<Object?> get props => [sku, quantity, instantCheckout];
   // cancelToken intentionally excluded — not a semantic field
 }

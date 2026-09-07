@@ -22,7 +22,8 @@ import '../widgets/promo_offer_card.dart';
 /// Read-only: applying/removing stays with the offers bottom sheet, so nothing
 /// here can leave the cart stale.
 class PromoDetailsPage extends StatelessWidget {
-  const PromoDetailsPage({super.key});
+  final String? savingsTextFromCart;
+  const PromoDetailsPage({super.key, this.savingsTextFromCart});
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +34,14 @@ class PromoDetailsPage extends StatelessWidget {
         titleKey: const ValueKey(PromoDetailsTestStrings.appBarTitle),
         backButtonKey: const ValueKey(PromoDetailsTestStrings.backButton),
       ),
-      body: const _Body(),
+      body: _Body(savingsTextFromCart: savingsTextFromCart),
     );
   }
 }
 
 class _Body extends StatelessWidget {
-  const _Body();
+  final String? savingsTextFromCart;
+  const _Body({this.savingsTextFromCart});
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +90,7 @@ class _Body extends StatelessWidget {
                     PromoDetailsTestStrings.savingsText,
                   ),
                   ctaKey: const ValueKey(PromoDetailsTestStrings.ctaButton),
+                  savingsTextFromCart: savingsTextFromCart,
                 ),
                 if (details.hasAbout) ...[
                   const SizedBox(height: _gapSection),

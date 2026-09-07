@@ -32,7 +32,8 @@ class ActionTrigger extends StatefulWidget {
   ///
   /// Only consulted for tooltip actions. Ignored for bottomSheet/dialog,
   /// where [child] is already the whole tappable widget.
-  final Widget Function(Widget anchor, VoidCallback showTooltip)? tooltipBuilder;
+  final Widget Function(Widget anchor, VoidCallback showTooltip)?
+  tooltipBuilder;
 
   // ── Tooltip positioning/spacing — tunable per call site ──────────────────
   // The arrow's horizontal position is NOT one of these: super_tooltip always
@@ -116,7 +117,9 @@ class _ActionTriggerState extends State<ActionTrigger> {
       return;
     }
     setState(() => _tooltipLeft = left);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _controller?.showTooltip());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _controller?.showTooltip(),
+    );
   }
 
   @override
@@ -135,11 +138,14 @@ class _ActionTriggerState extends State<ActionTrigger> {
         controller: _controller,
         content: Text(
           action.content!.text!,
-          style: TextStyle(color: action.content!.textColor.toColorOr(Colors.white), fontSize: 14),
+          style: TextStyle(
+            color: action.content!.textColor.toColorOr(Colors.white),
+            fontSize: 14,
+          ),
         ),
         style: TooltipStyle(
           backgroundColor: action.content!.bgColor.toColorOr(AppColors.info),
-          borderRadius: 8,
+          borderRadius: 4,
           borderColor: Colors.transparent,
           hasShadow: false,
         ),
@@ -153,14 +159,12 @@ class _ActionTriggerState extends State<ActionTrigger> {
           left: widget.alignTooltipLeftToAnchor ? _tooltipLeft : null,
         ),
         barrierConfig: const BarrierConfiguration(color: Colors.transparent),
-        // With a builder, ALL taps must route through _showTooltip() so the
-        // anchor gets measured for alignTooltipLeftToAnchor — SuperTooltip's
-        // own showOnTap would bypass that measurement on icon taps and open
-        // the bubble at the wrong x. Without a builder, [child] is the whole
-        // tappable, and SuperTooltip's showOnTap is what makes it tap-open.
-        interactionConfig: InteractionConfiguration(showOnTap: !hasBuilder),
+        // Tapping the anchor alone still works even with a builder — both
+        // paths drive the same controller, so either can open it.
+        interactionConfig: const InteractionConfiguration(showOnTap: true),
         constraints: BoxConstraints(
-          maxWidth: widget.tooltipMaxWidth ?? MediaQuery.sizeOf(context).width - 64,
+          maxWidth:
+              widget.tooltipMaxWidth ?? MediaQuery.sizeOf(context).width - 64,
         ),
         child: widget.alignTooltipLeftToAnchor
             ? KeyedSubtree(key: _anchorKey, child: widget.child)
@@ -168,14 +172,11 @@ class _ActionTriggerState extends State<ActionTrigger> {
       );
 
       if (!hasBuilder) return anchor;
-      // SuperTooltip would otherwise swallow taps on its wrapped child before
-      // they reach the builder's outer GestureDetector, so icon taps would
-      // no-op. IgnorePointer lets every tap in the builder's row route
-      // through _showTooltip() — the anchor is still measured via its key.
-      return widget.tooltipBuilder!(IgnorePointer(child: anchor), _showTooltip);
+      return widget.tooltipBuilder!(anchor, _showTooltip);
     }
 
-    if ((action.isBottomSheet || action.isDialog) && action.content?.description != null) {
+    if ((action.isBottomSheet || action.isDialog) &&
+        action.content?.description != null) {
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => _show(context, action),
@@ -208,7 +209,8 @@ class _ActionTriggerState extends State<ActionTrigger> {
                   content.rightAction,
                   fallback: AppBottomSheetButtonStyle.outlined,
                 ),
-                onPressed: () => _runAction(context, content.rightAction!.actionUrl),
+                onPressed: () =>
+                    _runAction(context, content.rightAction!.actionUrl),
               )
             : null,
       );
@@ -234,7 +236,8 @@ class _ActionTriggerState extends State<ActionTrigger> {
                 content.rightAction,
                 fallback: AppDialogButtonStyle.outlined,
               ),
-              onPressed: () => _runAction(context, content.rightAction!.actionUrl),
+              onPressed: () =>
+                  _runAction(context, content.rightAction!.actionUrl),
             )
           : null,
     );

@@ -48,19 +48,32 @@ class CartRepositoryImpl with SafeApiCall implements CartRepository {
   @override
   Future<Either<Failure, CartEntity>> getCart({
     bool isMergeCall = false,
+    bool instantCheckout = false,
     CancelToken? cancelToken,
   }) {
     return safeApiCall(
       networkInfo,
-      () => remoteDataSource.getCart(isMergeCall: isMergeCall, cancelToken: cancelToken),
+      () => remoteDataSource.getCart(
+        isMergeCall: isMergeCall,
+        instantCheckout: instantCheckout,
+        cancelToken: cancelToken,
+      ),
     );
   }
 
   @override
-  Future<Either<Failure, CartEntity>> removeCartItem(String sku, {CancelToken? cancelToken}) {
+  Future<Either<Failure, CartEntity>> removeCartItem(
+    String sku, {
+    bool instantCheckout = false,
+    CancelToken? cancelToken,
+  }) {
     return safeApiCall(
       networkInfo,
-      () => remoteDataSource.removeCartItem(sku, cancelToken: cancelToken),
+      () => remoteDataSource.removeCartItem(
+        sku,
+        instantCheckout: instantCheckout,
+        cancelToken: cancelToken,
+      ),
     );
   }
 
@@ -68,11 +81,17 @@ class CartRepositoryImpl with SafeApiCall implements CartRepository {
   Future<Either<Failure, CartEntity>> updateCartItem(
     String sku,
     int quantity, {
+    bool instantCheckout = false,
     CancelToken? cancelToken,
   }) {
     return safeApiCall(
       networkInfo,
-      () => remoteDataSource.updateCartItem(sku, quantity, cancelToken: cancelToken),
+      () => remoteDataSource.updateCartItem(
+        sku,
+        quantity,
+        instantCheckout: instantCheckout,
+        cancelToken: cancelToken,
+      ),
     );
   }
 
@@ -81,6 +100,7 @@ class CartRepositoryImpl with SafeApiCall implements CartRepository {
     String sku, {
     int? productId,
     int? price,
+    bool instantCheckout = false,
     CancelToken? cancelToken,
   }) {
     return safeApiCall(
@@ -89,6 +109,7 @@ class CartRepositoryImpl with SafeApiCall implements CartRepository {
         sku,
         productId: productId,
         price: price,
+        instantCheckout: instantCheckout,
         cancelToken: cancelToken,
       ),
     );
@@ -107,10 +128,7 @@ class CartRepositoryImpl with SafeApiCall implements CartRepository {
       final decoded = jsonDecode(raw);
       if (decoded is! List) return const Right([]);
       return Right(
-        decoded
-            .whereType<Map<String, dynamic>>()
-            .map(MessageBarModel.fromJson)
-            .toList(),
+        decoded.whereType<Map<String, dynamic>>().map(MessageBarModel.fromJson).toList(),
       );
     } catch (e, s) {
       // Written by the splash app-config sync; a malformed payload means the

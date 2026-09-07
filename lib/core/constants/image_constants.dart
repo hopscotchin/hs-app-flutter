@@ -50,7 +50,8 @@ class ImageConstants {
   static const String helpIcon = 'assets/icons/help_icon.svg';
 
   // PDP Icons
-  static const String pdpPincodeInfo = 'assets/icons/pdp/ic_pdp_pincode_info.svg';
+  static const String pdpPincodeInfo =
+      'assets/icons/pdp/ic_pdp_pincode_info.svg';
 
   // Message Bar Icons
   static const String messageBarError = 'assets/icons/messagebars/ic_error.svg';
@@ -66,6 +67,7 @@ class ImageConstants {
   static const String promoOffer = 'assets/icons/promo_offer.svg';
   static const String cartQuantityAdd = 'assets/icons/add.svg';
   static const String cartQuantityRemove = 'assets/icons/remove.svg';
+  static const String closeIcon = 'assets/icons/close.svg';
 
   // Kids
   static const String editIcon = 'assets/icons/edit.svg';

@@ -17,6 +17,7 @@ class GetCartUseCase implements UseCase<CartEntity, GetCartParams> {
   Future<Either<Failure, CartEntity>> call(GetCartParams params) {
     return repository.getCart(
       isMergeCall: params.isMergeCall,
+      instantCheckout: params.instantCheckout,
       cancelToken: params.cancelToken,
     );
   }
@@ -24,9 +25,12 @@ class GetCartUseCase implements UseCase<CartEntity, GetCartParams> {
 
 class GetCartParams extends Equatable {
   final bool isMergeCall;
+
+  /// Scopes the fetch to the buy-now item alone — see [CartRepository.getCart].
+  final bool instantCheckout;
   final CancelToken? cancelToken;
 
-  const GetCartParams({this.isMergeCall = false, this.cancelToken});
+  const GetCartParams({this.isMergeCall = false, this.instantCheckout = false, this.cancelToken});
 
   @override
   List<Object?> get props => [isMergeCall];

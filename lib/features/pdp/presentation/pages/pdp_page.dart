@@ -21,6 +21,26 @@ class PdpPage extends StatelessWidget {
           PdpSnackbar.show(context, state.snackBarMessage!);
         },
         child: BlocBuilder<PdpBloc, PdpState>(
+          // Only the fields PdpContent actually reads in build. Everything else
+          // on PdpState is consumed by a narrower subscriber, so letting it
+          // through here rebuilt the entire page — every fixed section, the
+          // whole SliverChildListDelegate — for nothing.
+          //
+          // KEEP IN SYNC: a new PdpState field read by PdpContent.build must
+          // be added here, otherwise the page silently won't rebuild for it.
+          //   isAddingToBag / isBuyingNow  → the add-to-bag bar's own BlocBuilder
+          //   *SuccessTick, snackBar*      → BlocListeners with listenWhen
+          //   pincodeVerify*               → awaited off bloc.stream, not built
+          //   sizeChart*, isLoadingSizeChart → the size-chart sheet's BlocBuilder
+          //   recommendations*             → the recommendations sliver's BlocBuilder
+          //   recommendationsPage, errorMessage → not read in build at all
+          // status covers the error view, which takes no message.
+          buildWhen: (prev, curr) =>
+              prev.status != curr.status ||
+              prev.productDetail != curr.productDetail ||
+              prev.selectedSku != curr.selectedSku ||
+              prev.verifiedPincode != curr.verifiedPincode ||
+              prev.expandedDetailTab != curr.expandedDetailTab,
           builder: (context, state) => switch (state.status) {
             PdpStatus.loading => const PdpShimmerLoading(),
             PdpStatus.error => const PdpErrorView(),

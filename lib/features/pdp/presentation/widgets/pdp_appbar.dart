@@ -11,7 +11,7 @@ import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 
-class PdpAppBar extends StatelessWidget {
+class PdpAppBar extends StatefulWidget {
   const PdpAppBar({
     super.key,
     required this.scrollController,
@@ -34,37 +34,79 @@ class PdpAppBar extends StatelessWidget {
   final GlobalKey? cartIconKey;
 
   @override
+  State<PdpAppBar> createState() => _PdpAppBarState();
+}
+
+class _PdpAppBarState extends State<PdpAppBar> {
+  // The bar's appearance depends on the scroll offset only through this single
+  // bool. Previously the whole AnimatedContainer was rebuilt from a raw
+  // ListenableBuilder on the controller, so every scroll tick allocated a fresh
+  // BoxDecoration/Border and ran the implicit-animation didUpdateWidget path
+  // 60-120x/s to arrive at the same target. Notifying on the bool instead means
+  // that happens twice per page — once each way across the threshold.
+  //
+  // The AnimatedContainer is unchanged and still owns the 200ms easeOut fade:
+  // implicit animations are driven by their own controller, not by rebuilds, so
+  // rebuilding less often does not alter the transition.
+  late final ValueNotifier<bool> _fullyExpanded = ValueNotifier<bool>(_computeFullyExpanded());
+
+  // Stay transparent while the image is in view; turn white once the page has
+  // scrolled far enough that the image has largely scrolled off.
+  bool _computeFullyExpanded() {
+    final offset = widget.scrollController.hasClients ? widget.scrollController.offset : 0.0;
+    return offset >= widget.whiteThreshold;
+  }
+
+  void _onScroll() => _fullyExpanded.value = _computeFullyExpanded();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didUpdateWidget(PdpAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scrollController != widget.scrollController) {
+      oldWidget.scrollController.removeListener(_onScroll);
+      widget.scrollController.addListener(_onScroll);
+    }
+    // whiteThreshold is derived from the layout (carousel height vs. bar
+    // height), so a metrics change can move the boundary without a scroll.
+    if (oldWidget.whiteThreshold != widget.whiteThreshold ||
+        oldWidget.scrollController != widget.scrollController) {
+      _onScroll();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_onScroll);
+    _fullyExpanded.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Positioned(
       top: 0,
       left: 0,
       right: 0,
-      child: ListenableBuilder(
-        listenable: scrollController,
-        builder: (context, child) {
-          final offset = scrollController.hasClients
-              ? scrollController.offset
-              : 0.0;
-          // Stay transparent while the image is in view; turn white once the
-          // page has scrolled far enough that the image has largely scrolled off.
-          final fullyExpanded = offset >= whiteThreshold;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-            decoration: BoxDecoration(
-              color: AppColors.baseDefault.withValues(
-                alpha: fullyExpanded ? 1.0 : 0.0,
-              ),
-              border: fullyExpanded
-                  ? const Border(
-                      bottom: BorderSide(color: AppColors.neutralGrey2),
-                    )
-                  : null,
-            ),
-            child: child,
-          );
-        },
-        child: PdpAppBarContent(onBack: onBack, cartIconKey: cartIconKey),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: _fullyExpanded,
+        builder: (context, fullyExpanded, child) => AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          decoration: BoxDecoration(
+            color: AppColors.baseDefault.withValues(alpha: fullyExpanded ? 1.0 : 0.0),
+            border: fullyExpanded
+                ? const Border(bottom: BorderSide(color: AppColors.neutralGrey2))
+                : null,
+          ),
+          child: child,
+        ),
+        child: PdpAppBarContent(onBack: widget.onBack, cartIconKey: widget.cartIconKey),
       ),
     );
   }
@@ -85,17 +127,26 @@ class PdpAppBarContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bag = BadgeIcon(
-      key: cartIconKey ?? const ValueKey(PdpTestStrings.appBarCartButton),
-      iconSize: AppSpacing.iconSm,
-      icon: const CustomImage(
-        path: ImageConstants.bag,
-        height: AppSpacing.iconSm,
-        width: AppSpacing.iconSm,
+    // Subscribed here rather than with context.watch at the top of build: the
+    // count only affects the badge, but watching in this build method rebuilt
+    // the whole bar — SafeArea, Row, back button, heart and all — on every cart
+    // change. Scoped to the badge, an add-to-bag rebuilds one widget.
+    //
+    // This is also the only thing that still rebuilds this subtree, since
+    // PdpAppBar passes it as the unchanging `child` of its ValueListenableBuilder.
+    final bag = BlocBuilder<CartCountCubit, int>(
+      builder: (context, count) => BadgeIcon(
+        key: cartIconKey ?? const ValueKey(PdpTestStrings.appBarCartButton),
+        iconSize: AppSpacing.iconSm,
+        icon: const CustomImage(
+          path: ImageConstants.bag,
+          height: AppSpacing.iconSm,
+          width: AppSpacing.iconSm,
+        ),
+        count: count,
+        padding: EdgeInsets.zero,
+        onTap: () => AppNavigator.goToCart(context),
       ),
-      count: context.watch<CartCountCubit>().state,
-      padding: EdgeInsets.zero,
-      onTap: () => AppNavigator.goToCart(context),
     );
     return SafeArea(
       bottom: false,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/components/atoms/dotted_border_box.dart';
 import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
 import 'package:hs_app_flutter/components/buttons/button_enums.dart';
+import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
+import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/colors.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
@@ -34,6 +36,7 @@ class PromoOfferCard extends StatelessWidget {
     this.removeButtonKey,
     this.termsKey,
     this.ctaKey,
+    this.savingsTextFromCart,
   });
 
   final PromoOfferEntity offer;
@@ -63,6 +66,7 @@ class PromoOfferCard extends StatelessWidget {
   final Key? removeButtonKey;
   final Key? termsKey;
   final Key? ctaKey;
+  final String? savingsTextFromCart;
 
   bool get _enabled => offer.isApplicable;
 
@@ -99,10 +103,7 @@ class PromoOfferCard extends StatelessWidget {
               AppSpacing.horizontalGapXs,
             ],
             Expanded(child: _details(context)),
-            if (!_isReadOnly) ...[
-              AppSpacing.horizontalGapXs,
-              _actionButton(),
-            ],
+            if (!_isReadOnly) ...[AppSpacing.horizontalGapXs, _actionButton()],
           ],
         ),
       ),
@@ -124,8 +125,9 @@ class PromoOfferCard extends StatelessWidget {
             key: descriptionKey,
             TextSpan(
               text: offer.description,
-              style:
-                  AppTypographyV1.labelLarge.regular.copyWith(color: _textColor),
+              style: AppTypographyV1.labelLarge.regular.copyWith(
+                color: _textColor,
+              ),
               children: [
                 if (offer.showTerms) ...[
                   const TextSpan(text: ' '),
@@ -149,17 +151,13 @@ class PromoOfferCard extends StatelessWidget {
           Text(
             offer.validityText!,
             key: validityKey,
-            style: AppTypographyV1.labelLarge.regular.copyWith(color: _textColor),
+            style: AppTypographyV1.labelLarge.regular.copyWith(
+              color: _textColor,
+            ),
           ),
         ],
-        if (offer.showSavings) ...[
-          const SizedBox(height: 6,),
-          _savingsRow(),
-        ],
-        if (onAction != null) ...[
-          AppSpacing.verticalGapXxs,
-          _ctaLink(),
-        ],
+        if (offer.showSavings) ...[const SizedBox(height: 6), _savingsRow()],
+        if (onAction != null) ...[AppSpacing.verticalGapXxs, _ctaLink()],
       ],
     );
   }
@@ -168,7 +166,7 @@ class PromoOfferCard extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.brandSecondary.withValues(alpha: 0.15),
-        borderRadius: const BorderRadius.all(Radius.circular(6))
+        borderRadius: const BorderRadius.all(Radius.circular(6)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(6.0),
@@ -182,7 +180,9 @@ class PromoOfferCard extends StatelessWidget {
             ),
             AppSpacing.horizontalGapXxs,
             Text(
-              offer.savingsText!,
+              savingsTextFromCart.isNotNullOrEmpty
+                  ? savingsTextFromCart ?? ''
+                  : offer.savingsText ?? '',
               key: savingsKey,
               style: AppTypographyV1.labelLarge.semiBold.linkColor(),
             ),
@@ -217,25 +217,25 @@ class PromoOfferCard extends StatelessWidget {
   }
 
   Widget _actionButton() {
+    if (!_enabled) {
+      return SecondaryButton.inactive(
+        key: applyButtonKey,
+        text: CommonStrings.apply,
+        size: ButtonSize.small,
+      );
+    }
     if (offer.isApplied) {
       return SecondaryButton.defaultType(
         key: removeButtonKey,
-        text: 'Remove',
+        text: CommonStrings.remove,
         size: ButtonSize.small,
         state: _buttonState,
         onTap: onRemove,
       );
     }
-    if (!_enabled) {
-      return SecondaryButton.inactive(
-        key: applyButtonKey,
-        text: 'Apply',
-        size: ButtonSize.small,
-      );
-    }
     return SecondaryButton.defaultType(
       key: applyButtonKey,
-      text: 'Apply',
+      text: CommonStrings.apply,
       size: ButtonSize.small,
       state: _buttonState,
       onTap: onApply,

@@ -62,6 +62,7 @@ class PromosOffersRepositoryImpl
   @override
   Future<Either<Failure, PromoActionResultEntity>> applyPromo({
     required String promoCode,
+    PromoOffersSource fromLocation = PromoOffersSource.cart,
     CancelToken? cancelToken,
   }) {
     return safeApiCall(_networkInfo, () async {
@@ -69,8 +70,9 @@ class PromosOffersRepositoryImpl
       // text field already blocks whitespace, but apply is also driven by the
       // offers sheet and by the post-login resume, and a stray space would
       // make the backend reject an otherwise valid code.
-      final response = await _api.applyPromo(
+      final response = await _api.applyPromoFrom(
         request: PromoApplyRequestModel(promoCode: promoCode.trim()),
+        fromLocation: fromLocation,
         cancelToken: cancelToken,
       );
       return response.toEntity();
