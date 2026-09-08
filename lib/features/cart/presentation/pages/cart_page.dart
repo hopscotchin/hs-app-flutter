@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
 import 'package:hs_app_flutter/components/atoms/badge_icon.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/atoms/empty_state_widget.dart';
 import 'package:hs_app_flutter/components/atoms/price_summary_widget.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/extensions/context_extension.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/colors.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
+import 'package:hs_app_flutter/features/cart/domain/entities/cart_entity.dart';
 import 'package:hs_app_flutter/features/cart/domain/entities/delivery_pincode_entity.dart';
 import 'package:hs_app_flutter/features/cart/presentation/widgets/cart_slg_widget.dart';
 import 'package:hs_app_flutter/features/cart/presentation/widgets/gift_card_banner.dart';
 import 'package:hs_app_flutter/features/pincode/presentation/widgets/pincode_bottom_sheet.dart';
+import 'package:shimmer/shimmer.dart';
 
-import '../../../../components/atoms/error_retry_widget.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/cart_strings.dart';
-import '../../../../core/constants/strings/common_strings.dart';
 import '../../../../core/constants/strings/login_redirects.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/utils/snackbar_utils.dart';
@@ -32,6 +32,7 @@ import '../widgets/cart_checkout_bar.dart';
 import '../widgets/cart_item_widget.dart';
 import '../widgets/cart_promo_section.dart';
 import '../widgets/cart_shimmer_loading.dart';
+import '../widgets/remove_cart_item_sheet.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key, this.fromBuyNow = false});
@@ -88,7 +89,7 @@ class _CartPageState extends State<CartPage> {
   Future<void> _onEddPincodeTap(BuildContext context) async {
     final result = await PincodeBottomSheet.show(context);
     if (result != null && context.mounted) {
-      context.read<CartBloc>().add(UpdateDeliveryPincode(pincode: result));
+      context.read<CartBloc>().add(const RefreshCart());
     }
   }
 
@@ -132,15 +133,12 @@ class _CartPageState extends State<CartPage> {
     return BlocListener<CartBloc, CartState>(
       // Buy Now hand-off from PDP — fires only on the first load thanks to the
       // one-shot latch.
-      listenWhen: (prev, curr) =>
-          widget.fromBuyNow && !_buyNowCheckoutStarted && curr.isLoaded,
+      listenWhen: (prev, curr) => widget.fromBuyNow && !_buyNowCheckoutStarted && curr.isLoaded,
       listener: (context, state) => _onCartLoadedForBuyNow(state),
       child: Stack(
         children: [
           Scaffold(
-            appBar: _CartAppBar(
-              onEddPincodeTap: () => _onEddPincodeTap(context),
-            ),
+            appBar: _CartAppBar(onEddPincodeTap: () => _onEddPincodeTap(context)),
             body: _CartBody(
               priceSummaryKey: _priceSummaryKey,
               onPullToRefresh: () => _onPullToRefresh(context),
@@ -167,7 +165,7 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
   const _CartAppBar({required this.onEddPincodeTap});
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 1);
 
   @override
   Widget build(BuildContext context) {
@@ -181,59 +179,132 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
         onTap: () => Navigator.of(context).pop(),
         child: const Padding(
           padding: EdgeInsets.only(left: AppSpacing.lgMd, right: AppSpacing.md),
-          child: CustomImage(
-            path: ImageConstants.arrowBack,
-            fit: BoxFit.contain,
-          ),
+          child: CustomImage(path: ImageConstants.arrowBack, fit: BoxFit.contain),
         ),
       ),
       title: Text(
         CartStrings.bag,
+        key: const ValueKey(CartTestStrings.appBarTitle),
         style: AppTypographyV1.titleMedium.bold.textPrimary(),
       ),
       actions: [
-        // Only rebuilds when the pincode itself changes — not on every
-        // cart mutation (loading flags, toasts, item updates, etc.).
-        BlocSelector<CartBloc, CartState, DeliveryPincodeEntity?>(
-          selector: (state) => state.cart?.deliveryPincode,
-          builder: (context, pincode) {
+        // Only rebuilds when the pincode itself changes (or the initial load
+        // ends) — not on every cart mutation (loading flags, toasts, item
+        // updates, etc.).
+        BlocSelector<CartBloc, CartState, (bool, DeliveryPincodeEntity?, CartEntity?)>(
+          selector: (state) => (state.isLoading, state.cart?.deliveryPincode, state.cart),
+          builder: (context, value) {
+            final (isLoading, pincode, cartList) = value;
+            // On the very first load there is no cart yet, so the label would
+            // otherwise read "Enter pincode for EDD" — a call to action for
+            // something the user may already have set — and then swap to the
+            // real pincode a moment later. A shimmer says "not known yet"
+            // instead, matching the body's CartShimmerLoading.
+            if (isLoading) {
+              return const _AppBarShimmer(width: 132, height: AppSpacing.md);
+            }
+            if ((cartList?.items ?? []).isEmpty) return const SizedBox.shrink();
             final label = (pincode?.pincode?.isNotEmpty ?? false)
                 ? '${pincode?.pincodeMessage ?? CartStrings.deliverTo} ${pincode!.pincode}'
                 : CartStrings.enterPincodeForEdd;
             return GestureDetector(
+              key: const ValueKey(CartTestStrings.appBarPincodeButton),
               onTap: onEddPincodeTap,
-              child: Row(
-                children: [
-                  Text(
-                    label,
-                    style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
-                  ),
-                  AppSpacing.horizontalGapXxs,
-                  const CustomImage(
-                    path: ImageConstants.arrowDown,
-                    height: AppSpacing.iconMd,
-                    width: AppSpacing.iconMd,
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Row(
+                  children: [
+                    Text(
+                      label,
+                      key: const ValueKey(CartTestStrings.appBarPincodeText),
+                      style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
+                    ),
+                    AppSpacing.horizontalGapXxs,
+                    const CustomImage(
+                      path: ImageConstants.arrowDown,
+                      height: AppSpacing.iconMd,
+                      width: AppSpacing.iconMd,
+                    ),
+                  ],
+                ),
               ),
             );
           },
         ),
 
-        BadgeIcon(
-          key: const ValueKey(PlpTestStrings.appBarWishlistButton),
-          iconSize: AppSpacing.iconSm,
-          icon: const CustomImage(
-            path: ImageConstants.heart,
-            width: AppSpacing.iconSm,
-            height: AppSpacing.iconSm,
-          ),
-          count: 0,
-          onTap: () {},
-          iconColor: AppColors.textPrimary,
+        BlocSelector<CartBloc, CartState, bool>(
+          selector: (state) => state.isLoading,
+          builder: (context, isLoading) {
+            // Circular, and the icon's own size — the heart is round enough
+            // that a rounded-rect placeholder would read as a different
+            // control.
+            if (isLoading) {
+              return const Padding(
+                padding: EdgeInsets.only(left: 2),
+                child: _AppBarShimmer(
+                  width: AppSpacing.iconSm,
+                  height: AppSpacing.iconSm,
+                  borderRadius: BorderRadius.all(Radius.circular(AppSpacing.iconSm)),
+                ),
+              );
+            }
+            return BadgeIcon(
+              key: const ValueKey(CartTestStrings.appBarWishlistButton),
+              iconSize: AppSpacing.iconSm,
+              icon: const Padding(
+                padding: EdgeInsets.only(left: 2, top: 5, bottom: 5),
+                child: CustomImage(
+                  path: ImageConstants.heart,
+                  width: AppSpacing.iconSm,
+                  height: AppSpacing.iconSm,
+                ),
+              ),
+              count: 0,
+              onTap: () {},
+              iconColor: AppColors.textPrimary,
+            );
+          },
         ),
         AppSpacing.horizontalGapSm,
       ],
+      // Separates the bar from the scrolling cart content, which otherwise
+      // runs straight into it — same treatment as the search page's app bar.
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(1),
+        child: Divider(height: 2, color: AppColors.neutralGrey1),
+      ),
+    );
+  }
+}
+
+/// Stand-in for an app-bar action during the initial cart load. Each use is
+/// sized to the widget it replaces so the bar doesn't reflow when the real
+/// content arrives, and they share CartShimmerLoading's colours so the header
+/// and body shimmer as one surface.
+class _AppBarShimmer extends StatelessWidget {
+  const _AppBarShimmer({
+    required this.width,
+    required this.height,
+    this.borderRadius = AppSpacing.borderRadiusXs,
+  });
+
+  final double width;
+  final double height;
+  final BorderRadius borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Shimmer.fromColors(
+        baseColor: AppColors.neutralGrey2,
+        highlightColor: AppColors.neutralGrey1,
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(color: Colors.white, borderRadius: borderRadius),
+        ),
+      ),
     );
   }
 }
@@ -254,45 +325,58 @@ class _CartBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<CartBloc, CartState>(
-      // One-shot side effects (toast / promo sheet / checkout sheet) are
-      // mutually exclusive per emission, so a single listener with an
-      // if/else-if chain covers all three instead of three separate
-      // BlocListeners each re-scanning every state change.
+      // One listener covers all three one-shot side effects (toast / promo
+      // sheet / checkout sheet) instead of three BlocListeners each re-scanning
+      // every state change.
+      //
+      // Each condition compares against the previous state rather than just
+      // testing for non-null. The clear events (`ClearToast` and friends) are
+      // queued with `add`, so they land an event-loop turn later; until then
+      // any unrelated emission still carries the payload, and a plain non-null
+      // test would fire the effect a second time — which is what was opening
+      // the promo error sheet twice.
       listenWhen: (prev, curr) =>
-          curr.toastMessage != null || curr.promoActionSheet != null,
+          (curr.toastMessage != null && curr.toastMessage != prev.toastMessage) ||
+          (curr.promoActionSheet != null && curr.promoActionSheet != prev.promoActionSheet),
       listener: (context, state) {
         final cartBloc = context.read<CartBloc>();
 
+        // Handled independently, not as an if/else chain: a promo apply can
+        // answer with a message *and* a sheet in the same emission, and
+        // deferring one of them to a later state would leave it stranded once
+        // the comparison above stops seeing it as new.
         if (state.toastMessage.isNotNullOrEmpty) {
           context.showSnack(
             state.toastMessage!,
-            status: state.toastIsError
-                ? SnackStatus.error
-                : SnackStatus.success,
+            status: state.toastIsError ? SnackStatus.error : SnackStatus.success,
+            key: const ValueKey(CartTestStrings.toastSnackBar),
           );
           cartBloc.add(const ClearToast());
-          return;
         }
 
-        // Backend-authored sheet returned by a promo apply/remove — shown in
-        // place of the toast, so it's cleared once presented.
+        // Backend-authored sheet returned by a promo apply/remove.
         if (state.promoActionSheet != null) {
           final sheet = state.promoActionSheet!;
           cartBloc.add(const ClearPromoActionSheet());
           showPromoActionSheet(context, sheet);
-          return;
         }
       },
       child: BlocBuilder<CartBloc, CartState>(
         builder: (context, state) {
           if (state.isLoading) {
-            return const CartShimmerLoading();
+            return const CartShimmerLoading(key: ValueKey(CartTestStrings.shimmerLoading));
           }
 
           if (state.isError) {
-            return ErrorRetryWidget(
-              message: state.errorMessage ?? CommonStrings.somethingWentWrong,
-              onRetry: () => context.read<CartBloc>().add(const LoadCart()),
+            return Padding(
+              padding: EdgeInsets.only(bottom: context.height * 0.1),
+              child: EmptyStateWidget(
+                titleKey: const ValueKey(CartTestStrings.errorStateTitle),
+                subtitleKey: const ValueKey(CartTestStrings.errorStateSubtitle),
+                buttonKey: const ValueKey(CartTestStrings.errorStateButton),
+                type: EmptyStateType.networkError,
+                onButtonTap: () => AppNavigator.goToHome(context),
+              ),
             );
           }
 
@@ -301,26 +385,22 @@ class _CartBody extends StatelessWidget {
           }
 
           final cart = state.cart!;
-          // An item-less cart is only worth rendering when there is still
-          // something to act on: items pending merge from the temp cart, whose
-          // "Update bag" message bar is the sole way to trigger that merge.
-          //
-          // Both halves are required. `isCartItemExistInTemp` alone is not
-          // enough — the backend can leave it set on a genuinely empty cart
-          // (e.g. right after the last line is moved to the wishlist), and
-          // suppressing the empty state then leaves a blank page: the item
-          // list is empty and promo / summary / SLG are all gated on
-          // `items.isNotEmpty`.
-          final hasMergePrompt =
-              cart.isCartItemExistInTemp && cart.messageBars.isNotEmpty;
+          final hasMergePrompt = cart.isCartItemExistInTemp && cart.messageBars.isNotEmpty;
           if (cart.items.isEmpty && !hasMergePrompt) {
-            return EmptyStateWidget(
-              type: EmptyStateType.cart,
-              onButtonTap: () => AppNavigator.goToHome(context),
+            return Padding(
+              padding: EdgeInsets.only(bottom: context.height * 0.1),
+              child: EmptyStateWidget(
+                titleKey: const ValueKey(CartTestStrings.emptyStateTitle),
+                subtitleKey: const ValueKey(CartTestStrings.emptyStateSubtitle),
+                buttonKey: const ValueKey(CartTestStrings.emptyStateButton),
+                type: EmptyStateType.cart,
+                onButtonTap: () => AppNavigator.goToHome(context),
+              ),
             );
           }
 
           return RefreshIndicator(
+            key: const ValueKey(CartTestStrings.refreshIndicator),
             onRefresh: onPullToRefresh,
             child: _CartContent(state: state, priceSummaryKey: priceSummaryKey),
           );
@@ -338,10 +418,7 @@ class _CartCheckoutBar extends StatelessWidget {
   final VoidCallback? onDetailsTap;
   final VoidCallback onCheckout;
 
-  const _CartCheckoutBar({
-    required this.onDetailsTap,
-    required this.onCheckout,
-  });
+  const _CartCheckoutBar({required this.onDetailsTap, required this.onCheckout});
 
   @override
   Widget build(BuildContext context) {
@@ -353,7 +430,7 @@ class _CartCheckoutBar extends StatelessWidget {
 
         final cart = state.cart!;
         return CartCheckoutBar(
-          itemCount: cart.items.length,
+          itemCount: cart.orderDetails?.itemCount ?? cart.items.length,
           orderSummary: cart.orderSummary,
           isLoading: state.isCheckoutLoading,
           onDetailsTap: cart.orderSummary != null ? onDetailsTap : null,
@@ -368,9 +445,6 @@ class _CartCheckoutBar extends StatelessWidget {
 /// UPDATING OVERLAY — blocks interaction during cart mutations
 /// ─────────────────────────────────────────────────────────
 
-/// Blocks all interaction on the page while any cart mutation (quantity
-/// change, remove, move-to-wishlist, promo apply/remove, merge) and its
-/// mandatory follow-up cart refresh is in flight.
 class _CartUpdatingOverlay extends StatelessWidget {
   const _CartUpdatingOverlay();
 
@@ -381,6 +455,7 @@ class _CartUpdatingOverlay extends StatelessWidget {
       builder: (context, isCartUpdating) {
         if (!isCartUpdating) return const SizedBox.shrink();
         return Positioned.fill(
+          key: const ValueKey(CartTestStrings.updatingOverlay),
           child: AbsorbPointer(
             child: Container(
               // The cart content stays visible (just dimmed) underneath —
@@ -394,9 +469,7 @@ class _CartUpdatingOverlay extends StatelessWidget {
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
                     strokeCap: StrokeCap.round,
-                    valueColor: AlwaysStoppedAnimation(
-                      AppColors.progressActive,
-                    ),
+                    valueColor: AlwaysStoppedAnimation(AppColors.progressActive),
                     backgroundColor: AppColors.progressTrack,
                   ),
                 ),
@@ -427,7 +500,8 @@ class _CartContent extends StatelessWidget {
     final cartBloc = context.read<CartBloc>();
     final loggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
     if (!loggedIn) {
-      //* this needs testing will add in next release
+      cartBloc.setPendingPromo(code);
+      AppNavigator.goToLogin(context, redirectType: LoginRedirects.typePromo);
       return;
     }
     cartBloc.add(ApplyPromoCode(promoCode: code));
@@ -446,37 +520,10 @@ class _CartContent extends StatelessWidget {
     final loggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
     if (!loggedIn) {
       cartBloc.setPendingMoveToWishlist(event);
-      AppNavigator.goToLogin(
-        context,
-        redirectType: LoginRedirects.typeAddToWishlist,
-      );
+      AppNavigator.goToLogin(context, redirectType: LoginRedirects.typeAddToWishlist);
       return;
     }
     cartBloc.add(event);
-  }
-
-  void _onRemoveItem(BuildContext context, String sku) {
-    AppBottomSheet.show(
-      context,
-      title: CartStrings.removeItemsTitle,
-      description: CartStrings.removeItemsDescription,
-      primaryAction: AppBottomSheetAction(
-        label: CartStrings.no,
-        style: AppBottomSheetButtonStyle.filled,
-        onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-      ),
-      secondaryAction: AppBottomSheetAction(
-        label: CommonStrings.remove,
-        style: AppBottomSheetButtonStyle.outlined,
-        buttonKey: const ValueKey(
-          CartTestStrings.removeItemBottomSheetRemoveButton,
-        ),
-        onPressed: () {
-          Navigator.of(context, rootNavigator: true).pop();
-          context.read<CartBloc>().add(RemoveCartItem(sku: sku));
-        },
-      ),
-    );
   }
 
   @override
@@ -504,30 +551,36 @@ class _CartContent extends StatelessWidget {
                 right: AppSpacing.sm,
               ),
               child: MessageBarsWidget(
+                padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
                 messageBars: cart.messageBars,
+                keyPrefix: CartTestStrings.screen,
                 onAction: (actionLink, _) {
-                  //* this needs testing will add in next release
+                  if (actionLink != null && actionLink.toLowerCase().contains('merge')) {
+                    context.read<CartBloc>().add(const MergeCart());
+                  }
                 },
               ),
             ),
 
-          if (cart.giftCardItem != null)
-            GiftCardBanner(giftCardItem: cart.giftCardItem!),
+          if (cart.giftCardItem != null) GiftCardBanner(giftCardItem: cart.giftCardItem!),
           ListView.builder(
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            padding: AppSpacing.paddingVerticalSm,
             itemCount: cart.items.length,
+            padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
               final item = cart.items[index];
               return CartItemWidget(
-                key: ValueKey(item.sku),
+                key: ValueKey('${CartTestStrings.item}_$index'),
+                testIndex: index,
                 item: item,
-                isLoading: state.loadingItemSku == item.sku,
+                hasMessageBars: cart.messageBars.isNotEmpty,
+                isLoading: state.isItemBusy(item.sku),
+                isMovingToWishlist: state.isMovingToWishlist(item.sku),
                 onQuantityChanged: (qty) => context.read<CartBloc>().add(
-                  UpdateCartItemQuantity(sku: item.sku ?? '', quantity: qty),
+                  UpdateCartItemQuantity(sku: item.sku ?? '', quantity: qty, itemIndex: index),
                 ),
-                onRemove: () => _onRemoveItem(context, item.sku ?? ''),
+                onRemove: () => showRemoveCartItemSheet(context, item.sku ?? ''),
                 onMoveToWishlist: () => _moveToWishlist(
                   context,
                   MoveToWishlist(
@@ -541,7 +594,8 @@ class _CartContent extends StatelessWidget {
           ),
 
           // Promo code section
-          if (cart.items.isNotEmpty)
+          if (cart.items.isNotEmpty) ...{
+            AppSpacing.verticalGapLMd,
             CartPromoSection(
               promotionData: cart.promotionData,
               isLoading: state.isPromoLoading,
@@ -555,13 +609,18 @@ class _CartContent extends StatelessWidget {
                 if (cartChanged) cartBloc.add(const LoadCart());
               },
             ),
+          },
 
           // Price summary
           if (cart.items.isNotEmpty && cart.orderSummary != null) ...[
-            AppSpacing.verticalGapLg,
+            AppSpacing.verticalGapLMd,
+            // const SizedBox(height: 40),
             KeyedSubtree(
               key: priceSummaryKey,
-              child: PriceSummaryWidget(summary: cart.orderSummary!),
+              child: PriceSummaryWidget(
+                summary: cart.orderSummary!,
+                keyPrefix: CartTestStrings.priceSummary,
+              ),
             ),
           ],
 
@@ -571,20 +630,21 @@ class _CartContent extends StatelessWidget {
             Padding(
               padding: AppSpacing.paddingHorizontalSm,
               child: MessageBarsWidget(
+                textStyle: AppTypographyV1.labelLarge.regular.copyWith(
+                  color: AppColors.neutralGrey6,
+                ),
                 iconSize: (24, 24),
                 messageBars: cart.bottomMessageBars,
+                keyPrefix: CartTestStrings.bottomMessageBarScreen,
                 cardStyle: true,
               ),
             ),
           ],
-          if (cart.items.isNotEmpty &&
-              cart.serviceLevelGuarantee.isNotEmpty) ...{
-            if (cart.bottomMessageBars.isEmpty) ...{
-              const SizedBox(height: AppSpacing.md),
-            },
+          if (cart.items.isNotEmpty && cart.serviceLevelGuarantee.isNotEmpty) ...{
+            if (cart.bottomMessageBars.isEmpty) ...{const SizedBox(height: AppSpacing.md)},
             SlgWidget(items: cart.serviceLevelGuarantee),
-            AppSpacing.verticalGapSm,
           },
+          AppSpacing.verticalGapSm,
         ],
       ),
     );

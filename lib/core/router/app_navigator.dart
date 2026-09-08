@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../features/pdp/domain/entities/pdp_entry_args.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/address_entity.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/manage_address_args.dart';
 import 'package:hs_app_flutter/features/address/presentation/widgets/address_item_card.dart';
 import 'package:hs_app_flutter/features/pdp/domain/entities/media_entity.dart';
 import 'package:hs_app_flutter/features/plp/domain/entities/page_type.dart';
+import 'package:hs_app_flutter/features/plp/domain/entities/plp_entry_args.dart';
 
 import '../../features/account/presentation/bloc/account_bloc.dart';
 import '../../features/auth/domain/entities/otp_config/otp_config_entity.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/cart/presentation/bloc/cart_bloc.dart';
 import '../../features/cart/presentation/cubit/cart_actions_cubit.dart';
-import '../../features/pdp/domain/entities/pdp_entry_args.dart';
 import '../../features/wishlist/presentation/cubit/wishlist_cubit.dart';
 import '../constants/route_names.dart';
 import '../constants/strings/auth_strings.dart';
 import '../constants/strings/login_redirects.dart';
 import '../entities/message_bar_entity.dart';
+import '../navigation/nav_destination.dart';
 
 abstract final class AppNavigator {
   static bool _isRouteInStack(BuildContext context, String routeName) {
@@ -35,11 +38,10 @@ abstract final class AppNavigator {
   /// checkout on its own as soon as the cart loads, instead of waiting for the
   /// checkout button — the Flutter equivalent of Android's
   /// `Util.createBuyNowShoppingCartIntent` passing `IS_FROM_BUYNOW`.
-  static void goToCart(BuildContext context, {bool fromBuyNow = false}) =>
-      context.pushNamed(
-        RouteNames.cartName,
-        queryParameters: fromBuyNow ? const {'fromBuyNow': 'true'} : const {},
-      );
+  static void goToCart(BuildContext context, {bool fromBuyNow = false}) => context.pushNamed(
+    RouteNames.cartName,
+    queryParameters: fromBuyNow ? const {'fromBuyNow': 'true'} : const {},
+  );
 
   /// Pops the current route / dismisses the top-most sheet or dialog.
   static void goBack(BuildContext context) => context.pop();
@@ -181,6 +183,12 @@ abstract final class AppNavigator {
     return result == true;
   }
 
+  /// [args] carries the analytics entry context (`from_screen`,
+  /// `from_location`, `position`, …) — the Flutter equivalent of the Intent
+  /// extras Android reads in `PLPAnalytics.setIntentData`. It travels as
+  /// `extra` rather than a query parameter so it stays out of the URL and off
+  /// deeplinks; omit it for a deeplink-style open, which is what Android does
+  /// too when nothing is passed.
   static void goToPlp(
     BuildContext context, {
     PageType pageType = PageType.plp,
@@ -188,12 +196,13 @@ abstract final class AppNavigator {
     String? categoryName,
     String? searchQuery,
     String? rawSearchParams,
+    PlpEntryArgs? args,
   }) {
     final queryParams = <String, String>{'pageType': pageType.name, 'plpId': plpId.toString()};
     if (categoryName != null) queryParams['categoryName'] = categoryName;
     if (searchQuery != null) queryParams['searchQuery'] = searchQuery;
     if (rawSearchParams != null) queryParams['rawSearchParams'] = rawSearchParams;
-    context.pushNamed('plp', queryParameters: queryParams);
+    context.pushNamed('plp', queryParameters: queryParams, extra: args);
   }
 
   /// [args] carries the analytics entry context (`from_screen`, `position`,
@@ -238,10 +247,26 @@ abstract final class AppNavigator {
 
   static void goToLegal(BuildContext context) => context.pushNamed('legal');
 
-  static void goToPromoDetails(BuildContext context, int promoId) =>
-      context.pushNamed('promoDetails', pathParameters: {'promoId': promoId.toString()});
+  /// [savingsTextFromCart] is the cart's "You saved ₹X" line, shown on the
+  /// detail page when the user arrives from the cart's offer sheet.
+  ///
+  /// It travels in `extra`, not in the URL: `RouteNames.promoDetails` declares
+  /// exactly one path parameter (`:promoId`), so passing a second one trips
+  /// go_router's `paramNames.contains(key)` assertion. It is also display
+  /// copy — free text with spaces, ₹ and commas — which has no business in a
+  /// path segment even if the route did accept it.
+  static void goToPromoDetails(BuildContext context, int promoId, {String? savingsTextFromCart}) =>
+      context.pushNamed(
+        'promoDetails',
+        pathParameters: {'promoId': promoId.toString()},
+        extra: <String, dynamic>{
+          if (savingsTextFromCart != null && savingsTextFromCart.isNotEmpty)
+            PromoDetailsDestination.savingsTextExtraKey: savingsTextFromCart,
+        },
+      );
 
   static void goToSearch(BuildContext context) => context.pushNamed('search');
+
   static void goToAddresses(
     BuildContext context, {
     AddressListMode mode = AddressListMode.normal,

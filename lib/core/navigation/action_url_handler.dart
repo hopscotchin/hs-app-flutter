@@ -80,6 +80,9 @@ class ActionUrlHandler {
     final route = uri.host;
     final params = uri.queryParameters;
     final id = params['id'] ?? '';
+    // Only the promo-details routes read this; `Uri.queryParameters` has
+    // already percent-decoded it.
+    final savingsTextFromCart = params[PromoDetailsDestination.savingsTextExtraKey] ?? '';
 
     switch (route) {
       // ── Home ──
@@ -94,9 +97,7 @@ class ActionUrlHandler {
 
       // ── Special / Landing Page ──
       case DeeplinkHost.specialPage || DeeplinkHost.collections:
-        return id.isNotEmpty
-            ? LandingPageDestination(pageName: id)
-            : const HomeDestination();
+        return id.isNotEmpty ? LandingPageDestination(pageName: id) : const HomeDestination();
 
       // ── Boutique ──
       case _Route.boutique || DeeplinkHost.boutiquesListing:
@@ -108,19 +109,13 @@ class ActionUrlHandler {
 
       // ── PDP ──
       case _Route.product || DeeplinkHost.productPage:
-        return id.isNotEmpty
-            ? PdpDestination(productId: id)
-            : const HomeDestination();
+        return id.isNotEmpty ? PdpDestination(productId: id) : const HomeDestination();
 
       // ── Search ──
       case _Route.search || DeeplinkHost.searchPage:
         final q = params['q'] ?? params['keyword'] ?? '';
         return q.isNotEmpty
-            ? PlpDestination(
-                pageType: PageType.search,
-                plpId: 0,
-                searchQuery: q,
-              )
+            ? PlpDestination(pageType: PageType.search, plpId: 0, searchQuery: q)
             : const HomeDestination();
 
       // ── Cart ──
@@ -166,16 +161,12 @@ class ActionUrlHandler {
         return LoginDestination(mobile: id.isNotEmpty ? id : null);
 
       // ── Rate / Update app ──
-      case DeeplinkHost.rateApp ||
-          DeeplinkHost.updateApp ||
-          DeeplinkHost.updateApp2:
+      case DeeplinkHost.rateApp || DeeplinkHost.updateApp || DeeplinkHost.updateApp2:
         return const RateAppDestination();
 
       // ── Tabbed Landing Page ──
       case DeeplinkHost.tabbedLandingPage:
-        return id.isNotEmpty
-            ? LandingPageDestination(pageName: id)
-            : const HomeDestination();
+        return id.isNotEmpty ? LandingPageDestination(pageName: id) : const HomeDestination();
 
       // ── Promo details ──
       // Two accepted spellings, because two backend surfaces emit them:
@@ -190,7 +181,7 @@ class ActionUrlHandler {
         final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
         final promoId = _id(id.isNotEmpty ? id : segments.firstOrNull);
         return promoId > 0
-            ? PromoDetailsDestination(promoId: promoId)
+            ? PromoDetailsDestination(promoId: promoId, savingsTextFromCart: savingsTextFromCart)
             : const HomeDestination();
 
       // ── TODO: navigate to dedicated pages when built ──
@@ -235,9 +226,7 @@ class ActionUrlHandler {
 
       // ── Special / Landing Page: /special/<pageName> ──
       case 'special':
-        final pageName = segments.length >= 2
-            ? segments[1]
-            : (params['id'] ?? '');
+        final pageName = segments.length >= 2 ? segments[1] : (params['id'] ?? '');
         return pageName.isNotEmpty
             ? LandingPageDestination(pageName: pageName)
             : const HomeDestination();
@@ -256,19 +245,18 @@ class ActionUrlHandler {
       // TODO fallback below, since there is no offers *listing* page (offers
       // are a bottom sheet). Only the id-bearing detail path is routed here.
       case _Route.promoDetails || _Route.promoDetailsNoHyphen:
-        final promoId = segments.length >= 2
-            ? _id(segments[1])
-            : _id(params['id']);
+        final promoId = segments.length >= 2 ? _id(segments[1]) : _id(params['id']);
         return promoId > 0
-            ? PromoDetailsDestination(promoId: promoId)
+            ? PromoDetailsDestination(
+                promoId: promoId,
+                savingsTextFromCart: params[PromoDetailsDestination.savingsTextExtraKey] ?? '',
+              )
             : const HomeDestination();
 
       // ── PDP: /product/<pid> ──
       case _Route.product:
         final pid = segments.length >= 2 ? segments[1] : (params['id'] ?? '');
-        return pid.isNotEmpty
-            ? PdpDestination(productId: pid)
-            : const HomeDestination();
+        return pid.isNotEmpty ? PdpDestination(productId: pid) : const HomeDestination();
 
       // ── Search: /search, /productsearch, /productssearch ──
       case _Route.search:
@@ -281,20 +269,12 @@ class ActionUrlHandler {
         }
         final q = params['keyword'] ?? params['q'] ?? '';
         return q.isNotEmpty
-            ? PlpDestination(
-                pageType: PageType.search,
-                plpId: 0,
-                searchQuery: q,
-              )
+            ? PlpDestination(pageType: PageType.search, plpId: 0, searchQuery: q)
             : const HomeDestination();
 
       case 'productsearch' || 'productssearch':
         final q = params['keyword'] ?? params['q'] ?? '';
-        return PlpDestination(
-          pageType: PageType.search,
-          plpId: 0,
-          searchQuery: q,
-        );
+        return PlpDestination(pageType: PageType.search, plpId: 0, searchQuery: q);
 
       // ── Shop-by: /shop-by/category/<name> ──
       case 'shop-by':

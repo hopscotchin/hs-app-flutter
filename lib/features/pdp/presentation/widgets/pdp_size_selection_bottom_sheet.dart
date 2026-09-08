@@ -1,3 +1,4 @@
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -12,6 +13,7 @@ import '../../../../components/buttons/app_button.dart';
 import '../../../../components/buttons/button_enums.dart';
 import '../../../../components/page_components/price_info_row.dart';
 import '../../../../features/plp/domain/entities/product_price_entity.dart';
+import '../../../../core/analytics/pdp/pdp_analytics_tracker.dart';
 import '../bloc/pdp_bloc.dart';
 import 'pdp_size_chart_bottom_sheet.dart';
 import 'pdp_size_selector.dart';
@@ -30,15 +32,18 @@ void showPdpSizeSelectionBottomSheet(BuildContext context, {required bool fromBu
     showDragHandle: false,
     builder: (_) => BlocProvider.value(
       value: context.read<PdpBloc>(),
-      child: _PdpSizeSelectionBottomSheet(fromBuyNow: fromBuyNow),
+      // pageContext is the PDP page context — the only one that can see the
+      // route-level PdpAnalyticsTracker, which this sheet is not a descendant of.
+      child: _PdpSizeSelectionBottomSheet(fromBuyNow: fromBuyNow, pageContext: context),
     ),
   );
 }
 
 class _PdpSizeSelectionBottomSheet extends StatelessWidget {
-  const _PdpSizeSelectionBottomSheet({required this.fromBuyNow});
+  const _PdpSizeSelectionBottomSheet({required this.fromBuyNow, required this.pageContext});
 
   final bool fromBuyNow;
+  final BuildContext pageContext;
 
   @override
   Widget build(BuildContext context) {
@@ -94,10 +99,20 @@ class _PdpSizeSelectionBottomSheet extends StatelessWidget {
                   if (product.hasSizeChart == true)
                     GestureDetector(
                       key: const ValueKey(PdpTestStrings.sizeSheetSizeChartButton),
+                      // Android fires `size_chart_clicked` from *both* entry
+                      // points — the upfront selector
+                      // (`SizeSelectionView.kt:49`) and this sheet
+                      // (`SizeSelectionDialog.kt:113`). Read from `pageContext`:
+                      // the tracker is provided on the PDP route, which this
+                      // sheet is not a descendant of.
+                      //
                       // The chart stacks on top of this sheet instead of
                       // replacing it, so device back pops only the chart and
                       // lands back here with the size selection intact.
-                      onTap: () => showPdpSizeChartBottomSheet(context, productName: product.name),
+                      onTap: () {
+                        pageContext.read<PdpAnalyticsTracker>().onSizeChartOpened();
+                        showPdpSizeChartBottomSheet(context, productName: product.name);
+                      },
                       behavior: HitTestBehavior.opaque,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -128,7 +143,10 @@ class _PdpSizeSelectionBottomSheet extends StatelessWidget {
                       isSelected: selectedSku?.skuId == product.skus[i].skuId,
                       onTap: product.skus[i].enable == true && product.skus[i].skuId != null
                           ? () => context.read<PdpBloc>().add(
-                              PdpEvent.selectSku(skuId: product.skus[i].skuId!),
+                              PdpEvent.selectSku(
+                                skuId: product.skus[i].skuId!,
+                                fromLocation: FromLocations.addToCartButton,
+                              ),
                             )
                           : null,
                     ),

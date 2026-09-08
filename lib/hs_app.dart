@@ -1,3 +1,5 @@
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/core/network/connectivity/connectivity_listener.dart';
@@ -89,33 +91,35 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
       child: MaterialApp.router(
         title: 'Hopscotch',
         debugShowCheckedModeBanner: false,
+        // Both required by DevicePreview, and both inert when it is disabled:
+        // `locale` returns null and `appBuilder` returns its child untouched, so
+        // an AUTOMATION or release build behaves exactly as before.
+        //
+        // useInheritedMediaQuery is deprecated and ignored by Flutter — the View
+        // widget owns MediaQuery now — but device_preview still reads it to warn
+        // when it is false, so setting it only silences that check.
+        // ignore: deprecated_member_use
+        useInheritedMediaQuery: true,
+        locale: kDebugMode ? DevicePreview.locale(context) : null,
         theme: AppTheme.lightTheme,
         themeMode: ThemeMode.light,
         scaffoldMessengerKey: HSApp.scaffoldMessengerKey,
         routerConfig: AppRouter.router,
         builder: (context, child) {
-          return MultiBlocListener(
+          final app = MultiBlocListener(
             listeners: [
               // Keeps the nav-bar badge in step with the cart without CartBloc
               // having to know the cubit exists (it used to be constructor-
               // injected, which made the bloc untestable and let the count
               // desync whenever a handler forgot its `set()` call).
               //
-              // `items.length` is distinct lines, matching what the cart
-              // screen itself shows. The add-to-cart paths instead report the
-              // server's `cartItemQty` (total units) — reconciling those two
-              // is tracked separately.
               BlocListener<CartBloc, CartState>(
-                listenWhen: (a, b) => a.cart?.items.length != b.cart?.items.length,
+                listenWhen: (a, b) => _cartItemCount(a) != _cartItemCount(b),
                 listener: (context, state) {
                   // Buy-now mode is the exception: that cart response is scoped
-                  // to the single item being bought, so `items.length` is 1 no
-                  // matter how full the bag is. The badge already carries the
-                  // server's true `cartItemQty` from the buy-now call itself
-                  // (PdpBloc._onBuyNow), and leaving the mode refetches the full
-                  // bag, which lands here and corrects the count.
+
                   if (context.read<CartBloc>().instantCheckout) return;
-                  context.read<CartCountCubit>().set(state.cart?.items.length ?? 0);
+                  context.read<CartCountCubit>().set(_cartItemCount(state));
                 },
               ),
               BlocListener<WishlistCubit, WishlistState>(
@@ -146,8 +150,19 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
               ),
             ),
           );
+
+          // Guarded on kDebugMode, a compile-time constant, so a release build
+          // drops this call site entirely. Without the guard, appBuilder keeps
+          // DevicePreview — and its Provider store and freezed state union —
+          // reachable on the release path, even though the preview can never
+          // turn on there. `enabled: false` alone does not achieve that: the
+          // code still has to be compiled to be able to check the flag.
+          return kDebugMode ? DevicePreview.appBuilder(context, app) : app;
         },
       ),
     );
   }
 }
+
+int _cartItemCount(CartState state) =>
+    state.cart?.orderDetails?.itemCount ?? state.cart?.items.length ?? 0;

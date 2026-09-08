@@ -7,6 +7,7 @@ import '../../../../core/constants/strings/common_strings.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
 import '../../../../core/error/failures.dart';
 import '../../../cart/domain/usecases/add_to_cart_usecase.dart';
+import '../../domain/entities/color_variants_entity.dart';
 import '../../domain/entities/product_detail_entity.dart';
 import '../../domain/entities/recommendations_entity.dart';
 import '../../domain/entities/size_chart_entity.dart';
@@ -15,6 +16,7 @@ import '../../domain/usecases/get_product_details_usecase.dart';
 import '../../domain/usecases/get_recommendations_usecase.dart';
 import '../../domain/usecases/get_size_chart_usecase.dart';
 import '../../domain/usecases/verify_pincode_usecase.dart';
+import '../../../../core/analytics/pdp/pdp_analytics_tracker.dart';
 
 part 'pdp_bloc.freezed.dart';
 part 'pdp_event.dart';
@@ -23,6 +25,10 @@ part 'pdp_state.dart';
 @injectable
 class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
   PdpBloc({
+    /// Supplied by `PdpRoute` via `sl<PdpBloc>(param1: tracker)` so the Bloc and
+    /// the widget tree share one instance — the tracker's suppression state only
+    /// works if there is exactly one per PDP visit.
+    @factoryParam required this.tracker,
     required this.getProductDetailsUseCase,
     required this.getRecommendationsUseCase,
     required this.addToCartUseCase,
@@ -48,13 +54,18 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
   final VerifyPincodeUseCase verifyPincodeUseCase;
   final CartCountCubit cartCountCubit;
   final GetSizeChartUseCase getSizeChartUseCase;
+  final PdpAnalyticsTracker tracker;
 
   Future<void> _onLoadProductDetails(LoadProductDetails event, Emitter<PdpState> emit) async {
     emit(const PdpState(status: PdpStatus.loading));
     final token = swapCancelToken();
 
     final result = await getProductDetailsUseCase(
-      GetProductDetailsParams(productId: event.productId, cancelToken: token),
+      GetProductDetailsParams(
+        productId: event.productId,
+        colorVariant: event.colorVariant ? true : null,
+        cancelToken: token,
+      ),
     );
 
     result.fold(
@@ -64,6 +75,10 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
       },
       (productDetail) {
         emit(PdpState(status: PdpStatus.success, productDetail: productDetail));
+        // `product_viewed`. A colour switch routes through `onPidRefreshed`
+        // first (see _onSelectColorVariant), so this fires once per PID rather
+        // than duplicating.
+        tracker.onProductLoaded(productDetail);
         add(PdpEvent.loadRecommendations(productId: event.productId));
       },
     );
@@ -133,6 +148,9 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
     final skus = current.productDetail?.product?.skus ?? [];
     final sku = skus.where((s) => s.skuId == event.skuId).firstOrNull;
     if (sku == null) return;
+    // `size_selected` — the tracker applies Android's change-guard, so
+    // re-tapping the selected size emits nothing.
+    tracker.onSizeSelected(sku: sku, fromLocation: event.fromLocation);
     emit(current.copyWith(selectedSku: sku));
   }
 
@@ -142,7 +160,15 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
 
     emit(current.copyWith(isAddingToBag: true));
 
-    final result = await addToCartUseCase(AddToCartParams(skuId: event.skuId));
+    // `product.orderAttribution` — the journey node the response echoed back.
+    // Forwarded to the ATC body so `product_ordered` at order time can be
+    // attributed to this PDP's funnel.
+    final result = await addToCartUseCase(
+      AddToCartParams(
+        skuId: event.skuId,
+        trackingParams: current.productDetail?.product?.orderAttribution ?? const {},
+      ),
+    );
 
     result.fold(
       (f) {
@@ -170,6 +196,10 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
             addToBagSuccessTick: current.addToBagSuccessTick + 1,
           ),
         );
+        // `product_added_to_cart` — success only, matching Android.
+        tracker
+          ..syncDetail(updated.productDetail!)
+          ..onAddedToCart(updated.selectedSku);
       },
     );
   }
@@ -180,7 +210,13 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
 
     emit(current.copyWith(isBuyingNow: true));
 
-    final result = await addToCartUseCase(AddToCartParams(skuId: event.skuId, fromBuyNow: true));
+    final result = await addToCartUseCase(
+      AddToCartParams(
+        skuId: event.skuId,
+        fromBuyNow: true,
+        trackingParams: current.productDetail?.product?.orderAttribution ?? const {},
+      ),
+    );
 
     result.fold(
       (f) {
@@ -208,6 +244,11 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
             buyNowSuccessTick: current.buyNowSuccessTick + 1,
           ),
         );
+        // Buy-now goes through the same add-to-cart call on Android, so it emits
+        // `product_added_to_cart` too. `buy_now_clicked` already fired on tap.
+        tracker
+          ..syncDetail(updated.productDetail!)
+          ..onAddedToCart(updated.selectedSku);
       },
     );
   }
@@ -233,6 +274,8 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
         // Network/unknown failure — reported to the (still-open) sheet, which
         // shows it inline and lets the user retry. Prefer server-provided bars
         // (cart-style) when present, else wrap the plain message.
+        // Android's `UIError` branch → `pincode_change: failure`.
+        tracker.onPincodeVerifyFailed();
         emit(
           current.copyWith(
             pincodeVerifyTick: current.pincodeVerifyTick + 1,
@@ -241,6 +284,11 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
         );
       },
       (pincodeCheck) {
+        // ⚠️ Analytics reads `isServiceable`, NOT `action` — and a null value
+        // fires nothing at all. The UI keeps branching on `action`
+        // below; the two answer different questions.
+        tracker.onPincodeVerified(pincodeCheck);
+
         final action = pincodeCheck.action?.toLowerCase();
         final isFailure = action != null && action != 'success';
         if (isFailure) {
@@ -265,7 +313,17 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
           return sku;
         }).toList();
 
+        // The response's `trackingMeta` is the pincode-scoped slice, so it is
+        // MERGED over the product's node rather than replacing it — a replace
+        // would leave every later event without `brand`, `category`, `price` and
+        // the other 20 keys the pincode did not touch.
+        final pincodeMeta = pincodeCheck.trackingMeta;
+        final mergedMeta = pincodeMeta == null || pincodeMeta.isEmpty
+            ? product.trackingMeta
+            : <String, dynamic>{...?product.trackingMeta, ...pincodeMeta};
+
         final updatedProduct = product.copyWith(
+          trackingMeta: mergedMeta,
           eddInfo: pincodeCheck.eddInfo ?? product.eddInfo,
           isServiceable: pincodeCheck.isServiceable,
           serviceGuarantee: pincodeCheck.serviceGuarantee.isNotEmpty
@@ -297,6 +355,7 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
             pincodeVerifyError: null,
           ),
         );
+        tracker.syncDetail(state.productDetail!);
       },
     );
   }
@@ -309,14 +368,50 @@ class PdpBloc extends BaseBloc<PdpEvent, PdpState> {
           : CommonStrings.somethingWentWrong;
 
   void _onSelectColorVariant(SelectColorVariant event, Emitter<PdpState> emit) {
-    add(PdpEvent.loadProductDetails(productId: event.productId));
+    // Order matters: `new_color_selected` describes the OUTGOING product, so it
+    // must fire before the per-PID state is reset — matching Android, where
+    // `sendEventNewColorSelected` runs before `refreshPID`
+    // (`ProductDetailActivity.kt:304-305`).
+    // The variant node carries `new_product_id_selected`, so the tapped variant
+    // is located here and handed over whole rather than as a bare id.
+    final variants = state.productDetail?.product?.colorVariants ?? const [];
+    ColorVariantEntity? tapped;
+    for (final v in variants) {
+      if (v.productId == event.productId) {
+        tapped = v;
+        break;
+      }
+    }
+    tracker
+      ..onColourVariantSelected(tapped)
+      ..onPidRefreshed();
+    // `colorVariant: true` is what makes the next response answer
+    // `redirected_from_colour_widget` with "Yes" — the flag is a property of the
+    // request, so no client state has to survive the reload.
+    add(
+      PdpEvent.loadProductDetails(
+        productId: event.productId,
+        colorVariant: true,
+      ),
+    );
   }
 
-  void _onExpandDetailTab(ExpandDetailTab event, Emitter<PdpState> emit) {
+  Future<void> _onExpandDetailTab(
+    ExpandDetailTab event,
+    Emitter<PdpState> emit,
+  ) async {
     final current = state;
     if (current.status != PdpStatus.success) return;
     final newIndex = current.expandedDetailTab == event.tabIndex ? -1 : event.tabIndex;
     emit(current.copyWith(expandedDetailTab: newIndex));
+    // Awaited, not fire-and-forget: expand must land before tab_clicked.
+    final details = current.productDetail?.product?.details ?? const [];
+    await tracker.onDetailTabToggled(
+      tabIndex: newIndex,
+      tab: newIndex >= 0 && newIndex < details.length
+          ? details[newIndex]
+          : null,
+    );
   }
 
   Future<void> _onLoadSizeChart(LoadSizeChart event, Emitter<PdpState> emit) async {

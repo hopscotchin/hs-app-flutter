@@ -36,6 +36,8 @@ class CartPromoSection extends StatefulWidget {
 }
 
 class _CartPromoSectionState extends State<CartPromoSection> {
+  static const int _maxCodeLength = 100;
+
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   bool _hasText = false;
@@ -80,6 +82,7 @@ class _CartPromoSectionState extends State<CartPromoSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: const ValueKey(CartTestStrings.promoSection),
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.md),
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.neutralGrey2, width: 1),
@@ -130,6 +133,11 @@ class _CartPromoSectionState extends State<CartPromoSection> {
           // is stricter than trimming on submit: the field can never hold a
           // value that looks applied but isn't.
           inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
+          // Real codes are a handful of characters; the cap is only there to
+          // stop a paste of arbitrary length reaching the API. Enforced without
+          // `maxLength` so the field doesn't grow a counter under it.
+          maxLength: _maxCodeLength,
+          buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
           enabled: !widget.isLoading,
           style: AppTypographyV1.bodyRegular.regular.textPrimary(),
           onFieldSubmitted: (_) => _submit(),
@@ -152,6 +160,7 @@ class _CartPromoSectionState extends State<CartPromoSection> {
             prefixIcon: const Padding(
               padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: CustomImage(
+                key: ValueKey(CartTestStrings.promoOfferIcon),
                 path: ImageConstants.promoOffer,
                 width: AppSpacing.iconMd,
                 height: AppSpacing.iconMd,
@@ -217,6 +226,7 @@ class _CartPromoSectionState extends State<CartPromoSection> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const CustomImage(
+                key: ValueKey(CartTestStrings.promoOfferIcon),
                 path: ImageConstants.promoOffer,
                 width: AppSpacing.iconMd,
                 height: AppSpacing.iconMd,
@@ -229,6 +239,7 @@ class _CartPromoSectionState extends State<CartPromoSection> {
                     Flexible(
                       child: Text(
                         couponText,
+                        key: const ValueKey(CartTestStrings.promoAppliedCodeText),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypographyV1.labelLarge.regular.textPrimary().copyWith(
@@ -246,6 +257,7 @@ class _CartPromoSectionState extends State<CartPromoSection> {
                       Flexible(
                         child: Text(
                           savingsText,
+                          key: const ValueKey(CartTestStrings.promoAppliedSavingsText),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypographyV1.labelLarge.bold.linkColor().copyWith(
@@ -288,7 +300,11 @@ class _CartPromoSectionState extends State<CartPromoSection> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('See All Offers', style: AppTypographyV1.bodyMedium.medium.brandPrimary()),
+            Text(
+              'See All Offers',
+              key: const ValueKey(CartTestStrings.promoSeeAllOffersText),
+              style: AppTypographyV1.bodyMedium.medium.brandPrimary(),
+            ),
             const Icon(Icons.arrow_forward, size: 18, color: AppColors.brandPrimary),
           ],
         ),

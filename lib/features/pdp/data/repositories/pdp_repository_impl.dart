@@ -1,7 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
@@ -12,7 +10,6 @@ import '../../domain/entities/product_detail_entity.dart';
 import '../../domain/entities/recommendations_entity.dart';
 import '../../domain/entities/size_chart_entity.dart';
 import '../../domain/repositories/pdp_repository.dart';
-import '../datasources/mock/pdp_mock_data.dart';
 import '../datasources/remote/pdp_remote_datasource.dart';
 import '../models/pincode_check_model.dart';
 import '../models/product_detail_model.dart';
@@ -29,14 +26,13 @@ class PdpRepositoryImpl with SafeApiCall implements PdpRepository {
   @override
   Future<Either<Failure, ProductDetailEntity>> getProductDetails(
     int productId, {
+    bool? colorVariant,
     CancelToken? cancelToken,
   }) {
-    if (kDebugMode && dotenv.env['PDP_USE_MOCK'] == 'true') {
-      return Future.value(Right(pdpMockEntity));
-    }
     return safeApiCall(_networkInfo, () async {
       final response = await _api.getProductDetails(
         productId: productId,
+        colorVariant: colorVariant,
         cancelToken: cancelToken,
       );
       return response.toEntity();
@@ -49,9 +45,6 @@ class PdpRepositoryImpl with SafeApiCall implements PdpRepository {
     required int pageNo,
     CancelToken? cancelToken,
   }) {
-    if (kDebugMode && dotenv.env['PDP_USE_MOCK'] == 'true') {
-      return Future.value(Right(pdpRecommendationsMockEntity));
-    }
     return safeApiCall(_networkInfo, () async {
       final response = await _api.getRecommendations(
         productId: productId,
@@ -81,10 +74,7 @@ class PdpRepositoryImpl with SafeApiCall implements PdpRepository {
     int productId, {
     CancelToken? cancelToken,
   }) => safeApiCall(_networkInfo, () async {
-    final response = await _api.getSizeChart(
-      productId: productId,
-      cancelToken: cancelToken,
-    );
+    final response = await _api.getSizeChart(productId: productId, cancelToken: cancelToken);
     return response.toEntity();
   });
 }

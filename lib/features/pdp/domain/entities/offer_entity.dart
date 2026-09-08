@@ -20,5 +20,9 @@ abstract class OfferEntity with _$OfferEntity {
 
     /// Whether the Copy button is active.
     @Default(true) bool copyCoupon,
+
+    /// `offersList.data[].trackingMeta`, forwarded whole. Analytics never reads a key
+    /// from it — see docs/analytics/pdp/client/tm-collection.md.
+    Map<String, dynamic>? trackingMeta,
   }) = _OfferEntity;
 }

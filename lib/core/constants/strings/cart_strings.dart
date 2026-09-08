@@ -34,6 +34,11 @@ class CartStrings {
       'Are you sure you want to remove this item from bag?';
   static const String no = 'No';
 
+  // Fallbacks for the server-returned `message` on remove / move-to-wishlist
+  // (Android toasts the API message; these cover an empty one).
+  static const String itemRemoved = 'Item removed from bag';
+  static const String couldNotRemoveItem = "Couldn't remove this item";
+
   // Checkout bar
   static const String proceedToCheckout = 'Proceed To Checkout';
   static const String details = 'Details';

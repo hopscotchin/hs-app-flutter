@@ -19,6 +19,7 @@ class PincodeCheckModel {
     this.visualCues = const [],
     this.serviceGuarantee = const [],
     this.noPinCodeMessage,
+    this.trackingMeta,
   });
 
   @JsonKey(defaultValue: null)
@@ -38,6 +39,9 @@ class PincodeCheckModel {
   @JsonKey(defaultValue: null)
   final String? noPinCodeMessage;
 
+  @JsonKey(defaultValue: null)
+  final Map<String, dynamic>? trackingMeta;
+
   factory PincodeCheckModel.fromJson(Map<String, dynamic> json) =>
       _$PincodeCheckModelFromJson(json);
 }
@@ -55,5 +59,6 @@ extension PincodeCheckModelX on PincodeCheckModel {
     visualCues: visualCues.map((v) => v.toEntity()).toList(),
     serviceGuarantee: serviceGuarantee.map((s) => s.toEntity()).toList(),
     noPinCodeMessage: noPinCodeMessage,
+    trackingMeta: trackingMeta,
   );
 }

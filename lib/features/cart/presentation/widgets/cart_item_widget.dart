@@ -8,6 +8,7 @@ import '../../../../components/atoms/custom_chip_widget.dart';
 import '../../../../components/atoms/custom_image.dart';
 import '../../../../components/atoms/product_price_row.dart';
 import '../../../../core/constants/image_constants.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/cart_strings.dart';
 import '../../../../core/entities/visual_cue_entity.dart';
 import '../../../../core/extensions/string_extensions.dart';
@@ -33,25 +34,47 @@ import '../../domain/entities/cart_item_entity.dart';
 class CartItemWidget extends StatelessWidget {
   final CartItemEntity item;
   final bool isLoading;
+
+  /// This row's move-to-wishlist call is in flight — the action greys out and
+  /// stops responding until it lands, so it can't be fired twice. Mirrors
+  /// Android, which locks the row for the same window.
+  final bool isMovingToWishlist;
   final ValueChanged<int>? onQuantityChanged;
   final VoidCallback? onRemove;
   final VoidCallback? onMoveToWishlist;
+  final bool hasMessageBars;
+
+  /// Flat position of this line in the cart, used to compose the card's
+  /// automation keys (`cart_item_<i>_…`). Null → the card renders unkeyed.
+  final int? testIndex;
 
   const CartItemWidget({
     super.key,
     required this.item,
     this.isLoading = false,
+    this.isMovingToWishlist = false,
     this.onQuantityChanged,
     this.onRemove,
     this.onMoveToWishlist,
+    this.testIndex,
+    this.hasMessageBars = false,
   });
 
   bool get _isSoldOut => item.isCompletelySoldOut;
 
+  /// `cart_item_<i>_<suffix>`, or null when no index was supplied.
+  ValueKey<String>? _key(String suffix) =>
+      testIndex == null ? null : ValueKey('${CartTestStrings.item}_${testIndex!}_$suffix');
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xsm),
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.sm,
+        AppSpacing.xsm,
+        AppSpacing.sm,
+        AppSpacing.xsm,
+      ),
       decoration: const BoxDecoration(
         color: AppColors.neutralGrey1,
         borderRadius: AppSpacing.borderRadiusXs,
@@ -65,23 +88,10 @@ class CartItemWidget extends StatelessWidget {
             Expanded(flex: 1, child: _buildImageColumn(context)),
             Expanded(
               flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: AppSpacing.sm,
-                  top: AppSpacing.sm,
-                  right: AppSpacing.xs,
-                ),
-                // spaceBetween pins "Move To Wishlist" to the bottom of the
-                // taller side (IntrinsicHeight equalizes both columns) no
-                // matter how many optional rows (promo/coupon messages)
-                // render above it. It sits outside _greyedOut() — the
-                // "Move To Wishlist" action stays fully colored and tappable
-                // even when the rest of the card is greyed out for sold-out.
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [_buildDetails(), _buildWishlistRow()],
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [_buildDetails(), _buildWishlistRow()],
               ),
             ),
           ],
@@ -102,7 +112,7 @@ class CartItemWidget extends StatelessWidget {
         child,
         Positioned.fill(
           child: IgnorePointer(
-            child: Container(color: AppColors.neutralGrey1.withValues(alpha: 0.3)),
+            child: Container(color: AppColors.neutralGrey1.withValues(alpha: 0.4)),
           ),
         ),
       ],
@@ -125,6 +135,7 @@ class CartItemWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           GestureDetector(
+            key: _key(CartTestStrings.itemImageSuffix),
             onTap: isLoading ? null : () => _onImageTap(context),
             child: AspectRatio(
               aspectRatio: 5 / 7,
@@ -146,6 +157,7 @@ class CartItemWidget extends StatelessWidget {
             AppSpacing.verticalGapXs,
             Text(
               item.estimatedDelivery ?? '',
+              key: _key(CartTestStrings.itemEddSuffix),
               maxLines: 2,
               style: AppTypographyV1.labelLarge.regular.textPrimary(),
             ),
@@ -166,82 +178,111 @@ class CartItemWidget extends StatelessWidget {
     final visualCue = item.visualCue;
     final hasVisualCue = visualCue?.text.isNotNullOrEmpty ?? false;
 
+    // The grey scrim is applied per-block rather than over the whole column:
+    // the visual cue badge carries its own server-driven colors and must stay
+    // at full strength, so it is deliberately left outside _greyedOut().
     return Expanded(
-      child: _greyedOut(
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.sm, top: AppSpacing.sm),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (hasVisualCue)
                   _buildVisualCueBadge(visualCue!)
                 else
                   Expanded(
-                    child: Text(
-                      item.productName ?? '',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypographyV1.labelLarge.regular.textPrimary(),
+                    child: _greyedOut(
+                      Text(
+                        item.productName ?? '',
+                        key: _key(CartTestStrings.itemNameSuffix),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypographyV1.labelLarge.regular.textPrimary(),
+                      ),
                     ),
                   ),
                 if (hasVisualCue) const Spacer(),
                 GestureDetector(
+                  key: _key(CartTestStrings.itemRemoveSuffix),
                   behavior: HitTestBehavior.opaque,
                   onTap: isLoading ? null : onRemove,
-                  child: const Padding(
-                    padding: EdgeInsets.only(left: AppSpacing.md),
-                    child: Icon(
-                      Icons.close,
-                      size: AppSpacing.iconMd,
-                      color: AppColors.neutralGrey6,
+                  child: _greyedOut(
+                    const ColoredBox(
+                      color: Colors.transparent,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: AppSpacing.md,
+                          right: AppSpacing.md,
+                          bottom: 2,
+                          top: 5,
+                        ),
+                        child: CustomImage(path: ImageConstants.closeIcon, height: 11, width: 11),
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-            if (hasVisualCue) ...[
-              AppSpacing.verticalGapSm,
-              Text(
-                item.productName ?? '',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypographyV1.labelLarge.regular.textPrimary(),
-              ),
-            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.sm, right: AppSpacing.xs),
+            child: _greyedOut(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (hasVisualCue) ...[
+                    AppSpacing.verticalGapSm,
+                    Text(
+                      item.productName ?? '',
+                      key: _key(CartTestStrings.itemNameSuffix),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypographyV1.labelLarge.regular.textPrimary(),
+                    ),
+                  ],
 
-            AppSpacing.verticalGapXs,
-            if (item.priceInfo != null)
-              ProductPriceRow(
-                padding: EdgeInsets.zero,
-                priceText: item.priceInfo!.sellingPrice ?? '',
-                originalPriceText: item.priceInfo!.hasDiscount ? item.priceInfo!.mrp : null,
-                discountText: item.priceInfo!.discount,
-                isSoldOut: false,
-              ),
-            for (final detail in item.cartItemDetails) ...[
-              AppSpacing.verticalGapXs,
-              _buildItemDetail(detail),
-            ],
+                  AppSpacing.verticalGapXs,
+                  if (item.priceInfo != null)
+                    ProductPriceRow(
+                      key: _key(CartTestStrings.itemPriceSuffix),
+                      padding: EdgeInsets.zero,
+                      priceText: item.priceInfo!.sellingPrice ?? '',
+                      originalPriceText: item.priceInfo!.hasDiscount ? item.priceInfo!.mrp : null,
+                      discountText: item.priceInfo!.discount,
+                      isSoldOut: false,
+                    ),
+                  for (final detail in item.cartItemDetails) ...[
+                    AppSpacing.verticalGapXs,
+                    _buildItemDetail(detail, testIndex ?? 0),
+                  ],
 
-            AppSpacing.gapXxs,
-            _buildQuantityRow(),
-            AppSpacing.verticalGapXs,
-            _buildSizeRow(),
-          ],
-        ),
+                  AppSpacing.gapXxs,
+                  _buildQuantityRow(),
+                  AppSpacing.verticalGapXs,
+                  _buildSizeRow(),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildVisualCueBadge(VisualCueEntity cue) {
+    final cueKey = _key(CartTestStrings.itemVisualCueSuffix);
     final bgColor = cue.bgColor.toColorOr(AppColors.neutralGrey2);
     final txtColor = cue.textColor.toColorOr(AppColors.textPrimary);
 
     return cue.imageUrl.isNotNullOrEmpty
-        ? CustomImage(path: cue.imageUrl!, height: 15, width: 64)
+        ? CustomImage(key: cueKey, path: cue.imageUrl!, height: 15, width: 64)
         : CustomChipWidget(
+            key: cueKey,
             text: (cue.text ?? ''),
             backgroundColor: bgColor,
             borderColor: bgColor,
@@ -269,6 +310,7 @@ class CartItemWidget extends StatelessWidget {
         AppSpacing.horizontalGapXxs,
         if (showStepper)
           InkWell(
+            key: _key(CartTestStrings.itemQuantityDecreaseSuffix),
             onTap: canDecrease ? () => onQuantityChanged!(qty - 1) : null,
             child: Padding(
               padding: const EdgeInsets.only(
@@ -286,10 +328,15 @@ class CartItemWidget extends StatelessWidget {
           ),
         Padding(
           padding: const EdgeInsets.only(top: AppSpacing.xs),
-          child: Text('\t\t$qty', style: AppTypographyV1.labelLarge.medium.neutralGrey6()),
+          child: Text(
+            '\t\t$qty',
+            key: _key(CartTestStrings.itemQuantitySuffix),
+            style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
+          ),
         ),
         if (showStepper)
           InkWell(
+            key: _key(CartTestStrings.itemQuantityIncreaseSuffix),
             onTap: canIncrease ? () => onQuantityChanged!(qty + 1) : null,
             child: Padding(
               padding: const EdgeInsets.only(
@@ -312,6 +359,7 @@ class CartItemWidget extends StatelessWidget {
   Widget _buildSizeRow() {
     final stockColor = item.stockAvailabilityStatusColor.toColorOr(AppColors.dangerDefault);
     return RichText(
+      key: _key(CartTestStrings.itemSizeSuffix),
       text: TextSpan(
         text: CartStrings.size,
         style: AppTypographyV1.labelLarge.regular.neutralGrey6(),
@@ -332,7 +380,8 @@ class CartItemWidget extends StatelessWidget {
 
   // ─── Item detail row (price drop / tooltip note / coupon savings) ──
 
-  Widget _buildItemDetail(CartItemDetailEntity detail) {
+  Widget _buildItemDetail(CartItemDetailEntity detail, int index) {
+    final detailKey = _key('${CartTestStrings.itemDetailSuffix}_$index');
     final textColor = detail.titleColor.toColorOr(AppColors.textPrimary);
     final icon = detail.action?.iconUrl;
     final label = Text(
@@ -347,6 +396,7 @@ class CartItemWidget extends StatelessWidget {
       // row, so tapping anywhere (not just the icon) opens the tooltip while
       // the arrow still points precisely at the icon.
       return ActionTrigger(
+        key: detailKey,
         action: detail.action,
         // The icon sits in the card's right-hand column, left of centre, so a
         // wide bubble centred on it would spill past the card and leave the
@@ -364,28 +414,40 @@ class CartItemWidget extends StatelessWidget {
       );
     }
 
-    return ActionTrigger(action: detail.action, child: label);
+    return ActionTrigger(key: detailKey, action: detail.action, child: label);
   }
 
   // ─── Footer ───────────────────────────────────────────────────
 
   Widget _buildWishlistRow() {
+    final isBusy = isLoading || isMovingToWishlist;
     return GestureDetector(
-      onTap: isLoading ? null : onMoveToWishlist,
-      child: ColoredBox(
-        color: Colors.transparent,
-        child: Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.sm),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              const CustomImage(path: ImageConstants.cartWishListArrow),
-              Text(
-                CartStrings.moveToWishlistLabel,
-                style: AppTypographyV1.labelLarge.medium.brandPrimary(),
-              ),
-            ],
+      key: _key(CartTestStrings.itemMoveToWishlistSuffix),
+      onTap: isBusy ? null : onMoveToWishlist,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          left: AppSpacing.sm,
+          top: AppSpacing.sm,
+          right: AppSpacing.xs,
+        ),
+        child: ColoredBox(
+          color: Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            // Greyed rather than spinner-swapped: the row is about to disappear
+            // on success, and a spinner appearing then vanishing with the row
+            // reads as a flicker.
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const CustomImage(path: ImageConstants.cartWishListArrow),
+                Text(
+                  CartStrings.moveToWishlistLabel,
+                  style: AppTypographyV1.labelLarge.medium.brandPrimary(),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -76,7 +76,6 @@ class AnalyticsEvents {
   static const String productAttributeTabClicked = 'product_attribute_tab_clicked';
   static const String aPlusContentViewed = 'aplus_content_viewed';
   static const String xlProductCardScrolled = 'xl_product_card_scrolled';
-  static const String colorWidgetExpanded = 'color_widget_expanded';
   static const String newColorSelected = 'new_color_selected';
   static const String parentCollectionViewed = 'parent_collection_viewed';
   static const String parentCollectionClicked = 'parent_collection_clicked';

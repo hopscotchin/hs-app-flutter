@@ -41,7 +41,12 @@ class PlpQueryCorrectionSliver extends StatelessWidget {
     final corrected = qc.searchFor;
     if (corrected == null || corrected.isEmpty) return;
     context.read<PlpBloc>().add(
-      LoadPlpData(pageType: pageType, plpId: plpId, searchQuery: corrected),
+      LoadPlpData(
+        pageType: pageType,
+        plpId: plpId,
+        searchQuery: corrected,
+        isFromQueryCorrection: true,
+      ),
     );
   }
 }

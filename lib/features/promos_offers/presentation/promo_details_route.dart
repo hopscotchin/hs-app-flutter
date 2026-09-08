@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/route_names.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/navigation/nav_destination.dart';
 import 'bloc/promo_details_bloc.dart';
 import 'pages/promo_details_page.dart';
 
@@ -18,10 +19,13 @@ class PromoDetailsRoute {
       // A non-numeric id can only come from a malformed deeplink; 0 makes the
       // page show its "no longer available" message rather than crash.
       final promoId = int.tryParse(state.pathParameters['promoId'] ?? '') ?? 0;
+      // Not a path parameter — the route declares only `:promoId`. See
+      // `AppNavigator.goToPromoDetails`.
+      final extra = state.extra as Map<String, dynamic>?;
+      final savingsTextFromCart = extra?[PromoDetailsDestination.savingsTextExtraKey] as String?;
       return BlocProvider(
-        create: (_) =>
-            sl<PromoDetailsBloc>()..add(PromoDetailsEvent.load(promoId)),
-        child: const PromoDetailsPage(),
+        create: (_) => sl<PromoDetailsBloc>()..add(PromoDetailsEvent.load(promoId)),
+        child: PromoDetailsPage(savingsTextFromCart: savingsTextFromCart),
       );
     },
   );

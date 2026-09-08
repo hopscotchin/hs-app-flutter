@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../components/app_bottom_sheet.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/entities/backend_action_entity.dart';
 import '../../../../core/navigation/action_url_handler.dart';
 
@@ -23,9 +24,12 @@ Future<void> showPromoActionSheet(
   return AppBottomSheet.show(
     context,
     title: content.title,
+    titleKey: const ValueKey(PromoActionSheetTestStrings.title),
     description: description,
+    descriptionKey: const ValueKey(PromoActionSheetTestStrings.description),
     primaryAction: AppBottomSheetAction(
       label: content.leftAction?.label ?? 'Got It',
+      buttonKey: const ValueKey(PromoActionSheetTestStrings.primaryButton),
       style: _styleFor(
         content.leftAction,
         fallback: AppBottomSheetButtonStyle.filled,
@@ -36,6 +40,7 @@ Future<void> showPromoActionSheet(
         ? null
         : AppBottomSheetAction(
             label: content.rightAction!.label ?? 'Cancel',
+            buttonKey: const ValueKey(PromoActionSheetTestStrings.secondaryButton),
             style: _styleFor(
               content.rightAction,
               fallback: AppBottomSheetButtonStyle.outlined,

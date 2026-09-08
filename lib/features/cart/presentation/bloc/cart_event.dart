@@ -24,10 +24,15 @@ class UpdateCartItemQuantity extends CartEvent {
   final String sku;
   final int quantity;
 
-  const UpdateCartItemQuantity({required this.sku, required this.quantity});
+  /// Row position the tap came from, so the optimistic local step can address
+  /// the item directly instead of searching for it. Treated as a hint only —
+  /// the bloc falls back to a sku lookup if it no longer points at [sku].
+  final int? itemIndex;
+
+  const UpdateCartItemQuantity({required this.sku, required this.quantity, this.itemIndex});
 
   @override
-  List<Object?> get props => [sku, quantity];
+  List<Object?> get props => [sku, quantity, itemIndex];
 }
 
 class MoveToWishlist extends CartEvent {
@@ -98,16 +103,4 @@ class ClearCheckoutData extends CartEvent {
 /// on the next rebuild.
 class ClearPromoActionSheet extends CartEvent {
   const ClearPromoActionSheet();
-}
-
-/// User picked/confirmed a new EDD pincode via [PincodeBottomSheet].
-/// Updates the cart's [DeliveryPincodeEntity] locally — no dedicated backend
-/// endpoint exists for this yet, so it doesn't refetch the cart.
-class UpdateDeliveryPincode extends CartEvent {
-  final String pincode;
-
-  const UpdateDeliveryPincode({required this.pincode});
-
-  @override
-  List<Object?> get props => [pincode];
 }

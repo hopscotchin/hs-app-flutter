@@ -14,7 +14,14 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PincodeCheckEntity {
 
- String? get action; String? get message; List<SkuEntity> get skus; bool? get isServiceable; EddInfoEntity? get eddInfo; List<VisualCueEntity> get visualCues; List<ServiceGuaranteeEntity> get serviceGuarantee; String? get noPinCodeMessage;
+ String? get action; String? get message; List<SkuEntity> get skus; bool? get isServiceable; EddInfoEntity? get eddInfo; List<VisualCueEntity> get visualCues; List<ServiceGuaranteeEntity> get serviceGuarantee; String? get noPinCodeMessage;/// The pincode-scoped slice of `product.trackingMeta` — `from_pincode` and
+/// `delivery_days`, the two keys a pincode change moves.
+///
+/// **Partial.** Merged over the product's existing node key by key; replacing
+/// it would drop the other 23 keys and every event after a pincode check
+/// would lose `brand`, `category`, `price` and the rest. See
+/// `docs/analytics/pdp/contract/passthrough-spec.md` §2.
+ Map<String, dynamic>? get trackingMeta;
 /// Create a copy of PincodeCheckEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +32,16 @@ $PincodeCheckEntityCopyWith<PincodeCheckEntity> get copyWith => _$PincodeCheckEn
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PincodeCheckEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other.skus, skus)&&(identical(other.isServiceable, isServiceable) || other.isServiceable == isServiceable)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&const DeepCollectionEquality().equals(other.visualCues, visualCues)&&const DeepCollectionEquality().equals(other.serviceGuarantee, serviceGuarantee)&&(identical(other.noPinCodeMessage, noPinCodeMessage) || other.noPinCodeMessage == noPinCodeMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PincodeCheckEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other.skus, skus)&&(identical(other.isServiceable, isServiceable) || other.isServiceable == isServiceable)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&const DeepCollectionEquality().equals(other.visualCues, visualCues)&&const DeepCollectionEquality().equals(other.serviceGuarantee, serviceGuarantee)&&(identical(other.noPinCodeMessage, noPinCodeMessage) || other.noPinCodeMessage == noPinCodeMessage)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,action,message,const DeepCollectionEquality().hash(skus),isServiceable,eddInfo,const DeepCollectionEquality().hash(visualCues),const DeepCollectionEquality().hash(serviceGuarantee),noPinCodeMessage);
+int get hashCode => Object.hash(runtimeType,action,message,const DeepCollectionEquality().hash(skus),isServiceable,eddInfo,const DeepCollectionEquality().hash(visualCues),const DeepCollectionEquality().hash(serviceGuarantee),noPinCodeMessage,const DeepCollectionEquality().hash(trackingMeta));
 
 @override
 String toString() {
-  return 'PincodeCheckEntity(action: $action, message: $message, skus: $skus, isServiceable: $isServiceable, eddInfo: $eddInfo, visualCues: $visualCues, serviceGuarantee: $serviceGuarantee, noPinCodeMessage: $noPinCodeMessage)';
+  return 'PincodeCheckEntity(action: $action, message: $message, skus: $skus, isServiceable: $isServiceable, eddInfo: $eddInfo, visualCues: $visualCues, serviceGuarantee: $serviceGuarantee, noPinCodeMessage: $noPinCodeMessage, trackingMeta: $trackingMeta)';
 }
 
 
@@ -45,7 +52,7 @@ abstract mixin class $PincodeCheckEntityCopyWith<$Res>  {
   factory $PincodeCheckEntityCopyWith(PincodeCheckEntity value, $Res Function(PincodeCheckEntity) _then) = _$PincodeCheckEntityCopyWithImpl;
 @useResult
 $Res call({
- String? action, String? message, List<SkuEntity> skus, bool? isServiceable, EddInfoEntity? eddInfo, List<VisualCueEntity> visualCues, List<ServiceGuaranteeEntity> serviceGuarantee, String? noPinCodeMessage
+ String? action, String? message, List<SkuEntity> skus, bool? isServiceable, EddInfoEntity? eddInfo, List<VisualCueEntity> visualCues, List<ServiceGuaranteeEntity> serviceGuarantee, String? noPinCodeMessage, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -62,7 +69,7 @@ class _$PincodeCheckEntityCopyWithImpl<$Res>
 
 /// Create a copy of PincodeCheckEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? action = freezed,Object? message = freezed,Object? skus = null,Object? isServiceable = freezed,Object? eddInfo = freezed,Object? visualCues = null,Object? serviceGuarantee = null,Object? noPinCodeMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? action = freezed,Object? message = freezed,Object? skus = null,Object? isServiceable = freezed,Object? eddInfo = freezed,Object? visualCues = null,Object? serviceGuarantee = null,Object? noPinCodeMessage = freezed,Object? trackingMeta = freezed,}) {
   return _then(_self.copyWith(
 action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as String?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
@@ -72,7 +79,8 @@ as bool?,eddInfo: freezed == eddInfo ? _self.eddInfo : eddInfo // ignore: cast_n
 as EddInfoEntity?,visualCues: null == visualCues ? _self.visualCues : visualCues // ignore: cast_nullable_to_non_nullable
 as List<VisualCueEntity>,serviceGuarantee: null == serviceGuarantee ? _self.serviceGuarantee : serviceGuarantee // ignore: cast_nullable_to_non_nullable
 as List<ServiceGuaranteeEntity>,noPinCodeMessage: freezed == noPinCodeMessage ? _self.noPinCodeMessage : noPinCodeMessage // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 /// Create a copy of PincodeCheckEntity
@@ -169,10 +177,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? action,  String? message,  List<SkuEntity> skus,  bool? isServiceable,  EddInfoEntity? eddInfo,  List<VisualCueEntity> visualCues,  List<ServiceGuaranteeEntity> serviceGuarantee,  String? noPinCodeMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? action,  String? message,  List<SkuEntity> skus,  bool? isServiceable,  EddInfoEntity? eddInfo,  List<VisualCueEntity> visualCues,  List<ServiceGuaranteeEntity> serviceGuarantee,  String? noPinCodeMessage,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PincodeCheckEntity() when $default != null:
-return $default(_that.action,_that.message,_that.skus,_that.isServiceable,_that.eddInfo,_that.visualCues,_that.serviceGuarantee,_that.noPinCodeMessage);case _:
+return $default(_that.action,_that.message,_that.skus,_that.isServiceable,_that.eddInfo,_that.visualCues,_that.serviceGuarantee,_that.noPinCodeMessage,_that.trackingMeta);case _:
   return orElse();
 
 }
@@ -190,10 +198,10 @@ return $default(_that.action,_that.message,_that.skus,_that.isServiceable,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? action,  String? message,  List<SkuEntity> skus,  bool? isServiceable,  EddInfoEntity? eddInfo,  List<VisualCueEntity> visualCues,  List<ServiceGuaranteeEntity> serviceGuarantee,  String? noPinCodeMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? action,  String? message,  List<SkuEntity> skus,  bool? isServiceable,  EddInfoEntity? eddInfo,  List<VisualCueEntity> visualCues,  List<ServiceGuaranteeEntity> serviceGuarantee,  String? noPinCodeMessage,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _PincodeCheckEntity():
-return $default(_that.action,_that.message,_that.skus,_that.isServiceable,_that.eddInfo,_that.visualCues,_that.serviceGuarantee,_that.noPinCodeMessage);case _:
+return $default(_that.action,_that.message,_that.skus,_that.isServiceable,_that.eddInfo,_that.visualCues,_that.serviceGuarantee,_that.noPinCodeMessage,_that.trackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +218,10 @@ return $default(_that.action,_that.message,_that.skus,_that.isServiceable,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? action,  String? message,  List<SkuEntity> skus,  bool? isServiceable,  EddInfoEntity? eddInfo,  List<VisualCueEntity> visualCues,  List<ServiceGuaranteeEntity> serviceGuarantee,  String? noPinCodeMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? action,  String? message,  List<SkuEntity> skus,  bool? isServiceable,  EddInfoEntity? eddInfo,  List<VisualCueEntity> visualCues,  List<ServiceGuaranteeEntity> serviceGuarantee,  String? noPinCodeMessage,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _PincodeCheckEntity() when $default != null:
-return $default(_that.action,_that.message,_that.skus,_that.isServiceable,_that.eddInfo,_that.visualCues,_that.serviceGuarantee,_that.noPinCodeMessage);case _:
+return $default(_that.action,_that.message,_that.skus,_that.isServiceable,_that.eddInfo,_that.visualCues,_that.serviceGuarantee,_that.noPinCodeMessage,_that.trackingMeta);case _:
   return null;
 
 }
@@ -225,7 +233,7 @@ return $default(_that.action,_that.message,_that.skus,_that.isServiceable,_that.
 
 
 class _PincodeCheckEntity implements PincodeCheckEntity {
-  const _PincodeCheckEntity({this.action, this.message, final  List<SkuEntity> skus = const [], this.isServiceable, this.eddInfo, final  List<VisualCueEntity> visualCues = const [], final  List<ServiceGuaranteeEntity> serviceGuarantee = const [], this.noPinCodeMessage}): _skus = skus,_visualCues = visualCues,_serviceGuarantee = serviceGuarantee;
+  const _PincodeCheckEntity({this.action, this.message, final  List<SkuEntity> skus = const [], this.isServiceable, this.eddInfo, final  List<VisualCueEntity> visualCues = const [], final  List<ServiceGuaranteeEntity> serviceGuarantee = const [], this.noPinCodeMessage, final  Map<String, dynamic>? trackingMeta}): _skus = skus,_visualCues = visualCues,_serviceGuarantee = serviceGuarantee,_trackingMeta = trackingMeta;
   
 
 @override final  String? action;
@@ -254,6 +262,29 @@ class _PincodeCheckEntity implements PincodeCheckEntity {
 }
 
 @override final  String? noPinCodeMessage;
+/// The pincode-scoped slice of `product.trackingMeta` — `from_pincode` and
+/// `delivery_days`, the two keys a pincode change moves.
+///
+/// **Partial.** Merged over the product's existing node key by key; replacing
+/// it would drop the other 23 keys and every event after a pincode check
+/// would lose `brand`, `category`, `price` and the rest. See
+/// `docs/analytics/pdp/contract/passthrough-spec.md` §2.
+ final  Map<String, dynamic>? _trackingMeta;
+/// The pincode-scoped slice of `product.trackingMeta` — `from_pincode` and
+/// `delivery_days`, the two keys a pincode change moves.
+///
+/// **Partial.** Merged over the product's existing node key by key; replacing
+/// it would drop the other 23 keys and every event after a pincode check
+/// would lose `brand`, `category`, `price` and the rest. See
+/// `docs/analytics/pdp/contract/passthrough-spec.md` §2.
+@override Map<String, dynamic>? get trackingMeta {
+  final value = _trackingMeta;
+  if (value == null) return null;
+  if (_trackingMeta is EqualUnmodifiableMapView) return _trackingMeta;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of PincodeCheckEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -265,16 +296,16 @@ _$PincodeCheckEntityCopyWith<_PincodeCheckEntity> get copyWith => __$PincodeChec
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PincodeCheckEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other._skus, _skus)&&(identical(other.isServiceable, isServiceable) || other.isServiceable == isServiceable)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&const DeepCollectionEquality().equals(other._visualCues, _visualCues)&&const DeepCollectionEquality().equals(other._serviceGuarantee, _serviceGuarantee)&&(identical(other.noPinCodeMessage, noPinCodeMessage) || other.noPinCodeMessage == noPinCodeMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PincodeCheckEntity&&(identical(other.action, action) || other.action == action)&&(identical(other.message, message) || other.message == message)&&const DeepCollectionEquality().equals(other._skus, _skus)&&(identical(other.isServiceable, isServiceable) || other.isServiceable == isServiceable)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&const DeepCollectionEquality().equals(other._visualCues, _visualCues)&&const DeepCollectionEquality().equals(other._serviceGuarantee, _serviceGuarantee)&&(identical(other.noPinCodeMessage, noPinCodeMessage) || other.noPinCodeMessage == noPinCodeMessage)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,action,message,const DeepCollectionEquality().hash(_skus),isServiceable,eddInfo,const DeepCollectionEquality().hash(_visualCues),const DeepCollectionEquality().hash(_serviceGuarantee),noPinCodeMessage);
+int get hashCode => Object.hash(runtimeType,action,message,const DeepCollectionEquality().hash(_skus),isServiceable,eddInfo,const DeepCollectionEquality().hash(_visualCues),const DeepCollectionEquality().hash(_serviceGuarantee),noPinCodeMessage,const DeepCollectionEquality().hash(_trackingMeta));
 
 @override
 String toString() {
-  return 'PincodeCheckEntity(action: $action, message: $message, skus: $skus, isServiceable: $isServiceable, eddInfo: $eddInfo, visualCues: $visualCues, serviceGuarantee: $serviceGuarantee, noPinCodeMessage: $noPinCodeMessage)';
+  return 'PincodeCheckEntity(action: $action, message: $message, skus: $skus, isServiceable: $isServiceable, eddInfo: $eddInfo, visualCues: $visualCues, serviceGuarantee: $serviceGuarantee, noPinCodeMessage: $noPinCodeMessage, trackingMeta: $trackingMeta)';
 }
 
 
@@ -285,7 +316,7 @@ abstract mixin class _$PincodeCheckEntityCopyWith<$Res> implements $PincodeCheck
   factory _$PincodeCheckEntityCopyWith(_PincodeCheckEntity value, $Res Function(_PincodeCheckEntity) _then) = __$PincodeCheckEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String? action, String? message, List<SkuEntity> skus, bool? isServiceable, EddInfoEntity? eddInfo, List<VisualCueEntity> visualCues, List<ServiceGuaranteeEntity> serviceGuarantee, String? noPinCodeMessage
+ String? action, String? message, List<SkuEntity> skus, bool? isServiceable, EddInfoEntity? eddInfo, List<VisualCueEntity> visualCues, List<ServiceGuaranteeEntity> serviceGuarantee, String? noPinCodeMessage, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -302,7 +333,7 @@ class __$PincodeCheckEntityCopyWithImpl<$Res>
 
 /// Create a copy of PincodeCheckEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? action = freezed,Object? message = freezed,Object? skus = null,Object? isServiceable = freezed,Object? eddInfo = freezed,Object? visualCues = null,Object? serviceGuarantee = null,Object? noPinCodeMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? action = freezed,Object? message = freezed,Object? skus = null,Object? isServiceable = freezed,Object? eddInfo = freezed,Object? visualCues = null,Object? serviceGuarantee = null,Object? noPinCodeMessage = freezed,Object? trackingMeta = freezed,}) {
   return _then(_PincodeCheckEntity(
 action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as String?,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
@@ -312,7 +343,8 @@ as bool?,eddInfo: freezed == eddInfo ? _self.eddInfo : eddInfo // ignore: cast_n
 as EddInfoEntity?,visualCues: null == visualCues ? _self._visualCues : visualCues // ignore: cast_nullable_to_non_nullable
 as List<VisualCueEntity>,serviceGuarantee: null == serviceGuarantee ? _self._serviceGuarantee : serviceGuarantee // ignore: cast_nullable_to_non_nullable
 as List<ServiceGuaranteeEntity>,noPinCodeMessage: freezed == noPinCodeMessage ? _self.noPinCodeMessage : noPinCodeMessage // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,trackingMeta: freezed == trackingMeta ? _self._trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 

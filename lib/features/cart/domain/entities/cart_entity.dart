@@ -4,12 +4,17 @@ import '../../../../core/network/models/action_response.dart';
 import 'cart_item_entity.dart';
 import 'delivery_pincode_entity.dart';
 import 'gift_card_item_entity.dart';
+import 'order_details_entity.dart';
 import 'order_summary_entity.dart';
 import 'promotion_data_entity.dart';
 
 class CartEntity extends ActionResponse {
   final List<CartItemEntity> items;
   final OrderSummaryEntity? orderSummary;
+
+  /// Raw numeric totals (`orderDetails`). Its `itemCount` is the cart-wide
+  /// unit count and drives the bag badge.
+  final OrderDetailsEntity? orderDetails;
   final PromotionDataEntity? promotionData;
   final DeliveryPincodeEntity? deliveryPincode;
 
@@ -35,6 +40,7 @@ class CartEntity extends ActionResponse {
     super.messageBars,
     this.items = const [],
     this.orderSummary,
+    this.orderDetails,
     this.promotionData,
     this.deliveryPincode,
     this.isCartItemExistInTemp = false,
@@ -48,6 +54,7 @@ class CartEntity extends ActionResponse {
     super.json, {
     this.items = const [],
     this.orderSummary,
+    this.orderDetails,
     this.promotionData,
     this.deliveryPincode,
     this.isCartItemExistInTemp = false,
@@ -60,6 +67,7 @@ class CartEntity extends ActionResponse {
   CartEntity copyWith({
     List<CartItemEntity>? items,
     OrderSummaryEntity? orderSummary,
+    OrderDetailsEntity? orderDetails,
     PromotionDataEntity? promotionData,
     DeliveryPincodeEntity? deliveryPincode,
     bool? isCartItemExistInTemp,
@@ -75,6 +83,7 @@ class CartEntity extends ActionResponse {
       messageBars: messageBars ?? this.messageBars,
       items: items ?? this.items,
       orderSummary: orderSummary ?? this.orderSummary,
+      orderDetails: orderDetails ?? this.orderDetails,
       promotionData: promotionData ?? this.promotionData,
       deliveryPincode: deliveryPincode ?? this.deliveryPincode,
       isCartItemExistInTemp: isCartItemExistInTemp ?? this.isCartItemExistInTemp,
@@ -90,6 +99,7 @@ class CartEntity extends ActionResponse {
     action,
     items,
     orderSummary,
+    orderDetails,
     promotionData,
     deliveryPincode,
     messageBars,

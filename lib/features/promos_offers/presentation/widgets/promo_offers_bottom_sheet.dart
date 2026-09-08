@@ -2,16 +2,20 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hs_app_flutter/core/constants/strings/login_redirects.dart';
+import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
+import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:hs_app_flutter/features/account/presentation/bloc/account_bloc.dart';
 import 'package:hs_app_flutter/features/cart/presentation/bloc/cart_bloc.dart';
 
 import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
+import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
-import '../../../../core/constants/strings/common_strings.dart';
 import '../../../../core/constants/strings/promos_offers_strings.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/entities/backend_action_entity.dart';
+import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/navigation/action_url_handler.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -29,12 +33,7 @@ import 'promo_offer_card.dart';
 /// closes the sheet, removing keeps it open and reloads the list so `isApplied`
 /// flips in place.
 class PromoOffersBottomSheet extends StatelessWidget {
-  const PromoOffersBottomSheet({
-    super.key,
-    this.onCartChanged,
-    this.onAction,
-    this.onActionSheet,
-  });
+  const PromoOffersBottomSheet({super.key, this.onCartChanged, this.onAction, this.onActionSheet});
 
   /// Called the first time an apply/remove lands server-side, so [show] can
   /// tell its caller the cart is stale.
@@ -47,7 +46,7 @@ class PromoOffersBottomSheet extends StatelessWidget {
   /// Called with a card's backend deeplink when its CTA is tapped. The sheet
   /// closes itself; the actual navigation is left to [show] so it runs against
   /// the caller's context rather than this dying route's.
-  final ValueChanged<String>? onAction;
+  final ValueChanged<(String, String?)>? onAction;
 
   /// Returns true only if a promo was actually applied or removed — a plain
   /// dismiss returns false, so the caller can skip reloading the cart.
@@ -55,10 +54,10 @@ class PromoOffersBottomSheet extends StatelessWidget {
   /// A CTA deeplink tapped inside the sheet is followed here, after the sheet
   /// has closed, so the pushed route doesn't end up stacked under it.
   static Future<bool> show(
-      BuildContext context, {
-        bool isDismissible = true,
-        bool enableDrag = true,
-      }) async {
+    BuildContext context, {
+    bool isDismissible = true,
+    bool enableDrag = true,
+  }) async {
     // Tracked outside the route: a drag/barrier dismiss never runs our own pop,
     // so the result can't be carried by the route's pop value.
     final outcome = _SheetOutcome();
@@ -78,11 +77,13 @@ class PromoOffersBottomSheet extends StatelessWidget {
       // The sheet has no GoRoute of its own (it is a modal shown over the
       // caller), so there is no route file to move this into.
       builder: (_) => BlocProvider(
-        create: (_) =>
-        sl<PromosOffersBloc>()..add(const PromosOffersEvent.load()),
+        create: (_) => sl<PromosOffersBloc>()..add(const PromosOffersEvent.load()),
         child: PromoOffersBottomSheet(
           onCartChanged: () => outcome.cartChanged = true,
-          onAction: (actionUri) => outcome.deeplink = actionUri,
+          onAction: (offer) {
+            outcome.deeplink = offer.$1;
+            outcome.savingsText = offer.$2;
+          },
           onActionSheet: (sheet) => outcome.actionSheet = sheet,
         ),
       ),
@@ -95,8 +96,20 @@ class PromoOffersBottomSheet extends StatelessWidget {
     }
 
     final deeplink = outcome.deeplink;
+    final savingsText = outcome.savingsText;
     if (deeplink != null && context.mounted) {
-      ActionUrlHandler.navigate(context, deeplink);
+      // Passed as `extra` rather than spliced onto the deeplink string. The
+      // old `'$deeplink&savingsTextFromCart=$savingsText'` produced a broken
+      // URL whenever the deeplink had no query part yet (`&` with no `?`, as
+      // in `hopscotch://promo-details/123`), and never percent-encoded the
+      // text — which is display copy containing spaces, ₹ and commas.
+      ActionUrlHandler.navigate(
+        context,
+        deeplink,
+        extra: savingsText.isNotNullOrEmpty
+            ? <String, dynamic>{PromoDetailsDestination.savingsTextExtraKey: savingsText!}
+            : null,
+      );
     }
 
     return outcome.cartChanged;
@@ -114,57 +127,54 @@ class PromoOffersBottomSheet extends StatelessWidget {
       listener: (context, state) {
         if (state.cartChanged) onCartChanged?.call();
 
-        // Applying is terminal for this sheet — a backend sheet would be
-        // stacked on a route that's about to pop, so [show] presents it after.
-        final isClosing =
-            state.lastAction == PromoActionKind.apply &&
-                (state.actionError == null || state.actionError!.isEmpty);
+        // Only a *successful* apply is terminal for this sheet. A rejection is
+        // an HTTP 200 with `success: false`, so success is read from
+        // `actionSucceeded` rather than inferred from the absence of an error
+        // — inferring would pop the sheet on a bad code and force the user to
+        // reopen it to try another.
+        final isClosing = state.lastAction == PromoActionKind.apply && state.actionSucceeded;
         final actionSheet = state.actionBottomSheet;
 
         if (isClosing) {
           if (actionSheet != null) onActionSheet?.call(actionSheet);
         } else if (actionSheet != null) {
-          // Failure, or a remove that leaves the list open: stack it on top.
+          // A remove that leaves the list open can still stack its sheet.
           showPromoActionSheet(context, actionSheet);
           return;
         }
 
-        final error = state.actionError;
-        if (error != null && error.isNotEmpty) {
-          context.showSnack(error, status: SnackStatus.error);
-          return;
-        }
+        // Rejections are rendered inline by [_ActionErrorBar] instead of a
+        // snack, so they sit under the title where the design puts them and
+        // stay visible while the user picks another offer.
+        if (state.actionError?.isNotEmpty ?? false) return;
+
         final message = state.actionMessage;
         if (message != null && message.isNotEmpty) {
-          context.showSnack(message, status: SnackStatus.success);
+          context.showSnack(
+            message,
+            status: SnackStatus.success,
+            key: const ValueKey(PromoOffersTestStrings.actionSnackBar),
+          );
         }
         // The snack sits on the app's ScaffoldMessenger, so it outlives the pop.
         if (isClosing) Navigator.of(context, rootNavigator: true).pop();
       },
       child: SafeArea(
         top: false,
+        key: const ValueKey(PromoOffersTestStrings.sheet),
         child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.72,
-          ),
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.72),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Padding(
-                padding: EdgeInsets.fromLTRB(
-                  AppSpacing.md,
-                  0,
-                  AppSpacing.md,
-                  AppSpacing.lg,
-                ),
+                padding: EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.sm),
                 child: _SheetHeading(),
               ),
+              const _ActionErrorBar(),
               Flexible(
-                child: _SheetBody(
-                  bottomPadding: bottomPadding,
-                  onAction: onAction,
-                ),
+                child: _SheetBody(bottomPadding: bottomPadding, onAction: onAction),
               ),
             ],
           ),
@@ -180,6 +190,7 @@ class _SheetOutcome {
   bool cartChanged = false;
   String? deeplink;
   BackendActionContentEntity? actionSheet;
+  String? savingsText;
 }
 
 class _SheetHeading extends StatelessWidget {
@@ -195,11 +206,55 @@ class _SheetHeading extends StatelessWidget {
   }
 }
 
+/// Rejection feedback shown under the sheet's title — the sheet stays open on a
+/// failed apply so the user can try another offer without reopening it.
+///
+/// Mirrors how `ActionResponse.validate` packages a failure: the response may
+/// carry backend-authored bars (`messageBar` / `messageBars`) *or* a plain
+/// `message`. **Bars win** — they already carry their own copy, colour and
+/// icon, so rendering the message alongside would say the same thing twice.
+/// The message is only synthesised into a bar when none were sent.
+class _ActionErrorBar extends StatelessWidget {
+  const _ActionErrorBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<
+      PromosOffersBloc,
+      PromosOffersState,
+      ({List<MessageBarEntity> bars, String? message})
+    >(
+      selector: (state) => (bars: state.actionMessageBars, message: state.actionError),
+      builder: (context, feedback) {
+        final bars = feedback.bars.isNotEmpty ? feedback.bars : _fallbackBar(feedback.message);
+        if (bars.isEmpty) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.sm),
+          child: MessageBarsWidget(
+            spaceBetweenMessageBars: 0,
+            key: const ValueKey(PromoOffersTestStrings.actionErrorBar),
+            messageBars: bars,
+            cardStyle: true,
+          ),
+        );
+      },
+    );
+  }
+
+  /// A plain `message` rendered through the same widget as a real bar, so
+  /// either shape looks identical in the sheet. `error` picks up the app's
+  /// lavender [AppColors.brandTertiary] ground.
+  List<MessageBarEntity> _fallbackBar(String? message) => (message == null || message.isEmpty)
+      ? const []
+      : [MessageBarEntity(text: message, messageType: 'error', hasIcon: true)];
+}
+
 class _SheetBody extends StatelessWidget {
   const _SheetBody({required this.bottomPadding, this.onAction});
 
   final double bottomPadding;
-  final ValueChanged<String>? onAction;
+  final ValueChanged<(String, String?)>? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -208,10 +263,11 @@ class _SheetBody extends StatelessWidget {
         switch (state.status) {
           case PromosOffersStatus.initial:
           case PromosOffersStatus.loading:
-          // Card-shaped placeholders rather than a spinner, matching the
-          // home page. `listShimmer` already pads 16 horizontally, the same
-          // inset the real cards use.
+            // Card-shaped placeholders rather than a spinner, matching the
+            // home page. `listShimmer` already pads 16 horizontally, the same
+            // inset the real cards use.
             return LoadingShimmer.listShimmer(
+              key: const ValueKey(PromoOffersTestStrings.loadingShimmer),
               itemCount: 4,
               itemHeight: PromoOfferCard.approxHeight,
             );
@@ -224,23 +280,28 @@ class _SheetBody extends StatelessWidget {
                 AppSpacing.xl,
               ),
               child: Center(
-                child: Text(
-                  state.errorMessage ?? CommonStrings.somethingWentWrong,
-                  textAlign: TextAlign.center,
-                  style: AppTypographyV1.bodySmall.regular.textSecondary(),
+                child: EmptyStateWidget(
+                  titleKey: const ValueKey(PromoOffersTestStrings.emptyStateTitle),
+                  subtitleKey: const ValueKey(PromoOffersTestStrings.emptyStateSubtitle),
+                  buttonKey: const ValueKey(PromoOffersTestStrings.emptyStateButton),
+                  type: EmptyStateType.serverError,
+                  onButtonTap: () =>
+                      context.read<PromosOffersBloc>().add(const PromosOffersEvent.load()),
                 ),
               ),
             );
+
           case PromosOffersStatus.success:
             final sections = state.sections;
             if (sections.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                 child: EmptyStateWidget(
-                  key: const ValueKey(PromoOffersTestStrings.emptyStateButton),
+                  titleKey: const ValueKey(PromoOffersTestStrings.emptyStateTitle),
+                  subtitleKey: const ValueKey(PromoOffersTestStrings.emptyStateSubtitle),
+                  buttonKey: const ValueKey(PromoOffersTestStrings.emptyStateButton),
                   type: EmptyStateType.promosOffers,
-                  onButtonTap: () =>
-                      Navigator.of(context, rootNavigator: true).pop(),
+                  onButtonTap: () => Navigator.of(context, rootNavigator: true).pop(),
                 ),
               );
             }
@@ -254,21 +315,16 @@ class _SheetBody extends StatelessWidget {
             }
 
             return ListView.separated(
+              key: const ValueKey(PromoOffersTestStrings.list),
               shrinkWrap: true,
               padding: EdgeInsets.only(bottom: bottomPadding),
               itemCount: sections.length,
               separatorBuilder: (_, _) => const Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: AppSpacing.md,
-                  horizontal: AppSpacing.md,
-                ),
-                child: Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: AppColors.border,
-                ),
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.md),
+                child: Divider(height: 1, thickness: 1, color: AppColors.border),
               ),
               itemBuilder: (_, i) => _Section(
+                key: ValueKey('${PromoOffersTestStrings.section}_$i'),
                 section: sections[i],
                 startIndex: sectionStarts[i],
                 pendingActionCode: state.pendingActionCode,
@@ -283,6 +339,7 @@ class _SheetBody extends StatelessWidget {
 
 class _Section extends StatelessWidget {
   const _Section({
+    super.key,
     required this.section,
     required this.startIndex,
     required this.pendingActionCode,
@@ -294,13 +351,13 @@ class _Section extends StatelessWidget {
   /// Flat index of this section's first offer, for automation keys.
   final int startIndex;
   final String pendingActionCode;
-  final ValueChanged<String>? onAction;
+  final ValueChanged<(String, String?)>? onAction;
 
   /// Hand the deeplink to [PromoOffersBottomSheet.show] and close the sheet — it
   /// navigates once the route is gone, matching how home-page components hand
   /// their `actionUri` to `ActionUrlHandler`.
-  void _openAction(BuildContext context, String actionUri) {
-    onAction?.call(actionUri);
+  void _openAction(BuildContext context, String actionUri, String? savingsText) {
+    onAction?.call((actionUri, savingsText));
     Navigator.of(context, rootNavigator: true).pop();
   }
 
@@ -328,11 +385,11 @@ class _Section extends StatelessWidget {
   }
 
   Widget _card(
-      BuildContext context, {
-        required PromoOfferEntity offer,
-        required int index,
-        required bool isActionInProgress,
-      }) {
+    BuildContext context, {
+    required PromoOfferEntity offer,
+    required int index,
+    required bool isActionInProgress,
+  }) {
     final cardKey = '${PromoOffersTestStrings.card}_$index';
 
     return PromoOfferCard(
@@ -344,34 +401,30 @@ class _Section extends StatelessWidget {
         final cartBloc = context.read<CartBloc>();
         final loggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
         if (!loggedIn) {
-          //* this needs testing will add in next release
+          cartBloc.setPendingPromo(offer.code);
+          AppNavigator.goBack(context);
+          AppNavigator.goToLogin(context, redirectType: LoginRedirects.typePromo);
           return;
         }
-        context.read<PromosOffersBloc>().add(
-          PromosOffersEvent.apply(offer.code),
-        );
+        context.read<PromosOffersBloc>().add(PromosOffersEvent.apply(offer.code));
       },
-      onRemove: () => context.read<PromosOffersBloc>().add(
-        PromosOffersEvent.remove(offer.code),
-      ),
+      onRemove: () => context.read<PromosOffersBloc>().add(PromosOffersEvent.remove(offer.code)),
       onAction: offer.hasAction
-          ? () => _openAction(context, offer.actionUri!)
+          ? () => _openAction(context, offer.actionUri!, offer.savingsText)
           : null,
       // "See terms" is a deeplink to the promo details page, so it closes the
       // sheet on the way out exactly like the card's own CTA.
       onViewTerms: offer.showTerms
-          ? () => _openAction(context, offer.termsUri!)
+          ? () => _openAction(context, offer.termsUri!, offer.savingsText)
           : null,
       codeKey: ValueKey('${cardKey}_${PromoOffersTestStrings.codeSuffix}'),
-      applyButtonKey: ValueKey(
-        '${cardKey}_${PromoOffersTestStrings.applyButtonSuffix}',
-      ),
-      removeButtonKey: ValueKey(
-        '${cardKey}_${PromoOffersTestStrings.removeButtonSuffix}',
-      ),
-      termsKey: ValueKey(
-        '${cardKey}_${PromoOffersTestStrings.termsButtonSuffix}',
-      ),
+      titleKey: ValueKey('${cardKey}_${PromoOffersTestStrings.titleSuffix}'),
+      descriptionKey: ValueKey('${cardKey}_${PromoOffersTestStrings.descriptionSuffix}'),
+      validityKey: ValueKey('${cardKey}_${PromoOffersTestStrings.validitySuffix}'),
+      savingsKey: ValueKey('${cardKey}_${PromoOffersTestStrings.savingsSuffix}'),
+      applyButtonKey: ValueKey('${cardKey}_${PromoOffersTestStrings.applyButtonSuffix}'),
+      removeButtonKey: ValueKey('${cardKey}_${PromoOffersTestStrings.removeButtonSuffix}'),
+      termsKey: ValueKey('${cardKey}_${PromoOffersTestStrings.termsButtonSuffix}'),
       ctaKey: ValueKey('${cardKey}_${PromoOffersTestStrings.ctaButtonSuffix}'),
     );
   }

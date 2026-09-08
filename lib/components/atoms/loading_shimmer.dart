@@ -29,8 +29,11 @@ class LoadingShimmer extends StatelessWidget {
     );
   }
 
-  static Widget listShimmer({int itemCount = 5, double itemHeight = 80}) {
+  /// [key] is optional so a caller can hand the shimmer an automation key
+  /// (loading is an asserted state) without affecting existing call sites.
+  static Widget listShimmer({int itemCount = 5, double itemHeight = 80, Key? key}) {
     return ListView.builder(
+      key: key,
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: itemCount,

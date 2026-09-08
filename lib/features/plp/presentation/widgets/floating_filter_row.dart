@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/atoms/custom_chip_widget.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
@@ -9,9 +10,14 @@ import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
 
+import '../../../../core/analytics/constants/analytics_defaults.dart';
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/plp_events.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/floating_filter_entity.dart';
+import '../bloc/plp_bloc.dart';
 
 /// Inline floating-filter section rendered inside the product list.
 ///
@@ -37,9 +43,8 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
 
   /// Keys are disambiguated by section position so multiple floating filters on
   /// one page don't collide: `plp_floating_filter_<pos>_<suffix>`.
-  Key _key(String suffix) => ValueKey(
-    '${PlpTestStrings.floatingFilter}_${widget.section.position}_$suffix',
-  );
+  Key _key(String suffix) =>
+      ValueKey('${PlpTestStrings.floatingFilter}_${widget.section.position}_$suffix');
 
   late String _filterKey;
 
@@ -84,6 +89,16 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
   // ── Toggle & apply ────────────────────────────────────────────────────────
 
   void _toggle(String value) {
+    // The inline row has no sheet to open, so the first chip touched is the
+    // moment the user engaged with filtering — that is what filter_clicked
+    // describes. Latched so a multi-select run reports once, not per chip.
+    if (!_filterClickLogged) {
+      _filterClickLogged = true;
+      sl<AnalyticsHelper>().logFilterClicked(
+        trackingMeta: context.read<PlpBloc>().state.plpAnalyticsMeta,
+        clickSource: FilterClickSource.floatingFilter,
+      );
+    }
     setState(() {
       if (_selectedValues.contains(value)) {
         _selectedValues.remove(value);
@@ -95,9 +110,16 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
   }
 
   /// Sends the full selection set upstream. Empty string clears the filter key.
+  ///
+  /// No `filter_applied` here — that event reports the *resulting* feed size,
+  /// so the bloc emits it once the reload lands.
   void _applyFilter() {
+    _filterClickLogged = false;
     widget.onFiltersApplied(_filterKey, _selectedValues.join(','));
   }
+
+  /// One `filter_clicked` per engagement with this row, not per chip.
+  bool _filterClickLogged = false;
 
   // ── Geometry ──────────────────────────────────────────────────────────────
 
@@ -112,14 +134,31 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
     return (widget.section.tileWidth?.toDouble() ?? _swatchHeight).clamp(36.0, 48.0);
   }
 
-  /// Total row height for the horizontal ListView:
-  ///   TEXT   → 32 (chip height; label lives inside the chip)
-  ///   IMAGE / COLOUR → swatch + 4 gap + 16 label
-  double get _rowHeight {
-    if (_chipType == 'IMAGE' || _chipType == 'COLOUR') {
-      return _swatchHeight + 20;
-    }
-    return 27;
+  /// Cell width for IMAGE / COLOUR chips — the swatch width, unchanged. The
+  /// label wraps inside it rather than widening the cell, so the strip keeps
+  /// its original density and chip pitch.
+  double get _cellWidth => _swatchWidth;
+
+  /// Labels wrap to at most two lines (design spec) and ellipsise beyond that.
+  static const int _labelMaxLines = 2;
+
+  /// Gap between the swatch and its label.
+  static const double _labelGap = 4;
+
+  /// Label under an IMAGE / COLOUR swatch. Constrained to the cell width so a
+  /// long label wraps instead of stretching the chip; its HEIGHT is left to
+  /// the text layout, which is what lets the strip size itself (see [build]).
+  Widget _buildChipLabel(String label) {
+    return SizedBox(
+      width: _cellWidth,
+      child: Text(
+        label,
+        style: AppTypographyV1.labelMedium.medium.textPrimary(),
+        maxLines: _labelMaxLines,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
@@ -155,14 +194,30 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
               ),
             ),
 
-          SizedBox(
-            height: _rowHeight,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lgMd),
-              itemCount: section.chips.length,
-              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
-              itemBuilder: (_, index) => _buildChip(section.chips[index], index),
+          // Self-sizing strip: the height comes from the tallest chip, so a
+          // label that wraps to two lines simply makes the row taller instead
+          // of being clipped. The alternative — a `SizedBox` of a height
+          // computed from font size x line height x line count — has to
+          // predict text metrics the framework hasn't measured yet, and gets
+          // it wrong whenever the font file, the type ramp or the platform
+          // text scale changes.
+          //
+          // A `Row` inside a scroll view (rather than a lazy horizontal
+          // `ListView`, which cannot size to its children on the cross axis)
+          // is the right trade here: a floating-filter section carries a
+          // handful of chips, all of which are on screen or one flick away,
+          // so there is nothing for laziness to save.
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lgMd),
+            child: Row(
+              // Top-aligned so every swatch sits on one line and only the
+              // labels below them differ in height.
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: AppSpacing.xs,
+              children: [
+                for (final (index, chip) in section.chips.indexed) _buildChip(chip, index),
+              ],
             ),
           ),
 
@@ -210,7 +265,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
   Widget _buildTextChip(FloatingFilterChipEntity chip, bool isSelected) {
     const brand = AppColors.brandPrimary;
     return CustomChipWidget(
-      text: (chip.label ?? '').toUpperCase(),
+      text: chip.label ?? '',
       backgroundColor: isSelected ? brand.withValues(alpha: 0.07) : Colors.transparent,
       borderRadius: 2,
       borderColor: isSelected ? brand : AppColors.neutralGrey1,
@@ -254,17 +309,8 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
             ),
           ),
         ),
-        const SizedBox(height: 4),
-        SizedBox(
-          width: _swatchWidth,
-          child: Text(
-            chip.label ?? '',
-            style: AppTypographyV1.labelMedium.medium.textPrimary(),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
+        const SizedBox(height: 3),
+        _buildChipLabel(chip.label ?? ''),
       ],
     );
   }
@@ -298,14 +344,10 @@ class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKee
             ),
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          (chip.label ?? '').truncate(7),
-          style: AppTypographyV1.labelMedium.medium.textPrimary(),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-        ),
+        const SizedBox(height: _labelGap),
+        // Was `truncate(7)` + a single line, which cut "Multicolour" to
+        // "Multico…" even when there was room; two lines hold the real name.
+        _buildChipLabel(chip.label ?? ''),
       ],
     );
   }

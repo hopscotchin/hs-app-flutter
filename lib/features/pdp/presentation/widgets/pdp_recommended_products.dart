@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../../components/page_components/product_grid_widget.dart';
+import '../../../../core/navigation/nav_destination.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/pdp_strings.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 import '../../../../features/discover/domain/entities/home_page_entity.dart';
+import '../../domain/entities/pdp_entry_args.dart';
 import '../../domain/entities/recommendations_entity.dart';
+import '../../../../core/analytics/pdp/pdp_analytics_tracker.dart';
 
 /// Recommendations rail for the PDP. Returns a **sliver** (not a box) so the
 /// product grid can build lazily, one row at a time, as it scrolls into view —
@@ -31,12 +37,17 @@ class PdpRecommendedProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final records = recommendations.records;
-    if (records.isEmpty) {
+    final railTiles = recommendations.records;
+    if (railTiles.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
-    final rowCount = (records.length / _columns).ceil();
+    final rowCount = (railTiles.length / _columns).ceil();
+    // Same reason as the recently-viewed rail: the shared grid drops the tile
+    // node, so it is indexed here.
+    final railTilesById = {for (final t in railTiles) t.product.id: t};
+
+    final tracker = context.read<PdpAnalyticsTracker>();
 
     // The PDP's SafeArea has `bottom: false`, so the scroll view runs under the
     // system nav/gesture bar. The trailing spacer has to clear it, and its
@@ -52,21 +63,32 @@ class PdpRecommendedProducts extends StatelessWidget {
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
         SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            // `Center` wraps the Text so the paragraph gets the full row width to
-            // align within — `textAlign` on its own leaves the title at the left
-            // edge, because the Text shrink-wraps to its own width under loose
-            // constraints.
-            child: Center(
-              child: Text(
-                recommendations.pageMeta?.pageTitle ?? PdpStrings.productsYouMayLike,
-                key: const ValueKey(PdpTestStrings.recommendedTitle),
-                textAlign: TextAlign.center,
-                style: AppTypographyV1.titleMedium.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF000000),
-                  height: 1.0,
+          // `reco_viewed` fires when the rail heading scrolls into view, once per
+          // screen — Android does it from a scroll listener on the title adapter
+          // (`AnalyticsScrollHandler.kt:38-43`).
+          child: VisibilityDetector(
+            key: const Key('pdp_reco_title_visibility'),
+            onVisibilityChanged: (info) {
+              if (info.visibleFraction > 0) {
+                tracker.onRecoRailVisible(recommendations.trackingMeta);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              // `Center` wraps the Text so the paragraph gets the full row width to
+              // align within — `textAlign` on its own leaves the title at the left
+              // edge, because the Text shrink-wraps to its own width under loose
+              // constraints.
+              child: Center(
+                child: Text(
+                  recommendations.pageMeta?.pageTitle ?? PdpStrings.productsYouMayLike,
+                  key: const ValueKey(PdpTestStrings.recommendedTitle),
+                  textAlign: TextAlign.center,
+                  style: AppTypographyV1.titleMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF000000),
+                    height: 1.0,
+                  ),
                 ),
               ),
             ),
@@ -76,7 +98,7 @@ class PdpRecommendedProducts extends StatelessWidget {
         SliverList(
           delegate: SliverChildBuilderDelegate((context, rowIndex) {
             final start = rowIndex * _columns;
-            final end = start + _columns > records.length ? records.length : start + _columns;
+            final end = start + _columns > railTiles.length ? railTiles.length : start + _columns;
             // One row of the canonical grid — reused verbatim so tiles look and
             // behave exactly as in the eager grid, but built lazily per row.
             return ProductGridWidget(
@@ -85,7 +107,24 @@ class PdpRecommendedProducts extends StatelessWidget {
               keyPrefix: '${PdpTestStrings.recommendedPrefix}_row_$rowIndex',
               gridData: ProductGridData(
                 layoutInfo: const LayoutInfoData(columns: _columns, showProductInfo: true),
-                tiles: records.sublist(start, end),
+                tiles: railTiles.sublist(start, end).map((t) => t.product).toList(),
+              ),
+              // Overrides the shared grid's homepage logging — see the
+              // recently-viewed rail for why this matters.
+              onTileTapLog: (item) async {
+                final railTile = railTilesById[item.id];
+                if (railTile != null) tracker.onRecoTileTapped(railTile);
+              },
+              onWishlistLog: tracker.onRecoTileWishlisted,
+              // The destination PDP reports where it came from. Android sends the
+              // pair from the reco tile's own click handler
+              // (`ProductItemViewHolder.kt:64-76`); no `from_feed_size` travels
+              // with it, so it stays absent here too.
+              tapAnalytics: navExtra(
+                pdpEntryArgs: const PdpEntryArgs(
+                  fromScreen: FromScreens.product,
+                  fromPage: FromPage.recommendation,
+                ),
               ),
             );
           }, childCount: rowCount),

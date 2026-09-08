@@ -45,6 +45,17 @@ class EnvConfig {
 
   // HTTP Toolkit Proxy
   static bool get enableHttpToolkitProxy => dotenv.env['ENABLE_HTTP_TOOLKIT_PROXY'] == 'true';
+
+  /// Wraps the app in DevicePreview, so screen size and text scale become
+  /// runtime controls instead of an `adb shell wm density` round trip.
+  ///
+  /// Off by default: while it is on, the app renders into a simulated viewport
+  /// rather than the real device's metrics, which is misleading for any work
+  /// that is not specifically about layout. main() gates it on debug mode and on
+  /// this not being an automation build as well — DevicePreview's chrome and
+  /// scaled viewport would move every widget away from the coordinates Maestro
+  /// taps.
+  static bool get enableDevicePreview => dotenv.env['ENABLE_DEVICE_PREVIEW'] == 'true';
   // static String get proxyHost => dotenv.env['PROXY_HOST'] ?? '127.0.0.1';
   // static int get proxyPort => int.parse(dotenv.env['PROXY_PORT'] ?? '8000');
 

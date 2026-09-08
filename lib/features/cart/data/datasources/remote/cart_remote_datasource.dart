@@ -7,8 +7,8 @@ import '../../models/cart_model.dart';
 import 'package:injectable/injectable.dart';
 
 abstract class CartRemoteDataSource {
-  Future<AddToCartResponseModel> addToCart(String skuId, int quantity);
-  Future<AddToCartResponseModel> buyNow(String skuId, int quantity);
+  Future<AddToCartResponseModel> addToCart(Map<String, Object?> body);
+  Future<AddToCartResponseModel> buyNow(Map<String, Object?> body);
 
   /// [instantCheckout] scopes every cart call to the single buy-now item: the
   /// backend answers with just that line rather than the whole bag. Android
@@ -46,20 +46,14 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   CartRemoteDataSourceImpl({required this.apiClient});
 
   @override
-  Future<AddToCartResponseModel> addToCart(String skuId, int quantity) async {
-    final response = await apiClient.post(
-      ApiConstants.addToCart,
-      data: {'sku': skuId, 'quantity': '$quantity'},
-    );
+  Future<AddToCartResponseModel> addToCart(Map<String, Object?> body) async {
+    final response = await apiClient.post(ApiConstants.addToCart, data: body);
     return AddToCartResponseModel.fromJson(response.data as Map<String, dynamic>);
   }
 
   @override
-  Future<AddToCartResponseModel> buyNow(String skuId, int quantity) async {
-    final response = await apiClient.post(
-      ApiConstants.buyNow,
-      data: {'sku': skuId, 'quantity': '$quantity'},
-    );
+  Future<AddToCartResponseModel> buyNow(Map<String, Object?> body) async {
+    final response = await apiClient.post(ApiConstants.buyNow, data: body);
     return AddToCartResponseModel.fromJson(response.data as Map<String, dynamic>);
   }
 

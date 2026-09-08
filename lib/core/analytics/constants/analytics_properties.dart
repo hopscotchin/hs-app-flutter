@@ -227,6 +227,7 @@ class AnalyticsProperties {
   static const String type = 'type';
   static const String propertyType = 'property_type';
   static const String cta = 'cta';
+
   static const String fromScreen = 'from_screen';
   static const String fromPage = 'from_page';
   static const String fromLocation = 'from_location';

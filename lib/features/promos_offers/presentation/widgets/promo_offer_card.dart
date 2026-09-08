@@ -3,6 +3,7 @@ import 'package:hs_app_flutter/components/atoms/dotted_border_box.dart';
 import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
 import 'package:hs_app_flutter/components/buttons/button_enums.dart';
 import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
+import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/colors.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
@@ -35,6 +36,7 @@ class PromoOfferCard extends StatelessWidget {
     this.removeButtonKey,
     this.termsKey,
     this.ctaKey,
+    this.savingsTextFromCart,
   });
 
   final PromoOfferEntity offer;
@@ -64,6 +66,7 @@ class PromoOfferCard extends StatelessWidget {
   final Key? removeButtonKey;
   final Key? termsKey;
   final Key? ctaKey;
+  final String? savingsTextFromCart;
 
   bool get _enabled => offer.isApplicable;
 
@@ -170,7 +173,9 @@ class PromoOfferCard extends StatelessWidget {
             ),
             AppSpacing.horizontalGapXxs,
             Text(
-              offer.savingsText!,
+              savingsTextFromCart.isNotNullOrEmpty
+                  ? savingsTextFromCart ?? ''
+                  : offer.savingsText ?? '',
               key: savingsKey,
               style: AppTypographyV1.labelLarge.semiBold.linkColor(),
             ),

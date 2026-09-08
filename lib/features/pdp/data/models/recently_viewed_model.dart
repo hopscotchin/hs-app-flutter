@@ -1,7 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../../plp/data/models/listing_product_model.dart';
+import '../../domain/entities/tile_entity.dart';
 import '../../domain/entities/recently_viewed_entity.dart';
+import 'tile_model.dart';
 
 part 'recently_viewed_model.g.dart';
 
@@ -35,8 +36,7 @@ class ViewConfigModel {
   @JsonKey(defaultValue: 0)
   final int peepingFactor;
 
-  factory ViewConfigModel.fromJson(Map<String, dynamic> json) =>
-      _$ViewConfigModelFromJson(json);
+  factory ViewConfigModel.fromJson(Map<String, dynamic> json) => _$ViewConfigModelFromJson(json);
 }
 
 extension ViewConfigModelX on ViewConfigModel {
@@ -112,39 +112,29 @@ extension RecentlyViewedMarginsModelX on RecentlyViewedMarginsModel {
 }
 
 @JsonSerializable(createToJson: false)
-class RecentlyViewedTileModel {
-  const RecentlyViewedTileModel({this.product});
-
-  @JsonKey(defaultValue: null, fromJson: _productFromJson)
-  final ListingProductModel? product;
-
-  factory RecentlyViewedTileModel.fromJson(Map<String, dynamic> json) =>
-      _$RecentlyViewedTileModelFromJson(json);
-}
-
-ListingProductModel? _productFromJson(Object? json) =>
-    json is Map<String, dynamic> ? ListingProductModel.fromJson(json) : null;
-
-@JsonSerializable(createToJson: false)
 class RecentlyViewedModel {
   const RecentlyViewedModel({
     this.viewConfig,
     this.tiles = const [],
     this.heading,
     this.margins,
+    this.trackingMeta,
   });
 
   @JsonKey(defaultValue: null, fromJson: _viewConfigFromJson)
   final ViewConfigModel? viewConfig;
 
   @JsonKey(defaultValue: [])
-  final List<RecentlyViewedTileModel> tiles;
+  final List<TileModel> tiles;
 
   @JsonKey(name: 'heading', defaultValue: null, fromJson: _headingFromJson)
   final RecentlyViewedHeadingModel? heading;
 
   @JsonKey(defaultValue: null, fromJson: _marginsFromJson)
   final RecentlyViewedMarginsModel? margins;
+
+  @JsonKey(defaultValue: null)
+  final Map<String, dynamic>? trackingMeta;
 
   factory RecentlyViewedModel.fromJson(Map<String, dynamic> json) =>
       _$RecentlyViewedModelFromJson(json);
@@ -154,23 +144,17 @@ ViewConfigModel? _viewConfigFromJson(Object? json) =>
     json is Map<String, dynamic> ? ViewConfigModel.fromJson(json) : null;
 
 RecentlyViewedHeadingModel? _headingFromJson(Object? json) =>
-    json is Map<String, dynamic>
-    ? RecentlyViewedHeadingModel.fromJson(json)
-    : null;
+    json is Map<String, dynamic> ? RecentlyViewedHeadingModel.fromJson(json) : null;
 
 RecentlyViewedMarginsModel? _marginsFromJson(Object? json) =>
-    json is Map<String, dynamic>
-    ? RecentlyViewedMarginsModel.fromJson(json)
-    : null;
+    json is Map<String, dynamic> ? RecentlyViewedMarginsModel.fromJson(json) : null;
 
 extension RecentlyViewedModelX on RecentlyViewedModel {
   RecentlyViewedEntity toEntity() => RecentlyViewedEntity(
     viewConfig: viewConfig?.toEntity(),
-    tiles: tiles
-        .where((t) => t.product != null)
-        .map((t) => t.product!.toEntity())
-        .toList(),
+    tiles: tiles.map((t) => t.toEntity()).whereType<TileEntity>().toList(),
     heading: heading?.toEntity(),
     margins: margins?.toEntity(),
+    trackingMeta: trackingMeta,
   );
 }

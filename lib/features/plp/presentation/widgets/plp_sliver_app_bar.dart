@@ -4,6 +4,7 @@ import 'package:hs_app_flutter/components/atoms/auto_semantics.dart';
 import 'package:hs_app_flutter/components/atoms/badge_icon.dart';
 import 'package:hs_app_flutter/components/atoms/circular_icon_button.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
+import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
@@ -13,7 +14,10 @@ import 'package:hs_app_flutter/core/theme/theme.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
 
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/plp_events.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
+import '../../../../core/di/injection.dart';
 import '../../domain/entities/banner_entity.dart';
 import '../../domain/entities/page_type.dart';
 import '../bloc/plp_bloc.dart';
@@ -25,9 +29,26 @@ typedef _AppBarData = ({
   String? screenSubtitle,
   BannerEntity? banner,
   PlpStatus? status,
+  Map<String, dynamic>? trackingMeta,
 });
 
 class PlpSliverAppBar extends StatelessWidget {
+  /// The boutique header's geometry, for `scrolled_height`.
+  ///
+  /// Android folds the app bar's measured height into the scroll depth once the
+  /// header collapses (`ProductsListingActivity:1862`), so the probe needs both
+  /// the full height and the offset at which it is fully collapsed. Derived
+  /// here from the delegate's own extents so the two cannot drift — a change to
+  /// `_expandedHeight` or `minExtent` moves this with it. See
+  /// `PlpScrollProbe.configure`.
+  static ({double expandedHeight, double collapseOffset}) boutiqueHeaderGeometry(
+    double topPadding,
+  ) {
+    final maxExtent = _PlpHeaderDelegate._expandedHeight + topPadding;
+    final minExtent = topPadding;
+    return (expandedHeight: maxExtent, collapseOffset: maxExtent - minExtent);
+  }
+
   final PageType pageType;
   final String title;
 
@@ -42,6 +63,7 @@ class PlpSliverAppBar extends StatelessWidget {
         screenSubtitle: state.screenSubtitle,
         banner: state.banners.isNotEmpty ? state.banners.first : null,
         status: state.status,
+        trackingMeta: state.trackingMeta,
       ),
       builder: (context, data) {
         if (data.status == PlpStatus.loading) {
@@ -55,11 +77,29 @@ class PlpSliverAppBar extends StatelessWidget {
 
         final pageSubtitle = (data.screenSubtitle?.isNotEmpty ?? false) ? data.screenSubtitle! : '';
 
+        // Android has no boutique search to mirror, so the boutique reports a
+        // Flutter-only value rather than borrowing either existing screen name.
+        // See [FromScreens.searchBoutique].
+        final searchFromScreen = pageType == PageType.boutique
+            ? FromScreens.searchBoutique
+            : FromScreens.productListPage;
+
         if (hasBanner) {
-          return PlpSliverHeader(title: pageTitle, subtitle: pageSubtitle, banner: data.banner);
+          return PlpSliverHeader(
+            title: pageTitle,
+            subtitle: pageSubtitle,
+            banner: data.banner,
+            searchFromScreen: searchFromScreen,
+            trackingMeta: data.trackingMeta,
+          );
         }
 
-        return _StandardSliverAppBar(title: pageTitle, subtitle: pageSubtitle);
+        return _StandardSliverAppBar(
+          title: pageTitle,
+          subtitle: pageSubtitle,
+          searchFromScreen: searchFromScreen,
+          trackingMeta: data.trackingMeta,
+        );
       },
     );
   }
@@ -73,7 +113,18 @@ class _StandardSliverAppBar extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const _StandardSliverAppBar({required this.title, required this.subtitle});
+  /// `from_screen` for the search icon's event and navigation. Threaded rather
+  /// than derived, because which app bar renders is decided by whether the page
+  /// has a banner — not by its type — so neither variant can infer it.
+  final String searchFromScreen;
+  final Map<String, dynamic>? trackingMeta;
+
+  const _StandardSliverAppBar({
+    required this.title,
+    required this.subtitle,
+    required this.searchFromScreen,
+    this.trackingMeta,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +180,7 @@ class _StandardSliverAppBar extends StatelessWidget {
               key: const ValueKey(PlpTestStrings.appBarSearchButton),
               iconSize: 18,
               icon: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
-              onTap: () => AppNavigator.goToSearch(context),
+              onTap: () => _onSearchTap(context, searchFromScreen, trackingMeta),
             ),
           ),
         ),
@@ -169,11 +220,19 @@ class PlpSliverHeader extends StatelessWidget {
   final String subtitle;
   final BannerEntity? banner;
 
+  /// `from_screen` for the search icon's event and navigation. Threaded rather
+  /// than derived, because which app bar renders is decided by whether the page
+  /// has a banner — not by its type — so neither variant can infer it.
+  final String searchFromScreen;
+  final Map<String, dynamic>? trackingMeta;
+
   const PlpSliverHeader({
     super.key,
     required this.title,
     required this.subtitle,
     required this.banner,
+    required this.searchFromScreen,
+    this.trackingMeta,
   });
 
   @override
@@ -187,8 +246,10 @@ class PlpSliverHeader extends StatelessWidget {
       delegate: _PlpHeaderDelegate(
         title: title,
         subtitle: subtitle,
+        searchFromScreen: searchFromScreen,
         banner: banner,
         topPadding: topPadding,
+        trackingMeta: trackingMeta,
       ),
     );
   }
@@ -199,13 +260,19 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String subtitle;
   final BannerEntity? banner;
   final double topPadding;
+  final Map<String, dynamic>? trackingMeta;
 
   const _PlpHeaderDelegate({
     required this.title,
     required this.subtitle,
     required this.banner,
     required this.topPadding,
+    required this.searchFromScreen,
+    this.trackingMeta,
   });
+
+  /// See [PlpSliverHeader.searchFromScreen].
+  final String searchFromScreen;
 
   static const double _toolbarHeight = kToolbarHeight;
   static const double _expandedHeight = 300;
@@ -406,7 +473,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
                     id: PlpTestStrings.appBarSearchButton,
                     child: CircleIconButton(
                       key: const ValueKey(PlpTestStrings.appBarSearchButton),
-                      onTap: () => AppNavigator.goToSearch(context),
+                      onTap: () => _onSearchTap(context, searchFromScreen, trackingMeta),
                       child: const CustomImage(path: ImageConstants.search, width: 20, height: 20),
                     ),
                   ),
@@ -450,4 +517,27 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
         oldDelegate.banner != banner ||
         oldDelegate.topPadding != topPadding;
   }
+}
+
+/// `search_clicked` from the PLP toolbar, then navigation.
+///
+/// Both app-bar variants (standard and the collapsing boutique header) route
+/// through here so the event cannot be wired to one and missed on the other.
+///
+/// Both the event and the navigation report the same `from_screen` — the two
+/// lines Android runs back to back in
+/// `ProductListPageActivity.searchProductsListing` (`:3653-3654`).
+///
+/// A boutique reports `"Search Boutique"` — a Flutter-only value, because
+/// Android's boutique has no search item to mirror. See
+/// [FromScreens.searchBoutique].
+void _onSearchTap(BuildContext context, String fromScreen, Map<String, dynamic>? trackingMeta) {
+  sl<AnalyticsHelper>().logSearchClicked(
+    source: SourcePage(
+      fromScreen: fromScreen,
+      fromLocation: FromLocations.searchIcon,
+    ),
+    trackingMeta: trackingMeta,
+  );
+  AppNavigator.goToSearch(context);
 }

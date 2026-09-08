@@ -23,6 +23,7 @@ class FilterModel {
     this.isSection = false,
     this.pincode,
     this.visualCue,
+    this.trackingMeta,
   });
 
   @JsonKey(fromJson: parseToStringOrNull)
@@ -56,6 +57,9 @@ class FilterModel {
   @JsonKey(name: 'visualCue')
   final Map<String, dynamic>? visualCue;
 
+  @JsonKey(name: 'trackingMeta')
+  final Map<String, dynamic>? trackingMeta;
+
   factory FilterModel.fromJson(Map<String, dynamic> json) => _$FilterModelFromJson(json);
 
   FilterEntity toEntity() => FilterEntity(
@@ -72,6 +76,7 @@ class FilterModel {
     isSection: isSection,
     pincode: pincode,
     visualCue: _parseVisualCue(visualCue),
+    trackingMeta: trackingMeta,
   );
 
   static VisualCueEntity? _parseVisualCue(Map<String, dynamic>? raw) {

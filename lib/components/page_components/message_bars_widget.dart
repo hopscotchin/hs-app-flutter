@@ -39,6 +39,7 @@ class MessageBarsWidget extends StatelessWidget {
   final String? keyPrefix;
   final (double, double)? iconSize;
   final TextStyle? textStyle;
+  final EdgeInsetsGeometry? padding;
 
   const MessageBarsWidget({
     super.key,
@@ -49,6 +50,7 @@ class MessageBarsWidget extends StatelessWidget {
     this.spaceBetweenMessageBars = 10,
     this.iconSize = (_kIconSize, _kIconSize),
     this.textStyle,
+    this.padding,
   });
 
   @override
@@ -64,7 +66,7 @@ class MessageBarsWidget extends StatelessWidget {
       children: [
         for (var i = 0; i < visibleBars.length; i++)
           Padding(
-            padding: EdgeInsets.symmetric(vertical: spaceBetweenMessageBars),
+            padding: padding ?? EdgeInsets.symmetric(vertical: spaceBetweenMessageBars),
             child: _MessageBarItem(
               bar: visibleBars[i],
               cardStyle: cardStyle,

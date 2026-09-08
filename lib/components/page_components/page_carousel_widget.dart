@@ -31,6 +31,7 @@ class PageCarouselWidget extends StatefulWidget {
     this.onTileTapLog,
     this.onWishlistLog,
     this.onScrollLog,
+    this.tapAnalytics,
   });
 
   final PageCarouselData carouselData;
@@ -48,6 +49,15 @@ class PageCarouselWidget extends StatefulWidget {
   /// own and the host injects the handler
   /// (`RecentlyViewedProductsView.kt:69-81`).
   final Future<void> Function(PageCarouselTile tile)? onTileTapLog;
+
+  /// Analytics context a tap in this component hands to the destination —
+  /// forwarded verbatim as the navigation's `extra`.
+  ///
+  /// Opaque here on purpose: *which* context applies depends on the host, not
+  /// on this widget. `PageComponentRenderer` supplies a `SourcePage` for home
+  /// and landing pages; the PDP rails supply their own `PdpEntryArgs`. Both are
+  /// built with `navExtra`.
+  final Map<String, dynamic>? tapAnalytics;
 
   /// Overrides the wishlist analytics, `added` distinguishing the two events.
   ///
@@ -568,7 +578,11 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
             isWishlisted: wished,
             onTap: () {
               unawaited(logClick());
-              ActionUrlHandler.navigate(context, tapUri);
+              ActionUrlHandler.navigate(
+                context,
+                tapUri,
+                extra: widget.tapAnalytics,
+              );
             },
             onWishlistTap: () => WishlistActions.toggle(
               context,
@@ -599,7 +613,11 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
       key: _tileKey(index),
       onTap: () {
         unawaited(logClick());
-        ActionUrlHandler.navigate(context, tapUri);
+        ActionUrlHandler.navigate(
+          context,
+          tapUri,
+          extra: widget.tapAnalytics,
+        );
       },
       child: SizedBox(
         width: tileWidth,

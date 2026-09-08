@@ -20,14 +20,20 @@ class PdpSnackbar {
     bottom: PdpStrings.addToBagBarHeight + AppSpacing.md,
   );
 
+  /// [key] keys the message text for automation — a snack lives on the app's
+  /// `ScaffoldMessenger`, outside the page tree, so a key is the only handle a
+  /// test has on it. Optional, so no call site is forced to pass one.
   static void show(
     BuildContext context,
     String message, {
     Duration duration = const Duration(seconds: 2),
+    Key? key,
   }) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message), duration: duration, margin: _margin));
+      ..showSnackBar(
+        SnackBar(content: Text(message, key: key), duration: duration, margin: _margin),
+      );
   }
 
   // ── couponCode-Snackbars ───────────────────────────────────────────────────
@@ -54,6 +60,7 @@ class PdpSnackbar {
     BuildContext context,
     String couponCode, {
     Duration duration = const Duration(seconds: 2),
+    Key? key,
   }) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -71,6 +78,7 @@ class PdpSnackbar {
               padding: _couponPadding,
               child: Text(
                 '${PdpStrings.couponCodeCopied}: $couponCode',
+                key: key,
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

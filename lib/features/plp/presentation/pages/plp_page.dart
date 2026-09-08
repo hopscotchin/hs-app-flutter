@@ -15,14 +15,19 @@ import 'package:hs_app_flutter/features/plp/presentation/widgets/plp_filter_head
 import 'package:hs_app_flutter/features/plp/presentation/widgets/plp_product_sliver.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/plp_query_correction.dart';
 
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/plp_events.dart';
 import '../../../../core/di/injection.dart';
 import '../../../wishlist/presentation/cubit/wishlist_cubit.dart';
 import '../../domain/entities/listing_product_entity.dart';
 import '../../domain/entities/page_type.dart';
+import '../../domain/entities/plp_entry_args.dart';
 import '../../domain/entities/plp_list_item.dart';
 import '../../domain/entities/wishlist_info_entity.dart';
 import '../../domain/helpers/plp_query_builder.dart';
+import '../../domain/helpers/plp_scroll_payload.dart';
 import '../bloc/plp_bloc.dart';
+import '../helpers/plp_scroll_probe.dart';
 import '../widgets/plp_shimmer_loading.dart';
 import '../widgets/plp_sliver_app_bar.dart';
 
@@ -33,6 +38,10 @@ class PlpPage extends StatelessWidget {
   final String? searchQuery;
   final String? rawSearchParams;
 
+  /// Analytics entry context for the listing-viewed payload — `from_screen` /
+  /// `from_location` and friends. Null for deeplink-style opens.
+  final PlpEntryArgs? entryArgs;
+
   const PlpPage({
     super.key,
     required this.pageType,
@@ -40,6 +49,7 @@ class PlpPage extends StatelessWidget {
     this.categoryName,
     this.searchQuery,
     this.rawSearchParams,
+    this.entryArgs,
   });
 
   Map<String, dynamic> get _baseQueryParams {
@@ -74,6 +84,7 @@ class PlpPage extends StatelessWidget {
             searchQuery: searchQuery,
             categoryName: categoryName,
             rawSearchParams: rawSearchParams,
+            entryArgs: entryArgs,
           ),
         ),
       child: _PlpView(
@@ -115,6 +126,31 @@ class _PlpViewState extends State<_PlpView> {
   final ScrollController _scrollController = ScrollController();
   final ValueNotifier<bool> _showScrollToTop = ValueNotifier(false);
 
+  /// Scroll-depth accumulator behind `plp_scrolled`. Fed from the scroll
+  /// notification stream; see [PlpScrollProbe] for why that is cheap.
+  late final PlpScrollProbe _scrollProbe = PlpScrollProbe(
+    sliverKey: _productSliverKey,
+  );
+
+  /// Snapshot of the last loaded state, kept so [dispose] can build the
+  /// scroll payload without reading the bloc during teardown.
+  PlpState? _lastLoadedState;
+
+  /// The bloc's live `localAttribution` map, captured while the element is
+  /// still mounted.
+  ///
+  /// `dispose()` runs after the element is defunct, so **any** ancestor lookup
+  /// there — `context.read`, `Provider.of`, `BlocProvider.of` — throws
+  /// `"Looking up a deactivated widget's ancestor is unsafe."`. Reading the
+  /// bloc inline while assembling the payload is what silently killed
+  /// `plp_scrolled`: the throw happened while evaluating an argument, so the
+  /// log call was never reached and the only trigger the event has never ran.
+  ///
+  /// Holding the map reference (not a copy) keeps the late binding the payload
+  /// needs — `PlpBloc._onLoadPlpData` fills it *after* emitting `loaded`, so a
+  /// snapshot taken when the listener fires would always be empty.
+  Map<String, Object>? _localAttribution;
+
   /// Last-visible product count for the "X of Y" indicator. Computed from the
   /// product sliver's real geometry so it matches what's actually on screen
   /// (mirrors Android's getActualProductCount(getLastVisiblePosition())).
@@ -132,13 +168,90 @@ class _PlpViewState extends State<_PlpView> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _deviceHeight = View.of(context).physicalSize.height.round();
+    // Row heights are recorded in logical pixels, so the width they are
+    // normalised against must be logical too — the ratio is what carries the
+    // meaning, not the unit. See `plpScaledRowHeight`.
+    //
+    // Only the boutique listing has a collapsing header for Android's
+    // extra-row term to describe; the standard PLP toolbar floats.
+    final header = widget.pageType == PageType.boutique
+        ? PlpSliverAppBar.boutiqueHeaderGeometry(MediaQuery.paddingOf(context).top)
+        : null;
+    _scrollProbe.configure(
+      displayWidth: MediaQuery.sizeOf(context).width,
+      collapsingHeader: header?.expandedHeight ?? 0,
+      headerCollapseOffset: header?.collapseOffset ?? 0,
+    );
+    // Captured here, not in dispose — see [_localAttribution].
+    _localAttribution = context.read<PlpBloc>().localAttribution;
+  }
+
+  @override
   void dispose() {
+    // Android sends this from stopScrollTracking() as the PLP goes away
+    // (`PLPAnalytics.kt:624`); leaving the screen is the only moment the full
+    // depth is known. Fired before the controllers go, and never awaited.
+    _sendScrollEvent();
     _scrollController.removeListener(_onScroll);
     _showScrollToTop.dispose();
     _visibleCount.dispose();
     _scrollController.dispose();
     super.dispose();
   }
+
+  /// Emits `plp_scrolled` if the tracker has anything to report. Gated on the
+  /// tracker returning params rather than on a "did they scroll" flag —
+  /// a bounced visit legitimately reports zero depth exactly once.
+  void _sendScrollEvent() {
+    final state = _lastLoadedState;
+    if (state == null) return;
+
+    final depth = _scrollProbe.tracker.consumeScrollDepthParams();
+    if (depth == null) return;
+
+    final range = plpScrollRange(
+      startRow: _scrollProbe.tracker.startScrollIndex,
+      endRow: _scrollProbe.tracker.endScrollIndex,
+      itemCount: state.products.length,
+    );
+    final lists = plpScrollLists(productsIn(state.products, range));
+
+    sl<AnalyticsHelper>().logPlpScrolled(
+      scrollDepthParams: depth,
+      trackingMeta: state.plpAnalyticsMeta,
+      // Null, not 0, when unmeasured: this codebase keeps zeros, so a literal
+      // `screen_height: 0` would claim a device with no screen rather than
+      // "not known". `didChangeDependencies` always runs before `dispose`, so
+      // in practice it is set.
+      screenHeight: _deviceHeight > 0 ? _deviceHeight : null,
+      totalRows: plpTotalRows(
+        totalRecords: state.totalRecords ?? 0,
+        extraRowCount: _scrollProbe.tracker.extraRowCount,
+      ),
+      brand: lists.brand,
+      productIds: lists.productIds,
+      xlProductIds: lists.xlProductIds,
+      category: lists.category,
+      subCategory: lists.subCategory,
+      productType: lists.productType,
+      merchType: lists.merchType,
+      attribution: _localAttribution,
+    );
+
+    // Reopen the window so a later send reports the next stretch rather than
+    // repeating from row 1 (Android: resetStartScrollIndex after sending).
+    _scrollProbe.tracker.resetStartScrollIndex();
+  }
+
+  /// Device display height in physical pixels — Android reports
+  /// `DefaultDisplay.displayHeight`, which is raw pixels, not logical ones.
+  ///
+  /// Captured in [didChangeDependencies] rather than read on demand: the send
+  /// happens from [dispose], where looking up an inherited widget is illegal.
+  int _deviceHeight = 0;
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
@@ -166,6 +279,7 @@ class _PlpViewState extends State<_PlpView> {
   void _resetScroll() {
     _showScrollToTop.value = false;
     _visibleCount.value = 0;
+    _scrollProbe.onListReplaced();
     if (_scrollController.hasClients) {
       _scrollController.jumpTo(0);
     }
@@ -199,16 +313,31 @@ class _PlpViewState extends State<_PlpView> {
     }
     if (lastIndex == null) return null;
 
-    final listItems = context.read<PlpBloc>().state.listItems;
-    var products = 0;
-    for (var i = 0; i <= lastIndex && i < listItems.length; i++) {
-      products += switch (listItems[i]) {
+    // O(1) lookup. This used to sum the list from 0 on every scroll frame,
+    // which is O(list items) — ~1,800 iterations per frame on a 3,600-product
+    // listing. The running totals are rebuilt once per loaded state instead.
+    final prefix = _productCountPrefix;
+    if (prefix.isEmpty) return null;
+    return prefix[lastIndex.clamp(0, prefix.length - 1)];
+  }
+
+  /// Cumulative product count up to and including each list item, rebuilt when
+  /// a load completes. A row contributes 1-2 products, an XL tile 1, a floating
+  /// filter row 0.
+  List<int> _productCountPrefix = const [];
+
+  void _rebuildProductCountPrefix(List<PlpListItem> items) {
+    final prefix = List<int>.filled(items.length, 0);
+    var running = 0;
+    for (var i = 0; i < items.length; i++) {
+      running += switch (items[i]) {
         ProductRowItem(:final right) => right == null ? 1 : 2,
         ProductXLItem() => 1,
         FloatingFilterItem() => 0,
       };
+      prefix[i] = running;
     }
-    return products;
+    _productCountPrefix = prefix;
   }
 
   @override
@@ -255,6 +384,26 @@ class _PlpViewState extends State<_PlpView> {
             listenWhen: (prev, curr) => curr.status == PlpStatus.loading,
             listener: (context, state) => _resetScroll(),
           ),
+          // Keep a snapshot of the loaded page so the scroll event can be built
+          // during dispose, when the bloc is no longer safe to read.
+          BlocListener<PlpBloc, PlpState>(
+            listenWhen: (prev, curr) =>
+                curr.status == PlpStatus.loaded &&
+                (prev.status != curr.status ||
+                    prev.listItems.length != curr.listItems.length),
+            listener: (context, state) {
+              _lastLoadedState = state;
+              _rebuildProductCountPrefix(state.listItems);
+              // After the rows exist, record what fits on screen. A user who
+              // bounces straight back produces no scroll notification, and
+              // without this the scroll window stays empty — which makes the
+              // payload report every loaded product instead of the handful
+              // Android reports. See `PlpScrollProbe.seedInitialViewport`.
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) _scrollProbe.seedInitialViewport();
+              });
+            },
+          ),
         ],
         child: BlocBuilder<PlpBloc, PlpState>(
           buildWhen: (prev, curr) => prev.status != curr.status,
@@ -270,8 +419,9 @@ class _PlpViewState extends State<_PlpView> {
                   slivers: [
                     PlpSliverAppBar(pageType: widget.pageType, title: _title),
                     ...switch (state.status) {
-                      PlpStatus.initial ||
-                      PlpStatus.loading => const [SliverFillRemaining(child: PlpShimmerLoading())],
+                      PlpStatus.initial || PlpStatus.loading => [
+                        SliverFillRemaining(child: PlpShimmerLoading(pageType: widget.pageType)),
+                      ],
                       PlpStatus.error => [
                         SliverFillRemaining(
                           child: Center(
@@ -377,6 +527,10 @@ class _PlpViewState extends State<_PlpView> {
   static const double _paginationTriggerFraction = 0.8;
 
   bool _handleScroll(ScrollNotification notification) {
+    // Depth sampling first — it self-throttles, and must see the notification
+    // even on a list too short to paginate.
+    _scrollProbe.onScrollNotification(notification);
+
     final metrics = notification.metrics;
     if (metrics.axis != Axis.vertical || metrics.maxScrollExtent <= 0) return false;
     if (metrics.pixels >= metrics.maxScrollExtent * _paginationTriggerFraction) {

@@ -18,6 +18,9 @@ class AppButton extends StatelessWidget {
     this.state = ButtonState.enabled,
     this.leadingIcon,
     this.trailingIcon,
+    this.textStyle,
+    this.foregroundColor,
+    this.padding,
   });
 
   final String text;
@@ -29,6 +32,23 @@ class AppButton extends StatelessWidget {
   final ButtonState state;
   final Widget? leadingIcon;
   final Widget? trailingIcon;
+
+  /// Merged over the label style the [size] would otherwise give — set only the
+  /// properties that differ. For a caller whose design specs the label
+  /// differently from the shared scale, e.g. the PDP's CTAs at w700 on a 22px
+  /// line box.
+  final TextStyle? textStyle;
+
+  /// Overrides the label (and loading dots) colour the [variant] would give.
+  /// Background and border still come from the variant.
+  final Color? foregroundColor;
+
+  /// Replaces the inner padding [size] would give. For a caller narrow enough
+  /// that the hugging padding crowds the label: the PDP's two CTAs split a
+  /// 296px bar, where 20px per side was most of the slack "Add To Bag" needed
+  /// on a 320pt screen. A full-width button centres its label, so trimming this
+  /// costs nothing visually.
+  final EdgeInsets? padding;
 
   // ── State helpers ──────────────────────────────────────────────────────
 
@@ -46,15 +66,17 @@ class AppButton extends StatelessWidget {
     ButtonSize.regular => AppSpacing.buttonHeightLg, // 35
   };
 
-  EdgeInsets get _padding => switch (size) {
-    ButtonSize.small => const EdgeInsets.symmetric(horizontal: AppSpacing.sm), // 12
-    ButtonSize.medium => const EdgeInsets.symmetric(horizontal: AppSpacing.lgMd), // 20
-    ButtonSize.large => const EdgeInsets.symmetric(horizontal: AppSpacing.lg), // 24
-    ButtonSize.regular => const EdgeInsets.symmetric(
-      horizontal: AppSpacing.xs,
-      vertical: AppSpacing.xs,
-    ), // 24
-  };
+  EdgeInsets get _padding =>
+      padding ??
+      switch (size) {
+        ButtonSize.small => const EdgeInsets.symmetric(horizontal: AppSpacing.sm), // 12
+        ButtonSize.medium => const EdgeInsets.symmetric(horizontal: AppSpacing.lgMd), // 20
+        ButtonSize.large => const EdgeInsets.symmetric(horizontal: AppSpacing.lg), // 24
+        ButtonSize.regular => const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xs,
+          vertical: AppSpacing.xs,
+        ), // 24
+      };
 
   double get _dotSize => switch (size) {
     ButtonSize.small => isFullWidth ? 8 : 6.0,
@@ -75,11 +97,20 @@ class AppButton extends StatelessWidget {
     ButtonSize.regular => AppTypographyV1.bodyLarge.bold, // 15px
   };
 
+  TextStyle get _resolvedTextStyle => _textStyle.merge(textStyle);
+
   // ── Build ──────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    final style = AppButtonTheme.resolve(variant: variant, styleType: styleType);
+    final resolved = AppButtonTheme.resolve(variant: variant, styleType: styleType);
+    final style = foregroundColor == null
+        ? resolved
+        : AppButtonStyle(
+            backgroundColor: resolved.backgroundColor,
+            foregroundColor: foregroundColor!,
+            borderColor: resolved.borderColor,
+          );
 
     final Widget button = AnimatedOpacity(
       opacity: _isDisabled ? 0.5 : 1.0,
@@ -99,10 +130,14 @@ class AppButton extends StatelessWidget {
   Widget _buildBoxButton(AppButtonStyle style) {
     final List<Widget> rowChildren = [
       if (leadingIcon != null) ...[leadingIcon!, const SizedBox(width: AppSpacing.xs)],
+      // One line, ellipsised past it. Not shrink-to-fit: a FittedBox scales each
+      // button independently, so a pair would render its two labels at different
+      // sizes — and scaling and wrapping are mutually exclusive anyway, since a
+      // FittedBox lays its child out unbounded.
       Flexible(
         child: Text(
           text,
-          style: _textStyle.copyWith(color: style.foregroundColor),
+          style: _resolvedTextStyle.copyWith(color: style.foregroundColor),
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
         ),
@@ -146,7 +181,7 @@ class AppButton extends StatelessWidget {
             opacity: _isLoading ? 0.0 : 1.0,
             child: Text(
               text.toUpperCase(),
-              style: _textStyle.copyWith(color: style.foregroundColor),
+              style: _resolvedTextStyle.copyWith(color: style.foregroundColor),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),

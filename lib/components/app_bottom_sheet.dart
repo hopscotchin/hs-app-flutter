@@ -42,16 +42,16 @@ class AppBottomSheet extends StatelessWidget {
   final Key? titleKey;
   final Key? descriptionKey;
 
-  static Future<T?> show<T>(
+  /// Same modal chrome as [show], but with caller-supplied content — for
+  /// sheets that need to rebuild themselves (e.g. a confirm button that turns
+  /// into a loader) or to swap in the shared AppButton family. Keeps the
+  /// shape/background/root-navigator config in one place instead of having
+  /// every such caller re-declare it.
+  static Future<T?> showCustom<T>(
     BuildContext context, {
-    String? title,
-    required String description,
-    required AppBottomSheetAction primaryAction,
-    AppBottomSheetAction? secondaryAction,
+    required WidgetBuilder builder,
     bool isDismissible = true,
     bool enableDrag = true,
-    Key? titleKey,
-    Key? descriptionKey,
   }) {
     return showModalBottomSheet<T>(
       context: context,
@@ -63,6 +63,25 @@ class AppBottomSheet extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      builder: builder,
+    );
+  }
+
+  static Future<T?> show<T>(
+    BuildContext context, {
+    String? title,
+    required String description,
+    required AppBottomSheetAction primaryAction,
+    AppBottomSheetAction? secondaryAction,
+    bool isDismissible = true,
+    bool enableDrag = true,
+    Key? titleKey,
+    Key? descriptionKey,
+  }) {
+    return showCustom<T>(
+      context,
+      isDismissible: isDismissible,
+      enableDrag: enableDrag,
       builder: (_) => AppBottomSheet(
         title: title,
         description: description,

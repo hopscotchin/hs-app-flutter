@@ -21,7 +21,13 @@ mixin _$ProductEntity {
 /// Deliberately not modelled: a typed class can only carry fields someone has
 /// declared, so every new backend tracking dimension would need an app
 /// release. Read it through `PdpTrackingMeta` in the analytics layer.
- Map<String, dynamic>? get trackingMeta;
+ Map<String, dynamic>? get trackingMeta;/// `product.orderAttribution` — the journey node, chained on every event.
+///
+/// Holds `redirected_from_colour_widget`, answered by the `colorVariant`
+/// query param on the request rather than by client state: `"Yes"` when a
+/// swatch led here, `"No"` otherwise. The one node not called `trackingMeta`
+/// — see `docs/analytics/pdp/contract/passthrough-spec.md` §2.1.
+ Map<String, dynamic>? get orderAttribution;
 /// Create a copy of ProductEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -32,16 +38,16 @@ $ProductEntityCopyWith<ProductEntity> get copyWith => _$ProductEntityCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.priceInfo, priceInfo) || other.priceInfo == priceInfo)&&(identical(other.soldOut, soldOut) || other.soldOut == soldOut)&&const DeepCollectionEquality().equals(other.media, media)&&const DeepCollectionEquality().equals(other.skus, skus)&&const DeepCollectionEquality().equals(other.details, details)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&(identical(other.hasSizeChart, hasSizeChart) || other.hasSizeChart == hasSizeChart)&&(identical(other.isServiceable, isServiceable) || other.isServiceable == isServiceable)&&(identical(other.isEddDifferentForSKUs, isEddDifferentForSKUs) || other.isEddDifferentForSKUs == isEddDifferentForSKUs)&&(identical(other.isReturnInfoDifferentForSKUs, isReturnInfoDifferentForSKUs) || other.isReturnInfoDifferentForSKUs == isReturnInfoDifferentForSKUs)&&const DeepCollectionEquality().equals(other.serviceGuarantee, serviceGuarantee)&&(identical(other.visualCue, visualCue) || other.visualCue == visualCue)&&const DeepCollectionEquality().equals(other.colorVariants, colorVariants)&&(identical(other.wishlistInfo, wishlistInfo) || other.wishlistInfo == wishlistInfo)&&(identical(other.isGift, isGift) || other.isGift == isGift)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.priceInfo, priceInfo) || other.priceInfo == priceInfo)&&(identical(other.soldOut, soldOut) || other.soldOut == soldOut)&&const DeepCollectionEquality().equals(other.media, media)&&const DeepCollectionEquality().equals(other.skus, skus)&&const DeepCollectionEquality().equals(other.details, details)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&(identical(other.hasSizeChart, hasSizeChart) || other.hasSizeChart == hasSizeChart)&&(identical(other.isServiceable, isServiceable) || other.isServiceable == isServiceable)&&(identical(other.isEddDifferentForSKUs, isEddDifferentForSKUs) || other.isEddDifferentForSKUs == isEddDifferentForSKUs)&&(identical(other.isReturnInfoDifferentForSKUs, isReturnInfoDifferentForSKUs) || other.isReturnInfoDifferentForSKUs == isReturnInfoDifferentForSKUs)&&const DeepCollectionEquality().equals(other.serviceGuarantee, serviceGuarantee)&&(identical(other.visualCue, visualCue) || other.visualCue == visualCue)&&const DeepCollectionEquality().equals(other.colorVariants, colorVariants)&&(identical(other.wishlistInfo, wishlistInfo) || other.wishlistInfo == wishlistInfo)&&(identical(other.isGift, isGift) || other.isGift == isGift)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta)&&const DeepCollectionEquality().equals(other.orderAttribution, orderAttribution));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,priceInfo,soldOut,const DeepCollectionEquality().hash(media),const DeepCollectionEquality().hash(skus),const DeepCollectionEquality().hash(details),eddInfo,hasSizeChart,isServiceable,isEddDifferentForSKUs,isReturnInfoDifferentForSKUs,const DeepCollectionEquality().hash(serviceGuarantee),visualCue,const DeepCollectionEquality().hash(colorVariants),wishlistInfo,isGift,const DeepCollectionEquality().hash(trackingMeta));
+int get hashCode => Object.hashAll([runtimeType,id,name,priceInfo,soldOut,const DeepCollectionEquality().hash(media),const DeepCollectionEquality().hash(skus),const DeepCollectionEquality().hash(details),eddInfo,hasSizeChart,isServiceable,isEddDifferentForSKUs,isReturnInfoDifferentForSKUs,const DeepCollectionEquality().hash(serviceGuarantee),visualCue,const DeepCollectionEquality().hash(colorVariants),wishlistInfo,isGift,const DeepCollectionEquality().hash(trackingMeta),const DeepCollectionEquality().hash(orderAttribution)]);
 
 @override
 String toString() {
-  return 'ProductEntity(id: $id, name: $name, priceInfo: $priceInfo, soldOut: $soldOut, media: $media, skus: $skus, details: $details, eddInfo: $eddInfo, hasSizeChart: $hasSizeChart, isServiceable: $isServiceable, isEddDifferentForSKUs: $isEddDifferentForSKUs, isReturnInfoDifferentForSKUs: $isReturnInfoDifferentForSKUs, serviceGuarantee: $serviceGuarantee, visualCue: $visualCue, colorVariants: $colorVariants, wishlistInfo: $wishlistInfo, isGift: $isGift, trackingMeta: $trackingMeta)';
+  return 'ProductEntity(id: $id, name: $name, priceInfo: $priceInfo, soldOut: $soldOut, media: $media, skus: $skus, details: $details, eddInfo: $eddInfo, hasSizeChart: $hasSizeChart, isServiceable: $isServiceable, isEddDifferentForSKUs: $isEddDifferentForSKUs, isReturnInfoDifferentForSKUs: $isReturnInfoDifferentForSKUs, serviceGuarantee: $serviceGuarantee, visualCue: $visualCue, colorVariants: $colorVariants, wishlistInfo: $wishlistInfo, isGift: $isGift, trackingMeta: $trackingMeta, orderAttribution: $orderAttribution)';
 }
 
 
@@ -52,7 +58,7 @@ abstract mixin class $ProductEntityCopyWith<$Res>  {
   factory $ProductEntityCopyWith(ProductEntity value, $Res Function(ProductEntity) _then) = _$ProductEntityCopyWithImpl;
 @useResult
 $Res call({
- int? id, String? name, ProductPriceEntity? priceInfo, bool soldOut, List<MediaEntity> media, List<SkuEntity> skus, List<DetailEntity> details, EddInfoEntity? eddInfo, bool? hasSizeChart, bool? isServiceable, bool? isEddDifferentForSKUs, bool? isReturnInfoDifferentForSKUs, List<ServiceGuaranteeEntity> serviceGuarantee, VisualCueEntity? visualCue, List<ColorVariantEntity> colorVariants, WishlistInfoEntity? wishlistInfo, bool isGift, Map<String, dynamic>? trackingMeta
+ int? id, String? name, ProductPriceEntity? priceInfo, bool soldOut, List<MediaEntity> media, List<SkuEntity> skus, List<DetailEntity> details, EddInfoEntity? eddInfo, bool? hasSizeChart, bool? isServiceable, bool? isEddDifferentForSKUs, bool? isReturnInfoDifferentForSKUs, List<ServiceGuaranteeEntity> serviceGuarantee, VisualCueEntity? visualCue, List<ColorVariantEntity> colorVariants, WishlistInfoEntity? wishlistInfo, bool isGift, Map<String, dynamic>? trackingMeta, Map<String, dynamic>? orderAttribution
 });
 
 
@@ -69,7 +75,7 @@ class _$ProductEntityCopyWithImpl<$Res>
 
 /// Create a copy of ProductEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? name = freezed,Object? priceInfo = freezed,Object? soldOut = null,Object? media = null,Object? skus = null,Object? details = null,Object? eddInfo = freezed,Object? hasSizeChart = freezed,Object? isServiceable = freezed,Object? isEddDifferentForSKUs = freezed,Object? isReturnInfoDifferentForSKUs = freezed,Object? serviceGuarantee = null,Object? visualCue = freezed,Object? colorVariants = null,Object? wishlistInfo = freezed,Object? isGift = null,Object? trackingMeta = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? name = freezed,Object? priceInfo = freezed,Object? soldOut = null,Object? media = null,Object? skus = null,Object? details = null,Object? eddInfo = freezed,Object? hasSizeChart = freezed,Object? isServiceable = freezed,Object? isEddDifferentForSKUs = freezed,Object? isReturnInfoDifferentForSKUs = freezed,Object? serviceGuarantee = null,Object? visualCue = freezed,Object? colorVariants = null,Object? wishlistInfo = freezed,Object? isGift = null,Object? trackingMeta = freezed,Object? orderAttribution = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -89,6 +95,7 @@ as VisualCueEntity?,colorVariants: null == colorVariants ? _self.colorVariants :
 as List<ColorVariantEntity>,wishlistInfo: freezed == wishlistInfo ? _self.wishlistInfo : wishlistInfo // ignore: cast_nullable_to_non_nullable
 as WishlistInfoEntity?,isGift: null == isGift ? _self.isGift : isGift // ignore: cast_nullable_to_non_nullable
 as bool,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,orderAttribution: freezed == orderAttribution ? _self.orderAttribution : orderAttribution // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>?,
   ));
 }
@@ -210,10 +217,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  String? name,  ProductPriceEntity? priceInfo,  bool soldOut,  List<MediaEntity> media,  List<SkuEntity> skus,  List<DetailEntity> details,  EddInfoEntity? eddInfo,  bool? hasSizeChart,  bool? isServiceable,  bool? isEddDifferentForSKUs,  bool? isReturnInfoDifferentForSKUs,  List<ServiceGuaranteeEntity> serviceGuarantee,  VisualCueEntity? visualCue,  List<ColorVariantEntity> colorVariants,  WishlistInfoEntity? wishlistInfo,  bool isGift,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  String? name,  ProductPriceEntity? priceInfo,  bool soldOut,  List<MediaEntity> media,  List<SkuEntity> skus,  List<DetailEntity> details,  EddInfoEntity? eddInfo,  bool? hasSizeChart,  bool? isServiceable,  bool? isEddDifferentForSKUs,  bool? isReturnInfoDifferentForSKUs,  List<ServiceGuaranteeEntity> serviceGuarantee,  VisualCueEntity? visualCue,  List<ColorVariantEntity> colorVariants,  WishlistInfoEntity? wishlistInfo,  bool isGift,  Map<String, dynamic>? trackingMeta,  Map<String, dynamic>? orderAttribution)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProductEntity() when $default != null:
-return $default(_that.id,_that.name,_that.priceInfo,_that.soldOut,_that.media,_that.skus,_that.details,_that.eddInfo,_that.hasSizeChart,_that.isServiceable,_that.isEddDifferentForSKUs,_that.isReturnInfoDifferentForSKUs,_that.serviceGuarantee,_that.visualCue,_that.colorVariants,_that.wishlistInfo,_that.isGift,_that.trackingMeta);case _:
+return $default(_that.id,_that.name,_that.priceInfo,_that.soldOut,_that.media,_that.skus,_that.details,_that.eddInfo,_that.hasSizeChart,_that.isServiceable,_that.isEddDifferentForSKUs,_that.isReturnInfoDifferentForSKUs,_that.serviceGuarantee,_that.visualCue,_that.colorVariants,_that.wishlistInfo,_that.isGift,_that.trackingMeta,_that.orderAttribution);case _:
   return orElse();
 
 }
@@ -231,10 +238,10 @@ return $default(_that.id,_that.name,_that.priceInfo,_that.soldOut,_that.media,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  String? name,  ProductPriceEntity? priceInfo,  bool soldOut,  List<MediaEntity> media,  List<SkuEntity> skus,  List<DetailEntity> details,  EddInfoEntity? eddInfo,  bool? hasSizeChart,  bool? isServiceable,  bool? isEddDifferentForSKUs,  bool? isReturnInfoDifferentForSKUs,  List<ServiceGuaranteeEntity> serviceGuarantee,  VisualCueEntity? visualCue,  List<ColorVariantEntity> colorVariants,  WishlistInfoEntity? wishlistInfo,  bool isGift,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  String? name,  ProductPriceEntity? priceInfo,  bool soldOut,  List<MediaEntity> media,  List<SkuEntity> skus,  List<DetailEntity> details,  EddInfoEntity? eddInfo,  bool? hasSizeChart,  bool? isServiceable,  bool? isEddDifferentForSKUs,  bool? isReturnInfoDifferentForSKUs,  List<ServiceGuaranteeEntity> serviceGuarantee,  VisualCueEntity? visualCue,  List<ColorVariantEntity> colorVariants,  WishlistInfoEntity? wishlistInfo,  bool isGift,  Map<String, dynamic>? trackingMeta,  Map<String, dynamic>? orderAttribution)  $default,) {final _that = this;
 switch (_that) {
 case _ProductEntity():
-return $default(_that.id,_that.name,_that.priceInfo,_that.soldOut,_that.media,_that.skus,_that.details,_that.eddInfo,_that.hasSizeChart,_that.isServiceable,_that.isEddDifferentForSKUs,_that.isReturnInfoDifferentForSKUs,_that.serviceGuarantee,_that.visualCue,_that.colorVariants,_that.wishlistInfo,_that.isGift,_that.trackingMeta);case _:
+return $default(_that.id,_that.name,_that.priceInfo,_that.soldOut,_that.media,_that.skus,_that.details,_that.eddInfo,_that.hasSizeChart,_that.isServiceable,_that.isEddDifferentForSKUs,_that.isReturnInfoDifferentForSKUs,_that.serviceGuarantee,_that.visualCue,_that.colorVariants,_that.wishlistInfo,_that.isGift,_that.trackingMeta,_that.orderAttribution);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -251,10 +258,10 @@ return $default(_that.id,_that.name,_that.priceInfo,_that.soldOut,_that.media,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  String? name,  ProductPriceEntity? priceInfo,  bool soldOut,  List<MediaEntity> media,  List<SkuEntity> skus,  List<DetailEntity> details,  EddInfoEntity? eddInfo,  bool? hasSizeChart,  bool? isServiceable,  bool? isEddDifferentForSKUs,  bool? isReturnInfoDifferentForSKUs,  List<ServiceGuaranteeEntity> serviceGuarantee,  VisualCueEntity? visualCue,  List<ColorVariantEntity> colorVariants,  WishlistInfoEntity? wishlistInfo,  bool isGift,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  String? name,  ProductPriceEntity? priceInfo,  bool soldOut,  List<MediaEntity> media,  List<SkuEntity> skus,  List<DetailEntity> details,  EddInfoEntity? eddInfo,  bool? hasSizeChart,  bool? isServiceable,  bool? isEddDifferentForSKUs,  bool? isReturnInfoDifferentForSKUs,  List<ServiceGuaranteeEntity> serviceGuarantee,  VisualCueEntity? visualCue,  List<ColorVariantEntity> colorVariants,  WishlistInfoEntity? wishlistInfo,  bool isGift,  Map<String, dynamic>? trackingMeta,  Map<String, dynamic>? orderAttribution)?  $default,) {final _that = this;
 switch (_that) {
 case _ProductEntity() when $default != null:
-return $default(_that.id,_that.name,_that.priceInfo,_that.soldOut,_that.media,_that.skus,_that.details,_that.eddInfo,_that.hasSizeChart,_that.isServiceable,_that.isEddDifferentForSKUs,_that.isReturnInfoDifferentForSKUs,_that.serviceGuarantee,_that.visualCue,_that.colorVariants,_that.wishlistInfo,_that.isGift,_that.trackingMeta);case _:
+return $default(_that.id,_that.name,_that.priceInfo,_that.soldOut,_that.media,_that.skus,_that.details,_that.eddInfo,_that.hasSizeChart,_that.isServiceable,_that.isEddDifferentForSKUs,_that.isReturnInfoDifferentForSKUs,_that.serviceGuarantee,_that.visualCue,_that.colorVariants,_that.wishlistInfo,_that.isGift,_that.trackingMeta,_that.orderAttribution);case _:
   return null;
 
 }
@@ -266,7 +273,7 @@ return $default(_that.id,_that.name,_that.priceInfo,_that.soldOut,_that.media,_t
 
 
 class _ProductEntity implements ProductEntity {
-  const _ProductEntity({this.id, this.name, this.priceInfo, this.soldOut = false, final  List<MediaEntity> media = const [], final  List<SkuEntity> skus = const [], final  List<DetailEntity> details = const [], this.eddInfo, this.hasSizeChart, this.isServiceable, this.isEddDifferentForSKUs, this.isReturnInfoDifferentForSKUs, final  List<ServiceGuaranteeEntity> serviceGuarantee = const [], this.visualCue, final  List<ColorVariantEntity> colorVariants = const [], this.wishlistInfo, this.isGift = false, final  Map<String, dynamic>? trackingMeta}): _media = media,_skus = skus,_details = details,_serviceGuarantee = serviceGuarantee,_colorVariants = colorVariants,_trackingMeta = trackingMeta;
+  const _ProductEntity({this.id, this.name, this.priceInfo, this.soldOut = false, final  List<MediaEntity> media = const [], final  List<SkuEntity> skus = const [], final  List<DetailEntity> details = const [], this.eddInfo, this.hasSizeChart, this.isServiceable, this.isEddDifferentForSKUs, this.isReturnInfoDifferentForSKUs, final  List<ServiceGuaranteeEntity> serviceGuarantee = const [], this.visualCue, final  List<ColorVariantEntity> colorVariants = const [], this.wishlistInfo, this.isGift = false, final  Map<String, dynamic>? trackingMeta, final  Map<String, dynamic>? orderAttribution}): _media = media,_skus = skus,_details = details,_serviceGuarantee = serviceGuarantee,_colorVariants = colorVariants,_trackingMeta = trackingMeta,_orderAttribution = orderAttribution;
   
 
 @override final  int? id;
@@ -339,6 +346,27 @@ class _ProductEntity implements ProductEntity {
   return EqualUnmodifiableMapView(value);
 }
 
+/// `product.orderAttribution` — the journey node, chained on every event.
+///
+/// Holds `redirected_from_colour_widget`, answered by the `colorVariant`
+/// query param on the request rather than by client state: `"Yes"` when a
+/// swatch led here, `"No"` otherwise. The one node not called `trackingMeta`
+/// — see `docs/analytics/pdp/contract/passthrough-spec.md` §2.1.
+ final  Map<String, dynamic>? _orderAttribution;
+/// `product.orderAttribution` — the journey node, chained on every event.
+///
+/// Holds `redirected_from_colour_widget`, answered by the `colorVariant`
+/// query param on the request rather than by client state: `"Yes"` when a
+/// swatch led here, `"No"` otherwise. The one node not called `trackingMeta`
+/// — see `docs/analytics/pdp/contract/passthrough-spec.md` §2.1.
+@override Map<String, dynamic>? get orderAttribution {
+  final value = _orderAttribution;
+  if (value == null) return null;
+  if (_orderAttribution is EqualUnmodifiableMapView) return _orderAttribution;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of ProductEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -350,16 +378,16 @@ _$ProductEntityCopyWith<_ProductEntity> get copyWith => __$ProductEntityCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.priceInfo, priceInfo) || other.priceInfo == priceInfo)&&(identical(other.soldOut, soldOut) || other.soldOut == soldOut)&&const DeepCollectionEquality().equals(other._media, _media)&&const DeepCollectionEquality().equals(other._skus, _skus)&&const DeepCollectionEquality().equals(other._details, _details)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&(identical(other.hasSizeChart, hasSizeChart) || other.hasSizeChart == hasSizeChart)&&(identical(other.isServiceable, isServiceable) || other.isServiceable == isServiceable)&&(identical(other.isEddDifferentForSKUs, isEddDifferentForSKUs) || other.isEddDifferentForSKUs == isEddDifferentForSKUs)&&(identical(other.isReturnInfoDifferentForSKUs, isReturnInfoDifferentForSKUs) || other.isReturnInfoDifferentForSKUs == isReturnInfoDifferentForSKUs)&&const DeepCollectionEquality().equals(other._serviceGuarantee, _serviceGuarantee)&&(identical(other.visualCue, visualCue) || other.visualCue == visualCue)&&const DeepCollectionEquality().equals(other._colorVariants, _colorVariants)&&(identical(other.wishlistInfo, wishlistInfo) || other.wishlistInfo == wishlistInfo)&&(identical(other.isGift, isGift) || other.isGift == isGift)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.priceInfo, priceInfo) || other.priceInfo == priceInfo)&&(identical(other.soldOut, soldOut) || other.soldOut == soldOut)&&const DeepCollectionEquality().equals(other._media, _media)&&const DeepCollectionEquality().equals(other._skus, _skus)&&const DeepCollectionEquality().equals(other._details, _details)&&(identical(other.eddInfo, eddInfo) || other.eddInfo == eddInfo)&&(identical(other.hasSizeChart, hasSizeChart) || other.hasSizeChart == hasSizeChart)&&(identical(other.isServiceable, isServiceable) || other.isServiceable == isServiceable)&&(identical(other.isEddDifferentForSKUs, isEddDifferentForSKUs) || other.isEddDifferentForSKUs == isEddDifferentForSKUs)&&(identical(other.isReturnInfoDifferentForSKUs, isReturnInfoDifferentForSKUs) || other.isReturnInfoDifferentForSKUs == isReturnInfoDifferentForSKUs)&&const DeepCollectionEquality().equals(other._serviceGuarantee, _serviceGuarantee)&&(identical(other.visualCue, visualCue) || other.visualCue == visualCue)&&const DeepCollectionEquality().equals(other._colorVariants, _colorVariants)&&(identical(other.wishlistInfo, wishlistInfo) || other.wishlistInfo == wishlistInfo)&&(identical(other.isGift, isGift) || other.isGift == isGift)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta)&&const DeepCollectionEquality().equals(other._orderAttribution, _orderAttribution));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,priceInfo,soldOut,const DeepCollectionEquality().hash(_media),const DeepCollectionEquality().hash(_skus),const DeepCollectionEquality().hash(_details),eddInfo,hasSizeChart,isServiceable,isEddDifferentForSKUs,isReturnInfoDifferentForSKUs,const DeepCollectionEquality().hash(_serviceGuarantee),visualCue,const DeepCollectionEquality().hash(_colorVariants),wishlistInfo,isGift,const DeepCollectionEquality().hash(_trackingMeta));
+int get hashCode => Object.hashAll([runtimeType,id,name,priceInfo,soldOut,const DeepCollectionEquality().hash(_media),const DeepCollectionEquality().hash(_skus),const DeepCollectionEquality().hash(_details),eddInfo,hasSizeChart,isServiceable,isEddDifferentForSKUs,isReturnInfoDifferentForSKUs,const DeepCollectionEquality().hash(_serviceGuarantee),visualCue,const DeepCollectionEquality().hash(_colorVariants),wishlistInfo,isGift,const DeepCollectionEquality().hash(_trackingMeta),const DeepCollectionEquality().hash(_orderAttribution)]);
 
 @override
 String toString() {
-  return 'ProductEntity(id: $id, name: $name, priceInfo: $priceInfo, soldOut: $soldOut, media: $media, skus: $skus, details: $details, eddInfo: $eddInfo, hasSizeChart: $hasSizeChart, isServiceable: $isServiceable, isEddDifferentForSKUs: $isEddDifferentForSKUs, isReturnInfoDifferentForSKUs: $isReturnInfoDifferentForSKUs, serviceGuarantee: $serviceGuarantee, visualCue: $visualCue, colorVariants: $colorVariants, wishlistInfo: $wishlistInfo, isGift: $isGift, trackingMeta: $trackingMeta)';
+  return 'ProductEntity(id: $id, name: $name, priceInfo: $priceInfo, soldOut: $soldOut, media: $media, skus: $skus, details: $details, eddInfo: $eddInfo, hasSizeChart: $hasSizeChart, isServiceable: $isServiceable, isEddDifferentForSKUs: $isEddDifferentForSKUs, isReturnInfoDifferentForSKUs: $isReturnInfoDifferentForSKUs, serviceGuarantee: $serviceGuarantee, visualCue: $visualCue, colorVariants: $colorVariants, wishlistInfo: $wishlistInfo, isGift: $isGift, trackingMeta: $trackingMeta, orderAttribution: $orderAttribution)';
 }
 
 
@@ -370,7 +398,7 @@ abstract mixin class _$ProductEntityCopyWith<$Res> implements $ProductEntityCopy
   factory _$ProductEntityCopyWith(_ProductEntity value, $Res Function(_ProductEntity) _then) = __$ProductEntityCopyWithImpl;
 @override @useResult
 $Res call({
- int? id, String? name, ProductPriceEntity? priceInfo, bool soldOut, List<MediaEntity> media, List<SkuEntity> skus, List<DetailEntity> details, EddInfoEntity? eddInfo, bool? hasSizeChart, bool? isServiceable, bool? isEddDifferentForSKUs, bool? isReturnInfoDifferentForSKUs, List<ServiceGuaranteeEntity> serviceGuarantee, VisualCueEntity? visualCue, List<ColorVariantEntity> colorVariants, WishlistInfoEntity? wishlistInfo, bool isGift, Map<String, dynamic>? trackingMeta
+ int? id, String? name, ProductPriceEntity? priceInfo, bool soldOut, List<MediaEntity> media, List<SkuEntity> skus, List<DetailEntity> details, EddInfoEntity? eddInfo, bool? hasSizeChart, bool? isServiceable, bool? isEddDifferentForSKUs, bool? isReturnInfoDifferentForSKUs, List<ServiceGuaranteeEntity> serviceGuarantee, VisualCueEntity? visualCue, List<ColorVariantEntity> colorVariants, WishlistInfoEntity? wishlistInfo, bool isGift, Map<String, dynamic>? trackingMeta, Map<String, dynamic>? orderAttribution
 });
 
 
@@ -387,7 +415,7 @@ class __$ProductEntityCopyWithImpl<$Res>
 
 /// Create a copy of ProductEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? name = freezed,Object? priceInfo = freezed,Object? soldOut = null,Object? media = null,Object? skus = null,Object? details = null,Object? eddInfo = freezed,Object? hasSizeChart = freezed,Object? isServiceable = freezed,Object? isEddDifferentForSKUs = freezed,Object? isReturnInfoDifferentForSKUs = freezed,Object? serviceGuarantee = null,Object? visualCue = freezed,Object? colorVariants = null,Object? wishlistInfo = freezed,Object? isGift = null,Object? trackingMeta = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? name = freezed,Object? priceInfo = freezed,Object? soldOut = null,Object? media = null,Object? skus = null,Object? details = null,Object? eddInfo = freezed,Object? hasSizeChart = freezed,Object? isServiceable = freezed,Object? isEddDifferentForSKUs = freezed,Object? isReturnInfoDifferentForSKUs = freezed,Object? serviceGuarantee = null,Object? visualCue = freezed,Object? colorVariants = null,Object? wishlistInfo = freezed,Object? isGift = null,Object? trackingMeta = freezed,Object? orderAttribution = freezed,}) {
   return _then(_ProductEntity(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -407,6 +435,7 @@ as VisualCueEntity?,colorVariants: null == colorVariants ? _self._colorVariants 
 as List<ColorVariantEntity>,wishlistInfo: freezed == wishlistInfo ? _self.wishlistInfo : wishlistInfo // ignore: cast_nullable_to_non_nullable
 as WishlistInfoEntity?,isGift: null == isGift ? _self.isGift : isGift // ignore: cast_nullable_to_non_nullable
 as bool,trackingMeta: freezed == trackingMeta ? _self._trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,orderAttribution: freezed == orderAttribution ? _self._orderAttribution : orderAttribution // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>?,
   ));
 }

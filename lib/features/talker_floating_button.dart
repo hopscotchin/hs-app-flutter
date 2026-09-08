@@ -21,19 +21,11 @@ class _TalkerFloatingButtonState extends State<TalkerFloatingButton> {
   Offset _position = const Offset(16, 120);
   bool _isDragging = false;
 
-  void _copyToClipboard(
-    BuildContext screenContext,
-    Talker talker,
-    TalkerData data,
-  ) {
-    final text = data.generateTextMessage(
-      timeFormat: talker.settings.timeFormat,
-    );
+  void _copyToClipboard(BuildContext screenContext, Talker talker, TalkerData data) {
+    final text = data.generateTextMessage(timeFormat: talker.settings.timeFormat);
     Clipboard.setData(ClipboardData(text: text));
     final messenger = ScaffoldMessenger.maybeOf(screenContext);
-    messenger?.showSnackBar(
-      const SnackBar(content: Text('Log copied to clipboard')),
-    );
+    messenger?.showSnackBar(const SnackBar(content: Text('Log copied to clipboard')));
   }
 
   void _clampPosition(Size screen) {
@@ -66,9 +58,7 @@ class _TalkerFloatingButtonState extends State<TalkerFloatingButton> {
               onPanEnd: (_) => setState(() => _isDragging = false),
               onLongPress: () {
                 AppRouter.navigatorKey.currentState?.push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const AnalyticsDebugPage(),
-                  ),
+                  MaterialPageRoute<void>(builder: (_) => const AnalyticsDebugPage()),
                 );
               },
               onTap: () {

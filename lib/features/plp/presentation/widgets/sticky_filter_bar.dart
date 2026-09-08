@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
@@ -7,10 +8,15 @@ import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart'
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
 import 'package:hs_app_flutter/features/plp/domain/entities/plp_sorting_options_entity.dart';
 
+import '../../../../core/analytics/constants/analytics_defaults.dart';
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/plp_events.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/filter_section_entity.dart';
 import '../../domain/entities/plp_filter_entity.dart';
+import '../bloc/plp_bloc.dart';
 import 'filter_page.dart';
 import 'filter_section_sheet.dart';
 import 'sort_bottom_sheet.dart';
@@ -21,7 +27,10 @@ class StickyFilterBar extends StatelessWidget {
   final Map<String, String> appliedFilters;
   final Map<String, dynamic> baseQueryParams;
   final void Function(int orderRule) onSortApplied;
-  final void Function(Map<String, String> filters) onFiltersApplied;
+
+  /// Called when either filter surface applies a selection. [clickSource] says
+  /// which one — both routes end here, and the analytics differ per route.
+  final void Function(Map<String, String> filters, String clickSource) onFiltersApplied;
 
   const StickyFilterBar({
     super.key,
@@ -191,7 +200,18 @@ class StickyFilterBar extends StatelessWidget {
     );
   }
 
+  /// `filter_clicked` — fired as the control opens, carrying the *pre-filter*
+  /// feed size from the page blob. [clickSource] is the one thing the backend
+  /// cannot know: which control the user actually touched.
+  void _logFilterClicked(BuildContext context, String clickSource) {
+    sl<AnalyticsHelper>().logFilterClicked(
+      trackingMeta: context.read<PlpBloc>().state.plpAnalyticsMeta,
+      clickSource: clickSource,
+    );
+  }
+
   void _showSortSheet(BuildContext context) {
+    _logFilterClicked(context, FilterClickSource.stickyFilter);
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -204,6 +224,7 @@ class StickyFilterBar extends StatelessWidget {
   }
 
   void _showSectionSheet(BuildContext context, FilterSectionEntity section) async {
+    _logFilterClicked(context, FilterClickSource.stickyFilter);
     final result = await FilterSectionSheet.show(
       context,
       section: section,
@@ -214,12 +235,13 @@ class StickyFilterBar extends StatelessWidget {
       final merged = Map<String, String>.from(appliedFilters);
       merged.addAll(result);
       merged.removeWhere((_, v) => v.isEmpty);
-      onFiltersApplied(merged);
+      onFiltersApplied(merged, FilterClickSource.stickyFilter);
     }
   }
 
   /// Opens the full-screen FilterPage with all filter sections.
   void _showFilterPage(BuildContext context) async {
+    _logFilterClicked(context, FilterClickSource.standardFilter);
     final result = await FilterPage.open(
       context,
       plpFilter: plpFilter,
@@ -227,7 +249,7 @@ class StickyFilterBar extends StatelessWidget {
       baseQueryParams: baseQueryParams,
     );
     if (result != null) {
-      onFiltersApplied(result);
+      onFiltersApplied(result, FilterClickSource.standardFilter);
     }
   }
 }

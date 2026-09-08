@@ -45,13 +45,21 @@ class PdpBrandPrice extends StatelessWidget {
           if (product.name != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                product.name!,
-                key: const ValueKey(PdpTestStrings.productNameText),
-                style: AppTypographyV1.titleSmall.copyWith(
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF000000),
-                  height: 1.1,
+              // Wrapped so the title reaches the PLATFORM a11y tree. The bare
+              // `ValueKey` below is Flutter-internal and invisible to Maestro, which
+              // left the PDP with no way to prove WHICH product it was showing — the
+              // name is published on tiles but was absent from the page itself, so a
+              // pinned run could only assert it had reached *a* PDP.
+              child: AutoSemantics(
+                id: PdpTestStrings.productNameText,
+                child: Text(
+                  product.name!,
+                  key: const ValueKey(PdpTestStrings.productNameText),
+                  style: AppTypographyV1.titleSmall.copyWith(
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF000000),
+                    height: 1.1,
+                  ),
                 ),
               ),
             ),

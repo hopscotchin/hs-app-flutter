@@ -112,6 +112,12 @@ class _PdpAppBarState extends State<PdpAppBar> {
   }
 }
 
+/// Vertical padding on the wishlist and bag icons. Their touch targets end up
+/// 48px tall — the minimum tappable height — while still staying inside the
+/// height the back button sets (see [PdpStrings.appBarHeight]), so enlarging
+/// them does not move the white-background threshold.
+const double _rightIconVerticalPadding = AppSpacing.lmd;
+
 /// The static contents of the PDP app bar (back, wishlist, bag). Extracted so
 /// it can be reused outside the animated overlay — e.g. on the error view,
 /// where there is no scroll controller to drive the background fade.
@@ -136,63 +142,86 @@ class PdpAppBarContent extends StatelessWidget {
     // PdpAppBar passes it as the unchanging `child` of its ValueListenableBuilder.
     final bag = BlocBuilder<CartCountCubit, int>(
       builder: (context, count) => BadgeIcon(
-        key: cartIconKey ?? const ValueKey(PdpTestStrings.appBarCartButton),
+        key: const ValueKey(PdpTestStrings.appBarCartButton),
         iconSize: AppSpacing.iconSm,
-        icon: const CustomImage(
+        // The flight target sits on the icon, not on BadgeIcon: the tap
+        // padding below makes BadgeIcon's box wider than what the user sees,
+        // and the animation should land on the bag itself.
+        icon: CustomImage(
+          key: cartIconKey,
           path: ImageConstants.bag,
           height: AppSpacing.iconSm,
           width: AppSpacing.iconSm,
         ),
         count: count,
-        padding: EdgeInsets.zero,
+        // Right padding is the bar's own edge inset (previously an outer
+        // Padding), and the left half of the md gap to the heart — the heart
+        // carries the other half. The icons therefore sit exactly where they
+        // did, with the whitespace now part of the touch target.
+        padding: const EdgeInsets.only(
+          left: AppSpacing.xs,
+          right: AppSpacing.md,
+          top: _rightIconVerticalPadding,
+          bottom: _rightIconVerticalPadding,
+        ),
+        behavior: HitTestBehavior.opaque,
         onTap: () => AppNavigator.goToCart(context),
       ),
     );
     return SafeArea(
       bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.only(right: AppSpacing.md),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            GestureDetector(
-              key: const ValueKey(PdpTestStrings.appBarBackButton),
-              behavior: HitTestBehavior.opaque,
-              onTap: onBack ?? () => AppNavigator.goBack(context),
-              child: const Padding(
-                // Vertical padding drives the app bar's height — see
-                // PdpStrings.appBarHeight, which PdpContent uses as its
-                // white-background threshold.
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: PdpStrings.appBarVerticalPadding,
-                ),
-                child: CustomImage(
-                  path: ImageConstants.arrowBack,
-                  height: AppSpacing.lmd,
-                  width: AppSpacing.lmd,
-                  color: AppColors.neutralBlack,
-                ),
+      // No outer padding: each icon pads itself, so the whitespace around it
+      // is part of its touch target rather than dead space next to it.
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            key: const ValueKey(PdpTestStrings.appBarBackButton),
+            behavior: HitTestBehavior.opaque,
+            onTap: onBack ?? () => AppNavigator.goBack(context),
+            child: const Padding(
+              // Vertical padding drives the app bar's height — see
+              // PdpStrings.appBarHeight, which PdpContent uses as its
+              // white-background threshold.
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: PdpStrings.appBarVerticalPadding,
+              ),
+              child: CustomImage(
+                path: ImageConstants.arrowBack,
+                height: AppSpacing.lmd,
+                width: AppSpacing.lmd,
+                color: AppColors.neutralBlack,
               ),
             ),
-            Row(
-              children: [
-                // Static heart — mirrors Android's top-bar wishlist icon,
-                // which always shows the same (empty) heart and does not
-                // reflect membership state. No-op until a wishlist listing
-                // screen exists to navigate to.
-                const CustomImage(
-                  key: ValueKey(PdpTestStrings.appBarWishlistButton),
-                  path: ImageConstants.heart,
-                  height: AppSpacing.iconSm,
-                  width: AppSpacing.iconSm,
+          ),
+          Row(
+            children: [
+              // Static heart — mirrors Android's top-bar wishlist icon,
+              // which always shows the same (empty) heart and does not
+              // reflect membership state. No-op until a wishlist listing
+              // screen exists to navigate to; the opaque detector still
+              // claims the tap, which used to fall through the transparent
+              // bar to the carousel behind it.
+              GestureDetector(
+                key: const ValueKey(PdpTestStrings.appBarWishlistButton),
+                behavior: HitTestBehavior.opaque,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xs,
+                    vertical: _rightIconVerticalPadding,
+                  ),
+                  child: CustomImage(
+                    path: ImageConstants.heart,
+                    height: AppSpacing.iconSm,
+                    width: AppSpacing.iconSm,
+                  ),
                 ),
-                AppSpacing.horizontalGapMd,
-                bag,
-              ],
-            ),
-          ],
-        ),
+              ),
+              bag,
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -46,8 +46,9 @@ class PlpFilterHeader extends StatelessWidget {
               baseQueryParams: effectiveParams,
               onSortApplied: (orderRule) =>
                   context.read<PlpBloc>().add(ApplySort(orderRule: orderRule)),
-              onFiltersApplied: (filters) =>
-                  context.read<PlpBloc>().add(ApplyMultipleFilters(filters: filters)),
+              onFiltersApplied: (filters, clickSource) => context.read<PlpBloc>().add(
+                ApplyMultipleFilters(filters: filters, clickSource: clickSource),
+              ),
             ),
           ),
         );

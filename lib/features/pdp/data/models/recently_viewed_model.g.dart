@@ -39,21 +39,15 @@ RecentlyViewedMarginsModel _$RecentlyViewedMarginsModelFromJson(
       (json['titleHorizontalMargin'] as num?)?.toDouble() ?? 0.0,
 );
 
-RecentlyViewedTileModel _$RecentlyViewedTileModelFromJson(
-  Map<String, dynamic> json,
-) => RecentlyViewedTileModel(product: _productFromJson(json['product']));
-
 RecentlyViewedModel _$RecentlyViewedModelFromJson(Map<String, dynamic> json) =>
     RecentlyViewedModel(
       viewConfig: _viewConfigFromJson(json['viewConfig']),
       tiles:
           (json['tiles'] as List<dynamic>?)
-              ?.map(
-                (e) =>
-                    RecentlyViewedTileModel.fromJson(e as Map<String, dynamic>),
-              )
+              ?.map((e) => TileModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       heading: _headingFromJson(json['heading']),
       margins: _marginsFromJson(json['margins']),
+      trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
     );

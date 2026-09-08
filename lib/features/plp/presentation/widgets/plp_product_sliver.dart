@@ -3,8 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/atoms/product_tile.dart';
 
 import '../../../../components/atoms/xl_tile_widget.dart';
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/plp_events.dart';
+import '../../../../core/analytics/events/modules/wishlist_events.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/login_redirects.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/navigation/action_url_handler.dart';
 import '../../../../core/router/app_navigator.dart';
@@ -78,14 +82,28 @@ class PlpProductSliver extends StatelessWidget {
         discountKey: _discountKey(index),
         colorVariantsKey: _colorVariantsKey(index),
         onTap: () {
+          // Attribution write must land before nav — the destination reads it
+          // during its own build. Synchronous, never awaited.
+          final plpState = context.read<PlpBloc>().state;
+          sl<AnalyticsHelper>().logPlpTileClicked(
+            trackingMeta: product.trackingMeta,
+            pageMeta: plpState.orderAttribution,
+          );
           if (product.isCPT) {
-            ActionUrlHandler.navigate(context, product.actionUri, title: product.name);
+            ActionUrlHandler.navigate(
+              context,
+              product.actionUri,
+              title: product.name,
+              // A CPT can point at another listing; without this the
+              // destination PLP reports no from_screen / from_location and
+              // looks like a deeplink open.
+              extra: navExtra(plpEntryArgs: plpState.plpEntryArgs(index)),
+            );
           } else {
             // Entry context, or PDP loses from_screen / from_page /
             // from_feed_size / position on all 22 of its events. Read at tap
             // time so a listing that paged in since build reports the new size.
-            final plp = context.read<PlpBloc>().state;
-            AppNavigator.goToPdp(context, id, args: plp.pdpEntryArgs(product, index));
+            AppNavigator.goToPdp(context, id, args: plpState.pdpEntryArgs);
           }
         },
         onWishlistTap: () => _toggleWishlist(context, product),
@@ -93,11 +111,39 @@ class PlpProductSliver extends StatelessWidget {
     );
   }
 
+  /// The PLP heart. Android fires `product_added_to_wishlist` /
+  /// `product_removed_from_wishlist` here with `from_location: "Wishlist
+  /// button"` and `from_screen` = the listing's own name
+  /// (`PLPAnalytics.logProductAddedToWishList:440`,
+  /// `logProductRemovedFromWishlist:489`) — the PLP was passing neither
+  /// callback, so `WishlistActions` emitted nothing and both events were
+  /// missing from this surface entirely.
+  ///
+  /// The callbacks fire only on server confirmation, and survive the
+  /// logged-out login detour, so the add that eventually happens is the one
+  /// that reports.
   void _toggleWishlist(BuildContext context, ListingProductEntity product) {
+    // Read now, not in the callback: after a login detour this widget may be
+    // gone, and the bloc is what owns the page identity.
+    final fromScreen = context.read<PlpBloc>().state.plpFromScreen;
+
     WishlistActions.toggle(
       context,
       productId: product.id.toString(),
       price: WishlistActions.priceToInt(product.price?.sellingPrice),
+      // The product's own blob carries every dimension the payload needs —
+      // brand, category, subcategory, product_type, merch_type,
+      // source_tile_type — so it is spread rather than enumerated here.
+      onAdded: () => sl<AnalyticsHelper>().logProductAddedToWishlist(
+        productId: product.id.toString(),
+        fromScreen: fromScreen,
+        trackingMeta: product.trackingMeta,
+      ),
+      onRemoved: () => sl<AnalyticsHelper>().logProductRemovedFromWishlist(
+        productId: product.id.toString(),
+        fromScreen: fromScreen,
+        trackingMeta: product.trackingMeta,
+      ),
       loggedOutMessageBars: const [
         MessageBarEntity(text: LoginRedirects.redirectAddToWishlist, type: 'info', hasIcon: true),
       ],
@@ -165,14 +211,28 @@ class PlpProductSliver extends StatelessWidget {
                       colorVariantsKey: _colorVariantsKey(productStart),
                       onTap: () {
                         final plp = context.read<PlpBloc>().state;
+                        sl<AnalyticsHelper>().logPlpTileClicked(
+                          trackingMeta: product.trackingMeta,
+                          pageMeta: plp.orderAttribution,
+                        );
                         AppNavigator.goToPdp(
                           context,
                           product.id.toString(),
-                          args: plp.pdpEntryArgs(product, productStart),
+                          args: plp.pdpEntryArgs,
                         );
                       },
                       onWishlistTap: () => _toggleWishlist(context, product),
                       onAddToCartTap: () {},
+                      // Carries the full listing-viewed property set plus the
+                      // swipe — Android reuses addCommonProductListProperties()
+                      // wholesale here, so the page blob goes with it, not the
+                      // product's.
+                      onImageScrolled: (cardIndex, direction) =>
+                          sl<AnalyticsHelper>().logXlProductCardScrolled(
+                            trackingMeta: context.read<PlpBloc>().state.plpAnalyticsMeta,
+                            cardIndex: cardIndex,
+                            swipeDirection: direction,
+                          ),
                     ),
                   ),
                 ),
