@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/atoms/product_tile.dart';
+import 'package:hs_app_flutter/core/analytics/analytics_payload_builder.dart';
 
 import '../../../../components/atoms/xl_tile_widget.dart';
 import '../../../../core/analytics/events/analytics_helper.dart';
@@ -125,7 +126,7 @@ class PlpProductSliver extends StatelessWidget {
   void _toggleWishlist(BuildContext context, ListingProductEntity product) {
     // Read now, not in the callback: after a login detour this widget may be
     // gone, and the bloc is what owns the page identity.
-    final fromScreen = context.read<PlpBloc>().state.plpFromScreen;
+    final plp = context.read<PlpBloc>().state;
 
     WishlistActions.toggle(
       context,
@@ -136,13 +137,15 @@ class PlpProductSliver extends StatelessWidget {
       // source_tile_type — so it is spread rather than enumerated here.
       onAdded: () => sl<AnalyticsHelper>().logProductAddedToWishlist(
         productId: product.id.toString(),
-        fromScreen: fromScreen,
-        trackingMeta: product.trackingMeta,
+        fromScreen: plp.plpFromScreen,
+        trackingMeta: buildAnalyticsPayload(nodes: [product.trackingMeta, plp.orderAttribution]),
+        skuTrackingMeta: product.wishlistInfo.trackingMeta
       ),
       onRemoved: () => sl<AnalyticsHelper>().logProductRemovedFromWishlist(
         productId: product.id.toString(),
-        fromScreen: fromScreen,
-        trackingMeta: product.trackingMeta,
+        fromScreen: plp.plpFromScreen,
+        trackingMeta: buildAnalyticsPayload(nodes: [product.trackingMeta, plp.orderAttribution]),
+        skuTrackingMeta: product.wishlistInfo.trackingMeta
       ),
       loggedOutMessageBars: const [
         MessageBarEntity(text: LoginRedirects.redirectAddToWishlist, type: 'info', hasIcon: true),

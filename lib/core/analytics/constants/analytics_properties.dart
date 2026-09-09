@@ -231,7 +231,6 @@ class AnalyticsProperties {
   static const String fromScreen = 'from_screen';
   static const String fromPage = 'from_page';
   static const String fromLocation = 'from_location';
-  static const String fromCollection = 'from_collection';
   static const String collectionId = 'collection_id';
   static const String collectionName = 'collection_name';
   static const String collectionCount = 'collection_count';
@@ -240,7 +239,6 @@ class AnalyticsProperties {
   static const String filters = 'filters';
   static const String flow = 'flow';
   static const String source = 'source';
-  static const String sourceTileType = 'source_tile_type';
   static const String clickSource = 'click_source';
   static const String bannerName = 'banner_name';
   static const String banner = 'banner';

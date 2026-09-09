@@ -15,4 +15,5 @@ WishlistInfoModel _$WishlistInfoModelFromJson(Map<String, dynamic> json) =>
       canWishlist: json['canWishlist'] == null
           ? false
           : parseToBool(json['canWishlist']),
+      trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
     );

@@ -63,13 +63,6 @@ extension WishlistEvents on AnalyticsHelper {
         ..putAnalyticsKey(AnalyticsProperties.fromScreen, fromScreen)
         ..putAnalyticsKey(AnalyticsProperties.fromLocation, fromLocation)
         ..putAnalyticsKey(AnalyticsProperties.productId, productId)
-        // `source_tile_type` is a UI fact, not a product one: null on a surface
-        // that is not a tile, so PDP main omits the key rather than claiming a
-        // tile type for a page. Android's PDP payload has no such key either.
-        ..putAnalyticsKey(AnalyticsProperties.sourceTileType, sourceTileType)
-        // Android hardcodes `false` (`PLPAnalytics.kt:465`). Booleans are never
-        // dropped, so it does reach the wire.
-        ..putAnalyticsKey(AnalyticsProperties.fromCollection, false)
         // Read here rather than passed in, matching Android's
         // `PrefUtils.aTCUserType` — the helper owns the prefs handle.
         ..putAnalyticsKey(AnalyticsProperties.atcUser, prefs.atcUserType),
@@ -112,7 +105,6 @@ extension WishlistEvents on AnalyticsHelper {
         ..putAnalyticsKey(AnalyticsProperties.fromScreen, fromScreen)
         ..putAnalyticsKey(AnalyticsProperties.fromLocation, fromLocation)
         ..putAnalyticsKey(AnalyticsProperties.productId, productId)
-        ..putAnalyticsKey(AnalyticsProperties.sourceTileType, sourceTileType)
         // Android sends the literal `NONE` — not a computed status.
         ..putAnalyticsKey(
           AnalyticsProperties.priceStatus,
