@@ -29,15 +29,27 @@ class KidsConfirmSheet {
     return showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.white,
+      showDragHandle: false,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.md),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.md),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Center(
+                child: Container(
+                  width: 24,
+                  height: 2,
+                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandDefault,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                  ),
+                ),
+              ),
               Text(title, key: titleKey, style: AppTypographyV1.titleSmall.bold.textPrimary()),
               AppSpacing.verticalGapMd,
               Text(

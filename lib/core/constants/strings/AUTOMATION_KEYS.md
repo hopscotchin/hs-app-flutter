@@ -395,10 +395,9 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 
 | Type | Key | Examples | Widget file |
 |---|---|---|---|
+| Element | `kids_list` | — | `kids_page.dart` |
 | Title | `kids_list_app_bar_title` | — | `kids_page.dart` |
 | Button | `kids_list_back_button` | — | `kids_page.dart` |
-| Title | `kids_list_banner_title` | — | `kids_page.dart` |
-| Text | `kids_list_banner_subtitle` | — | `kids_page.dart` |
 | List item | `kids_list_item_<i>` | `kids_list_item_0`, `kids_list_item_1` | `kids_page.dart` |
 | Text | `kids_list_item_<i>_name` | `kids_list_item_0_name`, `kids_list_item_1_name` | `kids_page.dart` |
 | Button | `kids_list_item_<i>_edit` | `kids_list_item_0_edit`, `kids_list_item_1_edit` | `kids_page.dart` |
@@ -421,6 +420,8 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Row | `kids_form_consent_row` | — | `add_edit_kid_page.dart` |
 | Checkbox | `kids_form_consent_checkbox` | — | `add_edit_kid_page.dart` |
 | Element | `kids_form_consent_privacy_link` | — | `add_edit_kid_page.dart` |
+| Text | `kids_form_consent_error_text` | — | `add_edit_kid_page.dart` |
+| Text | `kids_form_api_error_banner_text` | — | `add_edit_kid_page.dart` |
 | Button | `kids_form_save_button` | — | `add_edit_kid_page.dart` |
 | Title | `kids_form_discard_bottomsheet_title` | — | `add_edit_kid_page.dart` |
 | Text | `kids_form_discard_bottomsheet_description` | — | `add_edit_kid_page.dart` |

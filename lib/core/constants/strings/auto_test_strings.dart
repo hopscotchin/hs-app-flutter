@@ -612,10 +612,9 @@ class KidsTestStrings {
   KidsTestStrings();
 
   // ── List ──
+  static const String listScreen = 'kids_list';
   static const String listAppBarTitle = 'kids_list_app_bar_title';
   static const String listBackButton = 'kids_list_back_button';
-  static const String listBannerTitle = 'kids_list_banner_title';
-  static const String listBannerSubtitle = 'kids_list_banner_subtitle';
   static const String listItem = 'kids_list_item'; // card → + `_<i>`
   static const String listItemNameSuffix = 'name'; // → `kids_list_item_<i>_name`
   static const String listItemEditSuffix = 'edit'; // → `kids_list_item_<i>_edit`
@@ -643,6 +642,8 @@ class KidsTestStrings {
   static const String formConsentRow = 'kids_form_consent_row';
   static const String formConsentCheckbox = 'kids_form_consent_checkbox';
   static const String formConsentPrivacyLink = 'kids_form_consent_privacy_link';
+  static const String formConsentErrorText = 'kids_form_consent_error_text';
+  static const String formApiErrorBannerText = 'kids_form_api_error_banner_text';
   static const String formSaveButton = 'kids_form_save_button';
 
   // Discard-changes bottom sheet

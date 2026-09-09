@@ -49,4 +49,9 @@ class KidsStrings {
   static const String discardChangesDescription = "You'll lose the details you've entered if you go back now.";
   static const String discardChangesConfirm = 'Discard';
   static const String discardChangesCancel = 'Keep editing';
+
+  // Shown as an inline banner (not the submit-error toast) when saving the
+  // child fails at the network/server level rather than a validation issue.
+  static const String apiErrorBannerTitle = 'Oops! Something Went Wrong';
+  static const String apiErrorBannerSubtitle = "We're fixing things behind the scenes.";
 }

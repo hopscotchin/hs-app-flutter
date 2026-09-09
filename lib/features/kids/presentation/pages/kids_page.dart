@@ -5,9 +5,12 @@ import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/error_retry_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
+import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/common_strings.dart';
 import '../../../../core/constants/strings/kids_strings.dart';
+import '../../../../core/entities/message_bar_entity.dart';
+import '../../../../core/extensions/color_extensions.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -98,10 +101,39 @@ class KidsPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                          child: _KidsBanner(
-                            title: content.bannerTitle,
-                            subtitle: content.bannerSubtitle,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.xs,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              AppSpacing.md,
+                              AppSpacing.sm,
+                              AppSpacing.md,
+                              AppSpacing.md,
+                            ),
+                            child: MessageBarsWidget(
+                              keyPrefix: KidsTestStrings.listScreen,
+                              cardStyle: true,
+                              contentPadding: const EdgeInsets.all(
+                                AppSpacing.sm,
+                              ),
+                              cardBorder: Border.all(
+                                color: AppColors.baseDefault,
+                                width: 0.1,
+                              ),
+                              titleStyle: AppTypographyV1.bodyRegular.bold
+                                  .textPrimary(),
+                              textStyle: AppTypographyV1.labelLarge.regular
+                                  .neutralGrey6(),
+                              messageBars: [
+                                MessageBarEntity(
+                                  messageType: 'custom',
+                                  bgColor: AppColors.neutralGrey2.toHex,
+                                  title: content.bannerTitle,
+                                  text: content.bannerSubtitle,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         Expanded(
@@ -199,49 +231,6 @@ class KidsPage extends StatelessWidget {
     );
 
     if (confirmed == true) bloc.add(DeleteChild(child.id));
-  }
-}
-
-/// "We'll remember their details" info banner — shown only above a
-/// populated list, not on the empty state (matches Figma).
-class _KidsBanner extends StatelessWidget {
-  const _KidsBanner({required this.title, required this.subtitle});
-
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.sm,
-        AppSpacing.md,
-        AppSpacing.md,
-      ),
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: AppColors.neutralGrey2,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
-        border: Border.all(color: AppColors.baseDefault, width: 0.1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            key: const ValueKey(KidsTestStrings.listBannerTitle),
-            style: AppTypographyV1.bodyRegular.bold.textPrimary(),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            key: const ValueKey(KidsTestStrings.listBannerSubtitle),
-            style: AppTypographyV1.labelLarge.regular.neutralGrey6(),
-          ),
-        ],
-      ),
-    );
   }
 }
 

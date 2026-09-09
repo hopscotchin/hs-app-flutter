@@ -26,13 +26,17 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
     on<GenderChanged>(_onGenderChanged);
     on<ConsentChanged>(_onConsentChanged);
     on<SubmitKid>(_onSubmit);
+    on<ClearApiError>(_onClearApiError);
   }
 
   final SaveChildUseCase _saveChild;
   final GetKidFormConfigUseCase _getFormConfig;
   final AnalyticsHelper _analytics;
 
-  Future<void> _onInit(InitManageKid event, Emitter<ManageKidState> emit) async {
+  Future<void> _onInit(
+    InitManageKid event,
+    Emitter<ManageKidState> emit,
+  ) async {
     final existing = event.existing;
     // `config` starts null so the UI can show a real loading state — see
     // KidsRepositoryImpl.getFormConfig, which only resolves to the local
@@ -45,6 +49,11 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
         name: existing?.name ?? '',
         gender: existing?.gender,
         dob: existing?.dob,
+        // Edit pre-fills from the stored value — consent was already given
+        // when this child was created (submit requires it), so the box
+        // starts checked. Create still starts unchecked: a new profile has
+        // no prior consent to reflect, so it stays an explicit opt-in.
+        consentGiven: existing?.consent ?? false,
       ),
     );
 
@@ -65,19 +74,24 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
   }
 
   void _onConsentChanged(ConsentChanged event, Emitter<ManageKidState> emit) {
-    emit(state.copyWith(consentGiven: event.given));
+    emit(
+      state.copyWith(
+        consentGiven: event.given,
+        // Checking the box clears its own error immediately; unchecking it
+        // doesn't re-show one until the next submit attempt.
+        consentError: event.given ? false : state.consentError,
+      ),
+    );
   }
 
   /// Single consolidated message, shown as one bottom toast rather than
   /// separate inline errors per field (per design feedback — Figma only
-  /// ever shows one error surface, not three).
+  /// ever shows one error surface, not three). Consent is validated
+  /// separately in [_onSubmit] since it now surfaces inline instead.
   String? _firstValidationError() {
     if (state.name.trim().isEmpty) return KidsStrings.nameRequiredError;
     if (state.gender == null) return KidsStrings.genderRequiredError;
     if (state.dob == null) return KidsStrings.dobRequiredError;
-    // Consent applies on both create and edit — the "Edit Profile" design
-    // shows the same checkbox, so it's not create-only.
-    if (!state.consentGiven) return KidsStrings.consentRequiredError;
     return null;
   }
 
@@ -88,7 +102,22 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
       return;
     }
 
-    emit(state.copyWith(isSubmitting: true, submitError: null));
+    // Consent applies on both create and edit — the "Edit Profile" design
+    // shows the same checkbox, so it's not create-only. Shown as an inline
+    // error under the checkbox rather than blocking the button entirely.
+    if (!state.consentGiven) {
+      emit(state.copyWith(consentError: true));
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        isSubmitting: true,
+        submitError: null,
+        consentError: false,
+        apiError: null,
+      ),
+    );
 
     final child = ChildEntity(
       id: state.original?.id ?? 0,
@@ -104,7 +133,14 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
     result.fold(
       (failure) {
         if (failure is RequestCancelledFailure) return;
-        emit(state.copyWith(isSubmitting: false, submitError: failure.message));
+        // The save call itself failed (network/server) rather than a fixable
+        // field — an inline banner, not the field-validation toast.
+        emit(
+          state.copyWith(
+            isSubmitting: false,
+            apiError: KidsStrings.apiErrorBannerSubtitle,
+          ),
+        );
       },
       (saved) {
         emit(state.copyWith(isSubmitting: false, saved: saved));
@@ -115,5 +151,9 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
         }
       },
     );
+  }
+
+  void _onClearApiError(ClearApiError event, Emitter<ManageKidState> emit) {
+    emit(state.copyWith(apiError: null));
   }
 }

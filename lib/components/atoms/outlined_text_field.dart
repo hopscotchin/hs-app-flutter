@@ -39,6 +39,7 @@ class OutlinedTextField extends StatefulWidget {
     this.suffixIconKey,
     this.hintTextKey,
     this.autovalidateMode,
+    this.fillColor,
   });
 
   final TextEditingController controller;
@@ -70,6 +71,11 @@ class OutlinedTextField extends StatefulWidget {
   final Key? hintTextKey;
   final Function(PointerDownEvent)? onTapOutside;
   final AutovalidateMode? autovalidateMode;
+
+  /// Background fill behind the field. Null (default) keeps the field
+  /// transparent, same as before this was added — pass a color (e.g. a grey)
+  /// to give a disabled/read-only field a filled look.
+  final Color? fillColor;
 
   @override
   State<OutlinedTextField> createState() => _OutlinedTextFieldState();
@@ -212,6 +218,8 @@ class _OutlinedTextFieldState extends State<OutlinedTextField> {
           inputFormatters: widget.inputFormatters,
           style: _inputStyle,
           decoration: InputDecoration(
+            filled: widget.fillColor != null,
+            fillColor: widget.fillColor,
             counterText: '',
             isDense: true,
             contentPadding: const EdgeInsets.symmetric(

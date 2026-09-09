@@ -16,4 +16,14 @@ extension ColorBrightnessX on Color {
   /// Near-white — needs a border to be visible on a white background.
   /// Matches Android `Util.isColourVeryLight` (luma ≥ 233).
   bool get isVeryLightColor => perceivedLuma >= 233;
+
+  /// `#AARRGGBB` hex string — the inverse of `StringX.toColor`, for handing
+  /// a locally-resolved [Color] to a backend-shaped model that expects the
+  /// raw hex string it would otherwise parse from JSON (e.g.
+  /// `MessageBarEntity.bgColor`).
+  String get toHex {
+    String channel(double c) =>
+        (c * 255).round().toRadixString(16).padLeft(2, '0');
+    return '#${channel(a)}${channel(r)}${channel(g)}${channel(b)}';
+  }
 }
