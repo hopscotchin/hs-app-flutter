@@ -65,7 +65,7 @@ lists. **Examples** = concrete keys for dynamic patterns. **Widget file** = the
 | Title | `account_app_bar_title` | — | `account_page.dart` |
 | Text | `account_forget_dialog_title_text_field` | — | `account_page.dart` |
 | Text | `account_forget_dialog_description_text_field` | — | `account_page.dart` |
-| Button | `account_forget_dialog_cancel_button` | — | `account_page.dart`, `cart_page.dart` |
+| Button | `account_forget_dialog_cancel_button` | — | `account_page.dart` |
 | Button | `account_forget_dialog_confirm_button` | — | `account_page.dart` |
 
 ## Join Us
@@ -279,6 +279,7 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 
 | Type | Key | Examples | Widget file |
 |---|---|---|---|
+| Element | `promo_offers_action_error_bar` | — | `promo_offers_bottom_sheet.dart` |
 | Title | `promo_offers_sheet_title` | — | `promo_offers_bottom_sheet.dart` |
 | Button | `promo_offers_empty_state_button` | — | `promo_offers_bottom_sheet.dart` |
 | List item | `promo_offers_card_<i>` | `promo_offers_card_0`, `promo_offers_card_1` | `promo_offers_bottom_sheet.dart` |
@@ -314,7 +315,8 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 
 | Type | Key | Examples | Widget file |
 |---|---|---|---|
-| Element | `cart_slg` | — | `cart_page.dart` |
+| Button | `cart_appbar_back_button` | — | `cart_page.dart` |
+| Element | `cart_slg` | — | `cart_slg_widget.dart` |
 | Text field | `cart_promo_code_input` | — | `cart_promo_section.dart` |
 | Hint | `cart_promo_code_input_hint` | — | `cart_promo_section.dart` |
 | Button | `cart_promo_apply_button` | — | `cart_promo_section.dart` |
@@ -325,6 +327,9 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Text | `cart_checkout_bar_total_amount_text` | — | `cart_checkout_bar.dart` |
 | Button | `cart_checkout_bar_details_button` | — | `cart_checkout_bar.dart` |
 | Button | `cart_checkout_bar_proceed_button` | — | `cart_checkout_bar.dart` |
+| Button | `cart_remove_item_bottomsheet_remove_button` | — | `remove_cart_item_sheet.dart` |
+| Button | `cart_remove_item_bottomsheet_no_button` | — | `remove_cart_item_sheet.dart` |
+
 ## Pdp
 
 | Type | Key | Examples | Widget file |
@@ -341,13 +346,14 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Title | `pdp_delivery_title` | — | `pdp_delivery_info.dart` |
 | Button | `pdp_enter_pincode_button` | — | `pdp_delivery_info.dart` |
 | Button | `pdp_change_pincode_button` | — | `pdp_delivery_info.dart` |
+| Option | `pdp_offers_section` | — | `pdp_offers.dart` |
 | Title | `pdp_offers_title` | — | `pdp_offers.dart` |
-| Card | `pdp_offer_card_<i>` | `pdp_offer_card_0`, `pdp_offer_card_1` | `pdp_offers.dart` |
+| List item | `pdp_offer_card_<i>` | `pdp_offer_card_0`, `pdp_offer_card_1` | `pdp_offers.dart` |
 | Button | `pdp_offer_card_<i>_copy` | `pdp_offer_card_0_copy`, `pdp_offer_card_1_copy` | `pdp_offers.dart` |
 | Title | `pdp_product_details_title` | — | `pdp_product_details.dart` |
 | Tab | `pdp_detail_tab_<i>` | `pdp_detail_tab_0`, `pdp_detail_tab_1` | `pdp_product_details.dart` |
-| Button | `pdp_add_to_bag_button` | — | `pdp_content.dart` |
-| Button | `pdp_buy_now_button` | — | `pdp_content.dart` |
+| Button | `pdp_add_to_bag_button` | — | `auto_semantics.dart`, `pdp_add_to_bag_bar_sold_out_test.dart`, `pdp_content.dart` |
+| Button | `pdp_buy_now_button` | — | `pdp_add_to_bag_bar_sold_out_test.dart`, `pdp_content.dart` |
 | Button | `pdp_docked_add_to_bag_button` | — | `pdp_content.dart` |
 | Button | `pdp_docked_buy_now_button` | — | `pdp_content.dart` |
 | Button | `pdp_scroll_to_top_button` | — | `pdp_content.dart` |
@@ -384,3 +390,39 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Header | `pdp_size_chart_header_<chart>_<col>` | `pdp_size_chart_header_<chart>_<col>` | `pdp_size_chart_bottom_sheet.dart` |
 | Cell | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_bottom_sheet.dart` |
 | Loading | `pdp_recommended_loading` | — | `pdp_recommended_products.dart` |
+
+## Kids
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Title | `kids_list_app_bar_title` | — | `kids_page.dart` |
+| Button | `kids_list_back_button` | — | `kids_page.dart` |
+| Title | `kids_list_banner_title` | — | `kids_page.dart` |
+| Text | `kids_list_banner_subtitle` | — | `kids_page.dart` |
+| List item | `kids_list_item_<i>` | `kids_list_item_0`, `kids_list_item_1` | `kids_page.dart` |
+| Text | `kids_list_item_<i>_name` | `kids_list_item_0_name`, `kids_list_item_1_name` | `kids_page.dart` |
+| Button | `kids_list_item_<i>_edit` | `kids_list_item_0_edit`, `kids_list_item_1_edit` | `kids_page.dart` |
+| Button | `kids_list_item_<i>_remove` | `kids_list_item_0_remove`, `kids_list_item_1_remove` | `kids_page.dart` |
+| Button | `kids_list_add_button` | — | `kids_page.dart` |
+| Title | `kids_list_empty_title` | — | `kids_page.dart` |
+| Text | `kids_list_empty_subtitle` | — | `kids_page.dart` |
+| Title | `kids_list_delete_bottomsheet_title` | — | `kids_page.dart` |
+| Text | `kids_list_delete_bottomsheet_description` | — | `kids_page.dart` |
+| Button | `kids_list_delete_bottomsheet_cancel_button` | — | `kids_page.dart` |
+| Button | `kids_list_delete_bottomsheet_confirm_button` | — | `kids_page.dart` |
+| Title | `kids_form_app_bar_title` | — | `add_edit_kid_page.dart` |
+| Button | `kids_form_back_button` | — | `add_edit_kid_page.dart` |
+| Text field | `kids_form_name_input` | — | `add_edit_kid_page.dart` |
+| Hint | `kids_form_name_input_hint` | — | `add_edit_kid_page.dart` |
+| Text field | `kids_form_dob_input` | — | `add_edit_kid_page.dart` |
+| Hint | `kids_form_dob_input_hint` | — | `add_edit_kid_page.dart` |
+| Radio | `kids_form_gender_boy_radio` | — | `add_edit_kid_page.dart` |
+| Radio | `kids_form_gender_girl_radio` | — | `add_edit_kid_page.dart` |
+| Row | `kids_form_consent_row` | — | `add_edit_kid_page.dart` |
+| Checkbox | `kids_form_consent_checkbox` | — | `add_edit_kid_page.dart` |
+| Element | `kids_form_consent_privacy_link` | — | `add_edit_kid_page.dart` |
+| Button | `kids_form_save_button` | — | `add_edit_kid_page.dart` |
+| Title | `kids_form_discard_bottomsheet_title` | — | `add_edit_kid_page.dart` |
+| Text | `kids_form_discard_bottomsheet_description` | — | `add_edit_kid_page.dart` |
+| Button | `kids_form_discard_bottomsheet_confirm_button` | — | `add_edit_kid_page.dart` |
+| Button | `kids_form_discard_bottomsheet_cancel_button` | — | `add_edit_kid_page.dart` |

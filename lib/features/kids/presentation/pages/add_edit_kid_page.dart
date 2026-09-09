@@ -112,7 +112,7 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                               hintTextKey: const ValueKey(KidsTestStrings.formNameInputHint),
                               controller: _nameController,
                               labelText: KidsStrings.nameLabel,
-                              required: false,
+                              required: true,
                               onChanged: (v) =>
                                   context.read<ManageKidBloc>().add(ManageKidEvent.nameChanged(v)),
                             ),
@@ -135,6 +135,8 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                                     radioKey: const ValueKey(KidsTestStrings.formGenderGirlRadio),
                                     isSelected: state.gender == ChildGender.girl,
                                     label: KidsStrings.genderGirl,
+                                    // Gender is fixed once a child exists, same as DOB above.
+                                    enabled: !_isEdit,
                                     onTap: () => context
                                         .read<ManageKidBloc>()
                                         .add(const ManageKidEvent.genderChanged(ChildGender.girl)),
@@ -146,6 +148,7 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                                     radioKey: const ValueKey(KidsTestStrings.formGenderBoyRadio),
                                     isSelected: state.gender == ChildGender.boy,
                                     label: KidsStrings.genderBoy,
+                                    enabled: !_isEdit,
                                     onTap: () => context
                                         .read<ManageKidBloc>()
                                         .add(const ManageKidEvent.genderChanged(ChildGender.boy)),
@@ -219,8 +222,12 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                           PrimaryButton.defaultType(
                             key: const ValueKey(KidsTestStrings.formSaveButton),
                             text: _isEdit ? KidsStrings.saveChangesButton : KidsStrings.saveButton,
-                            state: state.isSubmitting ? ButtonState.loading : ButtonState.enabled,
-                            onTap: () => context.read<ManageKidBloc>().add(const ManageKidEvent.submit()),
+                            state: state.isSubmitting
+                                ? ButtonState.loading
+                                : (state.isFormComplete ? ButtonState.enabled : ButtonState.disabled),
+                            onTap: state.isFormComplete
+                                ? () => context.read<ManageKidBloc>().add(const ManageKidEvent.submit())
+                                : null,
                           ),
                         ],
                       ),
@@ -302,24 +309,33 @@ class _GenderOption extends StatelessWidget {
     required this.isSelected,
     required this.label,
     required this.onTap,
+    this.enabled = true,
   });
 
   final Key radioKey;
   final bool isSelected;
   final String label;
   final VoidCallback onTap;
+  final bool enabled;
+
+  // Both options get the same muted look once gender is locked — the box
+  // itself doesn't call out which was selected, only the radio's fill does.
+  bool get _muted => !enabled;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
+          color: _muted ? AppColors.neutralGrey2 : null,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.neutralGrey3,
-            width: isSelected ? 1.5 : 1,
+            color: _muted
+                ? AppColors.neutralGrey4
+                : (isSelected ? AppColors.primary : AppColors.neutralGrey3),
+            width: !_muted && isSelected ? 1.5 : 1,
           ),
         ),
         // Built from the unlabeled AppRadio + a plain Text, rather than
@@ -330,9 +346,19 @@ class _GenderOption extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppRadio(key: radioKey, isSelected: isSelected, onTap: onTap),
+            AppRadio(
+              key: radioKey,
+              isSelected: isSelected,
+              isDisabled: _muted,
+              onTap: enabled ? onTap : null,
+            ),
             AppSpacing.horizontalGapXs,
-            Text(label, style: AppTypographyV1.bodyRegular.regular.textPrimary()),
+            Text(
+              label,
+              style: _muted
+                  ? AppTypographyV1.bodyRegular.regular.copyWith(color: AppColors.neutralGrey6)
+                  : AppTypographyV1.bodyRegular.regular.textPrimary(),
+            ),
           ],
         ),
       ),
@@ -364,7 +390,7 @@ class _DobField extends StatelessWidget {
     return OutlinedTextField(
       controller: TextEditingController(text: _display),
       labelText: KidsStrings.dobLabel,
-      required: false,
+      required: true,
       hintTextKey: const ValueKey(KidsTestStrings.formDobInputHint),
       readOnly: true,
       enabled: enabled,
@@ -401,47 +427,56 @@ class _ConsentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-            AppCheckbox(
-              key: const ValueKey(KidsTestStrings.formConsentCheckbox),
-              isSelected: checked,
-              onChanged: onChanged,
-            ),
-            AppSpacing.horizontalGapSm,
-            Expanded(
-              // Text.rich instead of Wrap: the privacy-policy link needs to
-              // flow inline as part of the same paragraph (joining the last
-              // line of the consent text when there's room), not sit as its
-              // own atomic block that Wrap can drop to a separate line.
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '$consentText ',
-                      style: AppTypographyV1.bodyRegular.regular.textPrimary(),
-                    ),
-                    WidgetSpan(
-                      alignment: PlaceholderAlignment.middle,
-                      child: GestureDetector(
-                        key: const ValueKey(KidsTestStrings.formConsentPrivacyLink),
-                        onTap: () => AppNavigator.goToWebView(
-                          context,
-                          url: privacyPolicyUrl,
-                          title: AuthStrings.privacyPolicy,
-                        ),
-                        child: Text(
-                          privacyPolicyLabel,
-                          style: AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.secondary),
-                        ),
+    return GestureDetector(
+      key: const ValueKey(KidsTestStrings.formConsentRow),
+      behavior: HitTestBehavior.opaque,
+      // Toggles on a tap anywhere in the row, including the consent text —
+      // the nested privacy-policy link below has its own GestureDetector,
+      // which wins the gesture arena over this one so its tap still opens
+      // the link instead of toggling the checkbox.
+      onTap: () => onChanged(!checked),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppCheckbox(
+            key: const ValueKey(KidsTestStrings.formConsentCheckbox),
+            isSelected: checked,
+            onChanged: onChanged,
+          ),
+          AppSpacing.horizontalGapSm,
+          Expanded(
+            // Text.rich instead of Wrap: the privacy-policy link needs to
+            // flow inline as part of the same paragraph (joining the last
+            // line of the consent text when there's room), not sit as its
+            // own atomic block that Wrap can drop to a separate line.
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$consentText ',
+                    style: AppTypographyV1.bodyRegular.regular.textPrimary(),
+                  ),
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: GestureDetector(
+                      key: const ValueKey(KidsTestStrings.formConsentPrivacyLink),
+                      onTap: () => AppNavigator.goToWebView(
+                        context,
+                        url: privacyPolicyUrl,
+                        title: AuthStrings.privacyPolicy,
+                      ),
+                      child: Text(
+                        privacyPolicyLabel,
+                        style: AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.secondary),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }

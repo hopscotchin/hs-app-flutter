@@ -34,4 +34,9 @@ extension ManageKidStateX on ManageKidState {
     if (o == null) return false;
     return name != o.name || gender != o.gender || dob != o.dob;
   }
+
+  /// Mirrors `ManageKidBloc._firstValidationError` — kept in sync with it so
+  /// the Save button's enabled state never disagrees with what submit would
+  /// actually accept.
+  bool get isFormComplete => name.trim().isNotEmpty && gender != null && dob != null && consentGiven;
 }

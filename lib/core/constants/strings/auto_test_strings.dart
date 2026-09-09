@@ -640,6 +640,7 @@ class KidsTestStrings {
   static const String formDobInputHint = 'kids_form_dob_input_hint';
   static const String formGenderBoyRadio = 'kids_form_gender_boy_radio';
   static const String formGenderGirlRadio = 'kids_form_gender_girl_radio';
+  static const String formConsentRow = 'kids_form_consent_row';
   static const String formConsentCheckbox = 'kids_form_consent_checkbox';
   static const String formConsentPrivacyLink = 'kids_form_consent_privacy_link';
   static const String formSaveButton = 'kids_form_save_button';
