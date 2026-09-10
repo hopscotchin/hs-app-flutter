@@ -11,6 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Imported by lib/main.dart (enableFlutterDriverExtension), so it must be a
+  # real dependency, not a dev_dependency.
+  flutter_driver:
+    sdk: flutter
+
   # Collection utilities (mapIndexed, firstWhereOrNull, groupBy, etc.)
   collection: ^1.19.1
 
@@ -125,8 +130,6 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
-    sdk: flutter
-  flutter_driver:
     sdk: flutter
 
   flutter_lints: ^6.0.0

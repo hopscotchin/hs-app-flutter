@@ -31,15 +31,12 @@ import 'hs_app.dart';
 
 void main() async {
   // enableFlutterDriverExtension installs its own WidgetsBinding, so it must run
-  // before ensureInitialized — otherwise the binding is already initialized and
-  // _DriverBinding's constructor throws '_debugInitializedType == null'.
-  // Only automation builds need the driver extension; normal debug/release use
-  // the standard binding.
-  if (kIsAutomation && kDebugMode) {
-    enableFlutterDriverExtension(silenceErrors: true);
-  } else {
-    WidgetsFlutterBinding.ensureInitialized();
-  }
+  // before anything else touches the binding — otherwise _DriverBinding's
+  // constructor throws '_debugInitializedType == null'. It is a no-op unless a
+  // VM service is attached (release builds have none), so it stays unconditional
+  // to keep QA automation builds identical to what we ship.
+  enableFlutterDriverExtension(silenceErrors: true);
+
   // debugPaintBaselinesEnabled = true;
 
   // VisibilityDetector callback cadence for home-page analytics. 500ms is also

@@ -155,11 +155,9 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
             // thing to get wrong. Inert in every other build.
             child: AutoSemantics(
               id: 'automation_build',
-              child: TalkerFloatingButton(
-                child: ConnectivityListener(
+              child:ConnectivityListener(
                   connectivityService: sl<ConnectivityService>(),
                   child: child ?? const SizedBox.shrink(),
-                ),
               ),
             ),
           );
