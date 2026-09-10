@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../components/appbar/hs_appbar.dart';
+import '../../../../components/atoms/custom_image.dart';
 import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/error_retry_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
@@ -279,10 +280,12 @@ class _AddChildFooter extends StatelessWidget {
                     children: [
                       _previewAvatar(
                         left: 0,
+                        index: 1,
                         imageUrl: avatars.elementAtOrNull(0),
                       ),
                       _previewAvatar(
                         left: 16,
+                        index: 0,
                         imageUrl: avatars.elementAtOrNull(1),
                       ),
                     ],
@@ -322,27 +325,42 @@ class _AddChildFooter extends StatelessWidget {
     );
   }
 
-  Widget _previewAvatar({required double left, String? imageUrl}) {
-    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+  Widget _previewAvatar({
+    required double left,
+    required int index,
+    String? imageUrl,
+  }) {
+    final uri = imageUrl != null ? Uri.tryParse(imageUrl) : null;
+    final hasImage =
+        uri != null && (uri.isScheme('HTTP') || uri.isScheme('HTTPS'));
+    const placeholder = Icon(
+      Icons.person,
+      size: 16,
+      color: AppColors.neutralGrey5,
+    );
     return Positioned(
       left: left,
       child: Container(
+        key: ValueKey('${KidsTestStrings.listFooterAvatarImage}_$index'),
         width: 28,
         height: 28,
         decoration: BoxDecoration(
           color: AppColors.neutralGrey3,
           shape: BoxShape.circle,
           border: Border.all(color: AppColors.baseDefault, width: 1.5),
-          image: hasImage
-              ? DecorationImage(
-                  image: NetworkImage(imageUrl),
-                  fit: BoxFit.cover,
-                )
-              : null,
         ),
         child: hasImage
-            ? null
-            : const Icon(Icons.person, size: 16, color: AppColors.neutralGrey5),
+            ? ClipOval(
+                child: CustomImage(
+                  path: imageUrl!,
+                  width: 28,
+                  height: 28,
+                  fit: BoxFit.cover,
+                  placeholder: placeholder,
+                  errorWidget: placeholder,
+                ),
+              )
+            : placeholder,
       ),
     );
   }

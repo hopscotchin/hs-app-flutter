@@ -12,9 +12,10 @@ import '../../domain/entities/child_entity.dart';
 ///  - `dob` arrives either as split `year`/`month`/`day` fields (legacy
 ///    path, loosely typed) or as a single `"DD-MM-YYYY"` string (v3) —
 ///    both are parsed defensively.
-///  - the photo URL key flips between `imgUrl` (response) and `imageUrl`
-///    (request) — this model reads `imgUrl` on the way in and the request
-///    body (built separately in the datasource) writes `imageUrl`.
+///  - the photo URL key is `imageUrl` on both the way in and the way out
+///    (the v3 save endpoint's request body, built separately in the
+///    datasource, writes the same key) — v2 renamed the legacy `imgUrl`
+///    response key to `imageUrl` per PROFILE_KIDS_API_CONTRACT.md §1.
 class ChildModel {
   const ChildModel({
     required this.id,
@@ -41,7 +42,7 @@ class ChildModel {
           _parseDob(json['year'], json['month'], json['day']) ??
           _parseDobDashString(json['dob'] as String?) ??
           _parseDobDisplayString(json['dob'] as String?),
-      imageUrl: json['imgUrl'] as String?,
+      imageUrl: json['imageUrl'] as String?,
       consent: json['consent'] as bool? ?? false,
     );
   }

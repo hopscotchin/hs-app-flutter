@@ -45,22 +45,24 @@ class KidItemCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          ClipOval(
+          Container(
+            width: 60,
+            height: 60,
+            decoration: const BoxDecoration(
+              color: AppColors.neutralGrey2,
+              shape: BoxShape.circle,
+            ),
             child: child.imageUrl != null && child.imageUrl!.isNotEmpty
-                ? CustomImage(
-                    path: child.imageUrl!,
-                    width: 64,
-                    height: 64,
-                    fit: BoxFit.cover,
-                  )
-                : Container(
-                    width: 64,
-                    height: 64,
-                    color: AppColors.neutralGrey2,
-                    child: const Icon(
-                      Icons.person_outline,
-                      color: AppColors.neutralGrey4,
+                ? Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xs),
+                    child: CustomImage(
+                      path: child.imageUrl!,
+                      fit: BoxFit.contain,
                     ),
+                  )
+                : const Icon(
+                    Icons.person_outline,
+                    color: AppColors.neutralGrey4,
                   ),
           ),
           AppSpacing.horizontalGapSm,

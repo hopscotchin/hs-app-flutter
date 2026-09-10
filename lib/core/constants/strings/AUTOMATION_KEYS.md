@@ -403,6 +403,7 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Button | `kids_list_item_<i>_edit` | `kids_list_item_0_edit`, `kids_list_item_1_edit` | `kids_page.dart` |
 | Button | `kids_list_item_<i>_remove` | `kids_list_item_0_remove`, `kids_list_item_1_remove` | `kids_page.dart` |
 | Button | `kids_list_add_button` | — | `kids_page.dart` |
+| Image | `kids_list_footer_avatar_image_<i>` | `kids_list_footer_avatar_image_0`, `kids_list_footer_avatar_image_1` | `kids_page.dart` |
 | Title | `kids_list_empty_title` | — | `kids_page.dart` |
 | Text | `kids_list_empty_subtitle` | — | `kids_page.dart` |
 | Title | `kids_list_delete_bottomsheet_title` | — | `kids_page.dart` |
