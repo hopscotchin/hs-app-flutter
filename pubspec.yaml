@@ -83,6 +83,13 @@ dependencies:
   # SMS OTP autofill (Android: SMS User Consent API; iOS: native autofillHints)
   sms_autofill: ^2.3.3
 
+  # Asset generator only (`dart run flutter_native_splash:create`) - nothing in
+  # lib/ imports it. It lives here rather than in dev_dependencies because
+  # GeneratedPluginRegistrant.java is generated once and compiled for every
+  # Android build type: as a dev dependency its plugin class is off the release
+  # classpath, so the native host's release build fails to compile the registrant.
+  flutter_native_splash: ^2.4.7
+
   freezed_annotation: ^3.1.0
   json_annotation: ^4.11.0
 
@@ -133,9 +140,6 @@ dev_dependencies:
   mocktail: ^1.0.5
   bloc_test: ^10.0.0
 
-  # Native Splash Screen
-  flutter_native_splash: ^2.4.7
-
   # Launcher Icons
   flutter_launcher_icons: ^0.14.4
 
@@ -147,6 +151,14 @@ dev_dependencies:
   retrofit_generator: ^10.2.5
 
 flutter:
+  # Makes this project an add-to-app module *in addition to* a standalone app,
+  # which is what enables `flutter build aar`. The editable android/ dir is
+  # kept, so `flutter run` / `flutter build apk` still use it as the host.
+  module:
+    androidX: true
+    androidPackage: in.hopscotch.android.flutter
+    iosBundleIdentifier: in.hopscotch.android
+
   uses-material-design: true
 
   assets:

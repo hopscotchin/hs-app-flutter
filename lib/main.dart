@@ -24,6 +24,7 @@ import 'core/di/injection.dart';
 import 'core/network/cookies/cookies_based_events_util.dart';
 import 'core/network/cookies/hs_cookie_store.dart';
 import 'core/network/network_client.dart';
+import 'core/services/native_fallback.dart';
 import 'core/services/pref_manager.dart';
 import 'core/services/push_notification_service.dart';
 import 'core/theme/app_theme.dart';
@@ -58,26 +59,61 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  await Future.wait([
-    EnvConfig.load(),
-    configureDependencies(),
-    if (!kIsWeb) ...[Firebase.initializeApp()],
-  ]);
+  // A failure in here (missing .env, DI, Firebase) leaves nothing renderable, so
+  // hand the session back to the native app instead of showing a blank screen.
+  // Note this runs *before* the handlers below are installed, so it needs its own
+  // catch - the `.env` startup crash escaped the root zone entirely.
+  try {
+    await Future.wait([
+      EnvConfig.load(),
+      configureDependencies(),
+      if (!kIsWeb) ...[Firebase.initializeApp()],
+    ]);
 
-  await _runPostInitBootstrapping();
+    await _runPostInitBootstrapping();
+  } catch (error, stack) {
+    await _reportStartupFailure(error, stack);
+    await NativeFallback.bail('startup: $error');
+    return;
+  }
 
   // Initialize Firebase (not supported on web without firebase_options.dart)
   if (!kIsWeb) {
     // Crashlytics: catch all Flutter framework errors (not supported on web)
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    FlutterError.onError = (details) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+      if (NativeFallback.shouldBail) {
+        NativeFallback.bail('framework error: ${details.exception}');
+      }
+    };
     // Crashlytics: catch async errors not caught by Flutter
     PlatformDispatcher.instance.onError = (error, stack) {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      if (NativeFallback.shouldBail) {
+        NativeFallback.bail('uncaught: $error');
+      }
       return true;
     };
   }
 
   runApp(sl<ClarityHelper>().wrap(const HSApp()));
+
+  // Past this point the app is on screen, so errors are reported but no longer
+  // bail - see NativeFallback.shouldBail.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    NativeFallback.hasRenderedFirstFrame = true;
+  });
+}
+
+/// Best-effort report of a failure that happened before Crashlytics is known to
+/// be usable - Firebase itself may be what failed to initialise.
+Future<void> _reportStartupFailure(Object error, StackTrace stack) async {
+  debugPrint('Startup failed: $error\n$stack');
+  try {
+    await FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+  } on Object catch (_) {
+    // Nothing more we can do; the native side gets the reason string.
+  }
 }
 
 Future<void> _runPostInitBootstrapping() async {
