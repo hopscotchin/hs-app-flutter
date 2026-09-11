@@ -35,13 +35,14 @@ void main() async {
   // _DriverBinding's constructor throws '_debugInitializedType == null'.
   // Only automation builds need the driver extension; normal debug/release use
   // the standard binding.
-  if (kIsAutomation && kDebugMode) {
-    enableFlutterDriverExtension(silenceErrors: true);
-  } else {
-    WidgetsFlutterBinding.ensureInitialized();
-  }
+  // if (kIsAutomation && kDebugMode) {
+  //   enableFlutterDriverExtension(silenceErrors: true);
+  // } else {
+  //   WidgetsFlutterBinding.ensureInitialized();
+  // }
   // debugPaintBaselinesEnabled = true;
-
+  enableFlutterDriverExtension(silenceErrors: true);
+  WidgetsFlutterBinding.ensureInitialized();
   // VisibilityDetector callback cadence for home-page analytics. 500ms is also
   // the package default, so this is a pin rather than a change: tighter values
   // pound the intersection-check path once per detector per interval during a
