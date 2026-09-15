@@ -24,10 +24,16 @@ abstract final class WishlistActions {
   /// Both survive the login detour: they are stored with the deferred toggle and
   /// replayed after a successful login, so the add that eventually happens is the
   /// one that reports.
+  /// [source] is the surface slug (`WishlistTestStrings.sourceHome` / `.sourcePlp`
+  /// / `.sourcePdp`, or `lp_<pageName>` for a landing page). It only drives the
+  /// automation key on the feedback snackbar, so a driver can tell "added from
+  /// PLP" apart from "added from PDP" — the single global listener in
+  /// `hs_app.dart` renders them all through one code path.
   static void toggle(
     BuildContext context, {
     required String productId,
     required int price,
+    required String source,
     String? sku,
     VoidCallback? onAdded,
     VoidCallback? onRemoved,
@@ -40,6 +46,7 @@ abstract final class WishlistActions {
       cubit.setPending(
         productId: productId,
         price: price,
+        source: source,
         sku: sku,
         onAdded: onAdded,
         onRemoved: onRemoved,
@@ -54,6 +61,7 @@ abstract final class WishlistActions {
     cubit.toggle(
       productId: productId,
       price: price,
+      source: source,
       sku: sku,
       onAdded: onAdded,
       onRemoved: onRemoved,

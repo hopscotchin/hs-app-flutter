@@ -24,7 +24,11 @@ const stringsPath = 'lib/core/constants/strings/auto_test_strings.dart';
 const outPath = 'lib/core/constants/strings/AUTOMATION_KEYS.md';
 
 /// Classes emitted from templates instead of being parsed (runtime-composed keys).
-const templatedClasses = {'HomeComponentTestStrings', 'MessageBarTestStrings'};
+const templatedClasses = {
+  'HomeComponentTestStrings',
+  'MessageBarTestStrings',
+  'WishlistTestStrings',
+};
 
 /// Members that are only key *prefixes*, never keys themselves.
 bool isPrefixOnly(String member) =>
@@ -177,6 +181,7 @@ String _inferType(String pattern) {
   // Strip placeholder segments so the real trailing token is exposed.
   final k = pattern.replaceAll(RegExp(r'_<[^>]+>'), '');
   bool ends(String s) => k.endsWith(s);
+  if (ends('_snackbar')) return 'Snackbar';
   if (ends('_hint')) return 'Hint';
   if (ends('_suffix') || ends('_suffix_icon')) return 'Suffix';
   if (ends('_button')) return 'Button';
@@ -357,6 +362,22 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Button | `<screen>_message_bar_action_button_<i>` | `login_message_bar_action_button_0` | `message_bars_widget.dart` |
 | Button | `<screen>_message_bar_left_button_<i>` | `plp_message_bar_left_button_0` | `message_bars_widget.dart` |
 | Button | `<screen>_message_bar_right_button_<i>` | `plp_message_bar_right_button_0` | `message_bars_widget.dart` |''';
+    case 'WishlistTestStrings':
+      return r'''
+Composed at runtime as `<source>_<action>_snackbar`, where `<source>` is the
+surface the heart was tapped on — `hp` (home), `lp_<pageName>` (landing page),
+`plp`, `pdp`. Every surface dispatches to the one global `WishlistCubit`, and
+`hs_app.dart` renders the snackbar, so these four patterns cover all of them.
+
+| Type | Key (pattern) | Examples | Widget file |
+|---|---|---|---|
+| Snackbar | `<source>_add_to_wishlist_snackbar` | `hp_add_to_wishlist_snackbar`, `plp_add_to_wishlist_snackbar`, `pdp_add_to_wishlist_snackbar` | `hs_app.dart` |
+| Snackbar | `<source>_remove_from_wishlist_snackbar` | `hp_remove_from_wishlist_snackbar`, `plp_remove_from_wishlist_snackbar` | `hs_app.dart` |
+| Snackbar | `<source>_add_to_wishlist_failed_snackbar` | `pdp_add_to_wishlist_failed_snackbar` | `hs_app.dart` |
+| Snackbar | `<source>_remove_from_wishlist_failed_snackbar` | `plp_remove_from_wishlist_failed_snackbar` | `hs_app.dart` |
+
+The source slug is passed at the tap site via `WishlistActions.toggle(source: ...)`
+and survives the logged-out login detour.''';
     default:
       return '';
   }

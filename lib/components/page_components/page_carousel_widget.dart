@@ -574,6 +574,7 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
               context,
               productId: product.id.toString(),
               price: WishlistActions.priceToInt(product.price?.sellingPrice),
+              source: WishlistTestStrings.sourceFromComponentPrefix(widget.keyPrefix),
               onAdded: () => widget.onWishlistLog?.call(tile, added: true),
               onRemoved: () => widget.onWishlistLog?.call(tile, added: false),
               loggedOutMessageBars: const [

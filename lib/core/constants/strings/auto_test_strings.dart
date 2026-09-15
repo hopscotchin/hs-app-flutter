@@ -607,3 +607,38 @@ class PdpTestStrings {
   // Recommendations pagination
   static const String recommendedLoading = 'pdp_recommended_loading';
 }
+
+/// Wishlist feedback snackbars, scoped to the surface the toggle came from.
+///
+/// The heart on Home, PLP and PDP all dispatch to the single global
+/// `WishlistCubit`, and one listener in `hs_app.dart` renders the snackbar — so
+/// the originating surface is carried through the toggle as a [source] slug and
+/// composed into the key here. Slugs match the screen prefixes used everywhere
+/// else in this file: `hp` (home), `lp_<pageName>` (landing), `plp`, `pdp`.
+class WishlistTestStrings {
+  WishlistTestStrings();
+
+  // Surface slugs passed to `WishlistActions.toggle(source: ...)`.
+  static const String sourceHome = 'hp';
+  static const String sourcePlp = 'plp';
+  static const String sourcePdp = 'pdp';
+
+  /// Page slug for a home/landing component, recovered from the `keyPrefix`
+  /// `PageComponentRenderer` composed (`hp_pg_2` -> `hp`,
+  /// `lp_summer-sale_pc_1` -> `lp_summer-sale`). The component index is dropped
+  /// on purpose: QA asserts "added from home", not from which carousel.
+  static String sourceFromComponentPrefix(String? keyPrefix) {
+    if (keyPrefix == null || keyPrefix.isEmpty) return sourceHome;
+    final match = RegExp(r'^(.*)_(hero|ct|pg|pc)_\d+$').firstMatch(keyPrefix);
+    return match?.group(1) ?? keyPrefix;
+  }
+
+  static String addedSnackbar(String source) =>
+      '${source}_add_to_wishlist_snackbar';
+  static String removedSnackbar(String source) =>
+      '${source}_remove_from_wishlist_snackbar';
+  static String addFailedSnackbar(String source) =>
+      '${source}_add_to_wishlist_failed_snackbar';
+  static String removeFailedSnackbar(String source) =>
+      '${source}_remove_from_wishlist_failed_snackbar';
+}

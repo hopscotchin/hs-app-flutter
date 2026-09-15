@@ -320,6 +320,7 @@ class _PdpContentState extends State<PdpContent> {
       context,
       productId: productId,
       price: wishlistPrice,
+      source: WishlistTestStrings.sourcePdp,
       sku: widget.state.selectedSku?.skuId,
       loggedOutMessageBars: const [
         MessageBarEntity(text: LoginRedirects.redirectWishlistItem, type: 'info', hasIcon: true),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/core/network/connectivity/connectivity_listener.dart';
 import 'package:hs_app_flutter/core/services/connectivity_service.dart';
-import 'package:hs_app_flutter/features/talker_floating_button.dart';
 
 import 'components/atoms/auto_semantics.dart';
 import 'core/analytics/events/analytics_helper.dart';
@@ -71,12 +70,14 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
   static void _showActionSnack(
     BuildContext context,
     String? message,
-    bool isError,
-  ) {
+    bool isError, {
+    String? autoKey,
+  }) {
     if (message == null || message.isEmpty) return;
     context.showSnack(
       message,
       status: isError ? SnackStatus.error : SnackStatus.success,
+      contentKey: autoKey == null ? null : ValueKey(autoKey),
     );
   }
 
@@ -135,6 +136,7 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
                   context,
                   state.feedbackMessage,
                   state.feedbackIsError,
+                  autoKey: state.feedbackKey,
                 ),
               ),
               BlocListener<CartActionsCubit, CartActionsState>(
@@ -155,9 +157,9 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
             // thing to get wrong. Inert in every other build.
             child: AutoSemantics(
               id: 'automation_build',
-              child:ConnectivityListener(
-                  connectivityService: sl<ConnectivityService>(),
-                  child: child ?? const SizedBox.shrink(),
+              child: ConnectivityListener(
+                connectivityService: sl<ConnectivityService>(),
+                child: child ?? const SizedBox.shrink(),
               ),
             ),
           );

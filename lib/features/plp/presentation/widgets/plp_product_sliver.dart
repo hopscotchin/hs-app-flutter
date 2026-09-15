@@ -98,6 +98,7 @@ class PlpProductSliver extends StatelessWidget {
       context,
       productId: product.id.toString(),
       price: WishlistActions.priceToInt(product.price?.sellingPrice),
+      source: WishlistTestStrings.sourcePlp,
       loggedOutMessageBars: const [
         MessageBarEntity(text: LoginRedirects.redirectAddToWishlist, type: 'info', hasIcon: true),
       ],

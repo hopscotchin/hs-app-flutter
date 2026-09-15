@@ -65,7 +65,7 @@ lists. **Examples** = concrete keys for dynamic patterns. **Widget file** = the
 | Title | `account_app_bar_title` | — | `account_page.dart` |
 | Text | `account_forget_dialog_title_text_field` | — | `account_page.dart` |
 | Text | `account_forget_dialog_description_text_field` | — | `account_page.dart` |
-| Button | `account_forget_dialog_cancel_button` | — | `account_page.dart`, `cart_page.dart` |
+| Button | `account_forget_dialog_cancel_button` | — | `account_page.dart` |
 | Button | `account_forget_dialog_confirm_button` | — | `account_page.dart` |
 
 ## Join Us
@@ -279,6 +279,7 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 
 | Type | Key | Examples | Widget file |
 |---|---|---|---|
+| Element | `promo_offers_action_error_bar` | — | `promo_offers_bottom_sheet.dart` |
 | Title | `promo_offers_sheet_title` | — | `promo_offers_bottom_sheet.dart` |
 | Button | `promo_offers_empty_state_button` | — | `promo_offers_bottom_sheet.dart` |
 | List item | `promo_offers_card_<i>` | `promo_offers_card_0`, `promo_offers_card_1` | `promo_offers_bottom_sheet.dart` |
@@ -314,7 +315,8 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 
 | Type | Key | Examples | Widget file |
 |---|---|---|---|
-| Element | `cart_slg` | — | `cart_page.dart` |
+| Button | `cart_appbar_back_button` | — | `cart_page.dart` |
+| Element | `cart_slg` | — | `cart_slg_widget.dart` |
 | Text field | `cart_promo_code_input` | — | `cart_promo_section.dart` |
 | Hint | `cart_promo_code_input_hint` | — | `cart_promo_section.dart` |
 | Button | `cart_promo_apply_button` | — | `cart_promo_section.dart` |
@@ -325,6 +327,9 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Text | `cart_checkout_bar_total_amount_text` | — | `cart_checkout_bar.dart` |
 | Button | `cart_checkout_bar_details_button` | — | `cart_checkout_bar.dart` |
 | Button | `cart_checkout_bar_proceed_button` | — | `cart_checkout_bar.dart` |
+| Button | `cart_remove_item_bottomsheet_remove_button` | — | `remove_cart_item_sheet.dart` |
+| Button | `cart_remove_item_bottomsheet_no_button` | — | `remove_cart_item_sheet.dart` |
+
 ## Pdp
 
 | Type | Key | Examples | Widget file |
@@ -341,13 +346,14 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Title | `pdp_delivery_title` | — | `pdp_delivery_info.dart` |
 | Button | `pdp_enter_pincode_button` | — | `pdp_delivery_info.dart` |
 | Button | `pdp_change_pincode_button` | — | `pdp_delivery_info.dart` |
+| Option | `pdp_offers_section` | — | `pdp_offers.dart` |
 | Title | `pdp_offers_title` | — | `pdp_offers.dart` |
-| Card | `pdp_offer_card_<i>` | `pdp_offer_card_0`, `pdp_offer_card_1` | `pdp_offers.dart` |
+| List item | `pdp_offer_card_<i>` | `pdp_offer_card_0`, `pdp_offer_card_1` | `pdp_offers.dart` |
 | Button | `pdp_offer_card_<i>_copy` | `pdp_offer_card_0_copy`, `pdp_offer_card_1_copy` | `pdp_offers.dart` |
 | Title | `pdp_product_details_title` | — | `pdp_product_details.dart` |
 | Tab | `pdp_detail_tab_<i>` | `pdp_detail_tab_0`, `pdp_detail_tab_1` | `pdp_product_details.dart` |
-| Button | `pdp_add_to_bag_button` | — | `pdp_content.dart` |
-| Button | `pdp_buy_now_button` | — | `pdp_content.dart` |
+| Button | `pdp_add_to_bag_button` | — | `auto_semantics.dart`, `pdp_add_to_bag_bar_sold_out_test.dart`, `pdp_content.dart` |
+| Button | `pdp_buy_now_button` | — | `pdp_add_to_bag_bar_sold_out_test.dart`, `pdp_content.dart` |
 | Button | `pdp_docked_add_to_bag_button` | — | `pdp_content.dart` |
 | Button | `pdp_docked_buy_now_button` | — | `pdp_content.dart` |
 | Button | `pdp_scroll_to_top_button` | — | `pdp_content.dart` |
@@ -384,3 +390,20 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Header | `pdp_size_chart_header_<chart>_<col>` | `pdp_size_chart_header_<chart>_<col>` | `pdp_size_chart_bottom_sheet.dart` |
 | Cell | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_bottom_sheet.dart` |
 | Loading | `pdp_recommended_loading` | — | `pdp_recommended_products.dart` |
+
+## Wishlist
+
+Composed at runtime as `<source>_<action>_snackbar`, where `<source>` is the
+surface the heart was tapped on — `hp` (home), `lp_<pageName>` (landing page),
+`plp`, `pdp`. Every surface dispatches to the one global `WishlistCubit`, and
+`hs_app.dart` renders the snackbar, so these four patterns cover all of them.
+
+| Type | Key (pattern) | Examples | Widget file |
+|---|---|---|---|
+| Snackbar | `<source>_add_to_wishlist_snackbar` | `hp_add_to_wishlist_snackbar`, `plp_add_to_wishlist_snackbar`, `pdp_add_to_wishlist_snackbar` | `hs_app.dart` |
+| Snackbar | `<source>_remove_from_wishlist_snackbar` | `hp_remove_from_wishlist_snackbar`, `plp_remove_from_wishlist_snackbar` | `hs_app.dart` |
+| Snackbar | `<source>_add_to_wishlist_failed_snackbar` | `pdp_add_to_wishlist_failed_snackbar` | `hs_app.dart` |
+| Snackbar | `<source>_remove_from_wishlist_failed_snackbar` | `plp_remove_from_wishlist_failed_snackbar` | `hs_app.dart` |
+
+The source slug is passed at the tap site via `WishlistActions.toggle(source: ...)`
+and survives the logged-out login detour.

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/usecases/add_to_wishlist_usecase.dart';
 import '../../domain/usecases/remove_from_wishlist_usecase.dart';
@@ -25,12 +26,17 @@ class _PendingWishlist {
   const _PendingWishlist({
     required this.productId,
     required this.price,
+    required this.source,
     this.sku,
     this.onAdded,
     this.onRemoved,
   });
   final String productId;
   final int price;
+
+  /// Surface the toggle came from (`WishlistTestStrings.source*`), so the
+  /// feedback snackbar after the login detour still carries the right key.
+  final String source;
   final String? sku;
 
   /// Carried through the login detour. Without these the replayed toggle
@@ -88,6 +94,7 @@ class WishlistCubit extends Cubit<WishlistState> {
   void setPending({
     required String productId,
     required int price,
+    required String source,
     String? sku,
     VoidCallback? onAdded,
     VoidCallback? onRemoved,
@@ -95,6 +102,7 @@ class WishlistCubit extends Cubit<WishlistState> {
     _pending = _PendingWishlist(
       productId: productId,
       price: price,
+      source: source,
       sku: sku,
       onAdded: onAdded,
       onRemoved: onRemoved,
@@ -109,6 +117,7 @@ class WishlistCubit extends Cubit<WishlistState> {
     toggle(
       productId: p.productId,
       price: p.price,
+      source: p.source,
       sku: p.sku,
       onAdded: p.onAdded,
       onRemoved: p.onRemoved,
@@ -125,6 +134,7 @@ class WishlistCubit extends Cubit<WishlistState> {
   Future<void> toggle({
     required String productId,
     required int price,
+    required String source,
     String? sku,
     VoidCallback? onAdded,
     VoidCallback? onRemoved,
@@ -146,15 +156,21 @@ class WishlistCubit extends Cubit<WishlistState> {
     emit(state.copyWith(items: optimistic, inFlight: {...state.inFlight, productId}));
 
     if (wasWishlisted) {
-      await _remove(productId: productId, wishlistItemId: existingItemId, onRemoved: onRemoved);
+      await _remove(
+        productId: productId,
+        wishlistItemId: existingItemId,
+        source: source,
+        onRemoved: onRemoved,
+      );
     } else {
-      await _add(productId: productId, price: price, sku: sku, onAdded: onAdded);
+      await _add(productId: productId, price: price, source: source, sku: sku, onAdded: onAdded);
     }
   }
 
   Future<void> _add({
     required String productId,
     required int price,
+    required String source,
     String? sku,
     VoidCallback? onAdded,
   }) async {
@@ -166,13 +182,21 @@ class WishlistCubit extends Cubit<WishlistState> {
         if (failure is RequestCancelledFailure) return;
         final reverted = Map<String, String?>.from(state.items)..remove(productId);
         emit(_clearInFlight(productId, items: reverted));
-        _emitFeedback("Couldn't add to wishlist", isError: true);
+        _emitFeedback(
+          "Couldn't add to wishlist",
+          isError: true,
+          autoKey: WishlistTestStrings.addFailedSnackbar(source),
+        );
       },
       (response) {
         final updated = Map<String, String?>.from(state.items)
           ..[productId] = response.wishlistItemId;
         emit(_clearInFlight(productId, items: updated));
-        _emitFeedback('Added to wishlist', isError: false);
+        _emitFeedback(
+          'Added to wishlist',
+          isError: false,
+          autoKey: WishlistTestStrings.addedSnackbar(source),
+        );
         // Analytics fires HERE — the server confirmed. Never on tap: `toggle`
         // emits optimistically and the failure branch above reverts it.
         onAdded?.call();
@@ -183,13 +207,18 @@ class WishlistCubit extends Cubit<WishlistState> {
   Future<void> _remove({
     required String productId,
     required String? wishlistItemId,
+    required String source,
     VoidCallback? onRemoved,
   }) async {
     if (wishlistItemId == null || wishlistItemId.isEmpty) {
       // Membership known but no item id to delete with — restore and report.
       final reverted = Map<String, String?>.from(state.items)..[productId] = wishlistItemId;
       emit(_clearInFlight(productId, items: reverted));
-      _emitFeedback("Couldn't remove from wishlist", isError: true);
+      _emitFeedback(
+        "Couldn't remove from wishlist",
+        isError: true,
+        autoKey: WishlistTestStrings.removeFailedSnackbar(source),
+      );
       return;
     }
     final result = await _removeFromWishlist(RemoveFromWishlistParams(wishlistId: wishlistItemId));
@@ -198,11 +227,19 @@ class WishlistCubit extends Cubit<WishlistState> {
         if (failure is RequestCancelledFailure) return;
         final reverted = Map<String, String?>.from(state.items)..[productId] = wishlistItemId;
         emit(_clearInFlight(productId, items: reverted));
-        _emitFeedback("Couldn't remove from wishlist", isError: true);
+        _emitFeedback(
+        "Couldn't remove from wishlist",
+        isError: true,
+        autoKey: WishlistTestStrings.removeFailedSnackbar(source),
+      );
       },
       (_) {
         emit(_clearInFlight(productId));
-        _emitFeedback('Removed from wishlist', isError: false);
+        _emitFeedback(
+          'Removed from wishlist',
+          isError: false,
+          autoKey: WishlistTestStrings.removedSnackbar(source),
+        );
         onRemoved?.call();
       },
     );
@@ -215,12 +252,13 @@ class WishlistCubit extends Cubit<WishlistState> {
     );
   }
 
-  void _emitFeedback(String message, {required bool isError}) {
+  void _emitFeedback(String message, {required bool isError, required String autoKey}) {
     emit(
       state.copyWith(
         feedbackTick: state.feedbackTick + 1,
         feedbackMessage: message,
         feedbackIsError: isError,
+        feedbackKey: autoKey,
       ),
     );
   }

@@ -164,6 +164,7 @@ class ProductGridWidget extends StatelessWidget {
           context,
           productId: item.id.toString(),
           price: WishlistActions.priceToInt(item.price?.sellingPrice),
+          source: WishlistTestStrings.sourceFromComponentPrefix(keyPrefix),
           onAdded: () => onWishlistLog?.call(item, added: true),
           onRemoved: () => onWishlistLog?.call(item, added: false),
           loggedOutMessageBars: const [

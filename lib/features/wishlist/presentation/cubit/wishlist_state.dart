@@ -12,6 +12,9 @@ abstract class WishlistState with _$WishlistState {
     @Default(<String>{}) Set<String> inFlight,
     @Default(0) int feedbackTick,
     String? feedbackMessage,
+    /// Automation key for the feedback snackbar (`WishlistTestStrings`), so a
+    /// driver can tell add / remove / failure apart without matching copy.
+    String? feedbackKey,
     @Default(false) bool feedbackIsError,
   }) = _WishlistState;
 }
