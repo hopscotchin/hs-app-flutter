@@ -1,12 +1,11 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../plp/domain/entities/listing_product_entity.dart';
+import 'tile_entity.dart';
 
 part 'recently_viewed_entity.freezed.dart';
 
 @freezed
-abstract class RecentlyViewedViewConfigEntity
-    with _$RecentlyViewedViewConfigEntity {
+abstract class RecentlyViewedViewConfigEntity with _$RecentlyViewedViewConfigEntity {
   const factory RecentlyViewedViewConfigEntity({
     @Default(240.0) double tileWidth,
     @Default(214.0) double tileHeight,
@@ -21,11 +20,8 @@ abstract class RecentlyViewedViewConfigEntity
 
 @freezed
 abstract class RecentlyViewedHeadingEntity with _$RecentlyViewedHeadingEntity {
-  const factory RecentlyViewedHeadingEntity({
-    String? url,
-    int? width,
-    int? height,
-  }) = _RecentlyViewedHeadingEntity;
+  const factory RecentlyViewedHeadingEntity({String? url, int? width, int? height}) =
+      _RecentlyViewedHeadingEntity;
 }
 
 @freezed
@@ -44,8 +40,12 @@ abstract class RecentlyViewedMarginsEntity with _$RecentlyViewedMarginsEntity {
 abstract class RecentlyViewedEntity with _$RecentlyViewedEntity {
   const factory RecentlyViewedEntity({
     RecentlyViewedViewConfigEntity? viewConfig,
-    @Default([]) List<ListingProductEntity> tiles,
+    @Default([]) List<TileEntity> tiles,
     RecentlyViewedHeadingEntity? heading,
     RecentlyViewedMarginsEntity? margins,
+
+    /// `recentlyViewed.trackingMeta`, forwarded whole. Analytics never reads a
+    /// key from it — see docs/analytics/pdp/client/tm-collection.md.
+    Map<String, dynamic>? trackingMeta,
   }) = _RecentlyViewedEntity;
 }

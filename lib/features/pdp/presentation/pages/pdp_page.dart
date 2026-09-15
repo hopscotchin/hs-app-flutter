@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../bloc/pdp_bloc.dart';
 import '../widgets/pdp_shimmer_loading.dart';
 import '../widgets/pdp_snackbar.dart';
@@ -18,7 +19,11 @@ class PdpPage extends StatelessWidget {
         listenWhen: (prev, curr) =>
             prev.snackBarTick != curr.snackBarTick && curr.snackBarMessage != null,
         listener: (context, state) {
-          PdpSnackbar.show(context, state.snackBarMessage!);
+          PdpSnackbar.show(
+            context,
+            state.snackBarMessage!,
+            key: const ValueKey(PdpTestStrings.snackBar),
+          );
         },
         child: BlocBuilder<PdpBloc, PdpState>(
           // Only the fields PdpContent actually reads in build. Everything else

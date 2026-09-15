@@ -59,6 +59,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     on<ApplyPromoCode>(_onApplyPromoCode);
     on<RemovePromoCode>(_onRemovePromoCode);
     on<MergeCart>(_onMergeCart);
+    on<ProceedToCheckout>(_onProceedToCheckout);
     on<ClearToast>(_onClearToast);
     on<ClearPromoActionSheet>(_onClearPromoActionSheet);
   }
@@ -142,17 +143,10 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     result.fold(
       (failure) {
         if (failure is RequestCancelledFailure) return;
-        emit(
-          CartState(status: CartStatus.error, errorMessage: failure.message),
-        );
+        emit(CartState(status: CartStatus.error, errorMessage: failure.message));
       },
-      (cart) => emit(
-        CartState(
-          status: CartStatus.loaded,
-          cart: cart,
-          staticMessageBars: staticBars,
-        ),
-      ),
+      (cart) =>
+          emit(CartState(status: CartStatus.loaded, cart: cart, staticMessageBars: staticBars)),
     );
   }
 
@@ -164,10 +158,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// one-shot — a toast, a promo sheet — that the UI consumed and cleared while
   /// the request was in flight. Rebuilding from the stale snapshot would put
   /// that toast back on the state and show the snackbar a second time.
-  Future<void> _onRefreshCart(
-    RefreshCart event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> _onRefreshCart(RefreshCart event, Emitter<CartState> emit) async {
     final token = swapCancelToken();
     final staticBars = await _staticMessageBars();
     final result = await getCartUseCase(
@@ -262,10 +253,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// (`CartState.isRemoving`) rather than the full-screen overlay: the sheet
   /// stays up until the API answers, then closes and the outcome is toasted —
   /// success with the server's message, failure with the reason.
-  Future<void> _onRemoveCartItem(
-    RemoveCartItem event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> _onRemoveCartItem(RemoveCartItem event, Emitter<CartState> emit) async {
     final current = state;
     if (current.isLoaded) {
       emit(
@@ -328,10 +316,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     );
   }
 
-  Future<void> _onUpdateCartItem(
-    UpdateCartItemQuantity event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> _onUpdateCartItem(UpdateCartItemQuantity event, Emitter<CartState> emit) async {
     final current = state;
     if (current.isLoaded) {
       emit(
@@ -368,13 +353,37 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
             ),
           );
         } else {
-          emit(
-            current.copyWith(
-              status: CartStatus.error,
-              errorMessage: failure.message,
-            ),
-          );
+          emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
         }
+      },
+      (_) {
+        if (!current.isLoaded) return;
+
+        // `PUT /shopping-cart/v2/{sku}` answers with only
+        // `{action, message, cartItemQty}` — no cart — so the overlay is
+        // dropped the moment it lands, the tapped line is stepped locally, and
+        // the authoritative totals (line price, order summary, EDD, message
+        // bars) are re-read in the background. Blocking through that second
+        // read is what made a single +/- tap feel slow: two round-trips to
+        // show a number the app already knew. Android does the same —
+        // `getCartData(UPDATE_CART, startLoading = false)`.
+        //
+        // (`cartItemQty` in the response is the cart-wide item count, not this
+        // line's quantity, so the local step uses the requested quantity.)
+        final items = List<CartItemEntity>.of(current.cart!.items);
+        final index = _indexOfItem(items, sku: event.sku, hint: event.itemIndex);
+        if (index != -1) {
+          items[index] = items[index].withQuantity(event.quantity);
+        }
+
+        emit(
+          current.copyWith(
+            pendingItemAction: null,
+            isCartUpdating: false,
+            cart: current.cart!.copyWith(items: items),
+          ),
+        );
+        add(const RefreshCart());
       },
       (_) {
         if (!current.isLoaded) return;
@@ -412,10 +421,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     );
   }
 
-  Future<void> _onMoveToWishlist(
-    MoveToWishlist event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> _onMoveToWishlist(MoveToWishlist event, Emitter<CartState> emit) async {
     final current = event.reloadCartFirst
         ? await _reloadCartBeforeMutation(emit)
         : state;
@@ -455,12 +461,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
             ),
           );
         } else {
-          emit(
-            current.copyWith(
-              status: CartStatus.error,
-              errorMessage: failure.message,
-            ),
-          );
+          emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
         }
       },
       // The overlay lifts as soon as the move lands; the cart re-read that
@@ -481,10 +482,13 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// endpoint the offers bottom sheet uses. That endpoint answers with only
   /// `{success, message}` — no cart — so the cart is re-read afterwards to pick
   /// up the new totals.
-  Future<void> _onApplyPromoCode(
-    ApplyPromoCode event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> _onApplyPromoCode(ApplyPromoCode event, Emitter<CartState> emit) async {
+    // A second tap while the first apply is still running would run the call
+    // twice and answer with two sheets stacked on top of each other. The Apply
+    // button already ignores taps while `isPromoLoading`, but the button is not
+    // the only way in (keyboard submit, the post-login replay), so the guard
+    // belongs here too.
+    if (state.isPromoLoading) return;
     // A second tap while the first apply is still running would run the call
     // twice and answer with two sheets stacked on top of each other. The Apply
     // button already ignores taps while `isPromoLoading`, but the button is not
@@ -574,10 +578,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
 
   /// Removes through `DELETE /v3/promotion/remove`, pairing with the apply
   /// above. Same `{success, message}` shape, so the cart is re-read afterwards.
-  Future<void> _onRemovePromoCode(
-    RemovePromoCode event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> _onRemovePromoCode(RemovePromoCode event, Emitter<CartState> emit) async {
     if (state.isPromoLoading) return;
     final current = state;
     if (current.isLoaded) {
@@ -626,19 +627,10 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       if (failure is RequestCancelledFailure) return;
       if (current.isLoaded) {
         emit(
-          current.copyWith(
-            isMerging: false,
-            isCartUpdating: false,
-            toastMessage: failure.message,
-          ),
+          current.copyWith(isMerging: false, isCartUpdating: false, toastMessage: failure.message),
         );
       } else {
-        emit(
-          current.copyWith(
-            status: CartStatus.error,
-            errorMessage: failure.message,
-          ),
-        );
+        emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
       }
     }, (_) async => _refreshAfterMutation(emit, current, isMergeCall: true));
   }
@@ -720,12 +712,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
             ),
           );
         } else {
-          emit(
-            previousState.copyWith(
-              status: CartStatus.error,
-              errorMessage: failure.message,
-            ),
-          );
+          emit(previousState.copyWith(status: CartStatus.error, errorMessage: failure.message));
         }
       },
       (cart) {

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
 import '../../../../components/atoms/product_tile.dart';
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/plp_events.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/listing_product_entity.dart';
@@ -39,7 +42,13 @@ class ProductGrid extends StatelessWidget {
       discountKey: _discountKey(index),
       colorVariantsKey: _colorVariantsKey(index),
       visualCueKeyBuilder: (j) => _visualCueKey(index, j),
-      onTap: () => AppNavigator.goToPdp(context, product.id.toString()),
+      onTap: () {
+        // No page blob here: this grid renders inside Discover's component
+        // list, not under a PlpBloc, so the product's own trackingMeta is the
+        // whole of the page context available at tap time.
+        sl<AnalyticsHelper>().logPlpTileClicked(trackingMeta: product.trackingMeta);
+        AppNavigator.goToPdp(context, product.id.toString());
+      },
     );
   }
 

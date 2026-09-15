@@ -18,7 +18,7 @@
 enum Funnel {
   discover('Discover'),
   categories('Categories'),
-  search('Search results'),
+  search('Search'),
   account('Account'),
   cart('Cart'),
   wishlist('Wishlist');

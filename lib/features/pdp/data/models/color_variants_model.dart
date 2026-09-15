@@ -11,6 +11,7 @@ class ColorVariantModel {
     this.mediaUrl,
     this.isSelected = false,
     this.isStockAvailable = false,
+    this.trackingMeta,
   });
 
   @JsonKey(defaultValue: null)
@@ -22,6 +23,9 @@ class ColorVariantModel {
   @JsonKey(defaultValue: false)
   final bool isStockAvailable;
 
+  @JsonKey(defaultValue: null)
+  final Map<String, dynamic>? trackingMeta;
+
   factory ColorVariantModel.fromJson(Map<String, dynamic> json) =>
       _$ColorVariantModelFromJson(json);
 }
@@ -32,5 +36,6 @@ extension ColorVariantModelX on ColorVariantModel {
     mediaUrl: mediaUrl,
     isSelected: isSelected,
     isStockAvailable: isStockAvailable,
+    trackingMeta: trackingMeta,
   );
 }

@@ -14,5 +14,6 @@ abstract class PlpFilterEntity with _$PlpFilterEntity {
     PlpSortingOptionsEntity? sortingOptions,
     @Default([]) List<FilterSectionEntity> filterSections,
     @Default([]) List<SelectedFilterEntity> selectedFilters,
+    Map<String, dynamic>? trackingMeta,
   }) = _PlpFilterEntity;
 }

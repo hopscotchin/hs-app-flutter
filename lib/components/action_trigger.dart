@@ -109,8 +109,10 @@ class _ActionTriggerState extends State<ActionTrigger> {
     // rounded corner rather than flush against it.
     final left = box == null
         ? null
-        : (box.localToGlobal(Offset.zero).dx - widget.tooltipArrowBaseWidth / 2)
-              .clamp(0.0, double.infinity);
+        : (box.localToGlobal(Offset.zero).dx - widget.tooltipArrowBaseWidth / 2).clamp(
+            0.0,
+            double.infinity,
+          );
 
     if (left == null || left == _tooltipLeft) {
       _controller?.showTooltip();
@@ -223,19 +225,13 @@ class _ActionTriggerState extends State<ActionTrigger> {
       description: content.description!,
       primaryAction: AppDialogAction(
         label: content.leftAction?.label ?? 'Got It',
-        style: _dialogStyleFor(
-          content.leftAction,
-          fallback: AppDialogButtonStyle.filled,
-        ),
+        style: _dialogStyleFor(content.leftAction, fallback: AppDialogButtonStyle.filled),
         onPressed: () => _runAction(context, content.leftAction?.actionUrl),
       ),
       secondaryAction: content.rightAction != null
           ? AppDialogAction(
               label: content.rightAction!.label ?? 'Cancel',
-              style: _dialogStyleFor(
-                content.rightAction,
-                fallback: AppDialogButtonStyle.outlined,
-              ),
+              style: _dialogStyleFor(content.rightAction, fallback: AppDialogButtonStyle.outlined),
               onPressed: () =>
                   _runAction(context, content.rightAction!.actionUrl),
             )

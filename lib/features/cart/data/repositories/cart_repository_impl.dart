@@ -30,18 +30,18 @@ class CartRepositoryImpl with SafeApiCall implements CartRepository {
   });
 
   @override
-  Future<Either<Failure, AddToCartResponseEntity>> addToCart(String skuId, int quantity) {
+  Future<Either<Failure, AddToCartResponseEntity>> addToCart(Map<String, Object?> body) {
     return safeApiCall(
       networkInfo,
-      () => remoteDataSource.addToCart(skuId, quantity).then((m) => m.toEntity()),
+      () => remoteDataSource.addToCart(body).then((m) => m.toEntity()),
     );
   }
 
   @override
-  Future<Either<Failure, AddToCartResponseEntity>> buyNow(String skuId, int quantity) {
+  Future<Either<Failure, AddToCartResponseEntity>> buyNow(Map<String, Object?> body) {
     return safeApiCall(
       networkInfo,
-      () => remoteDataSource.buyNow(skuId, quantity).then((m) => m.toEntity()),
+      () => remoteDataSource.buyNow(body).then((m) => m.toEntity()),
     );
   }
 

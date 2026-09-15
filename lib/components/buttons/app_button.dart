@@ -121,6 +121,13 @@ class AppButton extends StatelessWidget {
             foregroundColor: foregroundColor!,
             borderColor: resolved.borderColor,
           );
+    final style = foregroundColor == null
+        ? resolved
+        : AppButtonStyle(
+            backgroundColor: resolved.backgroundColor,
+            foregroundColor: foregroundColor!,
+            borderColor: resolved.borderColor,
+          );
 
     final Widget button = AnimatedOpacity(
       opacity: _isDisabled ? 0.5 : 1.0,

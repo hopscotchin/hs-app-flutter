@@ -10,6 +10,7 @@ import '../entities/size_chart_entity.dart';
 abstract class PdpRepository {
   Future<Either<Failure, ProductDetailEntity>> getProductDetails(
     int productId, {
+    bool? colorVariant,
     CancelToken? cancelToken,
   });
 

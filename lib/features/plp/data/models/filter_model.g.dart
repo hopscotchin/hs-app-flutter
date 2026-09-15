@@ -28,4 +28,5 @@ FilterModel _$FilterModelFromJson(Map<String, dynamic> json) => FilterModel(
   isSection: json['isSection'] == null ? false : parseToBool(json['isSection']),
   pincode: parseToStringOrNull(json['pincode']),
   visualCue: json['visualCue'] as Map<String, dynamic>?,
+  trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
 );

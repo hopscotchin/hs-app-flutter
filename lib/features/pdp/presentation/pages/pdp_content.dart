@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/analytics/constants/analytics_defaults.dart';
@@ -15,15 +16,16 @@ import '../../../wishlist/presentation/cubit/wishlist_cubit.dart';
 import '../../../wishlist/presentation/wishlist_actions.dart';
 import '../../domain/entities/media_entity.dart';
 import '../../domain/entities/product_entity.dart';
+import '../../../../core/analytics/pdp/pdp_analytics_tracker.dart';
 import '../bloc/pdp_bloc.dart';
 import '../widgets/pdp_add_to_bag_bar.dart';
 import '../widgets/pdp_appbar.dart';
+import '../widgets/pdp_fly_to_cart_overlay.dart';
 import '../widgets/pdp_brand_price.dart';
 import '../widgets/pdp_color_variants.dart';
 import '../widgets/pdp_delivery_info.dart';
-import '../widgets/pdp_fly_to_cart_overlay.dart';
-import '../widgets/pdp_image_carousel.dart';
 import '../widgets/pdp_offers.dart';
+import '../widgets/pdp_image_carousel.dart';
 import '../widgets/pdp_product_details.dart';
 import '../widgets/pdp_recently_viewed.dart';
 import '../widgets/pdp_recommended_products.dart';
@@ -52,7 +54,7 @@ class PdpContent extends StatefulWidget {
   State<PdpContent> createState() => _PdpContentState();
 }
 
-class _PdpContentState extends State<PdpContent> {
+class _PdpContentState extends State<PdpContent> with WidgetsBindingObserver {
   // The whole PDP is ONE CustomScrollView driven by this single controller —
   // the image and the content scroll as one page (no separate sheet).
   final _pageScroll = ScrollController();
@@ -88,18 +90,13 @@ class _PdpContentState extends State<PdpContent> {
   void initState() {
     super.initState();
     _pageScroll.addListener(_onPageScroll);
+    WidgetsBinding.instance.addObserver(this);
     _seedWishlist();
     // Covers the (unlikely but possible) case where the docked slot is
     // already on-screen at first layout, before any scroll fires the listener.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _updateDockedBarVisibility();
     });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _bottomInset = MediaQuery.viewPaddingOf(context).bottom;
   }
 
   @override
@@ -117,7 +114,37 @@ class _PdpContentState extends State<PdpContent> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Android fires `pdp_images_scrolled` from `Activity.onStop`, which covers
+    // backgrounding as well as leaving the screen. The tracker's high-water mark
+    // makes this idempotent.
+    if (state == AppLifecycleState.paused) {
+      _tracker
+        ?..flushImagesScrolled()
+        ..flushRecentlyViewedScrolled();
+    }
+    super.didChangeAppLifecycleState(state);
+  }
+
+  /// Captured in [didChangeDependencies] because `dispose` runs after the
+  /// element is unmounted, when `context.read` is no longer legal.
+  PdpAnalyticsTracker? _tracker;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _tracker = context.read<PdpAnalyticsTracker>();
+    _bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+  }
+
+  @override
   void dispose() {
+    // Route pop — Android's `onStop` equivalent for leaving the PDP. Both
+    // scroll events report here; Android fires them from the same callback.
+    _tracker
+      ?..flushImagesScrolled()
+      ..flushRecentlyViewedScrolled();
+    WidgetsBinding.instance.removeObserver(this);
     _pageScroll.removeListener(_onPageScroll);
     _pageScroll.dispose();
     _isBarDocked.dispose();
@@ -151,6 +178,13 @@ class _PdpContentState extends State<PdpContent> {
     if (!mounted || !_pageScroll.hasClients) return;
     _updateDockedBarVisibility();
     final pos = _pageScroll.position;
+    // `reco_viewed` only counts when the rail arrives on a downward scroll
+    // (Android `AnalyticsScrollHandler.kt:28`). Recorded here rather than read
+    // inside the visibility callback, which is debounced and would usually see
+    // an idle position.
+    if (pos.userScrollDirection != ScrollDirection.idle) {
+      _tracker?.onContentScrolled(down: pos.userScrollDirection == ScrollDirection.reverse);
+    }
     if (pos.pixels < pos.maxScrollExtent - 300) return;
     final bloc = context.read<PdpBloc>();
     if (!bloc.state.isLoadingMoreRecommendations &&
@@ -316,11 +350,19 @@ class _PdpContentState extends State<PdpContent> {
 
     final productId = product.id?.toString() ?? '';
     final wishlistPrice = WishlistActions.priceToInt(product.priceInfo?.sellingPrice);
+    // Both events fire from the cubit's success branches, so each reports only a
+    // server-confirmed change — never the tap, never a failure, and never a
+    // logged-out tap that merely routes to login. The callbacks travel with the
+    // deferred toggle, so the add that happens after login is the one that reports.
+    // `_tracker` rather than `context.read` because they run after an async gap.
+    final selectedSku = widget.state.selectedSku;
     void toggleWishlist() => WishlistActions.toggle(
       context,
       productId: productId,
       price: wishlistPrice,
-      sku: widget.state.selectedSku?.skuId,
+      sku: selectedSku?.skuId,
+      onAdded: () => _tracker?.onWishlistAdded(selectedSku: selectedSku),
+      onRemoved: () => _tracker?.onWishlistRemoved(selectedSku: selectedSku),
       loggedOutMessageBars: const [
         MessageBarEntity(text: LoginRedirects.redirectWishlistItem, type: 'info', hasIcon: true),
       ],
@@ -383,7 +425,10 @@ class _PdpContentState extends State<PdpContent> {
                               skuPrice: widget.state.selectedSku?.priceInfo,
                               isWishlisted: wished,
                               onWishlistTap: toggleWishlist,
-                              onShareTap: () => AppShareLauncher.shareProduct(product),
+                              onShareTap: () {
+                                context.read<PdpAnalyticsTracker>().onShareTapped();
+                                AppShareLauncher.shareProduct(product);
+                              },
                             ),
                           ),
                           if (product.colorVariants.isNotEmpty)
@@ -399,10 +444,16 @@ class _PdpContentState extends State<PdpContent> {
                               skus: product.skus,
                               selectedSku: widget.state.selectedSku,
                               hasSizeChart: product.hasSizeChart == true,
-                              onSizeSelected: (skuId) =>
-                                  context.read<PdpBloc>().add(PdpEvent.selectSku(skuId: skuId)),
-                              onSizeChartTap: () =>
-                                  showPdpSizeChartBottomSheet(context, productName: product.name),
+                              onSizeSelected: (skuId) => context.read<PdpBloc>().add(
+                                PdpEvent.selectSku(
+                                  skuId: skuId,
+                                  fromLocation: FromLocations.sizeListUpfront,
+                                ),
+                              ),
+                              onSizeChartTap: () {
+                                context.read<PdpAnalyticsTracker>().onSizeChartOpened();
+                                showPdpSizeChartBottomSheet(context, productName: product.name);
+                              },
                             ),
                           // Delivery + EDD info are hidden when the product is
                           // sold out — mirrors Android (DeliveryInfoView / EddInfoView
@@ -414,6 +465,8 @@ class _PdpContentState extends State<PdpContent> {
                               pinCode: widget.state.verifiedPincode,
                               isSizeSelected: widget.state.selectedSku != null,
                               isSoldOut: product.soldOut == true,
+                              onSheetOpened: () =>
+                                  context.read<PdpAnalyticsTracker>().onPincodeSheetOpened(),
                               onVerifyPincode: (pincode) async {
                                 final bloc = context.read<PdpBloc>();
                                 final startTick = bloc.state.pincodeVerifyTick;
@@ -536,6 +589,8 @@ class _PdpContentState extends State<PdpContent> {
                       media: product.media,
                       visualCue: product.visualCue,
                       pageScrollPosition: _pageScrollPosition,
+                      onPageSettled: (index) =>
+                          context.read<PdpAnalyticsTracker>().onImagePageSettled(index),
                     ),
                   ),
                 ),

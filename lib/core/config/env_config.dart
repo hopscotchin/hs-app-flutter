@@ -11,8 +11,7 @@ class EnvConfig {
   // API Configuration
   static String get apiHost => dotenv.env['API_HOST'] ?? 'www.hopscotch.in';
   static String get apiHostQa => dotenv.env['API_HOST_QA'] ?? 'qa.hopscotch.in';
-  static String get apiHostQaVpn =>
-      dotenv.env['API_HOST_QA_VPN'] ?? 'qa-vpn.hopscotch.in';
+  static String get apiHostQaVpn => dotenv.env['API_HOST_QA_VPN'] ?? 'qa-vpn.hopscotch.in';
   static String get apiHostWeb => dotenv.env['API_HOST_WEB'] ?? '';
   static String get httpsScheme => dotenv.env['HTTPS_SCHEME'] ?? 'https://';
   static String get httpScheme => dotenv.env['HTTP_SCHEME'] ?? 'http://';
@@ -21,8 +20,7 @@ class EnvConfig {
   // Web Configuration (webview URLs)
   static String get webHost => dotenv.env['WEB_HOST'] ?? 'www.hopscotch.in';
   static String get webHostQa => dotenv.env['WEB_HOST_QA'] ?? 'qa.hopscotch.in';
-  static String get webHostQaVpn =>
-      dotenv.env['WEB_HOST_QA_VPN'] ?? 'qa-vpn.hopscotch.in';
+  static String get webHostQaVpn => dotenv.env['WEB_HOST_QA_VPN'] ?? 'qa-vpn.hopscotch.in';
 
   // Client Credentials
   static String get authMethod => dotenv.env['AUTH_METHOD'] ?? 'v1';
@@ -38,35 +36,40 @@ class EnvConfig {
   // N7 Security Keys
   static String get n7HdHlKey => dotenv.env['N7_HD_HL_KEY'] ?? '';
   static String get n7SecurityKey => dotenv.env['N7_SECURITY_KEY'] ?? '';
-  static String get n7DebugMagicSecurityKey =>
-      dotenv.env['N7_DEBUG_MAGIC_SECURITY_KEY'] ?? '';
+  static String get n7DebugMagicSecurityKey => dotenv.env['N7_DEBUG_MAGIC_SECURITY_KEY'] ?? '';
 
   // Segment — ingestion endpoints (mirror Android APIConstants.SEGMENT_DEBUG /
   // SEGMENT_RELEASE). Stored hostname-only without scheme; the SDK prepends https.
   static String get segmentDebugUrl => dotenv.env['SEGMENT_DEBUG_URL'] ?? '';
-  static String get segmentReleaseUrl =>
-      dotenv.env['SEGMENT_RELEASE_URL'] ?? '';
+  static String get segmentReleaseUrl => dotenv.env['SEGMENT_RELEASE_URL'] ?? '';
 
   // HTTP Toolkit Proxy
-  static bool get enableHttpToolkitProxy =>
-      dotenv.env['ENABLE_HTTP_TOOLKIT_PROXY'] == 'true';
+  static bool get enableHttpToolkitProxy => dotenv.env['ENABLE_HTTP_TOOLKIT_PROXY'] == 'true';
+
+  /// Wraps the app in DevicePreview, so screen size and text scale become
+  /// runtime controls instead of an `adb shell wm density` round trip.
+  ///
+  /// Off by default: while it is on, the app renders into a simulated viewport
+  /// rather than the real device's metrics, which is misleading for any work
+  /// that is not specifically about layout. main() gates it on debug mode and on
+  /// this not being an automation build as well — DevicePreview's chrome and
+  /// scaled viewport would move every widget away from the coordinates Maestro
+  /// taps.
+  static bool get enableDevicePreview => dotenv.env['ENABLE_DEVICE_PREVIEW'] == 'true';
   // static String get proxyHost => dotenv.env['PROXY_HOST'] ?? '127.0.0.1';
   // static int get proxyPort => int.parse(dotenv.env['PROXY_PORT'] ?? '8000');
 
   // Analytics — Segment write keys + computed per-build accessors.
   static String get analyticsDebugKey => dotenv.env['ANALYTICS_DEBUG'] ?? '';
-  static String get analyticsReleaseKey =>
-      dotenv.env['ANALYTICS_RELEASE'] ?? '';
+  static String get analyticsReleaseKey => dotenv.env['ANALYTICS_RELEASE'] ?? '';
 
   /// Write key picked at runtime via kReleaseMode — debug keys go to the
   /// dev Segment workspace, release keys to production.
-  static String get segmentWriteKey =>
-      kReleaseMode ? analyticsReleaseKey : analyticsDebugKey;
+  static String get segmentWriteKey => kReleaseMode ? analyticsReleaseKey : analyticsDebugKey;
 
   /// Segment ingestion host (proxied through hopscotch.in to bypass ad-blockers).
   /// Returned as hostname + path with no scheme.
-  static String get segmentApiHost =>
-      kReleaseMode ? segmentReleaseUrl : segmentDebugUrl;
+  static String get segmentApiHost => kReleaseMode ? segmentReleaseUrl : segmentDebugUrl;
 
   // AppsFlyer — single dev key for both platforms (matches Android setup).
   static String get appsFlyerKey => dotenv.env['APPSFLYER_KEY'] ?? '';

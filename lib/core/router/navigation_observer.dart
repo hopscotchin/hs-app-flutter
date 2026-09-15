@@ -5,8 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 
-import '../analytics/attribution/attribution_data.dart';
+import '../analytics/attribution/attribution_store.dart';
+import '../analytics/attribution/lp_attribution_helper.dart';
 import '../analytics/attribution/order_attribution_helper.dart';
+import '../analytics/attribution/product_attribution_helper.dart';
 import '../analytics/constants/analytics_defaults.dart';
 import '../analytics/constants/analytics_properties.dart';
 import '../analytics/constants/funnel.dart';
@@ -65,10 +67,30 @@ import '../di/injection.dart';
 /// and to distinguish "declare shell tab" from "apply funnel side-effects".
 @lazySingleton
 class AppNavigationObserver extends NavigatorObserver {
-  AppNavigationObserver(this._orderAttribution, this._launchTimer);
+  AppNavigationObserver(
+    this._orderAttribution,
+    this._lpAttribution,
+    this._productAttribution,
+    this._launchTimer,
+  );
 
   final OrderAttributionHelper _orderAttribution;
+  final LpAttributionHelper _lpAttribution;
+  final ProductAttributionHelper _productAttribution;
   final LaunchTimer _launchTimer;
+
+  /// Every attribution store that must survive an out-of-shell funnel
+  /// excursion (Search / Cart) via LIFO snapshot & restore. **Add new
+  /// stores here** — implement [AttributionStore] on the helper and drop
+  /// it in the list; the snapshot/restore loop picks it up automatically.
+  ///
+  /// Order is irrelevant — each snapshot round-trips through its own
+  /// store, positionally paired inside [_funnelSnapshotStack].
+  late final List<AttributionStore> _funnelScopedStores = <AttributionStore>[
+    _orderAttribution,
+    _lpAttribution,
+    _productAttribution,
+  ];
 
   // Looked up lazily to break a DI cycle: HomeTrackAnalyticManager depends
   // on AnalyticsHelper which depends on this observer.
@@ -118,13 +140,12 @@ class AppNavigationObserver extends NavigatorObserver {
   /// Navigator. Top holds the currently visible LP's identity.
   final List<_LpContext> _lpContextStack = <_LpContext>[];
 
-  /// Route-scoped [AttributionData] snapshots — one entry per live
-  /// [_funnelRoutes] push on the Navigator. Top holds the pre-push state
-  /// of the topmost funnel route. Popped and restored to
-  /// [OrderAttributionHelper] on pop/remove of the matching route. See
-  /// the class docstring for the flagship scenario.
-  final List<AttributionData?> _attributionSnapshotStack =
-      <AttributionData?>[];
+  /// Route-scoped attribution snapshots — one entry per live
+  /// [_funnelRoutes] push on the Navigator. Each entry is a
+  /// positionally-aligned tuple: `_funnelScopedStores[i].snapshot()` at
+  /// index `i`. Popped and each store restored on pop/remove of the
+  /// matching route. See the class docstring for the flagship scenario.
+  final List<List<Object?>> _funnelSnapshotStack = <List<Object?>>[];
 
   /// Whichever shell tab is currently active — the target we restore to
   /// when a pushed route pops back to the shell. Written by
@@ -150,7 +171,7 @@ class AppNavigationObserver extends NavigatorObserver {
     // to resume any pushed funnel route, so drop any pending snapshots.
     // GoRouter typically pops pushed routes when a tab switches; if a
     // stale `didPop` fires after this, the empty stack just no-ops.
-    _attributionSnapshotStack.clear();
+    _funnelSnapshotStack.clear();
     // Flush any pending carousel scrolls from the outgoing tab before we
     // switch attribution — otherwise a scroll queued on Discover would
     // ship stamped with the incoming tab's funnel.
@@ -161,21 +182,23 @@ class AppNavigationObserver extends NavigatorObserver {
 
   /// Called by `LandingPageBloc` once the LP response arrives. Fills the
   /// top LP context entry so downstream events emit `lp_id` / `lp_name`,
-  /// and re-writes `extraData` for the immediate follow-up impressions.
-  ///
-  /// **Does NOT touch attribution.** LP-attribution promotion happens on
-  /// tile CLICK inside the LP, not on LP open — matches Android's
-  /// `LPAttributionHelper.addLPAttributionData` call sites, all of which
-  /// are click handlers.
+  /// re-writes `extraData` for the immediate follow-up impressions, and
+  /// stamps the same identity onto the top of the LP attribution stack
+  /// (which was pushed empty on `didPush`).
   void setLandingPageContext({required String? name, required String? id}) {
     if (_lpContextStack.isEmpty) {
       // Defensive — LP bloc emitted before push observer callback. Push a
       // fresh entry so we don't lose the identity.
       _lpContextStack.add(_LpContext());
+      _homeTrack.lpAttribution.pushLp();
     }
     final top = _lpContextStack.last
       ..name = name
       ..id = id;
+    _homeTrack.lpAttribution.updateTopIdentity(
+      landingPageName: name,
+      landingPageId: id,
+    );
     _homeTrack.extraData = ExtraData(
       fromHomePage: false,
       landingPageName: top.name,
@@ -213,7 +236,9 @@ class AppNavigationObserver extends NavigatorObserver {
       // starts clean.
       _screenStack.clear();
       _lpContextStack.clear();
-      _attributionSnapshotStack.clear();
+      _lpAttribution.clear();
+      _funnelSnapshotStack.clear();
+      _productAttribution.clear();
     } else {
       // First non-splash route commits to the Navigator — Android's
       // `Activity.onCreate` equivalent. LaunchTimer.logTtl is idempotent
@@ -222,11 +247,25 @@ class AppNavigationObserver extends NavigatorObserver {
       _launchTimer.logTtl();
       if (name == _lpRoute) {
         _lpContextStack.add(_LpContext());
+        // Reserve the top slot on the LP attribution stack — identity fills
+        // via `setLandingPageContext`, meta via tile-click `updateTopMeta`.
+        _homeTrack.lpAttribution.pushLp();
+      }
+      if (name == RouteNames.plpName) {
+        // Open a product-attribution scope — tile taps made while this PLP
+        // is on top will belong to it. `endPlpScope` on the paired pop drops
+        // them all so the stack mirrors the live nav depth.
+        _productAttribution.beginPlpScope();
       }
       // Snapshot BEFORE `_onActive` fires — otherwise the funnel-switch
       // wipe inside `_applyFunnel` overwrites the state we want to save.
+      // Every store in [_funnelScopedStores] snapshots together so a
+      // PLP → Search → back → PLP round-trip restores all of them (HP
+      // attribution, LP deque, product-tile stack) atomically.
       if (_funnelRoutes.containsKey(name)) {
-        _attributionSnapshotStack.add(_orderAttribution.getCurrent());
+        _funnelSnapshotStack.add(<Object?>[
+          for (final store in _funnelScopedStores) store.snapshot(),
+        ]);
       }
     }
     _onActive(name);
@@ -240,7 +279,11 @@ class AppNavigationObserver extends NavigatorObserver {
     final name = route.settings.name;
     if (name == _lpRoute && _lpContextStack.isNotEmpty) {
       _lpContextStack.removeLast();
+      // Drop the matching LP attribution slot — `LP2 back → LP3` peels
+      // `lp{top}` off so the stack once again reflects live LP depth.
+      _homeTrack.lpAttribution.popTop();
     }
+    _endProductAttributionScopeIfPlp(name);
     _restoreAttributionIfFunnelRoute(name);
     _onPopBack(previousRoute?.settings.name);
   }
@@ -257,6 +300,7 @@ class AppNavigationObserver extends NavigatorObserver {
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is! PageRoute) return;
     _logDebug('remove', route);
+    _endProductAttributionScopeIfPlp(route.settings.name);
     _restoreAttributionIfFunnelRoute(route.settings.name);
     _onPopBack(previousRoute?.settings.name);
   }
@@ -334,6 +378,10 @@ class AppNavigationObserver extends NavigatorObserver {
     _orderAttribution.setFunnel(funnel);
     _homeTrack.clearLpAttribution();
     _homeTrack.resetVisibilityState();
+    // Funnel switch = new journey. Drop every PLP tile-click entry so the
+    // new funnel's events don't carry stale product-click context from the
+    // previous funnel.
+    _productAttribution.clear();
     _homeTrack.extraData = ExtraData(
       fromHomePage: funnel == Funnel.discover,
     );
@@ -350,8 +398,19 @@ class AppNavigationObserver extends NavigatorObserver {
   /// preserves the restored `trackingMeta` / `sortBar`.
   void _restoreAttributionIfFunnelRoute(String? name) {
     if (name == null || !_funnelRoutes.containsKey(name)) return;
-    if (_attributionSnapshotStack.isEmpty) return;
-    _orderAttribution.restore(_attributionSnapshotStack.removeLast());
+    if (_funnelSnapshotStack.isEmpty) return;
+    final snaps = _funnelSnapshotStack.removeLast();
+    for (var i = 0; i < _funnelScopedStores.length; i++) {
+      _funnelScopedStores[i].restore(snaps[i]);
+    }
+  }
+
+  /// Close the product-attribution scope opened on the matching PLP push.
+  /// `endPlpScope` bulk-drops every tile-click entry pushed while this PLP
+  /// was on top, so the helper's stack shrinks with the nav stack.
+  void _endProductAttributionScopeIfPlp(String? name) {
+    if (name != RouteNames.plpName) return;
+    _productAttribution.endPlpScope();
   }
 
   void _pushScreen(String name) {

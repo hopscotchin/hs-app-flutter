@@ -4,7 +4,9 @@ import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
 import '../../../../components/atoms/error_retry_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../plp/domain/entities/plp_entry_args.dart';
 import '../bloc/categories_bloc.dart';
 import '../widgets/department_item_widget.dart';
 
@@ -54,10 +56,17 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 final dept = state.departments[index];
                 return DepartmentItemWidget(
                   department: dept,
+                  // Entry context for `product_listing_viewed`. Matches
+                  // Android's department tap, which puts exactly this pair on
+                  // the intent (`DepartmentsFragment.kt:62`).
                   onTap: () => AppNavigator.goToPlp(
                     context,
                     plpId: int.tryParse(dept.id) ?? 0,
                     categoryName: dept.label,
+                    args: const PlpEntryArgs(
+                      fromScreen: FromScreens.categories,
+                      fromLocation: FromLocations.categoryTile,
+                    ),
                   ),
                 );
               },

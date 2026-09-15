@@ -38,11 +38,7 @@ class PlpShimmerLoading extends StatelessWidget {
   }
 
   Widget _buildBanner() {
-    return Container(
-      height: _bannerHeight,
-      width: double.infinity,
-      color: Colors.white,
-    );
+    return Container(height: _bannerHeight, width: double.infinity, color: Colors.white);
   }
 
   /// Stand-in for `StickyFilterBar`: a row of quick-filter chips on the left
@@ -69,10 +65,7 @@ class PlpShimmerLoading extends StatelessWidget {
 
   Widget _buildGrid() {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
       child: GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.zero,
@@ -88,18 +81,11 @@ class PlpShimmerLoading extends StatelessWidget {
     );
   }
 
-  Widget _bar({
-    required double width,
-    required double height,
-    double radius = 4,
-  }) {
+  Widget _bar({required double width, required double height, double radius = 4}) {
     return Container(
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(radius),
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(radius)),
     );
   }
 

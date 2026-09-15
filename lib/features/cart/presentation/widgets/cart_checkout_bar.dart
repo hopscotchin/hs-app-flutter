@@ -49,6 +49,7 @@ class CartCheckoutBar extends StatelessWidget {
     // per-section below instead (16px on the CTA row only).
     return SafeArea(
       child: Container(
+        key: const ValueKey(CartTestStrings.checkoutBar),
         margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         decoration: const BoxDecoration(
           color: AppColors.surfaceHighlight,

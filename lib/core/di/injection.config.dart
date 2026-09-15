@@ -17,6 +17,8 @@ import 'package:hs_app_flutter/core/analytics/attribution/lp_attribution_helper.
     as _i233;
 import 'package:hs_app_flutter/core/analytics/attribution/order_attribution_helper.dart'
     as _i179;
+import 'package:hs_app_flutter/core/analytics/attribution/product_attribution_helper.dart'
+    as _i463;
 import 'package:hs_app_flutter/core/analytics/attribution/utm_header_util.dart'
     as _i469;
 import 'package:hs_app_flutter/core/analytics/events/analytics_helper.dart'
@@ -25,6 +27,8 @@ import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.d
     as _i66;
 import 'package:hs_app_flutter/core/analytics/home/journey_worker.dart'
     as _i473;
+import 'package:hs_app_flutter/core/analytics/pdp/pdp_analytics_tracker.dart'
+    as _i211;
 import 'package:hs_app_flutter/core/analytics/services/clarity_helper.dart'
     as _i903;
 import 'package:hs_app_flutter/core/analytics/services/clevertap_service.dart'
@@ -290,6 +294,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i179.OrderAttributionHelper>(
       () => _i179.OrderAttributionHelper(),
     );
+    gh.lazySingleton<_i463.ProductAttributionHelper>(
+      () => _i463.ProductAttributionHelper(),
+    );
     gh.lazySingleton<_i516.CheckoutTimer>(() => _i516.CheckoutTimer());
     gh.lazySingleton<_i773.LaunchTimer>(() => _i773.LaunchTimer());
     gh.lazySingleton<_i833.DeviceInfoPlugin>(() => registerModule.deviceInfo);
@@ -312,18 +319,20 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       preResolve: true,
     );
+    gh.lazySingleton<_i93.AppNavigationObserver>(
+      () => _i93.AppNavigationObserver(
+        gh<_i179.OrderAttributionHelper>(),
+        gh<_i233.LpAttributionHelper>(),
+        gh<_i463.ProductAttributionHelper>(),
+        gh<_i773.LaunchTimer>(),
+      ),
+    );
     gh.lazySingleton<_i818.PrefManager>(
       () => _i818.PrefManager(gh<_i460.SharedPreferences>()),
     );
     await gh.lazySingletonAsync<_i384.AnalyticsService>(
       () => registerModule.analyticsService(gh<_i818.PrefManager>()),
       preResolve: true,
-    );
-    gh.lazySingleton<_i93.AppNavigationObserver>(
-      () => _i93.AppNavigationObserver(
-        gh<_i179.OrderAttributionHelper>(),
-        gh<_i773.LaunchTimer>(),
-      ),
     );
     gh.lazySingleton<_i361.Dio>(
       () => registerModule.dio(gh<_i81.NetworkClient>()),
@@ -463,21 +472,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i351.NetworkInfo>(),
       ),
     );
-    gh.lazySingleton<_i127.AnalyticsHelper>(
-      () => _i127.AnalyticsHelper(
-        gh<_i384.AnalyticsService>(),
-        gh<_i818.PrefManager>(),
-        gh<_i655.PackageInfo>(),
-        gh<_i833.DeviceInfoPlugin>(),
-        gh<_i773.LaunchTimer>(),
-        gh<_i516.CheckoutTimer>(),
-        gh<_i209.ExperimentsUtil>(),
-        gh<_i179.OrderAttributionHelper>(),
-        gh<_i233.LpAttributionHelper>(),
-        gh<_i469.UtmHeaderUtil>(),
-        gh<_i93.AppNavigationObserver>(),
-      ),
-    );
     gh.lazySingleton<_i59.GetProductDetailsUseCase>(
       () => _i59.GetProductDetailsUseCase(gh<_i425.PdpRepository>()),
     );
@@ -566,6 +560,22 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i351.NetworkInfo>(),
       ),
     );
+    gh.lazySingleton<_i127.AnalyticsHelper>(
+      () => _i127.AnalyticsHelper(
+        gh<_i384.AnalyticsService>(),
+        gh<_i818.PrefManager>(),
+        gh<_i655.PackageInfo>(),
+        gh<_i833.DeviceInfoPlugin>(),
+        gh<_i773.LaunchTimer>(),
+        gh<_i516.CheckoutTimer>(),
+        gh<_i209.ExperimentsUtil>(),
+        gh<_i179.OrderAttributionHelper>(),
+        gh<_i233.LpAttributionHelper>(),
+        gh<_i463.ProductAttributionHelper>(),
+        gh<_i469.UtmHeaderUtil>(),
+        gh<_i93.AppNavigationObserver>(),
+      ),
+    );
     gh.lazySingleton<_i938.GetSearchSuggestionsUseCase>(
       () => _i938.GetSearchSuggestionsUseCase(gh<_i283.SearchRepository>()),
     );
@@ -592,9 +602,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i760.PlpRepository>(
       () => _i491.PlpRepositoryImpl(gh<_i13.PlpApi>(), gh<_i351.NetworkInfo>()),
-    );
-    gh.lazySingleton<_i163.AddToCartUseCase>(
-      () => _i163.AddToCartUseCase(gh<_i901.CartRepository>()),
     );
     gh.lazySingleton<_i242.GetCartUseCase>(
       () => _i242.GetCartUseCase(gh<_i901.CartRepository>()),
@@ -626,6 +633,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i473.JourneyWorker>(
       () => _i473.JourneyWorker(gh<_i127.AnalyticsHelper>()),
     );
+    gh.factory<_i211.PdpAnalyticsTracker>(
+      () => _i211.PdpAnalyticsTracker(gh<_i127.AnalyticsHelper>()),
+    );
     gh.factory<_i806.PromoDetailsBloc>(
       () => _i806.PromoDetailsBloc(gh<_i203.GetPromoDetailsUseCase>()),
     );
@@ -635,27 +645,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i505.GetCustomerInfoUseCase>(
       () => _i505.GetCustomerInfoUseCase(gh<_i68.SplashRepository>()),
     );
-    gh.factory<_i643.PlpBloc>(
-      () => _i643.PlpBloc(
-        getListingDataUseCase: gh<_i1013.GetListingDataUseCase>(),
-      ),
-    );
     gh.factory<_i833.AddressBloc>(
       () => _i833.AddressBloc(
         gh<_i637.GetAddressesUseCase>(),
         gh<_i277.DeleteAddressUseCase>(),
         gh<_i551.SelectAddressUseCase>(),
         gh<_i1013.AddressCacheManager>(),
-      ),
-    );
-    gh.factory<_i309.PdpBloc>(
-      () => _i309.PdpBloc(
-        getProductDetailsUseCase: gh<_i59.GetProductDetailsUseCase>(),
-        getRecommendationsUseCase: gh<_i69.GetRecommendationsUseCase>(),
-        addToCartUseCase: gh<_i163.AddToCartUseCase>(),
-        verifyPincodeUseCase: gh<_i197.VerifyPincodeUseCase>(),
-        cartCountCubit: gh<_i884.CartCountCubit>(),
-        getSizeChartUseCase: gh<_i1001.GetSizeChartUseCase>(),
       ),
     );
     gh.singleton<_i938.WishlistCubit>(
@@ -687,6 +682,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i79.GetAccountUseCase>(
       () => _i79.GetAccountUseCase(gh<_i532.AccountRepository>()),
+    );
+    gh.lazySingleton<_i163.AddToCartUseCase>(
+      () => _i163.AddToCartUseCase(
+        gh<_i901.CartRepository>(),
+        gh<_i127.AnalyticsHelper>(),
+      ),
     );
     gh.factory<_i316.PromosOffersBloc>(
       () => _i316.PromosOffersBloc(
@@ -728,12 +729,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i884.CartCountCubit>(),
       ),
     );
-    gh.lazySingleton<_i66.HomeTrackAnalyticManager>(
-      () => _i66.HomeTrackAnalyticManager(
-        analytics: gh<_i127.AnalyticsHelper>(),
-        orderAttribution: gh<_i179.OrderAttributionHelper>(),
-        lpAttribution: gh<_i233.LpAttributionHelper>(),
-        journeyWorker: gh<_i473.JourneyWorker>(),
+    gh.factoryParam<_i309.PdpBloc, _i211.PdpAnalyticsTracker, dynamic>(
+      (tracker, _) => _i309.PdpBloc(
+        tracker: tracker,
+        getProductDetailsUseCase: gh<_i59.GetProductDetailsUseCase>(),
+        getRecommendationsUseCase: gh<_i69.GetRecommendationsUseCase>(),
+        addToCartUseCase: gh<_i163.AddToCartUseCase>(),
+        verifyPincodeUseCase: gh<_i197.VerifyPincodeUseCase>(),
+        cartCountCubit: gh<_i884.CartCountCubit>(),
+        getSizeChartUseCase: gh<_i1001.GetSizeChartUseCase>(),
       ),
     );
     gh.factory<_i620.CategoriesBloc>(
@@ -752,6 +756,21 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i283.CheckPincodeUseCase>(
       () => _i283.CheckPincodeUseCase(gh<_i760.PlpRepository>()),
+    );
+    gh.factory<_i643.PlpBloc>(
+      () => _i643.PlpBloc(
+        getListingDataUseCase: gh<_i1013.GetListingDataUseCase>(),
+        analytics: gh<_i127.AnalyticsHelper>(),
+      ),
+    );
+    gh.lazySingleton<_i66.HomeTrackAnalyticManager>(
+      () => _i66.HomeTrackAnalyticManager(
+        analytics: gh<_i127.AnalyticsHelper>(),
+        orderAttribution: gh<_i179.OrderAttributionHelper>(),
+        lpAttribution: gh<_i233.LpAttributionHelper>(),
+        prefs: gh<_i818.PrefManager>(),
+        journeyWorker: gh<_i473.JourneyWorker>(),
+      ),
     );
     gh.factory<_i206.LandingPageBloc>(
       () => _i206.LandingPageBloc(

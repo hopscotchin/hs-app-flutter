@@ -50,18 +50,14 @@ class _Body extends StatelessWidget {
         switch (state.status) {
           case PromoDetailsStatus.initial:
           case PromoDetailsStatus.loading:
-            return const _LoadingSkeleton();
+            return const _LoadingSkeleton(key: ValueKey(PromoDetailsTestStrings.loadingShimmer));
           case PromoDetailsStatus.error:
-            return _Message(
-              text: state.errorMessage ?? CommonStrings.somethingWentWrong,
-            );
+            return _Message(text: state.errorMessage ?? CommonStrings.somethingWentWrong);
           case PromoDetailsStatus.success:
             final details = state.details!;
             final item = details.item;
             if (item.title.isEmpty && details.hasNoContent) {
-              return const _Message(
-                text: PromosOffersStrings.offerNoLongerAvailable,
-              );
+              return const _Message(text: PromosOffersStrings.offerNoLongerAvailable);
             }
             return ListView(
               padding: const EdgeInsets.fromLTRB(
@@ -80,15 +76,9 @@ class _Body extends StatelessWidget {
                       : null,
                   codeKey: const ValueKey(PromoDetailsTestStrings.code),
                   titleKey: const ValueKey(PromoDetailsTestStrings.title),
-                  descriptionKey: const ValueKey(
-                    PromoDetailsTestStrings.description,
-                  ),
-                  validityKey: const ValueKey(
-                    PromoDetailsTestStrings.validityText,
-                  ),
-                  savingsKey: const ValueKey(
-                    PromoDetailsTestStrings.savingsText,
-                  ),
+                  descriptionKey: const ValueKey(PromoDetailsTestStrings.description),
+                  validityKey: const ValueKey(PromoDetailsTestStrings.validityText),
+                  savingsKey: const ValueKey(PromoDetailsTestStrings.savingsText),
                   ctaKey: const ValueKey(PromoDetailsTestStrings.ctaButton),
                   savingsTextFromCart: savingsTextFromCart,
                 ),
@@ -98,14 +88,9 @@ class _Body extends StatelessWidget {
                 ],
                 // Separates the offer blurb from the numbered lists below;
                 // pointless when there are no lists.
-                if (details.hasAbout &&
-                    (details.hasFaqs || details.hasTerms)) ...[
+                if (details.hasAbout && (details.hasFaqs || details.hasTerms)) ...[
                   const SizedBox(height: _gapSection),
-                  const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: AppColors.border,
-                  ),
+                  const Divider(height: 1, thickness: 1, color: AppColors.border),
                 ],
                 if (details.hasFaqs) ...[
                   const SizedBox(height: _gapSection),
@@ -127,7 +112,7 @@ class _Body extends StatelessWidget {
 /// heading + body lines per section. Same paddings and gaps as the content it
 /// replaces, so nothing jumps when the response lands.
 class _LoadingSkeleton extends StatelessWidget {
-  const _LoadingSkeleton();
+  const _LoadingSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -182,17 +167,11 @@ class _SectionSkeleton extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
                 widthFactor: 0.55,
-                child: LoadingShimmer(
-                  height: _lineHeight,
-                  borderRadius: _lineRadius,
-                ),
+                child: LoadingShimmer(height: _lineHeight, borderRadius: _lineRadius),
               ),
             )
           else
-            const LoadingShimmer(
-              height: _lineHeight,
-              borderRadius: _lineRadius,
-            ),
+            const LoadingShimmer(height: _lineHeight, borderRadius: _lineRadius),
         ],
       ],
     );
@@ -207,8 +186,7 @@ const double _gapHeadingToBody = 6;
 const double _gapFaqItem = AppSpacing.sm; // 12
 const double _gapTermsItem = 9;
 
-TextStyle get _headingStyle =>
-    AppTypographyV1.bodySmall.bold.textPrimary(); // 13, bold
+TextStyle get _headingStyle => AppTypographyV1.bodySmall.bold.textPrimary(); // 13, bold
 
 class _AboutSection extends StatelessWidget {
   const _AboutSection({required this.text});
@@ -281,19 +259,14 @@ class _FaqItem extends StatelessWidget {
           if (faq.question.isNotEmpty)
             Text(
               faq.question,
-              key: ValueKey(
-                '${base}_${PromoDetailsTestStrings.faqQuestionSuffix}',
-              ),
+              key: ValueKey('${base}_${PromoDetailsTestStrings.faqQuestionSuffix}'),
               style: questionStyle,
             ),
           if (faq.answer.isNotEmpty) ...[
-            if (faq.question.isNotEmpty)
-              const SizedBox(height: _gapHeadingToBody),
+            if (faq.question.isNotEmpty) const SizedBox(height: _gapHeadingToBody),
             Text(
               faq.answer,
-              key: ValueKey(
-                '${base}_${PromoDetailsTestStrings.faqAnswerSuffix}',
-              ),
+              key: ValueKey('${base}_${PromoDetailsTestStrings.faqAnswerSuffix}'),
               style: AppTypographyV1.labelLarge.regular.textPrimary(),
             ),
           ],

@@ -138,6 +138,29 @@ class FromScreens {
   static const String productRating = 'Product Rating';
   static const String boutique = 'Boutique Plp';
   static const String productListPage = 'Search Plp';
+
+  /// The boutique's search icon — **a Flutter-only value with no Android
+  /// counterpart.**
+  ///
+  /// Android's boutique listing has no search control: `boutique_plp_menu.xml`
+  /// inflates only favorite, reminder, cart and wishlist, which is why
+  /// `ProductsListingActivity`'s `actionbar_search` branch (`:1214`) is
+  /// unreachable. Flutter's boutique app bar does have the icon, so
+  /// `search_clicked` fires from a surface Android never fires it from and
+  /// there is no existing string to reuse.
+  ///
+  /// Deliberately not [boutique]: that names the screen for events Android
+  /// *does* send from there (wishlist add/remove, PDP entry), and reusing it
+  /// would make this Flutter-only behaviour indistinguishable from them.
+  /// Deliberately not [productListPage] either — despite reading `"Search
+  /// Plp"`, that constant is `PRODUCT_LIST_PAGE`, the *listing screen's* name,
+  /// which Android also sends on wishlist events
+  /// (`ProductListPageActivity:367`, `:3643`, `:4204`). Using it here would
+  /// fold boutique searches into the listing's numbers.
+  ///
+  /// ⚠️ New value — needs to be added to the dashboards; no Android build will
+  /// ever emit it.
+  static const String searchBoutique = 'Search Boutique';
   static const String categories = 'Categories';
   static const String legal = 'Legal';
   static const String orderCheckout = 'Checkout';
@@ -184,6 +207,13 @@ class FromPage {
   static const String parentCollection = 'parent_collection';
   static const String recentlyViewed = 'recently_viewed';
   static const String homepage = 'homepage';
+
+  /// A (non-tabbed) landing page. Android writes it as a **literal**
+  /// (`SearchResultsShowingBoutiquesActivity:560` — `setFromPage("landingPage")`)
+  /// rather than adding it to its own `FromPage` object, so the camelCase is
+  /// deliberate and does not match the lowercase siblings around it.
+  static const String landingPage = 'landingPage';
+
   static const String tabbedLandingPage = 'tabbedlandingpage';
   static const String boutique = 'boutique';
   static const String orderDetails = 'order_details';
@@ -238,6 +268,15 @@ class FromLocations {
   static const String sizeSelectionBottomSheet = 'bottom_sheet';
   static const String productAttribute = 'product_attribute';
 
+  /// Homepage grid tile. Android passes `R.string.segment_custom_tile` as the
+  /// PLP intent's `FROM_LOCATION` for every tile tap
+  /// (`CollectionsAdapter.kt:688`).
+  static const String customTile = 'Custom tile';
+
+  /// Homepage / boutique custom *product* tile —
+  /// `R.string.segment_custom_product_tile` (`TileAction.java:946`).
+  static const String customProductTile = 'Custom product tile';
+
   // common-module additions
   static const String sizeListUpfront = 'Size list upfront';
   static const String cartIconButton = 'Cart Icon Button';
@@ -290,15 +329,6 @@ class RedirectTypes {
   static const String redirectAddChild = 'REDIRECT_ADD_CHILD';
 }
 
-/// `source_tile_type` values used by PDP / PLP attribution.
-class SourceTileType {
-  SourceTileType._();
-
-  static const String xl = 'xl';
-  static const String normal = 'normal';
-  static const String other = 'other';
-}
-
 /// `video_play_type` values for video components.
 class VideoPlayType {
   VideoPlayType._();
@@ -320,7 +350,20 @@ class FilterClickSource {
   FilterClickSource._();
 
   static const String genieFilter = 'genie_filter';
-  static const String standardFilters = 'standard_filters';
-  static const String floatingFilters = 'floating_filter';
+  static const String standardFilter = 'standard_filters';
+  static const String floatingFilter = 'floating_filter';
   static const String stickyFilter = 'sticky_filter';
+}
+
+/// `plp_type` values. Mirrors PLPAnalytics.kt companion constants.
+class PlpType {
+  PlpType._();
+
+  static const String productListing = 'Product listing';
+  static const String boutique = 'Boutique';
+  static const String search = 'Search';
+  static const String searchResults = 'Search results';
+  static const String noResults = 'No results';
+  static const String reco = 'Reco';
+  static const String promotionProducts = 'Promotion products';
 }

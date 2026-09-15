@@ -7,6 +7,10 @@ abstract class DetailEntity with _$DetailEntity {
   const factory DetailEntity({
     String? tabName,
     @Default([]) List<DetailItemEntity> items,
+
+    /// `details[].trackingMeta`, forwarded whole. Analytics never reads a key
+    /// from it — see docs/analytics/pdp/client/tm-collection.md.
+    Map<String, dynamic>? trackingMeta,
   }) = _DetailEntity;
 }
 

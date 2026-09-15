@@ -13,6 +13,7 @@ DetailModel _$DetailModelFromJson(Map<String, dynamic> json) => DetailModel(
           ?.map((e) => DetailItemModel.fromJson(e as Map<String, dynamic>))
           .toList() ??
       [],
+  trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
 );
 
 DetailItemModel _$DetailItemModelFromJson(Map<String, dynamic> json) =>

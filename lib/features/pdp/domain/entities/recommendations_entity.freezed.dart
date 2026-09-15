@@ -14,7 +14,11 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RecommendationsEntity {
 
- List<ListingProductEntity> get records; PageMetaEntity? get pageMeta;
+/// Named for the wire (`records[]`), typed as the shared rail tile: the
+/// element carries the product plus the click block that describes it as a
+/// tap target.
+ List<TileEntity> get records; PageMetaEntity? get pageMeta;/// `trackingMeta` at the rail root — `feed_size`, forwarded whole.
+ Map<String, dynamic>? get trackingMeta;
 /// Create a copy of RecommendationsEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +29,16 @@ $RecommendationsEntityCopyWith<RecommendationsEntity> get copyWith => _$Recommen
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecommendationsEntity&&const DeepCollectionEquality().equals(other.records, records)&&(identical(other.pageMeta, pageMeta) || other.pageMeta == pageMeta));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecommendationsEntity&&const DeepCollectionEquality().equals(other.records, records)&&(identical(other.pageMeta, pageMeta) || other.pageMeta == pageMeta)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(records),pageMeta);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(records),pageMeta,const DeepCollectionEquality().hash(trackingMeta));
 
 @override
 String toString() {
-  return 'RecommendationsEntity(records: $records, pageMeta: $pageMeta)';
+  return 'RecommendationsEntity(records: $records, pageMeta: $pageMeta, trackingMeta: $trackingMeta)';
 }
 
 
@@ -45,7 +49,7 @@ abstract mixin class $RecommendationsEntityCopyWith<$Res>  {
   factory $RecommendationsEntityCopyWith(RecommendationsEntity value, $Res Function(RecommendationsEntity) _then) = _$RecommendationsEntityCopyWithImpl;
 @useResult
 $Res call({
- List<ListingProductEntity> records, PageMetaEntity? pageMeta
+ List<TileEntity> records, PageMetaEntity? pageMeta, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -62,11 +66,12 @@ class _$RecommendationsEntityCopyWithImpl<$Res>
 
 /// Create a copy of RecommendationsEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? records = null,Object? pageMeta = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? records = null,Object? pageMeta = freezed,Object? trackingMeta = freezed,}) {
   return _then(_self.copyWith(
 records: null == records ? _self.records : records // ignore: cast_nullable_to_non_nullable
-as List<ListingProductEntity>,pageMeta: freezed == pageMeta ? _self.pageMeta : pageMeta // ignore: cast_nullable_to_non_nullable
-as PageMetaEntity?,
+as List<TileEntity>,pageMeta: freezed == pageMeta ? _self.pageMeta : pageMeta // ignore: cast_nullable_to_non_nullable
+as PageMetaEntity?,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 /// Create a copy of RecommendationsEntity
@@ -163,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<ListingProductEntity> records,  PageMetaEntity? pageMeta)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<TileEntity> records,  PageMetaEntity? pageMeta,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RecommendationsEntity() when $default != null:
-return $default(_that.records,_that.pageMeta);case _:
+return $default(_that.records,_that.pageMeta,_that.trackingMeta);case _:
   return orElse();
 
 }
@@ -184,10 +189,10 @@ return $default(_that.records,_that.pageMeta);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<ListingProductEntity> records,  PageMetaEntity? pageMeta)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<TileEntity> records,  PageMetaEntity? pageMeta,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _RecommendationsEntity():
-return $default(_that.records,_that.pageMeta);case _:
+return $default(_that.records,_that.pageMeta,_that.trackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +209,10 @@ return $default(_that.records,_that.pageMeta);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<ListingProductEntity> records,  PageMetaEntity? pageMeta)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<TileEntity> records,  PageMetaEntity? pageMeta,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _RecommendationsEntity() when $default != null:
-return $default(_that.records,_that.pageMeta);case _:
+return $default(_that.records,_that.pageMeta,_that.trackingMeta);case _:
   return null;
 
 }
@@ -219,17 +224,34 @@ return $default(_that.records,_that.pageMeta);case _:
 
 
 class _RecommendationsEntity implements RecommendationsEntity {
-  const _RecommendationsEntity({final  List<ListingProductEntity> records = const [], this.pageMeta}): _records = records;
+  const _RecommendationsEntity({final  List<TileEntity> records = const [], this.pageMeta, final  Map<String, dynamic>? trackingMeta}): _records = records,_trackingMeta = trackingMeta;
   
 
- final  List<ListingProductEntity> _records;
-@override@JsonKey() List<ListingProductEntity> get records {
+/// Named for the wire (`records[]`), typed as the shared rail tile: the
+/// element carries the product plus the click block that describes it as a
+/// tap target.
+ final  List<TileEntity> _records;
+/// Named for the wire (`records[]`), typed as the shared rail tile: the
+/// element carries the product plus the click block that describes it as a
+/// tap target.
+@override@JsonKey() List<TileEntity> get records {
   if (_records is EqualUnmodifiableListView) return _records;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_records);
 }
 
 @override final  PageMetaEntity? pageMeta;
+/// `trackingMeta` at the rail root — `feed_size`, forwarded whole.
+ final  Map<String, dynamic>? _trackingMeta;
+/// `trackingMeta` at the rail root — `feed_size`, forwarded whole.
+@override Map<String, dynamic>? get trackingMeta {
+  final value = _trackingMeta;
+  if (value == null) return null;
+  if (_trackingMeta is EqualUnmodifiableMapView) return _trackingMeta;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of RecommendationsEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -241,16 +263,16 @@ _$RecommendationsEntityCopyWith<_RecommendationsEntity> get copyWith => __$Recom
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecommendationsEntity&&const DeepCollectionEquality().equals(other._records, _records)&&(identical(other.pageMeta, pageMeta) || other.pageMeta == pageMeta));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecommendationsEntity&&const DeepCollectionEquality().equals(other._records, _records)&&(identical(other.pageMeta, pageMeta) || other.pageMeta == pageMeta)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_records),pageMeta);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_records),pageMeta,const DeepCollectionEquality().hash(_trackingMeta));
 
 @override
 String toString() {
-  return 'RecommendationsEntity(records: $records, pageMeta: $pageMeta)';
+  return 'RecommendationsEntity(records: $records, pageMeta: $pageMeta, trackingMeta: $trackingMeta)';
 }
 
 
@@ -261,7 +283,7 @@ abstract mixin class _$RecommendationsEntityCopyWith<$Res> implements $Recommend
   factory _$RecommendationsEntityCopyWith(_RecommendationsEntity value, $Res Function(_RecommendationsEntity) _then) = __$RecommendationsEntityCopyWithImpl;
 @override @useResult
 $Res call({
- List<ListingProductEntity> records, PageMetaEntity? pageMeta
+ List<TileEntity> records, PageMetaEntity? pageMeta, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -278,11 +300,12 @@ class __$RecommendationsEntityCopyWithImpl<$Res>
 
 /// Create a copy of RecommendationsEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? records = null,Object? pageMeta = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? records = null,Object? pageMeta = freezed,Object? trackingMeta = freezed,}) {
   return _then(_RecommendationsEntity(
 records: null == records ? _self._records : records // ignore: cast_nullable_to_non_nullable
-as List<ListingProductEntity>,pageMeta: freezed == pageMeta ? _self.pageMeta : pageMeta // ignore: cast_nullable_to_non_nullable
-as PageMetaEntity?,
+as List<TileEntity>,pageMeta: freezed == pageMeta ? _self.pageMeta : pageMeta // ignore: cast_nullable_to_non_nullable
+as PageMetaEntity?,trackingMeta: freezed == trackingMeta ? _self._trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 

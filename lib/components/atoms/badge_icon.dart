@@ -12,6 +12,11 @@ class BadgeIcon extends StatelessWidget {
   final VoidCallback? onTap;
   final EdgeInsetsGeometry padding;
 
+  /// Hit-test behaviour of the tap area. The default only registers taps that
+  /// land on the icon itself; pass [HitTestBehavior.opaque] when [padding] is
+  /// meant to be part of the touch target.
+  final HitTestBehavior behavior;
+
   const BadgeIcon({
     super.key,
     this.count = 0,
@@ -22,6 +27,7 @@ class BadgeIcon extends StatelessWidget {
     this.badgeTextColor = Colors.white,
     this.onTap,
     this.padding = const EdgeInsets.all(5.0),
+    this.behavior = HitTestBehavior.deferToChild,
   });
 
   @override
@@ -30,6 +36,7 @@ class BadgeIcon extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
+      behavior: behavior,
       child: Padding(
         padding: padding,
         child: Badge(

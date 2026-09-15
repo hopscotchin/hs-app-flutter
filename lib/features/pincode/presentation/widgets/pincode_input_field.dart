@@ -18,6 +18,7 @@ class PincodeInputField extends StatelessWidget {
     required this.onApply,
     required this.isChecking,
     required this.canApply,
+    required this.keyPrefix,
   });
 
   final TextEditingController controller;
@@ -26,24 +27,29 @@ class PincodeInputField extends StatelessWidget {
   final bool isChecking;
   final bool canApply;
 
+  /// Host slug for this sheet's automation keys (see [PincodeTestStrings]).
+  final String keyPrefix;
+
   @override
   Widget build(BuildContext context) {
     return OutlinedTextField(
+      key: ValueKey('${keyPrefix}_${PincodeTestStrings.sheetInput}'),
       controller: controller,
       focusNode: focusNode,
       labelText: AddressStrings.enterPincodeHint,
-      hintTextKey: const ValueKey(PincodeTestStrings.sheetInputHint),
+      hintTextKey: ValueKey('${keyPrefix}_${PincodeTestStrings.sheetInputHint}'),
       required: false,
       keyboardType: TextInputType.number,
       maxLength: 6,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      suffixIconKey: const ValueKey(PincodeTestStrings.sheetInputSuffixIcon),
+      suffixIconKey: ValueKey('${keyPrefix}_${PincodeTestStrings.sheetInputSuffixIcon}'),
       suffixIcon: Padding(
         padding: const EdgeInsets.only(right: 12),
         child: isChecking
-            ? const Row(
+            ? Row(
+                key: ValueKey('${keyPrefix}_${PincodeTestStrings.sheetApplyLoader}'),
                 mainAxisSize: MainAxisSize.min,
-                children: [
+                children: const [
                   SizedBox(
                     width: AppSpacing.md,
                     height: AppSpacing.md,
@@ -52,6 +58,7 @@ class PincodeInputField extends StatelessWidget {
                 ],
               )
             : InkWell(
+                key: ValueKey('${keyPrefix}_${PincodeTestStrings.sheetApplyButton}'),
                 onTap: canApply ? onApply : null,
                 child: Align(
                   widthFactor: 1,

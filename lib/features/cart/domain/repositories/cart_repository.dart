@@ -6,8 +6,10 @@ import '../entities/cart_entity.dart';
 import '../entities/message_bar_entity.dart';
 
 abstract class CartRepository {
-  Future<Either<Failure, AddToCartResponseEntity>> addToCart(String skuId, int quantity);
-  Future<Either<Failure, AddToCartResponseEntity>> buyNow(String skuId, int quantity);
+  /// [body] is the full POST body — `sku`, `quantity`, and any tracking /
+  /// attribution keys the use case assembled. Passed to the endpoint verbatim.
+  Future<Either<Failure, AddToCartResponseEntity>> addToCart(Map<String, Object?> body);
+  Future<Either<Failure, AddToCartResponseEntity>> buyNow(Map<String, Object?> body);
 
   /// [instantCheckout] scopes every cart call to the single buy-now item: the
   /// backend answers with just that line rather than the whole bag. Android

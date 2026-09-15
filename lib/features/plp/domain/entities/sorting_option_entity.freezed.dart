@@ -14,7 +14,16 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SortingOptionEntity {
 
- String? get label; int get orderRule; bool get isSelected;
+ String? get label; int get orderRule; bool get isSelected;/// The analytics name for this option — `"PriceHighLow"` where [label] is
+/// `"Price high to low"`. This is what `from_sort` / `new_sort` report on
+/// `sorting_applied`; [label] is a display string and must not be sent.
+/// (Distinct from `sort_order` on viewed events, which does use the
+/// display name.)
+///
+/// The response sends this at the option's top level, alongside `label`
+/// and `orderRule`. Sort options carry no `trackingMeta` blob — unlike
+/// filters and products — so this field is the only analytics name here.
+ String? get eventSortName;
 /// Create a copy of SortingOptionEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +34,16 @@ $SortingOptionEntityCopyWith<SortingOptionEntity> get copyWith => _$SortingOptio
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SortingOptionEntity&&(identical(other.label, label) || other.label == label)&&(identical(other.orderRule, orderRule) || other.orderRule == orderRule)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SortingOptionEntity&&(identical(other.label, label) || other.label == label)&&(identical(other.orderRule, orderRule) || other.orderRule == orderRule)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.eventSortName, eventSortName) || other.eventSortName == eventSortName));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,label,orderRule,isSelected);
+int get hashCode => Object.hash(runtimeType,label,orderRule,isSelected,eventSortName);
 
 @override
 String toString() {
-  return 'SortingOptionEntity(label: $label, orderRule: $orderRule, isSelected: $isSelected)';
+  return 'SortingOptionEntity(label: $label, orderRule: $orderRule, isSelected: $isSelected, eventSortName: $eventSortName)';
 }
 
 
@@ -45,7 +54,7 @@ abstract mixin class $SortingOptionEntityCopyWith<$Res>  {
   factory $SortingOptionEntityCopyWith(SortingOptionEntity value, $Res Function(SortingOptionEntity) _then) = _$SortingOptionEntityCopyWithImpl;
 @useResult
 $Res call({
- String? label, int orderRule, bool isSelected
+ String? label, int orderRule, bool isSelected, String? eventSortName
 });
 
 
@@ -62,12 +71,13 @@ class _$SortingOptionEntityCopyWithImpl<$Res>
 
 /// Create a copy of SortingOptionEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? label = freezed,Object? orderRule = null,Object? isSelected = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? label = freezed,Object? orderRule = null,Object? isSelected = null,Object? eventSortName = freezed,}) {
   return _then(_self.copyWith(
 label: freezed == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String?,orderRule: null == orderRule ? _self.orderRule : orderRule // ignore: cast_nullable_to_non_nullable
 as int,isSelected: null == isSelected ? _self.isSelected : isSelected // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,eventSortName: freezed == eventSortName ? _self.eventSortName : eventSortName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -152,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? label,  int orderRule,  bool isSelected)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? label,  int orderRule,  bool isSelected,  String? eventSortName)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SortingOptionEntity() when $default != null:
-return $default(_that.label,_that.orderRule,_that.isSelected);case _:
+return $default(_that.label,_that.orderRule,_that.isSelected,_that.eventSortName);case _:
   return orElse();
 
 }
@@ -173,10 +183,10 @@ return $default(_that.label,_that.orderRule,_that.isSelected);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? label,  int orderRule,  bool isSelected)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? label,  int orderRule,  bool isSelected,  String? eventSortName)  $default,) {final _that = this;
 switch (_that) {
 case _SortingOptionEntity():
-return $default(_that.label,_that.orderRule,_that.isSelected);case _:
+return $default(_that.label,_that.orderRule,_that.isSelected,_that.eventSortName);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -193,10 +203,10 @@ return $default(_that.label,_that.orderRule,_that.isSelected);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? label,  int orderRule,  bool isSelected)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? label,  int orderRule,  bool isSelected,  String? eventSortName)?  $default,) {final _that = this;
 switch (_that) {
 case _SortingOptionEntity() when $default != null:
-return $default(_that.label,_that.orderRule,_that.isSelected);case _:
+return $default(_that.label,_that.orderRule,_that.isSelected,_that.eventSortName);case _:
   return null;
 
 }
@@ -208,12 +218,22 @@ return $default(_that.label,_that.orderRule,_that.isSelected);case _:
 
 
 class _SortingOptionEntity implements SortingOptionEntity {
-  const _SortingOptionEntity({this.label, this.orderRule = 0, this.isSelected = false});
+  const _SortingOptionEntity({this.label, this.orderRule = 0, this.isSelected = false, this.eventSortName});
   
 
 @override final  String? label;
 @override@JsonKey() final  int orderRule;
 @override@JsonKey() final  bool isSelected;
+/// The analytics name for this option — `"PriceHighLow"` where [label] is
+/// `"Price high to low"`. This is what `from_sort` / `new_sort` report on
+/// `sorting_applied`; [label] is a display string and must not be sent.
+/// (Distinct from `sort_order` on viewed events, which does use the
+/// display name.)
+///
+/// The response sends this at the option's top level, alongside `label`
+/// and `orderRule`. Sort options carry no `trackingMeta` blob — unlike
+/// filters and products — so this field is the only analytics name here.
+@override final  String? eventSortName;
 
 /// Create a copy of SortingOptionEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -225,16 +245,16 @@ _$SortingOptionEntityCopyWith<_SortingOptionEntity> get copyWith => __$SortingOp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SortingOptionEntity&&(identical(other.label, label) || other.label == label)&&(identical(other.orderRule, orderRule) || other.orderRule == orderRule)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SortingOptionEntity&&(identical(other.label, label) || other.label == label)&&(identical(other.orderRule, orderRule) || other.orderRule == orderRule)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.eventSortName, eventSortName) || other.eventSortName == eventSortName));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,label,orderRule,isSelected);
+int get hashCode => Object.hash(runtimeType,label,orderRule,isSelected,eventSortName);
 
 @override
 String toString() {
-  return 'SortingOptionEntity(label: $label, orderRule: $orderRule, isSelected: $isSelected)';
+  return 'SortingOptionEntity(label: $label, orderRule: $orderRule, isSelected: $isSelected, eventSortName: $eventSortName)';
 }
 
 
@@ -245,7 +265,7 @@ abstract mixin class _$SortingOptionEntityCopyWith<$Res> implements $SortingOpti
   factory _$SortingOptionEntityCopyWith(_SortingOptionEntity value, $Res Function(_SortingOptionEntity) _then) = __$SortingOptionEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String? label, int orderRule, bool isSelected
+ String? label, int orderRule, bool isSelected, String? eventSortName
 });
 
 
@@ -262,12 +282,13 @@ class __$SortingOptionEntityCopyWithImpl<$Res>
 
 /// Create a copy of SortingOptionEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? label = freezed,Object? orderRule = null,Object? isSelected = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? label = freezed,Object? orderRule = null,Object? isSelected = null,Object? eventSortName = freezed,}) {
   return _then(_SortingOptionEntity(
 label: freezed == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String?,orderRule: null == orderRule ? _self.orderRule : orderRule // ignore: cast_nullable_to_non_nullable
 as int,isSelected: null == isSelected ? _self.isSelected : isSelected // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,eventSortName: freezed == eventSortName ? _self.eventSortName : eventSortName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

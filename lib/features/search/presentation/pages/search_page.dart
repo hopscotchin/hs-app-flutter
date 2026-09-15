@@ -5,11 +5,17 @@ import 'package:hs_app_flutter/core/constants/strings/search_strings.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 
+import '../../../../core/analytics/constants/analytics_defaults.dart';
+import '../../../../core/analytics/constants/attribution_constants.dart';
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/search_events.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../plp/domain/entities/page_type.dart';
+import '../../../plp/domain/entities/plp_entry_args.dart';
 import '../../domain/entities/search_suggestion_entity.dart';
 import '../bloc/search_bloc.dart';
 
@@ -41,8 +47,49 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
-  void _onSuggestionTap(SearchSuggestionEntity suggestion) {
+  /// Analytics entry context for a search-driven PLP open.
+  ///
+  /// Android has no `FROM_SCREEN` intent extra on this path — `PLPAnalytics`
+  /// hardcodes the literal `"Search"` in its search branch
+  /// (`PLPAnalytics.kt:874`). Flutter's PLP reads the value from the entry args
+  /// instead of hardcoding it in the event builder, so it is supplied here; the
+  /// wire value is identical.
+  ///
+  /// [index] is 1-indexed on the wire, matching Android's
+  /// `SUGGESTION_INDEX = position + 1` (`:256`); a submitted query that was
+  /// never a listed suggestion passes null rather than a fabricated rank.
+  PlpEntryArgs _entryArgs(
+    SearchSuggestionEntity suggestion,
+    String query, {
+    int? index,
+  }) {
+    return PlpEntryArgs(
+      fromScreen: PlpType.search,
+      // `from_section` is retired: nothing populated it, so it was always
+      // null on the wire. The parameter and everything downstream of it are
+      // gone rather than left dangling.
+      suggestionIndex: index == null ? null : index + 1,
+      keyword: query,
+      suggestionTrackingData: suggestion.trackingData,
+      // Android sets `SourceTracker.addFromDetails` to `R.string.searchTitle`
+      // on every search-originated listing open — suggestion tap (`:202`),
+      // typed submit (`:397`) and recent-search tap alike — and
+      // `PLPAnalytics.setIntentData` reads it back into `add_from_details`
+      // (`:129`). There is no intent extra, so it travels here instead.
+      addFromDetails: AddFromDetails.search,
+    );
+  }
+
+  void _onSuggestionTap(SearchSuggestionEntity suggestion, {int? index}) {
     FocusScope.of(context).unfocus();
+
+    // Synchronous, before navigating — the PLP reads attribution during its
+    // own build.
+    sl<AnalyticsHelper>().setSearchAttribution(
+      funnelTile: suggestion.term?.isNotEmpty == true
+          ? suggestion.term!
+          : _controller.text.trim(),
+    );
 
     if (suggestion.searchParams != null && suggestion.searchParams!.isNotEmpty) {
       // Autocorrect suggestion with server-side search params — pass the raw
@@ -54,6 +101,7 @@ class _SearchPageState extends State<SearchPage> {
         plpId: 0,
         categoryName: term.isNotEmpty ? term : null,
         rawSearchParams: suggestion.searchParams,
+        args: _entryArgs(suggestion, term, index: index),
       );
       return;
     }
@@ -68,6 +116,7 @@ class _SearchPageState extends State<SearchPage> {
       pageType: PageType.search,
       plpId: 0,
       searchQuery: query,
+      args: _entryArgs(suggestion, query, index: index),
     );
   }
 
@@ -196,7 +245,7 @@ class _SearchPageState extends State<SearchPage> {
           title: Text.rich(
             TextSpan(style: AppTypography.bodyMedium, children: _buildHighlightedSpans(raw)),
           ),
-          onTap: () => _onSuggestionTap(s),
+          onTap: () => _onSuggestionTap(s, index: index),
         );
       },
     );

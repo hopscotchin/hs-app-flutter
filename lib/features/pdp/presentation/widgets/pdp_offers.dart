@@ -1,12 +1,15 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart'
-    show defaultTargetPlatform, TargetPlatform;
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
+import '../../../../core/analytics/pdp/pdp_analytics_tracker.dart';
 import 'package:flutter/services.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../../../components/atoms/auto_semantics.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/pdp_strings.dart';
 import '../../../../core/theme/colors.dart';
@@ -14,7 +17,6 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 import '../../domain/entities/offer_entity.dart';
 import 'pdp_snackbar.dart';
-import '../../../../components/atoms/auto_semantics.dart';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const _kCardBg = Color(0xFFF6F6F6);
@@ -114,6 +116,11 @@ class _PdpOffersState extends State<PdpOffers>
   bool _forcedStop = false;
   bool _isVisible = false;
   bool _isHostResumed = true;
+
+  // Latches once `coupon_code_scrolled` has been sent for this view — see
+  // [_maybeLogCouponScroll]. Mirrors Android's `eventTriggered`, which is
+  // likewise never reset (`PromoView.kt:91`).
+  bool _couponScrollEventSent = false;
 
   // The enclosing PDP page scroll, and whether it is currently moving.
   //
@@ -239,8 +246,7 @@ class _PdpOffersState extends State<PdpOffers>
   // _onCarouselPointerDown for the same pointer.
   int? _copyPointer;
 
-  void _onCopyPointerDown(PointerDownEvent event) =>
-      _copyPointer = event.pointer;
+  void _onCopyPointerDown(PointerDownEvent event) => _copyPointer = event.pointer;
 
   void _onCarouselPointerDown(PointerDownEvent event) {
     if (event.pointer == _copyPointer) {
@@ -260,18 +266,13 @@ class _PdpOffersState extends State<PdpOffers>
     if (pos.maxScrollExtent <= 0 || _snapItemStride <= 0) return;
     // Next index, wrapping past the last — mirrors getNextSnappedPosition().
     final next = (_currentIndex.value + 1) % widget.offers.length;
-    final target = (next * _snapItemStride - _snapOrigin).clamp(
-      0.0,
-      pos.maxScrollExtent,
-    );
+    final target = (next * _snapItemStride - _snapOrigin).clamp(0.0, pos.maxScrollExtent);
     final distance = (target - pos.pixels).abs();
     // Already there (sub-pixel) — animating would compute a 0ms duration.
     if (distance < 0.5) return;
     _scrollController.animateTo(
       target,
-      duration: Duration(
-        milliseconds: (distance * _msPerLogicalPx / _decelerateFactor).ceil(),
-      ),
+      duration: Duration(milliseconds: (distance * _msPerLogicalPx / _decelerateFactor).ceil()),
       // DecelerateInterpolator, as LinearSmoothScroller uses onto its target.
       curve: Curves.decelerate,
     );
@@ -292,15 +293,32 @@ class _PdpOffersState extends State<PdpOffers>
     if (pos.maxScrollExtent > 0 && pos.pixels >= pos.maxScrollExtent - 0.5) {
       rounded = cardCount - 1;
     } else {
-      rounded = ((pos.pixels + _snapOrigin) / _snapItemStride).round().clamp(
-        0,
-        cardCount - 1,
-      );
+      rounded = ((pos.pixels + _snapOrigin) / _snapItemStride).round().clamp(0, cardCount - 1);
     }
 
     if (rounded != _currentIndex.value) {
       _currentIndex.value = rounded;
     }
+  }
+
+  /// Sends `coupon_code_scrolled` under Android's two gates
+  /// (`PromoView.kt:90-101`).
+  ///
+  /// 1. **A real finger drag only.** Android fires inside
+  ///    `SCROLL_STATE_DRAGGING`. The call site is the exact counterpart — a
+  ///    ScrollStartNotification carrying dragDetails, which only a
+  ///    pointer-driven scroll produces — so this method needs no gate of its
+  ///    own, and an auto-advance can never reach it.
+  /// 2. **At most once per view.** Android's `eventTriggered` is set on the
+  ///    first drag and never reset, which is the latch below.
+  ///
+  /// Both matter. Without them this fired on every auto-advance — one every two
+  /// seconds, indefinitely, while the user did nothing — against Android's
+  /// ceiling of one per PDP view.
+  void _maybeLogCouponScroll() {
+    if (_couponScrollEventSent) return;
+    _couponScrollEventSent = true;
+    context.read<PdpAnalyticsTracker>().onCouponCarouselScrolled();
   }
 
   @override
@@ -311,10 +329,7 @@ class _PdpOffersState extends State<PdpOffers>
     final screenW = MediaQuery.sizeOf(context).width;
     // Sized so a card with neighbours on both sides shows a peek of each, which
     // is how it pages one card per fling like Android's PagerSnapHelper.
-    final cardWidth = (screenW - (_kCardPeek + _kCardGap) * 2).clamp(
-      200.0,
-      360.0,
-    );
+    final cardWidth = (screenW - (_kCardPeek + _kCardGap) * 2).clamp(200.0, 360.0);
     _snapItemStride = cardWidth + _kCardGap;
 
     // Where a card rests when it has a neighbour on each side: centred, so both
@@ -362,8 +377,11 @@ class _PdpOffersState extends State<PdpOffers>
           //    itself is exempt.
           NotificationListener<ScrollNotification>(
             onNotification: (notification) {
-              if (notification is ScrollStartNotification &&
-                  notification.dragDetails != null) {
+              if (notification is ScrollStartNotification && notification.dragDetails != null) {
+                // Android does both of these in the same place, on entering
+                // SCROLL_STATE_DRAGGING (PromoView.kt:96-103): sends the event,
+                // then stops the loop.
+                _maybeLogCouponScroll();
                 _stopForUserAction();
               }
               return false;
@@ -429,10 +447,7 @@ class _OfferCardList extends StatelessWidget {
       child: ListView.separated(
         controller: scrollController,
         scrollDirection: Axis.horizontal,
-        physics: _SnapScrollPhysics(
-          itemStride: cardWidth + _kCardGap,
-          snapOrigin: snapOrigin,
-        ),
+        physics: _SnapScrollPhysics(itemStride: cardWidth + _kCardGap, snapOrigin: snapOrigin),
         padding: AppSpacing.paddingHorizontalSm,
         itemCount: offers.length,
         separatorBuilder: (_, _) => const SizedBox(width: _kCardGap),
@@ -478,11 +493,7 @@ class _OfferCard extends StatelessWidget {
       // Bottom padding is omitted here and re-applied inside the Copy button so
       // the strip below the label is tappable rather than dead space. Cards
       // without a Copy button close the gap with their own bottom padding.
-      padding: const EdgeInsets.only(
-        left: AppSpacing.md,
-        right: AppSpacing.md,
-        top: AppSpacing.md,
-      ),
+      padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.md, top: AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -554,14 +565,23 @@ class _OfferCard extends StatelessWidget {
                   // required — the default deferToChild would only hit the Text.
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
+                    // `coupon_code_clicked` with the copy sentinel — Android
+                    // `PromoViewHolder.kt:42` passes `Coupon Code Copied` as the CTA.
+                    context.read<PdpAnalyticsTracker>().onCouponCodeTapped(
+                      callToAction: AnalyticsDefaults.couponCodeCopied,
+                      offer: offer,
+                    );
                     Clipboard.setData(ClipboardData(text: offer.couponCode!));
                     // Android draws its own clipboard confirmation from 13 (API
                     // 33) on, so ours would be a second popup for the same tap.
                     // iOS has no system clipboard UI at all — without this
                     // snackbar the copy would be silent there.
-                    if (defaultTargetPlatform !=
-                        TargetPlatform.android) {
-                      PdpSnackbar.showCouponCopied(context, offer.couponCode!);
+                    if (defaultTargetPlatform != TargetPlatform.android) {
+                      PdpSnackbar.showCouponCopied(
+                        context,
+                        offer.couponCode!,
+                        key: const ValueKey(PdpTestStrings.couponCopiedSnackBar),
+                      );
                     }
                   },
                   child: Padding(
@@ -604,11 +624,7 @@ class _SnapScrollPhysics extends ScrollPhysics {
   // against the screen edges while the cards between them stay centred.
   final double snapOrigin;
 
-  const _SnapScrollPhysics({
-    required this.itemStride,
-    required this.snapOrigin,
-    super.parent,
-  });
+  const _SnapScrollPhysics({required this.itemStride, required this.snapOrigin, super.parent});
 
   @override
   _SnapScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -619,11 +635,7 @@ class _SnapScrollPhysics extends ScrollPhysics {
     );
   }
 
-  double _getTargetPixels(
-    ScrollMetrics position,
-    Tolerance tolerance,
-    double velocity,
-  ) {
+  double _getTargetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
     final pixels = position.pixels;
     final maxExtent = position.maxScrollExtent;
     if (itemStride <= 0 || maxExtent <= 0) return pixels;
@@ -645,10 +657,7 @@ class _SnapScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(
-    ScrollMetrics position,
-    double velocity,
-  ) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
         (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
       return super.createBallisticSimulation(position, velocity);
@@ -687,10 +696,7 @@ class _CouponChip extends StatelessWidget {
     return CustomPaint(
       // Dashed border drawn on top of the fill — Flutter's BoxDecoration has no
       // dashed BorderStyle, so we stroke a dashed rounded-rect ourselves.
-      foregroundPainter: const _DashedRRectPainter(
-        color: _kChipBorder,
-        radius: 5,
-      ),
+      foregroundPainter: const _DashedRRectPainter(color: _kChipBorder, radius: 5),
       child: Container(
         padding: const EdgeInsets.all(6),
         decoration: const BoxDecoration(
@@ -732,34 +738,25 @@ class _DashedRRectPainter extends CustomPainter {
     final rect =
         const Offset(_strokeWidth / 2, _strokeWidth / 2) &
         Size(size.width - _strokeWidth, size.height - _strokeWidth);
-    final path = Path()
-      ..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)));
+    final path = Path()..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)));
 
     for (final metric in path.computeMetrics()) {
       var dist = 0.0;
       while (dist < metric.length) {
-        canvas.drawPath(
-          metric.extractPath(dist, (dist + _dash).clamp(0.0, metric.length)),
-          paint,
-        );
+        canvas.drawPath(metric.extractPath(dist, (dist + _dash).clamp(0.0, metric.length)), paint);
         dist += _dash + _gap;
       }
     }
   }
 
   @override
-  bool shouldRepaint(_DashedRRectPainter old) =>
-      old.color != color || old.radius != radius;
+  bool shouldRepaint(_DashedRRectPainter old) => old.color != color || old.radius != radius;
 }
 
 // ── Scroll indicator ──────────────────────────────────────────────────────────
 
 class _ScrollIndicator extends StatelessWidget {
-  const _ScrollIndicator({
-    required this.currentIndex,
-    required this.cardCount,
-    super.key,
-  });
+  const _ScrollIndicator({required this.currentIndex, required this.cardCount, super.key});
 
   final int currentIndex;
   final int cardCount;
@@ -782,10 +779,7 @@ class _ScrollIndicator extends StatelessWidget {
         final trackWidth = constraints.maxWidth;
         // Indicator represents 1 card as a fraction of all cards (capped at 20% min).
         final indicatorFraction = (1.0 / cardCount).clamp(0.1, 1.0);
-        final indicatorWidth = (trackWidth * indicatorFraction).clamp(
-          40.0,
-          trackWidth,
-        );
+        final indicatorWidth = (trackWidth * indicatorFraction).clamp(40.0, trackWidth);
         final maxTravel = trackWidth - indicatorWidth;
         final progress = currentIndex / (cardCount - 1);
         final indicatorOffset = progress.clamp(0.0, 1.0) * maxTravel;
@@ -808,9 +802,7 @@ class _ScrollIndicator extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: _kIndicatorTrackColor.withValues(alpha: 0.2),
-                    borderRadius: const BorderRadius.all(
-                      Radius.circular(trackHeight / 2),
-                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(trackHeight / 2)),
                   ),
                 ),
               ),
@@ -825,9 +817,7 @@ class _ScrollIndicator extends StatelessWidget {
                 child: const DecoratedBox(
                   decoration: BoxDecoration(
                     color: _kIndicatorActiveColor,
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(activeHeight / 2),
-                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(activeHeight / 2)),
                   ),
                 ),
               ),

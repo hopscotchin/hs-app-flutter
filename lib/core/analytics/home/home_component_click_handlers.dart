@@ -63,4 +63,21 @@ extension HomeComponentClickHandlers on HomeTrackAnalyticManager {
           item.trackingMeta,
         ],
       );
+
+  /// CTA-button tap on any component that ships a `ctaButton` block
+  /// (CustomTiles, ProductGrid, …). Chain is `root.trackingMeta →
+  /// cta.trackingMeta` — deepest wins on collision, nulls dropped by
+  /// [logTileClick]. Emits `tile_clicked` on the Discover funnel and
+  /// `lp_tile_clicked` on LPs (via the `fromHomePage` branch inside
+  /// `logTileClick`).
+  Future<void> onCtaButtonTapped({
+    required Map<String, dynamic>? rootTrackingMeta,
+    required CtaButton cta,
+  }) =>
+      logTileClick(
+        trackingMetaChain: <Map<String, dynamic>?>[
+          rootTrackingMeta,
+          cta.trackingMeta,
+        ],
+      );
 }

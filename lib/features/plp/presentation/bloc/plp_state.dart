@@ -29,24 +29,47 @@ abstract class PlpState with _$PlpState {
     /// `ProductListPageActivity.java:794`). Nothing else reads it — the query
     /// builder keeps its own copy for endpoint selection.
     @Default(PageType.plp) PageType pageType,
+
+    /// Page-level analytics blob from the listing response, forwarded to
+    /// Segment verbatim. Never read by the UI — it exists so analytics
+    /// events fired from this bloc can spread it into their payload.
+    /// See PLP_ANALYTICS_BACKEND_CONTRACT.md.
+    Map<String, dynamic>? trackingMeta,
+
+    /// Page-level order-attribution blob from the listing response. Pushed
+    /// into `ProductAttributionHelper` on tile tap alongside the product's
+    /// own trackingMeta so the product-click history keeps the listing's
+    /// funnel context.
+    Map<String, dynamic>? orderAttribution,
+
   }) = _PlpState;
 }
 
 extension PlpStateX on PlpState {
   bool get hasProducts => products.isNotEmpty;
 
+  /// Merged analytics blob spread onto every PLP event — [orderAttribution]
+  /// first, [trackingMeta] wins on collision. Returns `null` when both
+  /// backend sources are absent so downstream `putAllAnalyticsKeys` no-ops.
+  Map<String, dynamic>? get plpAnalyticsMeta {
+    return <String, dynamic>{...?orderAttribution, ...?trackingMeta};
+  }
+
   /// How many products this listing holds in total — the full count, not the
   /// loaded page. Mirrors Android's `totalProductCount`; falls back to what is
   /// loaded so far when the response omits it.
   int get feedSize => totalRecords ?? products.length;
 
-  /// The analytics entry context handed to PDP when the tile for [product] at
-  /// flat index [index] is tapped.
+  /// The analytics entry context handed to PDP when a tile on this listing is
+  /// tapped.
   ///
-  /// Without it, PDP falls back to `const PdpEntryArgs()` and **four properties
-  /// silently vanish** from all 22 PDP events — `from_screen`, `from_page`,
-  /// `from_feed_size` and `position` — while `source_tile_type` reports the
-  /// `'other'` default. Nothing errors; the funnel just loses its origin.
+  /// Describes the **listing**, not the tapped product — which is why it takes
+  /// no arguments. Every field is a fact about this page, and the PLP is the
+  /// only screen that knows them.
+  ///
+  /// Without it, PDP falls back to `const PdpEntryArgs()` and three properties
+  /// silently vanish from all 22 PDP events — `from_screen`, `from_page` and
+  /// `from_feed_size`. Nothing errors; the funnel just loses its origin.
   ///
   /// Ports Android's listing → PDP handoff
   /// (`hsapp/.../ProductListPageActivity.java:793-830`, which builds the bundle
@@ -57,8 +80,10 @@ extension PlpStateX on PlpState {
   /// | `from_screen` | `plpName` / `boutiqueName`, else the literal | [screenName], falling back to `FromScreens.plp` — see the gap note |
   /// | `from_page` | `"plp"` (`:794`), `"boutique"` (`PLPProductViewModel.java:171`), or `R.string.search` (`:796`) | [pageType], mapped below |
   /// | `from_feed_size` | `totalProductCount` | [feedSize] |
-  /// | `position` | `positionTag + 1` — **1-indexed** | `index + 1` |
-  /// | `source_tile_type` | `isXLTile ? XL : NORMAL` | same, lowercase — see below |
+  ///
+  /// Android also sends `position` and `source_tile_type` on this hop
+  /// (`:829`), which [PdpEntryArgs] no longer models — dropped by develop's PDP
+  /// analytics rework, not here.
   ///
   /// Lives here rather than on [PdpEntryArgs] because a `PdpEntryArgs.fromPlp`
   /// factory would make `pdp/domain` depend on `plp/domain` for [PageType] —
@@ -66,29 +91,19 @@ extension PlpStateX on PlpState {
   /// at all, so it must stay ignorant of listings. Each source screen owns its
   /// own translation into the shared contract; this is the listing's.
   ///
-  /// ⚠️ **`source_tile_type` casing.** Android has paths that disagree: the old
-  /// PLP sends `hsapp`'s `"XL"` / `"Normal"` (`:827`) while `hsplp` and the
-  /// boutique path send `common`'s `"xl"` / `"normal"`
-  /// (`ProductListActivity.kt:613`, `PLPProductViewModel.java:171`). The same
-  /// tile therefore reports capitalised or not depending on the source screen —
-  /// an Android-side metric split. Flutter matches the
-  /// lowercase form, which is also what the rest of our constants use.
-  ///
-  /// ⚠️ **`from_screen` is wrong for boutiques today, and cannot be fixed here.**
-  /// Android sends the boutique's name (`"water yellowA"` in a live capture);
-  /// Flutter falls back to the literal `"PLP"` because [screenName] is empty. It
-  /// comes from `pageMeta.pageTitle`, and a boutique is served by the *search*
-  /// endpoint (`plp_repository_impl.dart:34`), which does not return that field.
-  /// The route can already carry a name — `PlpDestination.navigate` forwards
+  /// ⚠️ **A boutique reports `"Boutique Plp"`, not its own name.** Android
+  /// sends `salePlanDetail.name` (`"water yellowA"` in a live capture) and only
+  /// falls back to the constant; Flutter always hits the fallback, because
+  /// [screenName] comes from `pageMeta.pageTitle` and the search endpoint that
+  /// serves boutiques does not return it (`plp_repository_impl.dart:34`). The
+  /// route can carry a name — `PlpDestination.navigate` forwards
   /// `title ?? categoryName` into `goToPlp` — but the homepage tile call sites
-  /// pass no title, and [PlpState] does not retain `categoryName` either.
-  /// Closing it needs a decision on where the boutique's display name comes
-  /// from, so it is recorded as a finding rather than guessed at.
-  PdpEntryArgs pdpEntryArgs(ListingProductEntity product, int index) =>
+  /// pass none, and [PlpState] does not retain `categoryName`. Closing it needs
+  /// a decision on where the boutique's display name comes from, so it is
+  /// recorded as a finding rather than guessed at.
+  PdpEntryArgs get pdpEntryArgs =>
       PdpEntryArgs(
-        fromScreen: (screenName?.isNotEmpty ?? false)
-            ? screenName
-            : FromScreens.plp,
+        fromScreen: plpFromScreen,
         fromPage: switch (pageType) {
           PageType.plp => FromPage.plp,
           PageType.boutique => FromPage.boutique,
@@ -96,15 +111,43 @@ extension PlpStateX on PlpState {
           // (`fromScreen = fromPage = getString(R.string.search)`).
           PageType.search => FromPage.search,
         },
-        fromFeedSize: feedSize,
-        // 1-indexed, matching Android: its PLP passes `positionTag + 1` into the PDP
-        // intent (`ProductListPageActivity.java:829`), where `positionTag` is the
-        // 0-based grid index. Both PDP modules then forward the value untouched, so
-        // `index + 1` here is what keeps the two platforms on the same base. Removing
-        // it would shift every Flutter position down by one against Android.
-        position: index + 1,
-        sourceTileType: product.isXLTile
-            ? SourceTileType.xl
-            : SourceTileType.normal,
+        fromFeedSize: feedSize
       );
+
+  /// `from_screen` for events fired *on* this listing (as opposed to events
+  /// describing how the user arrived at it).
+  ///
+  /// Android's PLP wishlist events use `pageName` — the listing's own name —
+  /// not the entry screen (`PLPAnalytics.logProductAddedToWishList:440`,
+  /// `logProductRemovedFromWishlist:489`).
+  ///
+  /// The fallback is page-type-aware, mirroring Android's
+  /// `salePlanDetail?.name ?: FromScreens.BOUTIQUE`
+  /// (`ProductListActivity.kt:716`, `:745`). It matters in practice: a
+  /// boutique is served by the search endpoint, which returns no `pageTitle`
+  /// (`plp_repository_impl.dart:34`), so [screenName] is routinely empty there
+  /// and every such event would otherwise report the listing's `"PLP"` rather
+  /// than naming the boutique screen at all.
+  String get plpFromScreen {
+    if (screenName?.isNotEmpty ?? false) return screenName!;
+    return pageType == PageType.boutique
+        ? FromScreens.boutique
+        : FromScreens.plp;
+  }
+
+  /// Entry context for a custom-product-tile tap that routes to another
+  /// listing. Mirrors Android's CPT branch (`TileAction.java:940-953`):
+  /// `FROM_SCREEN` is the current listing's name, `FROM_LOCATION` is the
+  /// literal `"Custom product tile"`, and it is the one path that also carries
+  /// `POSITION` and `FROM_FEED_SIZE`.
+  ///
+  /// Shares [pdpEntryArgs]' `from_screen` fallback and its boutique-name
+  /// caveat, for the same reason — [screenName] is empty on the search-served
+  /// boutique response.
+  PlpEntryArgs plpEntryArgs(int index) => PlpEntryArgs(
+    fromScreen: plpFromScreen,
+    fromLocation: FromLocations.customProductTile,
+    position: index + 1,
+    fromFeedSize: feedSize,
+  );
 }

@@ -210,12 +210,43 @@ class MessageBarTestStrings {
 }
 
 /// Pincode-check bottom sheet. Keys are `pincode_sheet_<element>`.
+/// Delivery-pincode bottom sheet. It is one widget shown from three places
+/// (the cart's app bar, PDP's delivery block and — soon — checkout), so a bare
+/// `pincode_sheet_*` key would match whichever copy happened to be open. Every
+/// key is therefore composed as `<host>_pincode_sheet_<element>`, with the host
+/// slug taken from `PincodeSheetSource`: a cart test asserts on
+/// `cart_pincode_sheet_apply_button` and can never hit PDP's sheet.
 class PincodeTestStrings {
   PincodeTestStrings();
 
-  // Pincode check bottom sheet
-  static const String sheetInputHint = 'pincode_sheet_input_hint';
-  static const String sheetInputSuffixIcon = 'pincode_sheet_input_suffix_icon';
+  /// Host slugs, one per `PincodeSheetSource`.
+  static const String cartHost = 'cart';
+  static const String pdpHost = 'pdp';
+  static const String checkoutHost = 'checkout';
+
+  /// Screen prefix for the sheet's backend-driven bars →
+  /// `cart_pincode_sheet_message_bar_message_text_field_<i>`.
+  static const String screen = 'pincode_sheet'; // → `<host>_pincode_sheet`
+
+  static const String sheet = 'pincode_sheet'; // → `<host>_pincode_sheet`
+  static const String sheetTitle = 'pincode_sheet_title'; // → `<host>_pincode_sheet_title`
+  static const String sheetInput = 'pincode_sheet_input'; // → `<host>_pincode_sheet_input`
+  static const String sheetInputHint =
+      'pincode_sheet_input_hint'; // → `<host>_pincode_sheet_input_hint`
+  static const String sheetInputSuffixIcon =
+      'pincode_sheet_input_suffix_icon'; // → `<host>_pincode_sheet_input_suffix_icon`
+  static const String sheetApplyButton =
+      'pincode_sheet_apply_button'; // → `<host>_pincode_sheet_apply_button`
+
+  /// Spinner that replaces "Apply" while serviceability is being checked.
+  static const String sheetApplyLoader =
+      'pincode_sheet_apply_loader'; // → `<host>_pincode_sheet_apply_loader`
+
+  /// Inline verify-failure text under the input (PDP flow).
+  static const String sheetErrorText =
+      'pincode_sheet_error_text_field'; // → `<host>_pincode_sheet_error_text_field`
+  static const String sheetToastSnackBar =
+      'pincode_sheet_toast_snackbar'; // → `<host>_pincode_sheet_toast_snackbar`
 }
 
 /// Product listing page (PLP). Keys are `plp_<element>[_<index>]`. Dynamic list
@@ -404,13 +435,34 @@ class PromoOffersTestStrings {
   /// Inline rejection bar shown under the sheet title on a failed apply.
   static const String actionErrorBar = 'promo_offers_action_error_bar';
 
+  /// Sheet root — presence assertion for "the offers sheet is open".
+  static const String sheet = 'promo_offers_sheet';
   static const String sheetTitle = 'promo_offers_sheet_title';
+
+  /// Card-shaped placeholders shown while the list loads.
+  static const String loadingShimmer = 'promo_offers_loading_shimmer';
+
+  /// Scrollable list of sections, and one key per section.
+  static const String list = 'promo_offers_list';
+  static const String section = 'promo_offers_section'; // + `_<i>`
+
+  /// Success toast for an apply/remove that answered with a plain message.
+  static const String actionSnackBar = 'promo_offers_action_snackbar';
+
+  static const String emptyStateTitle = 'promo_offers_empty_state_title';
+  static const String emptyStateSubtitle = 'promo_offers_empty_state_subtitle';
   static const String emptyStateButton = 'promo_offers_empty_state_button';
 
   /// One card per offer, flat-indexed across both (applicable /
   /// non-applicable) sections.
   static const String card = 'promo_offers_card'; // + `_<i>`
   static const String codeSuffix = 'code'; // → `promo_offers_card_<i>_code`
+  static const String titleSuffix = 'title'; // → `promo_offers_card_<i>_title`
+  static const String descriptionSuffix = 'description'; // → `promo_offers_card_<i>_description`
+  static const String validitySuffix =
+      'validity_text_field'; // → `promo_offers_card_<i>_validity_text_field`
+  static const String savingsSuffix =
+      'savings_text_field'; // → `promo_offers_card_<i>_savings_text_field`
   // Apply and Remove are mutually exclusive, but keyed separately on purpose:
   // which one renders *is* the applied-state assertion.
   static const String applyButtonSuffix =
@@ -424,9 +476,21 @@ class PromoOffersTestStrings {
       'cta_button'; // → `promo_offers_card_<i>_cta_button`
 }
 
+/// Backend-authored bottom sheet returned by promo apply/remove
+/// (`showPromoActionSheet`). Shown from both the cart and the offers sheet.
+class PromoActionSheetTestStrings {
+  PromoActionSheetTestStrings();
+
+  static const String title = 'promo_action_bottomsheet_title';
+  static const String description = 'promo_action_bottomsheet_description';
+  static const String primaryButton = 'promo_action_bottomsheet_primary_button';
+  static const String secondaryButton = 'promo_action_bottomsheet_secondary_button';
+}
+
 class PromoDetailsTestStrings {
   PromoDetailsTestStrings();
 
+  static const String loadingShimmer = 'promo_details_loading_shimmer';
   static const String appBarTitle = 'promo_details_app_bar_title';
   static const String backButton = 'promo_details_back_button';
   static const String code = 'promo_details_code';
@@ -454,22 +518,112 @@ class PromoDetailsTestStrings {
 class CartTestStrings {
   CartTestStrings();
 
+  /// Screen prefix — passed to `MessageBarsWidget` for the top (merge /
+  /// promo) bars → `cart_message_bar_message_text_field_<i>`.
+  static const String screen = 'cart';
+
+  /// Screen prefix for the backend-driven bars under the price summary →
+  /// `cart_bottom_message_bar_message_text_field_<i>`.
+  static const String bottomMessageBarScreen =
+      'cart_bottom'; // → `cart_bottom_message_bar_message_text_field_<i>`
+
+  // ── Page-level states ──
+  /// Initial-load skeleton (`CartShimmerLoading`).
+  static const String shimmerLoading = 'cart_shimmer_loading';
+
+  /// Full-screen scrim + spinner shown while a cart mutation is in flight.
+  static const String updatingOverlay = 'cart_updating_overlay';
+
+  /// Pull-to-refresh wrapper around the loaded cart.
+  static const String refreshIndicator = 'cart_refresh_indicator';
+
+  /// Toasts. They render on the app's `ScaffoldMessenger` (outside the page
+  /// tree), so the key is the only handle a test has on them.
+  static const String toastSnackBar = 'cart_toast_snackbar';
+  static const String loginRequiredSnackBar = 'cart_login_required_snackbar';
+
   // ── App bar ──
   static const String appBarBackButton = 'cart_appbar_back_button';
+  static const String appBarTitle = 'cart_app_bar_title';
+  static const String appBarWishlistButton = 'cart_appbar_wishlist_button';
+  static const String appBarPincodeButton = 'cart_app_bar_pincode_button';
+  static const String appBarPincodeText = 'cart_app_bar_pincode_text_field';
+
+  // ── Empty bag state ──
+  static const String emptyStateTitle = 'cart_empty_state_title';
+  static const String emptyStateSubtitle = 'cart_empty_state_subtitle';
+  static const String emptyStateButton = 'cart_empty_state_button';
+
+  // ── Load-failure state ──
+  static const String errorStateTitle = 'cart_error_state_title';
+  static const String errorStateSubtitle = 'cart_error_state_subtitle';
+  static const String errorStateButton = 'cart_error_state_button';
+
+  // ── Free-gift banner ──
+  static const String giftCardBanner = 'cart_gift_card_banner';
+  static const String giftCardImage = 'cart_gift_card_image';
+  static const String giftCardTitle = 'cart_gift_card_title';
+  static const String giftCardDescription = 'cart_gift_card_description';
+
+  // ── Line items ──
+  /// One card per cart line, flat-indexed → `cart_item_<i>`.
+  static const String item = 'cart_item'; // + `_<i>`
+  static const String itemImageSuffix = 'image'; // → `cart_item_<i>_image`
+  static const String itemNameSuffix = 'name_text_field'; // → `cart_item_<i>_name_text_field`
+  static const String itemVisualCueSuffix = 'visual_cue'; // → `cart_item_<i>_visual_cue`
+  static const String itemPriceSuffix = 'price_text_field'; // → `cart_item_<i>_price_text_field`
+  static const String itemRemoveSuffix = 'remove_button'; // → `cart_item_<i>_remove_button`
+  static const String itemQuantitySuffix = 'qty_text_field'; // → `cart_item_<i>_qty_text_field`
+  static const String itemQuantityIncreaseSuffix =
+      'qty_increase_button'; // → `cart_item_<i>_qty_increase_button`
+  static const String itemQuantityDecreaseSuffix =
+      'qty_decrease_button'; // → `cart_item_<i>_qty_decrease_button`
+  static const String itemSizeSuffix = 'size_text_field'; // → `cart_item_<i>_size_text_field`
+  static const String itemEddSuffix = 'edd_text_field'; // → `cart_item_<i>_edd_text_field`
+  static const String itemMoveToWishlistSuffix =
+      'move_to_wishlist_button'; // → `cart_item_<i>_move_to_wishlist_button`
+  /// Price-drop / coupon-savings note rows inside a line item, indexed within
+  /// the item.
+  static const String itemDetailSuffix = 'detail'; // → `cart_item_<i>_detail_<j>`
 
   /// Screen prefix for the shared `ServiceGuaranteeRow` (Genuine Products /
   /// Easy Returns / Secure Payments) → `cart_slg_item_<i>_icon` / `_label`.
-  static const String slgScreen = 'cart_slg';
+  static const String slgScreen =
+      'cart_slg'; // → `cart_slg_item_<i>` / `cart_slg_item_<i>_icon` / `cart_slg_item_<i>_label`
+  static const String slgIconSuffix = 'icon';
+  static const String slgLabelSuffix = 'label';
+
+  // ── Price summary ──
+  /// Prefix handed to the shared `PriceSummaryWidget`, which composes its own
+  /// suffixes from it (the widget is screen-agnostic, so it never imports this
+  /// class).
+  static const String priceSummary =
+      'cart_price_summary'; // + `_title` / `_subtitle` / `_row_<i>` / `_row_<i>_label` / `_row_<i>_value`
 
   // ── Promo section ──
+  /// Section root — the card holding either the code input or the applied
+  /// summary, plus the "See All Offers" row.
+  static const String promoSection = 'cart_promo_section';
+
+  /// Offer tag icon. The input and the applied summary render it in the same
+  /// place and never together, so they share one key.
+  static const String promoOfferIcon = 'cart_promo_offer_icon';
   static const String promoCodeInput = 'cart_promo_code_input';
   static const String promoCodeInputHint = 'cart_promo_code_input_hint';
   static const String promoApplyButton = 'cart_promo_apply_button';
   static const String promoRemoveButton = 'cart_promo_remove_button';
+
+  /// Applied-promo summary labels (backend copy: "SAVE10 applied" /
+  /// "Your savings ₹120").
+  static const String promoAppliedCodeText = 'cart_promo_applied_code_text_field';
+  static const String promoAppliedSavingsText = 'cart_promo_applied_savings_text_field';
+
   static const String promoSeeAllOffersButton =
       'cart_promo_see_all_offers_button';
+  static const String promoSeeAllOffersText = 'cart_promo_see_all_offers_text_field';
 
   // ── Checkout bar ──
+  static const String checkoutBar = 'cart_checkout_bar';
   static const String checkoutBarSavingsBanner =
       'cart_checkout_bar_savings_banner';
   static const String checkoutBarItemCountText =
@@ -482,6 +636,9 @@ class CartTestStrings {
       'cart_checkout_bar_proceed_button';
 
   // ── Remove item confirmation bottom sheet ──
+  static const String removeItemBottomSheetTitle = 'cart_remove_item_bottomsheet_title';
+  static const String removeItemBottomSheetDescription =
+      'cart_remove_item_bottomsheet_description';
   static const String removeItemBottomSheetRemoveButton =
       'cart_remove_item_bottomsheet_remove_button';
   static const String removeItemBottomSheetNoButton =
@@ -532,6 +689,12 @@ class PdpTestStrings {
   static const String detailTab = 'pdp_detail_tab'; // header → + `_<i>`
 
   // Add-to-bag bar (floating primary + docked copy — both mounted, keyed apart)
+  /// PDP snackbars (`PdpSnackbar`). They render on the app's
+  /// `ScaffoldMessenger`, above the floating CTA bar — the add-to-bag /
+  /// buy-now outcome toast, and the coupon-copied confirmation.
+  static const String snackBar = 'pdp_snackbar';
+  static const String couponCopiedSnackBar = 'pdp_coupon_copied_snackbar';
+
   static const String addToBagButton = 'pdp_add_to_bag_button';
   static const String buyNowButton = 'pdp_buy_now_button';
   static const String dockedAddToBagButton = 'pdp_docked_add_to_bag_button';
