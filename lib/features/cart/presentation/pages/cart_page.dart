@@ -111,10 +111,10 @@ class _CartPageState extends State<CartPage> {
   /// `checkLoginAndCheckout`. See [_openCheckoutOrLogin], which is that gate.
   void _startCheckout() async {
     //* this needs testing will add in next release
-    context.showSnack(
-      'Thanks for testing this but checkout is not for this release',
-      status: SnackStatus.error,
-    );
+    //     context.showSnack(
+    //       'Thanks for testing this but checkout is not for this release',
+    //       status: SnackStatus.error,
+    //     );
   }
 
   /// Buy Now hand-off from PDP: start checkout once the cart is loaded and
@@ -580,7 +580,8 @@ class _CartContent extends StatelessWidget {
                 onQuantityChanged: (qty) => context.read<CartBloc>().add(
                   UpdateCartItemQuantity(sku: item.sku ?? '', quantity: qty, itemIndex: index),
                 ),
-                onRemove: () => showRemoveCartItemSheet(context, item.sku ?? ''),
+                onRemove: () =>
+                    showRemoveCartItemSheet(context, item.sku ?? ''),
                 onMoveToWishlist: () => _moveToWishlist(
                   context,
                   MoveToWishlist(

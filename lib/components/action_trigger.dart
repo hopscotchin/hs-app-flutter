@@ -32,7 +32,8 @@ class ActionTrigger extends StatefulWidget {
   ///
   /// Only consulted for tooltip actions. Ignored for bottomSheet/dialog,
   /// where [child] is already the whole tappable widget.
-  final Widget Function(Widget anchor, VoidCallback showTooltip)? tooltipBuilder;
+  final Widget Function(Widget anchor, VoidCallback showTooltip)?
+  tooltipBuilder;
 
   // ── Tooltip positioning/spacing — tunable per call site ──────────────────
   // The arrow's horizontal position is NOT one of these: super_tooltip always
@@ -118,7 +119,9 @@ class _ActionTriggerState extends State<ActionTrigger> {
       return;
     }
     setState(() => _tooltipLeft = left);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _controller?.showTooltip());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _controller?.showTooltip(),
+    );
   }
 
   @override
@@ -137,7 +140,10 @@ class _ActionTriggerState extends State<ActionTrigger> {
         controller: _controller,
         content: Text(
           action.content!.text!,
-          style: TextStyle(color: action.content!.textColor.toColorOr(Colors.white), fontSize: 14),
+          style: TextStyle(
+            color: action.content!.textColor.toColorOr(Colors.white),
+            fontSize: 14,
+          ),
         ),
         style: TooltipStyle(
           backgroundColor: action.content!.bgColor.toColorOr(AppColors.info),
@@ -159,7 +165,8 @@ class _ActionTriggerState extends State<ActionTrigger> {
         // paths drive the same controller, so either can open it.
         interactionConfig: const InteractionConfiguration(showOnTap: true),
         constraints: BoxConstraints(
-          maxWidth: widget.tooltipMaxWidth ?? MediaQuery.sizeOf(context).width - 64,
+          maxWidth:
+              widget.tooltipMaxWidth ?? MediaQuery.sizeOf(context).width - 64,
         ),
         child: widget.alignTooltipLeftToAnchor
             ? KeyedSubtree(key: _anchorKey, child: widget.child)
@@ -170,7 +177,8 @@ class _ActionTriggerState extends State<ActionTrigger> {
       return widget.tooltipBuilder!(anchor, _showTooltip);
     }
 
-    if ((action.isBottomSheet || action.isDialog) && action.content?.description != null) {
+    if ((action.isBottomSheet || action.isDialog) &&
+        action.content?.description != null) {
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => _show(context, action),
@@ -203,7 +211,8 @@ class _ActionTriggerState extends State<ActionTrigger> {
                   content.rightAction,
                   fallback: AppBottomSheetButtonStyle.outlined,
                 ),
-                onPressed: () => _runAction(context, content.rightAction!.actionUrl),
+                onPressed: () =>
+                    _runAction(context, content.rightAction!.actionUrl),
               )
             : null,
       );
@@ -223,7 +232,8 @@ class _ActionTriggerState extends State<ActionTrigger> {
           ? AppDialogAction(
               label: content.rightAction!.label ?? 'Cancel',
               style: _dialogStyleFor(content.rightAction, fallback: AppDialogButtonStyle.outlined),
-              onPressed: () => _runAction(context, content.rightAction!.actionUrl),
+              onPressed: () =>
+                  _runAction(context, content.rightAction!.actionUrl),
             )
           : null,
     );

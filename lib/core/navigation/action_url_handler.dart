@@ -82,7 +82,8 @@ class ActionUrlHandler {
     final id = params['id'] ?? '';
     // Only the promo-details routes read this; `Uri.queryParameters` has
     // already percent-decoded it.
-    final savingsTextFromCart = params[PromoDetailsDestination.savingsTextExtraKey] ?? '';
+    final savingsTextFromCart =
+        params[PromoDetailsDestination.savingsTextExtraKey] ?? '';
 
     switch (route) {
       // ── Home ──
@@ -181,7 +182,10 @@ class ActionUrlHandler {
         final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
         final promoId = _id(id.isNotEmpty ? id : segments.firstOrNull);
         return promoId > 0
-            ? PromoDetailsDestination(promoId: promoId, savingsTextFromCart: savingsTextFromCart)
+            ? PromoDetailsDestination(
+                promoId: promoId,
+                savingsTextFromCart: savingsTextFromCart,
+              )
             : const HomeDestination();
 
       // ── TODO: navigate to dedicated pages when built ──

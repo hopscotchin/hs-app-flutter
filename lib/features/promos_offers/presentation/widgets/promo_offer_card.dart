@@ -91,7 +91,10 @@ class PromoOfferCard extends StatelessWidget {
         borderRadius: AppSpacing.borderRadiusXs,
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.sm,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -122,7 +125,9 @@ class PromoOfferCard extends StatelessWidget {
             key: descriptionKey,
             TextSpan(
               text: offer.description,
-              style: AppTypographyV1.labelLarge.regular.copyWith(color: _textColor),
+              style: AppTypographyV1.labelLarge.regular.copyWith(
+                color: _textColor,
+              ),
               children: [
                 if (offer.showTerms) ...[
                   const TextSpan(text: ' '),
@@ -146,7 +151,9 @@ class PromoOfferCard extends StatelessWidget {
           Text(
             offer.validityText!,
             key: validityKey,
-            style: AppTypographyV1.labelLarge.regular.copyWith(color: _textColor),
+            style: AppTypographyV1.labelLarge.regular.copyWith(
+              color: _textColor,
+            ),
           ),
         ],
         if (offer.showSavings) ...[const SizedBox(height: 6), _savingsRow()],
@@ -251,7 +258,11 @@ class _CodeBadge extends StatelessWidget {
     const textColor = AppColors.brandPrimary;
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: _width, maxWidth: _width, minHeight: _minHeight),
+      constraints: const BoxConstraints(
+        minWidth: _width,
+        maxWidth: _width,
+        minHeight: _minHeight,
+      ),
       child: DottedBorderBox(
         color: borderColor,
         child: ColoredBox(
@@ -265,7 +276,9 @@ class _CodeBadge extends StatelessWidget {
               child: Text(
                 code,
                 textAlign: TextAlign.center,
-                style: AppTypographyV1.labelLarge.bold.copyWith(color: textColor),
+                style: AppTypographyV1.labelLarge.bold.copyWith(
+                  color: textColor,
+                ),
               ),
             ),
           ),
