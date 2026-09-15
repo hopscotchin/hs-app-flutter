@@ -80,6 +80,16 @@ class ApiConstants {
   static const String logout = '/customer/logout';
   static const String forgetGuestUser = '/customer/flush-data/guestuser';
 
+  // My Kids (child profiles)
+  static const String kidsList = '/v2/questionnaire/list';
+  static const String kidsDelete = '/v2/questionnaire/{kidId}';
+  static const String kidsSave = '/v3/questionnaire/save-and-update';
+  // NEW — no existing precedent for a screen-scoped content/config endpoint
+  // anywhere in either app (confirmed by audit); this is a newly-proposed
+  // contract, not yet implemented by backend. Add/Edit Kid screen falls back
+  // to local defaults (KidFormConfigEntity.fallback()) until it exists.
+  static const String kidsFormConfig = '/v2/questionnaire/form-config';
+
   // Address Management
   static const String addresses = '/delivery/addresses/v3';
   static const String customerAddresses = '/customer/v2/addresses';

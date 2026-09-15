@@ -8,6 +8,7 @@ import 'package:hs_app_flutter/features/address/presentation/address_route.dart'
 import 'package:hs_app_flutter/features/analytics/presentation/analytics_debug_route.dart';
 import 'package:hs_app_flutter/features/auth/presentation/auth_route.dart';
 import 'package:hs_app_flutter/features/cart/presentation/cart_route.dart';
+import 'package:hs_app_flutter/features/kids/presentation/kids_route.dart';
 import 'package:hs_app_flutter/features/landing_page/presentation/landing_page_route.dart';
 import 'package:hs_app_flutter/features/legal/presentation/legal_route.dart';
 import 'package:hs_app_flutter/features/pdp/presentation/pdp_fullscreen_gallery_route.dart';
@@ -50,6 +51,7 @@ class AppRouter {
       WebViewRoute.getRoute(_rootNavigatorKey),
       LandingPageRoute.getRoute(_rootNavigatorKey),
       AddressRoute.getRoute(_rootNavigatorKey),
+      KidsRoute.getRoute(_rootNavigatorKey),
       LegalRoute.getRoute(_rootNavigatorKey),
       PromoDetailsRoute.getRoute(_rootNavigatorKey),
       if (kDebugMode) AnalyticsDebugRoute.getRoute(_rootNavigatorKey),

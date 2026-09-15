@@ -154,11 +154,16 @@ class AnalyticsHelper {
   // default with first day of week = Monday and minimum days in first week = 4
   // (the locale defaults on most JVMs). Compute the same here.
   int _isoWeekOfYear(DateTime date) {
-    final thursday = DateTime.utc(date.year, date.month, date.day)
-        .add(Duration(days: 3 - ((date.weekday + 6) % 7)));
+    final thursday = DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+    ).add(Duration(days: 3 - ((date.weekday + 6) % 7)));
     final firstThursday = DateTime.utc(thursday.year, 1, 4);
     final firstThursdayOffset = (firstThursday.weekday + 6) % 7;
-    final week1Monday = firstThursday.subtract(Duration(days: firstThursdayOffset));
+    final week1Monday = firstThursday.subtract(
+      Duration(days: firstThursdayOffset),
+    );
     final diffDays = thursday.difference(week1Monday).inDays;
     return (diffDays ~/ 7) + 1;
   }
@@ -350,15 +355,14 @@ class AnalyticsHelper {
   /// Child-cohort counters. Always writes the six cohort keys (zero-padded
   /// when null) plus `total_child_profiles`. Mirrors Android
   /// `identifyForChildCohorts`.
+  ///
+  /// Keys are the abbreviated `ChildProfileCohort` codes (`B_I`/`B_T`/`B_C`/
+  /// `G_I`/`G_T`/`G_C`), matching [ChildEntity.cohortKey] exactly — the
+  /// [cohorts] map passed in is keyed by that same getter, so a mismatch
+  /// here means every lookup below silently misses and reports 0 no matter
+  /// how many children actually exist in that bucket.
   Future<void> identifyForChildCohorts(Map<String, int>? cohorts) async {
-    const requiredKeys = <String>[
-      'boy_infant',
-      'boy_toddler',
-      'boy_child',
-      'girl_infant',
-      'girl_toddler',
-      'girl_child',
-    ];
+    const requiredKeys = <String>['B_I', 'B_T', 'B_C', 'G_I', 'G_T', 'G_C'];
     const suffix = '_child_profile';
     final traits = <String, Object?>{};
     var total = 0;
@@ -430,16 +434,24 @@ class AnalyticsHelper {
   }
 
   Future<void> _identifyOnUtmChange(Map<String, Object?> traits) async {
-    traits[AnalyticsProperties.utmSource] = _utm.utmSource ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmMedium] = _utm.utmMedium ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmCampaign] = _utm.utmCampaign ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmContent] = _utm.utmContent ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmTerm] = _utm.utmTerm ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.deeplink] = _utm.deeplink ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmGender] = _utm.utmGender ?? AnalyticsDefaults.none;
+    traits[AnalyticsProperties.utmSource] =
+        _utm.utmSource ?? AnalyticsDefaults.none;
+    traits[AnalyticsProperties.utmMedium] =
+        _utm.utmMedium ?? AnalyticsDefaults.none;
+    traits[AnalyticsProperties.utmCampaign] =
+        _utm.utmCampaign ?? AnalyticsDefaults.none;
+    traits[AnalyticsProperties.utmContent] =
+        _utm.utmContent ?? AnalyticsDefaults.none;
+    traits[AnalyticsProperties.utmTerm] =
+        _utm.utmTerm ?? AnalyticsDefaults.none;
+    traits[AnalyticsProperties.deeplink] =
+        _utm.deeplink ?? AnalyticsDefaults.none;
+    traits[AnalyticsProperties.utmGender] =
+        _utm.utmGender ?? AnalyticsDefaults.none;
     if (traits.length > 2) {
       final now = DateTime.now();
-      final stamp = '${now.year.toString().padLeft(4, '0')}-'
+      final stamp =
+          '${now.year.toString().padLeft(4, '0')}-'
           '${now.month.toString().padLeft(2, '0')}-'
           '${now.day.toString().padLeft(2, '0')} '
           '${(now.hour % 12 == 0 ? 12 : now.hour % 12).toString().padLeft(2, '0')}:'
@@ -594,10 +606,13 @@ class AnalyticsHelper {
   }) async {
     final props = <String, Object?>{
       AnalyticsProperties.versionName: _packageInfo.version,
-      AnalyticsProperties.versionCode: int.tryParse(_packageInfo.buildNumber) ?? 0,
+      AnalyticsProperties.versionCode:
+          int.tryParse(_packageInfo.buildNumber) ?? 0,
     };
     final deviceProfile = _prefs.deviceProfile;
-    if (_prefs.isDeviceProfileSet && deviceProfile != null && deviceProfile.isNotEmpty) {
+    if (_prefs.isDeviceProfileSet &&
+        deviceProfile != null &&
+        deviceProfile.isNotEmpty) {
       props[AnalyticsProperties.deviceProfile] = deviceProfile;
     }
     if (sendExtraParams) {
@@ -611,7 +626,9 @@ class AnalyticsHelper {
         props[AnalyticsProperties.previousVersionCode] = prevVersionCode;
       }
     }
-    props[AnalyticsProperties.pushEnabled] = _yesNo(_prefs.pushEnabledAnalytics);
+    props[AnalyticsProperties.pushEnabled] = _yesNo(
+      _prefs.pushEnabledAnalytics,
+    );
     props[AnalyticsProperties.fmessenger] = _yesNo(_prefs.isFbAvailable);
     props[AnalyticsProperties.waInstalled] = _yesNo(_prefs.isWaAvailable);
     props[AnalyticsProperties.fcInstalled] = _yesNo(_prefs.isFcAvailable);
@@ -644,8 +661,9 @@ class AnalyticsHelper {
     // this method). ttl ≤ tti (delta = paint + interactive-ready).
     _launchTimer.logTti();
     final props = <String, Object?>{
-      AnalyticsProperties.fromScreen:
-          fromScreen.isNotEmpty ? fromScreen : AnalyticsDefaults.none,
+      AnalyticsProperties.fromScreen: fromScreen.isNotEmpty
+          ? fromScreen
+          : AnalyticsDefaults.none,
       AnalyticsProperties.ttl: _launchTimer.ttl,
       AnalyticsProperties.tti: _launchTimer.tti,
       AnalyticsProperties.installType:
@@ -698,9 +716,11 @@ class AnalyticsHelper {
     if (checkoutUser != null && checkoutUser.isNotEmpty) {
       props[AnalyticsProperties.checkoutUser] = checkoutUser;
     }
-    props[AnalyticsProperties.stepDuration] =
-        _checkoutTimer.timeSinceLastEvent(updateWithCurrentTime: reset);
-    props[AnalyticsProperties.totalDuration] = _checkoutTimer.timeSinceFirstEvent;
+    props[AnalyticsProperties.stepDuration] = _checkoutTimer.timeSinceLastEvent(
+      updateWithCurrentTime: reset,
+    );
+    props[AnalyticsProperties.totalDuration] =
+        _checkoutTimer.timeSinceFirstEvent;
     final bg = _checkoutTimer.backgroundDuration;
     props[AnalyticsProperties.backgroundTime] = bg;
     if (bg > 0) _checkoutTimer.resetBackgroundTimer();
@@ -722,5 +742,6 @@ class AnalyticsHelper {
     return props;
   }
 
-  String _yesNo(bool value) => value ? AnalyticsDefaults.yes : AnalyticsDefaults.no;
+  String _yesNo(bool value) =>
+      value ? AnalyticsDefaults.yes : AnalyticsDefaults.no;
 }

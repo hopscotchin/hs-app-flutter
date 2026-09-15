@@ -20,7 +20,8 @@ const _kIconSpacing = 12.0;
 
 /// Callback when an action link is tapped on a message bar.
 /// [actionLink] is the link string, [messageBar] is the source entity.
-typedef MessageBarActionCallback = void Function(String? actionLink, MessageBarEntity messageBar);
+typedef MessageBarActionCallback =
+    void Function(String? actionLink, MessageBarEntity messageBar);
 
 /// Renders a list of [MessageBarEntity] items.
 class MessageBarsWidget extends StatelessWidget {
@@ -39,7 +40,21 @@ class MessageBarsWidget extends StatelessWidget {
   final String? keyPrefix;
   final (double, double)? iconSize;
   final TextStyle? textStyle;
+
+  /// Overrides the title's style entirely (size, weight and colour) — the
+  /// default is always `labelLarge.bold`, brand-purple unless the bar's own
+  /// `textColor` is set. Null (default) keeps that behavior.
+  final TextStyle? titleStyle;
   final EdgeInsetsGeometry? padding;
+
+  /// Overrides each card's own internal content padding (default
+  /// `_kContentPadding`). Distinct from [padding] above, which only spaces
+  /// bars apart from each other/siblings.
+  final EdgeInsetsGeometry? contentPadding;
+
+  /// Optional border drawn around each card — null (default) keeps cards
+  /// borderless, same as before this was added.
+  final BoxBorder? cardBorder;
 
   const MessageBarsWidget({
     super.key,
@@ -50,7 +65,10 @@ class MessageBarsWidget extends StatelessWidget {
     this.spaceBetweenMessageBars = 10,
     this.iconSize = (_kIconSize, _kIconSize),
     this.textStyle,
+    this.titleStyle,
     this.padding,
+    this.contentPadding,
+    this.cardBorder,
   });
 
   @override
@@ -66,7 +84,9 @@ class MessageBarsWidget extends StatelessWidget {
       children: [
         for (var i = 0; i < visibleBars.length; i++)
           Padding(
-            padding: padding ?? EdgeInsets.symmetric(vertical: spaceBetweenMessageBars),
+            padding:
+                padding ??
+                EdgeInsets.symmetric(vertical: spaceBetweenMessageBars),
             child: _MessageBarItem(
               bar: visibleBars[i],
               cardStyle: cardStyle,
@@ -75,6 +95,9 @@ class MessageBarsWidget extends StatelessWidget {
               keyPrefix: keyPrefix,
               iconSize: iconSize,
               textStyle: textStyle,
+              titleStyle: titleStyle,
+              contentPadding: contentPadding,
+              cardBorder: cardBorder,
             ),
           ),
       ],
@@ -132,6 +155,9 @@ class _MessageBarItem extends StatefulWidget {
   final String? keyPrefix;
   final (double, double)? iconSize;
   final TextStyle? textStyle;
+  final TextStyle? titleStyle;
+  final EdgeInsetsGeometry? contentPadding;
+  final BoxBorder? cardBorder;
 
   const _MessageBarItem({
     required this.bar,
@@ -141,6 +167,9 @@ class _MessageBarItem extends StatefulWidget {
     this.keyPrefix,
     this.iconSize,
     this.textStyle,
+    this.titleStyle,
+    this.contentPadding,
+    this.cardBorder,
   });
 
   @override
@@ -182,10 +211,11 @@ class _MessageBarItemState extends State<_MessageBarItem> {
         ? (bar.hasIcon && bar.icon.isNotNullOrEmpty)
         : true;
 
-    final hasTwoButtons = bar.actionText.isNotNullOrEmpty && bar.actionTextRight.isNotNullOrEmpty;
+    final hasTwoButtons =
+        bar.actionText.isNotNullOrEmpty && bar.actionTextRight.isNotNullOrEmpty;
 
     final content = Padding(
-      padding: _kContentPadding,
+      padding: widget.contentPadding ?? _kContentPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -197,7 +227,9 @@ class _MessageBarItemState extends State<_MessageBarItem> {
             children: [
               if (showIcon) ...[
                 Padding(
-                  padding: hasTwoButtons ? const EdgeInsets.only(top: 3) : EdgeInsets.zero,
+                  padding: hasTwoButtons
+                      ? const EdgeInsets.only(top: 3)
+                      : EdgeInsets.zero,
                   child: _buildIcon(bar, type, textColor, widget.iconSize),
                 ),
                 const SizedBox(width: _kIconSpacing),
@@ -215,8 +247,15 @@ class _MessageBarItemState extends State<_MessageBarItem> {
                     ],
                     hasTwoButtons
                         ? _buildPlainMessage(bar, textColor, widget.textStyle)
-                        : _buildMessageWithInlineAction(bar, textColor, widget.textStyle),
-                    if (hasTwoButtons) ...[const SizedBox(height: 20), _buildTwoButtons(bar)],
+                        : _buildMessageWithInlineAction(
+                            bar,
+                            textColor,
+                            widget.textStyle,
+                          ),
+                    if (hasTwoButtons) ...[
+                      const SizedBox(height: 20),
+                      _buildTwoButtons(bar),
+                    ],
                   ],
                 ),
               ),
@@ -229,7 +268,11 @@ class _MessageBarItemState extends State<_MessageBarItem> {
     if (widget.cardStyle) {
       return Container(
         width: double.infinity,
-        decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(4)),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(4),
+          border: widget.cardBorder,
+        ),
         child: content,
       );
     }
@@ -246,15 +289,26 @@ class _MessageBarItemState extends State<_MessageBarItem> {
     (double, double)? iconSize,
   ) {
     if (type == _MessageBarType.custom) {
-      return (bar.icon ?? '').contains('http')
-          ? CustomImage(
-              height: iconSize?.$1,
-              width: iconSize?.$2,
-              path: bar.icon ?? '',
-              placeholder: const Icon(Icons.info),
-              errorWidget: const Icon(Icons.info),
-            )
-          : const Icon(Icons.info);
+      final icon = bar.icon ?? '';
+      // Backend-sent bars only ever carry a network icon, and CustomImage's
+      // *network* path has error handling (falls back to the glyph below on
+      // a bad URL) — but its *local-asset* path has none at all, so a
+      // malformed/garbage icon string from the backend would otherwise
+      // crash into Flutter's broken-asset error instead of degrading
+      // gracefully. `assets/` is safe to trust here only because it can't
+      // originate from the backend — it's how *this app's own code* points
+      // at a bundled icon (e.g. the Kids "why we ask" shield).
+      final isTrustedLocalAsset = icon.startsWith('assets/');
+      if (icon.startsWith('http') || isTrustedLocalAsset) {
+        return CustomImage(
+          height: iconSize?.$1,
+          width: iconSize?.$2,
+          path: icon,
+          placeholder: const Icon(Icons.info),
+          errorWidget: const Icon(Icons.info),
+        );
+      }
+      return const Icon(Icons.info);
     }
 
     return Padding(
@@ -274,21 +328,24 @@ class _MessageBarItemState extends State<_MessageBarItem> {
   TextStyle _messageTextStyle(Color textColor) =>
       AppTypographyV1.labelMedium.regular.copyWith(color: textColor);
 
-  TextStyle get _actionTextStyle =>
-      AppTypographyV1.labelMedium.bold.copyWith(color: AppColors.brandSecondary);
+  TextStyle get _actionTextStyle => AppTypographyV1.labelMedium.bold.copyWith(
+    color: AppColors.brandSecondary,
+  );
 
   /// Title is bolder and brand-coloured; the backend can still override the
   /// colour for the whole bar via `textColor`, which is why that wins when set.
-  TextStyle _titleTextStyle(MessageBarEntity bar, Color textColor) => AppTypographyV1
-      .labelLarge
-      .bold
-      .copyWith(color: bar.textColor.isNotNullOrEmpty ? textColor : AppColors.brandPrimary);
+  TextStyle _titleTextStyle(MessageBarEntity bar, Color textColor) =>
+      AppTypographyV1.labelLarge.bold.copyWith(
+        color: bar.textColor.isNotNullOrEmpty
+            ? textColor
+            : AppColors.brandPrimary,
+      );
 
   Widget _buildTitle(MessageBarEntity bar, Color textColor) {
     return Text.rich(
       TextSpan(children: HtmlText.spans(bar.title)),
       key: _key(MessageBarTestStrings.messageBarTitleTextField),
-      style: _titleTextStyle(bar, textColor),
+      style: widget.titleStyle ?? _titleTextStyle(bar, textColor),
     );
   }
 
@@ -296,7 +353,11 @@ class _MessageBarItemState extends State<_MessageBarItem> {
   /// most bars and as a small HTML fragment on others (the cart credits bar
   /// bolds its amount), and [HtmlText.spans] handles both — so this path also
   /// decodes entities like `&amp;` that a plain `Text` would show raw.
-  Widget _buildPlainMessage(MessageBarEntity bar, Color textColor, TextStyle? textStyle) {
+  Widget _buildPlainMessage(
+    MessageBarEntity bar,
+    Color textColor,
+    TextStyle? textStyle,
+  ) {
     return Text.rich(
       TextSpan(children: HtmlText.spans(bar.displayText)),
       key: _key(MessageBarTestStrings.messageBarMessageTextField),

@@ -162,6 +162,24 @@ import 'package:hs_app_flutter/features/discover/domain/usecases/get_home_page_u
     as _i325;
 import 'package:hs_app_flutter/features/discover/presentation/bloc/home_bloc.dart'
     as _i626;
+import 'package:hs_app_flutter/features/kids/data/datasources/remote/kids_remote_datasource.dart'
+    as _i359;
+import 'package:hs_app_flutter/features/kids/data/repositories/kids_repository_impl.dart'
+    as _i634;
+import 'package:hs_app_flutter/features/kids/domain/repositories/kids_repository.dart'
+    as _i970;
+import 'package:hs_app_flutter/features/kids/domain/usecases/delete_child_usecase.dart'
+    as _i465;
+import 'package:hs_app_flutter/features/kids/domain/usecases/get_children_usecase.dart'
+    as _i1052;
+import 'package:hs_app_flutter/features/kids/domain/usecases/get_kid_form_config_usecase.dart'
+    as _i1004;
+import 'package:hs_app_flutter/features/kids/domain/usecases/save_child_usecase.dart'
+    as _i396;
+import 'package:hs_app_flutter/features/kids/presentation/bloc/kids_bloc.dart'
+    as _i17;
+import 'package:hs_app_flutter/features/kids/presentation/bloc/manage_kid_bloc.dart'
+    as _i512;
 import 'package:hs_app_flutter/features/landing_page/presentation/bloc/landing_page_bloc.dart'
     as _i206;
 import 'package:hs_app_flutter/features/pdp/data/datasources/remote/pdp_remote_datasource.dart'
@@ -380,6 +398,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i184.HomeRemoteDataSource>(
       () => _i184.HomeRemoteDataSource(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i359.KidsRemoteDatasource>(
+      () => _i359.KidsRemoteDatasource(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i976.PdpRemoteDatasource>(
       () => _i976.PdpRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -406,6 +427,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i454.CartRemoteDataSource>(
       () => _i454.CartRemoteDataSourceImpl(apiClient: gh<_i930.ApiClient>()),
+    );
+    gh.lazySingleton<_i359.KidsFormConfigFetcher>(
+      () => _i359.KidsFormConfigFetcher(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i1014.HomeRepository>(
       () => _i298.HomeRepositoryImpl(
@@ -569,6 +593,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i938.GetSearchSuggestionsUseCase>(
       () => _i938.GetSearchSuggestionsUseCase(gh<_i283.SearchRepository>()),
     );
+    gh.lazySingleton<_i970.KidsRepository>(
+      () => _i634.KidsRepositoryImpl(
+        gh<_i359.KidsRemoteDatasource>(),
+        gh<_i359.KidsFormConfigFetcher>(),
+        gh<_i351.NetworkInfo>(),
+      ),
+    );
     gh.lazySingleton<_i766.CheckMobileUseCase>(
       () => _i766.CheckMobileUseCase(gh<_i476.AuthRepository>()),
     );
@@ -626,6 +657,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i473.JourneyWorker>(
       () => _i473.JourneyWorker(gh<_i127.AnalyticsHelper>()),
     );
+    gh.lazySingleton<_i465.DeleteChildUseCase>(
+      () => _i465.DeleteChildUseCase(gh<_i970.KidsRepository>()),
+    );
+    gh.lazySingleton<_i1052.GetChildrenUseCase>(
+      () => _i1052.GetChildrenUseCase(gh<_i970.KidsRepository>()),
+    );
+    gh.lazySingleton<_i1004.GetKidFormConfigUseCase>(
+      () => _i1004.GetKidFormConfigUseCase(gh<_i970.KidsRepository>()),
+    );
+    gh.lazySingleton<_i396.SaveChildUseCase>(
+      () => _i396.SaveChildUseCase(gh<_i970.KidsRepository>()),
+    );
     gh.factory<_i806.PromoDetailsBloc>(
       () => _i806.PromoDetailsBloc(gh<_i203.GetPromoDetailsUseCase>()),
     );
@@ -656,6 +699,13 @@ extension GetItInjectableX on _i174.GetIt {
         verifyPincodeUseCase: gh<_i197.VerifyPincodeUseCase>(),
         cartCountCubit: gh<_i884.CartCountCubit>(),
         getSizeChartUseCase: gh<_i1001.GetSizeChartUseCase>(),
+      ),
+    );
+    gh.factory<_i17.KidsBloc>(
+      () => _i17.KidsBloc(
+        gh<_i1052.GetChildrenUseCase>(),
+        gh<_i465.DeleteChildUseCase>(),
+        gh<_i127.AnalyticsHelper>(),
       ),
     );
     gh.singleton<_i938.WishlistCubit>(
@@ -752,6 +802,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i283.CheckPincodeUseCase>(
       () => _i283.CheckPincodeUseCase(gh<_i760.PlpRepository>()),
+    );
+    gh.factory<_i512.ManageKidBloc>(
+      () => _i512.ManageKidBloc(
+        gh<_i396.SaveChildUseCase>(),
+        gh<_i1004.GetKidFormConfigUseCase>(),
+        gh<_i127.AnalyticsHelper>(),
+      ),
     );
     gh.factory<_i206.LandingPageBloc>(
       () => _i206.LandingPageBloc(
