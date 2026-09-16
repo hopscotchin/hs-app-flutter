@@ -8,11 +8,15 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 import '../appbar/hs_appbar.dart';
 import '../../core/config/env_config.dart';
+import '../../core/constants/api_constants.dart';
+import '../../core/di/injection.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/router/app_navigator.dart';
+import '../../core/services/notification_permission_service.dart';
 import '../../core/theme/colors.dart';
 import '../../core/utils/snackbar_utils.dart';
 import 'empty_state_widget.dart';
+import 'notification_permission_nudge_bar.dart';
 
 /// Generalised in-app WebView.
 ///
@@ -98,6 +102,7 @@ class _InAppWebViewPageState extends State<InAppWebViewPage> {
   int _progress = 0;
   bool _isLoading = true;
   bool _hasError = false;
+  bool _showNotificationNudge = false;
 
   @override
   void initState() {
@@ -135,8 +140,9 @@ class _InAppWebViewPageState extends State<InAppWebViewPage> {
               });
             }
           },
-          onPageFinished: (_) {
+          onPageFinished: (url) {
             if (mounted) setState(() => _isLoading = false);
+            _maybeShowNotificationNudge(url);
           },
           onWebResourceError: (error) {
             debugPrint(
@@ -186,6 +192,40 @@ class _InAppWebViewPageState extends State<InAppWebViewPage> {
       WebViewCookieManager().clearCookies();
     }
     super.dispose();
+  }
+
+  Widget _buildNotificationNudgeBar() {
+    final service = sl<NotificationPermissionService>();
+    final nudge = service.wishlistNudgeCopy;
+    return NotificationPermissionNudgeBar(
+      message: nudge?.description ?? 'Turn on notifications for price-drop alerts.',
+      enableLabel: nudge?.positiveButtonText ?? 'Enable',
+      dismissLabel: nudge?.negativeButtonText ?? 'Not now',
+      onEnable: () {
+        setState(() => _showNotificationNudge = false);
+        service.requestWebviewPermission();
+      },
+      onDismiss: () {
+        setState(() => _showNotificationNudge = false);
+        service.recordWebviewDismissed();
+      },
+    );
+  }
+
+  // ── Notification permission nudge (wishlist page only) ─────────
+  //
+  // Mirrors Android's `WebAppActivity` nudge, which only appears when the
+  // loaded page is the wishlist. No dedicated wishlist page (native or
+  // web-rendered) exists in this app yet, so this is effectively dormant
+  // until one is routed through `InAppWebViewPage` with a matching URL.
+
+  Future<void> _maybeShowNotificationNudge(String url) async {
+    if (!url.contains(ApiConstants.wishlist)) return;
+    final service = sl<NotificationPermissionService>();
+    if (!await service.shouldShowWebviewNudge()) return;
+    if (!mounted) return;
+    service.recordWebviewIntentShown();
+    setState(() => _showNotificationNudge = true);
   }
 
   // ── Loading ──────────────────────────────────────────────────
@@ -385,6 +425,7 @@ class _InAppWebViewPageState extends State<InAppWebViewPage> {
             backgroundColor: AppColors.primaryLight,
           ),
         Expanded(child: WebViewWidget(controller: _controller)),
+        if (_showNotificationNudge) _buildNotificationNudgeBar(),
       ],
     );
   }

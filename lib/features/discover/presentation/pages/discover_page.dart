@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../components/app_dialog.dart';
 import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
@@ -11,6 +12,7 @@ import '../../../../core/analytics/events/modules/home_events.dart';
 import '../../../../core/analytics/home/home_track_analytic_manager.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/navigation_observer.dart';
+import '../../../../core/services/notification_permission_service.dart';
 import '../../domain/entities/home_page_entity.dart';
 import '../bloc/home_bloc.dart';
 import '../widgets/combined_header_delegate.dart';
@@ -36,6 +38,10 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
   final ScrollController _scrollController = ScrollController();
 
   bool _suppressScrollTabsToTop = false;
+
+  /// Guards `_maybeShowNotificationNudge` to at most once per page instance —
+  /// `HomeStatus.success` can otherwise re-fire on pull-to-refresh/pagination.
+  bool _notificationNudgeChecked = false;
 
   /// Cached list of sortingOption ids (parallel to the visible tabs). Used so
   /// the bloc receives the API's `pageName` (`Shop_for_Baby`, etc.) on tab tap.
@@ -128,6 +134,42 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     });
   }
 
+  Future<void> _maybeShowNotificationNudge(BuildContext context) async {
+    _notificationNudgeChecked = true;
+    final service = sl<NotificationPermissionService>();
+    if (!await service.shouldShowHomepageDialog()) return;
+    final nudge = service.homepageNudgeCopy;
+    if (nudge == null || !mounted || !context.mounted) return;
+
+    service.recordHomepageIntentShown();
+    await AppDialog.show(
+      context,
+      title: nudge.title,
+      description: nudge.description ?? '',
+      barrierDismissible: false,
+      primaryAction: AppDialogAction(
+        label: nudge.positiveButtonText ?? 'Enable',
+        style: AppDialogButtonStyle.filled,
+        onPressed: () {
+          // rootNavigator: true — AppDialog.show pushes via showDialog's
+          // default root-navigator behavior; this app's go_router shell
+          // gives `context` its own local (tab) navigator, so an unscoped
+          // pop() here would close the current page/tab instead of the
+          // dialog once that tab's stack only has this one route.
+          Navigator.of(context, rootNavigator: true).pop();
+          service.requestHomepagePermission();
+        },
+      ),
+      secondaryAction: AppDialogAction(
+        label: nudge.negativeButtonText ?? 'Not now',
+        onPressed: () {
+          Navigator.of(context, rootNavigator: true).pop();
+          service.recordHomepageDismissed();
+        },
+      ),
+    );
+  }
+
   void _onTabSelected(int index) {
     if (index == _selectedTabIndex) return;
     // Suppress the deferred `_scrollTabsToTop` animation — switching tabs
@@ -176,8 +218,17 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     // this single transition covers every refresh trigger.
     return BlocListener<HomeBloc, HomeState>(
       listenWhen: (prev, curr) =>
-          prev.status != HomeStatus.loading && curr.status == HomeStatus.loading,
-      listener: (context, _) => _scrollToTopOnReload(),
+          (prev.status != HomeStatus.loading && curr.status == HomeStatus.loading) ||
+          (!_notificationNudgeChecked &&
+              prev.status != HomeStatus.success &&
+              curr.status == HomeStatus.success),
+      listener: (context, state) {
+        if (state.status == HomeStatus.loading) {
+          _scrollToTopOnReload();
+        } else if (state.status == HomeStatus.success) {
+          _maybeShowNotificationNudge(context);
+        }
+      },
       child: BlocBuilder<HomeBloc, HomeState>(
         // Skip rebuilds for pure-pagination flips (isLoadingMore true ↔ false).
         // The spinner sliver below has its own BlocSelector that handles

@@ -8,18 +8,25 @@ import 'package:injectable/injectable.dart';
 
 import '../services/pref_manager.dart';
 import '../utils/device_utils.dart';
+import 'notification_permission_service.dart';
 import '../../features/device/domain/usecases/register_device_usecase.dart';
 
 @lazySingleton
 class PushNotificationService {
-  PushNotificationService(this._registerDevice, this._prefManager);
+  PushNotificationService(
+    this._registerDevice,
+    this._prefManager,
+    this._notificationPermissionService,
+  );
 
   final RegisterDeviceUseCase _registerDevice;
   final PrefManager _prefManager;
+  final NotificationPermissionService _notificationPermissionService;
 
   Future<void> initialize() async {
     if (kIsWeb) return;
     FirebaseMessaging.instance.onTokenRefresh.listen(_sendToServer);
+    _notificationPermissionService.registerResponseListener();
     await _registerIfNeeded();
   }
 

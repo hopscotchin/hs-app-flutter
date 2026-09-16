@@ -43,6 +43,10 @@ import 'package:hs_app_flutter/core/network/connectivity/network_info.dart'
 import 'package:hs_app_flutter/core/network/network_client.dart' as _i81;
 import 'package:hs_app_flutter/core/router/navigation_observer.dart' as _i93;
 import 'package:hs_app_flutter/core/services/connectivity_service.dart' as _i93;
+import 'package:hs_app_flutter/core/services/notification_nudge_helper.dart'
+    as _i811;
+import 'package:hs_app_flutter/core/services/notification_permission_service.dart'
+    as _i546;
 import 'package:hs_app_flutter/core/services/pref_manager.dart' as _i818;
 import 'package:hs_app_flutter/core/services/push_notification_service.dart'
     as _i1061;
@@ -296,6 +300,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i93.ConnectivityService>(
       () => registerModule.connectivityService(),
     );
+    gh.lazySingleton<_i811.NotificationNudgeHelper>(
+      () => _i811.NotificationNudgeHelper(),
+    );
     gh.lazySingleton<_i806.HandleDeeplinkUseCase>(
       () => _i806.HandleDeeplinkUseCase(),
     );
@@ -424,6 +431,15 @@ extension GetItInjectableX on _i174.GetIt {
         apiClient: gh<_i930.ApiClient>(),
       ),
     );
+    gh.lazySingleton<_i68.SplashRepository>(
+      () => _i558.SplashRepositoryImpl(
+        gh<_i748.SplashRemoteDatasource>(),
+        gh<_i351.NetworkInfo>(),
+        gh<_i818.PrefManager>(),
+        gh<_i81.NetworkClient>(),
+        gh<_i811.NotificationNudgeHelper>(),
+      ),
+    );
     gh.lazySingleton<_i901.CartRepository>(
       () => _i77.CartRepositoryImpl(
         remoteDataSource: gh<_i454.CartRemoteDataSource>(),
@@ -441,14 +457,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i259.CategoriesRepositoryImpl(
         remoteDataSource: gh<_i730.CategoriesRemoteDataSource>(),
         networkInfo: gh<_i351.NetworkInfo>(),
-      ),
-    );
-    gh.lazySingleton<_i68.SplashRepository>(
-      () => _i558.SplashRepositoryImpl(
-        gh<_i748.SplashRemoteDatasource>(),
-        gh<_i351.NetworkInfo>(),
-        gh<_i818.PrefManager>(),
-        gh<_i81.NetworkClient>(),
       ),
     );
     gh.lazySingleton<_i550.ClearSessionUseCase>(
@@ -559,6 +567,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i692.RemoveFromWishlistUseCase>(
       () => _i692.RemoveFromWishlistUseCase(gh<_i945.WishlistRepository>()),
+    );
+    gh.lazySingleton<_i546.NotificationPermissionService>(
+      () => _i546.NotificationPermissionService(
+        gh<_i818.PrefManager>(),
+        gh<_i811.NotificationNudgeHelper>(),
+        gh<_i127.AnalyticsHelper>(),
+      ),
     );
     gh.lazySingleton<_i283.SearchRepository>(
       () => _i525.SearchRepositoryImpl(
@@ -707,12 +722,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i179.OrderAttributionHelper>(),
       ),
     );
-    gh.lazySingleton<_i1061.PushNotificationService>(
-      () => _i1061.PushNotificationService(
-        gh<_i407.RegisterDeviceUseCase>(),
-        gh<_i818.PrefManager>(),
-      ),
-    );
     gh.factory<_i531.ManageAddressBloc>(
       () => _i531.ManageAddressBloc(
         gh<_i697.CreateAddressUseCase>(),
@@ -726,6 +735,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i521.CartActionsCubit(
         gh<_i163.AddToCartUseCase>(),
         gh<_i884.CartCountCubit>(),
+      ),
+    );
+    gh.lazySingleton<_i1061.PushNotificationService>(
+      () => _i1061.PushNotificationService(
+        gh<_i407.RegisterDeviceUseCase>(),
+        gh<_i818.PrefManager>(),
+        gh<_i546.NotificationPermissionService>(),
       ),
     );
     gh.lazySingleton<_i66.HomeTrackAnalyticManager>(

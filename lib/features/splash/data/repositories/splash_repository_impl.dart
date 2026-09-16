@@ -8,6 +8,7 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/mixins/safe_api_call.dart';
 import '../../../../core/network/connectivity/network_info.dart';
 import '../../../../core/network/network_client.dart';
+import '../../../../core/services/notification_nudge_helper.dart';
 import '../../../../core/services/pref_manager.dart';
 import '../../../auth/data/models/user_info/user_info_model.dart';
 import '../../domain/entities/customer_info_entity.dart';
@@ -23,12 +24,14 @@ class SplashRepositoryImpl with SafeApiCall implements SplashRepository {
     this._networkInfo,
     this._prefManager,
     this._networkClient,
+    this._notificationNudgeHelper,
   );
 
   final SplashRemoteDatasource _api;
   final NetworkInfo _networkInfo;
   final PrefManager _prefManager;
   final NetworkClient _networkClient;
+  final NotificationNudgeHelper _notificationNudgeHelper;
 
   @override
   Future<Either<Failure, Unit>> getAppConfig({
@@ -81,6 +84,10 @@ class SplashRepositoryImpl with SafeApiCall implements SplashRepository {
     if (n7 != null) {
       _networkClient.setN7HumanDetectorEnabled(n7.enabled);
     }
+
+    // In-memory only, mirroring Android's NotificationNudgeHelper — not
+    // persisted, refetched every cold start.
+    _notificationNudgeHelper.setNudges(config.notificationNudges);
   }
 
   Future<void> _persistCustomerInfo(CustomerInfoEntity info) async {

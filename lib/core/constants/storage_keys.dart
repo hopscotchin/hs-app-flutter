@@ -116,4 +116,16 @@ class StorageKeys {
 
   // Environment (debug builds only — release is pinned at compile time)
   static const String selectedEnvironment = 'hs_selected_environment';
+
+  // Notification permission nudge (mirrors Android AppRecordData's
+  // notification-nudge keys). Homepage dialog state:
+  static const String notificationDialogShown = 'hs_notification_dialog_shown';
+  static const String notificationNudgeDateTime = 'hs_notification_nudge_date_time';
+  static const String notificationNudgeDismissed = 'hs_notification_nudge_dismissed';
+  static const String notificationNudgeOneTimeTargetDateNotified =
+      'hs_notification_nudge_one_time_target_date_notified';
+  // PLP nudge state — separate timestamp/dismiss keys, matching Android's
+  // dedicated `AppRecordData.getNotificationNudgePLPDateTime` / `isNotificationNudgePLPDismiss`.
+  static const String notificationNudgePlpDateTime = 'hs_notification_nudge_plp_date_time';
+  static const String notificationNudgePlpDismissed = 'hs_notification_nudge_plp_dismissed';
 }

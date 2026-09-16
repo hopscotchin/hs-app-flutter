@@ -22,6 +22,7 @@ class AppConfigResponse extends ActionResponse {
   final String? videoTransformationsJson;
   final String? cartMessageBarsJson;
   final N7Config? n7Config;
+  final List<NotificationNudge>? notificationNudges;
 
   const AppConfigResponse({
     this.isHardUpdate = false,
@@ -37,6 +38,7 @@ class AppConfigResponse extends ActionResponse {
     this.videoTransformationsJson,
     this.cartMessageBarsJson,
     this.n7Config,
+    this.notificationNudges,
   });
 
   String? get firstContact =>
@@ -68,6 +70,9 @@ class AppConfigResponse extends ActionResponse {
       n7Config = json['n7Config'] != null
           ? N7Config.fromJson(json['n7Config'] as Map<String, dynamic>)
           : null,
+      notificationNudges = (json['notificationNudges'] as List<dynamic>?)
+          ?.map((e) => NotificationNudge.fromJson(e as Map<String, dynamic>))
+          .toList(),
       super.fromJson();
 
   static String? _encodeList(dynamic value) {
@@ -93,6 +98,88 @@ class AppConfigResponse extends ActionResponse {
     videoTransformationsJson,
     cartMessageBarsJson,
     n7Config,
+    notificationNudges,
+  ];
+}
+
+/// Mirrors Android's `NotificationNudge` — one entry per screen key
+/// ("HOMEPAGE", "PLP", …) describing the pre-permission nudge copy and the
+/// [Rule] that gates how often it may reappear.
+class NotificationNudge extends Equatable {
+  final String? screen;
+  final String? title;
+  final String? titleImage;
+  final String? description;
+  final String? negativeButtonText;
+  final String? positiveButtonText;
+  final NotificationNudgeRule? rule;
+
+  const NotificationNudge({
+    this.screen,
+    this.title,
+    this.titleImage,
+    this.description,
+    this.negativeButtonText,
+    this.positiveButtonText,
+    this.rule,
+  });
+
+  factory NotificationNudge.fromJson(Map<String, dynamic> json) {
+    return NotificationNudge(
+      screen: json['screen'] as String?,
+      title: json['title'] as String?,
+      titleImage: json['titleImage'] as String?,
+      description: json['description'] as String?,
+      negativeButtonText: json['negativeButtonText'] as String?,
+      positiveButtonText: json['positiveButtonText'] as String?,
+      rule: json['rule'] != null
+          ? NotificationNudgeRule.fromJson(json['rule'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    screen,
+    title,
+    titleImage,
+    description,
+    negativeButtonText,
+    positiveButtonText,
+    rule,
+  ];
+}
+
+/// Mirrors Android's `Rule` — frequencies are in **hours**,
+/// `oneTimeTargetDate` is epoch millis.
+class NotificationNudgeRule extends Equatable {
+  final int? deniedFrequency;
+  final int? dismissedFrequency;
+  final int? oneTimeTargetDate;
+  final int? showNudgeFrequency;
+
+  const NotificationNudgeRule({
+    this.deniedFrequency,
+    this.dismissedFrequency,
+    this.oneTimeTargetDate,
+    this.showNudgeFrequency,
+  });
+
+  factory NotificationNudgeRule.fromJson(Map<String, dynamic> json) {
+    return NotificationNudgeRule(
+      deniedFrequency: json['deniedFrequency'] as int?,
+      dismissedFrequency: json['dismissedFrequency'] as int?,
+      oneTimeTargetDate: json['oneTimeTargetDate'] as int?,
+      showNudgeFrequency: json['showNudgeFrequency'] as int?,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    deniedFrequency,
+    dismissedFrequency,
+    oneTimeTargetDate,
+    showNudgeFrequency,
   ];
 }
 

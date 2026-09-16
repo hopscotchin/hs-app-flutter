@@ -367,6 +367,40 @@ class PrefManager {
   Future<void> setHasStoreButtonClicked(bool? value) =>
       _setBoolOrRemove(StorageKeys.isFirstLogin, value);
 
+  // ─── Notification permission nudge ───────────────────────────────
+  // Mirrors Android AppRecordData's notification-nudge state, split the same
+  // way: homepage dialog state vs. PLP's own separate timestamp/dismiss pair.
+
+  bool get notificationDialogShown =>
+      _prefs.getBool(StorageKeys.notificationDialogShown) ?? false;
+  Future<void> setNotificationDialogShown(bool value) =>
+      _prefs.setBool(StorageKeys.notificationDialogShown, value);
+
+  int get notificationNudgeDateTime =>
+      _prefs.getInt(StorageKeys.notificationNudgeDateTime) ?? 0;
+  Future<void> setNotificationNudgeDateTime(int value) =>
+      _prefs.setInt(StorageKeys.notificationNudgeDateTime, value);
+
+  bool get isNotificationNudgeDismissed =>
+      _prefs.getBool(StorageKeys.notificationNudgeDismissed) ?? false;
+  Future<void> setNotificationNudgeDismissed(bool value) =>
+      _prefs.setBool(StorageKeys.notificationNudgeDismissed, value);
+
+  int get notificationNudgeOneTimeTargetDateNotified =>
+      _prefs.getInt(StorageKeys.notificationNudgeOneTimeTargetDateNotified) ?? -1;
+  Future<void> setNotificationNudgeOneTimeTargetDateNotified(int value) =>
+      _prefs.setInt(StorageKeys.notificationNudgeOneTimeTargetDateNotified, value);
+
+  int get notificationNudgePlpDateTime =>
+      _prefs.getInt(StorageKeys.notificationNudgePlpDateTime) ?? 0;
+  Future<void> setNotificationNudgePlpDateTime(int value) =>
+      _prefs.setInt(StorageKeys.notificationNudgePlpDateTime, value);
+
+  bool get isNotificationNudgePlpDismissed =>
+      _prefs.getBool(StorageKeys.notificationNudgePlpDismissed) ?? false;
+  Future<void> setNotificationNudgePlpDismissed(bool value) =>
+      _prefs.setBool(StorageKeys.notificationNudgePlpDismissed, value);
+
   // ─── Helpers ──────────────────────────────────────────────────────
 
   Future<void> _setStringOrRemove(String key, String? value) {

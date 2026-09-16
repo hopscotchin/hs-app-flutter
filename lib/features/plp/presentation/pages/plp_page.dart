@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/atoms/empty_state_widget.dart';
+import 'package:hs_app_flutter/components/atoms/notification_permission_nudge_bar.dart';
 import 'package:hs_app_flutter/components/page_components/message_bars_widget.dart';
 import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/plp_strings.dart';
 import 'package:hs_app_flutter/core/navigation/action_url_handler.dart';
+import 'package:hs_app_flutter/core/services/notification_permission_service.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/floating_item_count.dart';
 import 'package:hs_app_flutter/features/plp/presentation/widgets/plp_applied_filters.dart';
@@ -126,6 +128,15 @@ class _PlpViewState extends State<_PlpView> {
   /// Key on the product [SliverList] so we can read its render geometry.
   final GlobalKey _productSliverKey = GlobalKey();
 
+  /// Product-card index at which Android inserts its notification-permission
+  /// nudge card (`NOTIFICATION_INTENT_POSITION`). This app doesn't splice a
+  /// card into the grid itself (see `product_grid.dart`'s manual row-pairing
+  /// logic) — instead the bar below appears once the shopper has scrolled
+  /// this far, matching the trigger point without touching the grid layout.
+  static const int _notificationNudgePosition = 12;
+  bool _notificationNudgeChecked = false;
+  final ValueNotifier<bool> _showNotificationNudge = ValueNotifier(false);
+
   String get _title => widget.categoryName ?? widget.searchQuery ?? '';
 
   @override
@@ -139,8 +150,18 @@ class _PlpViewState extends State<_PlpView> {
     _scrollController.removeListener(_onScroll);
     _showScrollToTop.dispose();
     _visibleCount.dispose();
+    _showNotificationNudge.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _maybeShowNotificationNudge() async {
+    _notificationNudgeChecked = true;
+    final service = sl<NotificationPermissionService>();
+    if (!await service.shouldShowPlpNudge()) return;
+    if (!mounted) return;
+    service.recordPlpIntentShown();
+    _showNotificationNudge.value = true;
   }
 
   void _onScroll() {
@@ -154,6 +175,10 @@ class _PlpViewState extends State<_PlpView> {
       final count = _lastVisibleProductCount();
       if (count != null && count != _visibleCount.value) {
         _visibleCount.value = count;
+      }
+      if (!_notificationNudgeChecked &&
+          _visibleCount.value >= _notificationNudgePosition) {
+        _maybeShowNotificationNudge();
       }
     }
   }
@@ -220,6 +245,31 @@ class _PlpViewState extends State<_PlpView> {
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
+      bottomNavigationBar: ValueListenableBuilder<bool>(
+        valueListenable: _showNotificationNudge,
+        builder: (context, show, _) {
+          if (!show) return const SizedBox.shrink();
+          final service = sl<NotificationPermissionService>();
+          final nudge = service.plpNudgeCopy;
+          return SafeArea(
+            top: false,
+            child: NotificationPermissionNudgeBar(
+              message:
+                  nudge?.description ?? 'Turn on notifications for restock alerts and price drops.',
+              enableLabel: nudge?.positiveButtonText ?? 'Enable',
+              dismissLabel: nudge?.negativeButtonText ?? 'Not now',
+              onEnable: () {
+                _showNotificationNudge.value = false;
+                service.requestPlpPermission();
+              },
+              onDismiss: () {
+                _showNotificationNudge.value = false;
+                service.recordPlpDismissed();
+              },
+            ),
+          );
+        },
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: ValueListenableBuilder<bool>(
         valueListenable: _showScrollToTop,
