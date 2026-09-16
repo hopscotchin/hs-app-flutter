@@ -69,3 +69,19 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // CleverTap push templates (rating, five-icon, timer, carousel,
+    // zero-bezel, input box, …). The core clevertap-android-sdk is already
+    // pulled in transitively by the `clevertap_plugin` Flutter package.
+    implementation("com.clevertap.android:push-templates:2.1.0")
+
+    // firebase-messaging: the firebase_messaging Flutter plugin declares this
+    // as `implementation` in its own module, so it's on the runtime classpath
+    // but not exposed to app code at compile time. FCMMessageListenerService
+    // needs it directly. Version pinned via the same BOM the Flutter Firebase
+    // plugins use (see firebase_core's android/gradle.properties) to avoid a
+    // version mismatch.
+    implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
+    implementation("com.google.firebase:firebase-messaging")
+}

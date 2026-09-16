@@ -36,6 +36,20 @@ target 'Runner' do
   end
 end
 
+# CleverTap push templates (rating, carousel, …): a Notification Service
+# Extension enriches the push with rich media, a Notification Content
+# Extension renders the template UI. See ios/CleverTapNotificationService
+# and ios/CleverTapNotificationContent.
+target 'CleverTapNotificationService' do
+  use_frameworks!
+  pod 'CTNotificationService'
+end
+
+target 'CleverTapNotificationContent' do
+  use_frameworks!
+  pod 'CTNotificationContent'
+end
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
