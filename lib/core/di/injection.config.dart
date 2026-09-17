@@ -43,6 +43,8 @@ import 'package:hs_app_flutter/core/network/connectivity/network_info.dart'
 import 'package:hs_app_flutter/core/network/network_client.dart' as _i81;
 import 'package:hs_app_flutter/core/router/navigation_observer.dart' as _i93;
 import 'package:hs_app_flutter/core/services/connectivity_service.dart' as _i93;
+import 'package:hs_app_flutter/core/services/deep_link_service.dart'
+    as _i1500;
 import 'package:hs_app_flutter/core/services/notification_nudge_helper.dart'
     as _i811;
 import 'package:hs_app_flutter/core/services/notification_permission_service.dart'
@@ -300,6 +302,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i93.ConnectivityService>(
       () => registerModule.connectivityService(),
     );
+    gh.lazySingleton<_i1500.DeepLinkService>(() => _i1500.DeepLinkService());
     gh.lazySingleton<_i811.NotificationNudgeHelper>(
       () => _i811.NotificationNudgeHelper(),
     );

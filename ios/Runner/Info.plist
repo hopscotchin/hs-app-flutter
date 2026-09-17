@@ -41,6 +41,14 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
+			<string>in.hopscotch.deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>hopscotch</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>

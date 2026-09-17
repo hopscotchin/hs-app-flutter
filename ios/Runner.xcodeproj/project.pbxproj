@@ -376,6 +376,9 @@
 							com.apple.Push = {
 								enabled = 1;
 							};
+							"com.apple.developer.associated-domains" = {
+								enabled = 1;
+							};
 						};
 					};
 				};

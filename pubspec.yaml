@@ -105,6 +105,9 @@ dependencies:
   segment_analytics: ^1.1.11
   appsflyer_sdk: ^6.16.2
   clevertap_plugin: ^3.4.0
+  # Deep link capture: custom `hopscotch://` scheme + Universal/App Links,
+  # cold start and warm/background. Feeds ActionUrlHandler via DeepLinkService.
+  app_links: ^7.2.1
   # Microsoft Clarity — session replays + custom tags for user_type / utm /
   # PID / PLP / boutiqueId + user id. Mirrors Android
   # `common/helper/ClarityHelper.kt`. Feature-flag gated via
