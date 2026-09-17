@@ -1,0 +1,109 @@
+{
+  "_comment": [
+    "Android's PDP response for PID 945499 — GET /api/v2/product/945499, captured",
+    "from the Android app (client 10.7.0, QA). Android's hspdp module reads v2;",
+    "Flutter reads v3. This fixture exists so a test can assert the two",
+    "trackingMeta blocks stay identical, which is the assumption PDP analytics",
+    "parity rests on.",
+    "Trimmed to the analytics-relevant fields: the full response also carries",
+    "banners, serviceGuarantee, details, plpRedirectURL, colorVariants,",
+    "seoMetaData and crmProductName, none of which reach any event."
+  ],
+  "product": {
+    "id": 945499,
+    "soldOut": false,
+    "hasSizeChart": true,
+    "productName": "Pink All Over Sleeveless Top",
+    "media": [
+      {
+        "mimeType": "IMAGE",
+        "height": 1000,
+        "width": 1000,
+        "url": "https://qastatic.hopscotch.in/fstatic/product/202007/dd2c711d-f659-4b6b-b4cf-0f2ba7bc04c4_full.jpg?version=1594453148107"
+      },
+      {
+        "mimeType": "IMAGE",
+        "height": 1000,
+        "width": 1000,
+        "url": "https://qastatic.hopscotch.in/fstatic/product/202007/b3657142-5d13-4b09-affe-7614896dc803_full.jpg?version=1594453148889"
+      },
+      {
+        "mimeType": "IMAGE",
+        "height": 1000,
+        "width": 1000,
+        "url": "https://qastatic.hopscotch.in/fstatic/product/202007/8cb3a8a0-e158-403a-9493-aa20238e5abb_full.jpg?version=1594453149882"
+      }
+    ],
+    "price": {
+      "type": "fixed",
+      "displayValue": "₹349",
+      "absoluteValue": 349.0,
+      "callout": "Inclusive of all taxes"
+    },
+    "skus": [
+      {
+        "skuId": "WHA-3049919",
+        "size": "3-4 Y",
+        "price": { "type": "fixed", "displayValue": "₹349", "absoluteValue": 349.0 },
+        "enable": false,
+        "availableQuantity": 0,
+        "skuProductDetails": { "sku_mrp": "₹449", "sku_type": "fixed", "sku_size": "3-4 Y" }
+      },
+      {
+        "skuId": "WHA-3049920",
+        "size": "4-5 Y",
+        "price": { "type": "fixed", "displayValue": "₹349", "absoluteValue": 349.0 },
+        "enable": true,
+        "availableQuantity": 3,
+        "skuProductDetails": { "sku_mrp": "₹449", "sku_type": "fixed", "sku_size": "4-5 Y" }
+      },
+      {
+        "skuId": "WHA-3049921",
+        "size": "5-6 Y",
+        "price": { "type": "fixed", "displayValue": "₹349", "absoluteValue": 349.0 },
+        "enable": false,
+        "availableQuantity": 0,
+        "skuProductDetails": { "sku_mrp": "₹449", "sku_type": "fixed", "sku_size": "5-6 Y" }
+      },
+      {
+        "skuId": "WHA-3049922",
+        "size": "6-7 Y",
+        "price": { "type": "fixed", "displayValue": "₹349", "absoluteValue": 349.0 },
+        "enable": true,
+        "availableQuantity": 2,
+        "skuProductDetails": { "sku_mrp": "₹449", "sku_type": "fixed", "sku_size": "6-7 Y" }
+      },
+      {
+        "skuId": "WHA-3049923",
+        "size": "7-8 Y",
+        "price": { "type": "fixed", "displayValue": "₹349", "absoluteValue": 349.0 },
+        "enable": true,
+        "availableQuantity": 486,
+        "skuProductDetails": { "sku_mrp": "₹449", "sku_type": "fixed", "sku_size": "7-8 Y" }
+      }
+    ],
+    "trackingMeta": {
+      "slug": "pink-all-over-sleeveless-top",
+      "isPidAplus": false,
+      "categoryName": "Apparel - Children",
+      "subcategoryName": "Sets",
+      "productTypeName": "Formal Sets",
+      "subProductTypeName": "TestTop",
+      "onSale": 0,
+      "fromAge": 36,
+      "toAge": 96,
+      "maxDeliveryDays": 45,
+      "brandName": "Whaou",
+      "gender": "Girl's",
+      "productAttrs": [
+        { "name": "HBT", "value": "T2" },
+        { "name": "Season", "value": "Autumn Winter" }
+      ],
+      "styleCode": "udf1",
+      "styleCodePidCount": 9
+    },
+    "wishList": { "status": false },
+    "isGift": false
+  },
+  "action": "success"
+}

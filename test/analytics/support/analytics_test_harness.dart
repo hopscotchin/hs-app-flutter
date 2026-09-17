@@ -8,12 +8,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hs_app_flutter/core/analytics/analytics_service.dart';
 import 'package:hs_app_flutter/core/analytics/attribution/lp_attribution_helper.dart';
 import 'package:hs_app_flutter/core/analytics/attribution/order_attribution_helper.dart';
+import 'package:hs_app_flutter/core/analytics/attribution/product_attribution_helper.dart';
 import 'package:hs_app_flutter/core/analytics/attribution/utm_header_util.dart';
 import 'package:hs_app_flutter/core/analytics/events/analytics_helper.dart';
 import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.dart';
 import 'package:hs_app_flutter/core/analytics/home/journey_worker.dart';
 import 'package:hs_app_flutter/core/analytics/state/checkout_timer.dart';
 import 'package:hs_app_flutter/core/analytics/state/experiments_util.dart';
+import 'package:hs_app_flutter/core/constants/storage_keys.dart';
 import 'package:hs_app_flutter/core/analytics/state/launch_timer.dart';
 import 'package:hs_app_flutter/core/di/injection.dart';
 import 'package:hs_app_flutter/core/router/navigation_observer.dart';
@@ -52,8 +54,11 @@ class AnalyticsTestHarness {
     required this.utm,
     required this.orderAttribution,
     required this.lpAttribution,
+    required this.productAttribution,
     required this.experiments,
     required this.captured,
+    required this.identifies,
+    required this.timeline,
     required this.navObserver,
   });
 
@@ -65,11 +70,27 @@ class AnalyticsTestHarness {
   final UtmHeaderUtil utm;
   final OrderAttributionHelper orderAttribution;
   final LpAttributionHelper lpAttribution;
+  final ProductAttributionHelper productAttribution;
   final ExperimentsUtil experiments;
   final AppNavigationObserver navObserver;
 
   /// Every (event, payload) pair the transport received, in fire order.
   final List<CapturedEvent> captured;
+
+  /// Every `identify` the transport received, in call order.
+  final List<CapturedIdentify> identifies;
+
+  /// Every transport call in one ordered list — `track:<event>`, `identify`,
+  /// `reset`. For assertions about *relative order* across call kinds, which
+  /// the per-kind lists cannot express.
+  ///
+  /// Sign-out is the case that needs it: `customer_logged_out` has to reach the
+  /// wire before `resetIdentity` wipes the userId, so the contract is an
+  /// ordering rather than a payload.
+  final List<String> timeline;
+
+  /// How many times identity was reset.
+  int get resetCount => timeline.where((e) => e == 'reset').length;
 
   /// Force iOS in tests — [AnalyticsHelper._readCpuArch] then short-circuits to
   /// `AnalyticsDefaults.none` without touching the `device_info_plus` plugin
@@ -88,7 +109,18 @@ class AnalyticsTestHarness {
     TestWidgetsFlutterBinding.ensureInitialized();
     debugDefaultTargetPlatformOverride = _testPlatform;
 
-    SharedPreferences.setMockInitialValues(initialPrefs);
+    // Default the AppConfig home-analytics flag to ON — production reflects
+    // that state once `AppConfig` lands from the server, and every
+    // impression-oriented test assumes it. Callers that specifically
+    // exercise the OFF branch (`gate_home_analytics_test.dart`) either
+    // pass `false` in `initialPrefs` or flip it via
+    // `PrefManager.setFeatureFlagHomeAnalytics(false)` after `build()`.
+    // Explicit caller-provided values in `initialPrefs` win.
+    final prefsSeed = <String, Object>{
+      StorageKeys.featureFlagHomeAnalytics: true,
+      ...initialPrefs,
+    };
+    SharedPreferences.setMockInitialValues(prefsSeed);
     final sharedPrefs = await SharedPreferences.getInstance();
 
     PackageInfo.setMockInitialValues(
@@ -107,10 +139,16 @@ class AnalyticsTestHarness {
     final experiments = ExperimentsUtil(prefs);
     final orderAttribution = OrderAttributionHelper();
     final lpAttribution = LpAttributionHelper();
+    final productAttribution = ProductAttributionHelper();
     final utm = UtmHeaderUtil(prefs);
     // Empty stack by default → contributes no `nav_screen_*` keys. Tests that
     // want nav stamping fire `observer.didPush(...)` manually.
-    final navObserver = AppNavigationObserver(orderAttribution, launchTimer);
+    final navObserver = AppNavigationObserver(
+      orderAttribution,
+      lpAttribution,
+      productAttribution,
+      launchTimer,
+    );
 
     // `AppNavigationObserver._homeTrack` uses `sl<HomeTrackAnalyticManager>()`
     // (lazy lookup, breaks the DI cycle). Register a real instance backed by
@@ -133,6 +171,7 @@ class AnalyticsTestHarness {
       experiments,
       orderAttribution,
       lpAttribution,
+      productAttribution,
       utm,
       navObserver,
     );
@@ -148,17 +187,41 @@ class AnalyticsTestHarness {
         analytics: analyticsForTrack,
         orderAttribution: orderAttribution,
         lpAttribution: lpAttribution,
+        prefs: prefs,
         journeyWorker: sl<JourneyWorker>(),
       ),
     );
 
     final captured = <CapturedEvent>[];
+    final identifies = <CapturedIdentify>[];
+    final timeline = <String>[];
     when(() => service.track(any(), any())).thenAnswer((invocation) async {
       final name = invocation.positionalArguments[0] as String;
       final props = Map<String, Object?>.of(
         invocation.positionalArguments[1] as Map<String, Object?>,
       );
       captured.add(CapturedEvent(name, props));
+      timeline.add('track:$name');
+    });
+    when(
+      () => service.identify(
+        userId: any(named: 'userId'),
+        traits: any(named: 'traits'),
+      ),
+    ).thenAnswer((invocation) async {
+      identifies.add(
+        CapturedIdentify(
+          invocation.namedArguments[const Symbol('userId')] as String?,
+          Map<String, Object?>.of(
+            invocation.namedArguments[const Symbol('traits')]
+                as Map<String, Object?>,
+          ),
+        ),
+      );
+      timeline.add('identify');
+    });
+    when(service.reset).thenAnswer((_) async {
+      timeline.add('reset');
     });
     when(() => service.appsFlyerUid).thenReturn('');
     when(() => service.cleverTapId).thenReturn('');
@@ -173,6 +236,7 @@ class AnalyticsTestHarness {
       experiments,
       orderAttribution,
       lpAttribution,
+      productAttribution,
       utm,
       navObserver,
     );
@@ -186,8 +250,11 @@ class AnalyticsTestHarness {
       utm: utm,
       orderAttribution: orderAttribution,
       lpAttribution: lpAttribution,
+      productAttribution: productAttribution,
       experiments: experiments,
       captured: captured,
+      identifies: identifies,
+      timeline: timeline,
       navObserver: navObserver,
     );
   }
@@ -215,11 +282,21 @@ class AnalyticsTestHarness {
 
   bool hasEvent(String eventName) => captured.any((e) => e.name == eventName);
 
-  void clear() => captured.clear();
+  void clear() {
+    captured.clear();
+    identifies.clear();
+    timeline.clear();
+  }
 }
 
 class CapturedEvent {
   CapturedEvent(this.name, this.props);
   final String name;
   final Map<String, Object?> props;
+}
+
+class CapturedIdentify {
+  CapturedIdentify(this.userId, this.traits);
+  final String? userId;
+  final Map<String, Object?> traits;
 }

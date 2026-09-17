@@ -32,14 +32,14 @@ void main() {
     h.orderAttribution
         .mergeTrackingMeta({'banner_name': 'HP banner', 'funnel_row': 1});
 
-    // Sim: LP push + LP tile click.
+    // Sim: LP push + LP tile click. `didPush` reserves the top slot;
+    // `setLandingPageContext` stamps identity; the tile-click meta lands
+    // via `updateTopMeta` (the production path from `logTileClick`).
     final lpRoute = _pageRoute('landingPage');
     h.navObserver.didPush(lpRoute, null);
     h.navObserver.setLandingPageContext(name: 'LP1', id: '100');
-    h.lpAttribution.pushTileMeta(
-      meta: const {'banner_name': 'LP tile banner', 'funnel_row': 5},
-      landingPageName: 'LP1',
-      landingPageId: '100',
+    h.lpAttribution.updateTopMeta(
+      const {'banner_name': 'LP tile banner', 'funnel_row': 5},
     );
 
     _expectStoreState(h, hp: 'HP banner', lp: 'LP tile banner', lpName: 'LP1');
@@ -58,11 +58,8 @@ void main() {
 
   test('LP pop → nameless shell prev clears LP + preserves HP', () async {
     h.orderAttribution.mergeTrackingMeta({'banner_name': 'HP'});
-    h.lpAttribution.pushTileMeta(
-      meta: const {'banner_name': 'LP tile'},
-      landingPageName: 'LP1',
-      landingPageId: '1',
-    );
+    h.lpAttribution.pushLp(landingPageName: 'LP1', landingPageId: '1');
+    h.lpAttribution.updateTopMeta(const {'banner_name': 'LP tile'});
 
     h.navObserver.didPop(_pageRoute('landingPage'), _pageRoute(null));
     await pumpEventQueue();
@@ -75,11 +72,8 @@ void main() {
     // Some GoRouter versions name the shell branch page. `_shellBranchRoutes`
     // treats these as "back to shell" identically to null-name.
     h.orderAttribution.mergeTrackingMeta({'banner_name': 'HP'});
-    h.lpAttribution.pushTileMeta(
-      meta: const {'banner_name': 'LP tile'},
-      landingPageName: 'LP1',
-      landingPageId: '1',
-    );
+    h.lpAttribution.pushLp(landingPageName: 'LP1', landingPageId: '1');
+    h.lpAttribution.updateTopMeta(const {'banner_name': 'LP tile'});
 
     h.navObserver.didPop(_pageRoute('landingPage'), _pageRoute('home'));
     await pumpEventQueue();
@@ -96,11 +90,7 @@ void main() {
     // LP push + LP click.
     h.navObserver.didPush(_pageRoute('landingPage'), null);
     h.navObserver.setLandingPageContext(name: 'LP1', id: '100');
-    h.lpAttribution.pushTileMeta(
-      meta: const {'banner_name': 'LP tile'},
-      landingPageName: 'LP1',
-      landingPageId: '100',
-    );
+    h.lpAttribution.updateTopMeta(const {'banner_name': 'LP tile'});
 
     // Back to shell — LP cleared, HP1 persists.
     h.navObserver.didPop(_pageRoute('landingPage'), _pageRoute(null));

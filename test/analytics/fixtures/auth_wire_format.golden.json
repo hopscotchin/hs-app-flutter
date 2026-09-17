@@ -1,0 +1,74 @@
+{
+  "login_viewed": {
+    "authentication_type": "String Mobile",
+    "from_location": "String Sign in button",
+    "from_redirect": "String none",
+    "from_screen": "String Account",
+    "from_validation_type": "String none",
+    "validation_type": "String OTP"
+  },
+  "otp_sent · sign-in": {
+    "authentication_type": "String Mobile",
+    "email": "String none",
+    "from_location": "String Sign in button",
+    "from_screen": "String Account",
+    "mobile": "String 9000000001",
+    "verification_reason": "String SIGN_IN"
+  },
+  "otp_verified": {
+    "authentication_type": "String Mobile",
+    "email": "String none",
+    "from_location": "String Sign in button",
+    "from_screen": "String Account",
+    "mobile": "String 9000000001",
+    "verification_reason": "String SIGN_IN"
+  },
+  "customer_logged_in · sign-in": {
+    "authentication_type": "String Mobile",
+    "from_location": "String Sign in button",
+    "from_redirect": "String none",
+    "from_screen": "String Account",
+    "from_validation_type": "String none",
+    "validation_type": "String OTP"
+  },
+  "customer_logged_out": {},
+  "join_viewed": {
+    "authentication_type": "String Mobile",
+    "from_location": "String Join button",
+    "from_redirect": "String none",
+    "from_screen": "String Account",
+    "from_validation_type": "String none",
+    "validation_type": "String OTP"
+  },
+  "otp_sent · sign-up": {
+    "authentication_type": "String Mobile",
+    "email": "String user@example.com",
+    "from_location": "String Join button",
+    "from_screen": "String Account",
+    "mobile": "String 9000000001",
+    "verification_reason": "String SIGN_UP"
+  },
+  "customer_registered": {
+    "authentication_type": "String Mobile",
+    "from_location": "String Join button",
+    "from_redirect": "String none",
+    "from_screen": "String Account",
+    "validation_type": "String OTP"
+  },
+  "customer_logged_in · sign-up": {
+    "authentication_type": "String Mobile",
+    "from_location": "String Join button",
+    "from_redirect": "String none",
+    "from_screen": "String Account",
+    "from_validation_type": "String none",
+    "validation_type": "String OTP"
+  },
+  "forgot_viewed · unfireable, payload defined": {
+    "email": "String user@example.com",
+    "from_authentication_type": "String Mobile",
+    "from_location": "String Sign in button",
+    "from_redirect": "String none",
+    "from_screen": "String Login",
+    "mobile": "String 9000000001"
+  }
+}
