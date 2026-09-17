@@ -15,7 +15,6 @@ import '../../../../core/constants/strings/auth_strings.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/kids_strings.dart';
 import '../../../../core/entities/message_bar_entity.dart';
-import '../../../../core/extensions/color_extensions.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -221,14 +220,14 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                                   // default is labelMedium.
                                   textStyle: AppTypographyV1.labelLarge.regular
                                       .copyWith(color: AppColors.neutralGrey6),
+                                  titleStyle: AppTypographyV1.labelLarge.bold
+                                      .copyWith(color: AppColors.neutralGrey6),
+                                  background: config.bannerBackgroundColor,
                                   messageBars: [
                                     MessageBarEntity(
                                       messageType: 'custom',
                                       hasIcon: true,
                                       icon: ImageConstants.shieldIcon,
-                                      bgColor:
-                                          config.bannerBackgroundColor.toHex,
-                                      textColor: AppColors.neutralGrey6.toHex,
                                       title: config.bannerTitle,
                                       text: config.bannerSubtitle,
                                     ),
@@ -505,7 +504,7 @@ class _GenderOption extends StatelessWidget {
   }
 }
 
-class _DobField extends StatelessWidget {
+class _DobField extends StatefulWidget {
   const _DobField({
     super.key,
     required this.dob,
@@ -517,36 +516,59 @@ class _DobField extends StatelessWidget {
   final bool enabled;
   final ValueChanged<DateTime> onPicked;
 
-  String get _display {
+  @override
+  State<_DobField> createState() => _DobFieldState();
+}
+
+class _DobFieldState extends State<_DobField> {
+  late final TextEditingController _controller = TextEditingController(
+    text: _displayFor(widget.dob),
+  );
+
+  static String _displayFor(DateTime? dob) {
     if (dob == null) return '';
-    final dd = dob!.day.toString().padLeft(2, '0');
-    final mm = dob!.month.toString().padLeft(2, '0');
-    return '$dd - $mm - ${dob!.year}';
+    final dd = dob.day.toString().padLeft(2, '0');
+    final mm = dob.month.toString().padLeft(2, '0');
+    return '$dd - $mm - ${dob.year}';
+  }
+
+  @override
+  void didUpdateWidget(_DobField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.dob != widget.dob) {
+      _controller.text = _displayFor(widget.dob);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return OutlinedTextField(
-      controller: TextEditingController(text: _display),
+      controller: _controller,
       labelText: KidsStrings.dobLabel,
       required: true,
       hintTextKey: const ValueKey(KidsTestStrings.formDobInputHint),
       readOnly: true,
-      enabled: enabled,
+      enabled: widget.enabled,
       // Matches _GenderOption's locked grey fill so both locked fields read
       // the same way once a child exists.
-      fillColor: enabled ? null : AppColors.neutralGrey2,
-      onTap: !enabled
+      fillColor: widget.enabled ? null : AppColors.neutralGrey2,
+      onTap: !widget.enabled
           ? null
           : () async {
               final now = DateTime.now();
               final picked = await showDatePicker(
                 context: context,
-                initialDate: dob ?? DateTime(now.year - 1, now.month, now.day),
+                initialDate: widget.dob ?? DateTime(now.year - 1, now.month, now.day),
                 firstDate: DateTime(now.year - 25),
                 lastDate: now,
               );
-              if (picked != null) onPicked(picked);
+              if (picked != null) widget.onPicked(picked);
             },
     );
   }

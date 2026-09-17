@@ -500,9 +500,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i454.CartRemoteDataSource>(
       () => _i454.CartRemoteDataSourceImpl(apiClient: gh<_i930.ApiClient>()),
     );
-    gh.lazySingleton<_i359.KidsFormConfigFetcher>(
-      () => _i359.KidsFormConfigFetcher(gh<_i361.Dio>()),
-    );
     gh.lazySingleton<_i1014.HomeRepository>(
       () => _i298.HomeRepositoryImpl(
         gh<_i184.HomeRemoteDataSource>(),
@@ -607,6 +604,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i297.CheckDeliveryPincodeUseCase>(
       () => _i297.CheckDeliveryPincodeUseCase(gh<_i799.PincodeRepository>()),
     );
+    gh.lazySingleton<_i970.KidsRepository>(
+      () => _i634.KidsRepositoryImpl(
+        gh<_i359.KidsRemoteDatasource>(),
+        gh<_i351.NetworkInfo>(),
+      ),
+    );
     gh.lazySingleton<_i982.ApplyPromoUseCase>(
       () => _i982.ApplyPromoUseCase(gh<_i585.PromosOffersRepository>()),
     );
@@ -702,13 +705,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i938.GetSearchSuggestionsUseCase>(
       () => _i938.GetSearchSuggestionsUseCase(gh<_i283.SearchRepository>()),
-    );
-    gh.lazySingleton<_i970.KidsRepository>(
-      () => _i634.KidsRepositoryImpl(
-        gh<_i359.KidsRemoteDatasource>(),
-        gh<_i359.KidsFormConfigFetcher>(),
-        gh<_i351.NetworkInfo>(),
-      ),
     );
     gh.lazySingleton<_i766.CheckMobileUseCase>(
       () => _i766.CheckMobileUseCase(gh<_i476.AuthRepository>()),

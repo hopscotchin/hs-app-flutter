@@ -10,7 +10,6 @@ class KidsStrings {
   static const String addChild = 'Add child';
   static const String addAnotherChild = 'Add another child';
   static const String addChildSubtitle = 'Personalize for more little ones';
-  static const String limitReachedMessage = "Oops! You've reached the limit. You can add up to 5 profiles only.";
 
   static const String deleteConfirmTitle = 'Delete Child Profile?';
   static const String deleteConfirmDescription =

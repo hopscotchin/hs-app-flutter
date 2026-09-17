@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../core/logger/my_logger.dart';
+
 part 'child_entity.freezed.dart';
 
 enum ChildGender { boy, girl }
@@ -13,8 +15,18 @@ extension ChildGenderX on ChildGender {
 
   String get displayLabel => this == ChildGender.boy ? 'Boy' : 'Girl';
 
-  static ChildGender fromWire(String? value) =>
-      value?.toUpperCase() == 'GIRL' ? ChildGender.girl : ChildGender.boy;
+  /// Defaults to [ChildGender.boy] on anything unrecognized (including
+  /// `null`), since [ChildEntity.gender] is non-nullable — but logs first,
+  /// so a backend typo/omission shows up instead of silently miscategorizing
+  /// a child in cohort analytics.
+  static ChildGender fromWire(String? value) {
+    final upper = value?.toUpperCase();
+    if (upper == 'GIRL') return ChildGender.girl;
+    if (upper != 'BOY') {
+      logger.w('Unrecognized child gender from wire: $value — defaulting to boy');
+    }
+    return ChildGender.boy;
+  }
 }
 
 @freezed

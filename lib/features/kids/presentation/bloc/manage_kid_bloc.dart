@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -38,14 +40,15 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
     Emitter<ManageKidState> emit,
   ) async {
     final existing = event.existing;
-    // `config` starts null so the UI can show a real loading state — see
-    // KidsRepositoryImpl.getFormConfig, which only resolves to the local
-    // fallback copy if the fetch genuinely fails; on success it carries the
-    // live backend content.
     emit(
       ManageKidState(
         mode: existing == null ? ManageKidMode.create : ManageKidMode.update,
         original: existing,
+        // Seeded with the local fallback so the form (which needs no network
+        // itself) renders immediately instead of blocking on the config
+        // fetch — swapped for the live backend content below once the fetch
+        // resolves, or left as-is if it fails.
+        config: KidFormConfigEntity.fallback(),
         name: existing?.name ?? '',
         gender: existing?.gender,
         dob: existing?.dob,
@@ -145,9 +148,9 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
       (saved) {
         emit(state.copyWith(isSubmitting: false, saved: saved));
         if (state.mode == ManageKidMode.create) {
-          _analytics.logChildProfileAdded(saved);
+          unawaited(_analytics.logChildProfileAdded(saved));
         } else {
-          _analytics.logChildProfileEdited(saved);
+          unawaited(_analytics.logChildProfileEdited(saved));
         }
       },
     );

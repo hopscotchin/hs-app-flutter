@@ -48,4 +48,6 @@ abstract final class RouteNames {
   static const String addressesName = 'addresses';
   static const String addAddressName = 'addAddress';
   static const String wishlistName = 'wishlist';
+  static const String kidsName = 'kids';
+  static const String addKidName = 'addKid';
 }

@@ -14,7 +14,11 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$KidFormConfigEntity {
 
- String get heading; String get subheading; String get bannerTitle; String get bannerSubtitle; Color get bannerBackgroundColor; String get consentText; String get viewPrivacyPolicyLabel; String get viewPrivacyPolicyUrl;
+ String get heading; String get subheading; String get bannerTitle; String get bannerSubtitle; Color get bannerBackgroundColor; String get consentText; String get viewPrivacyPolicyLabel; String get viewPrivacyPolicyUrl;// Gender-specific "no photo yet" avatars. Nullable — null means "render
+// the local generic-person placeholder" (a client-only rendering detail,
+// not part of the contract), same convention as
+// `KidsListContentEntity.footerAvatars`.
+ String? get placeholderImageBoy; String? get placeholderImageGirl;
 /// Create a copy of KidFormConfigEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +29,16 @@ $KidFormConfigEntityCopyWith<KidFormConfigEntity> get copyWith => _$KidFormConfi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is KidFormConfigEntity&&(identical(other.heading, heading) || other.heading == heading)&&(identical(other.subheading, subheading) || other.subheading == subheading)&&(identical(other.bannerTitle, bannerTitle) || other.bannerTitle == bannerTitle)&&(identical(other.bannerSubtitle, bannerSubtitle) || other.bannerSubtitle == bannerSubtitle)&&(identical(other.bannerBackgroundColor, bannerBackgroundColor) || other.bannerBackgroundColor == bannerBackgroundColor)&&(identical(other.consentText, consentText) || other.consentText == consentText)&&(identical(other.viewPrivacyPolicyLabel, viewPrivacyPolicyLabel) || other.viewPrivacyPolicyLabel == viewPrivacyPolicyLabel)&&(identical(other.viewPrivacyPolicyUrl, viewPrivacyPolicyUrl) || other.viewPrivacyPolicyUrl == viewPrivacyPolicyUrl));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KidFormConfigEntity&&(identical(other.heading, heading) || other.heading == heading)&&(identical(other.subheading, subheading) || other.subheading == subheading)&&(identical(other.bannerTitle, bannerTitle) || other.bannerTitle == bannerTitle)&&(identical(other.bannerSubtitle, bannerSubtitle) || other.bannerSubtitle == bannerSubtitle)&&(identical(other.bannerBackgroundColor, bannerBackgroundColor) || other.bannerBackgroundColor == bannerBackgroundColor)&&(identical(other.consentText, consentText) || other.consentText == consentText)&&(identical(other.viewPrivacyPolicyLabel, viewPrivacyPolicyLabel) || other.viewPrivacyPolicyLabel == viewPrivacyPolicyLabel)&&(identical(other.viewPrivacyPolicyUrl, viewPrivacyPolicyUrl) || other.viewPrivacyPolicyUrl == viewPrivacyPolicyUrl)&&(identical(other.placeholderImageBoy, placeholderImageBoy) || other.placeholderImageBoy == placeholderImageBoy)&&(identical(other.placeholderImageGirl, placeholderImageGirl) || other.placeholderImageGirl == placeholderImageGirl));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,heading,subheading,bannerTitle,bannerSubtitle,bannerBackgroundColor,consentText,viewPrivacyPolicyLabel,viewPrivacyPolicyUrl);
+int get hashCode => Object.hash(runtimeType,heading,subheading,bannerTitle,bannerSubtitle,bannerBackgroundColor,consentText,viewPrivacyPolicyLabel,viewPrivacyPolicyUrl,placeholderImageBoy,placeholderImageGirl);
 
 @override
 String toString() {
-  return 'KidFormConfigEntity(heading: $heading, subheading: $subheading, bannerTitle: $bannerTitle, bannerSubtitle: $bannerSubtitle, bannerBackgroundColor: $bannerBackgroundColor, consentText: $consentText, viewPrivacyPolicyLabel: $viewPrivacyPolicyLabel, viewPrivacyPolicyUrl: $viewPrivacyPolicyUrl)';
+  return 'KidFormConfigEntity(heading: $heading, subheading: $subheading, bannerTitle: $bannerTitle, bannerSubtitle: $bannerSubtitle, bannerBackgroundColor: $bannerBackgroundColor, consentText: $consentText, viewPrivacyPolicyLabel: $viewPrivacyPolicyLabel, viewPrivacyPolicyUrl: $viewPrivacyPolicyUrl, placeholderImageBoy: $placeholderImageBoy, placeholderImageGirl: $placeholderImageGirl)';
 }
 
 
@@ -45,7 +49,7 @@ abstract mixin class $KidFormConfigEntityCopyWith<$Res>  {
   factory $KidFormConfigEntityCopyWith(KidFormConfigEntity value, $Res Function(KidFormConfigEntity) _then) = _$KidFormConfigEntityCopyWithImpl;
 @useResult
 $Res call({
- String heading, String subheading, String bannerTitle, String bannerSubtitle, Color bannerBackgroundColor, String consentText, String viewPrivacyPolicyLabel, String viewPrivacyPolicyUrl
+ String heading, String subheading, String bannerTitle, String bannerSubtitle, Color bannerBackgroundColor, String consentText, String viewPrivacyPolicyLabel, String viewPrivacyPolicyUrl, String? placeholderImageBoy, String? placeholderImageGirl
 });
 
 
@@ -62,7 +66,7 @@ class _$KidFormConfigEntityCopyWithImpl<$Res>
 
 /// Create a copy of KidFormConfigEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? heading = null,Object? subheading = null,Object? bannerTitle = null,Object? bannerSubtitle = null,Object? bannerBackgroundColor = null,Object? consentText = null,Object? viewPrivacyPolicyLabel = null,Object? viewPrivacyPolicyUrl = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? heading = null,Object? subheading = null,Object? bannerTitle = null,Object? bannerSubtitle = null,Object? bannerBackgroundColor = null,Object? consentText = null,Object? viewPrivacyPolicyLabel = null,Object? viewPrivacyPolicyUrl = null,Object? placeholderImageBoy = freezed,Object? placeholderImageGirl = freezed,}) {
   return _then(_self.copyWith(
 heading: null == heading ? _self.heading : heading // ignore: cast_nullable_to_non_nullable
 as String,subheading: null == subheading ? _self.subheading : subheading // ignore: cast_nullable_to_non_nullable
@@ -72,7 +76,9 @@ as String,bannerBackgroundColor: null == bannerBackgroundColor ? _self.bannerBac
 as Color,consentText: null == consentText ? _self.consentText : consentText // ignore: cast_nullable_to_non_nullable
 as String,viewPrivacyPolicyLabel: null == viewPrivacyPolicyLabel ? _self.viewPrivacyPolicyLabel : viewPrivacyPolicyLabel // ignore: cast_nullable_to_non_nullable
 as String,viewPrivacyPolicyUrl: null == viewPrivacyPolicyUrl ? _self.viewPrivacyPolicyUrl : viewPrivacyPolicyUrl // ignore: cast_nullable_to_non_nullable
-as String,
+as String,placeholderImageBoy: freezed == placeholderImageBoy ? _self.placeholderImageBoy : placeholderImageBoy // ignore: cast_nullable_to_non_nullable
+as String?,placeholderImageGirl: freezed == placeholderImageGirl ? _self.placeholderImageGirl : placeholderImageGirl // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -157,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  Color bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  Color bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl,  String? placeholderImageBoy,  String? placeholderImageGirl)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _KidFormConfigEntity() when $default != null:
-return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSubtitle,_that.bannerBackgroundColor,_that.consentText,_that.viewPrivacyPolicyLabel,_that.viewPrivacyPolicyUrl);case _:
+return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSubtitle,_that.bannerBackgroundColor,_that.consentText,_that.viewPrivacyPolicyLabel,_that.viewPrivacyPolicyUrl,_that.placeholderImageBoy,_that.placeholderImageGirl);case _:
   return orElse();
 
 }
@@ -178,10 +184,10 @@ return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSub
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  Color bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  Color bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl,  String? placeholderImageBoy,  String? placeholderImageGirl)  $default,) {final _that = this;
 switch (_that) {
 case _KidFormConfigEntity():
-return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSubtitle,_that.bannerBackgroundColor,_that.consentText,_that.viewPrivacyPolicyLabel,_that.viewPrivacyPolicyUrl);case _:
+return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSubtitle,_that.bannerBackgroundColor,_that.consentText,_that.viewPrivacyPolicyLabel,_that.viewPrivacyPolicyUrl,_that.placeholderImageBoy,_that.placeholderImageGirl);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +204,10 @@ return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSub
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  Color bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  Color bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl,  String? placeholderImageBoy,  String? placeholderImageGirl)?  $default,) {final _that = this;
 switch (_that) {
 case _KidFormConfigEntity() when $default != null:
-return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSubtitle,_that.bannerBackgroundColor,_that.consentText,_that.viewPrivacyPolicyLabel,_that.viewPrivacyPolicyUrl);case _:
+return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSubtitle,_that.bannerBackgroundColor,_that.consentText,_that.viewPrivacyPolicyLabel,_that.viewPrivacyPolicyUrl,_that.placeholderImageBoy,_that.placeholderImageGirl);case _:
   return null;
 
 }
@@ -213,7 +219,7 @@ return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSub
 
 
 class _KidFormConfigEntity implements KidFormConfigEntity {
-  const _KidFormConfigEntity({required this.heading, required this.subheading, required this.bannerTitle, required this.bannerSubtitle, required this.bannerBackgroundColor, required this.consentText, required this.viewPrivacyPolicyLabel, required this.viewPrivacyPolicyUrl});
+  const _KidFormConfigEntity({required this.heading, required this.subheading, required this.bannerTitle, required this.bannerSubtitle, required this.bannerBackgroundColor, required this.consentText, required this.viewPrivacyPolicyLabel, required this.viewPrivacyPolicyUrl, required this.placeholderImageBoy, required this.placeholderImageGirl});
   
 
 @override final  String heading;
@@ -224,6 +230,12 @@ class _KidFormConfigEntity implements KidFormConfigEntity {
 @override final  String consentText;
 @override final  String viewPrivacyPolicyLabel;
 @override final  String viewPrivacyPolicyUrl;
+// Gender-specific "no photo yet" avatars. Nullable — null means "render
+// the local generic-person placeholder" (a client-only rendering detail,
+// not part of the contract), same convention as
+// `KidsListContentEntity.footerAvatars`.
+@override final  String? placeholderImageBoy;
+@override final  String? placeholderImageGirl;
 
 /// Create a copy of KidFormConfigEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -235,16 +247,16 @@ _$KidFormConfigEntityCopyWith<_KidFormConfigEntity> get copyWith => __$KidFormCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _KidFormConfigEntity&&(identical(other.heading, heading) || other.heading == heading)&&(identical(other.subheading, subheading) || other.subheading == subheading)&&(identical(other.bannerTitle, bannerTitle) || other.bannerTitle == bannerTitle)&&(identical(other.bannerSubtitle, bannerSubtitle) || other.bannerSubtitle == bannerSubtitle)&&(identical(other.bannerBackgroundColor, bannerBackgroundColor) || other.bannerBackgroundColor == bannerBackgroundColor)&&(identical(other.consentText, consentText) || other.consentText == consentText)&&(identical(other.viewPrivacyPolicyLabel, viewPrivacyPolicyLabel) || other.viewPrivacyPolicyLabel == viewPrivacyPolicyLabel)&&(identical(other.viewPrivacyPolicyUrl, viewPrivacyPolicyUrl) || other.viewPrivacyPolicyUrl == viewPrivacyPolicyUrl));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _KidFormConfigEntity&&(identical(other.heading, heading) || other.heading == heading)&&(identical(other.subheading, subheading) || other.subheading == subheading)&&(identical(other.bannerTitle, bannerTitle) || other.bannerTitle == bannerTitle)&&(identical(other.bannerSubtitle, bannerSubtitle) || other.bannerSubtitle == bannerSubtitle)&&(identical(other.bannerBackgroundColor, bannerBackgroundColor) || other.bannerBackgroundColor == bannerBackgroundColor)&&(identical(other.consentText, consentText) || other.consentText == consentText)&&(identical(other.viewPrivacyPolicyLabel, viewPrivacyPolicyLabel) || other.viewPrivacyPolicyLabel == viewPrivacyPolicyLabel)&&(identical(other.viewPrivacyPolicyUrl, viewPrivacyPolicyUrl) || other.viewPrivacyPolicyUrl == viewPrivacyPolicyUrl)&&(identical(other.placeholderImageBoy, placeholderImageBoy) || other.placeholderImageBoy == placeholderImageBoy)&&(identical(other.placeholderImageGirl, placeholderImageGirl) || other.placeholderImageGirl == placeholderImageGirl));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,heading,subheading,bannerTitle,bannerSubtitle,bannerBackgroundColor,consentText,viewPrivacyPolicyLabel,viewPrivacyPolicyUrl);
+int get hashCode => Object.hash(runtimeType,heading,subheading,bannerTitle,bannerSubtitle,bannerBackgroundColor,consentText,viewPrivacyPolicyLabel,viewPrivacyPolicyUrl,placeholderImageBoy,placeholderImageGirl);
 
 @override
 String toString() {
-  return 'KidFormConfigEntity(heading: $heading, subheading: $subheading, bannerTitle: $bannerTitle, bannerSubtitle: $bannerSubtitle, bannerBackgroundColor: $bannerBackgroundColor, consentText: $consentText, viewPrivacyPolicyLabel: $viewPrivacyPolicyLabel, viewPrivacyPolicyUrl: $viewPrivacyPolicyUrl)';
+  return 'KidFormConfigEntity(heading: $heading, subheading: $subheading, bannerTitle: $bannerTitle, bannerSubtitle: $bannerSubtitle, bannerBackgroundColor: $bannerBackgroundColor, consentText: $consentText, viewPrivacyPolicyLabel: $viewPrivacyPolicyLabel, viewPrivacyPolicyUrl: $viewPrivacyPolicyUrl, placeholderImageBoy: $placeholderImageBoy, placeholderImageGirl: $placeholderImageGirl)';
 }
 
 
@@ -255,7 +267,7 @@ abstract mixin class _$KidFormConfigEntityCopyWith<$Res> implements $KidFormConf
   factory _$KidFormConfigEntityCopyWith(_KidFormConfigEntity value, $Res Function(_KidFormConfigEntity) _then) = __$KidFormConfigEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String heading, String subheading, String bannerTitle, String bannerSubtitle, Color bannerBackgroundColor, String consentText, String viewPrivacyPolicyLabel, String viewPrivacyPolicyUrl
+ String heading, String subheading, String bannerTitle, String bannerSubtitle, Color bannerBackgroundColor, String consentText, String viewPrivacyPolicyLabel, String viewPrivacyPolicyUrl, String? placeholderImageBoy, String? placeholderImageGirl
 });
 
 
@@ -272,7 +284,7 @@ class __$KidFormConfigEntityCopyWithImpl<$Res>
 
 /// Create a copy of KidFormConfigEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? heading = null,Object? subheading = null,Object? bannerTitle = null,Object? bannerSubtitle = null,Object? bannerBackgroundColor = null,Object? consentText = null,Object? viewPrivacyPolicyLabel = null,Object? viewPrivacyPolicyUrl = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? heading = null,Object? subheading = null,Object? bannerTitle = null,Object? bannerSubtitle = null,Object? bannerBackgroundColor = null,Object? consentText = null,Object? viewPrivacyPolicyLabel = null,Object? viewPrivacyPolicyUrl = null,Object? placeholderImageBoy = freezed,Object? placeholderImageGirl = freezed,}) {
   return _then(_KidFormConfigEntity(
 heading: null == heading ? _self.heading : heading // ignore: cast_nullable_to_non_nullable
 as String,subheading: null == subheading ? _self.subheading : subheading // ignore: cast_nullable_to_non_nullable
@@ -282,7 +294,9 @@ as String,bannerBackgroundColor: null == bannerBackgroundColor ? _self.bannerBac
 as Color,consentText: null == consentText ? _self.consentText : consentText // ignore: cast_nullable_to_non_nullable
 as String,viewPrivacyPolicyLabel: null == viewPrivacyPolicyLabel ? _self.viewPrivacyPolicyLabel : viewPrivacyPolicyLabel // ignore: cast_nullable_to_non_nullable
 as String,viewPrivacyPolicyUrl: null == viewPrivacyPolicyUrl ? _self.viewPrivacyPolicyUrl : viewPrivacyPolicyUrl // ignore: cast_nullable_to_non_nullable
-as String,
+as String,placeholderImageBoy: freezed == placeholderImageBoy ? _self.placeholderImageBoy : placeholderImageBoy // ignore: cast_nullable_to_non_nullable
+as String?,placeholderImageGirl: freezed == placeholderImageGirl ? _self.placeholderImageGirl : placeholderImageGirl // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

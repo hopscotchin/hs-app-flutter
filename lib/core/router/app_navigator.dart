@@ -374,13 +374,13 @@ abstract final class AppNavigator {
 
   static void goToSearch(BuildContext context) => context.pushNamed('search');
 
-  static void goToKids(BuildContext context) => context.pushNamed('kids');
+  static void goToKids(BuildContext context) => context.pushNamed(RouteNames.kidsName);
 
   /// Push the add/edit child screen. Pass [existing] to enter edit mode.
   /// Returns the saved [ChildEntity] on success, or `null` on cancel.
   static Future<ChildEntity?> goToAddKid(BuildContext context, {ChildEntity? existing}) {
     return context.pushNamed<ChildEntity>(
-      'addKid',
+      RouteNames.addKidName,
       extra: <String, dynamic>{'existing': existing},
     );
   }

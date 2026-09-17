@@ -13,7 +13,7 @@ import 'pages/kids_page.dart';
 class KidsRoute {
   static GoRoute getRoute(GlobalKey<NavigatorState> rootKey) => GoRoute(
     path: RouteNames.kids,
-    name: 'kids',
+    name: RouteNames.kidsName,
     parentNavigatorKey: rootKey,
     builder: (context, state) {
       return BlocProvider(
@@ -24,7 +24,7 @@ class KidsRoute {
     routes: [
       GoRoute(
         path: RouteNames.addKid,
-        name: 'addKid',
+        name: RouteNames.addKidName,
         parentNavigatorKey: rootKey,
         builder: (context, state) {
           final existing = (state.extra as Map<String, dynamic>?)?['existing'] as ChildEntity?;

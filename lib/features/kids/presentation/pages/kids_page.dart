@@ -11,7 +11,6 @@ import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/common_strings.dart';
 import '../../../../core/constants/strings/kids_strings.dart';
 import '../../../../core/entities/message_bar_entity.dart';
-import '../../../../core/extensions/color_extensions.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -126,10 +125,10 @@ class KidsPage extends StatelessWidget {
                                   .textPrimary(),
                               textStyle: AppTypographyV1.labelLarge.regular
                                   .neutralGrey6(),
+                              background: AppColors.neutralGrey2,
                               messageBars: [
                                 MessageBarEntity(
                                   messageType: 'custom',
-                                  bgColor: AppColors.neutralGrey2.toHex,
                                   title: content.bannerTitle,
                                   text: content.bannerSubtitle,
                                 ),

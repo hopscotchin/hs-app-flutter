@@ -13,14 +13,12 @@ import '../../domain/entities/kids_list_content_entity.dart';
 import '../../domain/repositories/kids_repository.dart';
 import '../datasources/remote/kids_remote_datasource.dart';
 import '../models/child_model.dart';
-import '../models/kid_form_config_model.dart';
 
 @LazySingleton(as: KidsRepository)
 class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
-  KidsRepositoryImpl(this._api, this._formConfigFetcher, this._networkInfo);
+  KidsRepositoryImpl(this._api, this._networkInfo);
 
   final KidsRemoteDatasource _api;
-  final KidsFormConfigFetcher _formConfigFetcher;
   final NetworkInfo _networkInfo;
 
   @override
@@ -58,9 +56,9 @@ class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
     // errors all fall back to local defaults instead of surfacing an error
     // for what's purely presentational screen copy.
     try {
-      final json = await _formConfigFetcher.fetch(cancelToken: cancelToken);
-      if (json.isEmpty) return Right(KidFormConfigEntity.fallback());
-      return Right(KidFormConfigModel.fromJson(json));
+      final response = await _api.getFormConfig(cancelToken: cancelToken);
+      if (!response.isSuccessful) return Right(KidFormConfigEntity.fallback());
+      return Right(response.toEntity());
     } catch (e, s) {
       logger.w('Kid form config fetch failed, using local fallback', error: e, stackTrace: s);
       return Right(KidFormConfigEntity.fallback());
