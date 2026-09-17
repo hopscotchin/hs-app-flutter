@@ -75,6 +75,7 @@ class HomeAnalyticsHarness {
       analytics: h.analytics,
       orderAttribution: h.orderAttribution,
       lpAttribution: h.lpAttribution,
+      prefs: h.prefs,
       journeyWorker: JourneyWorker(h.analytics),
     );
     tracker.extraData = const ExtraData(fromHomePage: true);

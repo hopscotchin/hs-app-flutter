@@ -10,6 +10,7 @@ import 'package:sms_autofill/sms_autofill.dart';
 import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
+import '../../domain/entities/auth_entry_args.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
 import '../../../../core/router/app_navigator.dart';
@@ -28,6 +29,14 @@ class OtpVerificationPage extends StatefulWidget {
   final String loginId;
   final OtpConfigEntity otpConfig;
   final String otpReason;
+
+  /// Carried from the screen that opened login, through the whole flow — the
+  /// entry point that started the journey applies to the OTP step too.
+  ///
+  /// Used by every event fired from this screen — `otp_verified`,
+  /// `customer_logged_in` and `customer_registered`. Android hardcodes the
+  /// first of those; Flutter does not, as of the A2 decision.
+  final AuthEntryArgs entry;
   final bool isCheckoutFlow;
   final String? redirectType;
 
@@ -35,7 +44,8 @@ class OtpVerificationPage extends StatefulWidget {
     super.key,
     required this.loginId,
     required this.otpConfig,
-    this.otpReason = 'SIGN_IN',
+    this.otpReason = AuthStrings.signInReason,
+    this.entry = AuthEntryArgs.unknown,
     this.isCheckoutFlow = false,
     this.redirectType,
   });
@@ -290,15 +300,28 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> with TickerPr
   void _onVerify() {
     if (_otp.length == _otpLength && !context.read<AuthBloc>().state.isLoading) {
       context.read<AuthBloc>().add(
-        VerifyOtp(loginId: widget.loginId, otp: _otp, otpReason: widget.otpReason),
+        VerifyOtp(
+          loginId: widget.loginId,
+          otp: _otp,
+          otpReason: widget.otpReason,
+          entry: _entry,
+        ),
       );
     }
   }
+
+  /// See the note on `LoginPage._entry` — same shape, same limitation.
+  AuthEntryArgs get _entry =>
+      widget.entry.copyWith(fromRedirect: widget.redirectType);
 
   void _onResend() {
     _otpController.clear();
     setState(() {});
     _otpFocusNode.requestFocus();
-    context.read<AuthBloc>().add(SendOtp(loginId: widget.loginId, otpReason: widget.otpReason));
+    // Resend fires otp_sent a second time, and it has to report the same entry
+    // as the first — one journey, one entry point.
+    context.read<AuthBloc>().add(
+      SendOtp(loginId: widget.loginId, otpReason: widget.otpReason, entry: _entry),
+    );
   }
 }

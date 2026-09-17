@@ -8,8 +8,10 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 import '../appbar/hs_appbar.dart';
 import '../../core/config/env_config.dart';
+import '../../core/analytics/constants/analytics_defaults.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/router/app_navigator.dart';
+import '../../features/auth/domain/entities/auth_entry_args.dart';
 import '../../core/theme/colors.dart';
 import '../../core/utils/snackbar_utils.dart';
 import 'empty_state_widget.dart';
@@ -297,7 +299,10 @@ class _InAppWebViewPageState extends State<InAppWebViewPage> {
     final handler = widget.onLoginRequested;
     if (handler == null) {
       // No SSO wiring — just open the login screen.
-      AppNavigator.goToLogin(context);
+      AppNavigator.goToLogin(
+        context,
+        entry: const AuthEntryArgs(fromScreen: FromScreens.webview),
+      );
       return;
     }
 

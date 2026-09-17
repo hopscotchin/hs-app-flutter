@@ -9,7 +9,9 @@ import '../widgets/auth_primary_button.dart';
 import '../../../../components/appbar/hs_appbar.dart';
 import '../widgets/auth_terms_disclaimer.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
+import '../../domain/entities/auth_entry_args.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/navigation/action_url_handler.dart';
 import '../../../../core/router/app_navigator.dart';
@@ -21,7 +23,15 @@ class JoinUsPage extends StatefulWidget {
   final String? initialMobile;
   final String? redirectType;
 
-  const JoinUsPage({super.key, this.initialMobile, this.redirectType});
+  /// Where the user came from, for the auth events. See [AuthEntryArgs].
+  final AuthEntryArgs entry;
+
+  const JoinUsPage({
+    super.key,
+    this.initialMobile,
+    this.redirectType,
+    this.entry = AuthEntryArgs.unknown,
+  });
 
   @override
   State<JoinUsPage> createState() => _JoinUsPageState();
@@ -42,6 +52,9 @@ class _JoinUsPageState extends State<JoinUsPage> {
       _mobileController.text = '${mobile.substring(0, 5)} ${mobile.substring(5)}';
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => _nameFocusNode.requestFocus());
+    // See the note in login_page.dart — dispatched, not fired here.
+    // Android's equivalent is RegisterFragment.kt:83.
+    context.read<AuthBloc>().add(AuthEvent.joinViewed(entry: _entry));
   }
 
   @override
@@ -85,8 +98,9 @@ class _JoinUsPageState extends State<JoinUsPage> {
               bloc: context.read<AuthBloc>(),
               loginId: _rawMobile,
               otpConfig: state.otpConfig!,
-              otpReason: 'SIGN_UP',
+              otpReason: AuthStrings.signUpReason,
               redirectType: widget.redirectType,
+              entry: _entry,
             );
           } else if (state.isRedirectLinkFound) {
             ActionUrlHandler.navigate(
@@ -209,6 +223,11 @@ class _JoinUsPageState extends State<JoinUsPage> {
                             onActionTap: () => AppNavigator.goToLogin(
                               context,
                               initialMobile: _rawMobile.length == 10 ? _rawMobile : null,
+                              // See the matching pivot in login_page.dart.
+                              entry: const AuthEntryArgs(
+                                fromScreen: FromScreens.join,
+                                fromLocation: FromLocations.signInButton,
+                              ),
                             ),
                           ),
                           AppSpacing.verticalGapLg,
@@ -225,6 +244,10 @@ class _JoinUsPageState extends State<JoinUsPage> {
     );
   }
 
+  /// See the note on `LoginPage._entry` — same shape, same limitation.
+  AuthEntryArgs get _entry =>
+      widget.entry.copyWith(fromRedirect: widget.redirectType);
+
   void _onSendOtp() {
     _showErrors = true;
     if (_formKey.currentState!.validate()) {
@@ -233,6 +256,7 @@ class _JoinUsPageState extends State<JoinUsPage> {
           displayName: _nameController.text.trim(),
           email: _emailController.text.trim(),
           mobile: _rawMobile,
+          entry: _entry,
         ),
       );
     }

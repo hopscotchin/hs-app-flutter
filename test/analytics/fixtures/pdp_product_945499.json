@@ -1,0 +1,694 @@
+{
+  "banners": [
+    {
+      "position": "top",
+      "id": 88,
+      "media": {
+        "mimeType": "IMAGE",
+        "height": 95,
+        "width": 750,
+        "url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202509/e9850662-63d7-4e37-be47-91883e2e6fa5_full.png?version=1758605720478"
+      },
+      "actionUri": "hopscotch://special?id=SumitNewspl",
+      "type": "SPECIAL_PAGE"
+    }
+  ],
+  "product": {
+    "id": 945499,
+    "hasSizeChart": true,
+    "media": [
+      {
+        "mimeType": "IMAGE",
+        "height": 1000,
+        "width": 1000,
+        "url": "https://qastatic.hopscotch.in/fstatic/product/202007/dd2c711d-f659-4b6b-b4cf-0f2ba7bc04c4_full.jpg?version=1594453148107"
+      },
+      {
+        "mimeType": "IMAGE",
+        "height": 1000,
+        "width": 1000,
+        "url": "https://qastatic.hopscotch.in/fstatic/product/202007/b3657142-5d13-4b09-affe-7614896dc803_full.jpg?version=1594453148889"
+      },
+      {
+        "mimeType": "IMAGE",
+        "height": 1000,
+        "width": 1000,
+        "url": "https://qastatic.hopscotch.in/fstatic/product/202007/8cb3a8a0-e158-403a-9493-aa20238e5abb_full.jpg?version=1594453149882"
+      }
+    ],
+    "name": "Pink All Over Sleeveless Top",
+    "priceInfo": {
+      "sellingPrice": "₹349",
+      "absoluteValue": 349.0,
+      "callout": "Price inclusive of all taxes"
+    },
+    "skus": [
+      {
+        "skuId": "WHA-3049919",
+        "title": "3-4 Y",
+        "priceInfo": {
+          "sellingPrice": "₹349",
+          "absoluteValue": 349.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": false,
+        "info": {
+          "text": "Out Of Stock",
+          "textColor": "#80333333"
+        },
+        "eddInfo": {
+          "edd": "Get it in 6-7 weeks"
+        },
+        "availableQuantity": 0,
+        "skuAttributes": {
+          "skuMrp": "₹449",
+          "skuSize": "3-4 Y",
+          "skuType": "fixed"
+        },
+        "trackingMeta": {
+          "sku": "WHA-3049919",
+          "sku_size": "3-4 Y",
+          "pdt_size": "3-4 Y",
+          "available_quantity": 0,
+          "low_inventory": "Sold out"
+        }
+      },
+      {
+        "skuId": "WHA-3049920",
+        "title": "4-5 Y",
+        "priceInfo": {
+          "sellingPrice": "₹349",
+          "absoluteValue": 349.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": true,
+        "info": {
+          "text": "3 Left",
+          "textColor": "#E00000"
+        },
+        "eddInfo": {
+          "edd": "Get it in 6-7 weeks"
+        },
+        "availableQuantity": 3,
+        "skuAttributes": {
+          "skuMrp": "₹449",
+          "skuSize": "4-5 Y",
+          "skuType": "fixed"
+        },
+        "trackingMeta": {
+          "sku": "WHA-3049920",
+          "sku_size": "4-5 Y",
+          "pdt_size": "4-5 Y",
+          "available_quantity": 3,
+          "low_inventory": "Yes"
+        }
+      },
+      {
+        "skuId": "WHA-3049921",
+        "title": "5-6 Y",
+        "priceInfo": {
+          "sellingPrice": "₹349",
+          "absoluteValue": 349.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": false,
+        "info": {
+          "text": "Out Of Stock",
+          "textColor": "#80333333"
+        },
+        "eddInfo": {
+          "edd": "Get it in 6-7 weeks"
+        },
+        "availableQuantity": 0,
+        "skuAttributes": {
+          "skuMrp": "₹449",
+          "skuSize": "5-6 Y",
+          "skuType": "fixed"
+        },
+        "trackingMeta": {
+          "sku": "WHA-3049921",
+          "sku_size": "5-6 Y",
+          "pdt_size": "5-6 Y",
+          "available_quantity": 0,
+          "low_inventory": "Sold out"
+        }
+      },
+      {
+        "skuId": "WHA-3049922",
+        "title": "6-7 Y",
+        "priceInfo": {
+          "sellingPrice": "₹349",
+          "absoluteValue": 349.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": true,
+        "info": {
+          "text": "2 Left",
+          "textColor": "#E00000"
+        },
+        "eddInfo": {
+          "edd": "Get it in 6-7 weeks"
+        },
+        "availableQuantity": 2,
+        "skuAttributes": {
+          "skuMrp": "₹449",
+          "skuSize": "6-7 Y",
+          "skuType": "fixed"
+        },
+        "trackingMeta": {
+          "sku": "WHA-3049922",
+          "sku_size": "6-7 Y",
+          "pdt_size": "6-7 Y",
+          "available_quantity": 2,
+          "low_inventory": "Yes"
+        }
+      },
+      {
+        "skuId": "WHA-3049923",
+        "title": "7-8 Y",
+        "priceInfo": {
+          "sellingPrice": "₹349",
+          "absoluteValue": 349.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": true,
+        "eddInfo": {
+          "edd": "Get it in Tomorrow",
+          "orderSla": "Order within 4 hrs"
+        },
+        "availableQuantity": 486,
+        "skuAttributes": {
+          "skuMrp": "₹449",
+          "skuSize": "7-8 Y",
+          "skuType": "fixed"
+        },
+        "trackingMeta": {
+          "sku": "WHA-3049923",
+          "sku_size": "7-8 Y",
+          "pdt_size": "7-8 Y",
+          "available_quantity": 486,
+          "low_inventory": "No"
+        }
+      }
+    ],
+    "eddInfo": {
+      "edd": "Get it in 3-4 days"
+    },
+    "serviceGuarantee": [
+      {
+        "label": "COD Available",
+        "icon": "https://static.hopscotch.in/vector_cod_available.svg"
+      },
+      {
+        "label": "7 Days Exchange",
+        "icon": "https://static.hopscotch.in/vector_exchange_available.svg"
+      },
+      {
+        "label": "7 Days Return",
+        "icon": "https://static.hopscotch.in/vector_return_available.svg"
+      }
+    ],
+    "details": [
+      {
+        "tabName": "Specification",
+        "items": [
+          {
+            "type": "skuValue",
+            "span": 1,
+            "displayKey": "MRP : ",
+            "displayStyle": "inline",
+            "showBullet": false,
+            "showDivider": false,
+            "fieldPath": "skuMrp"
+          },
+          {
+            "type": "skuValue",
+            "span": 1,
+            "displayKey": "TYPE : ",
+            "displayStyle": "block",
+            "showBullet": false,
+            "showDivider": false,
+            "fieldPath": "skuType"
+          }
+        ],
+        "trackingMeta": {
+          "tab_name": "Specification"
+        }
+      },
+      {
+        "tabName": "Description",
+        "items": [
+          {
+            "type": "skuValue",
+            "span": 1,
+            "displayKey": "MRP : ",
+            "displayStyle": "inline",
+            "showBullet": false,
+            "showDivider": false,
+            "fieldPath": "skuMrp"
+          },
+          {
+            "type": "skuValue",
+            "span": 1,
+            "displayKey": "SIZE : ",
+            "displayStyle": "block",
+            "showBullet": true,
+            "showDivider": true,
+            "fieldPath": "skuSize"
+          }
+        ],
+        "trackingMeta": {
+          "tab_name": "Description"
+        }
+      }
+    ],
+    "isServiceable": true,
+    "isEddDifferentForSKUs": true,
+    "isReturnInfoDifferentForSKUs": false,
+    "trackingMeta": {
+      "product_id": "945499",
+      "name": "Pink All Over Sleeveless Top",
+      "image_url": "https://qastatic.hopscotch.in/fstatic/product/202007/dd2c711d-f659-4b6b-b4cf-0f2ba7bc04c4_full.jpg?version=1594453148107",
+      "image_count": 3,
+      "category": "Apparel - Children",
+      "subcategory": "Sets",
+      "product_type": "Formal Sets",
+      "subproduct_type": "TestTop",
+      "brand": "Whaou",
+      "gender": "Girl's",
+      "from_age": 36,
+      "to_age": 96,
+      "price": 349,
+      "mrp": 449.0,
+      "discount_percentage": 22.0,
+      "sizes": 5,
+      "sku": [
+        "WHA-3049919",
+        "WHA-3049920",
+        "WHA-3049921",
+        "WHA-3049922",
+        "WHA-3049923"
+      ],
+      "delivery_days": 4,
+      "style_code": "udf1",
+      "count_of_pids_in_style_code": "9",
+      "preorder": "No",
+      "sale": "No",
+      "HBT": "T2",
+      "Season": "Autumn Winter",
+      "from_pincode": "standard"
+    },
+    "orderAttribution": {
+      "redirected_from_colour_widget": "No"
+    },
+    "plpRedirectURL": {
+      "redirectText": "All Formal Sets",
+      "redirectUrl": "/products/11862/all-formal-sets?q={\"subCategory\":\"412\",\"productClass\":\"1937\",\"category\":\"373\",\"browse\":\"Girl's\"}"
+    },
+    "wishlistInfo": {
+      "canWishlist": true,
+      "isWishlisted": false
+    },
+    "colorVariants": {
+      "trackingMeta": {
+        "style_code": "udf1",
+        "count_of_pids_in_style_code": "9"
+      },
+      "variants": [
+        {
+          "productId": 906575,
+          "mediaUrl": "https://qastatic.hopscotch.in/fstatic/product/201912/951b9f75-99e8-467b-b8ef-af96abe94520_full.jpg?version=1575630001480",
+          "isStockAvailable": true,
+          "isSelected": false,
+          "trackingMeta": {
+            "new_product_id_selected": "906575"
+          }
+        },
+        {
+          "productId": 921805,
+          "mediaUrl": "https://qastatic.hopscotch.in/fstatic/product/202003/cab8f5b6-9dec-475c-a79d-e0994c0e4576_full.jpg?version=1584419834960",
+          "isStockAvailable": true,
+          "isSelected": false,
+          "trackingMeta": {
+            "new_product_id_selected": "921805"
+          }
+        },
+        {
+          "productId": 943672,
+          "mediaUrl": "https://qastatic.hopscotch.in/fstatic/product/202006/5b9f4e52-fc83-4724-b407-2dd149171bee_full.jpg?version=1591858063703",
+          "isStockAvailable": true,
+          "isSelected": false,
+          "trackingMeta": {
+            "new_product_id_selected": "943672"
+          }
+        },
+        {
+          "productId": 945343,
+          "mediaUrl": "https://qastatic.hopscotch.in/fstatic/product/202006/51f0a145-2734-42e8-b907-1c9c88d158a9_full.jpg?version=1593161773594",
+          "isStockAvailable": true,
+          "isSelected": false,
+          "trackingMeta": {
+            "new_product_id_selected": "945343"
+          }
+        },
+        {
+          "productId": 945499,
+          "mediaUrl": "https://qastatic.hopscotch.in/fstatic/product/202007/dd2c711d-f659-4b6b-b4cf-0f2ba7bc04c4_full.jpg?version=1594453148107",
+          "isStockAvailable": true,
+          "isSelected": true,
+          "trackingMeta": {
+            "new_product_id_selected": "945499"
+          }
+        },
+        {
+          "productId": 947621,
+          "mediaUrl": "https://qastatic.hopscotch.in/fstatic/product/202007/23379f4d-7bfe-4c9a-8cdd-57cbfed1f831_full.jpg?version=1594716565763",
+          "isStockAvailable": true,
+          "isSelected": false,
+          "trackingMeta": {
+            "new_product_id_selected": "947621"
+          }
+        },
+        {
+          "productId": 947674,
+          "mediaUrl": "https://qastatic.hopscotch.in/fstatic/product/202007/d2ed1768-d722-4162-8546-7aea9ab96574_full.jpg?version=1595913509535",
+          "isStockAvailable": true,
+          "isSelected": false,
+          "trackingMeta": {
+            "new_product_id_selected": "947674"
+          }
+        },
+        {
+          "productId": 951170,
+          "mediaUrl": "https://qastatic.hopscotch.in/fstatic/product/202007/6c46bcfc-e4ab-4b50-bce5-37d4e8fab195_full.jpg?version=1594797576417",
+          "isStockAvailable": true,
+          "isSelected": false,
+          "trackingMeta": {
+            "new_product_id_selected": "951170"
+          }
+        },
+        {
+          "productId": 957767,
+          "mediaUrl": "https://qastatic.hopscotch.in/fstatic/product/202007/ac407da2-2e21-440e-866d-21e187d99dfd_full.jpg?version=1596112853985",
+          "isStockAvailable": true,
+          "isSelected": false,
+          "trackingMeta": {
+            "new_product_id_selected": "957767"
+          }
+        }
+      ]
+    },
+    "isGift": false,
+    "soldOut": false
+  },
+  "offersList": {
+    "data": [
+      {
+        "header": "TEST45",
+        "description": "TEST45",
+        "promoCode": "TEST450",
+        "features": {
+          "displayCoupon": true,
+          "copyCoupon": true
+        },
+        "trackingMeta": {
+          "coupon_code": "TEST450"
+        }
+      }
+    ],
+    "trackingMeta": {
+      "coupon_applicable": 2
+    }
+  },
+  "action": "success",
+  "recentlyViewed": {
+    "trackingMeta": {
+      "feed_size": 4
+    },
+    "viewConfig": {
+      "minTilesToShow": 2,
+      "peepingFactor": 30,
+      "snapping": true,
+      "showPageIndicators": true,
+      "tileWidth": 200,
+      "tileHeight": 300,
+      "navigation": true,
+      "imageCornerRadius": 4
+    },
+    "tiles": [
+      {
+        "id": 0,
+        "product": {
+          "id": 932944,
+          "name": "VPK - Gray Sleeveless Printed Top",
+          "brandName": "Whaou",
+          "quantity": 3,
+          "soldOut": false,
+          "isXLTile": false,
+          "isCPT": false,
+          "wishlistInfo": {
+            "id": 0,
+            "isWishlisted": false,
+            "canWishlist": true
+          },
+          "media": [
+            {
+              "mimeType": "IMAGE",
+              "url": "https://qastatic.hopscotch.in/fstatic/product/202006/c3ef095d-15a8-4613-a42c-719e314a4484_full.jpg?version=1592572224017"
+            }
+          ],
+          "priceInfo": {
+            "sellingPrice": "₹299",
+            "mrp": "MRP:₹349",
+            "discount": "14% OFF",
+            "absoluteValue": 299
+          },
+          "actionUri": "hopscotch://product?id=932944",
+          "visualCue": {
+            "uiType": "TEXT",
+            "location": "BottomLeft",
+            "text": "3 LEFT",
+            "textColor": "#333333",
+            "backgroundColor": "#E5E5EA"
+          },
+          "trackingMeta": {
+            "widget_position": 0,
+            "product_id": "932944",
+            "category": "Apparel - Children",
+            "subcategory": "Sets",
+            "product_type": "Short set",
+            "subproduct_type": "aman123456891",
+            "name": "VPK - Gray Sleeveless Printed Top",
+            "brand": "Whaou",
+            "gender": "Boy's",
+            "from_age": 12,
+            "to_age": 36,
+            "price": 449,
+            "mrp": 499.0,
+            "discount_percentage": 10.0,
+            "image_url": "https://q/z_full.jpg",
+            "sku": "FCA-2998686",
+            "sale": "No",
+            "preorder": "No",
+            "merch_type": "Catalog",
+            "available_quantity": 1,
+            "low_inventory": "Yes"
+          }
+        },
+        "trackingMeta": {
+          "clicked_product_pid": "932944",
+          "clicked_product_type": "Short set",
+          "clicked_product_category": "Apparel - Children",
+          "clicked_product_subcategory": "Sets"
+        }
+      },
+      {
+        "id": 1,
+        "product": {
+          "id": 923856,
+          "name": "Yellow Fruit Print Full Sleeve Blazer",
+          "brandName": "Raasha",
+          "quantity": 18,
+          "soldOut": false,
+          "isXLTile": false,
+          "isCPT": false,
+          "wishlistInfo": {
+            "id": 0,
+            "isWishlisted": false,
+            "canWishlist": true
+          },
+          "media": [
+            {
+              "mimeType": "IMAGE",
+              "url": "https://qastatic.hopscotch.in/fstatic/product/202001/82097471-94dc-49c5-bfc1-6460fa84b3ac_full.jpg?version=1580122552311"
+            }
+          ],
+          "priceInfo": {
+            "sellingPrice": "₹899",
+            "mrp": "MRP:₹1,499",
+            "discount": "40% OFF",
+            "absoluteValue": 899
+          },
+          "actionUri": "hopscotch://product?id=923856",
+          "trackingMeta": {
+            "widget_position": 1,
+            "product_id": "923856",
+            "category": "Apparel - Children",
+            "subcategory": "Sets",
+            "product_type": "Short set",
+            "subproduct_type": "aman123456891",
+            "name": "Yellow Fruit Print Full Sleeve Blazer",
+            "brand": "Raasha",
+            "gender": "Boy's",
+            "from_age": 12,
+            "to_age": 36,
+            "price": 449,
+            "mrp": 499.0,
+            "discount_percentage": 10.0,
+            "image_url": "https://q/z_full.jpg",
+            "sku": "FCA-2998686",
+            "sale": "No",
+            "preorder": "No",
+            "merch_type": "Catalog",
+            "available_quantity": 1,
+            "low_inventory": "Yes"
+          }
+        },
+        "trackingMeta": {
+          "clicked_product_pid": "923856",
+          "clicked_product_type": "Short set",
+          "clicked_product_category": "Apparel - Children",
+          "clicked_product_subcategory": "Sets"
+        }
+      },
+      {
+        "id": 2,
+        "product": {
+          "id": 923936,
+          "name": "Gray Text Print Half Sleeve T-Shirt And Shorts Set",
+          "brandName": "JBCLUB",
+          "quantity": 4,
+          "soldOut": false,
+          "isXLTile": false,
+          "isCPT": false,
+          "wishlistInfo": {
+            "id": 0,
+            "isWishlisted": false,
+            "canWishlist": true
+          },
+          "media": [
+            {
+              "mimeType": "IMAGE",
+              "url": "https://qastatic.hopscotch.in/fstatic/product/202002/5e62b7da-1817-4734-bf1e-9088ee725227_full.jpg?version=1581486797726"
+            }
+          ],
+          "priceInfo": {
+            "sellingPrice": "₹510",
+            "absoluteValue": 510
+          },
+          "actionUri": "hopscotch://product?id=923936",
+          "trackingMeta": {
+            "widget_position": 2,
+            "product_id": "923936",
+            "category": "Apparel - Children",
+            "subcategory": "Sets",
+            "product_type": "Short set",
+            "subproduct_type": "aman123456891",
+            "name": "Gray Text Print Half Sleeve T-Shirt And Shorts Set",
+            "brand": "JBCLUB",
+            "gender": "Boy's",
+            "from_age": 12,
+            "to_age": 36,
+            "price": 449,
+            "mrp": 499.0,
+            "discount_percentage": 10.0,
+            "image_url": "https://q/z_full.jpg",
+            "sku": "FCA-2998686",
+            "sale": "No",
+            "preorder": "No",
+            "merch_type": "Catalog",
+            "available_quantity": 1,
+            "low_inventory": "Yes"
+          }
+        },
+        "trackingMeta": {
+          "clicked_product_pid": "923936",
+          "clicked_product_type": "Short set",
+          "clicked_product_category": "Apparel - Children",
+          "clicked_product_subcategory": "Sets"
+        }
+      },
+      {
+        "id": 3,
+        "product": {
+          "id": 931199,
+          "name": "Orange Baby Polo Half Sleeve Printed T-Shirt Set",
+          "brandName": "1st Care",
+          "quantity": 10,
+          "soldOut": false,
+          "isXLTile": false,
+          "isCPT": false,
+          "wishlistInfo": {
+            "id": 0,
+            "isWishlisted": false,
+            "canWishlist": true
+          },
+          "media": [
+            {
+              "mimeType": "IMAGE",
+              "url": "https://qastatic.hopscotch.in/fstatic/product/202003/f4cd92b5-abd6-4dd2-8a58-493eae76027c_full.jpg?version=1583317815574"
+            }
+          ],
+          "priceInfo": {
+            "sellingPrice": "₹449",
+            "mrp": "MRP:₹499",
+            "discount": "10% OFF",
+            "absoluteValue": 449
+          },
+          "actionUri": "hopscotch://product?id=931199",
+          "trackingMeta": {
+            "widget_position": 3,
+            "product_id": "931199",
+            "category": "Apparel - Children",
+            "subcategory": "Sets",
+            "product_type": "Short set",
+            "subproduct_type": "aman123456891",
+            "name": "Orange Baby Polo Half Sleeve Printed T-Shirt Set",
+            "brand": "1st Care",
+            "gender": "Boy's",
+            "from_age": 12,
+            "to_age": 36,
+            "price": 449,
+            "mrp": 499.0,
+            "discount_percentage": 10.0,
+            "image_url": "https://q/z_full.jpg",
+            "sku": "FCA-2998686",
+            "sale": "No",
+            "preorder": "No",
+            "merch_type": "Catalog",
+            "available_quantity": 1,
+            "low_inventory": "Yes"
+          }
+        },
+        "trackingMeta": {
+          "clicked_product_pid": "931199",
+          "clicked_product_type": "Short set",
+          "clicked_product_category": "Apparel - Children",
+          "clicked_product_subcategory": "Sets"
+        }
+      }
+    ],
+    "heading": {
+      "url": "https://qastatic.hopscotch.in/fstatic/product/Screenshot%202025-04-11%20at%2012.44.38%E2%80%AFPM.png",
+      "height": 75,
+      "width": 960
+    },
+    "margins": {
+      "top": 20,
+      "bottom": 20,
+      "horizontal": 16,
+      "innerHorizontalMargin": 8,
+      "titleBottomMargin": 16
+    }
+  }
+}

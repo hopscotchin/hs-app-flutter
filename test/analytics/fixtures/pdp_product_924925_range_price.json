@@ -1,0 +1,404 @@
+{
+  "banners": [
+    {
+      "position": "top",
+      "id": 88,
+      "media": {
+        "mimeType": "IMAGE",
+        "height": 95,
+        "width": 750,
+        "url": "https://qastatic.hopscotch.in/fstatic/boutique/banner/202509/e9850662-63d7-4e37-be47-91883e2e6fa5_full.png?version=1758605720478"
+      },
+      "actionUri": "hopscotch://special?id=SumitNewspl",
+      "type": "SPECIAL_PAGE"
+    }
+  ],
+  "product": {
+    "id": 924925,
+    "hasSizeChart": true,
+    "media": [
+      {
+        "mimeType": "IMAGE",
+        "height": 1000,
+        "width": 1000,
+        "url": "https://qastatic.hopscotch.in/fstatic/product/202002/92ae8fec-c3d9-40e2-9bec-208370fb5b4a_full.jpg?version=1582114674786"
+      },
+      {
+        "mimeType": "IMAGE",
+        "height": 1000,
+        "width": 1000,
+        "url": "https://qastatic.hopscotch.in/fstatic/product/202002/0273a989-cab8-4b0f-95cc-6d3811cbbf26_full.jpg?version=1582114675660"
+      },
+      {
+        "mimeType": "IMAGE",
+        "height": 1000,
+        "width": 1000,
+        "url": "https://qastatic.hopscotch.in/fstatic/product/202002/7f14af10-4b96-4fa1-8c25-cc488eaecbe5_full.jpg?version=1582114676346"
+      }
+    ],
+    "name": "Black Boys Race Printed Jogger",
+    "priceInfo": {
+      "sellingPrice": "₹449-₹499",
+      "absoluteValue": 449.0,
+      "callout": "Price inclusive of all taxes"
+    },
+    "skus": [
+      {
+        "skuId": "GBN-2974116",
+        "title": "1-2 Y",
+        "priceInfo": {
+          "sellingPrice": "₹449",
+          "absoluteValue": 449.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": true,
+        "info": {
+          "text": "2 Left",
+          "textColor": "#E00000"
+        },
+        "eddInfo": {
+          "edd": "Get it in 2-3 days",
+          "orderSla": "Usually ships within a day"
+        },
+        "availableQuantity": 2,
+        "skuAttributes": {
+          "skuMrp": "₹449",
+          "skuSize": "1-2 Y",
+          "skuType": "fixed"
+        }
+      },
+      {
+        "skuId": "GBN-2974117",
+        "title": "2-3 Y",
+        "priceInfo": {
+          "sellingPrice": "₹449",
+          "absoluteValue": 449.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": true,
+        "info": {
+          "text": "3 Left",
+          "textColor": "#E00000"
+        },
+        "eddInfo": {
+          "edd": "Get it in 2-3 days",
+          "orderSla": "Usually ships within a day"
+        },
+        "availableQuantity": 3,
+        "skuAttributes": {
+          "skuMrp": "₹449",
+          "skuSize": "2-3 Y",
+          "skuType": "fixed"
+        }
+      },
+      {
+        "skuId": "GBN-2974118",
+        "title": "3-4 Y",
+        "priceInfo": {
+          "sellingPrice": "₹449",
+          "absoluteValue": 449.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": true,
+        "info": {
+          "text": "3 Left",
+          "textColor": "#E00000"
+        },
+        "eddInfo": {
+          "edd": "Get it in 2-3 days",
+          "orderSla": "Usually ships within a day"
+        },
+        "availableQuantity": 3,
+        "skuAttributes": {
+          "skuMrp": "₹449",
+          "skuSize": "3-4 Y",
+          "skuType": "fixed"
+        }
+      },
+      {
+        "skuId": "GBN-2974119",
+        "title": "4-5 Y",
+        "priceInfo": {
+          "sellingPrice": "₹449",
+          "absoluteValue": 449.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": true,
+        "info": {
+          "text": "1 Left",
+          "textColor": "#E00000"
+        },
+        "eddInfo": {
+          "edd": "Get it in 2-3 days",
+          "orderSla": "Usually ships within a day"
+        },
+        "availableQuantity": 1,
+        "skuAttributes": {
+          "skuMrp": "₹449",
+          "skuSize": "4-5 Y",
+          "skuType": "fixed"
+        }
+      },
+      {
+        "skuId": "GBN-2974120",
+        "title": "5-6 Y",
+        "priceInfo": {
+          "sellingPrice": "₹449",
+          "absoluteValue": 449.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": false,
+        "info": {
+          "text": "Out Of Stock",
+          "textColor": "#80333333"
+        },
+        "eddInfo": {
+          "edd": "Get it in 2-3 days",
+          "orderSla": "Usually ships within a day"
+        },
+        "availableQuantity": 0,
+        "skuAttributes": {
+          "skuMrp": "₹449",
+          "skuSize": "5-6 Y",
+          "skuType": "fixed"
+        }
+      },
+      {
+        "skuId": "GBN-2974121",
+        "title": "7-8 Y",
+        "priceInfo": {
+          "sellingPrice": "₹499",
+          "absoluteValue": 499.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": false,
+        "info": {
+          "text": "Out Of Stock",
+          "textColor": "#80333333"
+        },
+        "eddInfo": {
+          "edd": "Get it in 2-3 days",
+          "orderSla": "Usually ships within a day"
+        },
+        "availableQuantity": 0,
+        "skuAttributes": {
+          "skuMrp": "₹499",
+          "skuSize": "7-8 Y",
+          "skuType": "fixed"
+        }
+      },
+      {
+        "skuId": "GBN-2974122",
+        "title": "9-10 Y",
+        "priceInfo": {
+          "sellingPrice": "₹499",
+          "absoluteValue": 499.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": false,
+        "info": {
+          "text": "Out Of Stock",
+          "textColor": "#80333333"
+        },
+        "eddInfo": {
+          "edd": "Get it in 6-7 weeks"
+        },
+        "availableQuantity": 0,
+        "skuAttributes": {
+          "skuMrp": "₹499",
+          "skuSize": "9-10 Y",
+          "skuType": "fixed"
+        }
+      },
+      {
+        "skuId": "GBN-2974123",
+        "title": "11-12 Y",
+        "priceInfo": {
+          "sellingPrice": "₹499",
+          "absoluteValue": 499.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": true,
+        "info": {
+          "text": "2 Left",
+          "textColor": "#E00000"
+        },
+        "eddInfo": {
+          "edd": "Get it in 2-3 days",
+          "orderSla": "Usually ships within a day"
+        },
+        "availableQuantity": 2,
+        "skuAttributes": {
+          "skuMrp": "₹499",
+          "skuSize": "11-12 Y",
+          "skuType": "fixed"
+        }
+      },
+      {
+        "skuId": "GBN-2974124",
+        "title": "13-14 Y",
+        "priceInfo": {
+          "sellingPrice": "₹499",
+          "absoluteValue": 499.0,
+          "callout": "Price inclusive of all taxes"
+        },
+        "enable": true,
+        "info": {
+          "text": "2 Left",
+          "textColor": "#E00000"
+        },
+        "eddInfo": {
+          "edd": "Get it in 2-3 days",
+          "orderSla": "Usually ships within a day"
+        },
+        "availableQuantity": 2,
+        "skuAttributes": {
+          "skuMrp": "₹499",
+          "skuSize": "13-14 Y",
+          "skuType": "fixed"
+        }
+      }
+    ],
+    "eddInfo": {
+      "edd": "Get it in 2-3 days",
+      "orderSla": "Usually ships within a day"
+    },
+    "serviceGuarantee": [
+      {
+        "label": "COD Available",
+        "icon": "https://static.hopscotch.in/vector_cod_available.svg"
+      },
+      {
+        "label": "No Exchange",
+        "icon": "https://static.hopscotch.in/not_available.svg"
+      },
+      {
+        "label": "7 Days Return",
+        "icon": "https://static.hopscotch.in/vector_return_available.svg"
+      }
+    ],
+    "details": [
+      {
+        "tabName": "Specification",
+        "items": [
+          {
+            "type": "skuValue",
+            "span": 1,
+            "displayKey": "MRP : ",
+            "displayStyle": "inline",
+            "showBullet": false,
+            "showDivider": false,
+            "fieldPath": "skuMrp"
+          },
+          {
+            "type": "skuValue",
+            "span": 1,
+            "displayKey": "TYPE : ",
+            "displayStyle": "block",
+            "showBullet": false,
+            "showDivider": false,
+            "fieldPath": "skuType"
+          }
+        ]
+      },
+      {
+        "tabName": "Description",
+        "items": [
+          {
+            "type": "skuValue",
+            "span": 1,
+            "displayKey": "MRP : ",
+            "displayStyle": "inline",
+            "showBullet": false,
+            "showDivider": false,
+            "fieldPath": "skuMrp"
+          },
+          {
+            "type": "skuValue",
+            "span": 1,
+            "displayKey": "SIZE : ",
+            "displayStyle": "block",
+            "showBullet": true,
+            "showDivider": true,
+            "fieldPath": "skuSize"
+          }
+        ]
+      }
+    ],
+    "isServiceable": true,
+    "isEddDifferentForSKUs": false,
+    "isReturnInfoDifferentForSKUs": false,
+    "trackingMeta": {
+      "slug": "black-boys-race-printed-jogger",
+      "isPidAplus": true,
+      "category": "Apparel - Children",
+      "subcategory": "Sportswear",
+      "product_type": "Joggers",
+      "from_age": 12,
+      "to_age": 168,
+      "delivery_days": 3,
+      "brand": "Game Begins",
+      "gender": "Boy's",
+      "product_attrs": [
+        {
+          "name": "HBT",
+          "value": "B2"
+        },
+        {
+          "name": "Season",
+          "value": "Summer"
+        }
+      ],
+      "count_of_pids_in_style_code": "0",
+      "sale": "No"
+    },
+    "orderAttribution": {
+      "redirected_from_colour_widget": "No"
+    },
+    "plpRedirectURL": {
+      "redirectText": "All Joggers",
+      "redirectUrl": "/products/11862/all-joggers?q={\"subCategory\":\"848\",\"productClass\":\"1683\",\"category\":\"373\",\"browse\":\"Boy's\"}"
+    },
+    "wishlistInfo": {
+      "canWishlist": true,
+      "isWishlisted": false
+    },
+    "isGift": false,
+    "soldOut": false
+  },
+  "offersList": {
+    "data": [
+      {
+        "header": "TEST45",
+        "description": "TEST45",
+        "promoCode": "TEST450",
+        "features": {
+          "displayCoupon": true,
+          "copyCoupon": true
+        }
+      },
+      {
+        "header": "testRebrand",
+        "description": "testRebrand",
+        "promoCode": "TESTREBRAND",
+        "features": {
+          "displayCoupon": true,
+          "copyCoupon": true
+        }
+      },
+      {
+        "header": "Buy one Get one Free",
+        "description": "An Exclusive Discount to get a free product.",
+        "promoCode": "BOGO31071",
+        "features": {
+          "displayCoupon": true,
+          "copyCoupon": true
+        }
+      }
+    ],
+    "trackingMeta": {
+      "coupon_applicable": 1
+    }
+  },
+  "action": "success"
+}

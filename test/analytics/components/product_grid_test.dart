@@ -74,6 +74,32 @@ void main() {
       expect(payload[AnalyticsProperties.sortbar], AnalyticsDefaults.sortBarAll);
       expectRootMerged(payload, ctx.rootMeta);
     }, skip: skipReason);
-  });
 
+    test('attribution carries forward to next-screen event', () async {
+      final ctx = harness;
+      final tile =
+          (ctx.component.data!['tiles'] as List).first as Map<String, dynamic>;
+      await ctx.tracker.logTileClick(trackingMetaChain: [
+        ctx.component.data!['trackingMeta'] as Map<String, dynamic>?,
+        tile['trackingMeta'] as Map<String, dynamic>?,
+      ]);
+      ctx.h.clear();
+
+      // Fire the downstream event WITHOUT any caller-seeded props. Providing
+      // e.g. `productId: 42` here would shadow the tile's own `product_id`
+      // — caller props spread AFTER attribution and win on collision. That's
+      // correct semantics, but wrong for a test that's checking attribution
+      // flow-through. Empty props isolate the attribution assertion.
+      await ctx.h.analytics.logEvent(
+        AnalyticsEvents.productViewed,
+        const <String, Object?>{},
+        attribution: true,
+      );
+
+      final payload = ctx.h.singleEvent(AnalyticsEvents.productViewed);
+      expectNoNullFields(payload);
+      final tileMeta = tile['trackingMeta'] as Map<String, dynamic>;
+      expectAttributionCarriedForward(payload, tileMeta);
+    }, skip: skipReason);
+  });
 }

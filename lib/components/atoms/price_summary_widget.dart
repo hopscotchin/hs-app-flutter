@@ -23,13 +23,22 @@ class PriceSummaryWidget extends StatelessWidget {
   /// Optional rows rendered after the total (e.g. payment method breakdowns).
   final List<PricingItemEntity> postTotalRows;
 
+  /// Automation-key prefix supplied by the host screen (e.g. `cart_price_summary`).
+  /// Null → unkeyed, so existing call sites are unaffected.
+  final String? keyPrefix;
+
   const PriceSummaryWidget({
     super.key,
     required this.summary,
     this.title,
     this.subtitle,
     this.postTotalRows = const [],
+    this.keyPrefix,
   });
+
+  /// `<keyPrefix>_<suffix>`, or null when the host passed no prefix.
+  ValueKey<String>? _key(String suffix) =>
+      keyPrefix == null ? null : ValueKey('${keyPrefix!}_$suffix');
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +47,20 @@ class PriceSummaryWidget extends StatelessWidget {
 
     return Column(
       children: [
-        Center(child: Text(displayTitle, style: AppTypographyV1.titleMedium.bold.textPrimary())),
+        Center(
+          child: Text(
+            displayTitle,
+            key: _key('title'),
+            style: AppTypographyV1.titleMedium.bold.textPrimary(),
+          ),
+        ),
         const SizedBox(height: 4),
         Center(
-          child: Text(displaySubtitle, style: AppTypographyV1.labelLarge.regular.neutralGrey6()),
+          child: Text(
+            displaySubtitle,
+            key: _key('subtitle'),
+            style: AppTypographyV1.labelLarge.regular.neutralGrey6(),
+          ),
         ),
         const SizedBox(height: 28),
         Container(
@@ -54,17 +73,19 @@ class PriceSummaryWidget extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [...summary.pricingData.map(_buildPricingRow)],
+            children: [...summary.pricingData.indexed.map((e) => _buildPricingRow(e.$2, e.$1))],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildPricingRow(PricingItemEntity item) {
+  Widget _buildPricingRow(PricingItemEntity item, int index) {
     final valueColor = item.textColor.toColor;
+    final rowKey = keyPrefix == null ? null : '${keyPrefix!}_row_$index';
 
     return Column(
+      key: rowKey == null ? null : ValueKey(rowKey),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
@@ -75,7 +96,11 @@ class PriceSummaryWidget extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(item.label ?? '', style: AppTypographyV1.bodyRegular.regular.textPrimary()),
+                  Text(
+                    item.label ?? '',
+                    key: rowKey == null ? null : ValueKey('${rowKey}_label'),
+                    style: AppTypographyV1.bodyRegular.regular.textPrimary(),
+                  ),
                   if (item.action != null) ...[
                     const SizedBox(width: 4),
                     ActionTrigger(
@@ -100,6 +125,7 @@ class PriceSummaryWidget extends StatelessWidget {
                   ],
                   Text(
                     item.value ?? '',
+                    key: rowKey == null ? null : ValueKey('${rowKey}_value'),
                     style: AppTypographyV1.bodySmall.bold.textPrimary().copyWith(color: valueColor),
                   ),
                 ],

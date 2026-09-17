@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/atoms/badge_icon.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/atoms/empty_state_widget.dart';
+import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
 import 'package:hs_app_flutter/components/atoms/price_summary_widget.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/extensions/context_extension.dart';
@@ -11,6 +12,7 @@ import 'package:hs_app_flutter/core/theme/colors.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
+import 'package:hs_app_flutter/features/auth/domain/entities/auth_entry_args.dart';
 import 'package:hs_app_flutter/features/cart/domain/entities/cart_entity.dart';
 import 'package:hs_app_flutter/features/cart/domain/entities/delivery_pincode_entity.dart';
 import 'package:hs_app_flutter/features/cart/presentation/widgets/cart_slg_widget.dart';
@@ -18,15 +20,15 @@ import 'package:hs_app_flutter/features/cart/presentation/widgets/gift_card_bann
 import 'package:hs_app_flutter/features/pincode/presentation/widgets/pincode_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../components/atoms/error_retry_widget.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/cart_strings.dart';
-import '../../../../core/constants/strings/common_strings.dart';
 import '../../../../core/constants/strings/login_redirects.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../../account/presentation/bloc/account_bloc.dart';
+import '../../../checkout/domain/entities/buy_now_entity.dart';
+import '../../../checkout/presentation/pages/checkout_bottom_sheet.dart';
 import '../../../promos_offers/presentation/widgets/promo_action_sheet.dart';
 import '../../../promos_offers/presentation/widgets/promo_offers_bottom_sheet.dart';
 import '../bloc/cart_bloc.dart';
@@ -111,12 +113,50 @@ class _CartPageState extends State<CartPage> {
   /// here. Android does the same: `CartFragment.proceedToCheckout` calls the API
   /// first and only consults the login status once it comes back successful, in
   /// `checkLoginAndCheckout`. See [_openCheckoutOrLogin], which is that gate.
-  void _startCheckout() async {
-    //* this needs testing will add in next release
-    //     context.showSnack(
-    //       'Thanks for testing this but checkout is not for this release',
-    //       status: SnackStatus.error,
-    //     );
+  void _startCheckout() {
+    // context.showSnack(
+    //   'Thansk for testing this but checkout is not for this release',
+    //   status: SnackStatus.error,
+    // );
+    // final isLoggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
+    // if (!isLoggedIn) {
+
+    // final loggedIn = await AppNavigator.showMobileLoginFlow(context);
+    // if (!loggedIn || !mounted) return;
+    // _startCheckout();
+    // return;
+    // }
+    // context.read<CartBloc>().add(const ProceedToCheckout());
+  }
+
+  /// Android's `checkLoginAndCheckout`: with a successful `orderNow` in hand,
+  /// logged-in users get the checkout sheet and logged-out users get the login
+  /// flow instead.
+  ///
+  /// On a successful login this re-runs [_startCheckout] rather than opening the
+  /// sheet with [data] — `handleAfterLogin(REDIRECT_CHECKOUT_SHEET)` does the
+  /// same, discarding the response fetched as a guest so checkout is driven by
+  /// one fetched as the signed-in user.
+  Future<void> _openCheckoutOrLogin(BuyNowEntity data) async {
+    if (!context.read<AccountBloc>().state.account.isLoggedIn) {
+      // from_location stays "none": the CTA that gets here is proceed-to-
+      // checkout, and there is no FromLocations constant for it. Reporting a
+      // near-miss like `cartButton` would invent a dimension.
+      final loggedIn = await AppNavigator.showMobileLoginFlow(
+        context,
+        entry: const AuthEntryArgs(fromScreen: FromScreens.shoppingCart),
+      );
+      if (!loggedIn || !mounted) return;
+      _startCheckout();
+      return;
+    }
+    await showCheckoutBottomSheet(context, buyNowData: data);
+    if (!mounted) return;
+    // Dismissing the sheet is leaving the buy-now flow, so drop back to the
+    // full bag before refreshing — Android does the same in
+    // `CartFragment.onResume`, guarded by `exitedBuyNowFlow`.
+    _cartBloc.exitBuyNowMode();
+    _cartBloc.add(const RefreshCart());
   }
 
   /// Buy Now hand-off from PDP: start checkout once the cart is loaded and
@@ -135,18 +175,16 @@ class _CartPageState extends State<CartPage> {
     return BlocListener<CartBloc, CartState>(
       // Buy Now hand-off from PDP — fires only on the first load thanks to the
       // one-shot latch.
-      listenWhen: (prev, curr) =>
-          widget.fromBuyNow && !_buyNowCheckoutStarted && curr.isLoaded,
+      listenWhen: (prev, curr) => widget.fromBuyNow && !_buyNowCheckoutStarted && curr.isLoaded,
       listener: (context, state) => _onCartLoadedForBuyNow(state),
       child: Stack(
         children: [
           Scaffold(
-            appBar: _CartAppBar(
-              onEddPincodeTap: () => _onEddPincodeTap(context),
-            ),
+            appBar: _CartAppBar(onEddPincodeTap: () => _onEddPincodeTap(context)),
             body: _CartBody(
               priceSummaryKey: _priceSummaryKey,
               onPullToRefresh: () => _onPullToRefresh(context),
+              onCheckoutData: _openCheckoutOrLogin,
             ),
             bottomNavigationBar: _CartCheckoutBar(
               onDetailsTap: _scrollToPriceSummary,
@@ -184,27 +222,27 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
         onTap: () => Navigator.of(context).pop(),
         child: const Padding(
           padding: EdgeInsets.only(left: AppSpacing.lgMd, right: AppSpacing.md),
-          child: CustomImage(
-            path: ImageConstants.arrowBack,
-            fit: BoxFit.contain,
-          ),
+          child: CustomImage(path: ImageConstants.arrowBack, fit: BoxFit.contain),
         ),
       ),
       title: Text(
         CartStrings.bag,
+        key: const ValueKey(CartTestStrings.appBarTitle),
         style: AppTypographyV1.titleMedium.bold.textPrimary(),
       ),
       actions: [
-        BlocSelector<
-          CartBloc,
-          CartState,
-          (bool, DeliveryPincodeEntity?, CartEntity?)
-        >(
-          selector: (state) =>
-              (state.isLoading, state.cart?.deliveryPincode, state.cart),
+        // Only rebuilds when the pincode itself changes (or the initial load
+        // ends) — not on every cart mutation (loading flags, toasts, item
+        // updates, etc.).
+        BlocSelector<CartBloc, CartState, (bool, DeliveryPincodeEntity?, CartEntity?)>(
+          selector: (state) => (state.isLoading, state.cart?.deliveryPincode, state.cart),
           builder: (context, value) {
             final (isLoading, pincode, cartList) = value;
-
+            // On the very first load there is no cart yet, so the label would
+            // otherwise read "Enter pincode for EDD" — a call to action for
+            // something the user may already have set — and then swap to the
+            // real pincode a moment later. A shimmer says "not known yet"
+            // instead, matching the body's CartShimmerLoading.
             if (isLoading) {
               return const _AppBarShimmer(width: 132, height: AppSpacing.md);
             }
@@ -213,6 +251,7 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ? '${pincode?.pincodeMessage ?? CartStrings.deliverTo} ${pincode!.pincode}'
                 : CartStrings.enterPincodeForEdd;
             return GestureDetector(
+              key: const ValueKey(CartTestStrings.appBarPincodeButton),
               onTap: onEddPincodeTap,
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5),
@@ -220,6 +259,7 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
                   children: [
                     Text(
                       label,
+                      key: const ValueKey(CartTestStrings.appBarPincodeText),
                       style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
                     ),
                     AppSpacing.horizontalGapXxs,
@@ -238,20 +278,21 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
         BlocSelector<CartBloc, CartState, bool>(
           selector: (state) => state.isLoading,
           builder: (context, isLoading) {
+            // Circular, and the icon's own size — the heart is round enough
+            // that a rounded-rect placeholder would read as a different
+            // control.
             if (isLoading) {
               return const Padding(
                 padding: EdgeInsets.only(left: 2),
                 child: _AppBarShimmer(
                   width: AppSpacing.iconSm,
                   height: AppSpacing.iconSm,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(AppSpacing.iconSm),
-                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(AppSpacing.iconSm)),
                 ),
               );
             }
             return BadgeIcon(
-              key: const ValueKey(PlpTestStrings.appBarWishlistButton),
+              key: const ValueKey(CartTestStrings.appBarWishlistButton),
               iconSize: AppSpacing.iconSm,
               icon: const Padding(
                 padding: EdgeInsets.only(left: 2, top: 5, bottom: 5),
@@ -262,13 +303,18 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
               count: 0,
-              onTap: () {},
+              onTap: () => AppNavigator.goToWishlistGated(
+                context,
+                fromScreen: FromScreens.shoppingCart,
+              ),
               iconColor: AppColors.textPrimary,
             );
           },
         ),
         AppSpacing.horizontalGapSm,
       ],
+      // Separates the bar from the scrolling cart content, which otherwise
+      // runs straight into it — same treatment as the search page's app bar.
       bottom: const PreferredSize(
         preferredSize: Size.fromHeight(1),
         child: Divider(height: 2, color: AppColors.neutralGrey1),
@@ -277,6 +323,10 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
+/// Stand-in for an app-bar action during the initial cart load. Each use is
+/// sized to the widget it replaces so the bar doesn't reflow when the real
+/// content arrives, and they share CartShimmerLoading's colours so the header
+/// and body shimmer as one surface.
 class _AppBarShimmer extends StatelessWidget {
   const _AppBarShimmer({
     required this.width,
@@ -298,10 +348,7 @@ class _AppBarShimmer extends StatelessWidget {
         child: Container(
           width: width,
           height: height,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: borderRadius,
-          ),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: borderRadius),
         ),
       ),
     );
@@ -316,29 +363,45 @@ class _CartBody extends StatelessWidget {
   final GlobalKey priceSummaryKey;
   final Future<void> Function() onPullToRefresh;
 
+  /// Successful `orderNow` hand-off — the page decides between the checkout
+  /// sheet and the login flow.
+  final Future<void> Function(BuyNowEntity) onCheckoutData;
+
   const _CartBody({
     required this.priceSummaryKey,
     required this.onPullToRefresh,
+    required this.onCheckoutData,
   });
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<CartBloc, CartState>(
+      // One listener covers all three one-shot side effects (toast / promo
+      // sheet / checkout sheet) instead of three BlocListeners each re-scanning
+      // every state change.
+      //
+      // Each condition compares against the previous state rather than just
+      // testing for non-null. The clear events (`ClearToast` and friends) are
+      // queued with `add`, so they land an event-loop turn later; until then
+      // any unrelated emission still carries the payload, and a plain non-null
+      // test would fire the effect a second time — which is what was opening
+      // the promo error sheet twice.
       listenWhen: (prev, curr) =>
-          (curr.toastMessage != null &&
-              curr.toastMessage != prev.toastMessage) ||
-          (curr.promoActionSheet != null &&
-              curr.promoActionSheet != prev.promoActionSheet),
+          (curr.toastMessage != null && curr.toastMessage != prev.toastMessage) ||
+          (curr.promoActionSheet != null && curr.promoActionSheet != prev.promoActionSheet) ||
+          (curr.checkoutData != null && curr.checkoutData != prev.checkoutData),
       listener: (context, state) {
         final cartBloc = context.read<CartBloc>();
 
+        // Handled independently, not as an if/else chain: a promo apply can
+        // answer with a message *and* a sheet in the same emission, and
+        // deferring one of them to a later state would leave it stranded once
+        // the comparison above stops seeing it as new.
         if (state.toastMessage.isNotNullOrEmpty) {
           context.showSnack(
             state.toastMessage!,
-            status: state.toastIsError
-                ? SnackStatus.error
-                : SnackStatus.success,
-            duration: state.toastDuration,
+            status: state.toastIsError ? SnackStatus.error : SnackStatus.success,
+            key: const ValueKey(CartTestStrings.toastSnackBar),
           );
           cartBloc.add(const ClearToast());
         }
@@ -349,17 +412,31 @@ class _CartBody extends StatelessWidget {
           cartBloc.add(const ClearPromoActionSheet());
           showPromoActionSheet(context, sheet);
         }
+
+        // Successful orderNow. Clearing the data up front keeps this one-shot,
+        // so the post-login retry re-arms the listener when its response lands.
+        if (state.checkoutData != null) {
+          final buyNowData = state.checkoutData!;
+          cartBloc.add(const ClearCheckoutData());
+          onCheckoutData(buyNowData);
+        }
       },
       child: BlocBuilder<CartBloc, CartState>(
         builder: (context, state) {
           if (state.isLoading) {
-            return const CartShimmerLoading();
+            return const CartShimmerLoading(key: ValueKey(CartTestStrings.shimmerLoading));
           }
 
           if (state.isError) {
-            return ErrorRetryWidget(
-              message: state.errorMessage ?? CommonStrings.somethingWentWrong,
-              onRetry: () => context.read<CartBloc>().add(const LoadCart()),
+            return Padding(
+              padding: EdgeInsets.only(bottom: context.height * 0.1),
+              child: EmptyStateWidget(
+                titleKey: const ValueKey(CartTestStrings.errorStateTitle),
+                subtitleKey: const ValueKey(CartTestStrings.errorStateSubtitle),
+                buttonKey: const ValueKey(CartTestStrings.errorStateButton),
+                type: EmptyStateType.networkError,
+                onButtonTap: () => AppNavigator.goToHome(context),
+              ),
             );
           }
 
@@ -368,12 +445,14 @@ class _CartBody extends StatelessWidget {
           }
 
           final cart = state.cart!;
-          final hasMergePrompt =
-              cart.isCartItemExistInTemp && cart.messageBars.isNotEmpty;
+          final hasMergePrompt = cart.isCartItemExistInTemp && cart.messageBars.isNotEmpty;
           if (cart.items.isEmpty && !hasMergePrompt) {
             return Padding(
               padding: EdgeInsets.only(bottom: context.height * 0.1),
               child: EmptyStateWidget(
+                titleKey: const ValueKey(CartTestStrings.emptyStateTitle),
+                subtitleKey: const ValueKey(CartTestStrings.emptyStateSubtitle),
+                buttonKey: const ValueKey(CartTestStrings.emptyStateButton),
                 type: EmptyStateType.cart,
                 onButtonTap: () => AppNavigator.goToHome(context),
               ),
@@ -381,6 +460,7 @@ class _CartBody extends StatelessWidget {
           }
 
           return RefreshIndicator(
+            key: const ValueKey(CartTestStrings.refreshIndicator),
             onRefresh: onPullToRefresh,
             child: _CartContent(state: state, priceSummaryKey: priceSummaryKey),
           );
@@ -398,10 +478,7 @@ class _CartCheckoutBar extends StatelessWidget {
   final VoidCallback? onDetailsTap;
   final VoidCallback onCheckout;
 
-  const _CartCheckoutBar({
-    required this.onDetailsTap,
-    required this.onCheckout,
-  });
+  const _CartCheckoutBar({required this.onDetailsTap, required this.onCheckout});
 
   @override
   Widget build(BuildContext context) {
@@ -413,7 +490,7 @@ class _CartCheckoutBar extends StatelessWidget {
 
         final cart = state.cart!;
         return CartCheckoutBar(
-          itemCount: cart.items.length,
+          itemCount: cart.orderDetails?.itemCount ?? cart.items.length,
           orderSummary: cart.orderSummary,
           isLoading: state.isCheckoutLoading,
           onDetailsTap: cart.orderSummary != null ? onDetailsTap : null,
@@ -438,6 +515,7 @@ class _CartUpdatingOverlay extends StatelessWidget {
       builder: (context, isCartUpdating) {
         if (!isCartUpdating) return const SizedBox.shrink();
         return Positioned.fill(
+          key: const ValueKey(CartTestStrings.updatingOverlay),
           child: AbsorbPointer(
             child: Container(
               // The cart content stays visible (just dimmed) underneath —
@@ -451,9 +529,7 @@ class _CartUpdatingOverlay extends StatelessWidget {
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
                     strokeCap: StrokeCap.round,
-                    valueColor: AlwaysStoppedAnimation(
-                      AppColors.progressActive,
-                    ),
+                    valueColor: AlwaysStoppedAnimation(AppColors.progressActive),
                     backgroundColor: AppColors.progressTrack,
                   ),
                 ),
@@ -484,7 +560,8 @@ class _CartContent extends StatelessWidget {
     final cartBloc = context.read<CartBloc>();
     final loggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
     if (!loggedIn) {
-      //* this needs testing will add in next release
+      cartBloc.setPendingPromo(code);
+      AppNavigator.goToLogin(context, redirectType: LoginRedirects.typePromo);
       return;
     }
     cartBloc.add(ApplyPromoCode(promoCode: code));
@@ -506,6 +583,10 @@ class _CartContent extends StatelessWidget {
       AppNavigator.goToLogin(
         context,
         redirectType: LoginRedirects.typeAddToWishlist,
+        entry: const AuthEntryArgs(
+          fromScreen: FromScreens.shoppingCart,
+          fromLocation: FromLocations.moveToWishlist,
+        ),
       );
       return;
     }
@@ -539,14 +620,16 @@ class _CartContent extends StatelessWidget {
               child: MessageBarsWidget(
                 padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
                 messageBars: cart.messageBars,
+                keyPrefix: CartTestStrings.screen,
                 onAction: (actionLink, _) {
-                  //* this needs testing will add in next release
+                  if (actionLink != null && actionLink.toLowerCase().contains('merge')) {
+                    context.read<CartBloc>().add(const MergeCart());
+                  }
                 },
               ),
             ),
 
-          if (cart.giftCardItem != null)
-            GiftCardBanner(giftCardItem: cart.giftCardItem!),
+          if (cart.giftCardItem != null) GiftCardBanner(giftCardItem: cart.giftCardItem!),
           ListView.builder(
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
@@ -555,20 +638,16 @@ class _CartContent extends StatelessWidget {
             itemBuilder: (context, index) {
               final item = cart.items[index];
               return CartItemWidget(
-                key: ValueKey(item.sku),
+                key: ValueKey('${CartTestStrings.item}_$index'),
+                testIndex: index,
                 item: item,
                 hasMessageBars: cart.messageBars.isNotEmpty,
                 isLoading: state.isItemBusy(item.sku),
                 isMovingToWishlist: state.isMovingToWishlist(item.sku),
                 onQuantityChanged: (qty) => context.read<CartBloc>().add(
-                  UpdateCartItemQuantity(
-                    sku: item.sku ?? '',
-                    quantity: qty,
-                    itemIndex: index,
-                  ),
+                  UpdateCartItemQuantity(sku: item.sku ?? '', quantity: qty, itemIndex: index),
                 ),
-                onRemove: () =>
-                    showRemoveCartItemSheet(context, item.sku ?? ''),
+                onRemove: () => showRemoveCartItemSheet(context, item.sku ?? ''),
                 onMoveToWishlist: () => _moveToWishlist(
                   context,
                   MoveToWishlist(
@@ -602,9 +681,13 @@ class _CartContent extends StatelessWidget {
           // Price summary
           if (cart.items.isNotEmpty && cart.orderSummary != null) ...[
             AppSpacing.verticalGapLMd,
+            // const SizedBox(height: 40),
             KeyedSubtree(
               key: priceSummaryKey,
-              child: PriceSummaryWidget(summary: cart.orderSummary!),
+              child: PriceSummaryWidget(
+                summary: cart.orderSummary!,
+                keyPrefix: CartTestStrings.priceSummary,
+              ),
             ),
           ],
 
@@ -619,15 +702,13 @@ class _CartContent extends StatelessWidget {
                 ),
                 iconSize: (24, 24),
                 messageBars: cart.bottomMessageBars,
+                keyPrefix: CartTestStrings.bottomMessageBarScreen,
                 cardStyle: true,
               ),
             ),
           ],
-          if (cart.items.isNotEmpty &&
-              cart.serviceLevelGuarantee.isNotEmpty) ...{
-            if (cart.bottomMessageBars.isEmpty) ...{
-              const SizedBox(height: AppSpacing.md),
-            },
+          if (cart.items.isNotEmpty && cart.serviceLevelGuarantee.isNotEmpty) ...{
+            if (cart.bottomMessageBars.isEmpty) ...{const SizedBox(height: AppSpacing.md)},
             SlgWidget(items: cart.serviceLevelGuarantee),
           },
           AppSpacing.verticalGapSm,

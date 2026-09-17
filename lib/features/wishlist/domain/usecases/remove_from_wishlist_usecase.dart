@@ -8,13 +8,13 @@ import '../repositories/wishlist_repository.dart';
 
 @lazySingleton
 class RemoveFromWishlistUseCase
-    implements UseCase<void, RemoveFromWishlistParams> {
+    implements UseCase<String?, RemoveFromWishlistParams> {
   RemoveFromWishlistUseCase(this._repository);
 
   final WishlistRepository _repository;
 
   @override
-  Future<Either<Failure, void>> call(RemoveFromWishlistParams params) {
+  Future<Either<Failure, String?>> call(RemoveFromWishlistParams params) {
     return _repository.removeFromWishlist(params.wishlistId);
   }
 }

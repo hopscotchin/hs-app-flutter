@@ -55,8 +55,14 @@ app.*.map.json
 # FVM Version Cache
 .fvm/
 
-# Maestro / analytics-verification artefacts.
+# Maestro / analytics-verification tooling and artefacts.
 #
+# The harness itself is local: `.mcp.json` hardcodes this machine's maestro binary
+# and repo path, and `maestro/` is a verification rig run by hand against a device,
+# not something the app or CI builds.
+.mcp.json
+/maestro/
+
 # `takeScreenshot: <name>` in a flow writes `<name>.png` to the workspace root, and
 # the capture proxy writes its JSONL wherever it is pointed — both are run output,
 # not source. Root-scoped so real assets under assets/ are unaffected. Maestro's own

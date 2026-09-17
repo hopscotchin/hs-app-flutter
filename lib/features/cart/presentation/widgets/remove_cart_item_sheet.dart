@@ -72,38 +72,30 @@ class _RemoveCartItemSheet extends StatelessWidget {
               children: [
                 Text(
                   CartStrings.removeItemsTitle,
+                  key: const ValueKey(CartTestStrings.removeItemBottomSheetTitle),
                   style: AppTypographyV1.titleSmall.bold.textPrimary(),
                 ),
                 AppSpacing.verticalGapMd,
                 Text(
                   CartStrings.removeItemsDescription,
-                  style: AppTypographyV1.bodyRegular.regular
-                      .textPrimary()
-                      .copyWith(height: 1.5),
+                  key: const ValueKey(CartTestStrings.removeItemBottomSheetDescription),
+                  style: AppTypographyV1.bodyRegular.regular.textPrimary().copyWith(height: 1.5),
                 ),
                 const SizedBox(height: 28),
                 Row(
                   children: [
                     Expanded(
                       child: TertiaryButton.defaultType(
-                        key: const ValueKey(
-                          CartTestStrings.removeItemBottomSheetRemoveButton,
-                        ),
+                        key: const ValueKey(CartTestStrings.removeItemBottomSheetRemoveButton),
                         text: CommonStrings.remove,
-                        state: isRemoving
-                            ? ButtonState.loading
-                            : ButtonState.enabled,
-                        onTap: () => context.read<CartBloc>().add(
-                          RemoveCartItem(sku: sku),
-                        ),
+                        state: isRemoving ? ButtonState.loading : ButtonState.enabled,
+                        onTap: () => context.read<CartBloc>().add(RemoveCartItem(sku: sku)),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: PrimaryButton.defaultType(
-                        key: const ValueKey(
-                          CartTestStrings.removeItemBottomSheetNoButton,
-                        ),
+                        key: const ValueKey(CartTestStrings.removeItemBottomSheetNoButton),
                         text: CartStrings.no,
                         state: ButtonState.enabled,
                         onTap: () => Navigator.of(context).maybePop(),

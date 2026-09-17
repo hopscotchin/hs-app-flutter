@@ -8,9 +8,11 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../router/navigation_observer.dart';
 import '../../services/pref_manager.dart';
+import '../analytics_map.dart';
 import '../analytics_service.dart';
 import '../attribution/lp_attribution_helper.dart';
 import '../attribution/order_attribution_helper.dart';
+import '../attribution/product_attribution_helper.dart';
 import '../attribution/utm_header_util.dart';
 import '../constants/analytics_defaults.dart';
 import '../constants/analytics_events.dart';
@@ -60,6 +62,7 @@ class AnalyticsHelper {
     this._experiments,
     this._orderAttribution,
     this._lpAttribution,
+    this._productAttribution,
     this._utm,
     this._navObserver,
   );
@@ -73,6 +76,7 @@ class AnalyticsHelper {
   final ExperimentsUtil _experiments;
   final OrderAttributionHelper _orderAttribution;
   final LpAttributionHelper _lpAttribution;
+  final ProductAttributionHelper _productAttribution;
   final UtmHeaderUtil _utm;
   final AppNavigationObserver _navObserver;
 
@@ -83,6 +87,7 @@ class AnalyticsHelper {
   CheckoutTimer get checkoutTimer => _checkoutTimer;
   OrderAttributionHelper get orderAttribution => _orderAttribution;
   LpAttributionHelper get lpAttribution => _lpAttribution;
+  ProductAttributionHelper get productAttribution => _productAttribution;
   UtmHeaderUtil get utm => _utm;
   PrefManager get prefs => _prefs;
 
@@ -98,13 +103,16 @@ class AnalyticsHelper {
     _addTimeBuckets(props);
 
     if (attribution && !useSavedAttribution) {
-      // Two-store attribution: OrderAttribution carries HP unprefixed keys +
-      // funnel + sortbar; LpAttribution carries the LP click deque as
-      // `lp{n}_*`. Composed here; both stores' `clear`/write lifecycles
-      // are independent (LP wipes on back-to-shell, HP persists across
-      // funnel switch until next HP click overrides specific keys).
+      // Three-store attribution:
+      // - OrderAttribution: HP unprefixed keys + funnel + sortbar.
+      // - LpAttribution: LP click deque as `lp{n}_*`.
+      // - ProductAttribution: top of the nav-scoped PLP tile-click stack
+      //   (the click that opened the current PDP / journey step).
+      // Composition order matters — Product added last so its keys win on
+      // any collision, matching the "more specific source wins" convention.
       props.addAll(_orderAttribution.segmentParams);
       props.addAll(_lpAttribution.segmentParams);
+      props.addAll(_productAttribution.segmentParams);
     } else if (attribution && useSavedAttribution) {
       final snapshot = _readScrollAttributionSnapshot();
       if (snapshot.isNotEmpty) props.addAll(snapshot);
@@ -202,7 +210,7 @@ class AnalyticsHelper {
   Future<void> logScrollEvent(
     String event,
     Map<String, Object?> properties, {
-    bool attribution = true,
+    bool attribution = false,
     bool useSavedAttribution = false,
   }) async {
     final enriched = <String, Object?>{
@@ -309,17 +317,13 @@ class AnalyticsHelper {
   }) async {
     final traits = _getUserTraits();
     _identifyWithUserType(traits);
-    if (email != null && email.isNotEmpty) traits['email'] = email;
-    if (userName != null && userName.isNotEmpty) traits['name'] = userName;
-    if (phone != null && phone.isNotEmpty) {
-      traits[AnalyticsProperties.mobile] = phone;
-    }
+    traits.putAnalyticsKey('email', email);
+    traits.putAnalyticsKey('name', userName);
+    traits.putAnalyticsKey(AnalyticsProperties.mobile, phone);
     if (isRegistered) {
       traits['createdAt'] = DateTime.now().toUtc().toIso8601String();
     }
-    if (mobileStatus != null && mobileStatus.isNotEmpty) {
-      traits[AnalyticsProperties.mobileStatus] = mobileStatus;
-    }
+    traits.putAnalyticsKey(AnalyticsProperties.mobileStatus, mobileStatus);
     traits[AnalyticsProperties.continueBrowsingEligibleVisitor] =
         isEligibleForContinueBrowsing;
     await _callIdentify(traits);
@@ -404,22 +408,20 @@ class AnalyticsHelper {
   }
 
   void _identifyWithUserType(Map<String, Object?> traits) {
+    // `userType` wins; `segmentUserType` is the fallback only when the first
+    // is absent. Either being empty drops the key rather than writing "".
     final userType = _prefs.userType;
-    if (userType != null && userType.isNotEmpty) {
-      traits[AnalyticsProperties.userType] = userType;
-      return;
-    }
-    final segmentUserType = _prefs.segmentUserType;
-    if (segmentUserType != null && segmentUserType.isNotEmpty) {
-      traits[AnalyticsProperties.userType] = segmentUserType;
-    }
+    traits.putAnalyticsKey(
+      AnalyticsProperties.userType,
+      (userType?.isNotEmpty ?? false) ? userType : _prefs.segmentUserType,
+    );
   }
 
   void _identifyOnSessionChange(Map<String, Object?> traits) {
-    final lastVisit = _prefs.lastVisitDate;
-    if (lastVisit != null && lastVisit.isNotEmpty) {
-      traits[AnalyticsProperties.lastVisitDate] = lastVisit;
-    }
+    traits.putAnalyticsKey(
+      AnalyticsProperties.lastVisitDate,
+      _prefs.lastVisitDate,
+    );
     final daysSince = _prefs.daysSinceLastVisit;
     if (daysSince != -1) {
       traits[AnalyticsProperties.daysSinceLastVisit] = daysSince;
@@ -492,21 +494,12 @@ class AnalyticsHelper {
   /// arrives through `logEvent` + `AnalyticsService.track` + AmplitudeSessionPlugin.
   Future<void> fireSessionStartedEvent() async {
     final props = <String, Object?>{};
-    if (_utm.utmSource != null && _utm.utmSource!.isNotEmpty) {
-      props[AnalyticsProperties.sessionUtmSource] = _utm.utmSource;
-    }
-    if (_utm.utmCampaign != null && _utm.utmCampaign!.isNotEmpty) {
-      props[AnalyticsProperties.sessionUtmCampaign] = _utm.utmCampaign;
-    }
-    if (_utm.utmMedium != null && _utm.utmMedium!.isNotEmpty) {
-      props[AnalyticsProperties.sessionUtmMedium] = _utm.utmMedium;
-    }
-    if (_utm.deeplink != null && _utm.deeplink!.isNotEmpty) {
-      props[AnalyticsProperties.sessionDeeplink] = _utm.deeplink;
-    }
-    if (_utm.utmGender != null && _utm.utmGender!.isNotEmpty) {
-      props[AnalyticsProperties.sessionUtmGender] = _utm.utmGender;
-    }
+    props
+      ..putAnalyticsKey(AnalyticsProperties.sessionUtmSource, _utm.utmSource)
+      ..putAnalyticsKey(AnalyticsProperties.sessionUtmCampaign, _utm.utmCampaign)
+      ..putAnalyticsKey(AnalyticsProperties.sessionUtmMedium, _utm.utmMedium)
+      ..putAnalyticsKey(AnalyticsProperties.sessionDeeplink, _utm.deeplink)
+      ..putAnalyticsKey(AnalyticsProperties.sessionUtmGender, _utm.utmGender);
     await logEvent(AnalyticsEvents.sessionStarted, props);
   }
 
@@ -609,11 +602,11 @@ class AnalyticsHelper {
       AnalyticsProperties.versionCode:
           int.tryParse(_packageInfo.buildNumber) ?? 0,
     };
-    final deviceProfile = _prefs.deviceProfile;
-    if (_prefs.isDeviceProfileSet &&
-        deviceProfile != null &&
-        deviceProfile.isNotEmpty) {
-      props[AnalyticsProperties.deviceProfile] = deviceProfile;
+    if (_prefs.isDeviceProfileSet) {
+      props.putAnalyticsKey(
+        AnalyticsProperties.deviceProfile,
+        _prefs.deviceProfile,
+      );
     }
     if (sendExtraParams) {
       if (installType.isNotEmpty) {
@@ -708,19 +701,15 @@ class AnalyticsHelper {
   /// `addUserTypeAndDuration(reset)`.
   Map<String, Object?> addUserTypeAndDuration({bool reset = true}) {
     final props = <String, Object?>{};
-    final atcUser = _prefs.atcUserType;
-    if (atcUser != null && atcUser.isNotEmpty) {
-      props[AnalyticsProperties.atcUser] = atcUser;
-    }
-    final checkoutUser = _prefs.checkoutFlowUserType;
-    if (checkoutUser != null && checkoutUser.isNotEmpty) {
-      props[AnalyticsProperties.checkoutUser] = checkoutUser;
-    }
-    props[AnalyticsProperties.stepDuration] = _checkoutTimer.timeSinceLastEvent(
-      updateWithCurrentTime: reset,
-    );
-    props[AnalyticsProperties.totalDuration] =
-        _checkoutTimer.timeSinceFirstEvent;
+    props
+      ..putAnalyticsKey(AnalyticsProperties.atcUser, _prefs.atcUserType)
+      ..putAnalyticsKey(
+        AnalyticsProperties.checkoutUser,
+        _prefs.checkoutFlowUserType,
+      );
+    props[AnalyticsProperties.stepDuration] =
+        _checkoutTimer.timeSinceLastEvent(updateWithCurrentTime: reset);
+    props[AnalyticsProperties.totalDuration] = _checkoutTimer.timeSinceFirstEvent;
     final bg = _checkoutTimer.backgroundDuration;
     props[AnalyticsProperties.backgroundTime] = bg;
     if (bg > 0) _checkoutTimer.resetBackgroundTimer();
@@ -731,14 +720,12 @@ class AnalyticsHelper {
   /// non-time-tracked checkout events. Mirrors Android `addUserType()`.
   Map<String, Object?> addUserType() {
     final props = <String, Object?>{};
-    final atcUser = _prefs.atcUserType;
-    if (atcUser != null && atcUser.isNotEmpty) {
-      props[AnalyticsProperties.atcUser] = atcUser;
-    }
-    final checkoutUser = _prefs.checkoutFlowUserType;
-    if (checkoutUser != null && checkoutUser.isNotEmpty) {
-      props[AnalyticsProperties.checkoutUser] = checkoutUser;
-    }
+    props
+      ..putAnalyticsKey(AnalyticsProperties.atcUser, _prefs.atcUserType)
+      ..putAnalyticsKey(
+        AnalyticsProperties.checkoutUser,
+        _prefs.checkoutFlowUserType,
+      );
     return props;
   }
 

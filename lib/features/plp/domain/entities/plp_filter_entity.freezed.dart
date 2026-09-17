@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PlpFilterEntity {
 
- List<QuickFilterEntity> get quickFilters; PlpSortingOptionsEntity? get sortingOptions; List<FilterSectionEntity> get filterSections; List<SelectedFilterEntity> get selectedFilters;
+ List<QuickFilterEntity> get quickFilters; PlpSortingOptionsEntity? get sortingOptions; List<FilterSectionEntity> get filterSections; List<SelectedFilterEntity> get selectedFilters; Map<String, dynamic>? get trackingMeta;
 /// Create a copy of PlpFilterEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $PlpFilterEntityCopyWith<PlpFilterEntity> get copyWith => _$PlpFilterEntityCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlpFilterEntity&&const DeepCollectionEquality().equals(other.quickFilters, quickFilters)&&(identical(other.sortingOptions, sortingOptions) || other.sortingOptions == sortingOptions)&&const DeepCollectionEquality().equals(other.filterSections, filterSections)&&const DeepCollectionEquality().equals(other.selectedFilters, selectedFilters));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlpFilterEntity&&const DeepCollectionEquality().equals(other.quickFilters, quickFilters)&&(identical(other.sortingOptions, sortingOptions) || other.sortingOptions == sortingOptions)&&const DeepCollectionEquality().equals(other.filterSections, filterSections)&&const DeepCollectionEquality().equals(other.selectedFilters, selectedFilters)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(quickFilters),sortingOptions,const DeepCollectionEquality().hash(filterSections),const DeepCollectionEquality().hash(selectedFilters));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(quickFilters),sortingOptions,const DeepCollectionEquality().hash(filterSections),const DeepCollectionEquality().hash(selectedFilters),const DeepCollectionEquality().hash(trackingMeta));
 
 @override
 String toString() {
-  return 'PlpFilterEntity(quickFilters: $quickFilters, sortingOptions: $sortingOptions, filterSections: $filterSections, selectedFilters: $selectedFilters)';
+  return 'PlpFilterEntity(quickFilters: $quickFilters, sortingOptions: $sortingOptions, filterSections: $filterSections, selectedFilters: $selectedFilters, trackingMeta: $trackingMeta)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $PlpFilterEntityCopyWith<$Res>  {
   factory $PlpFilterEntityCopyWith(PlpFilterEntity value, $Res Function(PlpFilterEntity) _then) = _$PlpFilterEntityCopyWithImpl;
 @useResult
 $Res call({
- List<QuickFilterEntity> quickFilters, PlpSortingOptionsEntity? sortingOptions, List<FilterSectionEntity> filterSections, List<SelectedFilterEntity> selectedFilters
+ List<QuickFilterEntity> quickFilters, PlpSortingOptionsEntity? sortingOptions, List<FilterSectionEntity> filterSections, List<SelectedFilterEntity> selectedFilters, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -62,13 +62,14 @@ class _$PlpFilterEntityCopyWithImpl<$Res>
 
 /// Create a copy of PlpFilterEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? quickFilters = null,Object? sortingOptions = freezed,Object? filterSections = null,Object? selectedFilters = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? quickFilters = null,Object? sortingOptions = freezed,Object? filterSections = null,Object? selectedFilters = null,Object? trackingMeta = freezed,}) {
   return _then(_self.copyWith(
 quickFilters: null == quickFilters ? _self.quickFilters : quickFilters // ignore: cast_nullable_to_non_nullable
 as List<QuickFilterEntity>,sortingOptions: freezed == sortingOptions ? _self.sortingOptions : sortingOptions // ignore: cast_nullable_to_non_nullable
 as PlpSortingOptionsEntity?,filterSections: null == filterSections ? _self.filterSections : filterSections // ignore: cast_nullable_to_non_nullable
 as List<FilterSectionEntity>,selectedFilters: null == selectedFilters ? _self.selectedFilters : selectedFilters // ignore: cast_nullable_to_non_nullable
-as List<SelectedFilterEntity>,
+as List<SelectedFilterEntity>,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 /// Create a copy of PlpFilterEntity
@@ -165,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<QuickFilterEntity> quickFilters,  PlpSortingOptionsEntity? sortingOptions,  List<FilterSectionEntity> filterSections,  List<SelectedFilterEntity> selectedFilters)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<QuickFilterEntity> quickFilters,  PlpSortingOptionsEntity? sortingOptions,  List<FilterSectionEntity> filterSections,  List<SelectedFilterEntity> selectedFilters,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PlpFilterEntity() when $default != null:
-return $default(_that.quickFilters,_that.sortingOptions,_that.filterSections,_that.selectedFilters);case _:
+return $default(_that.quickFilters,_that.sortingOptions,_that.filterSections,_that.selectedFilters,_that.trackingMeta);case _:
   return orElse();
 
 }
@@ -186,10 +187,10 @@ return $default(_that.quickFilters,_that.sortingOptions,_that.filterSections,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<QuickFilterEntity> quickFilters,  PlpSortingOptionsEntity? sortingOptions,  List<FilterSectionEntity> filterSections,  List<SelectedFilterEntity> selectedFilters)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<QuickFilterEntity> quickFilters,  PlpSortingOptionsEntity? sortingOptions,  List<FilterSectionEntity> filterSections,  List<SelectedFilterEntity> selectedFilters,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _PlpFilterEntity():
-return $default(_that.quickFilters,_that.sortingOptions,_that.filterSections,_that.selectedFilters);case _:
+return $default(_that.quickFilters,_that.sortingOptions,_that.filterSections,_that.selectedFilters,_that.trackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +207,10 @@ return $default(_that.quickFilters,_that.sortingOptions,_that.filterSections,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<QuickFilterEntity> quickFilters,  PlpSortingOptionsEntity? sortingOptions,  List<FilterSectionEntity> filterSections,  List<SelectedFilterEntity> selectedFilters)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<QuickFilterEntity> quickFilters,  PlpSortingOptionsEntity? sortingOptions,  List<FilterSectionEntity> filterSections,  List<SelectedFilterEntity> selectedFilters,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _PlpFilterEntity() when $default != null:
-return $default(_that.quickFilters,_that.sortingOptions,_that.filterSections,_that.selectedFilters);case _:
+return $default(_that.quickFilters,_that.sortingOptions,_that.filterSections,_that.selectedFilters,_that.trackingMeta);case _:
   return null;
 
 }
@@ -221,7 +222,7 @@ return $default(_that.quickFilters,_that.sortingOptions,_that.filterSections,_th
 
 
 class _PlpFilterEntity implements PlpFilterEntity {
-  const _PlpFilterEntity({final  List<QuickFilterEntity> quickFilters = const [], this.sortingOptions, final  List<FilterSectionEntity> filterSections = const [], final  List<SelectedFilterEntity> selectedFilters = const []}): _quickFilters = quickFilters,_filterSections = filterSections,_selectedFilters = selectedFilters;
+  const _PlpFilterEntity({final  List<QuickFilterEntity> quickFilters = const [], this.sortingOptions, final  List<FilterSectionEntity> filterSections = const [], final  List<SelectedFilterEntity> selectedFilters = const [], final  Map<String, dynamic>? trackingMeta}): _quickFilters = quickFilters,_filterSections = filterSections,_selectedFilters = selectedFilters,_trackingMeta = trackingMeta;
   
 
  final  List<QuickFilterEntity> _quickFilters;
@@ -246,6 +247,15 @@ class _PlpFilterEntity implements PlpFilterEntity {
   return EqualUnmodifiableListView(_selectedFilters);
 }
 
+ final  Map<String, dynamic>? _trackingMeta;
+@override Map<String, dynamic>? get trackingMeta {
+  final value = _trackingMeta;
+  if (value == null) return null;
+  if (_trackingMeta is EqualUnmodifiableMapView) return _trackingMeta;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of PlpFilterEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -257,16 +267,16 @@ _$PlpFilterEntityCopyWith<_PlpFilterEntity> get copyWith => __$PlpFilterEntityCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlpFilterEntity&&const DeepCollectionEquality().equals(other._quickFilters, _quickFilters)&&(identical(other.sortingOptions, sortingOptions) || other.sortingOptions == sortingOptions)&&const DeepCollectionEquality().equals(other._filterSections, _filterSections)&&const DeepCollectionEquality().equals(other._selectedFilters, _selectedFilters));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlpFilterEntity&&const DeepCollectionEquality().equals(other._quickFilters, _quickFilters)&&(identical(other.sortingOptions, sortingOptions) || other.sortingOptions == sortingOptions)&&const DeepCollectionEquality().equals(other._filterSections, _filterSections)&&const DeepCollectionEquality().equals(other._selectedFilters, _selectedFilters)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_quickFilters),sortingOptions,const DeepCollectionEquality().hash(_filterSections),const DeepCollectionEquality().hash(_selectedFilters));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_quickFilters),sortingOptions,const DeepCollectionEquality().hash(_filterSections),const DeepCollectionEquality().hash(_selectedFilters),const DeepCollectionEquality().hash(_trackingMeta));
 
 @override
 String toString() {
-  return 'PlpFilterEntity(quickFilters: $quickFilters, sortingOptions: $sortingOptions, filterSections: $filterSections, selectedFilters: $selectedFilters)';
+  return 'PlpFilterEntity(quickFilters: $quickFilters, sortingOptions: $sortingOptions, filterSections: $filterSections, selectedFilters: $selectedFilters, trackingMeta: $trackingMeta)';
 }
 
 
@@ -277,7 +287,7 @@ abstract mixin class _$PlpFilterEntityCopyWith<$Res> implements $PlpFilterEntity
   factory _$PlpFilterEntityCopyWith(_PlpFilterEntity value, $Res Function(_PlpFilterEntity) _then) = __$PlpFilterEntityCopyWithImpl;
 @override @useResult
 $Res call({
- List<QuickFilterEntity> quickFilters, PlpSortingOptionsEntity? sortingOptions, List<FilterSectionEntity> filterSections, List<SelectedFilterEntity> selectedFilters
+ List<QuickFilterEntity> quickFilters, PlpSortingOptionsEntity? sortingOptions, List<FilterSectionEntity> filterSections, List<SelectedFilterEntity> selectedFilters, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -294,13 +304,14 @@ class __$PlpFilterEntityCopyWithImpl<$Res>
 
 /// Create a copy of PlpFilterEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? quickFilters = null,Object? sortingOptions = freezed,Object? filterSections = null,Object? selectedFilters = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? quickFilters = null,Object? sortingOptions = freezed,Object? filterSections = null,Object? selectedFilters = null,Object? trackingMeta = freezed,}) {
   return _then(_PlpFilterEntity(
 quickFilters: null == quickFilters ? _self._quickFilters : quickFilters // ignore: cast_nullable_to_non_nullable
 as List<QuickFilterEntity>,sortingOptions: freezed == sortingOptions ? _self.sortingOptions : sortingOptions // ignore: cast_nullable_to_non_nullable
 as PlpSortingOptionsEntity?,filterSections: null == filterSections ? _self._filterSections : filterSections // ignore: cast_nullable_to_non_nullable
 as List<FilterSectionEntity>,selectedFilters: null == selectedFilters ? _self._selectedFilters : selectedFilters // ignore: cast_nullable_to_non_nullable
-as List<SelectedFilterEntity>,
+as List<SelectedFilterEntity>,trackingMeta: freezed == trackingMeta ? _self._trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 

@@ -129,11 +129,18 @@ class CtaButton extends Equatable {
   final String? actionType;
   final String? actionUri;
   final String? type;
+  final Map<String, dynamic>? trackingMeta;
 
-  const CtaButton({this.label, this.actionType, this.actionUri, this.type});
+  const CtaButton({
+    this.label,
+    this.actionType,
+    this.actionUri,
+    this.type,
+    this.trackingMeta,
+  });
 
   @override
-  List<Object?> get props => [label, actionType, actionUri, type];
+  List<Object?> get props => [label, actionType, actionUri, type, trackingMeta];
 }
 
 /// Single tile inside a `tileGrid` array (used by Hero and CustomTiles).

@@ -38,7 +38,17 @@ class HeroCarouselWidget extends StatefulWidget {
     this.margins,
     this.keyPrefix,
     this.componentIndex = -1,
+    this.tapAnalytics,
   });
+
+  /// Analytics context a tap in this component hands to the destination —
+  /// forwarded verbatim as the navigation's `extra`.
+  ///
+  /// Opaque here on purpose: *which* context applies depends on the host, not
+  /// on this widget. `PageComponentRenderer` supplies a `SourcePage` for home
+  /// and landing pages; the PDP rails supply their own `PdpEntryArgs`. Both are
+  /// built with `navExtra`.
+  final Map<String, dynamic>? tapAnalytics;
 
   @override
   State<HeroCarouselWidget> createState() => _HeroCarouselWidgetState();
@@ -242,7 +252,11 @@ class _HeroCarouselWidgetState extends State<HeroCarouselWidget>
                         // blocked navigation by tens/hundreds of ms.
                         unawaited(sl<HomeTrackAnalyticManager>()
                             .onHeroTileTapped(widget.heroData, tile));
-                        ActionUrlHandler.navigate(context, tile.actionUri);
+                        ActionUrlHandler.navigate(
+                          context,
+                          tile.actionUri,
+                          extra: widget.tapAnalytics,
+                        );
                       },
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(_cornerRadius),

@@ -8,6 +8,7 @@ import '../../../../components/atoms/custom_chip_widget.dart';
 import '../../../../components/atoms/custom_image.dart';
 import '../../../../components/atoms/product_price_row.dart';
 import '../../../../core/constants/image_constants.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/cart_strings.dart';
 import '../../../../core/entities/visual_cue_entity.dart';
 import '../../../../core/extensions/string_extensions.dart';
@@ -43,6 +44,10 @@ class CartItemWidget extends StatelessWidget {
   final VoidCallback? onMoveToWishlist;
   final bool hasMessageBars;
 
+  /// Flat position of this line in the cart, used to compose the card's
+  /// automation keys (`cart_item_<i>_…`). Null → the card renders unkeyed.
+  final int? testIndex;
+
   const CartItemWidget({
     super.key,
     required this.item,
@@ -51,10 +56,15 @@ class CartItemWidget extends StatelessWidget {
     this.onQuantityChanged,
     this.onRemove,
     this.onMoveToWishlist,
+    this.testIndex,
     this.hasMessageBars = false,
   });
 
   bool get _isSoldOut => item.isCompletelySoldOut;
+
+  /// `cart_item_<i>_<suffix>`, or null when no index was supplied.
+  ValueKey<String>? _key(String suffix) =>
+      testIndex == null ? null : ValueKey('${CartTestStrings.item}_${testIndex!}_$suffix');
 
   @override
   Widget build(BuildContext context) {
@@ -102,9 +112,7 @@ class CartItemWidget extends StatelessWidget {
         child,
         Positioned.fill(
           child: IgnorePointer(
-            child: Container(
-              color: AppColors.neutralGrey1.withValues(alpha: 0.4),
-            ),
+            child: Container(color: AppColors.neutralGrey1.withValues(alpha: 0.4)),
           ),
         ),
       ],
@@ -127,6 +135,7 @@ class CartItemWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           GestureDetector(
+            key: _key(CartTestStrings.itemImageSuffix),
             onTap: isLoading ? null : () => _onImageTap(context),
             child: AspectRatio(
               aspectRatio: 5 / 7,
@@ -144,11 +153,11 @@ class CartItemWidget extends StatelessWidget {
           // would read as "Arrives Sold out", so it's suppressed once the
           // item is flagged sold out (the greyed-out image already conveys
           // that state).
-          if (!item.isCompletelySoldOut &&
-              item.estimatedDelivery.isNotNullOrEmpty) ...[
+          if (!item.isCompletelySoldOut && item.estimatedDelivery.isNotNullOrEmpty) ...[
             AppSpacing.verticalGapXs,
             Text(
               item.estimatedDelivery ?? '',
+              key: _key(CartTestStrings.itemEddSuffix),
               maxLines: 2,
               style: AppTypographyV1.labelLarge.regular.textPrimary(),
             ),
@@ -178,10 +187,7 @@ class CartItemWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.only(
-              left: AppSpacing.sm,
-              top: AppSpacing.sm,
-            ),
+            padding: const EdgeInsets.only(left: AppSpacing.sm, top: AppSpacing.sm),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -192,6 +198,7 @@ class CartItemWidget extends StatelessWidget {
                     child: _greyedOut(
                       Text(
                         item.productName ?? '',
+                        key: _key(CartTestStrings.itemNameSuffix),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypographyV1.labelLarge.regular.textPrimary(),
@@ -200,6 +207,7 @@ class CartItemWidget extends StatelessWidget {
                   ),
                 if (hasVisualCue) const Spacer(),
                 GestureDetector(
+                  key: _key(CartTestStrings.itemRemoveSuffix),
                   behavior: HitTestBehavior.opaque,
                   onTap: isLoading ? null : onRemove,
                   child: _greyedOut(
@@ -212,11 +220,7 @@ class CartItemWidget extends StatelessWidget {
                           bottom: 2,
                           top: 5,
                         ),
-                        child: CustomImage(
-                          path: ImageConstants.closeIcon,
-                          height: 11,
-                          width: 11,
-                        ),
+                        child: CustomImage(path: ImageConstants.closeIcon, height: 11, width: 11),
                       ),
                     ),
                   ),
@@ -225,10 +229,7 @@ class CartItemWidget extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(
-              left: AppSpacing.sm,
-              right: AppSpacing.xs,
-            ),
+            padding: const EdgeInsets.only(left: AppSpacing.sm, right: AppSpacing.xs),
             child: _greyedOut(
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,6 +239,7 @@ class CartItemWidget extends StatelessWidget {
                     AppSpacing.verticalGapSm,
                     Text(
                       item.productName ?? '',
+                      key: _key(CartTestStrings.itemNameSuffix),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypographyV1.labelLarge.regular.textPrimary(),
@@ -247,17 +249,16 @@ class CartItemWidget extends StatelessWidget {
                   AppSpacing.verticalGapXs,
                   if (item.priceInfo != null)
                     ProductPriceRow(
+                      key: _key(CartTestStrings.itemPriceSuffix),
                       padding: EdgeInsets.zero,
                       priceText: item.priceInfo!.sellingPrice ?? '',
-                      originalPriceText: item.priceInfo!.hasDiscount
-                          ? item.priceInfo!.mrp
-                          : null,
+                      originalPriceText: item.priceInfo!.hasDiscount ? item.priceInfo!.mrp : null,
                       discountText: item.priceInfo!.discount,
                       isSoldOut: false,
                     ),
                   for (final detail in item.cartItemDetails) ...[
                     AppSpacing.verticalGapXs,
-                    _buildItemDetail(detail),
+                    _buildItemDetail(detail, testIndex ?? 0),
                   ],
 
                   AppSpacing.gapXxs,
@@ -274,23 +275,20 @@ class CartItemWidget extends StatelessWidget {
   }
 
   Widget _buildVisualCueBadge(VisualCueEntity cue) {
+    final cueKey = _key(CartTestStrings.itemVisualCueSuffix);
     final bgColor = cue.bgColor.toColorOr(AppColors.neutralGrey2);
     final txtColor = cue.textColor.toColorOr(AppColors.textPrimary);
 
     return cue.imageUrl.isNotNullOrEmpty
-        ? CustomImage(path: cue.imageUrl!, height: 15, width: 64)
+        ? CustomImage(key: cueKey, path: cue.imageUrl!, height: 15, width: 64)
         : CustomChipWidget(
+            key: cueKey,
             text: (cue.text ?? ''),
             backgroundColor: bgColor,
             borderColor: bgColor,
             borderRadius: AppSpacing.radiusXs,
-            textStyle: AppTypographyV1.labelMedium.medium.copyWith(
-              color: txtColor,
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xxs,
-              vertical: 0,
-            ),
+            textStyle: AppTypographyV1.labelMedium.medium.copyWith(color: txtColor),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs, vertical: 0),
           );
   }
 
@@ -308,13 +306,11 @@ class CartItemWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Text(
-          CartStrings.qty,
-          style: AppTypographyV1.labelLarge.regular.neutralGrey6(),
-        ),
+        Text(CartStrings.qty, style: AppTypographyV1.labelLarge.regular.neutralGrey6()),
         AppSpacing.horizontalGapXxs,
         if (showStepper)
           InkWell(
+            key: _key(CartTestStrings.itemQuantityDecreaseSuffix),
             onTap: canDecrease ? () => onQuantityChanged!(qty - 1) : null,
             child: Padding(
               padding: const EdgeInsets.only(
@@ -326,9 +322,7 @@ class CartItemWidget extends StatelessWidget {
                 path: ImageConstants.cartQuantityRemove,
                 width: AppSpacing.iconSm,
                 height: AppSpacing.iconSm,
-                color: canDecrease
-                    ? AppColors.textPrimary
-                    : AppColors.neutralGrey4,
+                color: canDecrease ? AppColors.textPrimary : AppColors.neutralGrey4,
               ),
             ),
           ),
@@ -336,11 +330,13 @@ class CartItemWidget extends StatelessWidget {
           padding: const EdgeInsets.only(top: AppSpacing.xs),
           child: Text(
             '\t\t$qty',
+            key: _key(CartTestStrings.itemQuantitySuffix),
             style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
           ),
         ),
         if (showStepper)
           InkWell(
+            key: _key(CartTestStrings.itemQuantityIncreaseSuffix),
             onTap: canIncrease ? () => onQuantityChanged!(qty + 1) : null,
             child: Padding(
               padding: const EdgeInsets.only(
@@ -352,9 +348,7 @@ class CartItemWidget extends StatelessWidget {
                 path: ImageConstants.cartQuantityAdd,
                 width: AppSpacing.iconSm,
                 height: AppSpacing.iconSm,
-                color: canIncrease
-                    ? AppColors.textPrimary
-                    : AppColors.neutralGrey4,
+                color: canIncrease ? AppColors.textPrimary : AppColors.neutralGrey4,
               ),
             ),
           ),
@@ -363,10 +357,9 @@ class CartItemWidget extends StatelessWidget {
   }
 
   Widget _buildSizeRow() {
-    final stockColor = item.stockAvailabilityStatusColor.toColorOr(
-      AppColors.dangerDefault,
-    );
+    final stockColor = item.stockAvailabilityStatusColor.toColorOr(AppColors.dangerDefault);
     return RichText(
+      key: _key(CartTestStrings.itemSizeSuffix),
       text: TextSpan(
         text: CartStrings.size,
         style: AppTypographyV1.labelLarge.regular.neutralGrey6(),
@@ -378,9 +371,7 @@ class CartItemWidget extends StatelessWidget {
           if (item.stockAvailabilityStatus.isNotNullOrEmpty)
             TextSpan(
               text: item.stockAvailabilityStatus!.padLeft(10),
-              style: AppTypographyV1.labelMedium.regular.copyWith(
-                color: stockColor,
-              ),
+              style: AppTypographyV1.labelMedium.regular.copyWith(color: stockColor),
             ),
         ],
       ),
@@ -389,7 +380,8 @@ class CartItemWidget extends StatelessWidget {
 
   // ─── Item detail row (price drop / tooltip note / coupon savings) ──
 
-  Widget _buildItemDetail(CartItemDetailEntity detail) {
+  Widget _buildItemDetail(CartItemDetailEntity detail, int index) {
+    final detailKey = _key('${CartTestStrings.itemDetailSuffix}_$index');
     final textColor = detail.titleColor.toColorOr(AppColors.textPrimary);
     final icon = detail.action?.iconUrl;
     final label = Text(
@@ -404,16 +396,13 @@ class CartItemWidget extends StatelessWidget {
       // row, so tapping anywhere (not just the icon) opens the tooltip while
       // the arrow still points precisely at the icon.
       return ActionTrigger(
+        key: detailKey,
         action: detail.action,
         // The icon sits in the card's right-hand column, left of centre, so a
         // wide bubble centred on it would spill past the card and leave the
         // tail mid-bubble. Pin the bubble's left edge to the icon instead.
         alignTooltipLeftToAnchor: true,
-        child: CustomImage(
-          path: icon!,
-          width: AppSpacing.iconXs,
-          height: AppSpacing.iconXs,
-        ),
+        child: CustomImage(path: icon!, width: AppSpacing.iconXs, height: AppSpacing.iconXs),
         tooltipBuilder: (anchor, showTooltip) => GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: showTooltip,
@@ -425,7 +414,7 @@ class CartItemWidget extends StatelessWidget {
       );
     }
 
-    return ActionTrigger(action: detail.action, child: label);
+    return ActionTrigger(key: detailKey, action: detail.action, child: label);
   }
 
   // ─── Footer ───────────────────────────────────────────────────
@@ -433,6 +422,7 @@ class CartItemWidget extends StatelessWidget {
   Widget _buildWishlistRow() {
     final isBusy = isLoading || isMovingToWishlist;
     return GestureDetector(
+      key: _key(CartTestStrings.itemMoveToWishlistSuffix),
       onTap: isBusy ? null : onMoveToWishlist,
       child: Padding(
         padding: const EdgeInsets.only(

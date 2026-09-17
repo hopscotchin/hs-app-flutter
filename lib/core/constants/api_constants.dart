@@ -57,7 +57,9 @@ class ApiConstants {
 
   // Wishlist
   static const String wishlist = '/wishlist';
+  static const String wishlistListing = '/v2/wishlist';
   static const String moveToWishlistFromCart = '/wishlist/move-to-wishlist';
+  static const String moveToCartFromWishlist = '/v2/wishlist/move-to-cart';
 
   // Auth — proposed v3 endpoints (swap in when backend ships; delete transformer files)
   static const String sendOtp = '/customer/v3/auth/send-otp';

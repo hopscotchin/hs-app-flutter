@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/atoms/custom_chip_widget.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/buttons/app_button_named.dart';
@@ -9,9 +10,14 @@ import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 import 'package:hs_app_flutter/core/theme/typography/typography_v1.dart';
 
+import '../../../../core/analytics/constants/analytics_defaults.dart';
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/plp_events.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/floating_filter_entity.dart';
+import '../bloc/plp_bloc.dart';
 
 /// Inline floating-filter section rendered inside the product list.
 ///
@@ -25,26 +31,20 @@ class FloatingFilterRow extends StatefulWidget {
   final FloatingFilterSectionEntity section;
   final void Function(String key, String value) onFiltersApplied;
 
-  const FloatingFilterRow({
-    super.key,
-    required this.section,
-    required this.onFiltersApplied,
-  });
+  const FloatingFilterRow({super.key, required this.section, required this.onFiltersApplied});
 
   @override
   State<FloatingFilterRow> createState() => _FloatingFilterRowState();
 }
 
-class _FloatingFilterRowState extends State<FloatingFilterRow>
-    with AutomaticKeepAliveClientMixin {
+class _FloatingFilterRowState extends State<FloatingFilterRow> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
   /// Keys are disambiguated by section position so multiple floating filters on
   /// one page don't collide: `plp_floating_filter_<pos>_<suffix>`.
-  Key _key(String suffix) => ValueKey(
-    '${PlpTestStrings.floatingFilter}_${widget.section.position}_$suffix',
-  );
+  Key _key(String suffix) =>
+      ValueKey('${PlpTestStrings.floatingFilter}_${widget.section.position}_$suffix');
 
   late String _filterKey;
 
@@ -89,6 +89,16 @@ class _FloatingFilterRowState extends State<FloatingFilterRow>
   // ── Toggle & apply ────────────────────────────────────────────────────────
 
   void _toggle(String value) {
+    // The inline row has no sheet to open, so the first chip touched is the
+    // moment the user engaged with filtering — that is what filter_clicked
+    // describes. Latched so a multi-select run reports once, not per chip.
+    if (!_filterClickLogged) {
+      _filterClickLogged = true;
+      sl<AnalyticsHelper>().logFilterClicked(
+        trackingMeta: context.read<PlpBloc>().state.plpAnalyticsMeta,
+        clickSource: FilterClickSource.floatingFilter,
+      );
+    }
     setState(() {
       if (_selectedValues.contains(value)) {
         _selectedValues.remove(value);
@@ -100,9 +110,16 @@ class _FloatingFilterRowState extends State<FloatingFilterRow>
   }
 
   /// Sends the full selection set upstream. Empty string clears the filter key.
+  ///
+  /// No `filter_applied` here — that event reports the *resulting* feed size,
+  /// so the bloc emits it once the reload lands.
   void _applyFilter() {
+    _filterClickLogged = false;
     widget.onFiltersApplied(_filterKey, _selectedValues.join(','));
   }
+
+  /// One `filter_clicked` per engagement with this row, not per chip.
+  bool _filterClickLogged = false;
 
   // ── Geometry ──────────────────────────────────────────────────────────────
 
@@ -114,10 +131,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow>
   /// Width of the swatch — square for COLOUR, from API tileWidth for IMAGE.
   double get _swatchWidth {
     if (_chipType == 'COLOUR') return _swatchHeight;
-    return (widget.section.tileWidth?.toDouble() ?? _swatchHeight).clamp(
-      36.0,
-      48.0,
-    );
+    return (widget.section.tileWidth?.toDouble() ?? _swatchHeight).clamp(36.0, 48.0);
   }
 
   /// Cell width for IMAGE / COLOUR chips — the swatch width, unchanged. The
@@ -173,10 +187,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow>
         children: [
           if (section.title.isNotNullOrEmpty)
             Padding(
-              padding: const EdgeInsets.only(
-                left: AppSpacing.lgMd,
-                bottom: AppSpacing.md,
-              ),
+              padding: const EdgeInsets.only(left: AppSpacing.lgMd, bottom: AppSpacing.md),
               child: Text(
                 section.title ?? '',
                 style: AppTypographyV1.titleMedium.bold.textPrimary(),
@@ -205,8 +216,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow>
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: AppSpacing.xs,
               children: [
-                for (final (index, chip) in section.chips.indexed)
-                  _buildChip(chip, index),
+                for (final (index, chip) in section.chips.indexed) _buildChip(chip, index),
               ],
             ),
           ),
@@ -220,9 +230,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow>
               child: SecondaryButton.defaultType(
                 key: _key(PlpTestStrings.floatingFilterApplySuffix),
                 text: PlpStrings.applyFilter,
-                state: _selectedValues.isNotEmpty
-                    ? ButtonState.enabled
-                    : ButtonState.disabled,
+                state: _selectedValues.isNotEmpty ? ButtonState.enabled : ButtonState.disabled,
                 onTap: _applyFilter,
                 size: ButtonSize.small,
               ),
@@ -258,9 +266,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow>
     const brand = AppColors.brandPrimary;
     return CustomChipWidget(
       text: chip.label ?? '',
-      backgroundColor: isSelected
-          ? brand.withValues(alpha: 0.07)
-          : Colors.transparent,
+      backgroundColor: isSelected ? brand.withValues(alpha: 0.07) : Colors.transparent,
       borderRadius: 2,
       borderColor: isSelected ? brand : AppColors.neutralGrey1,
       textStyle: AppTypographyV1.labelMedium.bold.copyWith(
@@ -323,9 +329,7 @@ class _FloatingFilterRowState extends State<FloatingFilterRow>
           decoration: BoxDecoration(
             color: Colors.transparent,
             border: Border.all(
-              color: isSelected
-                  ? AppColors.brandPrimary
-                  : AppColors.transparent,
+              color: isSelected ? AppColors.brandPrimary : AppColors.transparent,
               width: 1,
             ),
             borderRadius: BorderRadius.circular(4),

@@ -11,7 +11,6 @@ import 'notification_nudge_model.dart';
 import 'page_meta_model.dart';
 import 'plp_filter_model.dart';
 import 'query_correction_model.dart';
-import 'tracking_meta_model.dart';
 
 part 'listing_data_model.g.dart';
 
@@ -20,6 +19,7 @@ class ListingDataModel {
   const ListingDataModel({
     this.pageMeta,
     this.trackingMeta,
+    this.orderAttribution,
     this.notificationNudge,
     this.banners,
     this.floatingFilter,
@@ -40,7 +40,14 @@ class ListingDataModel {
   final String? message;
 
   final PageMetaModel? pageMeta;
-  final TrackingMetaModel? trackingMeta;
+  /// Raw analytics blob — passed to Segment untouched. See
+  /// PLP_ANALYTICS_BACKEND_CONTRACT.md for the key contract.
+  final Map<String, dynamic>? trackingMeta;
+  /// Page-level order-attribution blob (e.g. `plp: P12174`,
+  /// `redirected_from_cluster_eligible_plp`). Opaque, same shape as
+  /// [trackingMeta]. Pushed into `ProductAttributionHelper` on tile tap so a
+  /// downstream event can attribute the click back to this listing.
+  final Map<String, dynamic>? orderAttribution;
   final NotificationNudgeModel? notificationNudge;
 
   final BannersWrapperModel? banners;
@@ -74,7 +81,8 @@ class ListingDataModel {
 
     return ListingDataEntity(
       pageMeta: pageMeta?.toEntity(),
-      trackingMeta: trackingMeta?.toEntity(),
+      trackingMeta: trackingMeta,
+      orderAttribution: orderAttribution,
       notificationNudge: notificationNudge?.toEntity(),
       banners: pageBanner == null ? const [] : [pageBanner],
       floatingFilter: floatingFilter?.toEntity(),

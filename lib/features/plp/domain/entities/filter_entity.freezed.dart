@@ -14,7 +14,13 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FilterEntity {
 
- String? get filterKey; String? get filterValue; int? get count; String? get label; bool get isSelected; bool get isMultiSelect; String? get type; List<FilterEntity> get filters; String? get colorHex; String? get ovalImgUrl; bool get isSection; String? get pincode; VisualCueEntity? get visualCue;
+ String? get filterKey; String? get filterValue; int? get count; String? get label; bool get isSelected; bool get isMultiSelect; String? get type; List<FilterEntity> get filters; String? get colorHex; String? get ovalImgUrl; bool get isSection; String? get pincode; VisualCueEntity? get visualCue;/// Analytics blob for this leaf. Carries `sectionTracking` — the analytics
+/// name for the section, deliberately different from [filterKey] (`browse`
+/// on the wire is `department` in Segment) — and `isAttribute`, which
+/// decides whether a selection lands in `filter_attribute`.
+///
+/// Forwarded verbatim; see PLP_ANALYTICS_BACKEND_CONTRACT.md.
+ Map<String, dynamic>? get trackingMeta;
 /// Create a copy of FilterEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +31,16 @@ $FilterEntityCopyWith<FilterEntity> get copyWith => _$FilterEntityCopyWithImpl<F
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FilterEntity&&(identical(other.filterKey, filterKey) || other.filterKey == filterKey)&&(identical(other.filterValue, filterValue) || other.filterValue == filterValue)&&(identical(other.count, count) || other.count == count)&&(identical(other.label, label) || other.label == label)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isMultiSelect, isMultiSelect) || other.isMultiSelect == isMultiSelect)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.filters, filters)&&(identical(other.colorHex, colorHex) || other.colorHex == colorHex)&&(identical(other.ovalImgUrl, ovalImgUrl) || other.ovalImgUrl == ovalImgUrl)&&(identical(other.isSection, isSection) || other.isSection == isSection)&&(identical(other.pincode, pincode) || other.pincode == pincode)&&(identical(other.visualCue, visualCue) || other.visualCue == visualCue));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FilterEntity&&(identical(other.filterKey, filterKey) || other.filterKey == filterKey)&&(identical(other.filterValue, filterValue) || other.filterValue == filterValue)&&(identical(other.count, count) || other.count == count)&&(identical(other.label, label) || other.label == label)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isMultiSelect, isMultiSelect) || other.isMultiSelect == isMultiSelect)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.filters, filters)&&(identical(other.colorHex, colorHex) || other.colorHex == colorHex)&&(identical(other.ovalImgUrl, ovalImgUrl) || other.ovalImgUrl == ovalImgUrl)&&(identical(other.isSection, isSection) || other.isSection == isSection)&&(identical(other.pincode, pincode) || other.pincode == pincode)&&(identical(other.visualCue, visualCue) || other.visualCue == visualCue)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,filterKey,filterValue,count,label,isSelected,isMultiSelect,type,const DeepCollectionEquality().hash(filters),colorHex,ovalImgUrl,isSection,pincode,visualCue);
+int get hashCode => Object.hash(runtimeType,filterKey,filterValue,count,label,isSelected,isMultiSelect,type,const DeepCollectionEquality().hash(filters),colorHex,ovalImgUrl,isSection,pincode,visualCue,const DeepCollectionEquality().hash(trackingMeta));
 
 @override
 String toString() {
-  return 'FilterEntity(filterKey: $filterKey, filterValue: $filterValue, count: $count, label: $label, isSelected: $isSelected, isMultiSelect: $isMultiSelect, type: $type, filters: $filters, colorHex: $colorHex, ovalImgUrl: $ovalImgUrl, isSection: $isSection, pincode: $pincode, visualCue: $visualCue)';
+  return 'FilterEntity(filterKey: $filterKey, filterValue: $filterValue, count: $count, label: $label, isSelected: $isSelected, isMultiSelect: $isMultiSelect, type: $type, filters: $filters, colorHex: $colorHex, ovalImgUrl: $ovalImgUrl, isSection: $isSection, pincode: $pincode, visualCue: $visualCue, trackingMeta: $trackingMeta)';
 }
 
 
@@ -45,7 +51,7 @@ abstract mixin class $FilterEntityCopyWith<$Res>  {
   factory $FilterEntityCopyWith(FilterEntity value, $Res Function(FilterEntity) _then) = _$FilterEntityCopyWithImpl;
 @useResult
 $Res call({
- String? filterKey, String? filterValue, int? count, String? label, bool isSelected, bool isMultiSelect, String? type, List<FilterEntity> filters, String? colorHex, String? ovalImgUrl, bool isSection, String? pincode, VisualCueEntity? visualCue
+ String? filterKey, String? filterValue, int? count, String? label, bool isSelected, bool isMultiSelect, String? type, List<FilterEntity> filters, String? colorHex, String? ovalImgUrl, bool isSection, String? pincode, VisualCueEntity? visualCue, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -62,7 +68,7 @@ class _$FilterEntityCopyWithImpl<$Res>
 
 /// Create a copy of FilterEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? filterKey = freezed,Object? filterValue = freezed,Object? count = freezed,Object? label = freezed,Object? isSelected = null,Object? isMultiSelect = null,Object? type = freezed,Object? filters = null,Object? colorHex = freezed,Object? ovalImgUrl = freezed,Object? isSection = null,Object? pincode = freezed,Object? visualCue = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? filterKey = freezed,Object? filterValue = freezed,Object? count = freezed,Object? label = freezed,Object? isSelected = null,Object? isMultiSelect = null,Object? type = freezed,Object? filters = null,Object? colorHex = freezed,Object? ovalImgUrl = freezed,Object? isSection = null,Object? pincode = freezed,Object? visualCue = freezed,Object? trackingMeta = freezed,}) {
   return _then(_self.copyWith(
 filterKey: freezed == filterKey ? _self.filterKey : filterKey // ignore: cast_nullable_to_non_nullable
 as String?,filterValue: freezed == filterValue ? _self.filterValue : filterValue // ignore: cast_nullable_to_non_nullable
@@ -77,7 +83,8 @@ as String?,ovalImgUrl: freezed == ovalImgUrl ? _self.ovalImgUrl : ovalImgUrl // 
 as String?,isSection: null == isSection ? _self.isSection : isSection // ignore: cast_nullable_to_non_nullable
 as bool,pincode: freezed == pincode ? _self.pincode : pincode // ignore: cast_nullable_to_non_nullable
 as String?,visualCue: freezed == visualCue ? _self.visualCue : visualCue // ignore: cast_nullable_to_non_nullable
-as VisualCueEntity?,
+as VisualCueEntity?,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 
@@ -162,10 +169,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? filterKey,  String? filterValue,  int? count,  String? label,  bool isSelected,  bool isMultiSelect,  String? type,  List<FilterEntity> filters,  String? colorHex,  String? ovalImgUrl,  bool isSection,  String? pincode,  VisualCueEntity? visualCue)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? filterKey,  String? filterValue,  int? count,  String? label,  bool isSelected,  bool isMultiSelect,  String? type,  List<FilterEntity> filters,  String? colorHex,  String? ovalImgUrl,  bool isSection,  String? pincode,  VisualCueEntity? visualCue,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FilterEntity() when $default != null:
-return $default(_that.filterKey,_that.filterValue,_that.count,_that.label,_that.isSelected,_that.isMultiSelect,_that.type,_that.filters,_that.colorHex,_that.ovalImgUrl,_that.isSection,_that.pincode,_that.visualCue);case _:
+return $default(_that.filterKey,_that.filterValue,_that.count,_that.label,_that.isSelected,_that.isMultiSelect,_that.type,_that.filters,_that.colorHex,_that.ovalImgUrl,_that.isSection,_that.pincode,_that.visualCue,_that.trackingMeta);case _:
   return orElse();
 
 }
@@ -183,10 +190,10 @@ return $default(_that.filterKey,_that.filterValue,_that.count,_that.label,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? filterKey,  String? filterValue,  int? count,  String? label,  bool isSelected,  bool isMultiSelect,  String? type,  List<FilterEntity> filters,  String? colorHex,  String? ovalImgUrl,  bool isSection,  String? pincode,  VisualCueEntity? visualCue)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? filterKey,  String? filterValue,  int? count,  String? label,  bool isSelected,  bool isMultiSelect,  String? type,  List<FilterEntity> filters,  String? colorHex,  String? ovalImgUrl,  bool isSection,  String? pincode,  VisualCueEntity? visualCue,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _FilterEntity():
-return $default(_that.filterKey,_that.filterValue,_that.count,_that.label,_that.isSelected,_that.isMultiSelect,_that.type,_that.filters,_that.colorHex,_that.ovalImgUrl,_that.isSection,_that.pincode,_that.visualCue);case _:
+return $default(_that.filterKey,_that.filterValue,_that.count,_that.label,_that.isSelected,_that.isMultiSelect,_that.type,_that.filters,_that.colorHex,_that.ovalImgUrl,_that.isSection,_that.pincode,_that.visualCue,_that.trackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +210,10 @@ return $default(_that.filterKey,_that.filterValue,_that.count,_that.label,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? filterKey,  String? filterValue,  int? count,  String? label,  bool isSelected,  bool isMultiSelect,  String? type,  List<FilterEntity> filters,  String? colorHex,  String? ovalImgUrl,  bool isSection,  String? pincode,  VisualCueEntity? visualCue)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? filterKey,  String? filterValue,  int? count,  String? label,  bool isSelected,  bool isMultiSelect,  String? type,  List<FilterEntity> filters,  String? colorHex,  String? ovalImgUrl,  bool isSection,  String? pincode,  VisualCueEntity? visualCue,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _FilterEntity() when $default != null:
-return $default(_that.filterKey,_that.filterValue,_that.count,_that.label,_that.isSelected,_that.isMultiSelect,_that.type,_that.filters,_that.colorHex,_that.ovalImgUrl,_that.isSection,_that.pincode,_that.visualCue);case _:
+return $default(_that.filterKey,_that.filterValue,_that.count,_that.label,_that.isSelected,_that.isMultiSelect,_that.type,_that.filters,_that.colorHex,_that.ovalImgUrl,_that.isSection,_that.pincode,_that.visualCue,_that.trackingMeta);case _:
   return null;
 
 }
@@ -218,7 +225,7 @@ return $default(_that.filterKey,_that.filterValue,_that.count,_that.label,_that.
 
 
 class _FilterEntity implements FilterEntity {
-  const _FilterEntity({this.filterKey, this.filterValue, this.count, this.label, this.isSelected = false, this.isMultiSelect = false, this.type, final  List<FilterEntity> filters = const [], this.colorHex, this.ovalImgUrl, this.isSection = false, this.pincode, this.visualCue}): _filters = filters;
+  const _FilterEntity({this.filterKey, this.filterValue, this.count, this.label, this.isSelected = false, this.isMultiSelect = false, this.type, final  List<FilterEntity> filters = const [], this.colorHex, this.ovalImgUrl, this.isSection = false, this.pincode, this.visualCue, final  Map<String, dynamic>? trackingMeta}): _filters = filters,_trackingMeta = trackingMeta;
   
 
 @override final  String? filterKey;
@@ -240,6 +247,27 @@ class _FilterEntity implements FilterEntity {
 @override@JsonKey() final  bool isSection;
 @override final  String? pincode;
 @override final  VisualCueEntity? visualCue;
+/// Analytics blob for this leaf. Carries `sectionTracking` — the analytics
+/// name for the section, deliberately different from [filterKey] (`browse`
+/// on the wire is `department` in Segment) — and `isAttribute`, which
+/// decides whether a selection lands in `filter_attribute`.
+///
+/// Forwarded verbatim; see PLP_ANALYTICS_BACKEND_CONTRACT.md.
+ final  Map<String, dynamic>? _trackingMeta;
+/// Analytics blob for this leaf. Carries `sectionTracking` — the analytics
+/// name for the section, deliberately different from [filterKey] (`browse`
+/// on the wire is `department` in Segment) — and `isAttribute`, which
+/// decides whether a selection lands in `filter_attribute`.
+///
+/// Forwarded verbatim; see PLP_ANALYTICS_BACKEND_CONTRACT.md.
+@override Map<String, dynamic>? get trackingMeta {
+  final value = _trackingMeta;
+  if (value == null) return null;
+  if (_trackingMeta is EqualUnmodifiableMapView) return _trackingMeta;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of FilterEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -251,16 +279,16 @@ _$FilterEntityCopyWith<_FilterEntity> get copyWith => __$FilterEntityCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FilterEntity&&(identical(other.filterKey, filterKey) || other.filterKey == filterKey)&&(identical(other.filterValue, filterValue) || other.filterValue == filterValue)&&(identical(other.count, count) || other.count == count)&&(identical(other.label, label) || other.label == label)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isMultiSelect, isMultiSelect) || other.isMultiSelect == isMultiSelect)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other._filters, _filters)&&(identical(other.colorHex, colorHex) || other.colorHex == colorHex)&&(identical(other.ovalImgUrl, ovalImgUrl) || other.ovalImgUrl == ovalImgUrl)&&(identical(other.isSection, isSection) || other.isSection == isSection)&&(identical(other.pincode, pincode) || other.pincode == pincode)&&(identical(other.visualCue, visualCue) || other.visualCue == visualCue));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FilterEntity&&(identical(other.filterKey, filterKey) || other.filterKey == filterKey)&&(identical(other.filterValue, filterValue) || other.filterValue == filterValue)&&(identical(other.count, count) || other.count == count)&&(identical(other.label, label) || other.label == label)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isMultiSelect, isMultiSelect) || other.isMultiSelect == isMultiSelect)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other._filters, _filters)&&(identical(other.colorHex, colorHex) || other.colorHex == colorHex)&&(identical(other.ovalImgUrl, ovalImgUrl) || other.ovalImgUrl == ovalImgUrl)&&(identical(other.isSection, isSection) || other.isSection == isSection)&&(identical(other.pincode, pincode) || other.pincode == pincode)&&(identical(other.visualCue, visualCue) || other.visualCue == visualCue)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,filterKey,filterValue,count,label,isSelected,isMultiSelect,type,const DeepCollectionEquality().hash(_filters),colorHex,ovalImgUrl,isSection,pincode,visualCue);
+int get hashCode => Object.hash(runtimeType,filterKey,filterValue,count,label,isSelected,isMultiSelect,type,const DeepCollectionEquality().hash(_filters),colorHex,ovalImgUrl,isSection,pincode,visualCue,const DeepCollectionEquality().hash(_trackingMeta));
 
 @override
 String toString() {
-  return 'FilterEntity(filterKey: $filterKey, filterValue: $filterValue, count: $count, label: $label, isSelected: $isSelected, isMultiSelect: $isMultiSelect, type: $type, filters: $filters, colorHex: $colorHex, ovalImgUrl: $ovalImgUrl, isSection: $isSection, pincode: $pincode, visualCue: $visualCue)';
+  return 'FilterEntity(filterKey: $filterKey, filterValue: $filterValue, count: $count, label: $label, isSelected: $isSelected, isMultiSelect: $isMultiSelect, type: $type, filters: $filters, colorHex: $colorHex, ovalImgUrl: $ovalImgUrl, isSection: $isSection, pincode: $pincode, visualCue: $visualCue, trackingMeta: $trackingMeta)';
 }
 
 
@@ -271,7 +299,7 @@ abstract mixin class _$FilterEntityCopyWith<$Res> implements $FilterEntityCopyWi
   factory _$FilterEntityCopyWith(_FilterEntity value, $Res Function(_FilterEntity) _then) = __$FilterEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String? filterKey, String? filterValue, int? count, String? label, bool isSelected, bool isMultiSelect, String? type, List<FilterEntity> filters, String? colorHex, String? ovalImgUrl, bool isSection, String? pincode, VisualCueEntity? visualCue
+ String? filterKey, String? filterValue, int? count, String? label, bool isSelected, bool isMultiSelect, String? type, List<FilterEntity> filters, String? colorHex, String? ovalImgUrl, bool isSection, String? pincode, VisualCueEntity? visualCue, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -288,7 +316,7 @@ class __$FilterEntityCopyWithImpl<$Res>
 
 /// Create a copy of FilterEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? filterKey = freezed,Object? filterValue = freezed,Object? count = freezed,Object? label = freezed,Object? isSelected = null,Object? isMultiSelect = null,Object? type = freezed,Object? filters = null,Object? colorHex = freezed,Object? ovalImgUrl = freezed,Object? isSection = null,Object? pincode = freezed,Object? visualCue = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? filterKey = freezed,Object? filterValue = freezed,Object? count = freezed,Object? label = freezed,Object? isSelected = null,Object? isMultiSelect = null,Object? type = freezed,Object? filters = null,Object? colorHex = freezed,Object? ovalImgUrl = freezed,Object? isSection = null,Object? pincode = freezed,Object? visualCue = freezed,Object? trackingMeta = freezed,}) {
   return _then(_FilterEntity(
 filterKey: freezed == filterKey ? _self.filterKey : filterKey // ignore: cast_nullable_to_non_nullable
 as String?,filterValue: freezed == filterValue ? _self.filterValue : filterValue // ignore: cast_nullable_to_non_nullable
@@ -303,7 +331,8 @@ as String?,ovalImgUrl: freezed == ovalImgUrl ? _self.ovalImgUrl : ovalImgUrl // 
 as String?,isSection: null == isSection ? _self.isSection : isSection // ignore: cast_nullable_to_non_nullable
 as bool,pincode: freezed == pincode ? _self.pincode : pincode // ignore: cast_nullable_to_non_nullable
 as String?,visualCue: freezed == visualCue ? _self.visualCue : visualCue // ignore: cast_nullable_to_non_nullable
-as VisualCueEntity?,
+as VisualCueEntity?,trackingMeta: freezed == trackingMeta ? _self._trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 

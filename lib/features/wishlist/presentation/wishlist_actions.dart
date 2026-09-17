@@ -5,6 +5,7 @@ import '../../../core/constants/strings/login_redirects.dart';
 import '../../../core/entities/message_bar_entity.dart';
 import '../../../core/router/app_navigator.dart';
 import '../../account/presentation/bloc/account_bloc.dart';
+import '../../auth/domain/entities/auth_entry_args.dart';
 import 'cubit/wishlist_cubit.dart';
 
 /// The single entry point every screen uses to toggle wishlist membership.
@@ -21,6 +22,10 @@ abstract final class WishlistActions {
   /// A surface that passes neither emits nothing, which is the correct default
   /// for a screen whose analytics is not ported.
   ///
+  /// [entry] is the same idea for the auth events: the login gate below is
+  /// reached from four different screens, so the surface has to come from the
+  /// caller. A surface that passes nothing reports "none", not a wrong screen.
+  ///
   /// Both survive the login detour: they are stored with the deferred toggle and
   /// replayed after a successful login, so the add that eventually happens is the
   /// one that reports.
@@ -32,6 +37,7 @@ abstract final class WishlistActions {
     VoidCallback? onAdded,
     VoidCallback? onRemoved,
     List<MessageBarEntity> loggedOutMessageBars = const [],
+    AuthEntryArgs entry = AuthEntryArgs.unknown,
   }) {
     final loggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
     final cubit = context.read<WishlistCubit>();
@@ -48,6 +54,9 @@ abstract final class WishlistActions {
         context,
         redirectType: LoginRedirects.typeAddToWishlist,
         initialMessageBars: loggedOutMessageBars,
+        // Four surfaces call this, so the screen cannot be hardcoded here —
+        // it is the caller's, the same way [onAdded] is.
+        entry: entry,
       );
       return;
     }

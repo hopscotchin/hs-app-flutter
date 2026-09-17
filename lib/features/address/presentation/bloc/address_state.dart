@@ -7,6 +7,7 @@ abstract class AddressState with _$AddressState {
   const factory AddressState({
     @Default(AddressStatus.initial) AddressStatus status,
     @Default(AddressSource.customer) AddressSource source,
+    String? fromScreen,
     AddressesListEntity? addresses,
     String? errorMessage,
     int? deletingId,

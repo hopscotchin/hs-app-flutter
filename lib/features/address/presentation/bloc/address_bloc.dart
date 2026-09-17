@@ -1,8 +1,11 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hs_app_flutter/core/constants/strings/address_pincode_strings.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/address_events.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/error/failures.dart';
 import '../../data/managers/address_cache_manager.dart';
@@ -24,6 +27,7 @@ class AddressBloc extends BaseBloc<AddressEvent, AddressState> {
     this._deleteAddress,
     this._selectAddress,
     this._cache,
+    this._analytics,
   ) : super(const AddressState()) {
     on<LoadAddresses>(_onLoadAddresses);
     on<RefreshAddresses>(_onRefreshAddresses);
@@ -37,12 +41,17 @@ class AddressBloc extends BaseBloc<AddressEvent, AddressState> {
   final DeleteAddressUseCase _deleteAddress;
   final SelectAddressUseCase _selectAddress;
   final AddressCacheManager _cache;
+  final AnalyticsHelper _analytics;
 
   Future<void> _onLoadAddresses(
     LoadAddresses event,
     Emitter<AddressState> emit,
   ) async {
-    emit(AddressState(status: AddressStatus.loading, source: event.source));
+    emit(AddressState(
+      status: AddressStatus.loading,
+      source: event.source,
+      fromScreen: event.fromScreen ?? state.fromScreen,
+    ));
     final token = swapCancelToken();
 
     final result = await _getAddresses(
@@ -66,6 +75,7 @@ class AddressBloc extends BaseBloc<AddressEvent, AddressState> {
           AddressState(
             status: AddressStatus.success,
             source: event.source,
+            fromScreen: event.fromScreen ?? state.fromScreen,
             addresses: list,
           ),
         );
@@ -87,6 +97,9 @@ class AddressBloc extends BaseBloc<AddressEvent, AddressState> {
     final current = state;
     if (current.status != AddressStatus.success) return;
 
+    // Snapshot the target BEFORE delete — the reload wipes it from state.
+    final target = current.items.firstWhereOrNull((a) => a.id == event.addressId);
+
     emit(current.copyWith(deletingId: event.addressId));
 
     final result = await _deleteAddress(
@@ -107,8 +120,26 @@ class AddressBloc extends BaseBloc<AddressEvent, AddressState> {
             deleteSuccessMessage: popUpMessage,
           ),
         );
-        add(LoadAddresses(source: current.source));
+        if (target != null) {
+          _logAddressUpdated(target, isNewAddress: null);
+        }
+        add(LoadAddresses(
+          source: current.source,
+          fromScreen: current.fromScreen,
+        ));
       },
+    );
+  }
+
+  void _logAddressUpdated(AddressEntity address, {required bool? isNewAddress}) {
+    _analytics.logAddressUpdated(
+      fromScreen: state.fromScreen,
+      pincode: address.pincode,
+      deliveryCity: address.city,
+      isServiceable: address.isServicable,
+      canCod: address.canCod,
+      isDefault: address.isDefault,
+      isNewAddress: isNewAddress,
     );
   }
 

@@ -8,7 +8,7 @@ import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 import '../../domain/entities/address_entity.dart';
 
-enum AddressListMode { normal, checkout, cart }
+enum AddressListMode { normal, checkout }
 
 class AddressItemCard extends StatelessWidget {
   const AddressItemCard({

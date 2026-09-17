@@ -31,4 +31,5 @@ PincodeCheckModel _$PincodeCheckModelFromJson(Map<String, dynamic> json) =>
               .toList() ??
           [],
       noPinCodeMessage: json['noPinCodeMessage'] as String?,
+      trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
     );

@@ -20,5 +20,13 @@ abstract class FilterEntity with _$FilterEntity {
     @Default(false) bool isSection,
     String? pincode,
     VisualCueEntity? visualCue,
+
+    /// Analytics blob for this leaf. Carries `sectionTracking` — the analytics
+    /// name for the section, deliberately different from [filterKey] (`browse`
+    /// on the wire is `department` in Segment) — and `isAttribute`, which
+    /// decides whether a selection lands in `filter_attribute`.
+    ///
+    /// Forwarded verbatim; see PLP_ANALYTICS_BACKEND_CONTRACT.md.
+    Map<String, dynamic>? trackingMeta,
   }) = _FilterEntity;
 }

@@ -39,18 +39,15 @@ abstract class CartState with _$CartState {
     /// PLP/PDP style theirs (`WishlistState.feedbackIsError` is the same idea).
     @Default(false) bool toastIsError,
 
-    /// How long [toastMessage] stays up. Defaults to the app-wide 2s; the
-    /// quantity-update rejection ("Cart limit of 100 items exceeded!…") asks
-    /// for 10s because it tells the user what to DO next — remove items — and
-    /// two seconds is not enough to read an instruction and act on it.
-    @Default(Duration(seconds: 2)) Duration toastDuration,
-
     /// Bumped every time a [RefreshCart] handler completes (success or
     /// failure) — lets the pull-to-refresh indicator await exactly one
     /// round-trip via `bloc.stream.firstWhere((s) => s.refreshTick != tick)`
     /// without needing a dedicated loading flag (RefreshCart is otherwise a
     /// silent background refresh).
     @Default(0) int refreshTick,
+
+    /// Non-null when orderNow succeeds — UI should open checkout bottom sheet.
+    BuyNowEntity? checkoutData,
 
     /// Non-null when an apply/remove returned a backend-authored sheet — UI
     /// shows it instead of [toastMessage].
@@ -65,9 +62,7 @@ extension CartStateX on CartState {
   bool isItemBusy(String? sku) => sku != null && pendingItemAction?.sku == sku;
 
   bool _isPending(String? sku, CartItemAction action) =>
-      sku != null &&
-      pendingItemAction?.sku == sku &&
-      pendingItemAction?.action == action;
+      sku != null && pendingItemAction?.sku == sku && pendingItemAction?.action == action;
 
   /// Drives the spinner on the confirmation sheet's Remove button; its
   /// transition back to false is what closes the sheet, success or failure.
@@ -75,8 +70,7 @@ extension CartStateX on CartState {
 
   /// Greys out and disables that row's "Move to Wishlist" action so it can't
   /// be tapped twice.
-  bool isMovingToWishlist(String? sku) =>
-      _isPending(sku, CartItemAction.moveToWishlist);
+  bool isMovingToWishlist(String? sku) => _isPending(sku, CartItemAction.moveToWishlist);
   bool get isLoaded => status == CartStatus.loaded && cart != null;
   bool get isError => status == CartStatus.error;
 }

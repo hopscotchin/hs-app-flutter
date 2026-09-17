@@ -33,35 +33,5 @@ abstract class PdpEntryArgs with _$PdpEntryArgs {
     /// assert "the feed had no items" on every PDP opened outside a feed. Null means
     /// unknown and is dropped; 0 would be a claim.
     int? fromFeedSize,
-
-    /// Tile position in the originating list, or null when there was no tile.
-    ///
-    /// Nullable for the same reason: this defaulted to the sentinel `-1`, which the
-    /// `num <= 0` rule hid. Emitting `-1` as a position is worse than omitting it, so
-    /// the absence is now expressed in the type.
-    ///
-    /// ⚠️ Callers currently pass a 1-based value (`index + 1`) — a workaround for the
-    /// same rule, since a 0-based first tile was dropped. That workaround is no longer
-    /// needed, but switching to the true 0-based index changes every position value, so
-    /// it needs checking against Android's PDP first.
-    int? position,
-
-    /// `xl` / `normal` / `other`. Android defaults to `other`.
-    @Default(SourceTileType.other) String sourceTileType,
-
-    /// Tabbed-page context, when the user came through one.
-    PdpTabPageArgs? tabPage,
   }) = _PdpEntryArgs;
-}
-
-/// Tabbed-page block, attached to `product_viewed` and `product_added_to_cart`.
-/// All four values are Strings on the wire (`PDPAnalytics.kt:81-101`).
-@freezed
-abstract class PdpTabPageArgs with _$PdpTabPageArgs {
-  const factory PdpTabPageArgs({
-    String? containerName,
-    String? containerId,
-    String? tabName,
-    String? tabPosition,
-  }) = _PdpTabPageArgs;
 }

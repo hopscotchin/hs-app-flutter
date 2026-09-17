@@ -4,11 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/constants/strings/auth_strings.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/services/push_notification_service.dart';
 import '../../../account/presentation/bloc/account_bloc.dart';
+import '../../domain/entities/auth_entry_args.dart';
 import '../../domain/entities/check_mobile_response/check_mobile_response_entity.dart';
 import '../../domain/entities/otp_config/otp_config_entity.dart';
 import '../../domain/entities/verfiy_otp_response/verify_otp_response_entity.dart';
@@ -19,6 +21,7 @@ import '../../domain/usecases/persist_session_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import '../../domain/usecases/send_otp_usecase.dart';
 import '../../domain/usecases/verify_otp_usecase.dart';
+import '../analytics/auth_analytics_tracker.dart';
 
 part 'auth_bloc.freezed.dart';
 part 'auth_event.dart';
@@ -36,7 +39,10 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
     this._logout,
     this._pushNotificationService,
     this._accountBloc,
+    this._tracker,
   ) : super(const AuthState()) {
+    on<LoginViewed>(_onLoginViewed);
+    on<JoinViewed>(_onJoinViewed);
     on<CheckMobile>(_onCheckMobile);
     on<SendOtp>(_onSendOtp);
     on<VerifyOtp>(_onVerifyOtp);
@@ -54,6 +60,13 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
   final LogoutUseCase _logout;
   final PushNotificationService _pushNotificationService;
   final AccountBloc _accountBloc;
+  final AuthAnalyticsTracker _tracker;
+
+  void _onLoginViewed(LoginViewed event, Emitter<AuthState> emit) =>
+      _tracker.onLoginViewed(event.entry);
+
+  void _onJoinViewed(JoinViewed event, Emitter<AuthState> emit) =>
+      _tracker.onJoinViewed(event.entry);
 
   Future<void> _onCheckMobile(CheckMobile event, Emitter<AuthState> emit) async {
     emit(const AuthState(status: AuthStatus.loading));
@@ -95,13 +108,20 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
           ),
         );
       },
-      (entity) => emit(
-        AuthState(
-          status: AuthStatus.otpSent,
-          otpConfig: entity.otp,
-          messageBars: entity.messageBars,
-        ),
-      ),
+      (entity) {
+        _tracker.onOtpSent(
+          entry: event.entry,
+          verificationReason: event.otpReason,
+          mobile: event.loginId,
+        );
+        emit(
+          AuthState(
+            status: AuthStatus.otpSent,
+            otpConfig: entity.otp,
+            messageBars: entity.messageBars,
+          ),
+        );
+      },
     );
   }
 
@@ -129,6 +149,18 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
       },
       (entity) async {
         await _persistSession.call(entity);
+
+        _tracker.onOtpVerified(
+          entry: event.entry,
+          verificationReason: event.otpReason,
+          mobile: event.loginId,
+        );
+        _tracker.onAuthSuccess(
+          session: entity,
+          entry: event.entry,
+          isSignUp: event.otpReason == AuthStrings.signUpReason,
+        );
+
         unawaited(_pushNotificationService.reRegister());
         _accountBloc.add(const PrefetchAddresses());
         emit(AuthState(status: AuthStatus.success, verifyOtpResult: entity));
@@ -162,7 +194,15 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
         return;
       }
       emit(AuthState(status: AuthStatus.error, errorMessage: failure.message, messageBars: bars));
-    }, (entity) => emit(AuthState(status: AuthStatus.otpSent, otpConfig: entity.otp)));
+    }, (entity) {
+      _tracker.onOtpSent(
+        entry: event.entry,
+        verificationReason: AuthStrings.signUpReason,
+        mobile: event.mobile,
+        email: event.email,
+      );
+      emit(AuthState(status: AuthStatus.otpSent, otpConfig: entity.otp));
+    });
   }
 
   void _onResetAuth(ResetAuth event, Emitter<AuthState> emit) {
@@ -180,6 +220,9 @@ class AuthBloc extends BaseBloc<AuthEvent, AuthState> {
       },
       (_) async {
         await _clearSession.call();
+
+        await _tracker.onSignedOut();
+
         unawaited(_pushNotificationService.reRegister());
         emit(const AuthState(status: AuthStatus.signedOut));
         event.onSuccess?.call();

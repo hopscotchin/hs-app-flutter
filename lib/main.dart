@@ -5,6 +5,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:talker_dio_logger_plus/talker_dio_logger_plus.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -47,8 +48,7 @@ void main() async {
   // pound the intersection-check path once per detector per interval during a
   // scroll, and 100ms was measurably janky with 6+ components mounted. Stated
   // explicitly so the cost is visible before anyone lowers it.
-  VisibilityDetectorController.instance.updateInterval =
-      const Duration(milliseconds: 500);
+  VisibilityDetectorController.instance.updateInterval = const Duration(milliseconds: 500);
 
   SystemChrome.setSystemUIOverlayStyle(AppTheme.systemUiLight);
 
@@ -77,7 +77,25 @@ void main() async {
     };
   }
 
-  runApp(sl<ClarityHelper>().wrap(const HSApp()));
+  final app = sl<ClarityHelper>().wrap(const HSApp());
+
+  // DevicePreview turns screen size and text scale into runtime controls, which
+  // otherwise need an `adb shell wm density` / `font_scale` round trip and a
+  // reinstall per case. Opt in with ENABLE_DEVICE_PREVIEW=true in .env; off by
+  // default because while it is on the app renders into a simulated viewport
+  // rather than the real device's metrics.
+  //
+  // Two gates beyond the flag. Never in an AUTOMATION build: the preview's
+  // chrome and scaled, offset viewport move every widget away from the
+  // coordinates Maestro taps, and add nodes to the hierarchy the flows walk.
+  // And the whole branch sits behind kDebugMode, which is a compile-time
+  // constant — so a release build tree-shakes it out rather than merely
+  // disabling it.
+  if (kDebugMode && !kIsAutomation && EnvConfig.enableDevicePreview) {
+    runApp(DevicePreview(builder: (_) => app));
+  } else {
+    runApp(app);
+  }
 }
 
 Future<void> _runPostInitBootstrapping() async {
@@ -130,8 +148,6 @@ Future<void> _runPostInitBootstrapping() async {
   // ships the correct `install_type`.
   sl<AnalyticsHelper>().bootstrapInstallType();
   unawaited(sl<DeviceProbeService>().probeAdvertisingId());
-
-
 
   // Restore persistent ticket so initial API requests include auth header.
   final savedTicket = prefManager.persistentTicket;

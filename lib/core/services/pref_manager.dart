@@ -98,7 +98,7 @@ class PrefManager {
   Future<void> setFeatureFlagRatingAfterShopping(bool value) =>
       _setBoolOrRemove(StorageKeys.featureFlagRatingAfterShopping, value);
 
-  bool get featureFlagHomeAnalytics => _prefs.getBool(StorageKeys.featureFlagHomeAnalytics) ?? true;
+  bool get featureFlagHomeAnalytics => _prefs.getBool(StorageKeys.featureFlagHomeAnalytics) ?? false;
   Future<void> setFeatureFlagHomeAnalytics(bool value) =>
       _setBoolOrRemove(StorageKeys.featureFlagHomeAnalytics, value);
 

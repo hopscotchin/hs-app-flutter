@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import '../constants/analytics_properties.dart';
 import '../constants/funnel.dart';
 import 'attribution_data.dart';
+import 'attribution_store.dart';
 
 /// HP-attribution slice — **in-memory only**. Lives for the app session;
 /// wiped on process death. Cross-session attribution is server-side (the
@@ -19,7 +20,7 @@ import 'attribution_data.dart';
 /// reads keys from it. Only client-owned fields (funnel, sortbar) live
 /// as typed setters.
 @lazySingleton
-class OrderAttributionHelper {
+class OrderAttributionHelper implements AttributionStore {
   OrderAttributionHelper();
 
   AttributionData? _cached;
@@ -83,21 +84,19 @@ class OrderAttributionHelper {
   /// funnel-switch wipe that happened on push, so a `PLP → Search → back
   /// → PLP → PDP` flow preserves whatever HP click context the user had
   /// accumulated before opening Search. `null` restores to "nothing cached".
-  void restore(AttributionData? snapshot) {
-    _cached = snapshot;
+  ///
+  /// Signature widened to `Object?` for [AttributionStore]; the observer
+  /// hands back exactly what [snapshot] returned, so the cast is safe.
+  @override
+  void restore(Object? snapshot) {
+    _cached = snapshot as AttributionData?;
   }
+
+  @override
+  Object? snapshot() => _cached;
 
   /// HTTP request-body keys for ATC / wishlist-add / cart-update. Server
   /// accepts the trackingMeta snake_case keys back verbatim.
-  Map<String, Object?> get requestParams {
-    final data = _cached;
-    if (data == null) return const <String, Object?>{};
-    final params = <String, Object?>{...data.trackingMeta};
-    if (_nonEmpty(data.funnel)) params[AnalyticsProperties.funnel] = data.funnel;
-    if (_nonEmpty(data.sortBar)) params[AnalyticsProperties.sortbar] = data.sortBar;
-    return params;
-  }
-
   /// Segment event-payload keys. Merged into events fired with `attribution: true`.
   Map<String, Object?> get segmentParams {
     final data = _cached;

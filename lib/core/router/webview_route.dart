@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/components/atoms/in_app_webview_page.dart';
 import 'package:hs_app_flutter/core/constants/route_names.dart';
 
+import '../../features/auth/domain/entities/auth_entry_args.dart';
 import '../../features/auth/domain/usecases/generate_login_ticket_usecase.dart';
+import '../analytics/constants/analytics_defaults.dart';
 import '../di/injection.dart';
 import 'app_navigator.dart';
 
@@ -27,7 +29,10 @@ class WebViewRoute {
     BuildContext context,
     String? redirectUrl,
   ) async {
-    final loggedIn = await AppNavigator.showMobileLoginFlow(context);
+    final loggedIn = await AppNavigator.showMobileLoginFlow(
+      context,
+      entry: const AuthEntryArgs(fromScreen: FromScreens.webview),
+    );
     if (!loggedIn || !context.mounted) return null;
 
     final result = await sl<GenerateLoginTicketUseCase>()(

@@ -11,6 +11,7 @@ import '../../core/entities/message_bar_entity.dart';
 import '../../core/di/injection.dart';
 import '../../core/navigation/action_url_handler.dart';
 import '../../core/theme/spacing.dart';
+import '../../features/auth/domain/entities/auth_entry_args.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
 import '../../features/plp/domain/entities/listing_product_entity.dart';
 import '../../features/wishlist/presentation/widgets/wishlist_status_builder.dart';
@@ -51,6 +52,21 @@ class ProductGridWidget extends StatelessWidget {
   final void Function(ListingProductEntity item, {required bool added})?
       onWishlistLog;
 
+  /// Entry context for the auth events when a wishlist tap here hits the login
+  /// gate. Same reasoning as [onWishlistLog]: this widget is hosted by several
+  /// screens, so the surface is the host's to name. Unset reports "none" rather
+  /// than a guessed screen.
+  final AuthEntryArgs entry;
+
+  /// Analytics context a tap in this component hands to the destination —
+  /// forwarded verbatim as the navigation's `extra`.
+  ///
+  /// Opaque here on purpose: *which* context applies depends on the host, not
+  /// on this widget. `PageComponentRenderer` supplies a `SourcePage` for home
+  /// and landing pages; the PDP rails supply their own `PdpEntryArgs`. Both are
+  /// built with `navExtra`.
+  final Map<String, dynamic>? tapAnalytics;
+
   const ProductGridWidget({
     super.key,
     required this.gridData,
@@ -58,6 +74,8 @@ class ProductGridWidget extends StatelessWidget {
     this.keyPrefix,
     this.onTileTapLog,
     this.onWishlistLog,
+    this.entry = AuthEntryArgs.unknown,
+    this.tapAnalytics,
   });
 
   Key? _key(String suffix) =>
@@ -158,7 +176,12 @@ class ProductGridWidget extends StatelessWidget {
                   item,
                 ),
           );
-          ActionUrlHandler.navigate(context, item.actionUri, title: item.name);
+          ActionUrlHandler.navigate(
+            context,
+            item.actionUri,
+            title: item.name,
+            extra: tapAnalytics,
+          );
         },
         onWishlistTap: () => WishlistActions.toggle(
           context,
@@ -166,6 +189,7 @@ class ProductGridWidget extends StatelessWidget {
           price: WishlistActions.priceToInt(item.price?.sellingPrice),
           onAdded: () => onWishlistLog?.call(item, added: true),
           onRemoved: () => onWishlistLog?.call(item, added: false),
+          entry: entry,
           loggedOutMessageBars: const [
             MessageBarEntity(
               text: LoginRedirects.redirectAddToWishlist,
@@ -184,7 +208,19 @@ class ProductGridWidget extends StatelessWidget {
         key: _key(HomeComponentTestStrings.cta),
         label: cta.label ?? DiscoverStrings.viewAll,
         style: CtaButtonStyle.fromString(cta.type),
-        onPressed: () => ActionUrlHandler.navigate(context, cta.actionUri),
+        onPressed: () {
+          unawaited(
+            sl<HomeTrackAnalyticManager>().onCtaButtonTapped(
+              rootTrackingMeta: gridData.trackingMeta,
+              cta: cta,
+            ),
+          );
+          ActionUrlHandler.navigate(
+            context,
+            cta.actionUri,
+            extra: tapAnalytics,
+          );
+        },
       ),
     );
   }

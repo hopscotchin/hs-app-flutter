@@ -12,13 +12,14 @@ import '../support/analytics_test_harness.dart';
 /// Composition + merge-order at the event level. Two entry points:
 ///
 /// - Direct state writes (`h.orderAttribution.mergeTrackingMeta` /
-///   `h.lpAttribution.pushTileMeta`) → fire a probe event → inspect payload.
-///   Pins the wire-format contract of `_commonEventProperties`.
+///   `h.lpAttribution.pushLp` + `updateTopMeta`) → fire a probe event →
+///   inspect payload. Pins the wire-format contract of
+///   `_commonEventProperties`.
 ///
 /// - Real click flow via `HomeTrackAnalyticManager.logTileClick` — verifies
-///   HP click writes reach OrderAttribution, LP click writes reach the
-///   LpAttribution deque with source-LP identity, and the click event's
-///   own payload strips bare `lp_*` before spread.
+///   HP click writes reach OrderAttribution, LP click writes refresh the
+///   LpAttribution stack's top entry, and the click event's own payload
+///   strips bare `lp_*` before spread.
 void main() {
   late AnalyticsTestHarness h;
   late HomeTrackAnalyticManager tracker;
@@ -39,10 +40,9 @@ void main() {
         'banner_name': 'HP banner',
         'funnel_row': 1,
       });
-      h.lpAttribution.pushTileMeta(
-        meta: const {'banner_name': 'LP banner', 'slice_id': 'sl-lp'},
-        landingPageName: 'LP1',
-        landingPageId: '100',
+      h.lpAttribution.pushLp(landingPageName: 'LP1', landingPageId: '100');
+      h.lpAttribution.updateTopMeta(
+        const {'banner_name': 'LP banner', 'slice_id': 'sl-lp'},
       );
 
       await h.analytics.logEvent(AnalyticsEvents.productViewed, const {});
@@ -84,11 +84,8 @@ void main() {
     test('same-funnel re-set is a no-op — trackingMeta survives', () async {
       // setUp already applied setFunnel(Discover). Add HP data.
       h.orderAttribution.mergeTrackingMeta({'banner_name': 'HP'});
-      h.lpAttribution.pushTileMeta(
-        meta: const {'banner_name': 'LP1'},
-        landingPageName: 'LP1',
-        landingPageId: '1',
-      );
+      h.lpAttribution.pushLp(landingPageName: 'LP1', landingPageId: '1');
+      h.lpAttribution.updateTopMeta(const {'banner_name': 'LP1'});
 
       // Re-declare the SAME funnel (cold-start / logHomePageViewed pattern).
       h.orderAttribution.setFunnel(Funnel.discover);
@@ -178,13 +175,15 @@ void main() {
       expect(downstream.containsKey('lp1_banner_name'), isFalse);
     });
 
-    test('LP click writes into LpAttribution deque with source identity',
-        () async {
+    test('LP click writes into LpAttribution stack top', () async {
       tracker.extraData = const ExtraData(
         fromHomePage: false,
         landingPageName: 'LP1',
         landingPageId: '100',
       );
+      // In production the observer reserves the LP slot on `didPush`; the
+      // click just refreshes the top's meta. Simulate the reservation.
+      h.lpAttribution.pushLp(landingPageName: 'LP1', landingPageId: '100');
 
       await tracker.logTileClick(
         trackingMetaChain: const [
@@ -212,13 +211,14 @@ void main() {
       expect(downstream.containsKey('banner_name'), isFalse);
     });
 
-    test('lp_tile_clicked payload strips bare `lp_*` (deque emits lp1_*)',
+    test('lp_tile_clicked payload strips bare `lp_*` (stack emits lp1_*)',
         () async {
       tracker.extraData = const ExtraData(
         fromHomePage: false,
         landingPageName: 'LP1',
         landingPageId: '100',
       );
+      h.lpAttribution.pushLp(landingPageName: 'LP1', landingPageId: '100');
 
       // LP-variant component — ships `lp_`-prefixed keys as its own meta.
       await tracker.logTileClick(

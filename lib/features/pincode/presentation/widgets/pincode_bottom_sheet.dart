@@ -6,6 +6,7 @@ import 'package:hs_app_flutter/core/theme/colors.dart';
 
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/image_constants.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/theme/spacing.dart';
@@ -164,6 +165,12 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
     }
   }
 
+  /// Host slug for this sheet's automation keys. `source` is set once by the
+  /// opening event and never changes, so reading it off the bloc (rather than
+  /// threading it through every `buildWhen`) is safe.
+  String _keyPrefix(BuildContext context) =>
+      context.read<PincodeSheetBloc>().state.source.keyPrefix;
+
   @override
   Widget build(BuildContext context) {
     final viewInsets = MediaQuery.of(context).viewInsets.bottom;
@@ -175,7 +182,12 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
           listenWhen: (p, c) => p.toastMessage != c.toastMessage,
           listener: (context, state) {
             if (state.toastMessage != null && state.toastMessage!.isNotEmpty) {
-              context.showSnack(state.toastMessage!);
+              context.showSnack(
+                state.toastMessage!,
+                key: ValueKey(
+                  '${state.source.keyPrefix}_${PincodeTestStrings.sheetToastSnackBar}',
+                ),
+              );
             }
           },
         ),
@@ -200,6 +212,7 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
       ],
       child: SafeArea(
         top: false,
+        key: ValueKey('${_keyPrefix(context)}_${PincodeTestStrings.sheet}'),
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: maxHeight),
           child: Padding(
@@ -214,6 +227,7 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       AddressStrings.enterPincodeForEdd,
+                      key: ValueKey('${_keyPrefix(context)}_${PincodeTestStrings.sheetTitle}'),
                       style: AppTypographyV1.titleSmall.bold.textPrimary(),
                     ),
                   ),
@@ -243,6 +257,7 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
                           !state.isChecking &&
                           state.pincodeError == null;
                       return PincodeInputField(
+                        keyPrefix: _keyPrefix(context),
                         controller: _controller,
                         focusNode: _focusNode,
                         isChecking: state.isChecking,
@@ -262,6 +277,11 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
     );
   }
 }
+
+/// Same host slug as [_PincodeSheetBodyState._keyPrefix], for the private slot
+/// widgets that sit outside that State.
+String _prefix(BuildContext context) =>
+    context.read<PincodeSheetBloc>().state.source.keyPrefix;
 
 class _AddressList extends StatelessWidget {
   const _AddressList({required this.onSelect});
@@ -329,7 +349,13 @@ class _PdpErrorSlot extends StatelessWidget {
               ),
               AppSpacing.horizontalGapXs,
               // Wraps to the next line(s) when the message exceeds one line.
-              Expanded(child: Text(error, style: AppTypographyV1.bodySmall.error())),
+              Expanded(
+                child: Text(
+                  error,
+                  key: ValueKey('${_prefix(context)}_${PincodeTestStrings.sheetErrorText}'),
+                  style: AppTypographyV1.bodySmall.error(),
+                ),
+              ),
             ],
           ),
         );
@@ -349,7 +375,10 @@ class _MessageBarsSlot extends StatelessWidget {
         if (bars.isEmpty) return const SizedBox.shrink();
         return Padding(
           padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
-          child: MessageBarsWidget(messageBars: bars),
+          child: MessageBarsWidget(
+            messageBars: bars,
+            keyPrefix: '${_prefix(context)}_${PincodeTestStrings.screen}',
+          ),
         );
       },
     );

@@ -1,7 +1,7 @@
 # Dev Commands
 
-Common commands for this repo, what they do, and when to run them. Run all from
-the project root.
+Commands related to the automation/testing setup in this repo. Run all from the
+project root.
 
 ---
 

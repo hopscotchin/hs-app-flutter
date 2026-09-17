@@ -217,7 +217,7 @@ class ProductTile extends StatelessWidget {
     final txtColor = cue.textColor.toColorOr(AppColors.textPrimary);
 
     final badge = cue.imageUrl.isNotNullOrEmpty
-        ? CustomImage(path: cue.imageUrl!, height: 15, width: 64)
+        ? CustomImage(path: cue.imageUrl ?? '', height: 15, width: 64)
         : CustomChipWidget(
             text: (cue.text ?? ''),
             backgroundColor: bgColor,

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/constants/strings/auth_strings.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/send_otp_response/send_otp_response_entity.dart';
@@ -27,7 +28,7 @@ class SendOtpUseCase implements UseCase<SendOtpResponseEntity, SendOtpParams> {
 class SendOtpParams extends Equatable {
   const SendOtpParams({
     required this.loginId,
-    this.otpReason = 'SIGN_IN',
+    this.otpReason = AuthStrings.signInReason,
     this.pathUri,
     this.cancelToken,
   });

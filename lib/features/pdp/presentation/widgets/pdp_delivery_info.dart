@@ -55,14 +55,8 @@ class PdpDeliveryInfo extends StatelessWidget {
   /// Mirrors Android EddInfoView.getMessage3.
   String get _deliveryPromptLine {
     if (isSizeSelected && _isPincodeSet) return eddInfo?.orderSla ?? '';
-    if (!isSizeSelected && !_isPincodeSet) {
-      return PdpStrings.selectPincodeAndSize;
-    }
-
-    if (isSizeSelected && !_isPincodeSet) {
-      return PdpStrings.enterPincodeForDelivery;
-    }
-
+    if (!isSizeSelected && !_isPincodeSet) return PdpStrings.selectPincodeAndSize;
+    if (isSizeSelected && !_isPincodeSet) return PdpStrings.enterPincodeForDelivery;
     return PdpStrings.selectSizeForDelivery;
   }
 
@@ -113,12 +107,7 @@ class PdpDeliveryInfo extends StatelessWidget {
               color: _kCardBg,
               borderRadius: BorderRadius.all(Radius.circular(_kCardRadius)),
             ),
-            padding: const EdgeInsets.only(
-              left: 20,
-              right: 20,
-              top: 18,
-              bottom: 16,
-            ),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 18, bottom: 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -145,24 +134,18 @@ class PdpDeliveryInfo extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: _hasDestination
                       ? _PincodeDisplay(
-                          rowKey: const ValueKey(
-                            PdpTestStrings.changePincodeButton,
-                          ),
+                          rowKey: const ValueKey(PdpTestStrings.changePincodeButton),
                           label: eddInfo!.destination!,
                           onTap: () => _openPincodeSheet(context),
                         )
                       : _hasPincode
                       ? _PincodeDisplay(
-                          rowKey: const ValueKey(
-                            PdpTestStrings.changePincodeButton,
-                          ),
+                          rowKey: const ValueKey(PdpTestStrings.changePincodeButton),
                           label: pinCode!,
                           onTap: () => _openPincodeSheet(context),
                         )
                       : _EnterPincodeRow(
-                          buttonKey: const ValueKey(
-                            PdpTestStrings.enterPincodeButton,
-                          ),
+                          buttonKey: const ValueKey(PdpTestStrings.enterPincodeButton),
                           onTap: () => _openPincodeSheet(context),
                         ),
                 ),
@@ -218,10 +201,7 @@ class _EddRow extends StatelessWidget {
               ImageConstants.pdpPincodeInfo,
               width: AppSpacing.iconMd,
               height: AppSpacing.iconMd,
-              colorFilter: const ColorFilter.mode(
-                AppColors.brandDefault,
-                BlendMode.srcIn,
-              ),
+              colorFilter: const ColorFilter.mode(AppColors.brandDefault, BlendMode.srcIn),
             ),
           ),
         ),
@@ -261,11 +241,7 @@ class _EddRow extends StatelessWidget {
 // ── Pincode display row ───────────────────────────────────────────────────────
 
 class _PincodeDisplay extends StatelessWidget {
-  const _PincodeDisplay({
-    required this.label,
-    required this.onTap,
-    this.rowKey,
-  });
+  const _PincodeDisplay({required this.label, required this.onTap, this.rowKey});
   final String label;
   final VoidCallback onTap;
   final Key? rowKey;

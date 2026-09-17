@@ -102,7 +102,7 @@ class KidItemCard extends StatelessWidget {
                   key: removeKey,
                   onTap: onRemove ?? () {},
                   child: const CustomImage(
-                    path: ImageConstants.deleteIcon,
+                    path: ImageConstants.kidsDeleteIcon,
                     width: 18,
                     height: 18,
                   ),

@@ -827,7 +827,9 @@ as double,
 /// @nodoc
 mixin _$RecentlyViewedEntity {
 
- RecentlyViewedViewConfigEntity? get viewConfig; List<ListingProductEntity> get tiles; RecentlyViewedHeadingEntity? get heading; RecentlyViewedMarginsEntity? get margins;
+ RecentlyViewedViewConfigEntity? get viewConfig; List<TileEntity> get tiles; RecentlyViewedHeadingEntity? get heading; RecentlyViewedMarginsEntity? get margins;/// `recentlyViewed.trackingMeta`, forwarded whole. Analytics never reads a
+/// key from it — see docs/analytics/pdp/client/tm-collection.md.
+ Map<String, dynamic>? get trackingMeta;
 /// Create a copy of RecentlyViewedEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -838,16 +840,16 @@ $RecentlyViewedEntityCopyWith<RecentlyViewedEntity> get copyWith => _$RecentlyVi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecentlyViewedEntity&&(identical(other.viewConfig, viewConfig) || other.viewConfig == viewConfig)&&const DeepCollectionEquality().equals(other.tiles, tiles)&&(identical(other.heading, heading) || other.heading == heading)&&(identical(other.margins, margins) || other.margins == margins));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecentlyViewedEntity&&(identical(other.viewConfig, viewConfig) || other.viewConfig == viewConfig)&&const DeepCollectionEquality().equals(other.tiles, tiles)&&(identical(other.heading, heading) || other.heading == heading)&&(identical(other.margins, margins) || other.margins == margins)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,viewConfig,const DeepCollectionEquality().hash(tiles),heading,margins);
+int get hashCode => Object.hash(runtimeType,viewConfig,const DeepCollectionEquality().hash(tiles),heading,margins,const DeepCollectionEquality().hash(trackingMeta));
 
 @override
 String toString() {
-  return 'RecentlyViewedEntity(viewConfig: $viewConfig, tiles: $tiles, heading: $heading, margins: $margins)';
+  return 'RecentlyViewedEntity(viewConfig: $viewConfig, tiles: $tiles, heading: $heading, margins: $margins, trackingMeta: $trackingMeta)';
 }
 
 
@@ -858,7 +860,7 @@ abstract mixin class $RecentlyViewedEntityCopyWith<$Res>  {
   factory $RecentlyViewedEntityCopyWith(RecentlyViewedEntity value, $Res Function(RecentlyViewedEntity) _then) = _$RecentlyViewedEntityCopyWithImpl;
 @useResult
 $Res call({
- RecentlyViewedViewConfigEntity? viewConfig, List<ListingProductEntity> tiles, RecentlyViewedHeadingEntity? heading, RecentlyViewedMarginsEntity? margins
+ RecentlyViewedViewConfigEntity? viewConfig, List<TileEntity> tiles, RecentlyViewedHeadingEntity? heading, RecentlyViewedMarginsEntity? margins, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -875,13 +877,14 @@ class _$RecentlyViewedEntityCopyWithImpl<$Res>
 
 /// Create a copy of RecentlyViewedEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? viewConfig = freezed,Object? tiles = null,Object? heading = freezed,Object? margins = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? viewConfig = freezed,Object? tiles = null,Object? heading = freezed,Object? margins = freezed,Object? trackingMeta = freezed,}) {
   return _then(_self.copyWith(
 viewConfig: freezed == viewConfig ? _self.viewConfig : viewConfig // ignore: cast_nullable_to_non_nullable
 as RecentlyViewedViewConfigEntity?,tiles: null == tiles ? _self.tiles : tiles // ignore: cast_nullable_to_non_nullable
-as List<ListingProductEntity>,heading: freezed == heading ? _self.heading : heading // ignore: cast_nullable_to_non_nullable
+as List<TileEntity>,heading: freezed == heading ? _self.heading : heading // ignore: cast_nullable_to_non_nullable
 as RecentlyViewedHeadingEntity?,margins: freezed == margins ? _self.margins : margins // ignore: cast_nullable_to_non_nullable
-as RecentlyViewedMarginsEntity?,
+as RecentlyViewedMarginsEntity?,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 /// Create a copy of RecentlyViewedEntity
@@ -1002,10 +1005,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RecentlyViewedViewConfigEntity? viewConfig,  List<ListingProductEntity> tiles,  RecentlyViewedHeadingEntity? heading,  RecentlyViewedMarginsEntity? margins)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RecentlyViewedViewConfigEntity? viewConfig,  List<TileEntity> tiles,  RecentlyViewedHeadingEntity? heading,  RecentlyViewedMarginsEntity? margins,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RecentlyViewedEntity() when $default != null:
-return $default(_that.viewConfig,_that.tiles,_that.heading,_that.margins);case _:
+return $default(_that.viewConfig,_that.tiles,_that.heading,_that.margins,_that.trackingMeta);case _:
   return orElse();
 
 }
@@ -1023,10 +1026,10 @@ return $default(_that.viewConfig,_that.tiles,_that.heading,_that.margins);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RecentlyViewedViewConfigEntity? viewConfig,  List<ListingProductEntity> tiles,  RecentlyViewedHeadingEntity? heading,  RecentlyViewedMarginsEntity? margins)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RecentlyViewedViewConfigEntity? viewConfig,  List<TileEntity> tiles,  RecentlyViewedHeadingEntity? heading,  RecentlyViewedMarginsEntity? margins,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _RecentlyViewedEntity():
-return $default(_that.viewConfig,_that.tiles,_that.heading,_that.margins);case _:
+return $default(_that.viewConfig,_that.tiles,_that.heading,_that.margins,_that.trackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1043,10 +1046,10 @@ return $default(_that.viewConfig,_that.tiles,_that.heading,_that.margins);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RecentlyViewedViewConfigEntity? viewConfig,  List<ListingProductEntity> tiles,  RecentlyViewedHeadingEntity? heading,  RecentlyViewedMarginsEntity? margins)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RecentlyViewedViewConfigEntity? viewConfig,  List<TileEntity> tiles,  RecentlyViewedHeadingEntity? heading,  RecentlyViewedMarginsEntity? margins,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _RecentlyViewedEntity() when $default != null:
-return $default(_that.viewConfig,_that.tiles,_that.heading,_that.margins);case _:
+return $default(_that.viewConfig,_that.tiles,_that.heading,_that.margins,_that.trackingMeta);case _:
   return null;
 
 }
@@ -1058,12 +1061,12 @@ return $default(_that.viewConfig,_that.tiles,_that.heading,_that.margins);case _
 
 
 class _RecentlyViewedEntity implements RecentlyViewedEntity {
-  const _RecentlyViewedEntity({this.viewConfig, final  List<ListingProductEntity> tiles = const [], this.heading, this.margins}): _tiles = tiles;
+  const _RecentlyViewedEntity({this.viewConfig, final  List<TileEntity> tiles = const [], this.heading, this.margins, final  Map<String, dynamic>? trackingMeta}): _tiles = tiles,_trackingMeta = trackingMeta;
   
 
 @override final  RecentlyViewedViewConfigEntity? viewConfig;
- final  List<ListingProductEntity> _tiles;
-@override@JsonKey() List<ListingProductEntity> get tiles {
+ final  List<TileEntity> _tiles;
+@override@JsonKey() List<TileEntity> get tiles {
   if (_tiles is EqualUnmodifiableListView) return _tiles;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_tiles);
@@ -1071,6 +1074,19 @@ class _RecentlyViewedEntity implements RecentlyViewedEntity {
 
 @override final  RecentlyViewedHeadingEntity? heading;
 @override final  RecentlyViewedMarginsEntity? margins;
+/// `recentlyViewed.trackingMeta`, forwarded whole. Analytics never reads a
+/// key from it — see docs/analytics/pdp/client/tm-collection.md.
+ final  Map<String, dynamic>? _trackingMeta;
+/// `recentlyViewed.trackingMeta`, forwarded whole. Analytics never reads a
+/// key from it — see docs/analytics/pdp/client/tm-collection.md.
+@override Map<String, dynamic>? get trackingMeta {
+  final value = _trackingMeta;
+  if (value == null) return null;
+  if (_trackingMeta is EqualUnmodifiableMapView) return _trackingMeta;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of RecentlyViewedEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -1082,16 +1098,16 @@ _$RecentlyViewedEntityCopyWith<_RecentlyViewedEntity> get copyWith => __$Recentl
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecentlyViewedEntity&&(identical(other.viewConfig, viewConfig) || other.viewConfig == viewConfig)&&const DeepCollectionEquality().equals(other._tiles, _tiles)&&(identical(other.heading, heading) || other.heading == heading)&&(identical(other.margins, margins) || other.margins == margins));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecentlyViewedEntity&&(identical(other.viewConfig, viewConfig) || other.viewConfig == viewConfig)&&const DeepCollectionEquality().equals(other._tiles, _tiles)&&(identical(other.heading, heading) || other.heading == heading)&&(identical(other.margins, margins) || other.margins == margins)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,viewConfig,const DeepCollectionEquality().hash(_tiles),heading,margins);
+int get hashCode => Object.hash(runtimeType,viewConfig,const DeepCollectionEquality().hash(_tiles),heading,margins,const DeepCollectionEquality().hash(_trackingMeta));
 
 @override
 String toString() {
-  return 'RecentlyViewedEntity(viewConfig: $viewConfig, tiles: $tiles, heading: $heading, margins: $margins)';
+  return 'RecentlyViewedEntity(viewConfig: $viewConfig, tiles: $tiles, heading: $heading, margins: $margins, trackingMeta: $trackingMeta)';
 }
 
 
@@ -1102,7 +1118,7 @@ abstract mixin class _$RecentlyViewedEntityCopyWith<$Res> implements $RecentlyVi
   factory _$RecentlyViewedEntityCopyWith(_RecentlyViewedEntity value, $Res Function(_RecentlyViewedEntity) _then) = __$RecentlyViewedEntityCopyWithImpl;
 @override @useResult
 $Res call({
- RecentlyViewedViewConfigEntity? viewConfig, List<ListingProductEntity> tiles, RecentlyViewedHeadingEntity? heading, RecentlyViewedMarginsEntity? margins
+ RecentlyViewedViewConfigEntity? viewConfig, List<TileEntity> tiles, RecentlyViewedHeadingEntity? heading, RecentlyViewedMarginsEntity? margins, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -1119,13 +1135,14 @@ class __$RecentlyViewedEntityCopyWithImpl<$Res>
 
 /// Create a copy of RecentlyViewedEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? viewConfig = freezed,Object? tiles = null,Object? heading = freezed,Object? margins = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? viewConfig = freezed,Object? tiles = null,Object? heading = freezed,Object? margins = freezed,Object? trackingMeta = freezed,}) {
   return _then(_RecentlyViewedEntity(
 viewConfig: freezed == viewConfig ? _self.viewConfig : viewConfig // ignore: cast_nullable_to_non_nullable
 as RecentlyViewedViewConfigEntity?,tiles: null == tiles ? _self._tiles : tiles // ignore: cast_nullable_to_non_nullable
-as List<ListingProductEntity>,heading: freezed == heading ? _self.heading : heading // ignore: cast_nullable_to_non_nullable
+as List<TileEntity>,heading: freezed == heading ? _self.heading : heading // ignore: cast_nullable_to_non_nullable
 as RecentlyViewedHeadingEntity?,margins: freezed == margins ? _self.margins : margins // ignore: cast_nullable_to_non_nullable
-as RecentlyViewedMarginsEntity?,
+as RecentlyViewedMarginsEntity?,trackingMeta: freezed == trackingMeta ? _self._trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 

@@ -19,16 +19,13 @@ abstract class SkuEntity with _$SkuEntity {
     @Default(false) bool isSelected,
     @Default(false) bool isAddedToBag,
 
+    /// Opaque per-SKU analytics blob from the API. Backend owns the keys;
+    /// the client only forwards it onto events (e.g. `product_added_to_cart`
+    /// fired from the wishlist's move-to-bag).
+    Map<String, dynamic>? trackingMeta,
+
     /// Raw key→value map from API (e.g. {"skuMrp": "₹1,149"}).
     /// Used to resolve `skuValue` type detail items via fieldPath.
     Map<String, dynamic>? skuAttributes,
-
-    /// Per-SKU analytics block from the backend, carrying `sku`, `sku_size`,
-    /// `pdt_size`, `available_quantity` and `low_inventory`.
-    ///
-    /// This is the ONLY source for the selected size's id and stock wording — analytics
-    /// never falls back to [skuId], and `low_inventory` has nothing to derive it from on
-    /// the client, since "Sold out" needs `canWishList` rather than a count.
-    Map<String, dynamic>? trackingMeta,
   }) = _SkuEntity;
 }

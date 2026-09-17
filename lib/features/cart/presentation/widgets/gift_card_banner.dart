@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../components/atoms/cached_image_widget.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/extensions/string_extensions.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -18,6 +19,7 @@ class GiftCardBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: const ValueKey(CartTestStrings.giftCardBanner),
       margin: const EdgeInsets.only(top: AppSpacing.sm, left: AppSpacing.sm, right: AppSpacing.sm),
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
       decoration: BoxDecoration(
@@ -34,6 +36,7 @@ class GiftCardBanner extends StatelessWidget {
               border: Border.all(color: AppColors.surfaceBorder, width: 0.5),
             ),
             child: CachedImageWidget(
+              key: const ValueKey(CartTestStrings.giftCardImage),
               imageUrl: giftCardItem.imgSrc ?? '',
               width: AppSpacing.thumbnailSm,
               height: AppSpacing.thumbnailSm,
@@ -48,12 +51,14 @@ class GiftCardBanner extends StatelessWidget {
                 if (giftCardItem.title.isNotNullOrEmpty)
                   Text(
                     giftCardItem.title!,
+                    key: const ValueKey(CartTestStrings.giftCardTitle),
                     style: AppTypographyV1.bodyRegular.semiBold.neutralGrey6(),
                   ),
                 if (giftCardItem.description.isNotNullOrEmpty) ...[
                   AppSpacing.verticalGapXxxs,
                   Text(
                     giftCardItem.description!,
+                    key: const ValueKey(CartTestStrings.giftCardDescription),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypographyV1.labelMedium.regular.neutralGrey6(),

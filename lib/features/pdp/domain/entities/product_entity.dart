@@ -41,5 +41,13 @@ abstract class ProductEntity with _$ProductEntity {
     /// declared, so every new backend tracking dimension would need an app
     /// release. Read it through `PdpTrackingMeta` in the analytics layer.
     Map<String, dynamic>? trackingMeta,
+
+    /// `product.orderAttribution` — the journey node, chained on every event.
+    ///
+    /// Holds `redirected_from_colour_widget`, answered by the `colorVariant`
+    /// query param on the request rather than by client state: `"Yes"` when a
+    /// swatch led here, `"No"` otherwise. The one node not called `trackingMeta`
+    /// — see `docs/analytics/pdp/contract/passthrough-spec.md` §2.1.
+    Map<String, dynamic>? orderAttribution,
   }) = _ProductEntity;
 }

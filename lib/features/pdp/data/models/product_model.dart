@@ -35,6 +35,7 @@ class ProductModel {
     this.visualCue,
     this.isGift = false,
     this.trackingMeta,
+    this.orderAttribution,
   });
 
   @JsonKey(defaultValue: null)
@@ -81,6 +82,13 @@ class ProductModel {
   /// app release.
   @JsonKey(defaultValue: null)
   final Map<String, dynamic>? trackingMeta;
+
+  /// Raw `orderAttribution` map — the journey node, chained on every event.
+  ///
+  /// Kept a map for the same reason as [trackingMeta]: the backend can add a
+  /// journey dimension without an app release.
+  @JsonKey(defaultValue: null)
+  final Map<String, dynamic>? orderAttribution;
 
   factory ProductModel.fromJson(Map<String, dynamic> json) =>
       _$ProductModelFromJson(json);
@@ -148,6 +156,9 @@ extension ProductModelX on ProductModel {
       trackingMeta: (trackingMeta == null || trackingMeta!.isEmpty)
           ? null
           : trackingMeta,
+      orderAttribution: (orderAttribution == null || orderAttribution!.isEmpty)
+          ? null
+          : orderAttribution,
     );
   }
 }

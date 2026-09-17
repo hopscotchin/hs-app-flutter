@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../components/atoms/custom_image.dart';
 import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
+import '../../../../core/navigation/nav_destination.dart';
 import '../../../../core/constants/image_constants.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
@@ -125,6 +127,14 @@ class _LandingPageState extends State<LandingPage> {
                       index: index,
                       pagePrefix:
                           '${HomeComponentTestStrings.landingPage}_${widget.pageName}',
+                      // The API's `pageName` — the page *name*, not the
+                      // display title — which is what Android's
+                      // `specialPageName` holds
+                      // (`SearchResultsShowingBoutiquesActivity:528` → `:559`).
+                      sourcePage: SourcePage(
+                        fromScreen: state.homePage?.pageName ?? widget.pageName,
+                        fromPage: FromPage.landingPage,
+                      ),
                     ),
                   );
                 },
