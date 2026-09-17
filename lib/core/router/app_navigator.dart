@@ -3,12 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/pdp/domain/entities/pdp_entry_args.dart';
+import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
+import 'package:hs_app_flutter/core/di/injection.dart';
+import 'package:hs_app_flutter/core/theme/colors.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/address_entity.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/manage_address_args.dart';
+import 'package:hs_app_flutter/features/address/presentation/bloc/address_bloc.dart';
+import 'package:hs_app_flutter/features/address/presentation/pages/addresses_page.dart';
 import 'package:hs_app_flutter/features/address/presentation/widgets/address_item_card.dart';
-import 'package:hs_app_flutter/features/checkout/domain/entities/init_juspay_entity.dart';
-import 'package:hs_app_flutter/features/checkout/domain/entities/order_confirmation_entity.dart';
-import 'package:hs_app_flutter/features/checkout/domain/entities/payment_retry_entity.dart';
+import 'package:hs_app_flutter/features/checkout/domain/entities/order_confirmation_entry_args.dart';
+import 'package:hs_app_flutter/features/checkout/domain/entities/payment_retry_entry_args.dart';
+import 'package:hs_app_flutter/features/checkout/domain/entities/payment_state_entry_args.dart';
 import 'package:hs_app_flutter/features/pdp/domain/entities/media_entity.dart';
 import 'package:hs_app_flutter/features/plp/domain/entities/page_type.dart';
 import 'package:hs_app_flutter/features/plp/domain/entities/plp_entry_args.dart';
@@ -26,6 +31,7 @@ import '../constants/strings/auth_strings.dart';
 import '../constants/strings/login_redirects.dart';
 import '../entities/message_bar_entity.dart';
 import '../navigation/nav_destination.dart';
+import '../theme/spacing.dart';
 
 abstract final class AppNavigator {
   static bool _isRouteInStack(BuildContext context, String routeName) {
@@ -50,6 +56,22 @@ abstract final class AppNavigator {
 
   /// Pops the current route / dismisses the top-most sheet or dialog.
   static void goBack(BuildContext context) => context.pop();
+
+  /// Pops back to the existing Cart route on the stack, dropping every
+  /// route pushed on top of it (payment-state, payment-retry, etc.).
+  ///
+  /// Use this instead of [goToCart] on the terminal exits of the checkout
+  /// flow — [goToCart] PUSHES a fresh Cart onto the stack, which would
+  /// leave the payment-state page beneath it and let system-back "return"
+  /// to a page the user just aborted from. `popUntil` on the route name
+  /// unwinds cleanly whether the stack was `[Cart, PaymentState]` or the
+  /// deeper `[Cart, PaymentRetry, PaymentState]` (retry → new attempt).
+  static void backToCart(BuildContext context) {
+    Navigator.of(
+      context,
+      rootNavigator: true,
+    ).popUntil((route) => route.settings.name == RouteNames.cartName);
+  }
 
   /// [entry] is where the user came from, for the auth events. Callers that
   /// know their surface should pass it; the default reports "none" on the
@@ -282,43 +304,28 @@ abstract final class AppNavigator {
     );
   }
 
-  static void goToPaymentState(
-    BuildContext context, {
-    required InitJusPayEntity initJusPayEntity,
-    required int orderId,
-    required bool creditsApplied,
-    bool quickPayEnabled = false,
-  }) {
-    context.pushNamed(
-      'paymentState',
-      extra: <String, dynamic>{
-        'initJusPayEntity': initJusPayEntity,
-        'orderId': orderId,
-        'creditsApplied': creditsApplied,
-        'quickPayEnabled': quickPayEnabled,
-      },
-    );
+  /// The [args] bundle mirrors the intent extras Android's
+  /// `PaymentStateActivity` reads (`JUSPAY_RESPONSE`, `ORDER_ID`,
+  /// `IS_CREDITS_APPLIED`, `QUICK_PAY_ENABLED`, `FROM_SCREEN`,
+  /// `PAYMENT_MODE`). Passed through GoRouter's typed `extra` slot rather
+  /// than a raw Map, following the PDP / PLP / Auth entry-args pattern.
+  static void goToPaymentState(BuildContext context, PaymentStateEntryArgs args) {
+    context.pushNamed('paymentState', extra: args);
   }
 
-  static void goToPaymentRetry(
-    BuildContext context, {
-    required PaymentRetryEntity paymentRetryEntity,
-    required int orderId,
-  }) {
-    context.pushReplacementNamed(
-      'paymentRetry',
-      extra: <String, dynamic>{'paymentRetryEntity': paymentRetryEntity, 'orderId': orderId},
-    );
+  /// The [args] bundle carries the retry response + the analytics attribution
+  /// forwarded from the payment-state page. `previousPaymentMode` is the mode
+  /// of the failed attempt (Android: `IntentConstants.PAYMENT_MODE`), reused
+  /// as the fallback when the server-driven retry action omits its own mode.
+  static void goToPaymentRetry(BuildContext context, PaymentRetryEntryArgs args) {
+    context.pushReplacementNamed('paymentRetry', extra: args);
   }
 
   static void goToOrderConfirmation(
-    BuildContext context, {
-    required OrderConfirmationEntity orderConfirmationEntity,
-  }) {
-    context.pushReplacementNamed(
-      'orderConfirmation',
-      extra: <String, dynamic>{'orderConfirmationEntity': orderConfirmationEntity},
-    );
+    BuildContext context,
+    OrderConfirmationEntryArgs args,
+  ) {
+    context.pushReplacementNamed('orderConfirmation', extra: args);
   }
 
   static void goToOrders(BuildContext context) => context.pushNamed('orders');
@@ -380,6 +387,61 @@ abstract final class AppNavigator {
         RouteNames.addressesName,
         extra: <String, dynamic>{'mode': mode, 'fromScreen': fromScreen},
       );
+
+  /// Show the address list as a bottom sheet — used from checkout so the
+  /// address selector slides up over the checkout sheet rather than opening
+  /// a fresh page. Reuses [AddressesPage]: its Scaffold renders inside the
+  /// sheet, and its internal `Navigator.pop` on select dismisses the sheet.
+  ///
+  /// The mode is fixed to [AddressListMode.checkout] since that's the only
+  /// entry point that wants sheet chrome. Same "custom handle" wiring as
+  /// the checkout sheet — Material's default handle is turned off and we
+  /// paint a tighter one above the page's app bar so there's only ever
+  /// one handle visible.
+  /// Returns `true` when the sheet was dismissed after a successful
+  /// address selection, so the caller can re-fetch server-side data that
+  /// depends on the address (buy-now totals, EDD, etc). Returns `null`
+  /// on swipe-to-dismiss.
+  static Future<bool?> showAddressesSheet(
+    BuildContext context, {
+    required String fromScreen,
+  }) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    return AppBottomSheet.showCustom<bool>(
+      context,
+      showDragHandle: false,
+      builder: (_) => SizedBox(
+        height: screenHeight * 0.75,
+        child: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(top: AppSpacing.lgMd),
+              child: SizedBox(
+                width: 24,
+                height: 2,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.brandDefault,
+                    borderRadius: BorderRadius.all(Radius.circular(1)),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: BlocProvider(
+                create: (_) =>
+                    sl<AddressBloc>()..add(LoadAddresses(fromScreen: fromScreen)),
+                child: AddressesPage(
+                  mode: AddressListMode.checkout,
+                  fromScreen: fromScreen,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   /// Push the add/edit address screen.
   ///

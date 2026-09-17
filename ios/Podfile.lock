@@ -7,7 +7,11 @@ PODS:
     - CleverTap-iOS-SDK (= 7.5.0)
     - Flutter
   - Flutter (1.0.0)
+  - flutter_background_service_ios (0.0.3):
+    - Flutter
   - flutter_fgbg (0.0.1):
+    - Flutter
+  - flutter_local_notifications (0.0.1):
     - Flutter
   - HyperCore (0.0.10)
   - HyperSDK (2.2.4):
@@ -27,7 +31,9 @@ DEPENDENCIES:
   - advertising_id (from `.symlinks/plugins/advertising_id/ios`)
   - clevertap_plugin (from `.symlinks/plugins/clevertap_plugin/ios`)
   - Flutter (from `Flutter`)
+  - flutter_background_service_ios (from `.symlinks/plugins/flutter_background_service_ios/ios`)
   - flutter_fgbg (from `.symlinks/plugins/flutter_fgbg/ios`)
+  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - hypersdkflutter (from `.symlinks/plugins/hypersdkflutter/ios`)
   - segment_analytics (from `.symlinks/plugins/segment_analytics/ios`)
 
@@ -46,8 +52,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/clevertap_plugin/ios"
   Flutter:
     :path: Flutter
+  flutter_background_service_ios:
+    :path: ".symlinks/plugins/flutter_background_service_ios/ios"
   flutter_fgbg:
     :path: ".symlinks/plugins/flutter_fgbg/ios"
+  flutter_local_notifications:
+    :path: ".symlinks/plugins/flutter_local_notifications/ios"
   hypersdkflutter:
     :path: ".symlinks/plugins/hypersdkflutter/ios"
   segment_analytics:

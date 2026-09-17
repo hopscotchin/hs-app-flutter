@@ -27,6 +27,8 @@ import 'core/network/cookies/hs_cookie_store.dart';
 import 'core/network/network_client.dart';
 import 'core/services/pref_manager.dart';
 import 'core/services/push_notification_service.dart';
+import 'features/checkout/data/services/payment_notification_service.dart';
+import 'features/checkout/data/services/payment_polling_service.dart';
 import 'core/theme/app_theme.dart';
 import 'hs_app.dart';
 
@@ -159,6 +161,11 @@ Future<void> _runPostInitBootstrapping() async {
   networkClient.bindPrefManager(prefManager);
 
   await sl<PushNotificationService>().initialize();
+  // Payment polling infra — notification channel + foreground-service
+  // configuration for `/checkOrderStatus` polling. Idempotent, and no work
+  // fires until CheckoutBloc enters a PENDING state.
+  await sl<PaymentNotificationService>().init();
+  await sl<PaymentPollingService>().init();
   // HTTP Inspector — debug builds only. Opened via the floating button overlay.
   if (kDebugMode || kProfileMode) {
     final talker = TalkerFlutter.init();

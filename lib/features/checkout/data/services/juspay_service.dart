@@ -47,15 +47,6 @@ class JuspayService {
     await _hyperSDK.process(payloadMap, _createHandler(onEvent));
   }
 
-  /// Handles back press during payment — returns true if HyperSDK consumed it.
-  Future<bool> onBackPress() async {
-    if (await _hyperSDK.isInitialised()) {
-      await _hyperSDK.onBackPress();
-      return true;
-    }
-    return false;
-  }
-
   /// Terminates the HyperSDK session.
   Future<void> terminate() async {
     if (await _hyperSDK.isInitialised()) {
@@ -67,21 +58,30 @@ class JuspayService {
     void Function(Map<String, dynamic>) onEvent,
   ) {
     return (MethodCall methodCall) {
+      // Every method on the hyperSDK channel funnels through here — Juspay
+      // fires "initiate_result", "hide_loader", "show_loader", "process_result"
+      // etc. via `channel.invokeMethod(data.getString("event"), ...)`. Only
+      // `process_result` carries payment lifecycle we care about; the rest
+      // are silently ignored.
+      if (methodCall.method != 'process_result') return;
       try {
-        if (methodCall.method == 'process_result') {
-          final args = methodCall.arguments;
-          Map<String, dynamic> eventData;
-          if (args is String) {
-            eventData = jsonDecode(args) as Map<String, dynamic>;
-          } else if (args is Map) {
-            eventData = Map<String, dynamic>.from(args);
-          } else {
-            eventData = {'event': 'unknown', 'payload': args};
-          }
-          onEvent(eventData);
+        final args = methodCall.arguments;
+        Map<String, dynamic> eventData;
+        if (args is String) {
+          eventData = jsonDecode(args) as Map<String, dynamic>;
+        } else if (args is Map) {
+          eventData = Map<String, dynamic>.from(args);
+        } else {
+          eventData = {'event': 'unknown', 'payload': args};
         }
+        onEvent(eventData);
       } catch (_) {
-        onEvent({'event': 'error', 'errorMessage': 'Failed to parse callback'});
+        // Drop unparseable callbacks. Previously we synthesised
+        // `{event: "error", errorMessage: ...}` and forwarded it — which
+        // the bloc read as an unknown status and fell through to
+        // `CheckPaymentStatus`, restarting polling right after a legitimate
+        // "backpressed" abort. Swallow instead — the flow-level abort /
+        // success arrives via the normal callback path.
       }
     };
   }

@@ -115,6 +115,17 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Background execution windows for payment polling. `fetch` is the
+	     short 30-second window iOS grants when the app is backgrounded;
+	     `processing` is used by flutter_background_service to keep the
+	     poll running slightly longer. iOS still suspends aggressively,
+	     so CheckoutBloc's main-isolate polling remains the source of
+	     truth here. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

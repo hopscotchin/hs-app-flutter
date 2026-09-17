@@ -5,17 +5,30 @@ import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography.dart';
+import '../../domain/entities/order_confirmation_entry_args.dart';
 import '../../domain/entities/payment_retry_entity.dart';
+import '../../domain/entities/payment_state_entry_args.dart';
 import '../bloc/checkout_bloc.dart';
 
 class PaymentRetryPage extends StatelessWidget {
   final PaymentRetryEntity paymentRetryEntity;
   final int orderId;
 
+  /// Analytics attribution carried from the payment-state page — kept on
+  /// every downstream event fired here (retry click, order confirmation).
+  final String? fromScreen;
+
+  /// Payment mode of the failed attempt. When non-null, Android auto-retries
+  /// with this mode instead of showing the retry sheet; used as the fallback
+  /// when a retry action's own paymentMode is absent.
+  final String? previousPaymentMode;
+
   const PaymentRetryPage({
     super.key,
     required this.paymentRetryEntity,
     required this.orderId,
+    this.fromScreen,
+    this.previousPaymentMode,
   });
 
   @override
@@ -41,17 +54,26 @@ class PaymentRetryPage extends StatelessWidget {
         } else if (state is JuspayReady) {
           AppNavigator.goToPaymentState(
             context,
-            initJusPayEntity: state.initJusPayEntity,
-            orderId: orderId,
-            creditsApplied: false,
+            PaymentStateEntryArgs(
+              initJusPayEntity: state.initJusPayEntity,
+              orderId: orderId,
+              creditsApplied: false,
+              fromScreen: fromScreen,
+              paymentMode: previousPaymentMode,
+            ),
           );
         } else if (state is OrderConfirmationLoaded) {
           AppNavigator.goToOrderConfirmation(
             context,
-            orderConfirmationEntity: state.orderConfirmationEntity,
+            OrderConfirmationEntryArgs(
+              orderConfirmationEntity: state.orderConfirmationEntity,
+              fromScreen: fromScreen,
+            ),
           );
         } else if (state is OrderMarkedFailed) {
-          AppNavigator.goToCart(context);
+          // Pop back to the existing Cart, unwinding retry (and any
+          // retry-pushed payment-state) rather than pushing a new Cart.
+          AppNavigator.backToCart(context);
         } else if (state is CheckoutError) {
           ScaffoldMessenger.of(
             context,
@@ -252,7 +274,10 @@ class PaymentRetryPage extends StatelessWidget {
     if (paymentAction == null) return;
 
     final type = paymentAction.type?.toLowerCase();
-    final paymentMode = paymentAction.paymentMode ?? 'POL';
+    // Action's own mode wins; otherwise fall back to the failed attempt's
+    // mode (Android threads this via IntentConstants.PAYMENT_MODE), then to
+    // "POL" as a last resort.
+    final paymentMode = paymentAction.paymentMode ?? previousPaymentMode ?? 'POL';
 
     switch (type) {
       case 'retry':

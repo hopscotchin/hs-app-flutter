@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 // import 'package:hs_app_flutter/components/atoms/app_toggle_switch.dart';
+import 'package:hs_app_flutter/components/atoms/selection_radio.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 
 import '../../../../core/constants/strings/address_pincode_strings.dart';
@@ -105,7 +106,7 @@ class AddressItemCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _SelectionRadio(selected: isSelected, isDisabled: isDisabled),
+            SelectionRadio(selected: isSelected, isDisabled: isDisabled),
             AppSpacing.horizontalGapSm,
             Expanded(child: content),
           ],
@@ -172,7 +173,7 @@ class _NonServiceableChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: AppColors.onInfo, borderRadius: BorderRadius.circular(4)),
+      decoration: BoxDecoration(color: AppColors.neutralGrey2, borderRadius: BorderRadius.circular(6)),
       child: Text(
         AddressStrings.nonServiceable,
         style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
@@ -181,38 +182,3 @@ class _NonServiceableChip extends StatelessWidget {
   }
 }
 
-class _SelectionRadio extends StatelessWidget {
-  const _SelectionRadio({required this.selected, this.isDisabled = false});
-
-  final bool selected;
-  final bool isDisabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final borderColor = isDisabled
-        ? AppColors.neutralGrey4
-        : selected
-        ? AppColors.secondary
-        : AppColors.neutralGrey5;
-    final showDot = isDisabled || selected;
-    final dotColor = isDisabled ? AppColors.neutralGrey4 : AppColors.secondary;
-
-    return Container(
-      width: 20,
-      height: 20,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: borderColor, width: 1.8),
-      ),
-      child: showDot
-          ? Center(
-              child: Container(
-                width: 13,
-                height: 13,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: dotColor),
-              ),
-            )
-          : null,
-    );
-  }
-}

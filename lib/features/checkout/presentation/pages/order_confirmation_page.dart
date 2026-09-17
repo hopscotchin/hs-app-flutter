@@ -14,7 +14,15 @@ import '../../domain/entities/order_confirmation_item_entity.dart';
 class OrderConfirmationPage extends StatefulWidget {
   final OrderConfirmationEntity orderConfirmationEntity;
 
-  const OrderConfirmationPage({super.key, required this.orderConfirmationEntity});
+  /// Attribution stamped on any analytics fired from this screen (e.g. the
+  /// terminal `order_placed` event mirrors Android's `logOrderPlaced`).
+  final String? fromScreen;
+
+  const OrderConfirmationPage({
+    super.key,
+    required this.orderConfirmationEntity,
+    this.fromScreen,
+  });
 
   @override
   State<OrderConfirmationPage> createState() => _OrderConfirmationPageState();

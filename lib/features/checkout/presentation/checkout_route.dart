@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/core/constants/route_names.dart';
 
 import '../../../core/di/injection.dart';
-import '../domain/entities/init_juspay_entity.dart';
-import '../domain/entities/order_confirmation_entity.dart';
-import '../domain/entities/payment_retry_entity.dart';
+import '../domain/entities/order_confirmation_entry_args.dart';
+import '../domain/entities/payment_retry_entry_args.dart';
+import '../domain/entities/payment_state_entry_args.dart';
 import 'bloc/checkout_bloc.dart';
 import 'pages/order_confirmation_page.dart';
 import 'pages/payment_retry_page.dart';
@@ -19,14 +19,16 @@ class CheckoutRoute {
       name: 'paymentState',
       parentNavigatorKey: rootKey,
       builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>;
+        final args = state.extra as PaymentStateEntryArgs;
         return BlocProvider(
           create: (_) => sl<CheckoutBloc>(),
           child: PaymentStatePage(
-            initJusPayEntity: extra['initJusPayEntity'] as InitJusPayEntity,
-            orderId: extra['orderId'] as int,
-            creditsApplied: extra['creditsApplied'] as bool? ?? false,
-            quickPayEnabled: extra['quickPayEnabled'] as bool? ?? false,
+            initJusPayEntity: args.initJusPayEntity,
+            orderId: args.orderId,
+            creditsApplied: args.creditsApplied,
+            quickPayEnabled: args.quickPayEnabled,
+            fromScreen: args.fromScreen,
+            paymentMode: args.paymentMode,
           ),
         );
       },
@@ -36,13 +38,14 @@ class CheckoutRoute {
       name: 'paymentRetry',
       parentNavigatorKey: rootKey,
       builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>;
+        final args = state.extra as PaymentRetryEntryArgs;
         return BlocProvider(
           create: (_) => sl<CheckoutBloc>(),
           child: PaymentRetryPage(
-            paymentRetryEntity:
-                extra['paymentRetryEntity'] as PaymentRetryEntity,
-            orderId: extra['orderId'] as int,
+            paymentRetryEntity: args.paymentRetryEntity,
+            orderId: args.orderId,
+            fromScreen: args.fromScreen,
+            previousPaymentMode: args.previousPaymentMode,
           ),
         );
       },
@@ -52,10 +55,10 @@ class CheckoutRoute {
       name: 'orderConfirmation',
       parentNavigatorKey: rootKey,
       builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>;
+        final args = state.extra as OrderConfirmationEntryArgs;
         return OrderConfirmationPage(
-          orderConfirmationEntity:
-              extra['orderConfirmationEntity'] as OrderConfirmationEntity,
+          orderConfirmationEntity: args.orderConfirmationEntity,
+          fromScreen: args.fromScreen,
         );
       },
     ),

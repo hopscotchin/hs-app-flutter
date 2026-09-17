@@ -61,4 +61,7 @@ class ImageConstants {
   static const String cartQuantityAdd = 'assets/icons/add.svg';
   static const String cartQuantityRemove = 'assets/icons/remove.svg';
   static const String closeIcon = 'assets/icons/close.svg';
+
+  static const String paymentModes = 'assets/icons/payment_modes.svg';
+  static const String paymentPending = 'assets/icons/payment_pending.svg';
 }

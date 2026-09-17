@@ -55,14 +55,21 @@ class _AddressesPageState extends State<AddressesPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Checkout renders this page inside a bottom sheet (see
+    // `AppNavigator.showAddressesSheet`), which supplies its own drag
+    // handle and needs no back button / bottom border on the app bar —
+    // the sheet is dismissed via drag or an on-list action.
+    final isCheckout = widget.mode == AddressListMode.checkout;
     return Scaffold(
       backgroundColor: AppColors.baseDefault,
       appBar: HsAppbar(
-        title: widget.mode == AddressListMode.normal
-            ? AccountStrings.savedAddresses
-            : AddressStrings.shipToTitle,
+        title: isCheckout
+            ? AddressStrings.shipToTitle
+            : AccountStrings.savedAddresses,
         titleKey: const ValueKey(AddressTestStrings.listAppBarTitle),
         backButtonKey: const ValueKey(AddressTestStrings.listBackButton),
+        showBackButton: !isCheckout,
+        showBottomBorder: !isCheckout,
       ),
       body: SafeArea(
         top: false,
@@ -96,7 +103,10 @@ class _AddressesPageState extends State<AddressesPage> {
                 if (state.selectSucceeded) {
                   context.read<AddressBloc>().add(const ClearSelectFeedback());
                   if (_isCheckout) {
-                    Navigator.of(context).pop();
+                    // Return `true` so the checkout sheet knows a
+                    // selection actually happened and can re-fetch its
+                    // buy-now data. Swipe-to-dismiss returns null instead.
+                    Navigator.of(context).pop(true);
                   } else {
                     context.read<AddressBloc>().add(const RefreshAddresses());
                   }
@@ -371,7 +381,7 @@ class _CheckoutBottomBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SecondaryButton.defaultType(
+            child: TertiaryButton.defaultType(
               key: const ValueKey(AddressTestStrings.listAddNewButton),
               text: AddressStrings.addNewAddress,
               onTap: isSubmitting ? null : onAddNewAddress),

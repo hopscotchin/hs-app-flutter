@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/atoms/badge_icon.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/atoms/empty_state_widget.dart';
-import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
 import 'package:hs_app_flutter/components/atoms/price_summary_widget.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
@@ -114,20 +113,16 @@ class _CartPageState extends State<CartPage> {
   /// here. Android does the same: `CartFragment.proceedToCheckout` calls the API
   /// first and only consults the login status once it comes back successful, in
   /// `checkLoginAndCheckout`. See [_openCheckoutOrLogin], which is that gate.
-  void _startCheckout() {
-    // context.showSnack(
-    //   'Thansk for testing this but checkout is not for this release',
-    //   status: SnackStatus.error,
-    // );
-    // final isLoggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
-    // if (!isLoggedIn) {
+  void _startCheckout() async {
+    final isLoggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
+    if (!isLoggedIn) {
 
-    // final loggedIn = await AppNavigator.showMobileLoginFlow(context);
-    // if (!loggedIn || !mounted) return;
-    // _startCheckout();
-    // return;
-    // }
-    // context.read<CartBloc>().add(const ProceedToCheckout());
+    final loggedIn = await AppNavigator.showMobileLoginFlow(context);
+    if (!loggedIn || !mounted) return;
+    _startCheckout();
+    return;
+    }
+    context.read<CartBloc>().add(const ProceedToCheckout());
   }
 
   /// Android's `checkLoginAndCheckout`: with a successful `orderNow` in hand,
@@ -151,7 +146,13 @@ class _CartPageState extends State<CartPage> {
       _startCheckout();
       return;
     }
-    await showCheckoutBottomSheet(context, buyNowData: data);
+    // fromScreen: shoppingCart today; when PDP's Buy Now bypasses the cart
+    // to open this sheet directly, it should pass `FromScreens.product`.
+    await showCheckoutBottomSheet(
+      context,
+      buyNowData: data,
+      fromScreen: FromScreens.shoppingCart,
+    );
     if (!mounted) return;
     // Dismissing the sheet is leaving the buy-now flow, so drop back to the
     // full bag before refreshing — Android does the same in

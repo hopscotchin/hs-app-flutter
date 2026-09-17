@@ -157,7 +157,7 @@ class AppButton extends StatelessWidget {
         border: style.borderColor != null
             ? Border.all(color: style.borderColor!, width: 1.5)
             : null,
-        borderRadius: AppSpacing.borderRadiusXxs,
+        borderRadius: AppSpacing.borderRadiusXs,
       ),
       child: Stack(
         alignment: Alignment.center,
