@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
+import '../../../../core/navigation/nav_destination.dart';
 import '../../../../core/analytics/constants/funnel.dart';
 import '../../../../core/analytics/events/modules/home_events.dart';
 import '../../../../core/analytics/home/home_track_analytic_manager.dart';
@@ -291,6 +293,10 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
             component: components[index],
             index: index,
             pagePrefix: HomeComponentTestStrings.homePage,
+            sourcePage: const SourcePage(
+              fromScreen: FromScreens.discover,
+              fromPage: FromPage.homepage,
+            ),
           ),
           childCount: components.length,
           // PageComponentRenderer is stateless — no KeepAlive needed and the

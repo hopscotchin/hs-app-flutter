@@ -4,6 +4,7 @@ import '../../domain/entities/cart_entity.dart';
 import 'cart_item_model.dart';
 import 'delivery_pincode_model.dart';
 import 'gift_card_item_model.dart';
+import 'order_details_model.dart';
 import 'order_summary_model.dart';
 import 'promotion_data_model.dart';
 
@@ -11,6 +12,7 @@ class CartModel extends CartEntity {
   const CartModel({
     super.items,
     super.orderSummary,
+    super.orderDetails,
     super.promotionData,
     super.deliveryPincode,
     super.messageBars,
@@ -25,6 +27,7 @@ class CartModel extends CartEntity {
     : super.fromJson(
         items: _parseItems(json),
         orderSummary: _parseSummary(json),
+        orderDetails: _parseDetails(json),
         promotionData: _parsePromotion(json),
         deliveryPincode: _parsePincode(json),
         isCartItemExistInTemp: json['isCartItemExistInTemp'] as bool? ?? false,
@@ -54,6 +57,11 @@ class CartModel extends CartEntity {
   static OrderSummaryModel? _parseSummary(Map<String, dynamic> json) {
     final summaryJson = json['orderSummary'] as Map<String, dynamic>?;
     return summaryJson != null ? OrderSummaryModel.fromJson(summaryJson) : null;
+  }
+
+  static OrderDetailsModel? _parseDetails(Map<String, dynamic> json) {
+    final detailsJson = json['orderDetails'] as Map<String, dynamic>?;
+    return detailsJson != null ? OrderDetailsModel.fromJson(detailsJson) : null;
   }
 
   static PromotionDataModel? _parsePromotion(Map<String, dynamic> json) {

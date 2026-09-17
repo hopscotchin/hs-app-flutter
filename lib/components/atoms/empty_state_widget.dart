@@ -268,12 +268,13 @@ class EmptyStateWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             AppSpacing.verticalGapSm,
-            Text(
-              _resolvedSubtitle,
-              key: subtitleKey,
-              style: AppTypographyV1.bodySmall.medium.neutralGrey6(),
-              textAlign: TextAlign.center,
-            ),
+            if (_resolvedSubtitle.isNotNullOrEmpty)
+              Text(
+                _resolvedSubtitle,
+                key: subtitleKey,
+                style: AppTypographyV1.bodySmall.medium.neutralGrey6(),
+                textAlign: TextAlign.center,
+              ),
             if (_resolvedButtonLabel != null) ...[
               const SizedBox(height: 30),
               AppButton(

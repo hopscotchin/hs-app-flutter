@@ -8,6 +8,7 @@ abstract class WishlistInfoEntity with _$WishlistInfoEntity {
     int? id,
     @Default(false) bool isWishlisted,
     @Default(false) bool canWishlist,
+    Map<String, dynamic>? trackingMeta,
   }) = _WishlistInfoEntity;
 }
 

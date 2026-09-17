@@ -14,7 +14,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DetailEntity {
 
- String? get tabName; List<DetailItemEntity> get items;
+ String? get tabName; List<DetailItemEntity> get items;/// `details[].trackingMeta`, forwarded whole. Analytics never reads a key
+/// from it — see docs/analytics/pdp/client/tm-collection.md.
+ Map<String, dynamic>? get trackingMeta;
 /// Create a copy of DetailEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +27,16 @@ $DetailEntityCopyWith<DetailEntity> get copyWith => _$DetailEntityCopyWithImpl<D
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DetailEntity&&(identical(other.tabName, tabName) || other.tabName == tabName)&&const DeepCollectionEquality().equals(other.items, items));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DetailEntity&&(identical(other.tabName, tabName) || other.tabName == tabName)&&const DeepCollectionEquality().equals(other.items, items)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,tabName,const DeepCollectionEquality().hash(items));
+int get hashCode => Object.hash(runtimeType,tabName,const DeepCollectionEquality().hash(items),const DeepCollectionEquality().hash(trackingMeta));
 
 @override
 String toString() {
-  return 'DetailEntity(tabName: $tabName, items: $items)';
+  return 'DetailEntity(tabName: $tabName, items: $items, trackingMeta: $trackingMeta)';
 }
 
 
@@ -45,7 +47,7 @@ abstract mixin class $DetailEntityCopyWith<$Res>  {
   factory $DetailEntityCopyWith(DetailEntity value, $Res Function(DetailEntity) _then) = _$DetailEntityCopyWithImpl;
 @useResult
 $Res call({
- String? tabName, List<DetailItemEntity> items
+ String? tabName, List<DetailItemEntity> items, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -62,11 +64,12 @@ class _$DetailEntityCopyWithImpl<$Res>
 
 /// Create a copy of DetailEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? tabName = freezed,Object? items = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? tabName = freezed,Object? items = null,Object? trackingMeta = freezed,}) {
   return _then(_self.copyWith(
 tabName: freezed == tabName ? _self.tabName : tabName // ignore: cast_nullable_to_non_nullable
 as String?,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
-as List<DetailItemEntity>,
+as List<DetailItemEntity>,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 
@@ -151,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? tabName,  List<DetailItemEntity> items)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? tabName,  List<DetailItemEntity> items,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DetailEntity() when $default != null:
-return $default(_that.tabName,_that.items);case _:
+return $default(_that.tabName,_that.items,_that.trackingMeta);case _:
   return orElse();
 
 }
@@ -172,10 +175,10 @@ return $default(_that.tabName,_that.items);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? tabName,  List<DetailItemEntity> items)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? tabName,  List<DetailItemEntity> items,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _DetailEntity():
-return $default(_that.tabName,_that.items);case _:
+return $default(_that.tabName,_that.items,_that.trackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -192,10 +195,10 @@ return $default(_that.tabName,_that.items);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? tabName,  List<DetailItemEntity> items)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? tabName,  List<DetailItemEntity> items,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _DetailEntity() when $default != null:
-return $default(_that.tabName,_that.items);case _:
+return $default(_that.tabName,_that.items,_that.trackingMeta);case _:
   return null;
 
 }
@@ -207,7 +210,7 @@ return $default(_that.tabName,_that.items);case _:
 
 
 class _DetailEntity implements DetailEntity {
-  const _DetailEntity({this.tabName, final  List<DetailItemEntity> items = const []}): _items = items;
+  const _DetailEntity({this.tabName, final  List<DetailItemEntity> items = const [], final  Map<String, dynamic>? trackingMeta}): _items = items,_trackingMeta = trackingMeta;
   
 
 @override final  String? tabName;
@@ -216,6 +219,19 @@ class _DetailEntity implements DetailEntity {
   if (_items is EqualUnmodifiableListView) return _items;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_items);
+}
+
+/// `details[].trackingMeta`, forwarded whole. Analytics never reads a key
+/// from it — see docs/analytics/pdp/client/tm-collection.md.
+ final  Map<String, dynamic>? _trackingMeta;
+/// `details[].trackingMeta`, forwarded whole. Analytics never reads a key
+/// from it — see docs/analytics/pdp/client/tm-collection.md.
+@override Map<String, dynamic>? get trackingMeta {
+  final value = _trackingMeta;
+  if (value == null) return null;
+  if (_trackingMeta is EqualUnmodifiableMapView) return _trackingMeta;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
 }
 
 
@@ -229,16 +245,16 @@ _$DetailEntityCopyWith<_DetailEntity> get copyWith => __$DetailEntityCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DetailEntity&&(identical(other.tabName, tabName) || other.tabName == tabName)&&const DeepCollectionEquality().equals(other._items, _items));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DetailEntity&&(identical(other.tabName, tabName) || other.tabName == tabName)&&const DeepCollectionEquality().equals(other._items, _items)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,tabName,const DeepCollectionEquality().hash(_items));
+int get hashCode => Object.hash(runtimeType,tabName,const DeepCollectionEquality().hash(_items),const DeepCollectionEquality().hash(_trackingMeta));
 
 @override
 String toString() {
-  return 'DetailEntity(tabName: $tabName, items: $items)';
+  return 'DetailEntity(tabName: $tabName, items: $items, trackingMeta: $trackingMeta)';
 }
 
 
@@ -249,7 +265,7 @@ abstract mixin class _$DetailEntityCopyWith<$Res> implements $DetailEntityCopyWi
   factory _$DetailEntityCopyWith(_DetailEntity value, $Res Function(_DetailEntity) _then) = __$DetailEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String? tabName, List<DetailItemEntity> items
+ String? tabName, List<DetailItemEntity> items, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -266,11 +282,12 @@ class __$DetailEntityCopyWithImpl<$Res>
 
 /// Create a copy of DetailEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? tabName = freezed,Object? items = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? tabName = freezed,Object? items = null,Object? trackingMeta = freezed,}) {
   return _then(_DetailEntity(
 tabName: freezed == tabName ? _self.tabName : tabName // ignore: cast_nullable_to_non_nullable
 as String?,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
-as List<DetailItemEntity>,
+as List<DetailItemEntity>,trackingMeta: freezed == trackingMeta ? _self._trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 

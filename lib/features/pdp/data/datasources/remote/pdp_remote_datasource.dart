@@ -16,9 +16,15 @@ abstract class PdpRemoteDatasource {
   @factoryMethod
   factory PdpRemoteDatasource(Dio dio) = _PdpRemoteDatasource;
 
+  /// [colorVariant] is `true` only when this PID was reached by tapping a swatch
+  /// on another PDP. It is the request half of `redirected_from_colour_widget`:
+  /// the response echoes `"Yes"` in `product.orderAttribution`, `"No"` otherwise.
+  /// Sending it on the request is what lets the answer be a property of the
+  /// response rather than client state.
   @GET('${ApiConstants.productDetails}/{productId}')
   Future<ProductDetailModel> getProductDetails({
     @Path('productId') required int productId,
+    @Query('colorVariant') bool? colorVariant,
     @CancelRequest() CancelToken? cancelToken,
   });
 

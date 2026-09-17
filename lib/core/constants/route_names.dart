@@ -20,6 +20,7 @@ abstract final class RouteNames {
   static const String landingPage = '/landing-page';
   static const String orderConfirmation = '/order-confirmation';
   static const String orders = '/orders';
+  static const String wishlist = '/wishlist';
   static const String addresses = '/addresses';
   static const String addAddress = 'add';
   static const String legal = '/legal';
@@ -42,4 +43,7 @@ abstract final class RouteNames {
   static const String plpName = 'plp';
   static const String pdpName = 'pdp';
   static const String landingPageName = 'landingPage';
+  static const String addressesName = 'addresses';
+  static const String addAddressName = 'addAddress';
+  static const String wishlistName = 'wishlist';
 }

@@ -6,13 +6,16 @@ part 'detail_model.g.dart';
 
 @JsonSerializable(createToJson: false)
 class DetailModel {
-  const DetailModel({this.tabName, this.items = const []});
+  const DetailModel({this.tabName, this.items = const [], this.trackingMeta});
 
   @JsonKey(defaultValue: null)
   final String? tabName;
 
   @JsonKey(defaultValue: [])
   final List<DetailItemModel> items;
+
+  @JsonKey(defaultValue: null)
+  final Map<String, dynamic>? trackingMeta;
 
   factory DetailModel.fromJson(Map<String, dynamic> json) =>
       _$DetailModelFromJson(json);
@@ -22,6 +25,7 @@ extension DetailModelX on DetailModel {
   DetailEntity toEntity() => DetailEntity(
     tabName: tabName,
     items: items.map((e) => e.toEntity()).toList(),
+    trackingMeta: trackingMeta,
   );
 }
 

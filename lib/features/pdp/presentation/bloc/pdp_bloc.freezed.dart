@@ -143,11 +143,11 @@ return loadSizeChart(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int productId)?  loadProductDetails,TResult Function( String skuId)?  selectSku,TResult Function( String skuId)?  addToBag,TResult Function( String skuId)?  buyNow,TResult Function( String pincode)?  verifyPincode,TResult Function( int productId)?  selectColorVariant,TResult Function( int tabIndex)?  expandDetailTab,TResult Function( int productId)?  loadRecommendations,TResult Function()?  loadMoreRecommendations,TResult Function()?  loadSizeChart,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int productId,  bool colorVariant)?  loadProductDetails,TResult Function( String skuId,  String fromLocation)?  selectSku,TResult Function( String skuId)?  addToBag,TResult Function( String skuId)?  buyNow,TResult Function( String pincode)?  verifyPincode,TResult Function( int productId)?  selectColorVariant,TResult Function( int tabIndex)?  expandDetailTab,TResult Function( int productId)?  loadRecommendations,TResult Function()?  loadMoreRecommendations,TResult Function()?  loadSizeChart,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LoadProductDetails() when loadProductDetails != null:
-return loadProductDetails(_that.productId);case SelectSku() when selectSku != null:
-return selectSku(_that.skuId);case AddToBag() when addToBag != null:
+return loadProductDetails(_that.productId,_that.colorVariant);case SelectSku() when selectSku != null:
+return selectSku(_that.skuId,_that.fromLocation);case AddToBag() when addToBag != null:
 return addToBag(_that.skuId);case BuyNow() when buyNow != null:
 return buyNow(_that.skuId);case VerifyPincode() when verifyPincode != null:
 return verifyPincode(_that.pincode);case SelectColorVariant() when selectColorVariant != null:
@@ -173,11 +173,11 @@ return loadSizeChart();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int productId)  loadProductDetails,required TResult Function( String skuId)  selectSku,required TResult Function( String skuId)  addToBag,required TResult Function( String skuId)  buyNow,required TResult Function( String pincode)  verifyPincode,required TResult Function( int productId)  selectColorVariant,required TResult Function( int tabIndex)  expandDetailTab,required TResult Function( int productId)  loadRecommendations,required TResult Function()  loadMoreRecommendations,required TResult Function()  loadSizeChart,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int productId,  bool colorVariant)  loadProductDetails,required TResult Function( String skuId,  String fromLocation)  selectSku,required TResult Function( String skuId)  addToBag,required TResult Function( String skuId)  buyNow,required TResult Function( String pincode)  verifyPincode,required TResult Function( int productId)  selectColorVariant,required TResult Function( int tabIndex)  expandDetailTab,required TResult Function( int productId)  loadRecommendations,required TResult Function()  loadMoreRecommendations,required TResult Function()  loadSizeChart,}) {final _that = this;
 switch (_that) {
 case LoadProductDetails():
-return loadProductDetails(_that.productId);case SelectSku():
-return selectSku(_that.skuId);case AddToBag():
+return loadProductDetails(_that.productId,_that.colorVariant);case SelectSku():
+return selectSku(_that.skuId,_that.fromLocation);case AddToBag():
 return addToBag(_that.skuId);case BuyNow():
 return buyNow(_that.skuId);case VerifyPincode():
 return verifyPincode(_that.pincode);case SelectColorVariant():
@@ -199,11 +199,11 @@ return loadSizeChart();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int productId)?  loadProductDetails,TResult? Function( String skuId)?  selectSku,TResult? Function( String skuId)?  addToBag,TResult? Function( String skuId)?  buyNow,TResult? Function( String pincode)?  verifyPincode,TResult? Function( int productId)?  selectColorVariant,TResult? Function( int tabIndex)?  expandDetailTab,TResult? Function( int productId)?  loadRecommendations,TResult? Function()?  loadMoreRecommendations,TResult? Function()?  loadSizeChart,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int productId,  bool colorVariant)?  loadProductDetails,TResult? Function( String skuId,  String fromLocation)?  selectSku,TResult? Function( String skuId)?  addToBag,TResult? Function( String skuId)?  buyNow,TResult? Function( String pincode)?  verifyPincode,TResult? Function( int productId)?  selectColorVariant,TResult? Function( int tabIndex)?  expandDetailTab,TResult? Function( int productId)?  loadRecommendations,TResult? Function()?  loadMoreRecommendations,TResult? Function()?  loadSizeChart,}) {final _that = this;
 switch (_that) {
 case LoadProductDetails() when loadProductDetails != null:
-return loadProductDetails(_that.productId);case SelectSku() when selectSku != null:
-return selectSku(_that.skuId);case AddToBag() when addToBag != null:
+return loadProductDetails(_that.productId,_that.colorVariant);case SelectSku() when selectSku != null:
+return selectSku(_that.skuId,_that.fromLocation);case AddToBag() when addToBag != null:
 return addToBag(_that.skuId);case BuyNow() when buyNow != null:
 return buyNow(_that.skuId);case VerifyPincode() when verifyPincode != null:
 return verifyPincode(_that.pincode);case SelectColorVariant() when selectColorVariant != null:
@@ -223,10 +223,11 @@ return loadSizeChart();case _:
 
 
 class LoadProductDetails implements PdpEvent {
-  const LoadProductDetails({required this.productId});
+  const LoadProductDetails({required this.productId, this.colorVariant = false});
   
 
  final  int productId;
+@JsonKey() final  bool colorVariant;
 
 /// Create a copy of PdpEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -238,16 +239,16 @@ $LoadProductDetailsCopyWith<LoadProductDetails> get copyWith => _$LoadProductDet
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadProductDetails&&(identical(other.productId, productId) || other.productId == productId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadProductDetails&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.colorVariant, colorVariant) || other.colorVariant == colorVariant));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,productId);
+int get hashCode => Object.hash(runtimeType,productId,colorVariant);
 
 @override
 String toString() {
-  return 'PdpEvent.loadProductDetails(productId: $productId)';
+  return 'PdpEvent.loadProductDetails(productId: $productId, colorVariant: $colorVariant)';
 }
 
 
@@ -258,7 +259,7 @@ abstract mixin class $LoadProductDetailsCopyWith<$Res> implements $PdpEventCopyW
   factory $LoadProductDetailsCopyWith(LoadProductDetails value, $Res Function(LoadProductDetails) _then) = _$LoadProductDetailsCopyWithImpl;
 @useResult
 $Res call({
- int productId
+ int productId, bool colorVariant
 });
 
 
@@ -275,10 +276,11 @@ class _$LoadProductDetailsCopyWithImpl<$Res>
 
 /// Create a copy of PdpEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? productId = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? productId = null,Object? colorVariant = null,}) {
   return _then(LoadProductDetails(
 productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
-as int,
+as int,colorVariant: null == colorVariant ? _self.colorVariant : colorVariant // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -289,10 +291,11 @@ as int,
 
 
 class SelectSku implements PdpEvent {
-  const SelectSku({required this.skuId});
+  const SelectSku({required this.skuId, required this.fromLocation});
   
 
  final  String skuId;
+ final  String fromLocation;
 
 /// Create a copy of PdpEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -304,16 +307,16 @@ $SelectSkuCopyWith<SelectSku> get copyWith => _$SelectSkuCopyWithImpl<SelectSku>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SelectSku&&(identical(other.skuId, skuId) || other.skuId == skuId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SelectSku&&(identical(other.skuId, skuId) || other.skuId == skuId)&&(identical(other.fromLocation, fromLocation) || other.fromLocation == fromLocation));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,skuId);
+int get hashCode => Object.hash(runtimeType,skuId,fromLocation);
 
 @override
 String toString() {
-  return 'PdpEvent.selectSku(skuId: $skuId)';
+  return 'PdpEvent.selectSku(skuId: $skuId, fromLocation: $fromLocation)';
 }
 
 
@@ -324,7 +327,7 @@ abstract mixin class $SelectSkuCopyWith<$Res> implements $PdpEventCopyWith<$Res>
   factory $SelectSkuCopyWith(SelectSku value, $Res Function(SelectSku) _then) = _$SelectSkuCopyWithImpl;
 @useResult
 $Res call({
- String skuId
+ String skuId, String fromLocation
 });
 
 
@@ -341,9 +344,10 @@ class _$SelectSkuCopyWithImpl<$Res>
 
 /// Create a copy of PdpEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? skuId = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? skuId = null,Object? fromLocation = null,}) {
   return _then(SelectSku(
 skuId: null == skuId ? _self.skuId : skuId // ignore: cast_nullable_to_non_nullable
+as String,fromLocation: null == fromLocation ? _self.fromLocation : fromLocation // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

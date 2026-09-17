@@ -64,8 +64,7 @@ class PdpAddToBagBar extends StatelessWidget {
   /// Fixed width the bar spends regardless of the labels: the 6px frame on each
   /// side, the 6px gap between the buttons, and AppButton's own 20px of hugging
   /// padding plus the slack on both sides of each of the two labels.
-  static const double _barChrome =
-      6 * 2 + 6 + (AppSpacing.lgMd * 2) * 2 + _labelSlack * 2;
+  static const double _barChrome = 6 * 2 + 6 + (AppSpacing.lgMd * 2) * 2 + _labelSlack * 2;
 
   /// Least gap left between the bar and the screen edge in the extreme case
   /// where the labels are long enough that the bar would otherwise overflow.
@@ -98,16 +97,10 @@ class PdpAddToBagBar extends StatelessWidget {
           // DefaultTextStyle, so the theme contributes letterSpacing and the
           // like. Measuring without it underestimated every label by a pixel or
           // two, which a zero-slack box turned straight into an ellipsis.
-          final measuredStyle = DefaultTextStyle.of(
-            context,
-          ).style.merge(_ctaBaseStyle);
+          final measuredStyle = DefaultTextStyle.of(context).style.merge(_ctaBaseStyle);
           var widestLabel = 0.0;
           for (final label in _ctaLabels) {
-            final width = textWidth(
-              text: label,
-              style: measuredStyle,
-              textScaler: textScaler,
-            );
+            final width = textWidth(text: label, style: measuredStyle, textScaler: textScaler);
             if (width > widestLabel) widestLabel = width;
           }
 
@@ -115,16 +108,12 @@ class PdpAddToBagBar extends StatelessWidget {
           // off the screen. Both labels then take ONE shared size, so a long
           // label shrinks the pair rather than being cut, and the two are never
           // rendered at different sizes.
-          final available =
-              constraints.maxWidth - _barChrome - _minScreenMargin * 2;
+          final available = constraints.maxWidth - _barChrome - _minScreenMargin * 2;
           final scale = widestLabel * 2 <= available || widestLabel <= 0
               ? 1.0
               : available / (widestLabel * 2);
-          final ctaLabelStyle = TextStyle(
-            fontSize: _ctaBaseStyle.fontSize! * scale,
-          );
-          final buttonWidth =
-              widestLabel * scale + _labelSlack + AppSpacing.lgMd * 2;
+          final ctaLabelStyle = TextStyle(fontSize: _ctaBaseStyle.fontSize! * scale);
+          final buttonWidth = widestLabel * scale + _labelSlack + AppSpacing.lgMd * 2;
 
           return Container(
             // Height stays fixed — pdp_content measures the docked copy against
@@ -137,11 +126,7 @@ class PdpAddToBagBar extends StatelessWidget {
               borderRadius: AppSpacing.borderRadiusSm,
               border: Border.all(color: const Color(0xFFF6F6F6)),
               boxShadow: const [
-                BoxShadow(
-                  color: Color(0x05000000),
-                  blurRadius: 37.7,
-                  offset: Offset(0, 25),
-                ),
+                BoxShadow(color: Color(0x05000000), blurRadius: 37.7, offset: Offset(0, 25)),
               ],
             ),
             child: Row(
@@ -174,9 +159,7 @@ class PdpAddToBagBar extends StatelessWidget {
                     addToBagKey,
                     child: AppButton(
                       key: addToBagKey,
-                      text: isAddedToBag
-                          ? PdpStrings.goToBag
-                          : PdpStrings.addToBag,
+                      text: isAddedToBag ? PdpStrings.goToBag : PdpStrings.addToBag,
                       variant: ButtonVariant.primary,
                       isFullWidth: true,
                       textStyle: ctaLabelStyle,

@@ -22,10 +22,11 @@ class _PdpRemoteDatasource implements PdpRemoteDatasource {
   @override
   Future<ProductDetailModel> getProductDetails({
     required int productId,
+    bool? colorVariant,
     CancelToken? cancelToken,
   }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'colorVariant': colorVariant};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;

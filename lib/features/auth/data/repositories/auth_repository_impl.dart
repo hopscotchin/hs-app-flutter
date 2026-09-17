@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/constants/strings/auth_strings.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/mixins/safe_api_call.dart';
 import '../../../../core/network/connectivity/network_info.dart';
@@ -72,7 +73,12 @@ class AuthRepositoryImpl with SafeApiCall implements AuthRepository {
     CancelToken? cancelToken,
   }) => safeApiCall(_networkInfo, () async {
     final response = await _api.register(
-      body: {'displayName': displayName, 'email': email, 'mobile': mobile, 'otpReason': 'SIGN_UP'},
+      body: {
+        'displayName': displayName,
+        'email': email,
+        'mobile': mobile,
+        'otpReason': AuthStrings.signUpReason,
+      },
       cancelToken: cancelToken,
     );
     return response.toEntity();

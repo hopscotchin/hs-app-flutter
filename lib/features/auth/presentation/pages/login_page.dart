@@ -7,7 +7,9 @@ import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/atoms/filled_text_field.dart' show MobileNumberFormatter;
 import '../../../../components/atoms/outlined_text_field.dart';
 import '../../../../core/constants/route_names.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
+import '../../domain/entities/auth_entry_args.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../widgets/auth_footer_link_row.dart';
 import '../widgets/auth_primary_button.dart';
@@ -24,12 +26,18 @@ class LoginPage extends StatefulWidget {
   const LoginPage({
     super.key,
     this.initialMobile,
+    this.entry = AuthEntryArgs.unknown,
     this.initialMessageBars = const [],
     this.isCheckoutFlow = false,
     this.redirectType,
   });
 
   final String? initialMobile;
+
+  /// Where the user came from, for the auth events. Defaults to
+  /// [AuthEntryArgs.unknown], which reports "none" — the same value Android
+  /// sends when its intent extras are absent.
+  final AuthEntryArgs entry;
   final List<MessageBarEntity> initialMessageBars;
   final bool isCheckoutFlow;
   final String? redirectType;
@@ -62,6 +70,10 @@ class _LoginPageState extends State<LoginPage> {
       _inputController.text = '${mobile.substring(0, 5)} ${mobile.substring(5)}';
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => _inputFocusNode.requestFocus());
+    // Dispatched, not fired here: analytics emits from Blocs on this codebase.
+    // Once per route mount, mirroring Android's onViewCreated
+    // (MobileLoginFragment.kt:78), which has no suppression flag either.
+    context.read<AuthBloc>().add(AuthEvent.loginViewed(entry: _entry));
   }
 
   @override
@@ -70,6 +82,15 @@ class _LoginPageState extends State<LoginPage> {
     _inputFocusNode.dispose();
     super.dispose();
   }
+
+  /// Entry context for the auth events, with `from_redirect` merged in.
+  ///
+  /// `redirectType` arrives on the route and the rest of [AuthEntryArgs] does
+  /// not yet — `from_screen` and `from_location` need the ~19 navigation call
+  /// sites, which live in other feature modules. So this reports a real
+  /// `from_redirect` and `"none"` for the other two, today.
+  AuthEntryArgs get _entry =>
+      widget.entry.copyWith(fromRedirect: widget.redirectType);
 
   String get _rawMobile => _inputController.text.replaceAll(RegExp(r'\D'), '');
 
@@ -97,6 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                       loginId: _rawMobile,
                       otpReason: _checkoutOtpReason,
                       pathUri: state.checkMobileResult?.pathUri,
+                      entry: _entry,
                     ),
                   );
                   return;
@@ -112,6 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                         'otpConfig': state.otpConfig!,
                         'otpReason': _checkoutOtpReason,
                         'isCheckoutFlow': true,
+                        'entry': _entry,
                       },
                     )
                     .then((success) {
@@ -131,6 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                   otpConfig: state.otpConfig!,
                   otpReason: AuthStrings.signInReason,
                   redirectType: widget.redirectType,
+                  entry: _entry,
                 );
               },
               child: _buildBody(),
@@ -202,6 +226,12 @@ class _LoginPageState extends State<LoginPage> {
                             context,
                             initialMobile: _rawMobile.length == 10 ? _rawMobile : null,
                             redirectType: widget.redirectType,
+                            // The pivot is a new entry, not a continuation:
+                            // join_viewed reports Login as its from_screen.
+                            entry: const AuthEntryArgs(
+                              fromScreen: FromScreens.login,
+                              fromLocation: FromLocations.signUpButton,
+                            ),
                           ),
                         ),
                         AppSpacing.verticalGapLg,
@@ -249,7 +279,11 @@ class _LoginPageState extends State<LoginPage> {
         context.read<AuthBloc>().add(AuthEvent.checkMobile(mobile: _rawMobile));
       } else {
         context.read<AuthBloc>().add(
-          AuthEvent.sendOtp(loginId: _rawMobile, otpReason: AuthStrings.signInReason),
+          AuthEvent.sendOtp(
+            loginId: _rawMobile,
+            otpReason: AuthStrings.signInReason,
+            entry: _entry,
+          ),
         );
       }
     }

@@ -8,7 +8,6 @@ import 'notification_nudge_entity.dart';
 import 'page_meta_entity.dart';
 import 'plp_filter_entity.dart';
 import 'query_correction_entity.dart';
-import 'tracking_meta_entity.dart';
 
 part 'listing_data_entity.freezed.dart';
 
@@ -16,7 +15,17 @@ part 'listing_data_entity.freezed.dart';
 abstract class ListingDataEntity with _$ListingDataEntity {
   const factory ListingDataEntity({
     PageMetaEntity? pageMeta,
-    TrackingMetaEntity? trackingMeta,
+
+    /// Page-level analytics blob, forwarded to Segment verbatim. Deliberately
+    /// untyped: the client never reads keys out of it, so any key the backend
+    /// adds reaches the dashboard without an app release. See
+    /// PLP_ANALYTICS_BACKEND_CONTRACT.md.
+    Map<String, dynamic>? trackingMeta,
+
+    /// Page-level order-attribution blob. Opaque, same shape as
+    /// [trackingMeta]. Consumed only on tile tap — pushed into
+    /// `ProductAttributionHelper` alongside the product's own trackingMeta.
+    Map<String, dynamic>? orderAttribution,
     NotificationNudgeEntity? notificationNudge,
     @Default([]) List<BannerEntity> banners,
     FloatingFilterEntity? floatingFilter,

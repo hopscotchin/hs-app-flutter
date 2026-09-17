@@ -61,8 +61,7 @@ class _CartPromoSectionState extends State<CartPromoSection> {
     // Clear the typed code once the apply call actually succeeds (promo
     // flips to applied) rather than optimistically on tap — a failed apply
     // (wrong/expired code) leaves the text in place so the user can retry.
-    final justApplied =
-        !(oldWidget.promotionData?.isApplied ?? false) && _isApplied;
+    final justApplied = !(oldWidget.promotionData?.isApplied ?? false) && _isApplied;
     if (justApplied) _controller.clear();
   }
 
@@ -83,10 +82,8 @@ class _CartPromoSectionState extends State<CartPromoSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.md,
-      ),
+      key: const ValueKey(CartTestStrings.promoSection),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.md),
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.neutralGrey2, width: 1),
         borderRadius: AppSpacing.borderRadiusMd,
@@ -140,9 +137,7 @@ class _CartPromoSectionState extends State<CartPromoSection> {
           // stop a paste of arbitrary length reaching the API. Enforced without
           // `maxLength` so the field doesn't grow a counter under it.
           maxLength: _maxCodeLength,
-          buildCounter:
-              (_, {required currentLength, required isFocused, maxLength}) =>
-                  null,
+          buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
           enabled: !widget.isLoading,
           style: AppTypographyV1.bodyRegular.regular.textPrimary(),
           onFieldSubmitted: (_) => _submit(),
@@ -158,24 +153,20 @@ class _CartPromoSectionState extends State<CartPromoSection> {
             hint: Text(
               CartStrings.enterOfferCode,
               key: const ValueKey(CartTestStrings.promoCodeInputHint),
-              style: AppTypographyV1.bodyLarge.regular.copyWith(
-                color: AppColors.neutralGrey5,
-              ),
+              style: AppTypographyV1.bodyLarge.regular.copyWith(color: AppColors.neutralGrey5),
             ),
             // prefixIcon/suffixIcon (not prefix/suffix) render unconditionally
             // — `prefix`/`suffix` only reserve space once focused/has text.
             prefixIcon: const Padding(
               padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: CustomImage(
+                key: ValueKey(CartTestStrings.promoOfferIcon),
                 path: ImageConstants.promoOffer,
                 width: AppSpacing.iconMd,
                 height: AppSpacing.iconMd,
               ),
             ),
-            prefixIconConstraints: const BoxConstraints(
-              minWidth: 0,
-              minHeight: 0,
-            ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
             // The full-screen overlay (CartState.isCartUpdating) already
             // covers apply-in-flight — no need for a second, inline spinner
             // here as well.
@@ -188,17 +179,12 @@ class _CartPromoSectionState extends State<CartPromoSection> {
                 child: Text(
                   CommonStrings.apply,
                   style: AppTypographyV1.labelLarge.bold.copyWith(
-                    color: _hasText
-                        ? AppColors.brandPrimary
-                        : AppColors.neutralGrey5,
+                    color: _hasText ? AppColors.brandPrimary : AppColors.neutralGrey5,
                   ),
                 ),
               ),
             ),
-            suffixIconConstraints: const BoxConstraints(
-              minWidth: 0,
-              minHeight: 0,
-            ),
+            suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
@@ -213,9 +199,7 @@ class _CartPromoSectionState extends State<CartPromoSection> {
 
   Widget _buildAppliedState() {
     final promo = widget.promotionData!;
-    final couponText =
-        promo.appliedCouponText ??
-        '${promo.promoCode ?? ''} ${CartStrings.applied}';
+    final couponText = promo.appliedCouponText ?? '${promo.promoCode ?? ''} ${CartStrings.applied}';
     // toColorOrNull (not toColor): an unparseable backend hex must fall through
     // to the text style's own color rather than becoming transparent/invisible.
     final couponColor = promo.appliedCouponTextColor.toColorOrNull;
@@ -231,10 +215,7 @@ class _CartPromoSectionState extends State<CartPromoSection> {
       child: ColoredBox(
         color: AppColors.whiteColor,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.lmd,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.lmd),
           // The icon and "Remove" are inflexible, so Row sizes them at their
           // intrinsic width first and "Remove" stays pinned to the right edge.
           // The labels live in an Expanded that soaks up all remaining width:
@@ -245,6 +226,7 @@ class _CartPromoSectionState extends State<CartPromoSection> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const CustomImage(
+                key: ValueKey(CartTestStrings.promoOfferIcon),
                 path: ImageConstants.promoOffer,
                 width: AppSpacing.iconMd,
                 height: AppSpacing.iconMd,
@@ -257,11 +239,12 @@ class _CartPromoSectionState extends State<CartPromoSection> {
                     Flexible(
                       child: Text(
                         couponText,
+                        key: const ValueKey(CartTestStrings.promoAppliedCodeText),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTypographyV1.labelLarge.regular
-                            .textPrimary()
-                            .copyWith(color: couponColor),
+                        style: AppTypographyV1.labelLarge.regular.textPrimary().copyWith(
+                          color: couponColor,
+                        ),
                       ),
                     ),
                     if (savingsText != null) ...[
@@ -274,11 +257,12 @@ class _CartPromoSectionState extends State<CartPromoSection> {
                       Flexible(
                         child: Text(
                           savingsText,
+                          key: const ValueKey(CartTestStrings.promoAppliedSavingsText),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypographyV1.labelLarge.bold
-                              .linkColor()
-                              .copyWith(color: savingsColor),
+                          style: AppTypographyV1.labelLarge.bold.linkColor().copyWith(
+                            color: savingsColor,
+                          ),
                         ),
                       ),
                     ],
@@ -317,14 +301,11 @@ class _CartPromoSectionState extends State<CartPromoSection> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              CartStrings.seeAllOffers,
+              'See All Offers',
+              key: const ValueKey(CartTestStrings.promoSeeAllOffersText),
               style: AppTypographyV1.bodyMedium.medium.brandPrimary(),
             ),
-            const Icon(
-              Icons.arrow_forward,
-              size: 18,
-              color: AppColors.brandPrimary,
-            ),
+            const Icon(Icons.arrow_forward, size: 18, color: AppColors.brandPrimary),
           ],
         ),
       ),

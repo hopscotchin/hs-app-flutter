@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hs_app_flutter/core/constants/route_names.dart';
 
+import '../../../core/constants/strings/auth_strings.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/entities/message_bar_entity.dart';
 import '../../account/presentation/bloc/account_bloc.dart';
+import '../domain/entities/auth_entry_args.dart';
 import '../domain/entities/otp_config/otp_config_entity.dart';
 import 'bloc/auth_bloc.dart';
 import 'pages/join_us_page.dart';
@@ -27,6 +29,7 @@ class AuthRoute {
             initialMessageBars:
                 extra?['initialMessageBars'] as List<MessageBarEntity>? ?? const [],
             redirectType: extra?['redirectType'] as String?,
+            entry: extra?['entry'] as AuthEntryArgs? ?? AuthEntryArgs.unknown,
           ),
         );
       },
@@ -42,6 +45,7 @@ class AuthRoute {
           child: JoinUsPage(
             initialMobile: extra?['initialMobile'] as String?,
             redirectType: extra?['redirectType'] as String?,
+            entry: extra?['entry'] as AuthEntryArgs? ?? AuthEntryArgs.unknown,
           ),
         );
       },
@@ -57,9 +61,10 @@ class AuthRoute {
           child: OtpVerificationPage(
             loginId: extra['loginId'] as String,
             otpConfig: extra['otpConfig'] as OtpConfigEntity,
-            otpReason: extra['otpReason'] as String? ?? 'SIGN_IN',
+            otpReason: extra['otpReason'] as String? ?? AuthStrings.signInReason,
             isCheckoutFlow: extra['isCheckoutFlow'] as bool? ?? false,
             redirectType: extra['redirectType'] as String?,
+            entry: extra['entry'] as AuthEntryArgs? ?? AuthEntryArgs.unknown,
           ),
         );
       },
@@ -75,7 +80,10 @@ class AuthRoute {
             BlocProvider(create: (_) => sl<AuthBloc>()),
             BlocProvider.value(value: extra['accountBloc'] as AccountBloc),
           ],
-          child: const LoginPage(isCheckoutFlow: true),
+          child: LoginPage(
+            isCheckoutFlow: true,
+            entry: extra['entry'] as AuthEntryArgs? ?? AuthEntryArgs.unknown,
+          ),
         );
       },
     ),

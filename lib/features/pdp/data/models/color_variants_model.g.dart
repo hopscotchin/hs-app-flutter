@@ -12,4 +12,5 @@ ColorVariantModel _$ColorVariantModelFromJson(Map<String, dynamic> json) =>
       mediaUrl: json['mediaUrl'] as String?,
       isSelected: json['isSelected'] as bool? ?? false,
       isStockAvailable: json['isStockAvailable'] as bool? ?? false,
+      trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
     );

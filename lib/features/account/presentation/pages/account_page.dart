@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/app_bottom_sheet.dart';
 import 'package:hs_app_flutter/components/appbar/hs_appbar.dart';
+import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/cubits/cart_count_cubit.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
@@ -12,6 +13,7 @@ import 'package:hs_app_flutter/core/entities/message_bar_entity.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 import 'package:hs_app_flutter/core/utils/snackbar_utils.dart';
+import 'package:hs_app_flutter/features/auth/domain/entities/auth_entry_args.dart';
 import 'package:hs_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:hs_app_flutter/features/cart/presentation/cubit/cart_actions_cubit.dart';
 import 'package:hs_app_flutter/features/discover/presentation/bloc/home_bloc.dart';
@@ -94,6 +96,14 @@ class AccountPage extends StatelessWidget {
   }
 }
 
+/// Every sign-in path on this screen is the same entry: the Account tab, via a
+/// sign-in affordance. The eight call sites differ only in where they send the
+/// user afterwards, which `redirectType` already carries.
+const _accountSignIn = AuthEntryArgs(
+  fromScreen: FromScreens.account,
+  fromLocation: FromLocations.signInButton,
+);
+
 class _AccountContent extends StatelessWidget {
   final AccountEntity account;
 
@@ -132,6 +142,7 @@ class _AccountContent extends StatelessWidget {
                         ? AppNavigator.goToOrders(context)
                         : AppNavigator.goToLogin(
                             context,
+                            entry: _accountSignIn,
                             redirectType: LoginRedirects.typeOrders,
                             initialMessageBars: [
                               const MessageBarEntity(
@@ -148,9 +159,10 @@ class _AccountContent extends StatelessWidget {
                     title: AccountStrings.wishlist,
                     subtitle: isLoggedIn ? null : AccountStrings.wishlistSubtitle,
                     onTap: () => isLoggedIn
-                        ? AppNavigator.goToHome(context)
+                        ? AppNavigator.goToWishlist(context)
                         : AppNavigator.goToLogin(
                             context,
+                            entry: _accountSignIn,
                             redirectType: LoginRedirects.typeWishlistScreenFromAccount,
                             initialMessageBars: [
                               const MessageBarEntity(
@@ -170,6 +182,7 @@ class _AccountContent extends StatelessWidget {
                         ? AppNavigator.goToHome(context)
                         : AppNavigator.goToLogin(
                             context,
+                            entry: _accountSignIn,
                             redirectType: LoginRedirects.typeAccountSettings,
                             initialMessageBars: [
                               const MessageBarEntity(
@@ -186,9 +199,13 @@ class _AccountContent extends StatelessWidget {
                     title: AccountStrings.savedAddresses,
                     subtitle: isLoggedIn ? null : AccountStrings.savedAddressesSubtitle,
                     onTap: () => isLoggedIn
-                        ? AppNavigator.goToAddresses(context)
+                        ? AppNavigator.goToAddresses(
+                            context,
+                            fromScreen: FromScreens.account,
+                          )
                         : AppNavigator.goToLogin(
                             context,
+                            entry: _accountSignIn,
                             redirectType: LoginRedirects.typeAddresses,
                             initialMessageBars: [
                               const MessageBarEntity(
@@ -208,6 +225,7 @@ class _AccountContent extends StatelessWidget {
                         ? AppNavigator.goToHome(context)
                         : AppNavigator.goToLogin(
                             context,
+                            entry: _accountSignIn,
                             redirectType: LoginRedirects.typeCards,
                             initialMessageBars: [
                               const MessageBarEntity(
@@ -231,6 +249,7 @@ class _AccountContent extends StatelessWidget {
                         ? AppNavigator.goToHome(context)
                         : AppNavigator.goToLogin(
                             context,
+                            entry: _accountSignIn,
                             redirectType: LoginRedirects.typeCredits,
                             initialMessageBars: [
                               const MessageBarEntity(
@@ -250,6 +269,7 @@ class _AccountContent extends StatelessWidget {
                         ? AppNavigator.goToHome(context)
                         : AppNavigator.goToLogin(
                             context,
+                            entry: _accountSignIn,
                             redirectType: LoginRedirects.typeKids,
                             initialMessageBars: [
                               const MessageBarEntity(
@@ -271,7 +291,7 @@ class _AccountContent extends StatelessWidget {
                   AccountFooterWidget(
                     isLoggedIn: isLoggedIn,
                     onLegal: () => AppNavigator.goToLegal(context),
-                    onSignIn: () => AppNavigator.goToLogin(context),
+                    onSignIn: () => AppNavigator.goToLogin(context, entry: _accountSignIn),
                     onSignOut: () {
                       final homeBloc = context.read<HomeBloc>();
                       final wishlistCubit = context.read<WishlistCubit>();

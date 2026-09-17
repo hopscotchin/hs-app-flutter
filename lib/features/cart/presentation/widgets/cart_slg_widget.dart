@@ -28,7 +28,7 @@ class SlgWidget extends StatelessWidget {
             child: Padding(
               key: ValueKey('${CartTestStrings.slgScreen}_item_$index'),
               padding: EdgeInsets.only(right: index == items.length - 1 ? 0 : AppSpacing.sm),
-              child: _buildItem(item),
+              child: _buildItem(item, index),
             ),
           );
         }).toList(),
@@ -36,16 +36,23 @@ class SlgWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildItem(ServiceGuaranteeEntity item) {
+  Widget _buildItem(ServiceGuaranteeEntity item, int index) {
+    final itemKey = '${CartTestStrings.slgScreen}_item_$index';
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        CustomImage(path: item.icon!, width: AppSpacing.iconMd, height: AppSpacing.iconMd),
+        CustomImage(
+          key: ValueKey('${itemKey}_${CartTestStrings.slgIconSuffix}'),
+          path: item.icon!,
+          width: AppSpacing.iconMd,
+          height: AppSpacing.iconMd,
+        ),
         Flexible(
           child: Text(
             (item.label ?? '').replaceAll(' ', '\n'),
+            key: ValueKey('${itemKey}_${CartTestStrings.slgLabelSuffix}'),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: AppTypographyV1.labelMedium.bold.copyWith(color: const Color(0x80000000)),

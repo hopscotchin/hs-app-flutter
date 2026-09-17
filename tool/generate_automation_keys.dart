@@ -69,6 +69,9 @@ void main(List<String> args) {
       // Bare suffix helpers (no comment pattern) are only composed into another
       // key's row — skip them as standalone rows.
       if (m.name.endsWith('Suffix') && m.patterns.isEmpty) continue;
+      // Host/prefix slugs are composed into other keys' rows, not keys
+      // themselves (e.g. PincodeTestStrings.cartHost → `cart_pincode_sheet`).
+      if (m.name.endsWith('Host') && m.patterns.isEmpty) continue;
       final file = _widgetFile(usage, cls.name, m.name);
       for (final key in _fullKeys(m.value, m.patterns)) {
         final type = _inferType(key);
@@ -159,12 +162,18 @@ List<String> _fullKeys(String value, List<String> patterns) {
 /// Replace placeholders for a concrete example. [i] is the list index value.
 String _fill(String pattern, String i) => pattern
     .replaceAll('<i>', i)
+    .replaceAll('<j>', '0')
     .replaceAll('<pos>', '0')
-    .replaceAll('<pageName>', 'summer-sale');
+    .replaceAll('<pageName>', 'summer-sale')
+    .replaceAll('<host>', 'cart');
 
 String _examples(String key) {
   if (key.contains('<i>')) {
     return '${_fill(key, '0')}, ${_fill(key, '1')}';
+  }
+  // A host-prefixed key has one example per entry point, not per index.
+  if (key.contains('<host>')) {
+    return '${_fill(key, '0')}, ${_fill(key, '0').replaceFirst('cart_', 'pdp_')}';
   }
   if (key.contains('<')) {
     return _fill(key, '0');
@@ -186,14 +195,15 @@ String _inferType(String pattern) {
   if (ends('_subtitle') || ends('_description') || ends('_initials')) {
     return 'Text';
   }
-  if (ends('_image')) return 'Image';
+  if (ends('_image') || ends('_icon')) return 'Image';
   if (ends('_checkbox')) return 'Checkbox';
   if (ends('_radio')) return 'Radio';
   if (ends('_nav_item')) return 'Nav item';
   if (ends('_menu_item') || ends('_item') || ends('_tile') || ends('_card')) {
     return 'List item';
   }
-  if (ends('_code') || ends('_question') || ends('_answer')) return 'Text';
+  if (ends('_code') || ends('_question') || ends('_answer') || ends('_value')) return 'Text';
+  if (ends('_row')) return 'Row';
   if (ends('_chip')) return 'Chip';
   if (ends('_visual_cue')) return 'Visual cue';
   if (ends('_badge')) return 'Badge';
@@ -205,7 +215,14 @@ String _inferType(String pattern) {
       ends('_count')) {
     return 'Text';
   }
-  if (ends('_option') || ends('_section')) return 'Option';
+  if (ends('_snackbar') || ends('_toast')) return 'Snackbar';
+  if (ends('_bottomsheet') || ends('_sheet')) return 'Bottom sheet';
+  if (ends('_overlay')) return 'Overlay';
+  if (ends('_shimmer') || ends('_shimmer_loading') || ends('_loader')) return 'Loading';
+  if (ends('_list')) return 'List';
+  if (ends('_banner')) return 'Banner';
+  if (ends('_section')) return 'Section';
+  if (ends('_option')) return 'Option';
   if (ends('_leaf') || ends('_drilldown') || ends('_breadcrumb')) {
     return 'List item';
   }
@@ -350,6 +367,13 @@ Prefix composition (`hp_pg_2`, `lp_<pageName>_...`) happens in
       return '''
 Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 (`keyPrefix`) and appends the bar's list index.
+
+Cart/promo hosts and their slugs: `cart` (top merge/promo bars),
+`cart_bottom` (bars under the price summary) and `cart_pincode_sheet` (the
+delivery-pincode sheet opened from the Bag's app bar). The offers
+sheet's rejection bar is keyed as a whole instead
+(`promo_offers_action_error_bar`), because the bars there are backend-authored
+feedback for one apply rather than a list a test walks.
 
 | Type | Key (pattern) | Examples | Widget file |
 |---|---|---|---|

@@ -200,9 +200,13 @@ class WishlistCubit extends Cubit<WishlistState> {
         emit(_clearInFlight(productId, items: reverted));
         _emitFeedback("Couldn't remove from wishlist", isError: true);
       },
-      (_) {
+      (popUpMessage) {
         emit(_clearInFlight(productId));
-        _emitFeedback('Removed from wishlist', isError: false);
+        _emitFeedback(
+          popUpMessage ?? 'Removed from wishlist',
+          isError: false,
+        );
+        // Analytics fires HERE — the server confirmed. Mirrors [_add].
         onRemoved?.call();
       },
     );

@@ -76,7 +76,6 @@ class AnalyticsEvents {
   static const String productAttributeTabClicked = 'product_attribute_tab_clicked';
   static const String aPlusContentViewed = 'aplus_content_viewed';
   static const String xlProductCardScrolled = 'xl_product_card_scrolled';
-  static const String colorWidgetExpanded = 'color_widget_expanded';
   static const String newColorSelected = 'new_color_selected';
   static const String parentCollectionViewed = 'parent_collection_viewed';
   static const String parentCollectionClicked = 'parent_collection_clicked';
@@ -144,6 +143,7 @@ class AnalyticsEvents {
   static const String cartViewed = 'cart_viewed';
   static const String productAddedToCart = 'product_added_to_cart';
   static const String productAddedToNotifyList = 'product_added_to_notifylist';
+  static const String wishlistViewed = 'wishlist_viewed';
   static const String productAddedToWishlist = 'product_added_to_wishlist';
   static const String productRemovedFromWishlist = 'product_removed_from_wishlist';
   static const String productUpdated = 'product_updated';

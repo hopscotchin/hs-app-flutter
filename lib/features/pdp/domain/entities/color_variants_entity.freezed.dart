@@ -14,7 +14,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ColorVariantEntity {
 
- int? get productId; String? get mediaUrl; bool get isSelected; bool get isStockAvailable;
+ int? get productId; String? get mediaUrl; bool get isSelected; bool get isStockAvailable;/// `colorVariants.variants[].trackingMeta`, forwarded whole. Analytics never reads a key
+/// from it — see docs/analytics/pdp/client/tm-collection.md.
+ Map<String, dynamic>? get trackingMeta;
 /// Create a copy of ColorVariantEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +27,16 @@ $ColorVariantEntityCopyWith<ColorVariantEntity> get copyWith => _$ColorVariantEn
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ColorVariantEntity&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.mediaUrl, mediaUrl) || other.mediaUrl == mediaUrl)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isStockAvailable, isStockAvailable) || other.isStockAvailable == isStockAvailable));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ColorVariantEntity&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.mediaUrl, mediaUrl) || other.mediaUrl == mediaUrl)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isStockAvailable, isStockAvailable) || other.isStockAvailable == isStockAvailable)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,productId,mediaUrl,isSelected,isStockAvailable);
+int get hashCode => Object.hash(runtimeType,productId,mediaUrl,isSelected,isStockAvailable,const DeepCollectionEquality().hash(trackingMeta));
 
 @override
 String toString() {
-  return 'ColorVariantEntity(productId: $productId, mediaUrl: $mediaUrl, isSelected: $isSelected, isStockAvailable: $isStockAvailable)';
+  return 'ColorVariantEntity(productId: $productId, mediaUrl: $mediaUrl, isSelected: $isSelected, isStockAvailable: $isStockAvailable, trackingMeta: $trackingMeta)';
 }
 
 
@@ -45,7 +47,7 @@ abstract mixin class $ColorVariantEntityCopyWith<$Res>  {
   factory $ColorVariantEntityCopyWith(ColorVariantEntity value, $Res Function(ColorVariantEntity) _then) = _$ColorVariantEntityCopyWithImpl;
 @useResult
 $Res call({
- int? productId, String? mediaUrl, bool isSelected, bool isStockAvailable
+ int? productId, String? mediaUrl, bool isSelected, bool isStockAvailable, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -62,13 +64,14 @@ class _$ColorVariantEntityCopyWithImpl<$Res>
 
 /// Create a copy of ColorVariantEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? productId = freezed,Object? mediaUrl = freezed,Object? isSelected = null,Object? isStockAvailable = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? productId = freezed,Object? mediaUrl = freezed,Object? isSelected = null,Object? isStockAvailable = null,Object? trackingMeta = freezed,}) {
   return _then(_self.copyWith(
 productId: freezed == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as int?,mediaUrl: freezed == mediaUrl ? _self.mediaUrl : mediaUrl // ignore: cast_nullable_to_non_nullable
 as String?,isSelected: null == isSelected ? _self.isSelected : isSelected // ignore: cast_nullable_to_non_nullable
 as bool,isStockAvailable: null == isStockAvailable ? _self.isStockAvailable : isStockAvailable // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 
@@ -153,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? productId,  String? mediaUrl,  bool isSelected,  bool isStockAvailable)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? productId,  String? mediaUrl,  bool isSelected,  bool isStockAvailable,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ColorVariantEntity() when $default != null:
-return $default(_that.productId,_that.mediaUrl,_that.isSelected,_that.isStockAvailable);case _:
+return $default(_that.productId,_that.mediaUrl,_that.isSelected,_that.isStockAvailable,_that.trackingMeta);case _:
   return orElse();
 
 }
@@ -174,10 +177,10 @@ return $default(_that.productId,_that.mediaUrl,_that.isSelected,_that.isStockAva
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? productId,  String? mediaUrl,  bool isSelected,  bool isStockAvailable)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? productId,  String? mediaUrl,  bool isSelected,  bool isStockAvailable,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _ColorVariantEntity():
-return $default(_that.productId,_that.mediaUrl,_that.isSelected,_that.isStockAvailable);case _:
+return $default(_that.productId,_that.mediaUrl,_that.isSelected,_that.isStockAvailable,_that.trackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +197,10 @@ return $default(_that.productId,_that.mediaUrl,_that.isSelected,_that.isStockAva
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? productId,  String? mediaUrl,  bool isSelected,  bool isStockAvailable)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? productId,  String? mediaUrl,  bool isSelected,  bool isStockAvailable,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _ColorVariantEntity() when $default != null:
-return $default(_that.productId,_that.mediaUrl,_that.isSelected,_that.isStockAvailable);case _:
+return $default(_that.productId,_that.mediaUrl,_that.isSelected,_that.isStockAvailable,_that.trackingMeta);case _:
   return null;
 
 }
@@ -209,13 +212,26 @@ return $default(_that.productId,_that.mediaUrl,_that.isSelected,_that.isStockAva
 
 
 class _ColorVariantEntity implements ColorVariantEntity {
-  const _ColorVariantEntity({this.productId, this.mediaUrl, this.isSelected = false, this.isStockAvailable = false});
+  const _ColorVariantEntity({this.productId, this.mediaUrl, this.isSelected = false, this.isStockAvailable = false, final  Map<String, dynamic>? trackingMeta}): _trackingMeta = trackingMeta;
   
 
 @override final  int? productId;
 @override final  String? mediaUrl;
 @override@JsonKey() final  bool isSelected;
 @override@JsonKey() final  bool isStockAvailable;
+/// `colorVariants.variants[].trackingMeta`, forwarded whole. Analytics never reads a key
+/// from it — see docs/analytics/pdp/client/tm-collection.md.
+ final  Map<String, dynamic>? _trackingMeta;
+/// `colorVariants.variants[].trackingMeta`, forwarded whole. Analytics never reads a key
+/// from it — see docs/analytics/pdp/client/tm-collection.md.
+@override Map<String, dynamic>? get trackingMeta {
+  final value = _trackingMeta;
+  if (value == null) return null;
+  if (_trackingMeta is EqualUnmodifiableMapView) return _trackingMeta;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of ColorVariantEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -227,16 +243,16 @@ _$ColorVariantEntityCopyWith<_ColorVariantEntity> get copyWith => __$ColorVarian
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ColorVariantEntity&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.mediaUrl, mediaUrl) || other.mediaUrl == mediaUrl)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isStockAvailable, isStockAvailable) || other.isStockAvailable == isStockAvailable));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ColorVariantEntity&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.mediaUrl, mediaUrl) || other.mediaUrl == mediaUrl)&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isStockAvailable, isStockAvailable) || other.isStockAvailable == isStockAvailable)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,productId,mediaUrl,isSelected,isStockAvailable);
+int get hashCode => Object.hash(runtimeType,productId,mediaUrl,isSelected,isStockAvailable,const DeepCollectionEquality().hash(_trackingMeta));
 
 @override
 String toString() {
-  return 'ColorVariantEntity(productId: $productId, mediaUrl: $mediaUrl, isSelected: $isSelected, isStockAvailable: $isStockAvailable)';
+  return 'ColorVariantEntity(productId: $productId, mediaUrl: $mediaUrl, isSelected: $isSelected, isStockAvailable: $isStockAvailable, trackingMeta: $trackingMeta)';
 }
 
 
@@ -247,7 +263,7 @@ abstract mixin class _$ColorVariantEntityCopyWith<$Res> implements $ColorVariant
   factory _$ColorVariantEntityCopyWith(_ColorVariantEntity value, $Res Function(_ColorVariantEntity) _then) = __$ColorVariantEntityCopyWithImpl;
 @override @useResult
 $Res call({
- int? productId, String? mediaUrl, bool isSelected, bool isStockAvailable
+ int? productId, String? mediaUrl, bool isSelected, bool isStockAvailable, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -264,13 +280,14 @@ class __$ColorVariantEntityCopyWithImpl<$Res>
 
 /// Create a copy of ColorVariantEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? productId = freezed,Object? mediaUrl = freezed,Object? isSelected = null,Object? isStockAvailable = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? productId = freezed,Object? mediaUrl = freezed,Object? isSelected = null,Object? isStockAvailable = null,Object? trackingMeta = freezed,}) {
   return _then(_ColorVariantEntity(
 productId: freezed == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as int?,mediaUrl: freezed == mediaUrl ? _self.mediaUrl : mediaUrl // ignore: cast_nullable_to_non_nullable
 as String?,isSelected: null == isSelected ? _self.isSelected : isSelected // ignore: cast_nullable_to_non_nullable
 as bool,isStockAvailable: null == isStockAvailable ? _self.isStockAvailable : isStockAvailable // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,trackingMeta: freezed == trackingMeta ? _self._trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 

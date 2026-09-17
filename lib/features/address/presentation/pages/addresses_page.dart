@@ -24,9 +24,14 @@ import '../bloc/address_bloc.dart';
 import '../widgets/address_item_card.dart';
 
 class AddressesPage extends StatefulWidget {
-  const AddressesPage({super.key, this.mode = AddressListMode.normal});
+  const AddressesPage({
+    super.key,
+    this.mode = AddressListMode.normal,
+    this.fromScreen,
+  });
 
   final AddressListMode mode;
+  final String? fromScreen;
 
   @override
   State<AddressesPage> createState() => _AddressesPageState();
@@ -233,6 +238,7 @@ class _AddressesPageState extends State<AddressesPage> {
     final result = await AppNavigator.goToAddAddress(
       context,
       flow: _isCheckout ? ManageAddressFlow.cart : ManageAddressFlow.account,
+      fromScreen: widget.fromScreen,
     );
     if (result == null || !mounted) return;
     if (_isCheckout && result.address != null) {
@@ -268,6 +274,7 @@ class _AddressesPageState extends State<AddressesPage> {
     final result = await AppNavigator.goToAddAddress(
       context,
       flow: _isCheckout ? ManageAddressFlow.cart : ManageAddressFlow.account,
+      fromScreen: widget.fromScreen,
       address: address,
     );
     if (result != null && mounted) {

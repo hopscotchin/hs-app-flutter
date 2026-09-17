@@ -13,4 +13,5 @@ SortingOptionModel _$SortingOptionModelFromJson(Map<String, dynamic> json) =>
       isSelected: json['isSelected'] == null
           ? false
           : parseToBool(json['isSelected']),
+      eventSortName: parseToStringOrNull(json['eventSortName']),
     );

@@ -7,6 +7,7 @@ import '../../../../components/page_components/page_carousel_widget.dart';
 import '../../../../components/page_components/product_grid_widget.dart';
 import '../../../../core/analytics/home/home_track_analytic_manager.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/navigation/nav_destination.dart';
 import '../../data/models/component_models.dart';
 import '../../domain/entities/home_page_entity.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
@@ -39,11 +40,21 @@ class PageComponentRenderer extends StatefulWidget {
   /// a landing page. Null disables keying (component renders without keys).
   final String? pagePrefix;
 
+  /// The page these components belong to. Supplied by the host — it is the
+  /// thing that knows — rather than read from screen-scoped global state at tap
+  /// time. Null for a host whose taps report no origin.
+  final SourcePage? sourcePage;
+
+  /// [sourcePage] as the `extra` map the components forward on a tap.
+  /// Converted once here so they stay ignorant of analytics types.
+  Map<String, dynamic>? get _tapAnalytics => navExtra(sourcePage: sourcePage);
+
   const PageComponentRenderer({
     super.key,
     required this.component,
     this.index = 0,
     this.pagePrefix,
+    this.sourcePage,
   });
 
   /// Composes the component-level key prefix, e.g. `hp_pg_2`. Returns null when
@@ -189,6 +200,7 @@ class _PageComponentRendererState extends State<PageComponentRenderer> {
       margins: margins,
       keyPrefix: keyPrefix,
       componentIndex: widget.index,
+      tapAnalytics: widget._tapAnalytics,
     );
   }
 
@@ -199,7 +211,12 @@ class _PageComponentRendererState extends State<PageComponentRenderer> {
         ? ComponentDataParser.parseCustomTiles(widget.component.data!)
         : null;
     if (data == null) return const SizedBox.shrink();
-    return CustomTilesWidget(tilesData: data, margins: margins, keyPrefix: keyPrefix);
+    return CustomTilesWidget(
+      tilesData: data,
+      margins: margins,
+      keyPrefix: keyPrefix,
+      tapAnalytics: widget._tapAnalytics,
+    );
   }
 
   Widget _buildProductGrid(Object? parsed, ComponentMargins? margins, String? keyPrefix) {
@@ -209,7 +226,12 @@ class _PageComponentRendererState extends State<PageComponentRenderer> {
         ? ComponentDataParser.parseProductGrid(widget.component.data!)
         : null;
     if (data == null) return const SizedBox.shrink();
-    return ProductGridWidget(gridData: data, margins: margins, keyPrefix: keyPrefix);
+    return ProductGridWidget(
+      gridData: data,
+      margins: margins,
+      keyPrefix: keyPrefix,
+      tapAnalytics: widget._tapAnalytics,
+    );
   }
 
   Widget _buildPageCarousel(Object? parsed, ComponentMargins? margins, String? keyPrefix) {
@@ -219,6 +241,11 @@ class _PageComponentRendererState extends State<PageComponentRenderer> {
         ? ComponentDataParser.parsePageCarousel(widget.component.data!)
         : null;
     if (data == null) return const SizedBox.shrink();
-    return PageCarouselWidget(carouselData: data, margins: margins, keyPrefix: keyPrefix);
+    return PageCarouselWidget(
+      carouselData: data,
+      margins: margins,
+      keyPrefix: keyPrefix,
+      tapAnalytics: widget._tapAnalytics,
+    );
   }
 }

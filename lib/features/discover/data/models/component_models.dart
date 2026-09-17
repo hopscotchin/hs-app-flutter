@@ -42,6 +42,7 @@ class ComponentDataParser {
       actionType: json['actionType'] as String?,
       actionUri: json['actionUri'] as String? ?? json['actionUrl'] as String?,
       type: json['type'] as String?,
+      trackingMeta: _readTrackingMeta(json),
     );
   }
 

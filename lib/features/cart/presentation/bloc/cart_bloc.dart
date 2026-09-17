@@ -10,6 +10,7 @@ import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/extensions/string_extensions.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../../checkout/domain/entities/buy_now_entity.dart';
 import '../../../promos_offers/domain/entities/promo_action_result_entity.dart';
 import '../../../promos_offers/domain/entities/promo_offers_source.dart';
 import '../../../promos_offers/domain/usecases/apply_promo_usecase.dart';
@@ -20,6 +21,7 @@ import '../../domain/usecases/get_cart_usecase.dart';
 import '../../domain/usecases/get_static_message_bars_usecase.dart';
 import '../../domain/usecases/merge_cart_usecase.dart';
 import '../../domain/usecases/move_to_wishlist_usecase.dart';
+import '../../domain/usecases/order_now_usecase.dart';
 import '../../domain/usecases/remove_cart_item_usecase.dart';
 import '../../domain/usecases/update_cart_item_usecase.dart';
 
@@ -39,6 +41,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   final ApplyPromoUseCase applyPromoUseCase;
   final RemovePromoUseCase removePromoUseCase;
   final MergeCartUseCase mergeCartUseCase;
+  final OrderNowUseCase orderNowUseCase;
   final GetStaticMessageBarsUseCase getStaticMessageBarsUseCase;
 
   CartBloc({
@@ -49,6 +52,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     required this.applyPromoUseCase,
     required this.removePromoUseCase,
     required this.mergeCartUseCase,
+    required this.orderNowUseCase,
     required this.getStaticMessageBarsUseCase,
   }) : super(const CartState()) {
     on<LoadCart>(_onLoadCart);
@@ -59,7 +63,9 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     on<ApplyPromoCode>(_onApplyPromoCode);
     on<RemovePromoCode>(_onRemovePromoCode);
     on<MergeCart>(_onMergeCart);
+    on<ProceedToCheckout>(_onProceedToCheckout);
     on<ClearToast>(_onClearToast);
+    on<ClearCheckoutData>(_onClearCheckoutData);
     on<ClearPromoActionSheet>(_onClearPromoActionSheet);
   }
 
@@ -102,8 +108,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// through the wishlist store.
   MoveToWishlist? _pendingMoveToWishlist;
 
-  void setPendingMoveToWishlist(MoveToWishlist event) =>
-      _pendingMoveToWishlist = event;
+  void setPendingMoveToWishlist(MoveToWishlist event) => _pendingMoveToWishlist = event;
 
   void resumePendingMoveToWishlist() {
     final event = _pendingMoveToWishlist;
@@ -142,17 +147,10 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     result.fold(
       (failure) {
         if (failure is RequestCancelledFailure) return;
-        emit(
-          CartState(status: CartStatus.error, errorMessage: failure.message),
-        );
+        emit(CartState(status: CartStatus.error, errorMessage: failure.message));
       },
-      (cart) => emit(
-        CartState(
-          status: CartStatus.loaded,
-          cart: cart,
-          staticMessageBars: staticBars,
-        ),
-      ),
+      (cart) =>
+          emit(CartState(status: CartStatus.loaded, cart: cart, staticMessageBars: staticBars)),
     );
   }
 
@@ -164,10 +162,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// one-shot — a toast, a promo sheet — that the UI consumed and cleared while
   /// the request was in flight. Rebuilding from the stale snapshot would put
   /// that toast back on the state and show the snackbar a second time.
-  Future<void> _onRefreshCart(
-    RefreshCart event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> _onRefreshCart(RefreshCart event, Emitter<CartState> emit) async {
     final token = swapCancelToken();
     final staticBars = await _staticMessageBars();
     final result = await getCartUseCase(
@@ -209,15 +204,8 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// common case. It can go stale: a background refresh landing between the tap
   /// and the response can reorder or shorten the list, and writing blindly to
   /// the index would then step the wrong product (or throw).
-  static int _indexOfItem(
-    List<CartItemEntity> items, {
-    required String sku,
-    int? hint,
-  }) {
-    if (hint != null &&
-        hint >= 0 &&
-        hint < items.length &&
-        items[hint].sku == sku) {
+  static int _indexOfItem(List<CartItemEntity> items, {required String sku, int? hint}) {
+    if (hint != null && hint >= 0 && hint < items.length && items[hint].sku == sku) {
       return hint;
     }
     return items.indexWhere((item) => item.sku == sku);
@@ -262,25 +250,14 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// (`CartState.isRemoving`) rather than the full-screen overlay: the sheet
   /// stays up until the API answers, then closes and the outcome is toasted —
   /// success with the server's message, failure with the reason.
-  Future<void> _onRemoveCartItem(
-    RemoveCartItem event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> _onRemoveCartItem(RemoveCartItem event, Emitter<CartState> emit) async {
     final current = state;
     if (current.isLoaded) {
-      emit(
-        current.copyWith(
-          pendingItemAction: (sku: event.sku, action: CartItemAction.remove),
-        ),
-      );
+      emit(current.copyWith(pendingItemAction: (sku: event.sku, action: CartItemAction.remove)));
     }
     final token = swapCancelToken();
     final result = await removeCartItemUseCase(
-      RemoveCartItemParams(
-        sku: event.sku,
-        instantCheckout: instantCheckout,
-        cancelToken: token,
-      ),
+      RemoveCartItemParams(sku: event.sku, instantCheckout: instantCheckout, cancelToken: token),
     );
     result.fold(
       (failure) {
@@ -289,12 +266,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
         // forever, waiting for a call that will never answer.
         if (!current.isLoaded) {
           if (failure is! RequestCancelledFailure) {
-            emit(
-              current.copyWith(
-                status: CartStatus.error,
-                errorMessage: failure.message,
-              ),
-            );
+            emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
           }
           return;
         }
@@ -305,10 +277,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
         emit(
           current.copyWith(
             pendingItemAction: null,
-            toastMessage: _messageOr(
-              failure.message,
-              CartStrings.couldNotRemoveItem,
-            ),
+            toastMessage: _messageOr(failure.message, CartStrings.couldNotRemoveItem),
             toastIsError: true,
           ),
         );
@@ -328,10 +297,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     );
   }
 
-  Future<void> _onUpdateCartItem(
-    UpdateCartItemQuantity event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> _onUpdateCartItem(UpdateCartItemQuantity event, Emitter<CartState> emit) async {
     final current = state;
     if (current.isLoaded) {
       emit(
@@ -354,26 +320,9 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       (failure) {
         if (failure is RequestCancelledFailure) return;
         if (current.isLoaded) {
-          // A rejected step (cart item-limit, sold out, qty cap) must leave the
-          // row on its OLD quantity and say why — silently dropping the spinner
-          // reads as "nothing happened". `current` is pre-mutation state, so the
-          // stepper snaps back on its own.
-          emit(
-            current.copyWith(
-              pendingItemAction: null,
-              isCartUpdating: false,
-              toastMessage: failure.message,
-              toastIsError: true,
-              toastDuration: const Duration(seconds: 7),
-            ),
-          );
+          emit(current.copyWith(pendingItemAction: null, isCartUpdating: false));
         } else {
-          emit(
-            current.copyWith(
-              status: CartStatus.error,
-              errorMessage: failure.message,
-            ),
-          );
+          emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
         }
       },
       (_) {
@@ -391,11 +340,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
         // (`cartItemQty` in the response is the cart-wide item count, not this
         // line's quantity, so the local step uses the requested quantity.)
         final items = List<CartItemEntity>.of(current.cart!.items);
-        final index = _indexOfItem(
-          items,
-          sku: event.sku,
-          hint: event.itemIndex,
-        );
+        final index = _indexOfItem(items, sku: event.sku, hint: event.itemIndex);
         if (index != -1) {
           items[index] = items[index].withQuantity(event.quantity);
         }
@@ -412,20 +357,12 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     );
   }
 
-  Future<void> _onMoveToWishlist(
-    MoveToWishlist event,
-    Emitter<CartState> emit,
-  ) async {
-    final current = event.reloadCartFirst
-        ? await _reloadCartBeforeMutation(emit)
-        : state;
+  Future<void> _onMoveToWishlist(MoveToWishlist event, Emitter<CartState> emit) async {
+    final current = event.reloadCartFirst ? await _reloadCartBeforeMutation(emit) : state;
     if (current.isLoaded) {
       emit(
         current.copyWith(
-          pendingItemAction: (
-            sku: event.sku,
-            action: CartItemAction.moveToWishlist,
-          ),
+          pendingItemAction: (sku: event.sku, action: CartItemAction.moveToWishlist),
           isCartUpdating: true,
         ),
       );
@@ -455,12 +392,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
             ),
           );
         } else {
-          emit(
-            current.copyWith(
-              status: CartStatus.error,
-              errorMessage: failure.message,
-            ),
-          );
+          emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
         }
       },
       // The overlay lifts as soon as the move lands; the cart re-read that
@@ -481,19 +413,14 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// endpoint the offers bottom sheet uses. That endpoint answers with only
   /// `{success, message}` — no cart — so the cart is re-read afterwards to pick
   /// up the new totals.
-  Future<void> _onApplyPromoCode(
-    ApplyPromoCode event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> _onApplyPromoCode(ApplyPromoCode event, Emitter<CartState> emit) async {
     // A second tap while the first apply is still running would run the call
     // twice and answer with two sheets stacked on top of each other. The Apply
     // button already ignores taps while `isPromoLoading`, but the button is not
     // the only way in (keyboard submit, the post-login replay), so the guard
     // belongs here too.
     if (state.isPromoLoading) return;
-    final current = event.reloadCartFirst
-        ? await _reloadCartBeforeMutation(emit)
-        : state;
+    final current = event.reloadCartFirst ? await _reloadCartBeforeMutation(emit) : state;
     if (current.isLoaded) {
       emit(current.copyWith(isPromoLoading: true, isCartUpdating: true));
     }
@@ -574,10 +501,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
 
   /// Removes through `DELETE /v3/promotion/remove`, pairing with the apply
   /// above. Same `{success, message}` shape, so the cart is re-read afterwards.
-  Future<void> _onRemovePromoCode(
-    RemovePromoCode event,
-    Emitter<CartState> emit,
-  ) async {
+  Future<void> _onRemovePromoCode(RemovePromoCode event, Emitter<CartState> emit) async {
     if (state.isPromoLoading) return;
     final current = state;
     if (current.isLoaded) {
@@ -626,39 +550,87 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       if (failure is RequestCancelledFailure) return;
       if (current.isLoaded) {
         emit(
-          current.copyWith(
-            isMerging: false,
-            isCartUpdating: false,
-            toastMessage: failure.message,
-          ),
+          current.copyWith(isMerging: false, isCartUpdating: false, toastMessage: failure.message),
         );
       } else {
-        emit(
-          current.copyWith(
-            status: CartStatus.error,
-            errorMessage: failure.message,
-          ),
-        );
+        emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
       }
     }, (_) async => _refreshAfterMutation(emit, current, isMergeCall: true));
   }
 
-  void _onClearToast(ClearToast event, Emitter<CartState> emit) {
-    // Reset the status and duration with the message, so a later toast can't
-    // inherit stale error styling or the 10s hold.
-    emit(
-      state.copyWith(
-        toastMessage: null,
-        toastIsError: false,
-        toastDuration: const Duration(seconds: 2),
-      ),
+  /// Matches Android CartViewModel.orderNow() logic:
+  /// 1. refreshCartForRemovedItem → refresh cart with message
+  /// 2. action == SUCCESS → open checkout bottom sheet
+  /// 3. messageBars present → show them on cart
+  /// 4. else → show error
+  Future<void> _onProceedToCheckout(ProceedToCheckout event, Emitter<CartState> emit) async {
+    final current = state;
+    if (current.isLoaded) emit(current.copyWith(isCheckoutLoading: true));
+    final token = swapCancelToken();
+    final result = await orderNowUseCase(OrderNowParams(cancelToken: token));
+    await result.fold(
+      (failure) {
+        if (failure is RequestCancelledFailure) return;
+        if (current.isLoaded) {
+          emit(current.copyWith(isCheckoutLoading: false, toastMessage: failure.message));
+        } else {
+          emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
+        }
+      },
+      (data) async {
+        // Case 1: Items removed during checkout validation — re-fetch cart
+        if (data.refreshCartForRemovedItem == true) {
+          await _refreshAfterMutation(emit, current);
+          return;
+        }
+
+        // Case 2: Success — open checkout bottom sheet
+        if (data.isSuccessful) {
+          if (current.isLoaded) {
+            emit(current.copyWith(isCheckoutLoading: false, checkoutData: data));
+          }
+          return;
+        }
+
+        // Case 3: Has messageBars — show them on cart page
+        if (data.messageBars.isNotEmpty && current.isLoaded) {
+          emit(
+            current.copyWith(
+              isCheckoutLoading: false,
+              // Prepend API messageBars to existing cart messageBars
+              cart: current.cart!.copyWith(
+                messageBars: [...data.messageBars, ...current.cart!.messageBars],
+              ),
+              toastMessage: data.message,
+            ),
+          );
+          return;
+        }
+
+        // Case 4: Other failure
+        if (current.isLoaded) {
+          emit(
+            current.copyWith(
+              isCheckoutLoading: false,
+              toastMessage: data.message ?? 'Unable to proceed',
+            ),
+          );
+        }
+      },
     );
   }
 
-  void _onClearPromoActionSheet(
-    ClearPromoActionSheet event,
-    Emitter<CartState> emit,
-  ) {
+  void _onClearToast(ClearToast event, Emitter<CartState> emit) {
+    // Reset the status with the message, so a later success toast can't
+    // inherit a stale error styling.
+    emit(state.copyWith(toastMessage: null, toastIsError: false));
+  }
+
+  void _onClearCheckoutData(ClearCheckoutData event, Emitter<CartState> emit) {
+    emit(state.copyWith(checkoutData: null));
+  }
+
+  void _onClearPromoActionSheet(ClearPromoActionSheet event, Emitter<CartState> emit) {
     emit(state.copyWith(promoActionSheet: null));
   }
 
@@ -699,11 +671,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   }) async {
     final token = swapCancelToken();
     final result = await getCartUseCase(
-      GetCartParams(
-        isMergeCall: isMergeCall,
-        instantCheckout: instantCheckout,
-        cancelToken: token,
-      ),
+      GetCartParams(isMergeCall: isMergeCall, instantCheckout: instantCheckout, cancelToken: token),
     );
     result.fold(
       (failure) {
@@ -720,12 +688,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
             ),
           );
         } else {
-          emit(
-            previousState.copyWith(
-              status: CartStatus.error,
-              errorMessage: failure.message,
-            ),
-          );
+          emit(previousState.copyWith(status: CartStatus.error, errorMessage: failure.message));
         }
       },
       (cart) {

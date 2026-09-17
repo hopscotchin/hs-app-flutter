@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/route_names.dart';
 import '../../../core/di/injection.dart';
-import '../domain/entities/address_source.dart';
 import '../domain/entities/manage_address_args.dart';
 import 'bloc/address_bloc.dart';
 import 'bloc/manage_address_bloc.dart';
@@ -15,26 +14,23 @@ import 'widgets/address_item_card.dart';
 class AddressRoute {
   static GoRoute getRoute(GlobalKey<NavigatorState> rootKey) => GoRoute(
     path: RouteNames.addresses,
-    name: 'addresses',
+    name: RouteNames.addressesName,
     parentNavigatorKey: rootKey,
     builder: (context, state) {
       final extra = state.extra as Map<String, dynamic>?;
       final mode =
           extra?['mode'] as AddressListMode? ?? AddressListMode.normal;
-      // Account list (normal) + checkout list → /customer/v2/addresses.
-      // Cart list → /delivery/addresses/v3.
-      final source = mode == AddressListMode.cart
-          ? AddressSource.delivery
-          : AddressSource.customer;
+      final fromScreen = extra?['fromScreen'] as String?;
       return BlocProvider(
-        create: (_) => sl<AddressBloc>()..add(LoadAddresses(source: source)),
-        child: AddressesPage(mode: mode),
+        create: (_) => sl<AddressBloc>()
+          ..add(LoadAddresses(fromScreen: fromScreen)),
+        child: AddressesPage(mode: mode, fromScreen: fromScreen),
       );
     },
     routes: [
       GoRoute(
         path: RouteNames.addAddress,
-        name: 'addAddress',
+        name: RouteNames.addAddressName,
         parentNavigatorKey: rootKey,
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;

@@ -55,10 +55,12 @@ extension AuthEventPatterns on AuthEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SendOtp value)?  sendOtp,TResult Function( VerifyOtp value)?  verifyOtp,TResult Function( Register value)?  register,TResult Function( CheckMobile value)?  checkMobile,TResult Function( ResetAuth value)?  reset,TResult Function( AuthSignOut value)?  signOut,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoginViewed value)?  loginViewed,TResult Function( JoinViewed value)?  joinViewed,TResult Function( SendOtp value)?  sendOtp,TResult Function( VerifyOtp value)?  verifyOtp,TResult Function( Register value)?  register,TResult Function( CheckMobile value)?  checkMobile,TResult Function( ResetAuth value)?  reset,TResult Function( AuthSignOut value)?  signOut,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case SendOtp() when sendOtp != null:
+case LoginViewed() when loginViewed != null:
+return loginViewed(_that);case JoinViewed() when joinViewed != null:
+return joinViewed(_that);case SendOtp() when sendOtp != null:
 return sendOtp(_that);case VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that);case Register() when register != null:
 return register(_that);case CheckMobile() when checkMobile != null:
@@ -82,10 +84,12 @@ return signOut(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SendOtp value)  sendOtp,required TResult Function( VerifyOtp value)  verifyOtp,required TResult Function( Register value)  register,required TResult Function( CheckMobile value)  checkMobile,required TResult Function( ResetAuth value)  reset,required TResult Function( AuthSignOut value)  signOut,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoginViewed value)  loginViewed,required TResult Function( JoinViewed value)  joinViewed,required TResult Function( SendOtp value)  sendOtp,required TResult Function( VerifyOtp value)  verifyOtp,required TResult Function( Register value)  register,required TResult Function( CheckMobile value)  checkMobile,required TResult Function( ResetAuth value)  reset,required TResult Function( AuthSignOut value)  signOut,}){
 final _that = this;
 switch (_that) {
-case SendOtp():
+case LoginViewed():
+return loginViewed(_that);case JoinViewed():
+return joinViewed(_that);case SendOtp():
 return sendOtp(_that);case VerifyOtp():
 return verifyOtp(_that);case Register():
 return register(_that);case CheckMobile():
@@ -105,10 +109,12 @@ return signOut(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SendOtp value)?  sendOtp,TResult? Function( VerifyOtp value)?  verifyOtp,TResult? Function( Register value)?  register,TResult? Function( CheckMobile value)?  checkMobile,TResult? Function( ResetAuth value)?  reset,TResult? Function( AuthSignOut value)?  signOut,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoginViewed value)?  loginViewed,TResult? Function( JoinViewed value)?  joinViewed,TResult? Function( SendOtp value)?  sendOtp,TResult? Function( VerifyOtp value)?  verifyOtp,TResult? Function( Register value)?  register,TResult? Function( CheckMobile value)?  checkMobile,TResult? Function( ResetAuth value)?  reset,TResult? Function( AuthSignOut value)?  signOut,}){
 final _that = this;
 switch (_that) {
-case SendOtp() when sendOtp != null:
+case LoginViewed() when loginViewed != null:
+return loginViewed(_that);case JoinViewed() when joinViewed != null:
+return joinViewed(_that);case SendOtp() when sendOtp != null:
 return sendOtp(_that);case VerifyOtp() when verifyOtp != null:
 return verifyOtp(_that);case Register() when register != null:
 return register(_that);case CheckMobile() when checkMobile != null:
@@ -131,12 +137,14 @@ return signOut(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String loginId,  String otpReason,  String? pathUri)?  sendOtp,TResult Function( String loginId,  String otp,  String otpReason)?  verifyOtp,TResult Function( String displayName,  String email,  String mobile)?  register,TResult Function( String mobile)?  checkMobile,TResult Function()?  reset,TResult Function( void Function()? onSuccess)?  signOut,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( AuthEntryArgs entry)?  loginViewed,TResult Function( AuthEntryArgs entry)?  joinViewed,TResult Function( String loginId,  String otpReason,  String? pathUri,  AuthEntryArgs entry)?  sendOtp,TResult Function( String loginId,  String otp,  String otpReason,  AuthEntryArgs entry)?  verifyOtp,TResult Function( String displayName,  String email,  String mobile,  AuthEntryArgs entry)?  register,TResult Function( String mobile)?  checkMobile,TResult Function()?  reset,TResult Function( void Function()? onSuccess)?  signOut,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case SendOtp() when sendOtp != null:
-return sendOtp(_that.loginId,_that.otpReason,_that.pathUri);case VerifyOtp() when verifyOtp != null:
-return verifyOtp(_that.loginId,_that.otp,_that.otpReason);case Register() when register != null:
-return register(_that.displayName,_that.email,_that.mobile);case CheckMobile() when checkMobile != null:
+case LoginViewed() when loginViewed != null:
+return loginViewed(_that.entry);case JoinViewed() when joinViewed != null:
+return joinViewed(_that.entry);case SendOtp() when sendOtp != null:
+return sendOtp(_that.loginId,_that.otpReason,_that.pathUri,_that.entry);case VerifyOtp() when verifyOtp != null:
+return verifyOtp(_that.loginId,_that.otp,_that.otpReason,_that.entry);case Register() when register != null:
+return register(_that.displayName,_that.email,_that.mobile,_that.entry);case CheckMobile() when checkMobile != null:
 return checkMobile(_that.mobile);case ResetAuth() when reset != null:
 return reset();case AuthSignOut() when signOut != null:
 return signOut(_that.onSuccess);case _:
@@ -157,12 +165,14 @@ return signOut(_that.onSuccess);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String loginId,  String otpReason,  String? pathUri)  sendOtp,required TResult Function( String loginId,  String otp,  String otpReason)  verifyOtp,required TResult Function( String displayName,  String email,  String mobile)  register,required TResult Function( String mobile)  checkMobile,required TResult Function()  reset,required TResult Function( void Function()? onSuccess)  signOut,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( AuthEntryArgs entry)  loginViewed,required TResult Function( AuthEntryArgs entry)  joinViewed,required TResult Function( String loginId,  String otpReason,  String? pathUri,  AuthEntryArgs entry)  sendOtp,required TResult Function( String loginId,  String otp,  String otpReason,  AuthEntryArgs entry)  verifyOtp,required TResult Function( String displayName,  String email,  String mobile,  AuthEntryArgs entry)  register,required TResult Function( String mobile)  checkMobile,required TResult Function()  reset,required TResult Function( void Function()? onSuccess)  signOut,}) {final _that = this;
 switch (_that) {
-case SendOtp():
-return sendOtp(_that.loginId,_that.otpReason,_that.pathUri);case VerifyOtp():
-return verifyOtp(_that.loginId,_that.otp,_that.otpReason);case Register():
-return register(_that.displayName,_that.email,_that.mobile);case CheckMobile():
+case LoginViewed():
+return loginViewed(_that.entry);case JoinViewed():
+return joinViewed(_that.entry);case SendOtp():
+return sendOtp(_that.loginId,_that.otpReason,_that.pathUri,_that.entry);case VerifyOtp():
+return verifyOtp(_that.loginId,_that.otp,_that.otpReason,_that.entry);case Register():
+return register(_that.displayName,_that.email,_that.mobile,_that.entry);case CheckMobile():
 return checkMobile(_that.mobile);case ResetAuth():
 return reset();case AuthSignOut():
 return signOut(_that.onSuccess);}
@@ -179,12 +189,14 @@ return signOut(_that.onSuccess);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String loginId,  String otpReason,  String? pathUri)?  sendOtp,TResult? Function( String loginId,  String otp,  String otpReason)?  verifyOtp,TResult? Function( String displayName,  String email,  String mobile)?  register,TResult? Function( String mobile)?  checkMobile,TResult? Function()?  reset,TResult? Function( void Function()? onSuccess)?  signOut,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( AuthEntryArgs entry)?  loginViewed,TResult? Function( AuthEntryArgs entry)?  joinViewed,TResult? Function( String loginId,  String otpReason,  String? pathUri,  AuthEntryArgs entry)?  sendOtp,TResult? Function( String loginId,  String otp,  String otpReason,  AuthEntryArgs entry)?  verifyOtp,TResult? Function( String displayName,  String email,  String mobile,  AuthEntryArgs entry)?  register,TResult? Function( String mobile)?  checkMobile,TResult? Function()?  reset,TResult? Function( void Function()? onSuccess)?  signOut,}) {final _that = this;
 switch (_that) {
-case SendOtp() when sendOtp != null:
-return sendOtp(_that.loginId,_that.otpReason,_that.pathUri);case VerifyOtp() when verifyOtp != null:
-return verifyOtp(_that.loginId,_that.otp,_that.otpReason);case Register() when register != null:
-return register(_that.displayName,_that.email,_that.mobile);case CheckMobile() when checkMobile != null:
+case LoginViewed() when loginViewed != null:
+return loginViewed(_that.entry);case JoinViewed() when joinViewed != null:
+return joinViewed(_that.entry);case SendOtp() when sendOtp != null:
+return sendOtp(_that.loginId,_that.otpReason,_that.pathUri,_that.entry);case VerifyOtp() when verifyOtp != null:
+return verifyOtp(_that.loginId,_that.otp,_that.otpReason,_that.entry);case Register() when register != null:
+return register(_that.displayName,_that.email,_that.mobile,_that.entry);case CheckMobile() when checkMobile != null:
 return checkMobile(_that.mobile);case ResetAuth() when reset != null:
 return reset();case AuthSignOut() when signOut != null:
 return signOut(_that.onSuccess);case _:
@@ -198,13 +210,164 @@ return signOut(_that.onSuccess);case _:
 /// @nodoc
 
 
+class LoginViewed implements AuthEvent {
+  const LoginViewed({this.entry = AuthEntryArgs.unknown});
+  
+
+@JsonKey() final  AuthEntryArgs entry;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$LoginViewedCopyWith<LoginViewed> get copyWith => _$LoginViewedCopyWithImpl<LoginViewed>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginViewed&&(identical(other.entry, entry) || other.entry == entry));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,entry);
+
+@override
+String toString() {
+  return 'AuthEvent.loginViewed(entry: $entry)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $LoginViewedCopyWith<$Res> implements $AuthEventCopyWith<$Res> {
+  factory $LoginViewedCopyWith(LoginViewed value, $Res Function(LoginViewed) _then) = _$LoginViewedCopyWithImpl;
+@useResult
+$Res call({
+ AuthEntryArgs entry
+});
+
+
+$AuthEntryArgsCopyWith<$Res> get entry;
+
+}
+/// @nodoc
+class _$LoginViewedCopyWithImpl<$Res>
+    implements $LoginViewedCopyWith<$Res> {
+  _$LoginViewedCopyWithImpl(this._self, this._then);
+
+  final LoginViewed _self;
+  final $Res Function(LoginViewed) _then;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? entry = null,}) {
+  return _then(LoginViewed(
+entry: null == entry ? _self.entry : entry // ignore: cast_nullable_to_non_nullable
+as AuthEntryArgs,
+  ));
+}
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AuthEntryArgsCopyWith<$Res> get entry {
+  
+  return $AuthEntryArgsCopyWith<$Res>(_self.entry, (value) {
+    return _then(_self.copyWith(entry: value));
+  });
+}
+}
+
+/// @nodoc
+
+
+class JoinViewed implements AuthEvent {
+  const JoinViewed({this.entry = AuthEntryArgs.unknown});
+  
+
+@JsonKey() final  AuthEntryArgs entry;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$JoinViewedCopyWith<JoinViewed> get copyWith => _$JoinViewedCopyWithImpl<JoinViewed>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is JoinViewed&&(identical(other.entry, entry) || other.entry == entry));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,entry);
+
+@override
+String toString() {
+  return 'AuthEvent.joinViewed(entry: $entry)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $JoinViewedCopyWith<$Res> implements $AuthEventCopyWith<$Res> {
+  factory $JoinViewedCopyWith(JoinViewed value, $Res Function(JoinViewed) _then) = _$JoinViewedCopyWithImpl;
+@useResult
+$Res call({
+ AuthEntryArgs entry
+});
+
+
+$AuthEntryArgsCopyWith<$Res> get entry;
+
+}
+/// @nodoc
+class _$JoinViewedCopyWithImpl<$Res>
+    implements $JoinViewedCopyWith<$Res> {
+  _$JoinViewedCopyWithImpl(this._self, this._then);
+
+  final JoinViewed _self;
+  final $Res Function(JoinViewed) _then;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? entry = null,}) {
+  return _then(JoinViewed(
+entry: null == entry ? _self.entry : entry // ignore: cast_nullable_to_non_nullable
+as AuthEntryArgs,
+  ));
+}
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AuthEntryArgsCopyWith<$Res> get entry {
+  
+  return $AuthEntryArgsCopyWith<$Res>(_self.entry, (value) {
+    return _then(_self.copyWith(entry: value));
+  });
+}
+}
+
+/// @nodoc
+
+
 class SendOtp implements AuthEvent {
-  const SendOtp({required this.loginId, this.otpReason = 'SIGN_IN', this.pathUri});
+  const SendOtp({required this.loginId, this.otpReason = AuthStrings.signInReason, this.pathUri, this.entry = AuthEntryArgs.unknown});
   
 
  final  String loginId;
 @JsonKey() final  String otpReason;
  final  String? pathUri;
+@JsonKey() final  AuthEntryArgs entry;
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -216,16 +379,16 @@ $SendOtpCopyWith<SendOtp> get copyWith => _$SendOtpCopyWithImpl<SendOtp>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SendOtp&&(identical(other.loginId, loginId) || other.loginId == loginId)&&(identical(other.otpReason, otpReason) || other.otpReason == otpReason)&&(identical(other.pathUri, pathUri) || other.pathUri == pathUri));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SendOtp&&(identical(other.loginId, loginId) || other.loginId == loginId)&&(identical(other.otpReason, otpReason) || other.otpReason == otpReason)&&(identical(other.pathUri, pathUri) || other.pathUri == pathUri)&&(identical(other.entry, entry) || other.entry == entry));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loginId,otpReason,pathUri);
+int get hashCode => Object.hash(runtimeType,loginId,otpReason,pathUri,entry);
 
 @override
 String toString() {
-  return 'AuthEvent.sendOtp(loginId: $loginId, otpReason: $otpReason, pathUri: $pathUri)';
+  return 'AuthEvent.sendOtp(loginId: $loginId, otpReason: $otpReason, pathUri: $pathUri, entry: $entry)';
 }
 
 
@@ -236,11 +399,11 @@ abstract mixin class $SendOtpCopyWith<$Res> implements $AuthEventCopyWith<$Res> 
   factory $SendOtpCopyWith(SendOtp value, $Res Function(SendOtp) _then) = _$SendOtpCopyWithImpl;
 @useResult
 $Res call({
- String loginId, String otpReason, String? pathUri
+ String loginId, String otpReason, String? pathUri, AuthEntryArgs entry
 });
 
 
-
+$AuthEntryArgsCopyWith<$Res> get entry;
 
 }
 /// @nodoc
@@ -253,28 +416,39 @@ class _$SendOtpCopyWithImpl<$Res>
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? loginId = null,Object? otpReason = null,Object? pathUri = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? loginId = null,Object? otpReason = null,Object? pathUri = freezed,Object? entry = null,}) {
   return _then(SendOtp(
 loginId: null == loginId ? _self.loginId : loginId // ignore: cast_nullable_to_non_nullable
 as String,otpReason: null == otpReason ? _self.otpReason : otpReason // ignore: cast_nullable_to_non_nullable
 as String,pathUri: freezed == pathUri ? _self.pathUri : pathUri // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,entry: null == entry ? _self.entry : entry // ignore: cast_nullable_to_non_nullable
+as AuthEntryArgs,
   ));
 }
 
-
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AuthEntryArgsCopyWith<$Res> get entry {
+  
+  return $AuthEntryArgsCopyWith<$Res>(_self.entry, (value) {
+    return _then(_self.copyWith(entry: value));
+  });
+}
 }
 
 /// @nodoc
 
 
 class VerifyOtp implements AuthEvent {
-  const VerifyOtp({required this.loginId, required this.otp, this.otpReason = 'SIGN_IN'});
+  const VerifyOtp({required this.loginId, required this.otp, this.otpReason = AuthStrings.signInReason, this.entry = AuthEntryArgs.unknown});
   
 
  final  String loginId;
  final  String otp;
 @JsonKey() final  String otpReason;
+@JsonKey() final  AuthEntryArgs entry;
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -286,16 +460,16 @@ $VerifyOtpCopyWith<VerifyOtp> get copyWith => _$VerifyOtpCopyWithImpl<VerifyOtp>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VerifyOtp&&(identical(other.loginId, loginId) || other.loginId == loginId)&&(identical(other.otp, otp) || other.otp == otp)&&(identical(other.otpReason, otpReason) || other.otpReason == otpReason));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VerifyOtp&&(identical(other.loginId, loginId) || other.loginId == loginId)&&(identical(other.otp, otp) || other.otp == otp)&&(identical(other.otpReason, otpReason) || other.otpReason == otpReason)&&(identical(other.entry, entry) || other.entry == entry));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loginId,otp,otpReason);
+int get hashCode => Object.hash(runtimeType,loginId,otp,otpReason,entry);
 
 @override
 String toString() {
-  return 'AuthEvent.verifyOtp(loginId: $loginId, otp: $otp, otpReason: $otpReason)';
+  return 'AuthEvent.verifyOtp(loginId: $loginId, otp: $otp, otpReason: $otpReason, entry: $entry)';
 }
 
 
@@ -306,11 +480,11 @@ abstract mixin class $VerifyOtpCopyWith<$Res> implements $AuthEventCopyWith<$Res
   factory $VerifyOtpCopyWith(VerifyOtp value, $Res Function(VerifyOtp) _then) = _$VerifyOtpCopyWithImpl;
 @useResult
 $Res call({
- String loginId, String otp, String otpReason
+ String loginId, String otp, String otpReason, AuthEntryArgs entry
 });
 
 
-
+$AuthEntryArgsCopyWith<$Res> get entry;
 
 }
 /// @nodoc
@@ -323,28 +497,39 @@ class _$VerifyOtpCopyWithImpl<$Res>
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? loginId = null,Object? otp = null,Object? otpReason = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? loginId = null,Object? otp = null,Object? otpReason = null,Object? entry = null,}) {
   return _then(VerifyOtp(
 loginId: null == loginId ? _self.loginId : loginId // ignore: cast_nullable_to_non_nullable
 as String,otp: null == otp ? _self.otp : otp // ignore: cast_nullable_to_non_nullable
 as String,otpReason: null == otpReason ? _self.otpReason : otpReason // ignore: cast_nullable_to_non_nullable
-as String,
+as String,entry: null == entry ? _self.entry : entry // ignore: cast_nullable_to_non_nullable
+as AuthEntryArgs,
   ));
 }
 
-
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AuthEntryArgsCopyWith<$Res> get entry {
+  
+  return $AuthEntryArgsCopyWith<$Res>(_self.entry, (value) {
+    return _then(_self.copyWith(entry: value));
+  });
+}
 }
 
 /// @nodoc
 
 
 class Register implements AuthEvent {
-  const Register({required this.displayName, required this.email, required this.mobile});
+  const Register({required this.displayName, required this.email, required this.mobile, this.entry = AuthEntryArgs.unknown});
   
 
  final  String displayName;
  final  String email;
  final  String mobile;
+@JsonKey() final  AuthEntryArgs entry;
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -356,16 +541,16 @@ $RegisterCopyWith<Register> get copyWith => _$RegisterCopyWithImpl<Register>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Register&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.email, email) || other.email == email)&&(identical(other.mobile, mobile) || other.mobile == mobile));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Register&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.email, email) || other.email == email)&&(identical(other.mobile, mobile) || other.mobile == mobile)&&(identical(other.entry, entry) || other.entry == entry));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,displayName,email,mobile);
+int get hashCode => Object.hash(runtimeType,displayName,email,mobile,entry);
 
 @override
 String toString() {
-  return 'AuthEvent.register(displayName: $displayName, email: $email, mobile: $mobile)';
+  return 'AuthEvent.register(displayName: $displayName, email: $email, mobile: $mobile, entry: $entry)';
 }
 
 
@@ -376,11 +561,11 @@ abstract mixin class $RegisterCopyWith<$Res> implements $AuthEventCopyWith<$Res>
   factory $RegisterCopyWith(Register value, $Res Function(Register) _then) = _$RegisterCopyWithImpl;
 @useResult
 $Res call({
- String displayName, String email, String mobile
+ String displayName, String email, String mobile, AuthEntryArgs entry
 });
 
 
-
+$AuthEntryArgsCopyWith<$Res> get entry;
 
 }
 /// @nodoc
@@ -393,16 +578,26 @@ class _$RegisterCopyWithImpl<$Res>
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? displayName = null,Object? email = null,Object? mobile = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? displayName = null,Object? email = null,Object? mobile = null,Object? entry = null,}) {
   return _then(Register(
 displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,mobile: null == mobile ? _self.mobile : mobile // ignore: cast_nullable_to_non_nullable
-as String,
+as String,entry: null == entry ? _self.entry : entry // ignore: cast_nullable_to_non_nullable
+as AuthEntryArgs,
   ));
 }
 
-
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AuthEntryArgsCopyWith<$Res> get entry {
+  
+  return $AuthEntryArgsCopyWith<$Res>(_self.entry, (value) {
+    return _then(_self.copyWith(entry: value));
+  });
+}
 }
 
 /// @nodoc

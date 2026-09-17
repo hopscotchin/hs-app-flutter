@@ -1,3 +1,4 @@
+import '../../analytics_map.dart';
 import '../../constants/analytics_defaults.dart';
 import '../../constants/analytics_events.dart';
 import '../../constants/analytics_properties.dart';
@@ -19,12 +20,12 @@ extension HomeEvents on AnalyticsHelper {
     orderAttribution.setFunnel(Funnel.discover);
     orderAttribution.setSortBar(AnalyticsDefaults.sortBarAll);
 
-    final props = <String, Object?>{
-      if (fromLocation != null && fromLocation.isNotEmpty)
-        AnalyticsProperties.fromLocation: fromLocation,
-      if (fromScreen.isNotEmpty) AnalyticsProperties.fromScreen: fromScreen,
-      AnalyticsProperties.skin: prefs.homePageSkin ?? AnalyticsDefaults.none,
-    };
+    final props = <String, Object?>{}
+      ..putAnalyticsKey(AnalyticsProperties.fromLocation, fromLocation)
+      ..putAnalyticsKey(AnalyticsProperties.fromScreen, fromScreen)
+      // Always sent: an unskinned homepage reports "none", it is not absent.
+      ..[AnalyticsProperties.skin] =
+          prefs.homePageSkin ?? AnalyticsDefaults.none;
     await logEvent(AnalyticsEvents.homePageViewed, props, attribution: true);
     await logSortbarChanged(sortBar: AnalyticsDefaults.sortBarAll);
   }

@@ -1,0 +1,20 @@
+# Flutter Native Splash Configuration
+# Run: flutter pub run flutter_native_splash:create
+
+flutter_native_splash:
+  # Background color of the splash screen (primaryColor)
+  color: "#6D59D7"
+
+  # Optional: background color for dark mode
+  color_dark: "#6D59D7"
+
+  # Android 12+ specific settings
+  android_12:
+    # Background color for Android 12+
+    color: "#6D59D7"
+    color_dark: "#6D59D7"
+
+  # Web specific settings
+  web: false
+
+# dart run flutter_native_splash:create

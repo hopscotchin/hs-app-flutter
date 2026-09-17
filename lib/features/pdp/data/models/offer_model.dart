@@ -18,15 +18,12 @@ class OffersListModel {
   /// Kept a plain map, like every other `trackingMeta` block — the analytics
   /// layer reads it via `pdpCouponApplicable`. A typed DTO here could only carry
   /// fields someone has declared, so a new promo dimension would need a release.
-  @JsonKey(defaultValue: null, fromJson: _mapOrNull)
+  @JsonKey(defaultValue: null)
   final Map<String, dynamic>? trackingMeta;
 
   factory OffersListModel.fromJson(Map<String, dynamic> json) =>
       _$OffersListModelFromJson(json);
 }
-
-Map<String, dynamic>? _mapOrNull(Object? json) =>
-    json is Map<String, dynamic> ? json : null;
 
 @JsonSerializable(createToJson: false)
 class OfferModel {
@@ -35,6 +32,7 @@ class OfferModel {
     this.header,
     this.description,
     this.features,
+    this.trackingMeta,
   });
 
   /// Coupon/promo code, e.g. "10OFF".
@@ -48,6 +46,9 @@ class OfferModel {
   /// Description text shown below the headline.
   @JsonKey(defaultValue: null)
   final String? description;
+
+  @JsonKey(defaultValue: null)
+  final Map<String, dynamic>? trackingMeta;
 
   /// Controls chip/copy button visibility: {displayCoupon: bool, copyCoupon: bool}.
   @JsonKey(defaultValue: null)
@@ -64,5 +65,6 @@ extension OfferModelX on OfferModel {
     description: description,
     displayCoupon: features?['displayCoupon'] as bool? ?? true,
     copyCoupon: features?['copyCoupon'] as bool? ?? true,
+    trackingMeta: trackingMeta,
   );
 }

@@ -65,7 +65,7 @@ lists. **Examples** = concrete keys for dynamic patterns. **Widget file** = the
 | Title | `account_app_bar_title` | — | `account_page.dart` |
 | Text | `account_forget_dialog_title_text_field` | — | `account_page.dart` |
 | Text | `account_forget_dialog_description_text_field` | — | `account_page.dart` |
-| Button | `account_forget_dialog_cancel_button` | — | `account_page.dart`, `cart_page.dart` |
+| Button | `account_forget_dialog_cancel_button` | — | `account_page.dart` |
 | Button | `account_forget_dialog_confirm_button` | — | `account_page.dart` |
 
 ## Join Us
@@ -161,6 +161,13 @@ Prefix composition (`hp_pg_2`, `lp_<pageName>_...`) happens in
 Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 (`keyPrefix`) and appends the bar's list index.
 
+Cart/promo hosts and their slugs: `cart` (top merge/promo bars),
+`cart_bottom` (bars under the price summary) and `cart_pincode_sheet` (the
+delivery-pincode sheet opened from the Bag's app bar). The offers
+sheet's rejection bar is keyed as a whole instead
+(`promo_offers_action_error_bar`), because the bars there are backend-authored
+feedback for one apply rather than a list a test walks.
+
 | Type | Key (pattern) | Examples | Widget file |
 |---|---|---|---|
 | Text | `<screen>_message_bar_message_text_field_<i>` | `login_message_bar_message_text_field_0`, `plp_message_bar_message_text_field_0` | `message_bars_widget.dart` |
@@ -172,8 +179,15 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 
 | Type | Key | Examples | Widget file |
 |---|---|---|---|
-| Hint | `pincode_sheet_input_hint` | — | `pincode_input_field.dart` |
-| Suffix | `pincode_sheet_input_suffix_icon` | — | `pincode_input_field.dart` |
+| Bottom sheet | `<host>_pincode_sheet` | `cart_pincode_sheet`, `pdp_pincode_sheet` | `pincode_bottom_sheet.dart` |
+| Title | `<host>_pincode_sheet_title` | `cart_pincode_sheet_title`, `pdp_pincode_sheet_title` | `pincode_bottom_sheet.dart` |
+| Text field | `<host>_pincode_sheet_input` | `cart_pincode_sheet_input`, `pdp_pincode_sheet_input` | `pincode_input_field.dart` |
+| Hint | `<host>_pincode_sheet_input_hint` | `cart_pincode_sheet_input_hint`, `pdp_pincode_sheet_input_hint` | `pincode_input_field.dart` |
+| Suffix | `<host>_pincode_sheet_input_suffix_icon` | `cart_pincode_sheet_input_suffix_icon`, `pdp_pincode_sheet_input_suffix_icon` | `pincode_input_field.dart` |
+| Button | `<host>_pincode_sheet_apply_button` | `cart_pincode_sheet_apply_button`, `pdp_pincode_sheet_apply_button` | `pincode_input_field.dart` |
+| Loading | `<host>_pincode_sheet_apply_loader` | `cart_pincode_sheet_apply_loader`, `pdp_pincode_sheet_apply_loader` | `pincode_input_field.dart` |
+| Text | `<host>_pincode_sheet_error_text_field` | `cart_pincode_sheet_error_text_field`, `pdp_pincode_sheet_error_text_field` | `pincode_bottom_sheet.dart` |
+| Snackbar | `<host>_pincode_sheet_toast_snackbar` | `cart_pincode_sheet_toast_snackbar`, `pdp_pincode_sheet_toast_snackbar` | `pincode_bottom_sheet.dart` |
 
 ## PLP (Product Listing Page)
 
@@ -184,7 +198,7 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Title | `plp_appbar_collapsed_title` | — | `plp_sliver_app_bar.dart` |
 | Text | `plp_appbar_subtitle` | — | `plp_sliver_app_bar.dart` |
 | Button | `plp_appbar_search_button` | — | `plp_sliver_app_bar.dart` |
-| Button | `plp_appbar_wishlist_button` | — | `cart_page.dart`, `plp_sliver_app_bar.dart` |
+| Button | `plp_appbar_wishlist_button` | — | `plp_sliver_app_bar.dart` |
 | Button | `plp_appbar_cart_button` | — | `plp_sliver_app_bar.dart` |
 | Image | `plp_header_image` | — | `plp_sliver_app_bar.dart` |
 | Chip | `plp_applied_filter_chip_<i>` | `plp_applied_filter_chip_0`, `plp_applied_filter_chip_1` | `plp_applied_filters.dart` |
@@ -196,7 +210,7 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | List item | `plp_tile_<i>` | `plp_tile_0`, `plp_tile_1` | `plp_product_sliver.dart`, `product_grid.dart` |
 | Button | `plp_tile_<i>_wishlist` | `plp_tile_0_wishlist`, `plp_tile_1_wishlist` | `plp_product_sliver.dart`, `product_grid.dart` |
 | Button | `plp_tile_<i>_add_to_cart` | `plp_tile_0_add_to_cart`, `plp_tile_1_add_to_cart` | *(defined, not yet wired)* |
-| Visual cue | `plp_tile_<i>_visual_cue_<j>` | `plp_tile_0_visual_cue_<j>`, `plp_tile_1_visual_cue_<j>` | `plp_product_sliver.dart`, `product_grid.dart` |
+| Visual cue | `plp_tile_<i>_visual_cue_<j>` | `plp_tile_0_visual_cue_0`, `plp_tile_1_visual_cue_0` | `plp_product_sliver.dart`, `product_grid.dart` |
 | Text | `plp_tile_<i>_name` | `plp_tile_0_name`, `plp_tile_1_name` | `plp_product_sliver.dart`, `product_grid.dart` |
 | Text | `plp_tile_<i>_price` | `plp_tile_0_price`, `plp_tile_1_price` | `plp_product_sliver.dart`, `product_grid.dart` |
 | Text | `plp_tile_<i>_color_variants` | `plp_tile_0_color_variants`, `plp_tile_1_color_variants` | `plp_product_sliver.dart`, `product_grid.dart` |
@@ -214,7 +228,7 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Option | `plp_sort_sheet_option_<i>` | `plp_sort_sheet_option_0`, `plp_sort_sheet_option_1` | `sort_bottom_sheet.dart` |
 | Title | `plp_filter_title` | — | `filter_page.dart` |
 | Button | `plp_filter_close_button` | — | `filter_page.dart` |
-| Option | `plp_filter_section_<i>` | `plp_filter_section_0`, `plp_filter_section_1` | `filter_page.dart` |
+| Section | `plp_filter_section_<i>` | `plp_filter_section_0`, `plp_filter_section_1` | `filter_page.dart` |
 | Badge | `plp_filter_section_<i>_badge` | `plp_filter_section_0_badge`, `plp_filter_section_1_badge` | `filter_page.dart` |
 | Option | `plp_filter_option_<i>` | `plp_filter_option_0`, `plp_filter_option_1` | `filter_page.dart` |
 | Text field | `plp_filter_search_input` | — | `filter_page.dart` |
@@ -279,19 +293,41 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 
 | Type | Key | Examples | Widget file |
 |---|---|---|---|
+| Element | `promo_offers_action_error_bar` | — | `promo_offers_bottom_sheet.dart` |
+| Bottom sheet | `promo_offers_sheet` | — | `promo_offers_bottom_sheet.dart` |
 | Title | `promo_offers_sheet_title` | — | `promo_offers_bottom_sheet.dart` |
+| Loading | `promo_offers_loading_shimmer` | — | `promo_offers_bottom_sheet.dart` |
+| List | `promo_offers_list` | — | `promo_offers_bottom_sheet.dart` |
+| Section | `promo_offers_section_<i>` | `promo_offers_section_0`, `promo_offers_section_1` | `promo_offers_bottom_sheet.dart` |
+| Snackbar | `promo_offers_action_snackbar` | — | `promo_offers_bottom_sheet.dart` |
+| Title | `promo_offers_empty_state_title` | — | `promo_offers_bottom_sheet.dart` |
+| Text | `promo_offers_empty_state_subtitle` | — | `promo_offers_bottom_sheet.dart` |
 | Button | `promo_offers_empty_state_button` | — | `promo_offers_bottom_sheet.dart` |
 | List item | `promo_offers_card_<i>` | `promo_offers_card_0`, `promo_offers_card_1` | `promo_offers_bottom_sheet.dart` |
 | Text | `promo_offers_card_<i>_code` | `promo_offers_card_0_code`, `promo_offers_card_1_code` | `promo_offers_bottom_sheet.dart` |
+| Title | `promo_offers_card_<i>_title` | `promo_offers_card_0_title`, `promo_offers_card_1_title` | `promo_offers_bottom_sheet.dart` |
+| Text | `promo_offers_card_<i>_description` | `promo_offers_card_0_description`, `promo_offers_card_1_description` | `promo_offers_bottom_sheet.dart` |
+| Text | `promo_offers_card_<i>_validity_text_field` | `promo_offers_card_0_validity_text_field`, `promo_offers_card_1_validity_text_field` | `promo_offers_bottom_sheet.dart` |
+| Text | `promo_offers_card_<i>_savings_text_field` | `promo_offers_card_0_savings_text_field`, `promo_offers_card_1_savings_text_field` | `promo_offers_bottom_sheet.dart` |
 | Button | `promo_offers_card_<i>_apply_button` | `promo_offers_card_0_apply_button`, `promo_offers_card_1_apply_button` | `promo_offers_bottom_sheet.dart` |
 | Button | `promo_offers_card_<i>_remove_button` | `promo_offers_card_0_remove_button`, `promo_offers_card_1_remove_button` | `promo_offers_bottom_sheet.dart` |
 | Button | `promo_offers_card_<i>_terms_button` | `promo_offers_card_0_terms_button`, `promo_offers_card_1_terms_button` | `promo_offers_bottom_sheet.dart` |
 | Button | `promo_offers_card_<i>_cta_button` | `promo_offers_card_0_cta_button`, `promo_offers_card_1_cta_button` | `promo_offers_bottom_sheet.dart` |
 
+## Promo Action Sheet
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Title | `promo_action_bottomsheet_title` | — | `promo_action_sheet.dart` |
+| Text | `promo_action_bottomsheet_description` | — | `promo_action_sheet.dart` |
+| Button | `promo_action_bottomsheet_primary_button` | — | `promo_action_sheet.dart` |
+| Button | `promo_action_bottomsheet_secondary_button` | — | `promo_action_sheet.dart` |
+
 ## Promo Details
 
 | Type | Key | Examples | Widget file |
 |---|---|---|---|
+| Loading | `promo_details_loading_shimmer` | — | `promo_details_page.dart` |
 | Title | `promo_details_app_bar_title` | — | `promo_details_page.dart` |
 | Button | `promo_details_back_button` | — | `promo_details_page.dart` |
 | Text | `promo_details_code` | — | `promo_details_page.dart` |
@@ -314,17 +350,69 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 
 | Type | Key | Examples | Widget file |
 |---|---|---|---|
-| Element | `cart_slg` | — | `cart_page.dart` |
+| Text | `cart_bottom_message_bar_message_text_field_<i>` | `cart_bottom_message_bar_message_text_field_0`, `cart_bottom_message_bar_message_text_field_1` | `cart_page.dart` |
+| Loading | `cart_shimmer_loading` | — | `cart_page.dart` |
+| Overlay | `cart_updating_overlay` | — | `cart_page.dart` |
+| Indicator | `cart_refresh_indicator` | — | `cart_page.dart` |
+| Snackbar | `cart_toast_snackbar` | — | `cart_page.dart` |
+| Snackbar | `cart_login_required_snackbar` | — | `cart_page.dart` |
+| Button | `cart_appbar_back_button` | — | `cart_page.dart` |
+| Title | `cart_app_bar_title` | — | `cart_page.dart` |
+| Button | `cart_appbar_wishlist_button` | — | `cart_page.dart` |
+| Button | `cart_app_bar_pincode_button` | — | `cart_page.dart` |
+| Text | `cart_app_bar_pincode_text_field` | — | `cart_page.dart` |
+| Title | `cart_empty_state_title` | — | `cart_page.dart` |
+| Text | `cart_empty_state_subtitle` | — | `cart_page.dart` |
+| Button | `cart_empty_state_button` | — | `cart_page.dart` |
+| Title | `cart_error_state_title` | — | `cart_page.dart` |
+| Text | `cart_error_state_subtitle` | — | `cart_page.dart` |
+| Button | `cart_error_state_button` | — | `cart_page.dart` |
+| Banner | `cart_gift_card_banner` | — | `gift_card_banner.dart` |
+| Image | `cart_gift_card_image` | — | `gift_card_banner.dart` |
+| Title | `cart_gift_card_title` | — | `gift_card_banner.dart` |
+| Text | `cart_gift_card_description` | — | `gift_card_banner.dart` |
+| List item | `cart_item_<i>` | `cart_item_0`, `cart_item_1` | `cart_item_widget.dart`, `cart_page.dart` |
+| Image | `cart_item_<i>_image` | `cart_item_0_image`, `cart_item_1_image` | `cart_item_widget.dart` |
+| Text | `cart_item_<i>_name_text_field` | `cart_item_0_name_text_field`, `cart_item_1_name_text_field` | `cart_item_widget.dart` |
+| Visual cue | `cart_item_<i>_visual_cue` | `cart_item_0_visual_cue`, `cart_item_1_visual_cue` | `cart_item_widget.dart` |
+| Text | `cart_item_<i>_price_text_field` | `cart_item_0_price_text_field`, `cart_item_1_price_text_field` | `cart_item_widget.dart` |
+| Button | `cart_item_<i>_remove_button` | `cart_item_0_remove_button`, `cart_item_1_remove_button` | `cart_item_widget.dart` |
+| Text | `cart_item_<i>_qty_text_field` | `cart_item_0_qty_text_field`, `cart_item_1_qty_text_field` | `cart_item_widget.dart` |
+| Button | `cart_item_<i>_qty_increase_button` | `cart_item_0_qty_increase_button`, `cart_item_1_qty_increase_button` | `cart_item_widget.dart` |
+| Button | `cart_item_<i>_qty_decrease_button` | `cart_item_0_qty_decrease_button`, `cart_item_1_qty_decrease_button` | `cart_item_widget.dart` |
+| Text | `cart_item_<i>_size_text_field` | `cart_item_0_size_text_field`, `cart_item_1_size_text_field` | `cart_item_widget.dart` |
+| Text | `cart_item_<i>_edd_text_field` | `cart_item_0_edd_text_field`, `cart_item_1_edd_text_field` | `cart_item_widget.dart` |
+| Button | `cart_item_<i>_move_to_wishlist_button` | `cart_item_0_move_to_wishlist_button`, `cart_item_1_move_to_wishlist_button` | `cart_item_widget.dart` |
+| Element | `cart_item_<i>_detail_<j>` | `cart_item_0_detail_0`, `cart_item_1_detail_0` | `cart_item_widget.dart` |
+| List item | `cart_slg_item_<i>` | `cart_slg_item_0`, `cart_slg_item_1` | `cart_slg_widget.dart` |
+| Image | `cart_slg_item_<i>_icon` | `cart_slg_item_0_icon`, `cart_slg_item_1_icon` | `cart_slg_widget.dart` |
+| Text | `cart_slg_item_<i>_label` | `cart_slg_item_0_label`, `cart_slg_item_1_label` | `cart_slg_widget.dart` |
+| Title | `cart_price_summary_title` | — | `cart_page.dart` |
+| Text | `cart_price_summary_subtitle` | — | `cart_page.dart` |
+| Row | `cart_price_summary_row_<i>` | `cart_price_summary_row_0`, `cart_price_summary_row_1` | `cart_page.dart` |
+| Text | `cart_price_summary_row_<i>_label` | `cart_price_summary_row_0_label`, `cart_price_summary_row_1_label` | `cart_page.dart` |
+| Text | `cart_price_summary_row_<i>_value` | `cart_price_summary_row_0_value`, `cart_price_summary_row_1_value` | `cart_page.dart` |
+| Section | `cart_promo_section` | — | `cart_promo_section.dart` |
+| Image | `cart_promo_offer_icon` | — | `cart_promo_section.dart` |
 | Text field | `cart_promo_code_input` | — | `cart_promo_section.dart` |
 | Hint | `cart_promo_code_input_hint` | — | `cart_promo_section.dart` |
 | Button | `cart_promo_apply_button` | — | `cart_promo_section.dart` |
 | Button | `cart_promo_remove_button` | — | `cart_promo_section.dart` |
+| Text | `cart_promo_applied_code_text_field` | — | `cart_promo_section.dart` |
+| Text | `cart_promo_applied_savings_text_field` | — | `cart_promo_section.dart` |
 | Button | `cart_promo_see_all_offers_button` | — | `cart_promo_section.dart` |
-| Element | `cart_checkout_bar_savings_banner` | — | `cart_checkout_bar.dart` |
+| Text | `cart_promo_see_all_offers_text_field` | — | `cart_promo_section.dart` |
+| Element | `cart_checkout_bar` | — | `cart_checkout_bar.dart` |
+| Banner | `cart_checkout_bar_savings_banner` | — | `cart_checkout_bar.dart` |
 | Text | `cart_checkout_bar_item_count_text` | — | `cart_checkout_bar.dart` |
 | Text | `cart_checkout_bar_total_amount_text` | — | `cart_checkout_bar.dart` |
 | Button | `cart_checkout_bar_details_button` | — | `cart_checkout_bar.dart` |
 | Button | `cart_checkout_bar_proceed_button` | — | `cart_checkout_bar.dart` |
+| Title | `cart_remove_item_bottomsheet_title` | — | `remove_cart_item_sheet.dart` |
+| Text | `cart_remove_item_bottomsheet_description` | — | `remove_cart_item_sheet.dart` |
+| Button | `cart_remove_item_bottomsheet_remove_button` | — | `remove_cart_item_sheet.dart` |
+| Button | `cart_remove_item_bottomsheet_no_button` | — | `remove_cart_item_sheet.dart` |
+
 ## Pdp
 
 | Type | Key | Examples | Widget file |
@@ -341,12 +429,15 @@ Reusable. `MessageBarsWidget` prefixes each key with the host screen's slug
 | Title | `pdp_delivery_title` | — | `pdp_delivery_info.dart` |
 | Button | `pdp_enter_pincode_button` | — | `pdp_delivery_info.dart` |
 | Button | `pdp_change_pincode_button` | — | `pdp_delivery_info.dart` |
+| Section | `pdp_offers_section` | — | `pdp_offers.dart` |
 | Title | `pdp_offers_title` | — | `pdp_offers.dart` |
-| Card | `pdp_offer_card_<i>` | `pdp_offer_card_0`, `pdp_offer_card_1` | `pdp_offers.dart` |
+| List item | `pdp_offer_card_<i>` | `pdp_offer_card_0`, `pdp_offer_card_1` | `pdp_offers.dart` |
 | Button | `pdp_offer_card_<i>_copy` | `pdp_offer_card_0_copy`, `pdp_offer_card_1_copy` | `pdp_offers.dart` |
 | Title | `pdp_product_details_title` | — | `pdp_product_details.dart` |
 | Tab | `pdp_detail_tab_<i>` | `pdp_detail_tab_0`, `pdp_detail_tab_1` | `pdp_product_details.dart` |
-| Button | `pdp_add_to_bag_button` | — | `pdp_content.dart` |
+| Snackbar | `pdp_snackbar` | — | `pdp_page.dart` |
+| Snackbar | `pdp_coupon_copied_snackbar` | — | `pdp_offers.dart` |
+| Button | `pdp_add_to_bag_button` | — | `auto_semantics.dart`, `pdp_content.dart` |
 | Button | `pdp_buy_now_button` | — | `pdp_content.dart` |
 | Button | `pdp_docked_add_to_bag_button` | — | `pdp_content.dart` |
 | Button | `pdp_docked_buy_now_button` | — | `pdp_content.dart` |

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WishlistInfoEntity {
 
- int? get id; bool get isWishlisted; bool get canWishlist;
+ int? get id; bool get isWishlisted; bool get canWishlist; Map<String, dynamic>? get trackingMeta;
 /// Create a copy of WishlistInfoEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $WishlistInfoEntityCopyWith<WishlistInfoEntity> get copyWith => _$WishlistInfoEn
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is WishlistInfoEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.isWishlisted, isWishlisted) || other.isWishlisted == isWishlisted)&&(identical(other.canWishlist, canWishlist) || other.canWishlist == canWishlist));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is WishlistInfoEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.isWishlisted, isWishlisted) || other.isWishlisted == isWishlisted)&&(identical(other.canWishlist, canWishlist) || other.canWishlist == canWishlist)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,isWishlisted,canWishlist);
+int get hashCode => Object.hash(runtimeType,id,isWishlisted,canWishlist,const DeepCollectionEquality().hash(trackingMeta));
 
 @override
 String toString() {
-  return 'WishlistInfoEntity(id: $id, isWishlisted: $isWishlisted, canWishlist: $canWishlist)';
+  return 'WishlistInfoEntity(id: $id, isWishlisted: $isWishlisted, canWishlist: $canWishlist, trackingMeta: $trackingMeta)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $WishlistInfoEntityCopyWith<$Res>  {
   factory $WishlistInfoEntityCopyWith(WishlistInfoEntity value, $Res Function(WishlistInfoEntity) _then) = _$WishlistInfoEntityCopyWithImpl;
 @useResult
 $Res call({
- int? id, bool isWishlisted, bool canWishlist
+ int? id, bool isWishlisted, bool canWishlist, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -62,12 +62,13 @@ class _$WishlistInfoEntityCopyWithImpl<$Res>
 
 /// Create a copy of WishlistInfoEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? isWishlisted = null,Object? canWishlist = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? isWishlisted = null,Object? canWishlist = null,Object? trackingMeta = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,isWishlisted: null == isWishlisted ? _self.isWishlisted : isWishlisted // ignore: cast_nullable_to_non_nullable
 as bool,canWishlist: null == canWishlist ? _self.canWishlist : canWishlist // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 
@@ -152,10 +153,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  bool isWishlisted,  bool canWishlist)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  bool isWishlisted,  bool canWishlist,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WishlistInfoEntity() when $default != null:
-return $default(_that.id,_that.isWishlisted,_that.canWishlist);case _:
+return $default(_that.id,_that.isWishlisted,_that.canWishlist,_that.trackingMeta);case _:
   return orElse();
 
 }
@@ -173,10 +174,10 @@ return $default(_that.id,_that.isWishlisted,_that.canWishlist);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  bool isWishlisted,  bool canWishlist)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  bool isWishlisted,  bool canWishlist,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _WishlistInfoEntity():
-return $default(_that.id,_that.isWishlisted,_that.canWishlist);case _:
+return $default(_that.id,_that.isWishlisted,_that.canWishlist,_that.trackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -193,10 +194,10 @@ return $default(_that.id,_that.isWishlisted,_that.canWishlist);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  bool isWishlisted,  bool canWishlist)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  bool isWishlisted,  bool canWishlist,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _WishlistInfoEntity() when $default != null:
-return $default(_that.id,_that.isWishlisted,_that.canWishlist);case _:
+return $default(_that.id,_that.isWishlisted,_that.canWishlist,_that.trackingMeta);case _:
   return null;
 
 }
@@ -208,12 +209,21 @@ return $default(_that.id,_that.isWishlisted,_that.canWishlist);case _:
 
 
 class _WishlistInfoEntity implements WishlistInfoEntity {
-  const _WishlistInfoEntity({this.id, this.isWishlisted = false, this.canWishlist = false});
+  const _WishlistInfoEntity({this.id, this.isWishlisted = false, this.canWishlist = false, final  Map<String, dynamic>? trackingMeta}): _trackingMeta = trackingMeta;
   
 
 @override final  int? id;
 @override@JsonKey() final  bool isWishlisted;
 @override@JsonKey() final  bool canWishlist;
+ final  Map<String, dynamic>? _trackingMeta;
+@override Map<String, dynamic>? get trackingMeta {
+  final value = _trackingMeta;
+  if (value == null) return null;
+  if (_trackingMeta is EqualUnmodifiableMapView) return _trackingMeta;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of WishlistInfoEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -225,16 +235,16 @@ _$WishlistInfoEntityCopyWith<_WishlistInfoEntity> get copyWith => __$WishlistInf
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WishlistInfoEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.isWishlisted, isWishlisted) || other.isWishlisted == isWishlisted)&&(identical(other.canWishlist, canWishlist) || other.canWishlist == canWishlist));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WishlistInfoEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.isWishlisted, isWishlisted) || other.isWishlisted == isWishlisted)&&(identical(other.canWishlist, canWishlist) || other.canWishlist == canWishlist)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,isWishlisted,canWishlist);
+int get hashCode => Object.hash(runtimeType,id,isWishlisted,canWishlist,const DeepCollectionEquality().hash(_trackingMeta));
 
 @override
 String toString() {
-  return 'WishlistInfoEntity(id: $id, isWishlisted: $isWishlisted, canWishlist: $canWishlist)';
+  return 'WishlistInfoEntity(id: $id, isWishlisted: $isWishlisted, canWishlist: $canWishlist, trackingMeta: $trackingMeta)';
 }
 
 
@@ -245,7 +255,7 @@ abstract mixin class _$WishlistInfoEntityCopyWith<$Res> implements $WishlistInfo
   factory _$WishlistInfoEntityCopyWith(_WishlistInfoEntity value, $Res Function(_WishlistInfoEntity) _then) = __$WishlistInfoEntityCopyWithImpl;
 @override @useResult
 $Res call({
- int? id, bool isWishlisted, bool canWishlist
+ int? id, bool isWishlisted, bool canWishlist, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -262,12 +272,13 @@ class __$WishlistInfoEntityCopyWithImpl<$Res>
 
 /// Create a copy of WishlistInfoEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? isWishlisted = null,Object? canWishlist = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? isWishlisted = null,Object? canWishlist = null,Object? trackingMeta = freezed,}) {
   return _then(_WishlistInfoEntity(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,isWishlisted: null == isWishlisted ? _self.isWishlisted : isWishlisted // ignore: cast_nullable_to_non_nullable
 as bool,canWishlist: null == canWishlist ? _self.canWishlist : canWishlist // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,trackingMeta: freezed == trackingMeta ? _self._trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 

@@ -16,6 +16,7 @@ class PlpFilterModel {
     this.sortingOptions,
     this.filterSections = const [],
     this.selectedFilters = const [],
+    this.trackingMeta,
     this.action,
     this.message,
   });
@@ -27,6 +28,11 @@ class PlpFilterModel {
   final List<FilterSectionModel> filterSections;
   @JsonKey(defaultValue: [])
   final List<SelectedFilterModel> selectedFilters;
+
+  /// Backend-authored blob spread verbatim onto `filter_applied` — carries the
+  /// filter-response-scoped analytics keys (e.g. `non_preorder_filter`) that
+  /// the client cannot know.
+  final Map<String, dynamic>? trackingMeta;
 
   /// `"success"` | `"failure"` — the /v2/filter endpoint returns HTTP 200 even
   /// for logical failures, signalling the error via this field.
@@ -48,5 +54,6 @@ class PlpFilterModel {
     // full value here is what re-seeds the BE query, so no selected value is
     // lost. Mirrors Android's FilterManager.addSelectedFilters.
     selectedFilters: selectedFilters.map((sf) => sf.toEntity()).toList(),
+    trackingMeta: trackingMeta,
   );
 }

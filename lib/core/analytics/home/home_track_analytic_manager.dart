@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../features/discover/domain/entities/home_page_entity.dart';
+import '../../services/pref_manager.dart';
 import '../attribution/lp_attribution_helper.dart';
 import '../attribution/order_attribution_helper.dart';
 import '../constants/analytics_defaults.dart';
@@ -46,6 +47,7 @@ class HomeTrackAnalyticManager with WidgetsBindingObserver {
     required this.analytics,
     required this.orderAttribution,
     required this.lpAttribution,
+    required this.prefs,
     required JourneyWorker journeyWorker,
   }) : _worker = journeyWorker {
     WidgetsBinding.instance.addObserver(this);
@@ -54,6 +56,7 @@ class HomeTrackAnalyticManager with WidgetsBindingObserver {
   final AnalyticsHelper analytics;
   final OrderAttributionHelper orderAttribution;
   final LpAttributionHelper lpAttribution;
+  final PrefManager prefs;
   final JourneyWorker _worker;
 
   // ─── Per-screen state (all main-isolate) ───────────────────────────
@@ -180,11 +183,11 @@ class HomeTrackAnalyticManager with WidgetsBindingObserver {
   /// HP click: merged meta lands in `OrderAttributionHelper` — unprefixed
   /// keys accumulate; last click wins on same-name key.
   ///
-  /// LP click: merged meta pushes onto `LpAttributionHelper`'s deque
-  /// (raw meta preserved; source LP identity stamped on the entry).
-  /// Bare `lp_*` keys are stripped from the click payload — they'll
-  /// re-emit as `lp1_*` from the deque; leaving them here would
-  /// double-count.
+  /// LP click: merged meta REFRESHES the top of `LpAttributionHelper`'s
+  /// stack (raw meta preserved; the source LP's identity was already
+  /// stamped by the observer on LP push). Bare `lp_*` keys are stripped
+  /// from the click payload — they'll re-emit as `lp{n}_*` from the
+  /// stack; leaving them here would double-count.
   ///
   /// Returns [Future] for tests that need to observe post-dispatch state
   /// (`await tracker.logTileClick(...)` in a test still waits for the
@@ -226,11 +229,11 @@ class HomeTrackAnalyticManager with WidgetsBindingObserver {
     if (fromHomePage) {
       orderAttribution.replaceTrackingMeta(merged);
     } else {
-      lpAttribution.pushTileMeta(
-        meta: merged,
-        landingPageName: lpName,
-        landingPageId: lpId,
-      );
+      // LP click: refresh the top entry's meta (its identity was stamped
+      // by `AppNavigationObserver.setLandingPageContext` when the LP
+      // loaded). A second tap in the same LP OVERWRITES the first —
+      // matches the "click in LP3 updates lp3" contract.
+      lpAttribution.updateTopMeta(merged);
     }
     if (sortBar != null && sortBar.isNotEmpty) {
       sortBarName = sortBar;
@@ -341,6 +344,10 @@ class HomeTrackAnalyticManager with WidgetsBindingObserver {
     final seed = _seed();
     await _fireCarouselScrolls(seed);
     if (indices.isEmpty && heroTiles.isEmpty) return;
+    // AppConfig remote-config gate — Only the impression dispatch is gated;
+    // carousel scrolls (fired above) and tile clicks (their own path)
+    // run unconditionally.
+    if (!prefs.featureFlagHomeAnalytics) return;
     await _worker.flushImpressions(
       indices: indices,
       heroTiles: heroTiles,

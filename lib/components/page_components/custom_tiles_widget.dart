@@ -25,7 +25,17 @@ class CustomTilesWidget extends StatelessWidget {
     required this.tilesData,
     this.margins,
     this.keyPrefix,
+    this.tapAnalytics,
   });
+
+  /// Analytics context a tap in this component hands to the destination —
+  /// forwarded verbatim as the navigation's `extra`.
+  ///
+  /// Opaque here on purpose: *which* context applies depends on the host, not
+  /// on this widget. `PageComponentRenderer` supplies a `SourcePage` for home
+  /// and landing pages; the PDP rails supply their own `PdpEntryArgs`. Both are
+  /// built with `navExtra`.
+  final Map<String, dynamic>? tapAnalytics;
 
   Key? _key(String suffix) =>
       keyPrefix == null ? null : ValueKey('${keyPrefix}_$suffix');
@@ -107,10 +117,19 @@ class CustomTilesWidget extends StatelessWidget {
                 key: _key(HomeComponentTestStrings.cta),
                 label: tilesData.ctaButton!.label ?? DiscoverStrings.viewAll,
                 style: CtaButtonStyle.fromString(tilesData.ctaButton!.type),
-                onPressed: () => ActionUrlHandler.navigate(
-                  context,
-                  tilesData.ctaButton!.actionUri,
-                ),
+                onPressed: () {
+                  unawaited(
+                    sl<HomeTrackAnalyticManager>().onCtaButtonTapped(
+                      rootTrackingMeta: tilesData.trackingMeta,
+                      cta: tilesData.ctaButton!,
+                    ),
+                  );
+                  ActionUrlHandler.navigate(
+                    context,
+                    tilesData.ctaButton!.actionUri,
+                    extra: tapAnalytics,
+                  );
+                },
               ),
             ),
           ),
@@ -228,7 +247,11 @@ class CustomTilesWidget extends StatelessWidget {
       onTap: () {
         unawaited(sl<HomeTrackAnalyticManager>()
             .onCustomTileTapped(tilesData, row, tile));
-        ActionUrlHandler.navigate(context, tile.actionUri);
+        ActionUrlHandler.navigate(
+          context,
+          tile.actionUri,
+          extra: tapAnalytics,
+        );
       },
       child: imageCornerRadius > 0
           ? ClipRRect(

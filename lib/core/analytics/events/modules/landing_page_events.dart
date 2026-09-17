@@ -7,10 +7,8 @@ import '../analytics_helper.dart';
 /// `SearchResultsShowingBoutiquesActivity.java:836-841`:
 ///   • `logAppLaunchedEvent(FromScreens.SPECIAL_PAGE)` — kicks the cold-start
 ///     chain when the LP is the first viewable screen.
-///   • `logEvent(SPECIAL_PAGE_VIEWED, props, attribution: true, universal: true)`
-///     — Flutter's helper doesn't expose the `universal` flag today; we still
-///     merge `attribution: true` so the preceding tile click's funnel keys
-///     travel onto this event.
+///   • `logEvent(SPECIAL_PAGE_VIEWED, props, attribution: true)` —
+///     `attribution` carries the preceding tile click's funnel keys.
 ///
 /// Property shape:
 ///   • `id`   — `pageMeta.pageId` of the landing page response.

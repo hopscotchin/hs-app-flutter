@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/analytics/events/analytics_helper.dart';
+import '../../../../core/analytics/events/modules/address_events.dart';
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/constants/strings/address_pincode_strings.dart';
 import '../../../../core/entities/message_bar_entity.dart';
@@ -29,6 +31,7 @@ class ManageAddressBloc
     this._checkPincode,
     this._selectAddress,
     this._cache,
+    this._analytics,
   ) : super(const ManageAddressState()) {
     on<ManageAddressInitialized>(_onInitialized);
     on<ManageAddressFieldChanged>(_onFieldChanged);
@@ -55,6 +58,7 @@ class ManageAddressBloc
   final CheckPincodeUseCase _checkPincode;
   final SelectAddressUseCase _selectAddress;
   final AddressCacheManager _cache;
+  final AnalyticsHelper _analytics;
 
   void _onInitialized(
     ManageAddressInitialized event,
@@ -417,6 +421,18 @@ class ManageAddressBloc
       }
 
       final picked = _pickResultingAddress(mutation.currentAddress, mutation.items);
+
+      if (picked != null) {
+        _analytics.logAddressUpdated(
+          fromScreen: state.fromScreen,
+          pincode: picked.pincode,
+          deliveryCity: picked.city,
+          isServiceable: picked.isServicable,
+          canCod: picked.canCod,
+          isDefault: picked.isDefault,
+          isNewAddress: state.mode == ManageAddressMode.create,
+        );
+      }
 
       await _persistAddressesCache(mutation.rawItems);
 

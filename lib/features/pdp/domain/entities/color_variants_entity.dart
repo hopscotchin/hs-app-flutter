@@ -9,5 +9,9 @@ abstract class ColorVariantEntity with _$ColorVariantEntity {
     String? mediaUrl,
     @Default(false) bool isSelected,
     @Default(false) bool isStockAvailable,
+
+    /// `colorVariants.variants[].trackingMeta`, forwarded whole. Analytics never reads a key
+    /// from it — see docs/analytics/pdp/client/tm-collection.md.
+    Map<String, dynamic>? trackingMeta,
   }) = _ColorVariantEntity;
 }

@@ -4,6 +4,7 @@ part of 'address_bloc.dart';
 sealed class AddressEvent with _$AddressEvent {
   const factory AddressEvent.load({
     @Default(AddressSource.customer) AddressSource source,
+    String? fromScreen,
   }) = LoadAddresses;
   const factory AddressEvent.refresh() = RefreshAddresses;
   const factory AddressEvent.delete(int addressId) = DeleteAddress;

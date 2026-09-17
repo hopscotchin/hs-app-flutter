@@ -12,11 +12,8 @@ ListingDataModel _$ListingDataModelFromJson(
   pageMeta: json['pageMeta'] == null
       ? null
       : PageMetaModel.fromJson(json['pageMeta'] as Map<String, dynamic>),
-  trackingMeta: json['trackingMeta'] == null
-      ? null
-      : TrackingMetaModel.fromJson(
-          json['trackingMeta'] as Map<String, dynamic>,
-        ),
+  trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
+  orderAttribution: json['orderAttribution'] as Map<String, dynamic>?,
   notificationNudge: json['notificationNudge'] == null
       ? null
       : NotificationNudgeModel.fromJson(

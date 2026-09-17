@@ -21,17 +21,26 @@ class GetProductDetailsUseCase
   ) {
     return _repository.getProductDetails(
       params.productId,
+      colorVariant: params.colorVariant,
       cancelToken: params.cancelToken,
     );
   }
 }
 
 class GetProductDetailsParams extends Equatable {
-  const GetProductDetailsParams({required this.productId, this.cancelToken});
+  const GetProductDetailsParams({
+    required this.productId,
+    this.colorVariant,
+    this.cancelToken,
+  });
 
   final int productId;
+
+  /// `true` only when a colour swatch led here — see [PdpRemoteDatasource].
+  final bool? colorVariant;
+
   final CancelToken? cancelToken;
 
   @override
-  List<Object?> get props => [productId];
+  List<Object?> get props => [productId, colorVariant];
 }

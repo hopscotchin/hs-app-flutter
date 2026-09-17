@@ -7,7 +7,7 @@ part 'wishlist_info_model.g.dart';
 
 @JsonSerializable(createToJson: false)
 class WishlistInfoModel {
-  const WishlistInfoModel({this.id, this.isWishlisted = false, this.canWishlist = false});
+  const WishlistInfoModel({this.id, this.isWishlisted = false, this.canWishlist = false, this.trackingMeta});
 
   @JsonKey(fromJson: parseToIntOrNull)
   final int? id;
@@ -15,10 +15,11 @@ class WishlistInfoModel {
   final bool isWishlisted;
   @JsonKey(fromJson: parseToBool)
   final bool canWishlist;
+  final Map<String, dynamic>? trackingMeta;
 
   factory WishlistInfoModel.fromJson(Map<String, dynamic> json) =>
       _$WishlistInfoModelFromJson(json);
 
   WishlistInfoEntity toEntity() =>
-      WishlistInfoEntity(id: id, isWishlisted: isWishlisted, canWishlist: canWishlist);
+      WishlistInfoEntity(id: id, isWishlisted: isWishlisted, canWishlist: canWishlist, trackingMeta: trackingMeta);
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/account_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/auth_strings.dart';
 import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
+import 'package:hs_app_flutter/features/auth/domain/entities/auth_entry_args.dart';
 
 import '../../../../components/buttons/app_button_named.dart';
 
@@ -189,7 +191,13 @@ class _SignedOutHeader extends StatelessWidget {
             key: const ValueKey(AccountTestStrings.accountSignOutHeaderSignInButton),
             text: AccountStrings.signIn,
             isFullWidth: true,
-            onTap: () => AppNavigator.goToLogin(context),
+            onTap: () => AppNavigator.goToLogin(
+              context,
+              entry: const AuthEntryArgs(
+                fromScreen: FromScreens.account,
+                fromLocation: FromLocations.signInButton,
+              ),
+            ),
           ),
           if (account.hasGuestData) ...[
             AppSpacing.verticalGapSm,
@@ -213,7 +221,13 @@ class _SignedOutHeader extends StatelessWidget {
             key: const ValueKey(AccountTestStrings.accountSignOutHeaderJoinUsButton),
             promptText: AuthStrings.newToHopscotch,
             actionLabel: AuthStrings.joinUs.toUpperCase(),
-            onActionTap: () => AppNavigator.goToJoinUs(context),
+            onActionTap: () => AppNavigator.goToJoinUs(
+              context,
+              entry: const AuthEntryArgs(
+                fromScreen: FromScreens.account,
+                fromLocation: FromLocations.signUpButton,
+              ),
+            ),
           ),
         ],
       ),
