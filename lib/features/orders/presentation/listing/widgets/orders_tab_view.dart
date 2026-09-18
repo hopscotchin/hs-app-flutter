@@ -151,7 +151,6 @@ class OrdersTabView extends StatelessWidget {
       //     ),
       //   ),
       // ],
-
       SliverPadding(
         // Cards carry half the 12pt gap each, so 6 here puts the first card
         // 12 below the nudge (or the tabs) — the spec's page-column gap.
@@ -188,13 +187,24 @@ class OrdersTabView extends StatelessWidget {
           ),
         ),
 
-      if (support != null)
+      // Only once the list is complete. While pages are still coming the
+      // footer would sit above the load-more spinner and then get pushed down
+      // by the next page — it reads as the end of the list, so it may only
+      // appear when it is.
+      if (support != null && !tabState.hasNextPage)
         SliverToBoxAdapter(
           child: OrdersSupportFooter(
             support: support,
             onAction: onSupportAction,
           ),
         ),
+
+      // The gesture bar or the navigation buttons overlap the last sliver
+      // otherwise. Unconditional, because the card below the footer needs the
+      // same clearance when the footer is not drawn.
+      SliverToBoxAdapter(
+        child: SizedBox(height: MediaQuery.paddingOf(context).bottom),
+      ),
     ];
   }
 
