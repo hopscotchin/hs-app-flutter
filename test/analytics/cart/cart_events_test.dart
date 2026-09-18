@@ -168,28 +168,14 @@ void main() {
   });
 
   group('product_added_to_wishlist, cart variant', () {
-    test('forwards the item block and stamps the cart-level promo context', () async {
-      await h.analytics.logProductMovedToWishlistFromCart(
-        trackingMeta: itemBlock,
-        promoCodes: const ['TESTP5'],
-        promoAppliedCount: 1,
-      );
+    test('forwards the item block and the two client facts', () async {
+      await h.analytics.logProductMovedToWishlistFromCart(trackingMeta: itemBlock);
       final e = h.singleEvent(AnalyticsEvents.productAddedToWishlist);
       for (final entry in itemBlock.entries) {
         expect(e[entry.key], entry.value, reason: '`${entry.key}` did not survive');
       }
       expect(e[AnalyticsProperties.fromScreen], FromScreens.shoppingCart);
       expect(e[AnalyticsProperties.fromLocation], FromLocations.moveToWishlist);
-      // Plural here, against the singular `promo_code` the promo events send
-      // for the same array — Android's naming, preserved.
-      expect(e[AnalyticsProperties.promoCodes], ['TESTP5']);
-      expect(e[AnalyticsProperties.promoAppliedCount], 1);
-    });
-
-    test('a cart with no promo still reports the count as 0', () async {
-      await h.analytics.logProductMovedToWishlistFromCart(trackingMeta: itemBlock);
-      final e = h.singleEvent(AnalyticsEvents.productAddedToWishlist);
-      expect(e[AnalyticsProperties.promoAppliedCount], 0);
     });
   });
 
@@ -265,8 +251,6 @@ void main() {
           h.analytics.logPincodeChecked(fromScreen: FromScreens.shoppingCart, pincode: '560037'),
       AnalyticsEvents.shippingInfoViewed: () =>
           h.analytics.logShippingInfoViewed(fromLocation: FromLocations.orderSummary),
-      AnalyticsEvents.platformFeeInfoViewed: () =>
-          h.analytics.logPlatformFeeInfoViewed(fromLocation: FromLocations.orderSummary),
     };
 
     for (final entry in withAttribution.entries) {

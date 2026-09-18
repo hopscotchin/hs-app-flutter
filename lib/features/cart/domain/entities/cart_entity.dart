@@ -55,15 +55,6 @@ class CartEntity extends ActionResponse {
     return fromNode ?? const {};
   }
 
-  /// This SKU's attribution block, or null when the response carried none for
-  /// it. Type-checked rather than indexed: the map is raw JSON, so a SKU the
-  /// backend omitted — or sent as something other than an object — must read
-  /// as absent, not throw.
-  Map<String, dynamic>? trackingForSku(String sku) {
-    final entry = itemLevelTrackingData[sku];
-    return entry is Map<String, dynamic> ? entry : null;
-  }
-
   const CartEntity({
     super.action,
     super.message,

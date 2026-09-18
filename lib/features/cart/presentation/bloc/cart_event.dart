@@ -150,22 +150,6 @@ class PincodeCheckClicked extends CartEvent {
   const PincodeCheckClicked();
 }
 
-/// A price-summary row's ⓘ opened its sheet. Fires `shipping_info_viewed` or
-/// `platform_fee_info_viewed`, picked from [priceType].
-///
-/// The row rather than a resolved `from_location`: which fee it was decides the
-/// **event name** now, and that mapping belongs with the other analytics
-/// decisions in the bloc, not in the page.
-class PriceRowInfoOpened extends CartEvent {
-  /// The row's backend `priceType` — "Shipping fee", "Platform fee", ….
-  final String? priceType;
-
-  const PriceRowInfoOpened({this.priceType});
-
-  @override
-  List<Object?> get props => [priceType];
-}
-
 /// Which promo mutation the offers bottom sheet completed.
 ///
 /// [failed] covers both rejection shapes: a transport `Failure` and the

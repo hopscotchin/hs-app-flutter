@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/components/atoms/badge_icon.dart';
 import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/atoms/empty_state_widget.dart';
-import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
 import 'package:hs_app_flutter/components/atoms/price_summary_widget.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
+import 'package:hs_app_flutter/core/analytics/events/analytics_helper.dart';
+import 'package:hs_app_flutter/core/analytics/events/modules/cart_events.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/di/injection.dart';
 import 'package:hs_app_flutter/core/extensions/context_extension.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/colors.dart';
@@ -22,7 +24,6 @@ import 'package:hs_app_flutter/features/pincode/presentation/widgets/pincode_bot
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../components/page_components/message_bars_widget.dart';
-import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/cart_strings.dart';
 import '../../../../core/constants/strings/login_redirects.dart';
@@ -323,10 +324,8 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
               count: 0,
-              onTap: () => AppNavigator.goToWishlistGated(
-                context,
-                fromScreen: FromScreens.shoppingCart,
-              ),
+              onTap: () =>
+                  AppNavigator.goToWishlistGated(context, fromScreen: FromScreens.shoppingCart),
               iconColor: AppColors.textPrimary,
             );
           },
@@ -742,8 +741,11 @@ class _CartContent extends StatelessWidget {
                 // left the real shipping sheet unreported.
                 // Which fee was opened decides the event name; the bloc owns
                 // that map.
-                onRowActionOpened: (row) =>
-                    context.read<CartBloc>().add(PriceRowInfoOpened(priceType: row.label)),
+                onRowActionOpened: (row) => {
+                  sl<AnalyticsHelper>().logShippingInfoViewed(
+                    fromLocation: FromLocations.orderSummary,
+                  ),
+                },
               ),
             ),
           ],

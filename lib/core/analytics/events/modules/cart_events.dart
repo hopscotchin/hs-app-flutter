@@ -220,30 +220,18 @@ extension CartEvents on AnalyticsHelper {
   /// `putAnalyticsKey` drops, so the key never reaches the wire there either.
   /// It comes from the block when the backend sends a real count.
   ///
-  /// [promoCodes] and [promoAppliedCount] describe the **whole cart's** promo
-  /// state, so they cannot come from a per-item block. Android reads them off
-  /// `cart.promotionData` at the call site for this very reason
-  /// (`CartAnalytics:8-10`, `:30`, `:34`), and so does the caller here.
-  ///
-  /// Note `promo_codes` is **plural** on this event, against the singular
-  /// `promo_code` the three promo events send for the same array. A quirk of
-  /// Android's naming, preserved — the dashboards key on both spellings.
-  Future<void> logProductMovedToWishlistFromCart({
-    Map<String, dynamic>? trackingMeta,
-    List<String>? promoCodes,
-    int? promoAppliedCount,
-  }) => logEvent(
+  /// The cart's promo state is **not** sent. Android puts `promo_codes` and
+  /// `promo_applied_count` here (`CartAnalytics:256`, `:260`), but they
+  /// describe the whole bag rather than the line being moved, and this event
+  /// reports one product. ⚠️ A deliberate divergence: both keys go empty on
+  /// this event where Android populates them.
+  Future<void> logProductMovedToWishlistFromCart({Map<String, dynamic>? trackingMeta}) => logEvent(
     AnalyticsEvents.productAddedToWishlist,
     buildAnalyticsPayload(
       nodes: [trackingMeta],
       payload: <String, Object?>{}
         ..putAnalyticsKey(AnalyticsProperties.fromScreen, FromScreens.shoppingCart)
-        ..putAnalyticsKey(AnalyticsProperties.fromLocation, FromLocations.moveToWishlist)
-        ..putAnalyticsKey(AnalyticsProperties.promoCodes, promoCodes)
-        // Written raw: `0` is the honest count for a cart with no promo, and
-        // is the value Android's `zeroIfNull()` produces there. The key is
-        // always present so a dashboard can group on it.
-        ..[AnalyticsProperties.promoAppliedCount] = promoAppliedCount ?? 0,
+        ..putAnalyticsKey(AnalyticsProperties.fromLocation, FromLocations.moveToWishlist),
     ),
     attribution: true,
   );
@@ -349,19 +337,6 @@ extension CartEvents on AnalyticsHelper {
   /// [logPlatformFeeInfoViewed].
   Future<void> logShippingInfoViewed({required String fromLocation}) => logEvent(
     AnalyticsEvents.shippingInfoViewed,
-    <String, Object?>{}
-      ..putAnalyticsKey(AnalyticsProperties.fromScreen, FromScreens.shoppingCart)
-      ..putAnalyticsKey(AnalyticsProperties.fromLocation, fromLocation),
-    attribution: false,
-  );
-
-  /// `platform_fee_info_viewed` — the platform-fee row's ⓘ sheet.
-  ///
-  /// Same shape as [logShippingInfoViewed]; only the event name differs, so a
-  /// platform-fee view is no longer counted as a shipping-fee one. See
-  /// [AnalyticsEvents.platformFeeInfoViewed] for the parity caveat.
-  Future<void> logPlatformFeeInfoViewed({required String fromLocation}) => logEvent(
-    AnalyticsEvents.platformFeeInfoViewed,
     <String, Object?>{}
       ..putAnalyticsKey(AnalyticsProperties.fromScreen, FromScreens.shoppingCart)
       ..putAnalyticsKey(AnalyticsProperties.fromLocation, fromLocation),

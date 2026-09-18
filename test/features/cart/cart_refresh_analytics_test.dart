@@ -244,8 +244,6 @@ void main() {
     final wishlisted = h.singleEvent(AnalyticsEvents.productAddedToWishlist);
     expect(wishlisted[AnalyticsProperties.fromLocation], FromLocations.moveToWishlist);
     expect(wishlisted[AnalyticsProperties.fromScreen], FromScreens.shoppingCart);
-    // Cart-level promo context, read off the cart rather than the item block.
-    expect(wishlisted[AnalyticsProperties.promoAppliedCount], 0);
     expect(viewed[AnalyticsProperties.fromLocation], FromLocations.moveToWishlist);
   });
 
@@ -360,112 +358,6 @@ void main() {
       );
       expect(e['total_amount'], 500);
       expect(e['sku_count'], 1);
-    });
-  });
-
-  test('move to wishlist carries the mapped merchandising attributes', () async {
-    // End to end: the backend's per-SKU block reaches the event under the wire
-    // names, not its own. Sourced from `orderAttributionData` — the shape the
-    // live response uses while `wishlistInfo.trackingMeta` is still empty.
-    when(() => getCart(any())).thenAnswer(
-      (_) async => Right<Failure, CartEntity>(
-        CartModel.fromJson({
-          'cartItems': [
-            {'sku': 'SKU-0', 'productId': 100, 'brandName': 'Brand 0', 'quantity': 1},
-          ],
-          'orderAttributionData': {
-            'itemLevelTrackingData': {
-              'SKU-0': {
-                'atcUser': 'NB',
-                'hbt': 'T3',
-                'merchType': 'Catalog',
-                'atcSite': 'ios',
-                'country': 'India',
-                'taste': 'Classic',
-                'season': 'Autumn Winter',
-                'style': 'Half sleeves',
-                'pattern': 'Typography',
-                'weave': 'Woven',
-              },
-            },
-          },
-        }),
-      ),
-    );
-    await loadCart();
-    when(
-      () => moveToWishlist(any()),
-    ).thenAnswer((_) async => const Right<Failure, CartEntity>(CartEntity(action: 'success')));
-
-    bloc.add(const MoveToWishlist(sku: 'SKU-0', productId: 100, price: 599));
-    await awaitCartViewed();
-
-    final e = h.singleEvent(AnalyticsEvents.productAddedToWishlist);
-    expect(e[AnalyticsProperties.weave], 'Woven');
-    expect(e[AnalyticsProperties.country], 'India');
-    expect(e[AnalyticsProperties.merchType], 'Catalog');
-    expect(e[AnalyticsProperties.taste], 'Classic');
-    expect(e[AnalyticsProperties.hbt], 'T3');
-    // Backend spellings must not reach the wire alongside them.
-    expect(e.containsKey('merchType'), isFalse);
-    expect(e.containsKey('atcSite'), isFalse);
-    expect(e.containsKey('country'), isFalse);
-  });
-
-  test('a SKU with no tracking block still reports the move', () async {
-    // The old call site indexed the map directly and threw here.
-    await loadCart();
-    when(
-      () => moveToWishlist(any()),
-    ).thenAnswer((_) async => const Right<Failure, CartEntity>(CartEntity(action: 'success')));
-
-    bloc.add(const MoveToWishlist(sku: 'SKU-0', productId: 100, price: 599));
-    await awaitCartViewed();
-
-    final e = h.singleEvent(AnalyticsEvents.productAddedToWishlist);
-    expect(e[AnalyticsProperties.fromLocation], FromLocations.moveToWishlist);
-    expect(e.containsKey(AnalyticsProperties.weave), isFalse);
-  });
-
-  group('a price row picks its own info event', () {
-    // Driven through the real bloc, not a mirror of its matcher — the mapping
-    // is the thing under test.
-    Future<void> open(String? priceType) async {
-      await loadCart();
-      bloc.add(PriceRowInfoOpened(priceType: priceType));
-      await pumpEventQueue();
-    }
-
-    test('platform fee fires its own event', () async {
-      await open('Platform fee');
-      final e = h.singleEvent(AnalyticsEvents.platformFeeInfoViewed);
-      expect(e[AnalyticsProperties.fromScreen], FromScreens.shoppingCart);
-      expect(e[AnalyticsProperties.fromLocation], FromLocations.orderSummary);
-      expect(h.eventsNamed(AnalyticsEvents.shippingInfoViewed), isEmpty);
-    });
-
-    test('shipping fee keeps the Android event', () async {
-      await open('Shipping fee');
-      expect(h.singleEvent(AnalyticsEvents.shippingInfoViewed), isNotNull);
-      expect(h.eventsNamed(AnalyticsEvents.platformFeeInfoViewed), isEmpty);
-    });
-
-    test('casing and whitespace still match', () async {
-      await open('  PLATFORM fee ');
-      expect(h.singleEvent(AnalyticsEvents.platformFeeInfoViewed), isNotNull);
-    });
-
-    test('an unmapped row falls back to the Android event', () async {
-      // Never the coined one — a row nobody mapped must not open a bucket
-      // Android never writes to.
-      await open('Convenience fee');
-      expect(h.singleEvent(AnalyticsEvents.shippingInfoViewed), isNotNull);
-      expect(h.eventsNamed(AnalyticsEvents.platformFeeInfoViewed), isEmpty);
-    });
-
-    test('a null priceType falls back too', () async {
-      await open(null);
-      expect(h.singleEvent(AnalyticsEvents.shippingInfoViewed), isNotNull);
     });
   });
 

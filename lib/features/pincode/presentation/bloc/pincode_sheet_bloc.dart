@@ -177,7 +177,7 @@ class PincodeSheetBloc extends BaseBloc<PincodeSheetEvent, PincodeSheetState> {
   String get _analyticsFromScreen => switch (state.source) {
     PincodeSheetSource.cart => FromScreens.shoppingCart,
     PincodeSheetSource.pdp => FromScreens.product,
-    PincodeSheetSource.checkout => FromScreens.orderCheckout,
+    PincodeSheetSource.checkout => FromScreens.checkout,
   };
 
   Future<void> _runCheck(String pincode, Emitter<PincodeSheetState> emit, {int? addressId}) async {

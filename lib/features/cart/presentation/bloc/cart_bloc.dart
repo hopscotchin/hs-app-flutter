@@ -84,7 +84,6 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     on<ClearPromoActionSheet>(_onClearPromoActionSheet);
     on<CartItemControlTapped>(_onCartItemControlTapped);
     on<PincodeCheckClicked>(_onPincodeCheckClicked);
-    on<PriceRowInfoOpened>(_onPriceRowInfoOpened);
     on<OffersSheetPromoActionCompleted>(_onOffersSheetPromoActionCompleted);
   }
 
@@ -478,17 +477,12 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
         if (!current.isLoaded) return;
         // Same reason as remove: the block that describes the move lives on
         // the row, and the row is about to be dropped.
-        final promotion = current.cart!.promotionData;
         final trackingMeta = current.cart!.items
             .firstWhereOrNull((item) => item.sku == event.sku)
             ?.wishlistInfo
             ?.trackingMeta;
 
-        analytics.logProductMovedToWishlistFromCart(
-          trackingMeta: trackingMeta,
-          promoCodes: promotion?.allPromoCodes,
-          promoAppliedCount: promotion?.promoAppliedCount,
-        );
+        analytics.logProductMovedToWishlistFromCart(trackingMeta: trackingMeta);
         _completeItemRemoval(
           emit,
           current,
@@ -861,26 +855,6 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       fromScreen: FromScreens.shoppingCart,
       fromPincode: state.cart?.deliveryPincode?.pincode,
     );
-  }
-
-  /// The backend `priceType` of the one price-summary row with its own
-  /// analytics event. Lowercased here because the match normalises both sides.
-  ///
-  /// Backend display copy, not a wire constant — so a copy change degrades to
-  /// the fallback below rather than renaming anything on a dashboard.
-  static const String _platformFeeRowType = 'platform fee';
-
-  /// Which fee was opened picks the event; `from_location` is Android's single
-  /// `Order Summary` for both. An unrecognised row falls back to
-  /// `shipping_info_viewed`, the event Android actually emits, rather than
-  /// opening a bucket nobody named.
-  void _onPriceRowInfoOpened(PriceRowInfoOpened event, Emitter<CartState> emit) {
-    final isPlatformFee = event.priceType?.trim().toLowerCase() == _platformFeeRowType;
-    if (isPlatformFee) {
-      analytics.logPlatformFeeInfoViewed(fromLocation: FromLocations.orderSummary);
-    } else {
-      analytics.logShippingInfoViewed(fromLocation: FromLocations.orderSummary);
-    }
   }
 
   // ─── Analytics ────────────────────────────────────────────────────────

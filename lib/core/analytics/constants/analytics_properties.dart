@@ -356,16 +356,6 @@ class AnalyticsProperties {
   static const String styleCode = 'style_code';
   static const String redirectedFromColorWidget = 'redirected_from_colour_widget';
   static const String newProductIdSelected = 'new_product_id_selected';
-  static const String redirectedFromTabPage = 'redirected_from_tab_page';
-  static const String redirectedFromClusterEligiblePlp = 'redirected_from_cluster_eligible_plp';
-  static const String redirectedFromContinueBrowsingWidget =
-      'redirected_from_continue_browsing_widget';
-  static const String redirectedFromDoorway = 'redirected_from_doorway';
-
-  /// PDP: always emitted. Flutter has no shop-the-look entry path, so it ships
-  /// the constant `"No"` — Android always emits a `"Yes"`/`"No"` string here, so
-  /// dropping the key would be a divergence.
-  static const String redirectedFromShopTheLook = 'redirected_from_shop_the_look';
 
   // ─── Tabbed-page block (PDP: product_viewed + product_added_to_cart) ─
   static const String tabbedPageContainerName = 'tabbed_page_container_name';
