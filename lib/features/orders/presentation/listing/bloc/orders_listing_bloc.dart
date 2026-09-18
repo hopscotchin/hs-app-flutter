@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -49,6 +50,40 @@ class OrdersListingBloc
 
   static const int _pageSize = 20;
 
+  /// One cancel token per tab.
+  ///
+  /// [BaseBloc.swapCancelToken] keeps a single token, which assumes one bloc
+  /// drives one stream of requests. This bloc drives two independent lists, so
+  /// a shared token makes them cancel each other: switching to Gift Cards while
+  /// Orders is still loading kills the Orders request, its fold returns without
+  /// emitting, and the tab is stranded on the shimmer — `isUntouched` tests for
+  /// `initial`, so coming back never reloads it. The same collision stalls
+  /// pagination against refresh, and there `isLoadingMore` stays true, which
+  /// the guard in [_onLoadNextPage] then reads as "already loading" forever.
+  ///
+  /// With a token per tab, a cancel can only come from a newer request for the
+  /// same tab — which is about to emit — so returning silently is correct.
+  final Map<OrdersTab, CancelToken> _tokens = {};
+
+  /// Cancels this tab's in-flight request, if any, and returns a fresh token.
+  CancelToken _swapToken(OrdersTab tab) {
+    _tokens[tab]?.cancel(
+      'Cancelled: a newer request for this tab superseded it.',
+    );
+    final token = CancelToken();
+    _tokens[tab] = token;
+    return token;
+  }
+
+  @override
+  Future<void> close() {
+    for (final token in _tokens.values) {
+      token.cancel('Bloc closed.');
+    }
+    _tokens.clear();
+    return super.close();
+  }
+
   // ── Load ────────────────────────────────────────────────────────────────
 
   /// Full reset for one tab. Emits a bare [TabListingState] rather than a
@@ -65,7 +100,7 @@ class OrdersListingBloc
       ),
     );
 
-    final token = swapCancelToken();
+    final token = _swapToken(event.tab);
     final result = await _getListing(
       GetOrdersListingParams(
         tab: event.tab,
@@ -120,7 +155,7 @@ class OrdersListingBloc
     RefreshListing event,
     Emitter<OrdersListingState> emit,
   ) async {
-    final token = swapCancelToken();
+    final token = _swapToken(event.tab);
     final result = await _getListing(
       GetOrdersListingParams(
         tab: event.tab,
@@ -185,7 +220,7 @@ class OrdersListingBloc
     final nextPage = current.currentPage + 1;
     emit(state.withTab(event.tab, current.copyWith(isLoadingMore: true)));
 
-    final token = swapCancelToken();
+    final token = _swapToken(event.tab);
     final result = await _getListing(
       GetOrdersListingParams(
         tab: event.tab,
