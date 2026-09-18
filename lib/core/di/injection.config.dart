@@ -799,6 +799,21 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i127.AnalyticsHelper>(),
       ),
     );
+    gh.factory<_i672.CartBloc>(
+      () => _i672.CartBloc(
+        getCartUseCase: gh<_i242.GetCartUseCase>(),
+        removeCartItemUseCase: gh<_i1036.RemoveCartItemUseCase>(),
+        updateCartItemUseCase: gh<_i231.UpdateCartItemUseCase>(),
+        moveToWishlistUseCase: gh<_i44.MoveToWishlistUseCase>(),
+        applyPromoUseCase: gh<_i982.ApplyPromoUseCase>(),
+        removePromoUseCase: gh<_i935.RemovePromoUseCase>(),
+        mergeCartUseCase: gh<_i576.MergeCartUseCase>(),
+        orderNowUseCase: gh<_i580.OrderNowUseCase>(),
+        getStaticMessageBarsUseCase: gh<_i168.GetStaticMessageBarsUseCase>(),
+        analytics: gh<_i127.AnalyticsHelper>(),
+        cartTimer: gh<_i477.CartTimer>(),
+      ),
+    );
     gh.singleton<_i938.WishlistCubit>(
       () => _i938.WishlistCubit(
         gh<_i363.AddToWishlistUseCase>(),
@@ -875,19 +890,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i818.PrefManager>(),
       ),
     );
-    gh.factory<_i672.CartBloc>(
-      () => _i672.CartBloc(
-        getCartUseCase: gh<_i242.GetCartUseCase>(),
-        removeCartItemUseCase: gh<_i1036.RemoveCartItemUseCase>(),
-        updateCartItemUseCase: gh<_i231.UpdateCartItemUseCase>(),
-        moveToWishlistUseCase: gh<_i44.MoveToWishlistUseCase>(),
-        applyPromoUseCase: gh<_i982.ApplyPromoUseCase>(),
-        removePromoUseCase: gh<_i935.RemovePromoUseCase>(),
-        mergeCartUseCase: gh<_i576.MergeCartUseCase>(),
-        orderNowUseCase: gh<_i580.OrderNowUseCase>(),
-        getStaticMessageBarsUseCase: gh<_i168.GetStaticMessageBarsUseCase>(),
-        analytics: gh<_i127.AnalyticsHelper>(),
-        cartTimer: gh<_i477.CartTimer>(),
+    gh.factory<_i833.AddressBloc>(
+      () => _i833.AddressBloc(
+        gh<_i637.GetAddressesUseCase>(),
+        gh<_i277.DeleteAddressUseCase>(),
+        gh<_i551.SelectAddressUseCase>(),
+        gh<_i1013.AddressCacheManager>(),
         gh<_i127.AnalyticsHelper>(),
       ),
     );
