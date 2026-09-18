@@ -108,6 +108,12 @@ enum BackendActionType {
   /// through the same launcher rather than arriving as a URL.
   refundPolicy('REFUND_POLICY'),
 
+  /// privacy policy
+  privacyPolicy('PRIVACY_POLICY'),
+
+  /// terms and conditions
+  termsAndConditions('TERMS_AND_CONDITIONS'),
+
   /// No wire value — what [from] returns for anything unrecognised, including
   /// null.
   unknown('');

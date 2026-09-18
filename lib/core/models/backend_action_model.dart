@@ -10,30 +10,15 @@ class BackendActionButtonModel extends BackendActionButtonEntity {
     super.iconUrl,
   });
 
-  /// Accepts `actionUri` or the older `action` for the destination, preferring
-  /// `actionUri`.
-  ///
-  /// The orders v6/v9 contracts send `actionUri`, matching the key their
-  /// listing records already use and no longer colliding with
-  /// [BackendActionModel]'s `action`, whose value is an *object*.
-  ///
-  /// ⚠️ The `action` fallback is load-bearing, not politeness. Cart's message
-  /// bars and the promos action sheet still send `action`, and dropping it
-  /// fails silently rather than loudly: those buttons would parse with a null
-  /// destination and simply stop navigating. Delete it once those payloads
-  /// move. Same dual-key approach `PricingItemModel` uses for
-  /// `priceType`/`label`.
-  ///
-  /// `icon` keeps its wire name and maps to `iconUrl`, matching how
-  /// [BackendActionModel] has mapped that key since before this button had one.
+  /// Accepts `actionUri` for the destination.
   ///
   /// `type` is the identity for buttons that have no destination — a dialog's
   /// Continue, a fixed next step, or a behaviour whose target is app config.
-  /// Values are [BackendActionType].
+  /// Values are [BackendActionType]. It is optional and defaults to `unknown`.
   factory BackendActionButtonModel.fromJson(Map<String, dynamic> json) {
     return BackendActionButtonModel(
       label: parseToStringOrNull(json['label']),
-      actionUri: parseToStringOrNull(json['actionUri']),
+      actionUri: parseToStringOrNull(json['actionUri'] ?? json['action']),
       type: parseToStringOrNull(json['type']),
       style: parseToStringOrNull(json['style']),
       iconUrl: parseToStringOrNull(json['icon']),
