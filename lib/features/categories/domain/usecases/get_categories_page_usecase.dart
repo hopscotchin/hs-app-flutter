@@ -1,19 +1,19 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../entities/department_entity.dart';
+import '../entities/categories_page_entity.dart';
 import '../repositories/categories_repository.dart';
 import 'package:injectable/injectable.dart';
 
 @lazySingleton
-class GetDepartmentsUseCase
-    implements UseCase<List<DepartmentEntity>, NoParams> {
+class GetCategoriesPageUseCase
+    implements UseCase<CategoriesPageEntity, NoParams> {
   final CategoriesRepository repository;
 
-  GetDepartmentsUseCase(this.repository);
+  GetCategoriesPageUseCase(this.repository);
 
   @override
-  Future<Either<Failure, List<DepartmentEntity>>> call(NoParams params) {
-    return repository.getDepartments();
+  Future<Either<Failure, CategoriesPageEntity>> call(NoParams params) {
+    return repository.getCategoriesPage();
   }
 }

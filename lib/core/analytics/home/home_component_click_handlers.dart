@@ -53,6 +53,14 @@ extension HomeComponentClickHandlers on HomeTrackAnalyticManager {
         ],
       );
 
+  Future<void> onCategoryAccordionTapped(
+    CategoryAccordionData root,
+    CategoryAccordionTile tile,
+  ) =>
+      logTileClick(
+        trackingMetaChain: <Map<String, dynamic>?>[root.trackingMeta],
+      );
+
   Future<void> onProductGridTileTapped(
     ProductGridData root,
     ListingProductEntity item,

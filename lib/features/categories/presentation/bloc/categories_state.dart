@@ -16,12 +16,12 @@ class CategoriesLoading extends CategoriesState {
 }
 
 class CategoriesLoaded extends CategoriesState {
-  final List<DepartmentEntity> departments;
+  final CategoriesPageEntity page;
 
-  const CategoriesLoaded({required this.departments});
+  const CategoriesLoaded({required this.page});
 
   @override
-  List<Object?> get props => [departments];
+  List<Object?> get props => [page];
 }
 
 class CategoriesError extends CategoriesState {

@@ -107,6 +107,7 @@ class PageComponentType {
   static const String pageCarousel = 'PageCarousel';
   static const String productGrid = 'PRODUCT_GRID';
   static const String ctaButton = 'CTA_BUTTON';
+  static const String categoryAccordion = 'CategoryAccordion';
 }
 
 // ─── Shared building blocks ───
@@ -258,6 +259,7 @@ class PageCarouselTile extends Equatable {
   final int? id;
   final String? imageUrl;
   final String? actionUri;
+  final String? actionUriWeb;
   final String? mimeType;
   final String? sort;
   final ListingProductEntity? product;
@@ -267,6 +269,7 @@ class PageCarouselTile extends Equatable {
     this.id,
     this.imageUrl,
     this.actionUri,
+    this.actionUriWeb,
     this.mimeType,
     this.sort,
     this.product,
@@ -275,7 +278,7 @@ class PageCarouselTile extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, imageUrl, actionUri, mimeType, sort, product, trackingMeta];
+      [id, imageUrl, actionUri, actionUriWeb, mimeType, sort, product, trackingMeta];
 }
 
 // ─── Hero ───
@@ -490,6 +493,47 @@ class LayoutInfoData extends Equatable {
 
   @override
   List<Object?> get props => [columns, showProductInfo];
+}
+
+// ─── CategoryAccordion ───
+
+/// A single Categories-tab accordion row. `subCategory` is non-empty only
+/// when `actionType == 'subCategory'` — tapping the row expands to show
+/// these instead of navigating directly. There is no separate
+/// `viewConfig.nested` flag: [isNested] is derived purely from
+/// `subCategory.isNotEmpty`.
+class CategoryAccordionTile extends Equatable {
+  final String? title;
+  final String? actionType;
+  final String? actionUri;
+  final String? actionUriWeb;
+  final List<CategoryAccordionTile> subCategory;
+
+  const CategoryAccordionTile({
+    this.title,
+    this.actionType,
+    this.actionUri,
+    this.actionUriWeb,
+    this.subCategory = const [],
+  });
+
+  bool get isNested => subCategory.isNotEmpty;
+
+  @override
+  List<Object?> get props => [title, actionType, actionUri, actionUriWeb, subCategory];
+}
+
+class CategoryAccordionData extends Equatable {
+  final CategoryAccordionTile? tile;
+
+  /// Component-scoped tracking overrides from the backend. See
+  /// [PageComponent.trackingMeta].
+  final Map<String, dynamic>? trackingMeta;
+
+  const CategoryAccordionData({this.tile, this.trackingMeta});
+
+  @override
+  List<Object?> get props => [tile, trackingMeta];
 }
 
 /// Mirrors Android's Margins model. Controls outer/inner spacing per component.

@@ -7,12 +7,17 @@ import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
+import '../../../../core/constants/strings/search_strings.dart';
 import '../../../../core/navigation/nav_destination.dart';
 import '../../../../core/analytics/constants/funnel.dart';
+import '../../../../core/analytics/events/analytics_helper.dart';
 import '../../../../core/analytics/events/modules/home_events.dart';
+import '../../../../core/analytics/events/modules/plp_events.dart';
 import '../../../../core/analytics/home/home_track_analytic_manager.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/router/app_navigator.dart';
 import '../../../../core/router/navigation_observer.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/home_page_entity.dart';
 import '../bloc/home_bloc.dart';
 import '../widgets/combined_header_delegate.dart';
@@ -27,7 +32,7 @@ class DiscoverPage extends StatefulWidget {
 }
 
 class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClientMixin {
-  static const _kToolbarHeight = 80.0;
+  static const _kToolbarHeight = CombinedHeaderDelegate.defaultToolbarHeight;
   static const _kTabsHeight = 60.0;
 
   static const _kPaginationTrigger = 0.8;
@@ -213,11 +218,25 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
                         isImageDark: state.homePage?.isDarkHeader ?? false,
                         toolbarHeight: _kToolbarHeight,
                         tabsHeight: _kTabsHeight,
+                        showSearchBar: true,
+                        // Same hint text as Categories' search bar.
+                        searchPlaceholder: SearchStrings.defaultSearchPlaceholder,
+                        onSearchTap: () {
+                          sl<AnalyticsHelper>().logSearchClicked(
+                            source: const SourcePage(
+                              fromScreen: FromScreens.discover,
+                              fromLocation: FromLocations.searchBox,
+                            ),
+                          );
+                          AppNavigator.goToSearch(context);
+                        },
                       ),
                     ),
                     _buildContentSliver(context, state),
                     const LoadingMoreSliver(),
-                    const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
+                    const SliverPadding(
+                      padding: EdgeInsets.only(bottom: AppSpacing.bottomNavHeight + AppSpacing.md),
+                    ),
                   ],
                 ),
               ),

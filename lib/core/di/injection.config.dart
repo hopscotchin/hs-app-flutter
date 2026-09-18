@@ -149,8 +149,8 @@ import 'package:hs_app_flutter/features/categories/data/repositories/categories_
     as _i259;
 import 'package:hs_app_flutter/features/categories/domain/repositories/categories_repository.dart'
     as _i816;
-import 'package:hs_app_flutter/features/categories/domain/usecases/get_departments_usecase.dart'
-    as _i765;
+import 'package:hs_app_flutter/features/categories/domain/usecases/get_categories_page_usecase.dart'
+    as _i605;
 import 'package:hs_app_flutter/features/categories/presentation/bloc/categories_bloc.dart'
     as _i620;
 import 'package:hs_app_flutter/features/checkout/data/datasources/remote/checkout_remote_datasource.dart'
@@ -756,8 +756,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1013.GetListingDataUseCase>(
       () => _i1013.GetListingDataUseCase(gh<_i760.PlpRepository>()),
     );
-    gh.lazySingleton<_i765.GetDepartmentsUseCase>(
-      () => _i765.GetDepartmentsUseCase(gh<_i816.CategoriesRepository>()),
+    gh.lazySingleton<_i605.GetCategoriesPageUseCase>(
+      () => _i605.GetCategoriesPageUseCase(gh<_i816.CategoriesRepository>()),
     );
     gh.factory<_i140.CheckoutBloc>(
       () => _i140.CheckoutBloc(
@@ -822,9 +822,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i692.RemoveFromWishlistUseCase>(),
       ),
     );
-    gh.factory<_i724.SearchBloc>(
-      () => _i724.SearchBloc(gh<_i938.GetSearchSuggestionsUseCase>()),
-    );
     gh.lazySingleton<_i407.RegisterDeviceUseCase>(
       () => _i407.RegisterDeviceUseCase(gh<_i357.DeviceRepository>()),
     );
@@ -875,6 +872,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i179.OrderAttributionHelper>(),
       ),
     );
+    gh.factory<_i620.CategoriesBloc>(
+      () => _i620.CategoriesBloc(
+        gh<_i605.GetCategoriesPageUseCase>(),
+        gh<_i127.AnalyticsHelper>(),
+      ),
+    );
     gh.factory<_i487.PincodeSheetBloc>(
       () => _i487.PincodeSheetBloc(
         gh<_i297.CheckDeliveryPincodeUseCase>(),
@@ -904,6 +907,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i884.CartCountCubit>(),
       ),
     );
+    gh.factory<_i724.SearchBloc>(
+      () => _i724.SearchBloc(
+        gh<_i938.GetSearchSuggestionsUseCase>(),
+        gh<_i818.PrefManager>(),
+      ),
+    );
     gh.factory<_i631.OrdersListingBloc>(
       () => _i631.OrdersListingBloc(
         gh<_i871.GetOrdersListingUseCase>(),
@@ -928,11 +937,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i517.MoveToCartUseCase>(),
         gh<_i884.CartCountCubit>(),
         gh<_i127.AnalyticsHelper>(),
-      ),
-    );
-    gh.factory<_i620.CategoriesBloc>(
-      () => _i620.CategoriesBloc(
-        getDepartmentsUseCase: gh<_i765.GetDepartmentsUseCase>(),
       ),
     );
     gh.factory<_i18.AccountBloc>(
