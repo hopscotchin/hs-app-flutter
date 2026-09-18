@@ -99,16 +99,18 @@ class OrderListingCard extends StatelessWidget {
           color: AppColors.neutralGrey1,
           borderRadius: AppSpacing.borderRadiusXs,
         ),
+        // A BoxDecoration's borderRadius paints the background but does not
+        // clip children. The image sits flush to the card's left, top and
+        // bottom and rounds itself at 2, so inside a 4 corner its pixels poke
+        // out of the grey at both left corners. Clipping here is what makes
+        // the card the artboard's rounded rectangle rather than the image's.
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: record.isTappable ? onTap : null,
           borderRadius: AppSpacing.borderRadiusXs,
           // Right padding only. The image is flush to the card's left, top and
-          // bottom; the text column insets its own top. A uniform
+          // bottom; the text column insets its own top and bottom. A uniform
           // EdgeInsets.all gets three sides wrong.
-          //
-          // No bottom padding — the image runs to the card's bottom edge, so
-          // the card is exactly as tall as the image unless the text column
-          // outgrows it.
           child: Padding(
             padding: const EdgeInsets.only(right: AppSpacing.xs),
             child: Row(
@@ -154,8 +156,15 @@ class OrderListingCard extends StatelessWidget {
     final status = record.status;
 
     return Padding(
-      // Top only — the row carries the 12 below, so it clears the image as well.
-      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      // Both ends, not just the top. The card is as tall as the taller of the
+      // two columns, and the text wins more often than the artboard suggests:
+      // at 360pt — Pixel, and most mid-range Android — the image is only 168
+      // tall against a text column of roughly 176, so the card grows and the
+      // last line would otherwise sit flush on the card's bottom edge. Text
+      // scaling and a two-line detail row do the same on any width.
+      //
+      // The card's margin does not help here; it is outside the background.
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -184,7 +193,7 @@ class OrderListingCard extends StatelessWidget {
             AppSpacing.verticalGapXs,
             _itemDetail(record.itemDetails!),
           ],
-          AppSpacing.verticalGapSm,
+          AppSpacing.verticalGapXsm,
           _labelledValue(
             OrdersStrings.qtyLabel,
             '${record.quantity}',

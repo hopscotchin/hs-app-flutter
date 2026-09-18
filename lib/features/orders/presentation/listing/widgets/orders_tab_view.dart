@@ -138,16 +138,16 @@ class OrdersTabView extends StatelessWidget {
     return [
       // Both tabs carry the nudge; only Orders carries the support footer. No
       // tab check either way — each renders if the response has the block.
-      if (nudge != null) ...[
-        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
-        SliverToBoxAdapter(
-          child: NotificationNudgeCard(
-            nudge: nudge,
-            onAccept: onNudgeAccept,
-            onDecline: onNudgeDecline,
-          ),
-        ),
-      ],
+      // if (nudge != null) ...[
+      //   const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
+      //   SliverToBoxAdapter(
+      //     child: NotificationNudgeCard(
+      //       nudge: nudge,
+      //       onAccept: onNudgeAccept,
+      //       onDecline: onNudgeDecline,
+      //     ),
+      //   ),
+      // ],
 
       SliverPadding(
         // Cards carry half the 12pt gap each, so 6 here puts the first card

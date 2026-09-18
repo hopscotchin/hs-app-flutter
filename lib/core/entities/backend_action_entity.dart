@@ -27,8 +27,7 @@ class BackendActionButtonEntity extends Equatable {
   final String? actionUri;
 
   /// Names an app-owned behaviour or an identity, in SCREAMING_SNAKE —
-  /// `CALL_US`, `HELP_CENTER`, `REFUND_POLICY`, `CANCEL`, `RETURN`,
-  /// `EXCHANGE`, `ADD_ADDRESS`, `PAYMENT_RETRY`, `PAYMENT_FALLBACK`.
+  /// `CALL_US`, `HELP_CENTER`, `REFUND_POLICY`.
   ///
   /// Carries the buttons [actionUri] cannot: a dialog's Continue, a fixed next
   /// step, or anything whose destination is app config rather than a URL. Where
@@ -37,7 +36,8 @@ class BackendActionButtonEntity extends Equatable {
   /// Kept as the raw string, with [actionType] for switching on. An
   /// unrecognised value renders the button inert rather than throwing, so a
   /// type shipped by the backend degrades quietly on old builds — and keeping
-  /// the string means the log says `ADD_ADDRESS` rather than `unknown`.
+  /// the string means the log says whatever actually arrived rather than just
+  /// `unknown`.
   final String? type;
 
   /// Backend-chosen emphasis — `"primary"` / `"secondary"`. Null when the
@@ -92,8 +92,9 @@ class BackendActionButtonEntity extends Equatable {
 /// at tap time — neither is expressible as a URL on the wire, which is why
 /// [BackendActionButtonEntity.actionUri] is null on those buttons.
 ///
-/// The wire value sits beside each name because they differ: `returnItems` is
-/// `RETURN`, which cannot be a Dart identifier.
+/// The wire value sits beside each name because they differ: the wire is
+/// SCREAMING_SNAKE and a Dart identifier cannot be, so `callUs` carries
+/// `CALL_US` rather than deriving it.
 ///
 /// [unknown] is not a wire value. The vocabulary is open by design — the
 /// backend may ship a type before a build knows it — so [from] never throws and
@@ -106,14 +107,6 @@ enum BackendActionType {
   /// The "Read full refund T&C ›" line. A help-centre article, so it goes
   /// through the same launcher rather than arriving as a URL.
   refundPolicy('REFUND_POLICY'),
-
-  cancel('CANCEL'),
-  returnItems('RETURN'),
-  exchange('EXCHANGE'),
-  addAddress('ADD_ADDRESS'),
-  confirm('CONFIRM'),
-  paymentRetry('PAYMENT_RETRY'),
-  paymentFallback('PAYMENT_FALLBACK'),
 
   /// No wire value — what [from] returns for anything unrecognised, including
   /// null.
