@@ -14,7 +14,12 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChildEntity {
 
- int get id; String get name; ChildGender get gender; DateTime? get dob; String? get imageUrl; bool get consent;
+ int get id; String get name; ChildGender get gender; DateTime? get dob; String? get imageUrl; bool get consent;// The three fields below arrive straight from the backend's `age` /
+// `trackingMeta` (confirmed live on both `v2/list` and
+// `v3/save-and-update`'s response) — null only for a not-yet-saved
+// child built locally from form input, which has no backend-computed
+// values yet.
+ String? get age; int? get ageInMonths; String? get cohortKey;
 /// Create a copy of ChildEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +30,16 @@ $ChildEntityCopyWith<ChildEntity> get copyWith => _$ChildEntityCopyWithImpl<Chil
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChildEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.consent, consent) || other.consent == consent));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChildEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.consent, consent) || other.consent == consent)&&(identical(other.age, age) || other.age == age)&&(identical(other.ageInMonths, ageInMonths) || other.ageInMonths == ageInMonths)&&(identical(other.cohortKey, cohortKey) || other.cohortKey == cohortKey));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,gender,dob,imageUrl,consent);
+int get hashCode => Object.hash(runtimeType,id,name,gender,dob,imageUrl,consent,age,ageInMonths,cohortKey);
 
 @override
 String toString() {
-  return 'ChildEntity(id: $id, name: $name, gender: $gender, dob: $dob, imageUrl: $imageUrl, consent: $consent)';
+  return 'ChildEntity(id: $id, name: $name, gender: $gender, dob: $dob, imageUrl: $imageUrl, consent: $consent, age: $age, ageInMonths: $ageInMonths, cohortKey: $cohortKey)';
 }
 
 
@@ -45,7 +50,7 @@ abstract mixin class $ChildEntityCopyWith<$Res>  {
   factory $ChildEntityCopyWith(ChildEntity value, $Res Function(ChildEntity) _then) = _$ChildEntityCopyWithImpl;
 @useResult
 $Res call({
- int id, String name, ChildGender gender, DateTime? dob, String? imageUrl, bool consent
+ int id, String name, ChildGender gender, DateTime? dob, String? imageUrl, bool consent, String? age, int? ageInMonths, String? cohortKey
 });
 
 
@@ -62,7 +67,7 @@ class _$ChildEntityCopyWithImpl<$Res>
 
 /// Create a copy of ChildEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? gender = null,Object? dob = freezed,Object? imageUrl = freezed,Object? consent = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? gender = null,Object? dob = freezed,Object? imageUrl = freezed,Object? consent = null,Object? age = freezed,Object? ageInMonths = freezed,Object? cohortKey = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -70,7 +75,10 @@ as String,gender: null == gender ? _self.gender : gender // ignore: cast_nullabl
 as ChildGender,dob: freezed == dob ? _self.dob : dob // ignore: cast_nullable_to_non_nullable
 as DateTime?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String?,consent: null == consent ? _self.consent : consent // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,age: freezed == age ? _self.age : age // ignore: cast_nullable_to_non_nullable
+as String?,ageInMonths: freezed == ageInMonths ? _self.ageInMonths : ageInMonths // ignore: cast_nullable_to_non_nullable
+as int?,cohortKey: freezed == cohortKey ? _self.cohortKey : cohortKey // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -155,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  ChildGender gender,  DateTime? dob,  String? imageUrl,  bool consent)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  ChildGender gender,  DateTime? dob,  String? imageUrl,  bool consent,  String? age,  int? ageInMonths,  String? cohortKey)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChildEntity() when $default != null:
-return $default(_that.id,_that.name,_that.gender,_that.dob,_that.imageUrl,_that.consent);case _:
+return $default(_that.id,_that.name,_that.gender,_that.dob,_that.imageUrl,_that.consent,_that.age,_that.ageInMonths,_that.cohortKey);case _:
   return orElse();
 
 }
@@ -176,10 +184,10 @@ return $default(_that.id,_that.name,_that.gender,_that.dob,_that.imageUrl,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  ChildGender gender,  DateTime? dob,  String? imageUrl,  bool consent)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  ChildGender gender,  DateTime? dob,  String? imageUrl,  bool consent,  String? age,  int? ageInMonths,  String? cohortKey)  $default,) {final _that = this;
 switch (_that) {
 case _ChildEntity():
-return $default(_that.id,_that.name,_that.gender,_that.dob,_that.imageUrl,_that.consent);case _:
+return $default(_that.id,_that.name,_that.gender,_that.dob,_that.imageUrl,_that.consent,_that.age,_that.ageInMonths,_that.cohortKey);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +204,10 @@ return $default(_that.id,_that.name,_that.gender,_that.dob,_that.imageUrl,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  ChildGender gender,  DateTime? dob,  String? imageUrl,  bool consent)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  ChildGender gender,  DateTime? dob,  String? imageUrl,  bool consent,  String? age,  int? ageInMonths,  String? cohortKey)?  $default,) {final _that = this;
 switch (_that) {
 case _ChildEntity() when $default != null:
-return $default(_that.id,_that.name,_that.gender,_that.dob,_that.imageUrl,_that.consent);case _:
+return $default(_that.id,_that.name,_that.gender,_that.dob,_that.imageUrl,_that.consent,_that.age,_that.ageInMonths,_that.cohortKey);case _:
   return null;
 
 }
@@ -211,7 +219,7 @@ return $default(_that.id,_that.name,_that.gender,_that.dob,_that.imageUrl,_that.
 
 
 class _ChildEntity implements ChildEntity {
-  const _ChildEntity({this.id = 0, this.name = '', this.gender = ChildGender.boy, this.dob, this.imageUrl, this.consent = false});
+  const _ChildEntity({this.id = 0, this.name = '', this.gender = ChildGender.boy, this.dob, this.imageUrl, this.consent = false, this.age, this.ageInMonths, this.cohortKey});
   
 
 @override@JsonKey() final  int id;
@@ -220,6 +228,14 @@ class _ChildEntity implements ChildEntity {
 @override final  DateTime? dob;
 @override final  String? imageUrl;
 @override@JsonKey() final  bool consent;
+// The three fields below arrive straight from the backend's `age` /
+// `trackingMeta` (confirmed live on both `v2/list` and
+// `v3/save-and-update`'s response) — null only for a not-yet-saved
+// child built locally from form input, which has no backend-computed
+// values yet.
+@override final  String? age;
+@override final  int? ageInMonths;
+@override final  String? cohortKey;
 
 /// Create a copy of ChildEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -231,16 +247,16 @@ _$ChildEntityCopyWith<_ChildEntity> get copyWith => __$ChildEntityCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChildEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.consent, consent) || other.consent == consent));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChildEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.consent, consent) || other.consent == consent)&&(identical(other.age, age) || other.age == age)&&(identical(other.ageInMonths, ageInMonths) || other.ageInMonths == ageInMonths)&&(identical(other.cohortKey, cohortKey) || other.cohortKey == cohortKey));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,gender,dob,imageUrl,consent);
+int get hashCode => Object.hash(runtimeType,id,name,gender,dob,imageUrl,consent,age,ageInMonths,cohortKey);
 
 @override
 String toString() {
-  return 'ChildEntity(id: $id, name: $name, gender: $gender, dob: $dob, imageUrl: $imageUrl, consent: $consent)';
+  return 'ChildEntity(id: $id, name: $name, gender: $gender, dob: $dob, imageUrl: $imageUrl, consent: $consent, age: $age, ageInMonths: $ageInMonths, cohortKey: $cohortKey)';
 }
 
 
@@ -251,7 +267,7 @@ abstract mixin class _$ChildEntityCopyWith<$Res> implements $ChildEntityCopyWith
   factory _$ChildEntityCopyWith(_ChildEntity value, $Res Function(_ChildEntity) _then) = __$ChildEntityCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String name, ChildGender gender, DateTime? dob, String? imageUrl, bool consent
+ int id, String name, ChildGender gender, DateTime? dob, String? imageUrl, bool consent, String? age, int? ageInMonths, String? cohortKey
 });
 
 
@@ -268,7 +284,7 @@ class __$ChildEntityCopyWithImpl<$Res>
 
 /// Create a copy of ChildEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? gender = null,Object? dob = freezed,Object? imageUrl = freezed,Object? consent = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? gender = null,Object? dob = freezed,Object? imageUrl = freezed,Object? consent = null,Object? age = freezed,Object? ageInMonths = freezed,Object? cohortKey = freezed,}) {
   return _then(_ChildEntity(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -276,7 +292,10 @@ as String,gender: null == gender ? _self.gender : gender // ignore: cast_nullabl
 as ChildGender,dob: freezed == dob ? _self.dob : dob // ignore: cast_nullable_to_non_nullable
 as DateTime?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String?,consent: null == consent ? _self.consent : consent // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,age: freezed == age ? _self.age : age // ignore: cast_nullable_to_non_nullable
+as String?,ageInMonths: freezed == ageInMonths ? _self.ageInMonths : ageInMonths // ignore: cast_nullable_to_non_nullable
+as int?,cohortKey: freezed == cohortKey ? _self.cohortKey : cohortKey // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -38,6 +38,14 @@ abstract class ChildEntity with _$ChildEntity {
     DateTime? dob,
     String? imageUrl,
     @Default(false) bool consent,
+    // The three fields below arrive straight from the backend's `age` /
+    // `trackingMeta` (confirmed live on both `v2/list` and
+    // `v3/save-and-update`'s response) — null only for a not-yet-saved
+    // child built locally from form input, which has no backend-computed
+    // values yet.
+    String? age,
+    int? ageInMonths,
+    String? cohortKey,
   }) = _ChildEntity;
 }
 
@@ -49,13 +57,10 @@ extension ChildEntityX on ChildEntity {
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
   ]; // ignore: prefer_const_declarations
 
-  /// Ready-to-display date, e.g. "15 May 2019".
-  ///
-  /// Computed client-side today because the live backend only returns
-  /// year/month/day parts, not a display string. Once the backend ships the
-  /// direct `dob`/`age` strings proposed in PROFILE_KIDS_API_CONTRACT.md,
-  /// this whole extension goes away and the entity just carries the string
-  /// straight through.
+  /// Ready-to-display date, e.g. "15 May 2019" — reformatted from the
+  /// parsed [dob] rather than carrying the backend's own display string
+  /// straight through, since [dob] is also needed as a real `DateTime` for
+  /// the edit-mode date picker and the outgoing save request.
   String get dobDisplay {
     final d = dob;
     if (d == null) return '';
@@ -69,47 +74,5 @@ extension ChildEntityX on ChildEntity {
     final d = dob;
     if (d == null) return '';
     return '${d.year}-${d.month}-${d.day}';
-  }
-
-  /// Whole months between [dob] and today — mirrors Android's
-  /// `Utils.calculateAge`, floored at 0. Backing value for [ageDisplay] and
-  /// the cohort classification in [cohortKey].
-  int get ageInMonths {
-    final d = dob;
-    if (d == null) return 0;
-    final now = DateTime.now();
-    var months = (now.year - d.year) * 12 + (now.month - d.month);
-    if (now.day < d.day) months -= 1;
-    return months < 0 ? 0 : months;
-  }
-
-  /// Ready-to-display age, e.g. "5 Y 3 M". Temporary client-side computation
-  /// (see [dobDisplay]) until the backend precomputes it.
-  String get ageDisplay {
-    if (dob == null) return '';
-    final months = ageInMonths;
-    final years = months ~/ 12;
-    final remMonths = months % 12;
-    if (years == 0) return '$remMonths M';
-    if (remMonths == 0) return '$years Y';
-    return '$years Y $remMonths M';
-  }
-
-  /// Age-gender cohort bucket, mirroring Android's
-  /// `Utils.getChildCohortCategory` boundaries (<=12mo infant, 13-72mo
-  /// toddler, >72mo child) and the exact `ChildProfileCohort` codes
-  /// (`B_I`/`B_T`/`B_C`/`G_I`/`G_T`/`G_C`) it sends as both the
-  /// `child_age_gender_cohort` event property and the cohort-count trait
-  /// keys — do not swap in a friendlier string, dashboards key on these
-  /// exact codes.
-  String get cohortKey {
-    final months = ageInMonths;
-    final bucket = months <= 12
-        ? 'I'
-        : months <= 72
-        ? 'T'
-        : 'C';
-    final genderCode = gender == ChildGender.boy ? 'B' : 'G';
-    return '${genderCode}_$bucket';
   }
 }

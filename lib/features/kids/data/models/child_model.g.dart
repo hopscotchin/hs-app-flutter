@@ -13,4 +13,6 @@ ChildModel _$ChildModelFromJson(Map<String, dynamic> json) => ChildModel(
   dob: _dobFromJson(json['dob']),
   imageUrl: json['imageUrl'] as String?,
   consent: json['consent'] as bool? ?? false,
+  age: json['age'] as String?,
+  trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
 );

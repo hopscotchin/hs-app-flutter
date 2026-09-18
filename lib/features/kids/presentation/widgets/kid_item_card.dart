@@ -77,7 +77,7 @@ class KidItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${child.gender.displayLabel}  •  ${child.ageDisplay}',
+                  '${child.gender.displayLabel}  •  ${child.age ?? ''}',
                   style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
                 ),
                 const SizedBox(height: 2),

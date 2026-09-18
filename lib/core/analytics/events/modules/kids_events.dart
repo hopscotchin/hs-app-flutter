@@ -28,8 +28,8 @@ extension KidsEvents on AnalyticsHelper {
     AnalyticsProperties.childProfileGender: child.gender.displayLabel,
     if (child.dob != null) ...{
       AnalyticsProperties.childProfileDob: child.dobWireValue,
-      AnalyticsProperties.childProfileAge: child.ageInMonths,
-      AnalyticsProperties.childProfileCohort: child.cohortKey,
+      AnalyticsProperties.childProfileAge: child.ageInMonths ?? 0,
+      AnalyticsProperties.childProfileCohort: child.cohortKey ?? '',
     },
   };
 
@@ -50,7 +50,8 @@ extension KidsEvents on AnalyticsHelper {
   /// to the live `cohortKey` only for a child added before this assignment
   /// tracking existed (no recorded assignment to look up).
   Future<void> _adjustChildCohort(ChildEntity child, {required int delta}) async {
-    if (child.dob == null) return;
+    final liveCohortKey = child.cohortKey;
+    if (liveCohortKey == null) return;
     final raw = prefs.childCohorts;
     final counts = raw == null
         ? <String, int>{}
@@ -64,7 +65,7 @@ extension KidsEvents on AnalyticsHelper {
             (key, value) => MapEntry(key, value as String),
           );
     final childId = child.id.toString();
-    final key = delta > 0 ? child.cohortKey : (assignments[childId] ?? child.cohortKey);
+    final key = delta > 0 ? liveCohortKey : (assignments[childId] ?? liveCohortKey);
     if (delta > 0) {
       counts[key] = (counts[key] ?? 0) + 1;
       assignments[childId] = key;

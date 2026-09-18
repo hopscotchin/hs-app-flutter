@@ -19,6 +19,10 @@ part 'child_model.g.dart';
 ///    `"DD-MM-YYYY"` string the save endpoint's *request* body sends (see
 ///    [ChildEntityRequestX.toRequestJson]); the two are never the same shape.
 ///  - the photo URL key is `imageUrl` on both the way in and the way out.
+///
+/// `age` and `trackingMeta.{ageInMonths, cohort}` also arrive precomputed on
+/// both endpoints' responses — carried straight through to [ChildEntity]
+/// rather than recomputed client-side from [dob].
 @JsonSerializable(createToJson: false)
 class ChildModel {
   const ChildModel({
@@ -28,6 +32,8 @@ class ChildModel {
     this.dob,
     this.imageUrl,
     this.consent = false,
+    this.age,
+    this.trackingMeta,
   });
 
   @JsonKey(fromJson: parseToInt) final int id;
@@ -36,6 +42,12 @@ class ChildModel {
   @JsonKey(fromJson: _dobFromJson) final DateTime? dob;
   final String? imageUrl;
   @JsonKey(defaultValue: false) final bool consent;
+  final String? age;
+
+  /// Raw `{"cohort": "G_I", "ageInMonths": 12, "gender": "Girl"}` blob —
+  /// `cohort`/`ageInMonths` are extracted by key in [toEntity]; `gender` here
+  /// duplicates the top-level `gender` field and is otherwise unused.
+  final Map<String, dynamic>? trackingMeta;
 
   factory ChildModel.fromJson(Map<String, dynamic> json) => _$ChildModelFromJson(json);
 }
@@ -59,8 +71,17 @@ DateTime? _dobFromJson(Object? value) {
 }
 
 extension ChildModelX on ChildModel {
-  ChildEntity toEntity() =>
-      ChildEntity(id: id, name: name, gender: gender, dob: dob, imageUrl: imageUrl, consent: consent);
+  ChildEntity toEntity() => ChildEntity(
+    id: id,
+    name: name,
+    gender: gender,
+    dob: dob,
+    imageUrl: imageUrl,
+    consent: consent,
+    age: age,
+    ageInMonths: trackingMeta?['ageInMonths'] as int?,
+    cohortKey: trackingMeta?['cohort'] as String?,
+  );
 }
 
 extension ChildEntityRequestX on ChildEntity {
