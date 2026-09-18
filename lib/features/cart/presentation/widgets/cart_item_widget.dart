@@ -256,9 +256,15 @@ class CartItemWidget extends StatelessWidget {
                       discountText: item.priceInfo!.discount,
                       isSoldOut: false,
                     ),
-                  for (final detail in item.cartItemDetails) ...[
+                  // `.indexed` for the detail's own position: `_key` already
+                  // prefixes the row (`cart_item_<i>_`), so this argument is
+                  // the `<j>` in `cart_item_<i>_detail_<j>`. Passing the row
+                  // index here gave every detail on a row the same key, which
+                  // throws "Duplicate keys found" for any item carrying more
+                  // than one — a price drop plus a returns note, say.
+                  for (final (detailIndex, detail) in item.cartItemDetails.indexed) ...[
                     AppSpacing.verticalGapXs,
-                    _buildItemDetail(detail, testIndex ?? 0),
+                    _buildItemDetail(detail, detailIndex),
                   ],
 
                   AppSpacing.gapXxs,

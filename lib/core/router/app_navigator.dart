@@ -44,10 +44,33 @@ abstract final class AppNavigator {
   /// checkout on its own as soon as the cart loads, instead of waiting for the
   /// checkout button — the Flutter equivalent of Android's
   /// `Util.createBuyNowShoppingCartIntent` passing `IS_FROM_BUYNOW`.
-  static void goToCart(BuildContext context, {bool fromBuyNow = false}) => context.pushNamed(
-    RouteNames.cartName,
-    queryParameters: fromBuyNow ? const {'fromBuyNow': 'true'} : const {},
-  );
+  /// Opens the cart.
+  ///
+  /// [sourcePage] is **required** and names where the user came from — its
+  /// `fromScreen` becomes `from_screen` on every `cart_viewed` of the visit,
+  /// and its `fromLocation` names the control that opened the cart. Android
+  /// passes both at each call site the same way
+  /// (`CommonEvents.navigateToCart(fromScreen, fromLocation)`), and they are
+  /// required here for the same reason: neither can be derived. The PLP's
+  /// `fromScreen` is the *boutique's name* (`ProductListActivity:745`), which
+  /// no router or navigation observer knows.
+  ///
+  /// [SourcePage] rather than two loose strings so the cart matches the
+  /// Discover → PLP → PDP journeys, which already travel this way — one type,
+  /// one place where the field-to-wire-name mapping lives.
+  static void goToCart(
+    BuildContext context, {
+    required SourcePage sourcePage,
+    bool fromBuyNow = false,
+  }) {
+    context.pushNamed(
+      RouteNames.cartName,
+      queryParameters: fromBuyNow ? const {'fromBuyNow': 'true'} : const {},
+      // Passed as `extra` rather than a query parameter: it is a value object,
+      // and `PlpRoute` already carries its entry args this way.
+      extra: sourcePage,
+    );
+  }
 
   /// Pops the current route / dismisses the top-most sheet or dialog.
   static void goBack(BuildContext context) => context.pop();

@@ -194,10 +194,7 @@ class AnalyticsHelper {
     bool attribution = true,
   }) async {
     final enriched = <String, Object?>{
-      ..._commonEventProperties(
-        attribution: attribution,
-        useSavedAttribution: false,
-      ),
+      ..._commonEventProperties(attribution: attribution, useSavedAttribution: false),
       ...properties,
       AnalyticsProperties.timestamp: DateTime.now().toUtc().toIso8601String(),
     };
@@ -214,10 +211,7 @@ class AnalyticsHelper {
     bool useSavedAttribution = false,
   }) async {
     final enriched = <String, Object?>{
-      ..._commonEventProperties(
-        attribution: attribution,
-        useSavedAttribution: useSavedAttribution,
-      ),
+      ..._commonEventProperties(attribution: attribution, useSavedAttribution: useSavedAttribution),
       ...properties,
     };
     await _service.track(event, enriched);
@@ -245,8 +239,9 @@ class AnalyticsHelper {
     final adId = _prefs.advertisingId;
     if (adId != null && adId.isNotEmpty) {
       traits[AnalyticsProperties.advertisingId] = adId;
-      traits[AnalyticsProperties.advertisingIdType] =
-          defaultTargetPlatform == TargetPlatform.iOS ? 'IDFA' : 'AAID';
+      traits[AnalyticsProperties.advertisingIdType] = defaultTargetPlatform == TargetPlatform.iOS
+          ? 'IDFA'
+          : 'AAID';
     }
     return traits;
   }
@@ -324,8 +319,7 @@ class AnalyticsHelper {
       traits['createdAt'] = DateTime.now().toUtc().toIso8601String();
     }
     traits.putAnalyticsKey(AnalyticsProperties.mobileStatus, mobileStatus);
-    traits[AnalyticsProperties.continueBrowsingEligibleVisitor] =
-        isEligibleForContinueBrowsing;
+    traits[AnalyticsProperties.continueBrowsingEligibleVisitor] = isEligibleForContinueBrowsing;
     await _callIdentify(traits);
   }
 
@@ -338,17 +332,12 @@ class AnalyticsHelper {
 
   /// Continue-browsing eligibility trait.
   Future<void> identifyContinueBrowsingEligibleUser(bool eligible) async {
-    final traits = <String, Object?>{
-      AnalyticsProperties.continueBrowsingEligibleVisitor: eligible,
-    };
+    final traits = <String, Object?>{AnalyticsProperties.continueBrowsingEligibleVisitor: eligible};
     await _callIdentify(traits);
   }
 
   /// Gokwik risk score traits (paired write).
-  Future<void> identifyGokwikRisk({
-    required double score,
-    required String factor,
-  }) async {
+  Future<void> identifyGokwikRisk({required double score, required String factor}) async {
     final traits = <String, Object?>{
       AnalyticsProperties.gokwikRiskScore: score,
       AnalyticsProperties.gokwikRiskFactor: factor,
@@ -418,10 +407,7 @@ class AnalyticsHelper {
   }
 
   void _identifyOnSessionChange(Map<String, Object?> traits) {
-    traits.putAnalyticsKey(
-      AnalyticsProperties.lastVisitDate,
-      _prefs.lastVisitDate,
-    );
+    traits.putAnalyticsKey(AnalyticsProperties.lastVisitDate, _prefs.lastVisitDate);
     final daysSince = _prefs.daysSinceLastVisit;
     if (daysSince != -1) {
       traits[AnalyticsProperties.daysSinceLastVisit] = daysSince;
@@ -513,13 +499,10 @@ class AnalyticsHelper {
   String? _resolveInstallType() {
     final previousVersionCode = _prefs.cachedVersionCode;
     if (previousVersionCode == 0) {
-      return _prefs.isFirstInstall
-          ? AnalyticsDefaults.newInstall
-          : AnalyticsDefaults.update;
+      return _prefs.isFirstInstall ? AnalyticsDefaults.newInstall : AnalyticsDefaults.update;
     }
     final previousVersionName = _prefs.cachedVersionName ?? '';
-    if (previousVersionName.toLowerCase() !=
-        _packageInfo.version.toLowerCase()) {
+    if (previousVersionName.toLowerCase() != _packageInfo.version.toLowerCase()) {
       return AnalyticsDefaults.update;
     }
     return null;
@@ -571,8 +554,7 @@ class AnalyticsHelper {
         await _prefs.setApplicationStatusFlag(false);
         await _prefs.setIsFirstInstall(false);
       }
-    } else if (previousVersionName.toLowerCase() !=
-        currentVersionName.toLowerCase()) {
+    } else if (previousVersionName.toLowerCase() != currentVersionName.toLowerCase()) {
       await _prefs.setIsUpdated(true);
       _launchTimer.installType = AnalyticsDefaults.update;
       await fireApplicationOpenedEvent(
@@ -603,10 +585,7 @@ class AnalyticsHelper {
           int.tryParse(_packageInfo.buildNumber) ?? 0,
     };
     if (_prefs.isDeviceProfileSet) {
-      props.putAnalyticsKey(
-        AnalyticsProperties.deviceProfile,
-        _prefs.deviceProfile,
-      );
+      props.putAnalyticsKey(AnalyticsProperties.deviceProfile, _prefs.deviceProfile);
     }
     if (sendExtraParams) {
       if (installType.isNotEmpty) {
@@ -635,9 +614,7 @@ class AnalyticsHelper {
   Future<String> _readCpuArch() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
       final info = await _deviceInfo.androidInfo;
-      return info.supportedAbis.isNotEmpty
-          ? info.supportedAbis.first
-          : AnalyticsDefaults.none;
+      return info.supportedAbis.isNotEmpty ? info.supportedAbis.first : AnalyticsDefaults.none;
     }
     return AnalyticsDefaults.none;
   }
@@ -659,10 +636,8 @@ class AnalyticsHelper {
           : AnalyticsDefaults.none,
       AnalyticsProperties.ttl: _launchTimer.ttl,
       AnalyticsProperties.tti: _launchTimer.tti,
-      AnalyticsProperties.installType:
-          _launchTimer.installType ?? AnalyticsDefaults.none,
-      AnalyticsProperties.fromSource:
-          _launchTimer.launchSource ?? AnalyticsDefaults.none,
+      AnalyticsProperties.installType: _launchTimer.installType ?? AnalyticsDefaults.none,
+      AnalyticsProperties.fromSource: _launchTimer.launchSource ?? AnalyticsDefaults.none,
     };
     await logEvent(AnalyticsEvents.appLaunched, props);
     _launchTimer.stop();
@@ -703,12 +678,10 @@ class AnalyticsHelper {
     final props = <String, Object?>{};
     props
       ..putAnalyticsKey(AnalyticsProperties.atcUser, _prefs.atcUserType)
-      ..putAnalyticsKey(
-        AnalyticsProperties.checkoutUser,
-        _prefs.checkoutFlowUserType,
-      );
-    props[AnalyticsProperties.stepDuration] =
-        _checkoutTimer.timeSinceLastEvent(updateWithCurrentTime: reset);
+      ..putAnalyticsKey(AnalyticsProperties.checkoutUser, _prefs.checkoutFlowUserType);
+    props[AnalyticsProperties.stepDuration] = _checkoutTimer.timeSinceLastEvent(
+      updateWithCurrentTime: reset,
+    );
     props[AnalyticsProperties.totalDuration] = _checkoutTimer.timeSinceFirstEvent;
     final bg = _checkoutTimer.backgroundDuration;
     props[AnalyticsProperties.backgroundTime] = bg;
@@ -722,10 +695,7 @@ class AnalyticsHelper {
     final props = <String, Object?>{};
     props
       ..putAnalyticsKey(AnalyticsProperties.atcUser, _prefs.atcUserType)
-      ..putAnalyticsKey(
-        AnalyticsProperties.checkoutUser,
-        _prefs.checkoutFlowUserType,
-      );
+      ..putAnalyticsKey(AnalyticsProperties.checkoutUser, _prefs.checkoutFlowUserType);
     return props;
   }
 

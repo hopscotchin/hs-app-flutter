@@ -391,15 +391,26 @@ mixin _$PromosOffersState {
  List<MessageBarEntity> get actionMessageBars;/// Backend-authored sheet for the latest action; takes the place of the
 /// toast when present.
  BackendActionContentEntity? get actionBottomSheet;/// Mutation behind the latest [actionNonce]; null until one completes.
- PromoActionKind? get lastAction;/// Whether that mutation actually succeeded server-side.
+ PromoActionKind? get lastAction;/// Promo code that mutation was for.
+///
+/// [pendingActionCode] is cleared by the same emit that bumps
+/// [actionNonce], so a listener has nothing left to read — but
+/// `removed_promo_code` / `failed_promo_code` still need it.
+ String get lastActionCode;/// The **server's own** reason for the latest rejection (`promo_error`);
+/// null when it sent none.
+///
+/// Distinct from [actionError], which falls back to the app's UI copy so
+/// the sheet has something to render. Shipping that as `promo_error` would
+/// create a bucket for a string the backend never said — Android guards
+/// the same way (`if (!TextUtils.isEmpty(promoError))`). A transport
+/// failure's message is a real reason, so it lands here too.
+ String? get lastActionServerError;/// Whether that mutation actually succeeded server-side.
 ///
 /// Needed as its own flag rather than inferring from [actionError]: a
 /// rejection is an HTTP 200 with `success: false`, and the sheet must stay
 /// open for it. Inferring would let a rejection read as success and pop the
 /// sheet out from under the user.
- bool get actionSucceeded;/// Sticky once any apply/remove succeeds server-side, so the sheet's caller
-/// knows the cart needs a re-read even when the sheet is dismissed later.
- bool get cartChanged;
+ bool get actionSucceeded;
 /// Create a copy of PromosOffersState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -410,16 +421,16 @@ $PromosOffersStateCopyWith<PromosOffersState> get copyWith => _$PromosOffersStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PromosOffersState&&(identical(other.status, status) || other.status == status)&&(identical(other.offers, offers) || other.offers == offers)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.pendingActionCode, pendingActionCode) || other.pendingActionCode == pendingActionCode)&&(identical(other.actionNonce, actionNonce) || other.actionNonce == actionNonce)&&(identical(other.actionMessage, actionMessage) || other.actionMessage == actionMessage)&&(identical(other.actionError, actionError) || other.actionError == actionError)&&const DeepCollectionEquality().equals(other.actionMessageBars, actionMessageBars)&&(identical(other.actionBottomSheet, actionBottomSheet) || other.actionBottomSheet == actionBottomSheet)&&(identical(other.lastAction, lastAction) || other.lastAction == lastAction)&&(identical(other.actionSucceeded, actionSucceeded) || other.actionSucceeded == actionSucceeded)&&(identical(other.cartChanged, cartChanged) || other.cartChanged == cartChanged));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PromosOffersState&&(identical(other.status, status) || other.status == status)&&(identical(other.offers, offers) || other.offers == offers)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.pendingActionCode, pendingActionCode) || other.pendingActionCode == pendingActionCode)&&(identical(other.actionNonce, actionNonce) || other.actionNonce == actionNonce)&&(identical(other.actionMessage, actionMessage) || other.actionMessage == actionMessage)&&(identical(other.actionError, actionError) || other.actionError == actionError)&&const DeepCollectionEquality().equals(other.actionMessageBars, actionMessageBars)&&(identical(other.actionBottomSheet, actionBottomSheet) || other.actionBottomSheet == actionBottomSheet)&&(identical(other.lastAction, lastAction) || other.lastAction == lastAction)&&(identical(other.lastActionCode, lastActionCode) || other.lastActionCode == lastActionCode)&&(identical(other.lastActionServerError, lastActionServerError) || other.lastActionServerError == lastActionServerError)&&(identical(other.actionSucceeded, actionSucceeded) || other.actionSucceeded == actionSucceeded));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,offers,errorMessage,pendingActionCode,actionNonce,actionMessage,actionError,const DeepCollectionEquality().hash(actionMessageBars),actionBottomSheet,lastAction,actionSucceeded,cartChanged);
+int get hashCode => Object.hash(runtimeType,status,offers,errorMessage,pendingActionCode,actionNonce,actionMessage,actionError,const DeepCollectionEquality().hash(actionMessageBars),actionBottomSheet,lastAction,lastActionCode,lastActionServerError,actionSucceeded);
 
 @override
 String toString() {
-  return 'PromosOffersState(status: $status, offers: $offers, errorMessage: $errorMessage, pendingActionCode: $pendingActionCode, actionNonce: $actionNonce, actionMessage: $actionMessage, actionError: $actionError, actionMessageBars: $actionMessageBars, actionBottomSheet: $actionBottomSheet, lastAction: $lastAction, actionSucceeded: $actionSucceeded, cartChanged: $cartChanged)';
+  return 'PromosOffersState(status: $status, offers: $offers, errorMessage: $errorMessage, pendingActionCode: $pendingActionCode, actionNonce: $actionNonce, actionMessage: $actionMessage, actionError: $actionError, actionMessageBars: $actionMessageBars, actionBottomSheet: $actionBottomSheet, lastAction: $lastAction, lastActionCode: $lastActionCode, lastActionServerError: $lastActionServerError, actionSucceeded: $actionSucceeded)';
 }
 
 
@@ -430,7 +441,7 @@ abstract mixin class $PromosOffersStateCopyWith<$Res>  {
   factory $PromosOffersStateCopyWith(PromosOffersState value, $Res Function(PromosOffersState) _then) = _$PromosOffersStateCopyWithImpl;
 @useResult
 $Res call({
- PromosOffersStatus status, PromoOffersEntity? offers, String? errorMessage, String pendingActionCode, int actionNonce, String? actionMessage, String? actionError, List<MessageBarEntity> actionMessageBars, BackendActionContentEntity? actionBottomSheet, PromoActionKind? lastAction, bool actionSucceeded, bool cartChanged
+ PromosOffersStatus status, PromoOffersEntity? offers, String? errorMessage, String pendingActionCode, int actionNonce, String? actionMessage, String? actionError, List<MessageBarEntity> actionMessageBars, BackendActionContentEntity? actionBottomSheet, PromoActionKind? lastAction, String lastActionCode, String? lastActionServerError, bool actionSucceeded
 });
 
 
@@ -447,7 +458,7 @@ class _$PromosOffersStateCopyWithImpl<$Res>
 
 /// Create a copy of PromosOffersState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? offers = freezed,Object? errorMessage = freezed,Object? pendingActionCode = null,Object? actionNonce = null,Object? actionMessage = freezed,Object? actionError = freezed,Object? actionMessageBars = null,Object? actionBottomSheet = freezed,Object? lastAction = freezed,Object? actionSucceeded = null,Object? cartChanged = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? offers = freezed,Object? errorMessage = freezed,Object? pendingActionCode = null,Object? actionNonce = null,Object? actionMessage = freezed,Object? actionError = freezed,Object? actionMessageBars = null,Object? actionBottomSheet = freezed,Object? lastAction = freezed,Object? lastActionCode = null,Object? lastActionServerError = freezed,Object? actionSucceeded = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as PromosOffersStatus,offers: freezed == offers ? _self.offers : offers // ignore: cast_nullable_to_non_nullable
@@ -459,8 +470,9 @@ as String?,actionError: freezed == actionError ? _self.actionError : actionError
 as String?,actionMessageBars: null == actionMessageBars ? _self.actionMessageBars : actionMessageBars // ignore: cast_nullable_to_non_nullable
 as List<MessageBarEntity>,actionBottomSheet: freezed == actionBottomSheet ? _self.actionBottomSheet : actionBottomSheet // ignore: cast_nullable_to_non_nullable
 as BackendActionContentEntity?,lastAction: freezed == lastAction ? _self.lastAction : lastAction // ignore: cast_nullable_to_non_nullable
-as PromoActionKind?,actionSucceeded: null == actionSucceeded ? _self.actionSucceeded : actionSucceeded // ignore: cast_nullable_to_non_nullable
-as bool,cartChanged: null == cartChanged ? _self.cartChanged : cartChanged // ignore: cast_nullable_to_non_nullable
+as PromoActionKind?,lastActionCode: null == lastActionCode ? _self.lastActionCode : lastActionCode // ignore: cast_nullable_to_non_nullable
+as String,lastActionServerError: freezed == lastActionServerError ? _self.lastActionServerError : lastActionServerError // ignore: cast_nullable_to_non_nullable
+as String?,actionSucceeded: null == actionSucceeded ? _self.actionSucceeded : actionSucceeded // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -558,10 +570,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PromosOffersStatus status,  PromoOffersEntity? offers,  String? errorMessage,  String pendingActionCode,  int actionNonce,  String? actionMessage,  String? actionError,  List<MessageBarEntity> actionMessageBars,  BackendActionContentEntity? actionBottomSheet,  PromoActionKind? lastAction,  bool actionSucceeded,  bool cartChanged)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PromosOffersStatus status,  PromoOffersEntity? offers,  String? errorMessage,  String pendingActionCode,  int actionNonce,  String? actionMessage,  String? actionError,  List<MessageBarEntity> actionMessageBars,  BackendActionContentEntity? actionBottomSheet,  PromoActionKind? lastAction,  String lastActionCode,  String? lastActionServerError,  bool actionSucceeded)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PromosOffersState() when $default != null:
-return $default(_that.status,_that.offers,_that.errorMessage,_that.pendingActionCode,_that.actionNonce,_that.actionMessage,_that.actionError,_that.actionMessageBars,_that.actionBottomSheet,_that.lastAction,_that.actionSucceeded,_that.cartChanged);case _:
+return $default(_that.status,_that.offers,_that.errorMessage,_that.pendingActionCode,_that.actionNonce,_that.actionMessage,_that.actionError,_that.actionMessageBars,_that.actionBottomSheet,_that.lastAction,_that.lastActionCode,_that.lastActionServerError,_that.actionSucceeded);case _:
   return orElse();
 
 }
@@ -579,10 +591,10 @@ return $default(_that.status,_that.offers,_that.errorMessage,_that.pendingAction
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PromosOffersStatus status,  PromoOffersEntity? offers,  String? errorMessage,  String pendingActionCode,  int actionNonce,  String? actionMessage,  String? actionError,  List<MessageBarEntity> actionMessageBars,  BackendActionContentEntity? actionBottomSheet,  PromoActionKind? lastAction,  bool actionSucceeded,  bool cartChanged)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PromosOffersStatus status,  PromoOffersEntity? offers,  String? errorMessage,  String pendingActionCode,  int actionNonce,  String? actionMessage,  String? actionError,  List<MessageBarEntity> actionMessageBars,  BackendActionContentEntity? actionBottomSheet,  PromoActionKind? lastAction,  String lastActionCode,  String? lastActionServerError,  bool actionSucceeded)  $default,) {final _that = this;
 switch (_that) {
 case _PromosOffersState():
-return $default(_that.status,_that.offers,_that.errorMessage,_that.pendingActionCode,_that.actionNonce,_that.actionMessage,_that.actionError,_that.actionMessageBars,_that.actionBottomSheet,_that.lastAction,_that.actionSucceeded,_that.cartChanged);case _:
+return $default(_that.status,_that.offers,_that.errorMessage,_that.pendingActionCode,_that.actionNonce,_that.actionMessage,_that.actionError,_that.actionMessageBars,_that.actionBottomSheet,_that.lastAction,_that.lastActionCode,_that.lastActionServerError,_that.actionSucceeded);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -599,10 +611,10 @@ return $default(_that.status,_that.offers,_that.errorMessage,_that.pendingAction
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PromosOffersStatus status,  PromoOffersEntity? offers,  String? errorMessage,  String pendingActionCode,  int actionNonce,  String? actionMessage,  String? actionError,  List<MessageBarEntity> actionMessageBars,  BackendActionContentEntity? actionBottomSheet,  PromoActionKind? lastAction,  bool actionSucceeded,  bool cartChanged)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PromosOffersStatus status,  PromoOffersEntity? offers,  String? errorMessage,  String pendingActionCode,  int actionNonce,  String? actionMessage,  String? actionError,  List<MessageBarEntity> actionMessageBars,  BackendActionContentEntity? actionBottomSheet,  PromoActionKind? lastAction,  String lastActionCode,  String? lastActionServerError,  bool actionSucceeded)?  $default,) {final _that = this;
 switch (_that) {
 case _PromosOffersState() when $default != null:
-return $default(_that.status,_that.offers,_that.errorMessage,_that.pendingActionCode,_that.actionNonce,_that.actionMessage,_that.actionError,_that.actionMessageBars,_that.actionBottomSheet,_that.lastAction,_that.actionSucceeded,_that.cartChanged);case _:
+return $default(_that.status,_that.offers,_that.errorMessage,_that.pendingActionCode,_that.actionNonce,_that.actionMessage,_that.actionError,_that.actionMessageBars,_that.actionBottomSheet,_that.lastAction,_that.lastActionCode,_that.lastActionServerError,_that.actionSucceeded);case _:
   return null;
 
 }
@@ -614,7 +626,7 @@ return $default(_that.status,_that.offers,_that.errorMessage,_that.pendingAction
 
 
 class _PromosOffersState implements PromosOffersState {
-  const _PromosOffersState({this.status = PromosOffersStatus.initial, this.offers, this.errorMessage, this.pendingActionCode = '', this.actionNonce = 0, this.actionMessage, this.actionError, final  List<MessageBarEntity> actionMessageBars = const <MessageBarEntity>[], this.actionBottomSheet, this.lastAction, this.actionSucceeded = false, this.cartChanged = false}): _actionMessageBars = actionMessageBars;
+  const _PromosOffersState({this.status = PromosOffersStatus.initial, this.offers, this.errorMessage, this.pendingActionCode = '', this.actionNonce = 0, this.actionMessage, this.actionError, final  List<MessageBarEntity> actionMessageBars = const <MessageBarEntity>[], this.actionBottomSheet, this.lastAction, this.lastActionCode = '', this.lastActionServerError, this.actionSucceeded = false}): _actionMessageBars = actionMessageBars;
   
 
 @override@JsonKey() final  PromosOffersStatus status;
@@ -645,6 +657,21 @@ class _PromosOffersState implements PromosOffersState {
 @override final  BackendActionContentEntity? actionBottomSheet;
 /// Mutation behind the latest [actionNonce]; null until one completes.
 @override final  PromoActionKind? lastAction;
+/// Promo code that mutation was for.
+///
+/// [pendingActionCode] is cleared by the same emit that bumps
+/// [actionNonce], so a listener has nothing left to read — but
+/// `removed_promo_code` / `failed_promo_code` still need it.
+@override@JsonKey() final  String lastActionCode;
+/// The **server's own** reason for the latest rejection (`promo_error`);
+/// null when it sent none.
+///
+/// Distinct from [actionError], which falls back to the app's UI copy so
+/// the sheet has something to render. Shipping that as `promo_error` would
+/// create a bucket for a string the backend never said — Android guards
+/// the same way (`if (!TextUtils.isEmpty(promoError))`). A transport
+/// failure's message is a real reason, so it lands here too.
+@override final  String? lastActionServerError;
 /// Whether that mutation actually succeeded server-side.
 ///
 /// Needed as its own flag rather than inferring from [actionError]: a
@@ -652,9 +679,6 @@ class _PromosOffersState implements PromosOffersState {
 /// open for it. Inferring would let a rejection read as success and pop the
 /// sheet out from under the user.
 @override@JsonKey() final  bool actionSucceeded;
-/// Sticky once any apply/remove succeeds server-side, so the sheet's caller
-/// knows the cart needs a re-read even when the sheet is dismissed later.
-@override@JsonKey() final  bool cartChanged;
 
 /// Create a copy of PromosOffersState
 /// with the given fields replaced by the non-null parameter values.
@@ -666,16 +690,16 @@ _$PromosOffersStateCopyWith<_PromosOffersState> get copyWith => __$PromosOffersS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PromosOffersState&&(identical(other.status, status) || other.status == status)&&(identical(other.offers, offers) || other.offers == offers)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.pendingActionCode, pendingActionCode) || other.pendingActionCode == pendingActionCode)&&(identical(other.actionNonce, actionNonce) || other.actionNonce == actionNonce)&&(identical(other.actionMessage, actionMessage) || other.actionMessage == actionMessage)&&(identical(other.actionError, actionError) || other.actionError == actionError)&&const DeepCollectionEquality().equals(other._actionMessageBars, _actionMessageBars)&&(identical(other.actionBottomSheet, actionBottomSheet) || other.actionBottomSheet == actionBottomSheet)&&(identical(other.lastAction, lastAction) || other.lastAction == lastAction)&&(identical(other.actionSucceeded, actionSucceeded) || other.actionSucceeded == actionSucceeded)&&(identical(other.cartChanged, cartChanged) || other.cartChanged == cartChanged));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PromosOffersState&&(identical(other.status, status) || other.status == status)&&(identical(other.offers, offers) || other.offers == offers)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.pendingActionCode, pendingActionCode) || other.pendingActionCode == pendingActionCode)&&(identical(other.actionNonce, actionNonce) || other.actionNonce == actionNonce)&&(identical(other.actionMessage, actionMessage) || other.actionMessage == actionMessage)&&(identical(other.actionError, actionError) || other.actionError == actionError)&&const DeepCollectionEquality().equals(other._actionMessageBars, _actionMessageBars)&&(identical(other.actionBottomSheet, actionBottomSheet) || other.actionBottomSheet == actionBottomSheet)&&(identical(other.lastAction, lastAction) || other.lastAction == lastAction)&&(identical(other.lastActionCode, lastActionCode) || other.lastActionCode == lastActionCode)&&(identical(other.lastActionServerError, lastActionServerError) || other.lastActionServerError == lastActionServerError)&&(identical(other.actionSucceeded, actionSucceeded) || other.actionSucceeded == actionSucceeded));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,offers,errorMessage,pendingActionCode,actionNonce,actionMessage,actionError,const DeepCollectionEquality().hash(_actionMessageBars),actionBottomSheet,lastAction,actionSucceeded,cartChanged);
+int get hashCode => Object.hash(runtimeType,status,offers,errorMessage,pendingActionCode,actionNonce,actionMessage,actionError,const DeepCollectionEquality().hash(_actionMessageBars),actionBottomSheet,lastAction,lastActionCode,lastActionServerError,actionSucceeded);
 
 @override
 String toString() {
-  return 'PromosOffersState(status: $status, offers: $offers, errorMessage: $errorMessage, pendingActionCode: $pendingActionCode, actionNonce: $actionNonce, actionMessage: $actionMessage, actionError: $actionError, actionMessageBars: $actionMessageBars, actionBottomSheet: $actionBottomSheet, lastAction: $lastAction, actionSucceeded: $actionSucceeded, cartChanged: $cartChanged)';
+  return 'PromosOffersState(status: $status, offers: $offers, errorMessage: $errorMessage, pendingActionCode: $pendingActionCode, actionNonce: $actionNonce, actionMessage: $actionMessage, actionError: $actionError, actionMessageBars: $actionMessageBars, actionBottomSheet: $actionBottomSheet, lastAction: $lastAction, lastActionCode: $lastActionCode, lastActionServerError: $lastActionServerError, actionSucceeded: $actionSucceeded)';
 }
 
 
@@ -686,7 +710,7 @@ abstract mixin class _$PromosOffersStateCopyWith<$Res> implements $PromosOffersS
   factory _$PromosOffersStateCopyWith(_PromosOffersState value, $Res Function(_PromosOffersState) _then) = __$PromosOffersStateCopyWithImpl;
 @override @useResult
 $Res call({
- PromosOffersStatus status, PromoOffersEntity? offers, String? errorMessage, String pendingActionCode, int actionNonce, String? actionMessage, String? actionError, List<MessageBarEntity> actionMessageBars, BackendActionContentEntity? actionBottomSheet, PromoActionKind? lastAction, bool actionSucceeded, bool cartChanged
+ PromosOffersStatus status, PromoOffersEntity? offers, String? errorMessage, String pendingActionCode, int actionNonce, String? actionMessage, String? actionError, List<MessageBarEntity> actionMessageBars, BackendActionContentEntity? actionBottomSheet, PromoActionKind? lastAction, String lastActionCode, String? lastActionServerError, bool actionSucceeded
 });
 
 
@@ -703,7 +727,7 @@ class __$PromosOffersStateCopyWithImpl<$Res>
 
 /// Create a copy of PromosOffersState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? offers = freezed,Object? errorMessage = freezed,Object? pendingActionCode = null,Object? actionNonce = null,Object? actionMessage = freezed,Object? actionError = freezed,Object? actionMessageBars = null,Object? actionBottomSheet = freezed,Object? lastAction = freezed,Object? actionSucceeded = null,Object? cartChanged = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? offers = freezed,Object? errorMessage = freezed,Object? pendingActionCode = null,Object? actionNonce = null,Object? actionMessage = freezed,Object? actionError = freezed,Object? actionMessageBars = null,Object? actionBottomSheet = freezed,Object? lastAction = freezed,Object? lastActionCode = null,Object? lastActionServerError = freezed,Object? actionSucceeded = null,}) {
   return _then(_PromosOffersState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as PromosOffersStatus,offers: freezed == offers ? _self.offers : offers // ignore: cast_nullable_to_non_nullable
@@ -715,8 +739,9 @@ as String?,actionError: freezed == actionError ? _self.actionError : actionError
 as String?,actionMessageBars: null == actionMessageBars ? _self._actionMessageBars : actionMessageBars // ignore: cast_nullable_to_non_nullable
 as List<MessageBarEntity>,actionBottomSheet: freezed == actionBottomSheet ? _self.actionBottomSheet : actionBottomSheet // ignore: cast_nullable_to_non_nullable
 as BackendActionContentEntity?,lastAction: freezed == lastAction ? _self.lastAction : lastAction // ignore: cast_nullable_to_non_nullable
-as PromoActionKind?,actionSucceeded: null == actionSucceeded ? _self.actionSucceeded : actionSucceeded // ignore: cast_nullable_to_non_nullable
-as bool,cartChanged: null == cartChanged ? _self.cartChanged : cartChanged // ignore: cast_nullable_to_non_nullable
+as PromoActionKind?,lastActionCode: null == lastActionCode ? _self.lastActionCode : lastActionCode // ignore: cast_nullable_to_non_nullable
+as String,lastActionServerError: freezed == lastActionServerError ? _self.lastActionServerError : lastActionServerError // ignore: cast_nullable_to_non_nullable
+as String?,actionSucceeded: null == actionSucceeded ? _self.actionSucceeded : actionSucceeded // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

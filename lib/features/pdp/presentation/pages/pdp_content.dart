@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/navigation/nav_destination.dart';
 import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../auth/domain/entities/auth_entry_args.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
@@ -288,7 +289,16 @@ class _PdpContentState extends State<PdpContent> with WidgetsBindingObserver {
     _playFlyToCart(
       media,
       onComplete: () {
-        if (mounted) AppNavigator.goToCart(context, fromBuyNow: true);
+        if (mounted) {
+          AppNavigator.goToCart(
+            context,
+            sourcePage: const SourcePage(
+              fromScreen: FromScreens.product,
+              fromLocation: FromLocations.buyNowButton,
+            ),
+            fromBuyNow: true,
+          );
+        }
       },
     );
   }
@@ -321,7 +331,13 @@ class _PdpContentState extends State<PdpContent> with WidgetsBindingObserver {
           } else if (sku.isAddedToBag == true) {
             // Button reads "Go to Bag" once this SKU was added —
             // navigate to cart instead of re-adding (matches Android).
-            AppNavigator.goToCart(context);
+            AppNavigator.goToCart(
+              context,
+              sourcePage: const SourcePage(
+                fromScreen: FromScreens.product,
+                fromLocation: FromLocations.addToCartButton,
+              ),
+            );
           } else {
             // No animation here — it plays from the addToBagSuccessTick
             // listener once the API confirms the add.

@@ -7,16 +7,16 @@ import 'package:hs_app_flutter/core/analytics/constants/analytics_events.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dart';
 import 'package:hs_app_flutter/core/analytics/events/modules/pdp_events.dart';
 import 'package:hs_app_flutter/features/pdp/data/models/product_detail_model.dart';
-import 'package:hs_app_flutter/features/pdp/domain/entities/pdp_entry_args.dart';
-import 'package:hs_app_flutter/features/pdp/domain/entities/product_detail_entity.dart';
-import 'package:hs_app_flutter/features/pdp/domain/entities/sku_entity.dart';
-import 'package:hs_app_flutter/features/plp/domain/entities/listing_product_entity.dart';
-
-import '../../support/analytics_test_harness.dart';
-import 'package:hs_app_flutter/features/pdp/domain/entities/tile_entity.dart';
 import 'package:hs_app_flutter/features/pdp/domain/entities/color_variants_entity.dart';
 import 'package:hs_app_flutter/features/pdp/domain/entities/detail_entity.dart';
 import 'package:hs_app_flutter/features/pdp/domain/entities/offer_entity.dart';
+import 'package:hs_app_flutter/features/pdp/domain/entities/pdp_entry_args.dart';
+import 'package:hs_app_flutter/features/pdp/domain/entities/product_detail_entity.dart';
+import 'package:hs_app_flutter/features/pdp/domain/entities/sku_entity.dart';
+import 'package:hs_app_flutter/features/pdp/domain/entities/tile_entity.dart';
+import 'package:hs_app_flutter/features/plp/domain/entities/listing_product_entity.dart';
+
+import '../../support/analytics_test_harness.dart';
 import '../support/node_fixtures.dart';
 
 /// Wire-payload assertions for every in-scope PDP event.
@@ -156,11 +156,13 @@ void main() {
       expect(e[AnalyticsProperties.fromPincode], AnalyticsDefaults.standard);
     });
 
-    test('removed features emit NOTHING — no doorway / shop-the-look / A+ keys', () {
+    test('removed features emit NOTHING — no A+ keys', () {
+      // The doorway and shop-the-look keys are no longer listed: their
+      // constants have been deleted from `AnalyticsProperties`, so there is
+      // nothing left that could emit them. The A+ constants still exist, so
+      // asserting they stay off the payload still guards something.
       final e = h.singleEvent(AnalyticsEvents.productViewed);
       for (final removed in [
-        AnalyticsProperties.redirectedFromDoorway,
-        AnalyticsProperties.redirectedFromShopTheLook,
         AnalyticsProperties.isPidAplus,
         AnalyticsProperties.aPlusUspList,
         AnalyticsProperties.aPlusVirtualGroupName,
@@ -211,10 +213,7 @@ void main() {
       // These used to be entry-arg fields. They were removed from
       // `PdpEntryArgs`; any value on the wire has to arrive on
       // `product.trackingMeta` (or a chained node) rather than the client.
-      await h.analytics.logProductViewed(
-        product: flat.product!,
-        entry: const PdpEntryArgs(),
-      );
+      await h.analytics.logProductViewed(product: flat.product!, entry: const PdpEntryArgs());
       final e = h.singleEvent(AnalyticsEvents.productViewed);
       for (final clientOwnedInPrev in const [
         AnalyticsProperties.tabbedPageContainerName,
@@ -365,7 +364,6 @@ void main() {
       );
       final e = h.singleEvent(AnalyticsEvents.productAddedToCart);
       expect(e[AnalyticsProperties.productSize], '3-4 Y');
-      expect(e.containsKey(AnalyticsProperties.redirectedFromShopTheLook), isFalse);
     });
 
     test('buy_now_clicked uses the components-module event name', () async {

@@ -27,6 +27,12 @@ class PriceSummaryWidget extends StatelessWidget {
   /// Null → unkeyed, so existing call sites are unaffected.
   final String? keyPrefix;
 
+  /// Called with the row whose ⓘ just opened its bottom sheet.
+  ///
+  /// The host reports it, not this widget — the same summary renders on order
+  /// confirmation, which has no `shipping_info_viewed`. Null there.
+  final ValueChanged<PricingItemEntity>? onRowActionOpened;
+
   const PriceSummaryWidget({
     super.key,
     required this.summary,
@@ -34,6 +40,7 @@ class PriceSummaryWidget extends StatelessWidget {
     this.subtitle,
     this.postTotalRows = const [],
     this.keyPrefix,
+    this.onRowActionOpened,
   });
 
   /// `<keyPrefix>_<suffix>`, or null when the host passed no prefix.
@@ -105,6 +112,7 @@ class PriceSummaryWidget extends StatelessWidget {
                     const SizedBox(width: 4),
                     ActionTrigger(
                       action: item.action,
+                      onOpen: onRowActionOpened == null ? null : () => onRowActionOpened!(item),
                       child: item.action!.iconUrl.isNotNullOrEmpty
                           ? CustomImage(path: item.action!.iconUrl!, width: 20, height: 20)
                           : const Icon(Icons.info_outline, size: 20, color: AppColors.textTertiary),

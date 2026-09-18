@@ -33,6 +33,23 @@ abstract class PromosOffersState with _$PromosOffersState {
     /// Mutation behind the latest [actionNonce]; null until one completes.
     PromoActionKind? lastAction,
 
+    /// Promo code that mutation was for.
+    ///
+    /// [pendingActionCode] is cleared by the same emit that bumps
+    /// [actionNonce], so a listener has nothing left to read — but
+    /// `removed_promo_code` / `failed_promo_code` still need it.
+    @Default('') String lastActionCode,
+
+    /// The **server's own** reason for the latest rejection (`promo_error`);
+    /// null when it sent none.
+    ///
+    /// Distinct from [actionError], which falls back to the app's UI copy so
+    /// the sheet has something to render. Shipping that as `promo_error` would
+    /// create a bucket for a string the backend never said — Android guards
+    /// the same way (`if (!TextUtils.isEmpty(promoError))`). A transport
+    /// failure's message is a real reason, so it lands here too.
+    String? lastActionServerError,
+
     /// Whether that mutation actually succeeded server-side.
     ///
     /// Needed as its own flag rather than inferring from [actionError]: a
@@ -40,20 +57,13 @@ abstract class PromosOffersState with _$PromosOffersState {
     /// open for it. Inferring would let a rejection read as success and pop the
     /// sheet out from under the user.
     @Default(false) bool actionSucceeded,
-
-    /// Sticky once any apply/remove succeeds server-side, so the sheet's caller
-    /// knows the cart needs a re-read even when the sheet is dismissed later.
-    @Default(false) bool cartChanged,
   }) = _PromosOffersState;
 }
 
 extension PromosOffersStateX on PromosOffersState {
   List<PromoOfferSectionEntity> get sections => offers?.sections ?? const [];
-  bool get isEmpty => offers?.isEmpty ?? true;
 
   /// True while any apply/remove is in flight — used to lock every button so
   /// two promos can't be mutated at once.
   bool get isActionInProgress => pendingActionCode.isNotEmpty;
-
-  bool isPendingFor(String promoCode) => pendingActionCode == promoCode;
 }

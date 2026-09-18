@@ -6,6 +6,7 @@ class CartItemWishlistInfoModel extends CartItemWishlistInfoEntity {
     super.id,
     super.isWishlisted,
     super.canWishlist,
+    super.trackingMeta,
   });
 
   factory CartItemWishlistInfoModel.fromJson(Map<String, dynamic> json) {
@@ -13,6 +14,7 @@ class CartItemWishlistInfoModel extends CartItemWishlistInfoEntity {
       id: parseToIntOrNull(json['id']),
       isWishlisted: parseToBool(json['isWishlisted']),
       canWishlist: parseToBool(json['canWishlist']),
+      trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
     );
   }
 }

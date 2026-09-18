@@ -59,6 +59,12 @@ class ActionTrigger extends StatefulWidget {
   final double tooltipArrowBaseWidth;
   final double? tooltipMaxWidth;
 
+  /// Called when a bottomSheet/dialog action opens, so a host can report it
+  /// without reimplementing the `{type, icon, content}` handling. Not fired
+  /// for tooltips. Deliberately a plain callback — this component stays
+  /// ignorant of who is listening.
+  final VoidCallback? onOpen;
+
   const ActionTrigger({
     super.key,
     required this.action,
@@ -70,6 +76,7 @@ class ActionTrigger extends StatefulWidget {
     this.tooltipArrowBaseWidth = 16,
     this.tooltipMaxWidth,
     this.alignTooltipLeftToAnchor = false,
+    this.onOpen,
   });
 
   @override
@@ -183,6 +190,7 @@ class _ActionTriggerState extends State<ActionTrigger> {
 
   void _show(BuildContext context, BackendActionEntity action) {
     final content = action.content!;
+    widget.onOpen?.call();
     if (action.isBottomSheet) {
       AppBottomSheet.show(
         context,

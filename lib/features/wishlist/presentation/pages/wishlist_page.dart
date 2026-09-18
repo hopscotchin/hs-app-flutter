@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
+import 'package:hs_app_flutter/core/navigation/nav_destination.dart';
 
 import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/atoms/badge_icon.dart';
@@ -63,22 +65,16 @@ class _WishlistPageState extends State<WishlistPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.baseDefault,
-      appBar: HsAppbar(
-        title: WishlistStrings.title,
-        actions: const [_CartAction()],
-      ),
+      appBar: HsAppbar(title: WishlistStrings.title, actions: const [_CartAction()]),
       body: SafeArea(
         top: false,
         child: BlocListener<WishlistListingBloc, WishlistListingState>(
-          listenWhen: (prev, curr) =>
-              curr.message != null && curr.message != prev.message,
+          listenWhen: (prev, curr) => curr.message != null && curr.message != prev.message,
           listener: (context, state) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(SnackBar(content: Text(state.message!)));
-            context.read<WishlistListingBloc>().add(
-              const ClearWishlistMessage(),
-            );
+            context.read<WishlistListingBloc>().add(const ClearWishlistMessage());
           },
           child: BlocBuilder<WishlistListingBloc, WishlistListingState>(
             // Skip rebuilds driven by processingIds / message — those affect
@@ -100,9 +96,8 @@ class _WishlistPageState extends State<WishlistPage> {
                 case WishlistStatus.error:
                   return EmptyStateWidget(
                     type: EmptyStateType.serverError,
-                    onButtonTap: () => context.read<WishlistListingBloc>().add(
-                      const LoadWishlist(),
-                    ),
+                    onButtonTap: () =>
+                        context.read<WishlistListingBloc>().add(const LoadWishlist()),
                   );
 
                 case WishlistStatus.success:
@@ -112,10 +107,7 @@ class _WishlistPageState extends State<WishlistPage> {
                       onButtonTap: () => AppNavigator.goToHome(context),
                     );
                   }
-                  return _WishlistBody(
-                    state: state,
-                    scrollController: _scrollController,
-                  );
+                  return _WishlistBody(state: state, scrollController: _scrollController);
               }
             },
           ),
@@ -141,7 +133,13 @@ class _CartAction extends StatelessWidget {
       count: context.watch<CartCountCubit>().state,
       padding: EdgeInsets.zero,
       iconColor: AppColors.textPrimary,
-      onTap: () => AppNavigator.goToCart(context),
+      onTap: () => AppNavigator.goToCart(
+        context,
+        sourcePage: const SourcePage(
+          fromScreen: FromScreens.wishlist,
+          fromLocation: FromLocations.cartIcon,
+        ),
+      ),
     );
   }
 }
@@ -180,11 +178,7 @@ class _WishlistBody extends StatelessWidget {
   /// Always confirm the size in the shared PDP size sheet (with the size-chart
   /// link) before moving to the bag. Only an item with nothing selectable —
   /// i.e. sold out — falls through to a direct dispatch.
-  void _onMoveToBag(
-    BuildContext context,
-    WishlistListingBloc bloc,
-    WishlistProductEntity item,
-  ) {
+  void _onMoveToBag(BuildContext context, WishlistListingBloc bloc, WishlistProductEntity item) {
     if (!item.needsSizeSelection) {
       bloc.add(MoveWishlistItemToBag(item));
       return;

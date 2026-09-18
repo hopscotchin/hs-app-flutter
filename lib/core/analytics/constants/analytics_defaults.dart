@@ -77,6 +77,7 @@ class AnalyticsDefaults {
   static const String customTile = 'CT';
   static const String customProductTile = 'CPT';
   static const String messageBar = 'Message bar';
+
   /// Default sort-bar tab name. Mirrors Android common-module
   /// `AnalyticsDefaults.ALL = "All"`. Set by `OrderAttributionHelper.setSortBar`
   /// when the home page loads with no user selection.
@@ -103,6 +104,14 @@ class AnalyticsDefaults {
   static const String minimize = 'minimized';
   static const String same = 'Same';
   static const String lower = 'Lower';
+
+  /// `quantity_status` for a line that cannot be bought — sold out, or its size
+  /// is. Android's `Constants.ZERO`.
+  ///
+  /// The **string** `"0"`, never the number: Android's `putAnalyticsKey` drops
+  /// any number <= 0, so a numeric zero would silently never reach the wire and
+  /// the sold-out bucket would be empty on that platform.
+  static const String zeroQuantity = '0';
   static const String higher = 'Higher';
   static const String bankAccount = 'Bank account';
   static const String hopscotchMerchandisingCredits = 'Hopscotch merchandising credits';
@@ -266,6 +275,16 @@ class FromLocations {
   static const String imageCarousel = 'Image carousel';
   static const String messageBar = 'Message bar';
   static const String promoCode = 'Promo code application';
+
+  /// `from_location` for the price-summary info events — Android's
+  /// `FROM_ORDER_SUMMARY`, its only value for this slot. Which fee was opened
+  /// is carried by the event name, not by this.
+  ///
+  /// ⚠️ Android fires off the row's subText link and fires nothing for the ⓘ
+  /// icon (`PriceItemAdapter`). We report the ⓘ, the control that actually
+  /// opens the fee sheet. Same value, different trigger.
+  static const String orderSummary = 'Order Summary';
+
   static const String buyNowButton = 'Buy now button';
   static const String cancelButton = 'Cancel button';
   static const String returnButton = 'Return button';
@@ -294,11 +313,99 @@ class FromLocations {
 
   // common-module additions
   static const String sizeListUpfront = 'Size list upfront';
+
+  /// The app-bar bag icon — **how the cart is opened everywhere in Flutter**
+  /// (Home, PLP, PDP, wishlist, checkout), so it is the `from_location` of the
+  /// `cart_viewed` that a fresh cart entry fires.
+  ///
+  /// Android splits this across two values because it opens the cart from two
+  /// kinds of control: `ProductListActivity:753` and `PaymentStateActivity`
+  /// send this one from their app-bar icon, while `WishlistActivity:150` sends
+  /// [cartButton] from its own `shoppingBagIcon`. Flutter has one control, so
+  /// it sends one value — this one, the majority spelling and the one whose
+  /// call sites (a listing's app bar) match Flutter's.
+  ///
+  /// Note the capital I and B: Android's constant reads `"Cart Icon Button"`
+  /// while its sibling reads `"Cart button"`. Both are on the dashboards under
+  /// those exact spellings.
   static const String cartIconButton = 'Cart Icon Button';
+
+  /// The wishlist screen's bag icon on Android (`WishlistActivity:150`). Kept
+  /// for parity; Flutter routes every cart entry through [cartIconButton].
   static const String cartButton = 'Cart button';
   static const String sizeChartButton = 'Size Chart button';
   static const String productTile = 'Product Tile';
   static const String childrenManager = 'CHILDREN_MANAGER';
+
+  // ─── Cart reloads ───────────────────────────────────────────────────
+  // What re-read an already-open cart, reported as `from_location` on the
+  // `cart_viewed` that reload fires. A *fresh* cart entry reports
+  // [cartIconButton] instead — the control that opened it.
+  //
+  // Android has no equivalent: its `CartFragment.fromLocation` is set once
+  // from the launching intent and never changes, so every reload there
+  // repeats the value the cart was opened with. Splitting them is what makes
+  // "cart reloaded after a promo change" distinguishable from "user came back
+  // to the cart", which is the whole point of `cart_view_state: Cart reload`.
+
+  /// Cart re-read after the user changed the delivery pincode.
+  static const String pincodeSelection = 'Pincode selection';
+
+  /// Cart re-read after a promo was **removed**.
+  ///
+  /// Android's `FromLocations.REMOVE_PROMO`, used only by
+  /// `CartViewModel.removePromoCode()` (`:179`). Removal only — see
+  /// [applyPromo].
+  static const String removePromo = 'Remove promo';
+
+  /// Cart re-read after a promo was **applied**.
+  ///
+  /// ⚠️ Coined — needs analytics sign-off. Android has no value for this slot:
+  /// its apply lives on `PromosActivity` and the return reload is labelled
+  /// `MOBILE_VERIFY` = "Mobile verify from message bar" (`CartFragment:105`),
+  /// a misnomer not worth matching. Applies previously landed in
+  /// [removePromo]'s bucket, so the two stop being summable.
+  static const String applyPromo = 'Apply promo';
+
+  /// Cart re-read because checkout reported lines were dropped from the bag.
+  /// Android's `FromLocations.REFRESH_CART` (`CartViewModel:260`) — the odd
+  /// casing and wording are its literal value.
+  static const String refreshCartForRemovedItem = 'Refresh cart for RemoveItem';
+
+  /// Cart re-read after a quantity step, or the `from_location` of the
+  /// `product_update_clicked` that a +/- tap fires.
+  static const String updateCart = 'Update cart';
+
+  /// Cart re-read after the signed-out/other-device bag was merged in.
+  static const String mergeCart = 'Merge cart';
+
+  /// Cart re-read after a line was removed. Android's
+  /// `FromLocations.DELETE_CART`, sent from `CartFragment:444` —
+  /// `getCartData(DELETE_CART, startLoading = false)`.
+  ///
+  /// This is the **reload reason**, not the control: it names why the cart was
+  /// re-fetched, and rides on the `cart_viewed` that follows. The control that
+  /// started it is [removeCartItem].
+  static const String deleteCart = 'Delete cart';
+
+  /// The row's remove (✕) control — `from_location` on the
+  /// `product_update_clicked` and `product_updated` of a removal.
+  ///
+  /// ⚠️ **Flutter-only value; no Android build emits it.** Checked against the
+  /// full `hscart/.../helper/FromLocations.kt` — its sixteen values include
+  /// `SWIPE` and `MORE_BUTTON` for this slot but nothing for a remove button,
+  /// because Android has none: a line is removed by swiping it
+  /// (`CartProductViewHolder:167`) or through a per-row overflow menu
+  /// (`:180`). Neither gesture exists here, and reusing "Swipe" would report
+  /// an interaction the user cannot perform — the one thing this property is
+  /// meant to distinguish.
+  ///
+  /// Deliberately not [deleteCart] either: that is the reload reason above, and
+  /// sending it here would make the control indistinguishable from the refetch
+  /// it triggers on events that carry both.
+  ///
+  /// Needs adding to the dashboards alongside Android's two.
+  static const String removeCartItem = 'Remove cart item';
 }
 
 /// `click_type` values fired on tile/card clicks across the funnel.
@@ -381,4 +488,27 @@ class PlpType {
   static const String noResults = 'No results';
   static const String reco = 'Reco';
   static const String promotionProducts = 'Promotion products';
+}
+
+/// `cart_view_state` values. Mirrors Android `CartViewModel.cartViewState`,
+/// which is a bare `String` field the fragment writes before each fetch
+/// (`CartFragment` sets `Cart load` on first entry, `Cart reload` on every
+/// refetch, `Cart back` on return from checkout).
+///
+/// An empty value falls back to [AnalyticsDefaults.none] on Android
+/// (`fireCartViewedEvent`'s `ifEmpty`), so there is no "unset" token here —
+/// every fetch names its own state.
+class CartViewStates {
+  CartViewStates._();
+
+  /// First fetch after the cart screen is opened.
+  static const String cartLoad = 'Cart load';
+
+  /// Any subsequent fetch while the screen stays open — promo change,
+  /// quantity step, pincode change, merge, pull-to-refresh.
+  static const String cartReload = 'Cart reload';
+
+  /// Fetch triggered by returning to the cart from a screen it pushed
+  /// (checkout, PDP).
+  static const String cartBack = 'Cart back';
 }

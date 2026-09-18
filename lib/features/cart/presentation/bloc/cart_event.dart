@@ -71,7 +71,16 @@ class ApplyPromoCode extends CartEvent {
 }
 
 class RefreshCart extends CartEvent {
-  const RefreshCart();
+  /// What caused this reload, reported as `from_location` on the `cart_viewed`
+  /// it fires. Null when the reload has no reason of its own — a
+  /// pull-to-refresh, or a return to the cart — in which case the control that
+  /// opened the cart is reported instead.
+  final String? reloadReason;
+
+  const RefreshCart({this.reloadReason});
+
+  @override
+  List<Object?> get props => [reloadReason];
 }
 
 class RemovePromoCode extends CartEvent {
@@ -103,4 +112,71 @@ class ClearCheckoutData extends CartEvent {
 /// on the next rebuild.
 class ClearPromoActionSheet extends CartEvent {
   const ClearPromoActionSheet();
+}
+
+/// A row control was tapped — quantity +/-, delete, move-to-wishlist — before
+/// the corresponding API call runs. Fires `product_update_clicked`, which
+/// measures intent: Android reports it from the view holder on tap, so a tap
+/// that then fails (or that the user abandons at the confirmation sheet) is
+/// still counted, and the drop-off between it and `product_updated` is the
+/// number the event exists to produce.
+///
+/// Deliberately not folded into [UpdateCartItemQuantity] / [RemoveCartItem] /
+/// [MoveToWishlist]: the delete tap opens a confirmation sheet and only reaches
+/// [RemoveCartItem] if the user confirms, so the two are genuinely different
+/// moments.
+class CartItemControlTapped extends CartEvent {
+  final String sku;
+
+  /// Which control — [FromLocations.updateCart],
+  /// [FromLocations.removeCartItem], [FromLocations.moveToWishlist].
+  ///
+  /// The control, not the reload reason: a removal's follow-up `cart_viewed`
+  /// reports [FromLocations.deleteCart]. Android draws the two from different
+  /// value sets — `Swipe` / `More button` for the control
+  /// (`CartProductViewHolder:167`, `:180`) against `Delete cart` for the
+  /// refetch (`CartFragment:444`).
+  final String fromLocation;
+
+  const CartItemControlTapped({required this.sku, required this.fromLocation});
+
+  @override
+  List<Object?> get props => [sku, fromLocation];
+}
+
+/// The delivery-pincode row was tapped, before the sheet opens. Fires
+/// `pincode_check_clicked`.
+class PincodeCheckClicked extends CartEvent {
+  const PincodeCheckClicked();
+}
+
+/// Which promo mutation the offers bottom sheet completed.
+///
+/// [failed] covers both rejection shapes: a transport `Failure` and the
+/// commoner HTTP 200 with `success: false`. Only an **apply** reports it —
+/// Android declares `promo_removed_failed` but never fires it.
+enum OffersSheetPromoOutcome { applied, removed, failed }
+
+/// An apply/remove inside [PromoOffersBottomSheet] settled server-side.
+///
+/// The sheet's own `PromosOffersBloc` owns the offer list but knows nothing
+/// about the bag, and every promo event's payload *is* bag state — so the
+/// sheet reports the outcome here and this bloc builds the event.
+///
+/// [promoCode] is the code the action was for; it is unreadable from the cart
+/// afterwards (a removed code is gone from `orderPromocodes`, a rejected one
+/// was never in it). [error] is the server's reason, sent as `promo_error`.
+class OffersSheetPromoActionCompleted extends CartEvent {
+  final OffersSheetPromoOutcome outcome;
+  final String promoCode;
+  final String? error;
+
+  const OffersSheetPromoActionCompleted({
+    required this.outcome,
+    required this.promoCode,
+    this.error,
+  });
+
+  @override
+  List<Object?> get props => [outcome, promoCode, error];
 }

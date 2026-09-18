@@ -199,15 +199,9 @@ class _CartPromoSectionState extends State<CartPromoSection> {
 
   Widget _buildAppliedState() {
     final promo = widget.promotionData!;
-    final couponText = promo.appliedCouponText ?? '${promo.promoCode ?? ''} ${CartStrings.applied}';
-    // toColorOrNull (not toColor): an unparseable backend hex must fall through
-    // to the text style's own color rather than becoming transparent/invisible.
+    final couponText = promo.appliedCouponText;
     final couponColor = promo.appliedCouponTextColor.toColorOrNull;
-    final savingsText =
-        promo.savingsText ??
-        (promo.discountAmount != null
-            ? '${CartStrings.yourSavings} ₹${promo.discountAmount}'
-            : null);
+    final savingsText = promo.savingsText;
     final savingsColor = promo.savingsTextColor.toColorOrNull;
 
     return ClipRRect(
@@ -216,12 +210,6 @@ class _CartPromoSectionState extends State<CartPromoSection> {
         color: AppColors.whiteColor,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.lmd),
-          // The icon and "Remove" are inflexible, so Row sizes them at their
-          // intrinsic width first and "Remove" stays pinned to the right edge.
-          // The labels live in an Expanded that soaks up all remaining width:
-          // short labels hug the left and the slack shows up as a gap before
-          // "Remove"; a long savings string instead wraps onto a second line
-          // within that same space rather than overflowing the card.
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -238,7 +226,7 @@ class _CartPromoSectionState extends State<CartPromoSection> {
                   children: [
                     Flexible(
                       child: Text(
-                        couponText,
+                        couponText ?? '',
                         key: const ValueKey(CartTestStrings.promoAppliedCodeText),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
