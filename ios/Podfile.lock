@@ -57,7 +57,7 @@ SPEC CHECKSUMS:
   advertising_id: d5de9e659986092d7ca50977dc50f4f4fcd4c30a
   CleverTap-iOS-SDK: 000af11abfaa0e5ba779563a9a2e56555c0e07aa
   clevertap_plugin: a1e518d90c823856bd27cb3477cebfb6d0ccdc5b
-  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
   flutter_fgbg: d3da78df78454b1808f0829a5da9cd17dfe16444
   HyperCore: c4bd7222c69e3d68db8bb1ca2e40c43fd5f4127f
   HyperSDK: 891cfc69cf3befad4fd0951297a93801c4a6627d
@@ -68,4 +68,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 5d756f17ad2f0445d3b44517f147ac3e9ab8bc23
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.17.0

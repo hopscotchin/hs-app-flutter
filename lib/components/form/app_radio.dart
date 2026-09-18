@@ -44,19 +44,18 @@ class AppRadio extends StatelessWidget {
 
   bool get _isInteractive => !isDisabled && onTap != null;
   double get _size => 20.0;
-  Color get _activeColor => AppColors.brandSecondary;
+  // Disabled-but-selected renders as a solid grey dot rather than a faded
+  // purple one — a locked field (e.g. gender once a child exists) shouldn't
+  // still read as an active brand-coloured selection.
+  Color get _activeColor => isDisabled ? AppColors.neutralGrey5 : AppColors.brandSecondary;
   Color get _inactiveColor => AppColors.neutralGrey3;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      opacity: isDisabled ? 0.5 : 1.0,
-      duration: const Duration(milliseconds: 150),
-      child: GestureDetector(
-        onTap: _isInteractive ? onTap : null,
-        behavior: HitTestBehavior.opaque,
-        child: label != null ? _buildWithLabel() : buildRadio(),
-      ),
+    return GestureDetector(
+      onTap: _isInteractive ? onTap : null,
+      behavior: HitTestBehavior.opaque,
+      child: label != null ? _buildWithLabel() : buildRadio(),
     );
   }
 

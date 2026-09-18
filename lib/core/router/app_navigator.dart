@@ -6,6 +6,7 @@ import '../../features/pdp/domain/entities/pdp_entry_args.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/address_entity.dart';
 import 'package:hs_app_flutter/features/address/domain/entities/manage_address_args.dart';
 import 'package:hs_app_flutter/features/address/presentation/widgets/address_item_card.dart';
+import 'package:hs_app_flutter/features/kids/domain/entities/child_entity.dart';
 import 'package:hs_app_flutter/features/checkout/domain/entities/init_juspay_entity.dart';
 import 'package:hs_app_flutter/features/checkout/domain/entities/order_confirmation_entity.dart';
 import 'package:hs_app_flutter/features/checkout/domain/entities/payment_retry_entity.dart';
@@ -163,6 +164,7 @@ abstract final class AppNavigator {
     LoginRedirects.typeOrders: goToOrders,
     LoginRedirects.typeAddresses: (ctx) =>
         goToAddresses(ctx, fromScreen: FromScreens.account),
+    LoginRedirects.typeKids: goToKids,
     LoginRedirects.typeWishlistScreenFromAccount: goToWishlist,
     LoginRedirects.typeWishlistScreen: goToWishlist,
     LoginRedirects.typeGoToWishlist: goToWishlist,
@@ -394,6 +396,17 @@ abstract final class AppNavigator {
       );
 
   static void goToSearch(BuildContext context) => context.pushNamed('search');
+
+  static void goToKids(BuildContext context) => context.pushNamed(RouteNames.kidsName);
+
+  /// Push the add/edit child screen. Pass [existing] to enter edit mode.
+  /// Returns the saved [ChildEntity] on success, or `null` on cancel.
+  static Future<ChildEntity?> goToAddKid(BuildContext context, {ChildEntity? existing}) {
+    return context.pushNamed<ChildEntity>(
+      RouteNames.addKidName,
+      extra: <String, dynamic>{'existing': existing},
+    );
+  }
 
   static void goToAddresses(
     BuildContext context, {

@@ -61,4 +61,9 @@ class ImageConstants {
   static const String cartQuantityAdd = 'assets/icons/add.svg';
   static const String cartQuantityRemove = 'assets/icons/remove.svg';
   static const String closeIcon = 'assets/icons/close.svg';
+
+  // Kids
+  static const String editIcon = 'assets/icons/edit.svg';
+  static const String kidsDeleteIcon = 'assets/icons/delete.svg';
+  static const String shieldIcon = 'assets/icons/shield.svg';
 }

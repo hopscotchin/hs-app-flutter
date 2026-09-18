@@ -169,7 +169,9 @@ class AnalyticsHelper {
     ).add(Duration(days: 3 - ((date.weekday + 6) % 7)));
     final firstThursday = DateTime.utc(thursday.year, 1, 4);
     final firstThursdayOffset = (firstThursday.weekday + 6) % 7;
-    final week1Monday = firstThursday.subtract(Duration(days: firstThursdayOffset));
+    final week1Monday = firstThursday.subtract(
+      Duration(days: firstThursdayOffset),
+    );
     final diffDays = thursday.difference(week1Monday).inDays;
     return (diffDays ~/ 7) + 1;
   }
@@ -236,10 +238,12 @@ class AnalyticsHelper {
     };
     final adId = _prefs.advertisingId;
     if (adId != null && adId.isNotEmpty) {
-      traits[AnalyticsProperties.advertisingId] = adId;
-      traits[AnalyticsProperties.advertisingIdType] = defaultTargetPlatform == TargetPlatform.iOS
-          ? 'IDFA'
-          : 'AAID';
+      traits
+        ..putAnalyticsKey(AnalyticsProperties.advertisingId, adId)
+        ..putAnalyticsKey(
+          AnalyticsProperties.advertisingIdType,
+          defaultTargetPlatform == TargetPlatform.iOS ? 'IDFA' : 'AAID',
+        );
     }
     return traits;
   }
@@ -310,14 +314,22 @@ class AnalyticsHelper {
   }) async {
     final traits = _getUserTraits();
     _identifyWithUserType(traits);
-    traits.putAnalyticsKey('email', email);
-    traits.putAnalyticsKey('name', userName);
-    traits.putAnalyticsKey(AnalyticsProperties.mobile, phone);
+    traits
+      ..putAnalyticsKey('email', email)
+      ..putAnalyticsKey('name', userName)
+      ..putAnalyticsKey(AnalyticsProperties.mobile, phone);
     if (isRegistered) {
-      traits['createdAt'] = DateTime.now().toUtc().toIso8601String();
+      traits.putAnalyticsKey(
+        'createdAt',
+        DateTime.now().toUtc().toIso8601String(),
+      );
     }
-    traits.putAnalyticsKey(AnalyticsProperties.mobileStatus, mobileStatus);
-    traits[AnalyticsProperties.continueBrowsingEligibleVisitor] = isEligibleForContinueBrowsing;
+    traits
+      ..putAnalyticsKey(AnalyticsProperties.mobileStatus, mobileStatus)
+      ..putAnalyticsKey(
+        AnalyticsProperties.continueBrowsingEligibleVisitor,
+        isEligibleForContinueBrowsing,
+      );
     await _callIdentify(traits);
   }
 
@@ -346,24 +358,23 @@ class AnalyticsHelper {
   /// Child-cohort counters. Always writes the six cohort keys (zero-padded
   /// when null) plus `total_child_profiles`. Mirrors Android
   /// `identifyForChildCohorts`.
+  ///
+  /// Keys are the abbreviated `ChildProfileCohort` codes (`B_I`/`B_T`/`B_C`/
+  /// `G_I`/`G_T`/`G_C`), matching [ChildEntity.cohortKey] exactly — the
+  /// [cohorts] map passed in is keyed by that same getter, so a mismatch
+  /// here means every lookup below silently misses and reports 0 no matter
+  /// how many children actually exist in that bucket.
   Future<void> identifyForChildCohorts(Map<String, int>? cohorts) async {
-    const requiredKeys = <String>[
-      'boy_infant',
-      'boy_toddler',
-      'boy_child',
-      'girl_infant',
-      'girl_toddler',
-      'girl_child',
-    ];
+    const requiredKeys = <String>['B_I', 'B_T', 'B_C', 'G_I', 'G_T', 'G_C'];
     const suffix = '_child_profile';
     final traits = <String, Object?>{};
     var total = 0;
     for (final key in requiredKeys) {
       final value = cohorts?[key] ?? 0;
-      traits['$key$suffix'] = value;
+      traits.putAnalyticsKey('$key$suffix', value);
       total += value;
     }
-    traits[AnalyticsProperties.totalChildProfiles] = total;
+    traits.putAnalyticsKey(AnalyticsProperties.totalChildProfiles, total);
     await _callIdentify(traits);
   }
 
@@ -409,11 +420,14 @@ class AnalyticsHelper {
     traits.putAnalyticsKey(AnalyticsProperties.lastVisitDate, _prefs.lastVisitDate);
     final daysSince = _prefs.daysSinceLastVisit;
     if (daysSince != -1) {
-      traits[AnalyticsProperties.daysSinceLastVisit] = daysSince;
+      traits.putAnalyticsKey(AnalyticsProperties.daysSinceLastVisit, daysSince);
     }
-    traits[AnalyticsProperties.visitorType] = _prefs.isNewVisitor
-        ? AnalyticsDefaults.newVisitor
-        : AnalyticsDefaults.repeatVisitor;
+    traits.putAnalyticsKey(
+      AnalyticsProperties.visitorType,
+      _prefs.isNewVisitor
+          ? AnalyticsDefaults.newVisitor
+          : AnalyticsDefaults.repeatVisitor,
+    );
     if (_prefs.isNewVisitor) {
       // Flip after the first session-change identify fires.
       unawaited(_prefs.setIsNewVisitor(false));
@@ -421,13 +435,35 @@ class AnalyticsHelper {
   }
 
   Future<void> _identifyOnUtmChange(Map<String, Object?> traits) async {
-    traits[AnalyticsProperties.utmSource] = _utm.utmSource ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmMedium] = _utm.utmMedium ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmCampaign] = _utm.utmCampaign ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmContent] = _utm.utmContent ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmTerm] = _utm.utmTerm ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.deeplink] = _utm.deeplink ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmGender] = _utm.utmGender ?? AnalyticsDefaults.none;
+    traits
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmSource,
+        _utm.utmSource ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmMedium,
+        _utm.utmMedium ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmCampaign,
+        _utm.utmCampaign ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmContent,
+        _utm.utmContent ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmTerm,
+        _utm.utmTerm ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.deeplink,
+        _utm.deeplink ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmGender,
+        _utm.utmGender ?? AnalyticsDefaults.none,
+      );
     if (traits.length > 2) {
       final now = DateTime.now();
       final stamp =
@@ -437,7 +473,7 @@ class AnalyticsHelper {
           '${(now.hour % 12 == 0 ? 12 : now.hour % 12).toString().padLeft(2, '0')}:'
           '${now.minute.toString().padLeft(2, '0')}:'
           '${now.second.toString().padLeft(2, '0')}';
-      traits[AnalyticsProperties.utmDate] = stamp;
+      traits.putAnalyticsKey(AnalyticsProperties.utmDate, stamp);
     }
   }
 
@@ -447,7 +483,7 @@ class AnalyticsHelper {
     if (list.length > 1 && list.first.toLowerCase() == AnalyticsDefaults.none) {
       list.removeAt(0);
     }
-    traits[AnalyticsProperties.experiments] = list;
+    traits.putAnalyticsKey(AnalyticsProperties.experiments, list);
   }
 
   /// Logout-time reset. Wipes Segment anonymous id + cached traits.
@@ -573,7 +609,8 @@ class AnalyticsHelper {
   }) async {
     final props = <String, Object?>{
       AnalyticsProperties.versionName: _packageInfo.version,
-      AnalyticsProperties.versionCode: int.tryParse(_packageInfo.buildNumber) ?? 0,
+      AnalyticsProperties.versionCode:
+          int.tryParse(_packageInfo.buildNumber) ?? 0,
     };
     if (_prefs.isDeviceProfileSet) {
       props.putAnalyticsKey(AnalyticsProperties.deviceProfile, _prefs.deviceProfile);
@@ -589,7 +626,9 @@ class AnalyticsHelper {
         props[AnalyticsProperties.previousVersionCode] = prevVersionCode;
       }
     }
-    props[AnalyticsProperties.pushEnabled] = _yesNo(_prefs.pushEnabledAnalytics);
+    props[AnalyticsProperties.pushEnabled] = _yesNo(
+      _prefs.pushEnabledAnalytics,
+    );
     props[AnalyticsProperties.fmessenger] = _yesNo(_prefs.isFbAvailable);
     props[AnalyticsProperties.waInstalled] = _yesNo(_prefs.isWaAvailable);
     props[AnalyticsProperties.fcInstalled] = _yesNo(_prefs.isFcAvailable);
@@ -620,7 +659,9 @@ class AnalyticsHelper {
     // this method). ttl ≤ tti (delta = paint + interactive-ready).
     _launchTimer.logTti();
     final props = <String, Object?>{
-      AnalyticsProperties.fromScreen: fromScreen.isNotEmpty ? fromScreen : AnalyticsDefaults.none,
+      AnalyticsProperties.fromScreen: fromScreen.isNotEmpty
+          ? fromScreen
+          : AnalyticsDefaults.none,
       AnalyticsProperties.ttl: _launchTimer.ttl,
       AnalyticsProperties.tti: _launchTimer.tti,
       AnalyticsProperties.installType: _launchTimer.installType ?? AnalyticsDefaults.none,
@@ -686,5 +727,6 @@ class AnalyticsHelper {
     return props;
   }
 
-  String _yesNo(bool value) => value ? AnalyticsDefaults.yes : AnalyticsDefaults.no;
+  String _yesNo(bool value) =>
+      value ? AnalyticsDefaults.yes : AnalyticsDefaults.no;
 }

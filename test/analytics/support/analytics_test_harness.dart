@@ -308,9 +308,3 @@ class CapturedIdentify {
   final String? userId;
   final Map<String, Object?> traits;
 }
-
-class CapturedIdentify {
-  CapturedIdentify(this.userId, this.traits);
-  final String? userId;
-  final Map<String, Object?> traits;
-}
