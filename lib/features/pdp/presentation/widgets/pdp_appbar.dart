@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/navigation/nav_destination.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../components/atoms/badge_icon.dart';
 import '../../../../components/atoms/custom_image.dart';
 import '../../../../core/analytics/constants/analytics_defaults.dart';
@@ -166,7 +168,13 @@ class PdpAppBarContent extends StatelessWidget {
           bottom: _rightIconVerticalPadding,
         ),
         behavior: HitTestBehavior.opaque,
-        onTap: () => AppNavigator.goToCart(context),
+        onTap: () => AppNavigator.goToCart(
+          context,
+          sourcePage: const SourcePage(
+            fromScreen: FromScreens.product,
+            fromLocation: FromLocations.cartIconButton,
+          ),
+        ),
       ),
     );
     return SafeArea(

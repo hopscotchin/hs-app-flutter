@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
+import '../../../../core/navigation/nav_destination.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../../domain/entities/payment_retry_entity.dart';
@@ -51,7 +53,10 @@ class PaymentRetryPage extends StatelessWidget {
             orderConfirmationEntity: state.orderConfirmationEntity,
           );
         } else if (state is OrderMarkedFailed) {
-          AppNavigator.goToCart(context);
+          AppNavigator.goToCart(
+            context,
+            sourcePage: const SourcePage(fromScreen: FromScreens.paymentRetry),
+          );
         } else if (state is CheckoutError) {
           ScaffoldMessenger.of(
             context,

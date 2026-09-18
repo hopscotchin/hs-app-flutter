@@ -68,6 +68,8 @@ class PdpDeliveryInfo extends StatelessWidget {
       context,
       source: PincodeSheetSource.pdp,
       onPdpVerify: onVerifyPincode,
+      // The pincode being replaced — `from_pincode`.
+      currentPincode: pinCode,
     );
     if (result != null) await onVerifyPincode?.call(result);
   }

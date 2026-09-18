@@ -128,6 +128,7 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
           current.copyWith(
             pendingActionCode: '',
             actionError: failure.message,
+            lastActionServerError: failure.message,
             // ApiFailure is the only Failure that carries bars — an
             // `action: "failure"` body packs them onto the exception.
             actionMessageBars: failure is ApiFailure
@@ -135,6 +136,7 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
                 : const <MessageBarEntity>[],
             actionNonce: current.actionNonce + 1,
             lastAction: kind,
+            lastActionCode: promoCode,
             actionSucceeded: false,
           ),
         );
@@ -149,9 +151,11 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
               // this inline under its title, so there is no stacked sheet for
               // the copy to duplicate.
               actionError: action.hasMessage ? action.message : fallbackError,
+              lastActionServerError: action.hasMessage ? action.message : null,
               actionMessageBars: action.messageBars,
               actionNonce: current.actionNonce + 1,
               lastAction: kind,
+              lastActionCode: promoCode,
               actionSucceeded: false,
             ),
           );
@@ -168,7 +172,7 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
               actionBottomSheet: sheet,
               actionNonce: current.actionNonce + 1,
               lastAction: kind,
-              cartChanged: true,
+              lastActionCode: promoCode,
               actionSucceeded: true,
               // Clear any rejection still showing from a previous attempt.
               actionError: null,
@@ -181,6 +185,7 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
           emit,
           base: current,
           kind: kind,
+          promoCode: promoCode,
           actionMessage: message,
           bottomSheet: sheet,
         );
@@ -194,6 +199,7 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
     Emitter<PromosOffersState> emit, {
     required PromosOffersState base,
     required PromoActionKind kind,
+    required String promoCode,
     required String actionMessage,
     BackendActionContentEntity? bottomSheet,
   }) async {
@@ -211,7 +217,7 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
             actionBottomSheet: bottomSheet,
             actionNonce: base.actionNonce + 1,
             lastAction: kind,
-            cartChanged: true,
+            lastActionCode: promoCode,
             actionSucceeded: true,
           ),
         );
@@ -225,7 +231,7 @@ class PromosOffersBloc extends BaseBloc<PromosOffersEvent, PromosOffersState> {
           actionBottomSheet: bottomSheet,
           actionNonce: base.actionNonce + 1,
           lastAction: kind,
-          cartChanged: true,
+          lastActionCode: promoCode,
           actionSucceeded: true,
         ),
       ),

@@ -2,6 +2,7 @@ import '../../../../core/models/message_bar_model.dart';
 import '../../../../core/models/service_guarantee_model.dart';
 import '../../domain/entities/cart_entity.dart';
 import 'cart_item_model.dart';
+import 'cart_tracking_meta_model.dart';
 import 'delivery_pincode_model.dart';
 import 'gift_card_item_model.dart';
 import 'order_details_model.dart';
@@ -21,6 +22,7 @@ class CartModel extends CartEntity {
     super.bottomMessageBars,
     super.giftCardItem,
     super.trackingMeta,
+    super.orderAttributionData,
   });
 
   CartModel.fromJson(super.json)
@@ -41,8 +43,14 @@ class CartModel extends CartEntity {
                 .toList() ??
             const [],
         giftCardItem: _parseGiftCardItem(json),
-        trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
+        trackingMeta: _parseTrackingMeta(json),
+        orderAttributionData: json['orderAttributionData'] as Map<String, dynamic>?,
       );
+
+  static CartTrackingMetaModel? _parseTrackingMeta(Map<String, dynamic> json) {
+    final metaJson = json['trackingMeta'] as Map<String, dynamic>?;
+    return metaJson != null ? CartTrackingMetaModel.fromJson(metaJson) : null;
+  }
 
   static GiftCardItemModel? _parseGiftCardItem(Map<String, dynamic> json) {
     final giftJson = json['giftCardItem'] as Map<String, dynamic>?;
