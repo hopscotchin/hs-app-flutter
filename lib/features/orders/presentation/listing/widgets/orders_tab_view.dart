@@ -25,6 +25,7 @@ class OrdersTabView extends StatelessWidget {
     super.key,
     required this.tab,
     required this.onRecordTap,
+    required this.onNudgeShown,
     required this.onNudgeAccept,
     required this.onNudgeDecline,
     required this.onSupportAction,
@@ -33,6 +34,7 @@ class OrdersTabView extends StatelessWidget {
 
   final OrdersTab tab;
   final void Function(String actionUri) onRecordTap;
+  final VoidCallback onNudgeShown;
   final VoidCallback onNudgeAccept;
   final VoidCallback onNudgeDecline;
   final ValueChanged<BackendActionType> onSupportAction;
@@ -138,11 +140,12 @@ class OrdersTabView extends StatelessWidget {
     return [
       // Both tabs carry the nudge; only Orders carries the support footer. No
       // tab check either way — each renders if the response has the block.
-      // if (nudge != null) ...[
+      // if (nudge != null && nudge.isRenderable) ...[
       //   const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
       //   SliverToBoxAdapter(
       //     child: NotificationNudgeCard(
       //       nudge: nudge,
+      //       onShown: onNudgeShown,
       //       onAccept: onNudgeAccept,
       //       onDecline: onNudgeDecline,
       //     ),

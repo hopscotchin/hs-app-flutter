@@ -169,7 +169,6 @@ class _OrdersListingPageState extends State<OrdersListingPage>
       body: MultiBlocListener(
         listeners: [
           for (final tab in _tabs) _paginationErrorListener(tab),
-          _nudgeShownListener(),
         ],
         child: TabBarView(
           controller: _controller,
@@ -178,6 +177,7 @@ class _OrdersListingPageState extends State<OrdersListingPage>
               OrdersTabView(
                 tab: tab,
                 onRecordTap: (uri) => ActionUrlHandler.navigate(context, uri),
+                onNudgeShown: _onNudgeShown,
                 onNudgeAccept: _onNudgeAccept,
                 onNudgeDecline: _onNudgeDecline,
                 onSupportAction: _onSupportAction,
@@ -292,33 +292,27 @@ class _OrdersListingPageState extends State<OrdersListingPage>
     );
   }
 
-  /// Fires `notification_permission_intent_shown` the first time the nudge
-  /// appears, and only then.
-  ///
-  /// Driven off the state transition rather than the card's `build`, which
-  /// would re-fire on every rebuild — a scroll would inflate the count.
-  BlocListener<OrdersListingBloc, OrdersListingState> _nudgeShownListener() {
-    return BlocListener<OrdersListingBloc, OrdersListingState>(
-      listenWhen: (prev, curr) =>
-          prev.orders.page?.notificationNudge == null &&
-          curr.orders.page?.notificationNudge != null,
-      listener: (_, _) => _onNudgeShown(),
-    );
-  }
-
   // ── Nudge ───────────────────────────────────────────────────────────────
   //
   // The three notification-permission events were already defined in
   // lifecycle_events.dart but fired from nowhere; Orders is their first site.
   // All three report `from_screen: 'Order listing'`.
 
-  /// The card was rendered, so the user has been asked.
+  bool _nudgeShownSent = false;
+
+  /// The card was inserted, so the customer has been asked.
   ///
-  /// Fired from `initState` of the tab that shows it rather than from the
-  /// card's `build`, which would re-fire on every rebuild.
-  void _onNudgeShown() => widget.analytics.logNotificationPermissionIntentShown(
-    fromScreen: FromScreens.orderListing,
-  );
+  /// Called from [NotificationNudgeCard]'s `initState`, which makes the event
+  /// impossible without the widget. Guarded here because the card is not
+  /// unique: both tabs can carry a nudge, and a tab can be rebuilt. Android
+  /// asks once per visit to the screen, and so do we.
+  void _onNudgeShown() {
+    if (_nudgeShownSent) return;
+    _nudgeShownSent = true;
+    widget.analytics.logNotificationPermissionIntentShown(
+      fromScreen: FromScreens.orderListing,
+    );
+  }
 
   /// "Yes, Please" — hand off to the OS prompt and report what it returned.
   ///

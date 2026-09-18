@@ -30,24 +30,62 @@ import '../../../../plp/domain/entities/notification_nudge_entity.dart';
 /// permission request and the analytics to the caller. The frequency rules on
 /// the same block are the caller's to honour — this widget draws what it is
 /// given.
-class NotificationNudgeCard extends StatelessWidget {
+/// Whether the nudge carries everything this card draws.
+///
+/// Android renders the card only when all five are non-empty. Rendering a
+/// half-filled card would also fire `notification_permission_intent_shown` for
+/// something the customer cannot act on, so the same test gates both.
+extension NotificationNudgeRenderX on NotificationNudgeEntity {
+  bool get isRenderable =>
+      titleImage.isNotNullOrEmpty &&
+      title.isNotNullOrEmpty &&
+      description.isNotNullOrEmpty &&
+      positiveButtonText.isNotNullOrEmpty &&
+      negativeButtonText.isNotNullOrEmpty;
+}
+
+class NotificationNudgeCard extends StatefulWidget {
   const NotificationNudgeCard({
     super.key,
     required this.nudge,
+    required this.onShown,
     required this.onAccept,
     required this.onDecline,
   });
 
   final NotificationNudgeEntity nudge;
+
+  /// Called once, when this card is first inserted into the tree.
+  ///
+  /// `notification_permission_intent_shown` means "the customer was asked", so
+  /// it fires from here rather than from a state listener: no card, no event,
+  /// and nothing to keep in step. The caller makes it idempotent — both tabs
+  /// can carry a nudge, and a tab can be rebuilt.
+  final VoidCallback onShown;
+
   final VoidCallback onAccept;
   final VoidCallback onDecline;
 
+  @override
+  State<NotificationNudgeCard> createState() => _NotificationNudgeCardState();
+}
+
+class _NotificationNudgeCardState extends State<NotificationNudgeCard> {
   static const double _bellContainer = 32;
   static const double _bellIcon = 24;
   static const double _buttonHeight = 34;
 
   @override
+  void initState() {
+    super.initState();
+    widget.onShown();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final nudge = widget.nudge;
+    final onAccept = widget.onAccept;
+    final onDecline = widget.onDecline;
     final title = nudge.title;
     final description = nudge.description;
     final positive = nudge.positiveButtonText;
