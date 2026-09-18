@@ -14,6 +14,7 @@ class StorageKeys {
   static const String upiRefundsEnabled = 'hs_upi_refunds_enabled';
   static const String instantCheckoutVariant = 'hs_instant_checkout_variant';
   static const String customerCareContact = 'hs_customer_care_contact';
+  static const String customerCareTiming = 'hs_customer_care_timing';
   static const String videoAspectRatios = 'hs_video_aspect_ratios';
   static const String cartMessageBars = 'hs_cart_message_bars';
 
