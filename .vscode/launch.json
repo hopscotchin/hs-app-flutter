@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "hs-app-flutter",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            // Debug build with AUTOMATION=true, which is what turns on the
+            // ValueKey widget ids that Maestro selects on. Without the
+            // dart-define `kIsAutomation` is false, AutoSemantics returns the
+            // bare child, and every flow dies on its `automation_build` assert.
+            "name": "hs-app-flutter (AUTOMATION)",
+            "request": "launch",
+            "type": "dart",
+            "toolArgs": ["--dart-define=AUTOMATION=true"]
+        },
+        {
+            "name": "hs-app-flutter (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "hs-app-flutter (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
