@@ -13,6 +13,7 @@ import 'package:hs_app_flutter/core/analytics/attribution/utm_header_util.dart';
 import 'package:hs_app_flutter/core/analytics/events/analytics_helper.dart';
 import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.dart';
 import 'package:hs_app_flutter/core/analytics/home/journey_worker.dart';
+import 'package:hs_app_flutter/core/analytics/state/cart_timer.dart';
 import 'package:hs_app_flutter/core/analytics/state/checkout_timer.dart';
 import 'package:hs_app_flutter/core/analytics/state/experiments_util.dart';
 import 'package:hs_app_flutter/core/constants/storage_keys.dart';
@@ -50,6 +51,7 @@ class AnalyticsTestHarness {
     required this.prefs,
     required this.analytics,
     required this.launchTimer,
+    required this.cartTimer,
     required this.checkoutTimer,
     required this.utm,
     required this.orderAttribution,
@@ -66,6 +68,9 @@ class AnalyticsTestHarness {
   final PrefManager prefs;
   final AnalyticsHelper analytics;
   final LaunchTimer launchTimer;
+
+  /// Stamped by `AppNavigationObserver` on a cart-route push; read for `tti`.
+  final CartTimer cartTimer;
   final CheckoutTimer checkoutTimer;
   final UtmHeaderUtil utm;
   final OrderAttributionHelper orderAttribution;
@@ -135,6 +140,7 @@ class AnalyticsTestHarness {
     final prefs = PrefManager(sharedPrefs);
     final service = MockAnalyticsService();
     final launchTimer = LaunchTimer();
+    final cartTimer = CartTimer();
     final checkoutTimer = CheckoutTimer();
     final experiments = ExperimentsUtil(prefs);
     final orderAttribution = OrderAttributionHelper();
@@ -148,6 +154,7 @@ class AnalyticsTestHarness {
       lpAttribution,
       productAttribution,
       launchTimer,
+      cartTimer,
     );
 
     // `AppNavigationObserver._homeTrack` uses `sl<HomeTrackAnalyticManager>()`
@@ -246,6 +253,7 @@ class AnalyticsTestHarness {
       prefs: prefs,
       analytics: analytics,
       launchTimer: launchTimer,
+      cartTimer: cartTimer,
       checkoutTimer: checkoutTimer,
       utm: utm,
       orderAttribution: orderAttribution,
@@ -293,6 +301,12 @@ class CapturedEvent {
   CapturedEvent(this.name, this.props);
   final String name;
   final Map<String, Object?> props;
+}
+
+class CapturedIdentify {
+  CapturedIdentify(this.userId, this.traits);
+  final String? userId;
+  final Map<String, Object?> traits;
 }
 
 class CapturedIdentify {

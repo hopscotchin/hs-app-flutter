@@ -6,6 +6,8 @@ import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/cubits/cart_count_cubit.dart';
 import 'package:hs_app_flutter/core/theme/typography/text_style_extensions.dart';
 
+import '../../../../core/navigation/nav_destination.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../components/atoms/badge_icon.dart';
 import '../../../../components/atoms/cached_image_widget.dart';
 import '../../../../core/analytics/constants/analytics_defaults.dart';
@@ -244,7 +246,13 @@ class _AppBarContent extends StatelessWidget {
             key: const ValueKey(
               '${HomeComponentTestStrings.homePage}_${HomeComponentTestStrings.cartButton}',
             ),
-            onTap: () => AppNavigator.goToCart(context),
+            onTap: () => AppNavigator.goToCart(
+              context,
+              sourcePage: const SourcePage(
+                fromScreen: FromScreens.discover,
+                fromLocation: FromLocations.cartIconButton,
+              ),
+            ),
             child: BadgeIcon(
               count: context.watch<CartCountCubit>().state,
               icon: SvgPicture.asset(

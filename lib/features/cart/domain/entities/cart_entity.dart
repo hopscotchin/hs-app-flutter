@@ -2,6 +2,7 @@ import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/entities/service_guarantee_entity.dart';
 import '../../../../core/network/models/action_response.dart';
 import 'cart_item_entity.dart';
+import 'cart_tracking_meta_entity.dart';
 import 'delivery_pincode_entity.dart';
 import 'gift_card_item_entity.dart';
 import 'order_details_entity.dart';
@@ -29,10 +30,39 @@ class CartEntity extends ActionResponse {
   final List<MessageBarEntity> bottomMessageBars;
   final GiftCardItemEntity? giftCardItem;
 
-  /// Analytics-only metadata — sent verbatim to tracking, never parsed or
-  /// rendered. Keep it as raw JSON rather than a typed entity so new backend
-  /// fields flow straight to analytics without app changes.
-  final Map<String, dynamic>? trackingMeta;
+  /// The response's root-level `trackingMeta`, parsed into its flat analytics
+  /// keys plus the two nested objects it carries. See
+  /// [CartTrackingMetaEntity] — its `analyticsProps` is the `cart_viewed`
+  /// payload; `orderDetails` and `itemLevelTrackingData` are read by other
+  /// consumers and never reach a cart event.
+  final CartTrackingMetaEntity? trackingMeta;
+
+  /// `orderAttributionData` — the same per-SKU attribution under its own
+  /// top-level node in the newer response shape. Raw JSON; the client only
+  /// forwards it.
+  final Map<String, dynamic>? orderAttributionData;
+
+  /// Per-SKU attribution, from wherever this response carries it.
+  ///
+  /// Two response shapes put it in two places — nested in `trackingMeta`, and
+  /// under a top-level `orderAttributionData` — so the lookup prefers the
+  /// parsed block and falls back to the node. One accessor means callers
+  /// (`product_ordered` at order time) do not care which shape they were given.
+  Map<String, dynamic> get itemLevelTrackingData {
+    final fromBlock = trackingMeta?.itemLevelTrackingData ?? const {};
+    if (fromBlock.isNotEmpty) return fromBlock;
+    final fromNode = orderAttributionData?['itemLevelTrackingData'] as Map<String, dynamic>?;
+    return fromNode ?? const {};
+  }
+
+  /// This SKU's attribution block, or null when the response carried none for
+  /// it. Type-checked rather than indexed: the map is raw JSON, so a SKU the
+  /// backend omitted — or sent as something other than an object — must read
+  /// as absent, not throw.
+  Map<String, dynamic>? trackingForSku(String sku) {
+    final entry = itemLevelTrackingData[sku];
+    return entry is Map<String, dynamic> ? entry : null;
+  }
 
   const CartEntity({
     super.action,
@@ -48,6 +78,7 @@ class CartEntity extends ActionResponse {
     this.bottomMessageBars = const [],
     this.giftCardItem,
     this.trackingMeta,
+    this.orderAttributionData,
   });
 
   CartEntity.fromJson(
@@ -62,6 +93,7 @@ class CartEntity extends ActionResponse {
     this.bottomMessageBars = const [],
     this.giftCardItem,
     this.trackingMeta,
+    this.orderAttributionData,
   }) : super.fromJson();
 
   CartEntity copyWith({
@@ -75,7 +107,8 @@ class CartEntity extends ActionResponse {
     List<MessageBarEntity>? bottomMessageBars,
     GiftCardItemEntity? giftCardItem,
     List<MessageBarEntity>? messageBars,
-    Map<String, dynamic>? trackingMeta,
+    CartTrackingMetaEntity? trackingMeta,
+    Map<String, dynamic>? orderAttributionData,
   }) {
     return CartEntity(
       action: action,
@@ -91,6 +124,7 @@ class CartEntity extends ActionResponse {
       bottomMessageBars: bottomMessageBars ?? this.bottomMessageBars,
       giftCardItem: giftCardItem ?? this.giftCardItem,
       trackingMeta: trackingMeta ?? this.trackingMeta,
+      orderAttributionData: orderAttributionData ?? this.orderAttributionData,
     );
   }
 
@@ -108,5 +142,6 @@ class CartEntity extends ActionResponse {
     bottomMessageBars,
     giftCardItem,
     trackingMeta,
+    orderAttributionData,
   ];
 }

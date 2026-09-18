@@ -65,6 +65,14 @@ class AnalyticsEvents {
   static const String sizeChartViewed = 'size_chart_viewed';
   static const String sizeChartClicked = 'size_chart_clicked';
   static const String shippingInfoViewed = 'shipping_info_viewed';
+
+  /// The platform-fee row's ⓘ sheet.
+  ///
+  /// ⚠️ **Coined — no Android build emits it.** Android has one event for the
+  /// whole price summary, [shippingInfoViewed], fired with no idea which row
+  /// was tapped, so a platform-fee view was recorded as a shipping-fee one.
+  /// Needs the Segment/Amplitude event registering before release.
+  static const String platformFeeInfoViewed = 'platform_fee_info_viewed';
   static const String pdpRecoLoaded = 'PDP_reco_loaded'; // uppercase PDP, preserve
   static const String pdpAttributesLoaded = 'pdp_attributes_loaded';
   static const String pdpImagesScrolled = 'pdp_images_scrolled';

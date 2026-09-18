@@ -3,13 +3,14 @@ import '../../domain/entities/gift_card_item_entity.dart';
 import 'cart_item_media_model.dart';
 
 class GiftCardItemModel extends GiftCardItemEntity {
-  const GiftCardItemModel({super.media, super.title, super.description});
+  const GiftCardItemModel({super.media, super.title, super.description, super.trackingMeta});
 
   factory GiftCardItemModel.fromJson(Map<String, dynamic> json) {
     return GiftCardItemModel(
       media: CartItemMediaModel.listFromJson(json['media'] as List<dynamic>?),
       title: parseToStringOrNull(json['title']),
       description: parseToStringOrNull(json['description']),
+      trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
     );
   }
 }

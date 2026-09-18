@@ -4,6 +4,7 @@ import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dar
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../analytics/constants/analytics_defaults.dart';
 import '../../core/entities/message_bar_entity.dart';
 import '../../features/auth/domain/entities/auth_entry_args.dart';
 import '../../features/pdp/domain/entities/pdp_entry_args.dart';
@@ -250,7 +251,20 @@ class CartDestination extends NavDestination {
 
   @override
   void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
-    AppNavigator.goToCart(context);
+    AppNavigator.goToCart(
+      context,
+      // A deeplink has no originating screen inside the app, so `from_screen`
+      // is the `none` sentinel — Android's own fallback for an unknown one
+      // (`logRecoClickedEvent`, and every other `!isEmpty(x) ? x : NONE`).
+      // It was `FromLocations.deeplink`, which is a `from_location` value:
+      // there is no `FromScreens.deeplink`, and Android has no deeplink
+      // caller of `navigateToCart` to mirror. `from_location` already says
+      // the entry was a deeplink, so nothing is lost.
+      sourcePage: const SourcePage(
+        fromScreen: AnalyticsDefaults.none,
+        fromLocation: FromLocations.deeplink,
+      ),
+    );
   }
 }
 

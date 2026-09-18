@@ -13,6 +13,7 @@ import '../analytics/constants/analytics_defaults.dart';
 import '../analytics/constants/analytics_properties.dart';
 import '../analytics/constants/funnel.dart';
 import '../analytics/home/home_track_analytic_manager.dart';
+import '../analytics/state/cart_timer.dart';
 import '../analytics/state/launch_timer.dart';
 import '../constants/route_names.dart';
 import '../di/injection.dart';
@@ -72,12 +73,14 @@ class AppNavigationObserver extends NavigatorObserver {
     this._lpAttribution,
     this._productAttribution,
     this._launchTimer,
+    this._cartTimer,
   );
 
   final OrderAttributionHelper _orderAttribution;
   final LpAttributionHelper _lpAttribution;
   final ProductAttributionHelper _productAttribution;
   final LaunchTimer _launchTimer;
+  final CartTimer _cartTimer;
 
   /// Every attribution store that must survive an out-of-shell funnel
   /// excursion (Search / Cart) via LIFO snapshot & restore. **Add new
@@ -248,6 +251,9 @@ class AppNavigationObserver extends NavigatorObserver {
     // treating it as "back to shell" would wipe attribution + swap the
     // tracker's pageComponents via the Discover funnel callback.
     if (name == null) return;
+    // Every route to the cart starts the `tti` clock, so no navigation helper
+    // has to remember to.
+    if (name == RouteNames.cartName) _cartTimer.markOpened();
     if (name == _splashRoute) {
       // Cold start / logout re-entry — wipe the trail so the next session
       // starts clean.
