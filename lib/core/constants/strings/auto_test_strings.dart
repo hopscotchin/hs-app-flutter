@@ -695,6 +695,87 @@ class PdpTestStrings {
   static const String recommendedLoading = 'pdp_recommended_loading';
 }
 
+/// Orders + Gift Cards listing (`OrdersListingPage`).
+///
+/// Two tabs over one bloc, so every list key is composed from a tab-specific
+/// prefix: `orders_item_<i>_…` and `gift_cards_item_<i>_…`. Without that the
+/// two tabs would collide on `_item_0` and a driver could not tell which
+/// listing it was asserting against.
+class OrdersTestStrings {
+  OrdersTestStrings();
+
+  // ── Screen chrome ──
+  static const String appBarTitle = 'orders_app_bar_title';
+  static const String appBarBackButton = 'orders_appbar_back_button';
+  static const String tabOrders = 'orders_tab_orders';
+  static const String tabGiftCards = 'orders_tab_gift_cards';
+
+  // ── Per-tab prefixes ──
+  /// Prefix for everything inside the Orders tab → `orders_…`.
+  static const String ordersTab = 'orders';
+
+  /// Prefix for everything inside the Gift Cards tab → `gift_cards_…`.
+  static const String giftCardsTab = 'gift_cards';
+
+  // ── Page-level states, per tab ──
+  /// Initial-load skeleton → `<tab>_shimmer_loading`.
+  static const String shimmerLoadingSuffix =
+      'shimmer_loading'; // → `<tab>_shimmer_loading`
+
+  /// Pull-to-refresh wrapper → `<tab>_refresh_indicator`.
+  static const String refreshIndicatorSuffix =
+      'refresh_indicator'; // → `<tab>_refresh_indicator`
+
+  /// Full-page error retry → `<tab>_error_retry_button`.
+  static const String errorRetryButtonSuffix =
+      'error_retry_button'; // → `<tab>_error_retry_button`
+
+  /// Toast shown when appending a page fails → `<tab>_pagination_error_snackbar`.
+  static const String paginationErrorSnackBarSuffix =
+      'pagination_error_snackbar'; // → `<tab>_pagination_error_snackbar`
+
+  /// Spinner under the last row while the next page loads →
+  /// `<tab>_load_more_indicator`.
+  static const String loadMoreIndicatorSuffix =
+      'load_more_indicator'; // → `<tab>_load_more_indicator`
+
+  // ── Empty state, per tab ──
+  static const String emptyStateTitleSuffix =
+      'empty_state_title'; // → `<tab>_empty_state_title`
+  static const String emptyStateButtonSuffix =
+      'empty_state_button'; // → `<tab>_empty_state_button`
+
+  // ── List rows ──
+  /// One card per record, flat-indexed within its tab →
+  /// `<tab>_item_<i>`.
+  static const String itemSuffix = 'item'; // → `<tab>_item_<i>`
+
+  static const String itemImageSuffix = 'image'; // → `<tab>_item_<i>_image`
+  static const String itemTitleSuffix =
+      'title_text_field'; // → `<tab>_item_<i>_title_text_field`
+  static const String itemPriceSuffix =
+      'price_text_field'; // → `<tab>_item_<i>_price_text_field`
+  static const String itemQtySuffix =
+      'qty_text_field'; // → `<tab>_item_<i>_qty_text_field`
+  static const String itemSizeSuffix =
+      'size_text_field'; // → `<tab>_item_<i>_size_text_field`
+  static const String itemStatusTitleSuffix =
+      'status_title_text_field'; // → `<tab>_item_<i>_status_title_text_field`
+  static const String itemStatusSubtitleSuffix =
+      'status_subtitle_text_field'; // → `<tab>_item_<i>_status_subtitle_text_field`
+
+  // ── Notification nudge (Orders tab only) ──
+  static const String nudge = 'orders_nudge';
+  static const String nudgeTitle = 'orders_nudge_title_text_field';
+  static const String nudgePositiveButton = 'orders_nudge_positive_button';
+  static const String nudgeNegativeButton = 'orders_nudge_negative_button';
+
+  // ── Support footer (Orders tab only) ──
+  static const String supportTitle = 'orders_support_title_text_field';
+  static const String supportCallButton = 'orders_support_call_button';
+  static const String supportHelpButton = 'orders_support_help_button';
+}
+
 class KidsTestStrings {
   KidsTestStrings();
 
