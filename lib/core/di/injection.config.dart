@@ -206,16 +206,6 @@ import 'package:hs_app_flutter/features/orders/domain/usecases/listing/get_order
     as _i871;
 import 'package:hs_app_flutter/features/orders/presentation/listing/bloc/orders_listing_bloc.dart'
     as _i631;
-import 'package:hs_app_flutter/features/orders_old/data/datasources/remote/orders_api.dart'
-    as _i974;
-import 'package:hs_app_flutter/features/orders_old/data/repositories/orders_repository_impl.dart'
-    as _i183;
-import 'package:hs_app_flutter/features/orders_old/domain/repositories/orders_repository.dart'
-    as _i979;
-import 'package:hs_app_flutter/features/orders_old/domain/usecases/get_orders_page_usecase.dart'
-    as _i830;
-import 'package:hs_app_flutter/features/orders_old/presentation/bloc/orders_bloc.dart'
-    as _i123;
 import 'package:hs_app_flutter/features/pdp/data/datasources/remote/pdp_remote_datasource.dart'
     as _i976;
 import 'package:hs_app_flutter/features/pdp/data/repositories/pdp_repository_impl.dart'
@@ -451,7 +441,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1005.OrdersListingApi>(
       () => _i1005.OrdersListingApi(gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i974.OrdersApi>(() => _i974.OrdersApi(gh<_i361.Dio>()));
     gh.lazySingleton<_i976.PdpRemoteDatasource>(
       () => _i976.PdpRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -642,12 +631,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i351.NetworkInfo>(),
       ),
     );
-    gh.lazySingleton<_i979.OrdersRepository>(
-      () => _i183.OrdersRepositoryImpl(
-        gh<_i974.OrdersApi>(),
-        gh<_i351.NetworkInfo>(),
-      ),
-    );
     gh.factory<_i487.PincodeSheetBloc>(
       () => _i487.PincodeSheetBloc(
         gh<_i297.CheckDeliveryPincodeUseCase>(),
@@ -660,9 +643,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1020.AccountRemoteDataSource>(),
         gh<_i351.NetworkInfo>(),
       ),
-    );
-    gh.lazySingleton<_i830.GetOrdersPageUseCase>(
-      () => _i830.GetOrdersPageUseCase(gh<_i979.OrdersRepository>()),
     );
     gh.lazySingleton<_i363.AddToWishlistUseCase>(
       () => _i363.AddToWishlistUseCase(gh<_i945.WishlistRepository>()),
@@ -882,9 +862,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i871.GetOrdersListingUseCase>(),
         gh<_i127.AnalyticsHelper>(),
       ),
-    );
-    gh.factory<_i123.OrdersBloc>(
-      () => _i123.OrdersBloc(gh<_i830.GetOrdersPageUseCase>()),
     );
     gh.factoryParam<_i309.PdpBloc, _i211.PdpAnalyticsTracker, dynamic>(
       (tracker, _) => _i309.PdpBloc(
