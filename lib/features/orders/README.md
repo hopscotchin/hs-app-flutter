@@ -1,190 +1,135 @@
-# Orders Module — Reference Implementation
+# Orders
 
-This module is the **canonical template** for all new feature modules in this
-codebase. It demonstrates every rule in `CODING_GUIDELINES.md` end-to-end:
-`injectable` + `get_it` for DI, `retrofit` for the HTTP surface, `freezed`
-+ `json_serializable` for models/entities, and a `BaseBloc` for CancelToken
-hygiene.
+The Orders and Gift Cards listings, built against the `v6` contract in
+[`docs/orders/flutter_api_refactor/`](../../../docs/orders/flutter_api_refactor).
 
-When building a new feature, **copy this module's shape first**, then
-rename. Do not invent a new structure.
+The previous module — wired to `orders/v5` with placeholder UI — is at
+`lib/features/orders_old/` and is being deleted. Nothing here is derived from it; several
+of its habits were rules broken (Freezed data models, `toEntity()` in the class body,
+`Image.network`, a raw path in `@GET`, no `RequestCancelledFailure` guard) and are not
+repeated.
 
-## Folder Map
+## The contract in one line
+
+**All business logic is the backend's.** Status icons arrive as URLs, every enum and message
+arrives resolved, and status colours are not on the wire at all. Android decides all three on
+the client — a ~90-line `if/else` mapping nineteen status codes to drawables, duplicated
+across two adapters that have already drifted, plus a five-field message precedence and a
+colour chain keyed on an integer. None of it exists here. What that replaces is inventoried
+in [`android-business-logic.md`](../../../docs/orders/android-business-logic.md).
+
+The practical consequence: **this module branches on nothing but null.** A free gift is an
+ordinary record whose title is already "Free Gift" and whose `size` is simply absent; a
+gift-card row is an order row minus `size`. There is no `isGift` flag and no `recordType`.
+
+## Layout
+
+Listing is the first of roughly seven screens coming here — details, return, exchange,
+track, cancel, gift-card details — so the sub-domain split is in from the start.
 
 ```
-orders/
-├── data/
-│   ├── datasources/
-│   │   └── remote/
-│   │       └── orders_api.dart                # Retrofit — IS the remote data source
-│   ├── models/
-│   │   ├── order_info_model.dart              # freezed + JSON + toEntity()
-│   │   └── orders_page_response_model.dart
-│   └── repositories/
-│       └── orders_repository_impl.dart        # @LazySingleton(as: OrdersRepository)
-├── domain/
-│   ├── entities/
-│   │   ├── order_info.dart                    # pure freezed
-│   │   └── orders_page.dart
-│   ├── repositories/
-│   │   └── orders_repository.dart             # abstract — returns Either<Failure, T>
-│   └── usecases/
-│       └── get_orders_page_usecase.dart       # UseCase<OrdersPage, Params>
-└── presentation/
-    ├── bloc/
-    │   ├── orders_bloc.dart                   # extends BaseBloc
-    │   ├── orders_event.dart                  # imperative commands
-    │   └── orders_state.dart                  # noun-status
-    ├── pages/
-    │   └── orders_page.dart
-    └── widgets/
-        └── order_item_card.dart
+data/
+  datasources/remote/   one @RestApi per endpoint group
+  mock/                 delete when BE ships — see below
+  models/common/        status · emptyState · support — every surface reuses these
+  models/listing/
+  repositories/         one per sub-domain
+domain/
+  entities/common/ · entities/listing/
+  entities/orders_tab.dart · orders_entry_args.dart   shared across surfaces
+  repositories/ · usecases/listing/
+presentation/
+  orders_route.dart     getRoutes() — every orders screen registers here
+  shared/widgets/       status row, support footer — details reuses both
+  listing/bloc|pages|widgets/
 ```
 
-## Key Patterns Demonstrated
+`common/` and `shared/` are the load-bearing part: the status block appears on the listing
+card, the details item and the return item. Modelling it once is what stops three
+near-identical copies appearing as those screens land.
 
-### 1. Dependency Injection — injectable + get_it
+## One bloc, two tabs
 
-Every class that participates in the graph is annotated:
+`BlocProvider` may only live in the route file, which rules out a provider per tab inside the
+`TabBarView`. So `OrdersListingBloc` owns both tabs — a `TabListingState` each — and every
+event names the tab it acts on. Each tab body reads its own slice with `BlocSelector`, so a
+change on one does not rebuild the other.
 
-| Class | Annotation |
-|---|---|
-| `OrdersApi` (Retrofit) | `@lazySingleton` + `@factoryMethod` |
-| `OrdersRepositoryImpl` | `@LazySingleton(as: OrdersRepository)` |
-| `GetOrdersPageUseCase` | `@lazySingleton` |
-| `OrdersBloc` | `@injectable` (factory — fresh instance per screen) |
+Gift Cards loads on **first visit**, not on entry: firing both requests up front would put a
+call on the wire for a tab the user may never open.
 
-### Error handling — zero try/catch in feature code
+The nudge shows on **both** tabs, matching Android, which binds it above the tab pager. The
+support footer is Orders-only. Neither is a tab check in the code — both render if the
+response carries the block, so the difference lives entirely in the contract.
 
-All `DioException` → `AppException` → `Failure` translation happens in
-exactly one place: `SafeApiCall` in `core/mixins/safe_api_call.dart`,
-backed by the single `mapDioException` helper in
-`core/network/dio_exception_mapper.dart`. Feature data sources and
-repositories **never** try/catch. If you see one in a PR, it's wrong.
+## Three things that are easy to get wrong
 
-### Anti-over-abstraction policy
+**The failure envelope.** The BFF answers HTTP 200 for logical failures, and a Retrofit call
+bypasses `ApiClient._validateActionResponse` — that only runs for the `ApiClient`-based
+datasources. Without the `isFailure` check in the repository, `{"action":"error"}` parses
+into zero records and the screen says "no orders". The check tests `!= 'success'`, not
+`== 'failure'`: the captured responses use `"error"`.
 
-Only three abstractions exist in this module:
+**Refresh is silent.** `RefreshListing` emits no loading status, so the list stays on screen
+under the spinner, and it bumps `refreshTick` on success *and* failure — that tick is the
+only thing `RefreshIndicator` can await, since a failed refresh deliberately changes nothing
+else.
 
-1. **`OrdersApi`** — retrofit forces an abstract class. Not a design choice.
-2. **`OrdersRepository`** — the one real seam, between domain and data.
-3. **`UseCase<T, Params>`** — a style constraint so every use case has
-   the same call signature.
+**Cancelled requests are not errors.** Every fold returns early on
+`RequestCancelledFailure`. Without it, switching tabs mid-load renders a spurious error
+state.
 
-There is intentionally **no separate remote data source class** here.
-`OrdersApi` already gives us a typed boundary, and another wrapper would
-just forward calls without adding behavior. If local caching is added in
-the future, it should be introduced deliberately at that point rather
-than kept as a placeholder in the reference implementation.
+## The mock
 
-See `CODING_GUIDELINES.md §2.3` for the full rule.
+`USE_ORDER_LISTING_MOCK=true` in `.env` serves both listings from `data/mock/` while the
+endpoints are being built.
 
-The `Dio` instance is provided by `core/di/register_module.dart` via
-`@module`, reusing the fully-configured Dio owned by `NetworkClient`.
-**Never construct a new Dio in feature code** — it bypasses auth, cookie,
-and logging interceptors.
+The switch is a single early return at the top of
+`OrdersListingRepositoryImpl.getListing`; everything below reads as ordinary production code
+and is untouched by the flag. `OrdersMockSource` is static — nothing injected, nothing
+registered — so the dependency graph is identical either way.
 
-### 2. Typed HTTP — Retrofit
+The payloads are copied verbatim from the two `.jsonc` contracts and decoded through the
+**real** `fromJson`, so a key renamed in the contract fails here exactly as it would against
+the live API. They are raw strings (`r'''`) because the empty-state copy contains `\n`, which
+Dart would otherwise turn into a literal newline and invalid JSON.
 
-```dart
-@RestApi()
-@lazySingleton
-abstract class OrdersApi {
-  @factoryMethod
-  factory OrdersApi(Dio dio) = _OrdersApi;
+**To delete when BE ships:** the `data/mock/` folder, the `if` block in the repository, the
+getter in `EnvConfig`, and the two `.env` lines.
 
-  @GET(ApiConstants.ordersListing)
-  Future<OrdersPageResponseModel> getOrders({
-    @Query('pageNo') required int pageNo,
-    @Query('pageSize') required int pageSize,
-    @CancelRequest() CancelToken? cancelToken,
-  });
-}
-```
+## Analytics
 
-The remote data source wraps this and translates `DioException` →
-`AppException` handling does not live here. Retrofit calls flow directly
-into the repository, where `safeApiCall` maps transport and app
-exceptions cleanly to `Failure`.
+`order_listing_viewed` fires from the bloc on first-page loads only — initial, refresh, and
+switching to an already-loaded tab.
 
-### 3. Pure Entities, Mapped Models
+Android fires it on every successful response *including paginated ones*, which is why its
+`active_orders` climbs as the user scrolls. Here both counts come from the server node and no
+longer change per page, so per-page firing would inflate the event count without adding a
+dimension. That is a deliberate divergence, flagged for the analytics owner in
+[`orders-tracking-meta.md`](../../../docs/orders/orders-tracking-meta.md).
 
-Entities live in `domain/entities/` and are `@freezed`. They import only
-`freezed_annotation` — **no JSON, no Dio, no Flutter**. Models live in
-`data/models/`, are `@freezed` + `@JsonSerializable`, and carry a
-`toEntity()` method. **Models never extend entities.**
+`order_count`, `active_orders` and `tab` all arrive inside the response's `trackingMeta`
+blob and are forwarded whole — never read a key out of it. The app contributes only
+`from_screen`, which merges last so a server key cannot overwrite it.
 
-### 4. Network-Only Repository
+The nudge fires the three `notification_permission_*` events, which existed in
+`lifecycle_events.dart` but had no caller until now. Accept/reject reflect the **OS prompt's**
+outcome, not the tap — a user can accept the card and then decline the system dialog.
 
-The reference implementation is intentionally network-only today. That
-keeps the template honest: teams copying this module get a complete
-working baseline without inheriting placeholder cache code that is not
-yet wired into invalidation and UX flows.
+## Automation keys
 
-If a future feature needs cache-first behavior, add it once the cache
-read path, invalidation triggers, and tests are all designed together.
+Both tabs index their rows from zero, so every list key carries a tab prefix —
+`orders_item_0_title_text_field`, `gift_cards_item_0_title_text_field`. Without it a driver
+could not tell which listing it was asserting against. Keys live in `OrdersTestStrings`; run
+`dart run tool/generate_automation_keys.dart` after adding any.
 
-### 5. CancelToken Discipline via BaseBloc
+## Still open
 
-`OrdersBloc extends BaseBloc<OrdersEvent, OrdersState>`. Every handler
-starts with `final token = swapCancelToken();` which auto-cancels the
-previous in-flight request. On `close()`, the last token is cancelled
-too. No bloc in the codebase should manage `CancelToken` by hand.
-
-### 6. Events/States Shape
-
-- **Events are imperative commands**: `LoadOrders`, `RefreshOrders`,
-  `LoadNextOrdersPage`. All `const`.
-- **States are nouns describing status**: `OrdersInitial`, `OrdersLoading`,
-  `OrdersLoaded`, `OrdersError`. Sealed.
-
-### 7. Use Case Params
-
-`GetOrdersPageUseCase` follows `UseCase<OrdersPage, GetOrdersPageParams>`
-strictly. `call(params)` is the only public entry point — there is no
-ad-hoc `execute(...)` with positional arguments.
-
-## Code Generation
-
-This module depends on generated files:
-- `order_info.freezed.dart`
-- `orders_page.freezed.dart`
-- `order_info_model.freezed.dart`, `order_info_model.g.dart`
-- `orders_page_response_model.freezed.dart`, `orders_page_response_model.g.dart`
-- `orders_api.g.dart` (Retrofit)
-
-Run after pulling or changing these files:
-
-```bash
-dart run build_runner build --delete-conflicting-outputs
-```
-
-For active development use `watch`:
-
-```bash
-dart run build_runner watch --delete-conflicting-outputs
-```
-
-Generated files are committed to the repository.
-
-## Migrating to Full `configureDependencies()`
-
-The orders module is currently double-registered:
-1. Via `@LazySingleton(as: ...)` / `@injectable` annotations (inert until
-   `configureDependencies()` is called).
-2. Via manual `sl.registerLazySingleton(...)` in
-   `main/di/injection_container.dart`.
-
-Once the team is comfortable running `build_runner` in CI, the manual
-block for orders can be deleted and replaced with a single call to the
-generated `sl.init()` extension. The annotations are already correct.
-
-## Testing
-
-Every new file added here should ship with a test:
-- `test/orders/domain/usecases/get_orders_page_usecase_test.dart`
-- `test/orders/data/repositories/orders_repository_impl_test.dart`
-- `test/orders/presentation/bloc/orders_bloc_test.dart`
-
-Use `mocktail` for mocks and `bloc_test` for BLoC coverage. See
-`CODING_GUIDELINES.md §2.12` for coverage targets.
+- The support footer's `CALL_US` uses the number from app config; `HELP_CENTER` goes through
+  the existing `HelpCenterLauncher`. The contract also sends a `support` block, which is
+  parsed and currently ignored — it is marked *app-config, not this endpoint*.
+- The nudge's frequency rules (`showNudgeFrequency`, `dismissedFrequency`,
+  `deniedFrequency`) arrive on the wire but nothing counts them down yet, so the card shows
+  whenever the backend sends it.
+- No tests. The module is the reference implementation and should have
+  repository, use-case and bloc coverage.

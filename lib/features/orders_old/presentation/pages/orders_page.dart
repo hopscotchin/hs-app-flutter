@@ -6,14 +6,14 @@ import '../../../../components/atoms/loading_shimmer.dart';
 import '../bloc/orders_bloc.dart';
 import '../widgets/order_item_card.dart';
 
-class OrdersPage extends StatefulWidget {
-  const OrdersPage({super.key});
+class OrdersPageOld extends StatefulWidget {
+  const OrdersPageOld({super.key});
 
   @override
-  State<OrdersPage> createState() => _OrdersPageState();
+  State<OrdersPageOld> createState() => _OrdersPageOldState();
 }
 
-class _OrdersPageState extends State<OrdersPage> {
+class _OrdersPageOldState extends State<OrdersPageOld> {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -52,8 +52,7 @@ class _OrdersPageState extends State<OrdersPage> {
       ),
       body: BlocListener<OrdersBloc, OrdersState>(
         listenWhen: (prev, curr) =>
-            curr.paginationError != null &&
-            curr.paginationError != prev.paginationError,
+            curr.paginationError != null && curr.paginationError != prev.paginationError,
         listener: (context, state) {
           ScaffoldMessenger.of(
             context,
@@ -69,8 +68,7 @@ class _OrdersPageState extends State<OrdersPage> {
             if (state.status == OrdersStatus.error) {
               return ErrorRetryWidget(
                 message: state.errorMessage!,
-                onRetry: () =>
-                    context.read<OrdersBloc>().add(const LoadOrders()),
+                onRetry: () => context.read<OrdersBloc>().add(const LoadOrders()),
               );
             }
 
