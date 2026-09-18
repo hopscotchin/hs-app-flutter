@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../components/appbar/hs_appbar.dart';
@@ -140,6 +141,11 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                               controller: _nameController,
                               labelText: KidsStrings.nameLabel,
                               required: true,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'[a-zA-Z ]'),
+                                ),
+                              ],
                               onChanged: (v) => context
                                   .read<ManageKidBloc>()
                                   .add(ManageKidEvent.nameChanged(v)),
