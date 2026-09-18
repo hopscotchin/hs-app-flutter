@@ -66,6 +66,14 @@ class _OrdersListingPageState extends State<OrdersListingPage>
   /// PreferredSize the two share.
   static const double _tabBarHeight = 48;
   static const double _hairline = 1;
+
+  /// How far the tab indicator and the hairline under it are held off the
+  /// bar's two ends. One constant because the whole point is that they match.
+  static const double _tabInset = AppSpacing.md;
+
+  /// 20% black — the tint TabBar's own divider was drawing before it moved
+  /// into the Stack.
+  static const Color _tabDividerColor = Color(0x33000000);
   static const double _backArrowGlyph = 22;
 
   late final TabController _controller;
@@ -183,8 +191,42 @@ class _OrdersListingPageState extends State<OrdersListingPage>
   }
 
   /// Selected tab: 14/700 in brand purple over a 2px indicator. Unselected:
-  /// 14/400 grey over the 1px hairline the divider draws across both.
+  /// 14/400 grey over the 1px hairline that runs under both.
+  ///
+  /// Both the hairline and the indicator are inset [_tabInset] from the bar's
+  /// two ends. The indicator gets there with `indicatorPadding`; the hairline
+  /// cannot, because `TabBar` paints its own from 0 to the full width and
+  /// exposes no padding for it. So `dividerHeight: 0` switches that one off
+  /// and the [Stack] redraws it inset.
+  ///
+  /// The hairline is the Stack's first child, so it paints *behind* the
+  /// TabBar and the 2px indicator covers it on the selected tab — the same
+  /// order Flutter's own painter uses. Drawing it below the TabBar in a Column
+  /// instead would stack 2px of purple on 1px of grey rather than replacing it.
+  ///
+  /// The [SizedBox] is what gives the Stack a size, every child being
+  /// positioned. [_tabBarHeight] is the TabBar's own preferred height —
+  /// `_kTabHeight` 46 plus the 2 indicator — and `dividerHeight` never
+  /// contributed to it, so switching it off changes no geometry.
   Widget _tabBar() {
+    return SizedBox(
+      height: _tabBarHeight,
+      child: Stack(
+        children: [
+          const Positioned(
+            left: _tabInset,
+            right: _tabInset,
+            bottom: 0,
+            height: _hairline,
+            child: ColoredBox(color: _tabDividerColor),
+          ),
+          Positioned.fill(child: _tabBarContent()),
+        ],
+      ),
+    );
+  }
+
+  Widget _tabBarContent() {
     return TabBar(
       controller: _controller,
       labelColor: AppColors.primary,
@@ -192,10 +234,14 @@ class _OrdersListingPageState extends State<OrdersListingPage>
       indicatorColor: AppColors.primary,
       indicatorWeight: 2,
       indicatorSize: TabBarIndicatorSize.tab,
-      // The unselected tab keeps a 1px hairline under it; the selected one
-      // is overdrawn by the 2px indicator.
-      dividerColor: const Color(0x33000000),
-      dividerHeight: 1,
+      // The indicator spans the tab, not the label, so without this it runs
+      // the full half-width and butts against both the screen edge and the
+      // other tab. Insetting the rect keeps the tab's hit area and the
+      // label's centring untouched — only the bar shortens.
+      indicatorPadding: const EdgeInsets.symmetric(horizontal: _tabInset),
+      // Off, and redrawn inset by the Stack above. Not merely transparent:
+      // a zero height skips the paint entirely.
+      dividerHeight: 0,
       labelStyle: AppTypographyV1.bodyRegular.bold.copyWith(height: 19 / 14),
       unselectedLabelStyle: AppTypographyV1.bodyRegular.regular.copyWith(
         height: 19 / 14,
