@@ -18,7 +18,10 @@ mixin _$KidsListContentEntity {
  String get emptyStateTitle; String get emptyStateSubtitle;// Info banner shown above a populated list — the backend sends this as
 // a full message-bar object (title/message/bgColor/...), the same shape
 // used everywhere else in the app, not separate title/subtitle strings.
- MessageBarEntity get messageBar;// Persistent "Add child" / "Add another child" footer row.
+// Null means "don't show a banner" — the fallback has no hardcoded copy
+// to show in its place (unlike every other field here), so the screen
+// renders with no banner at all until backend actually sends one.
+ MessageBarEntity? get messageBar;// Persistent "Add child" / "Add another child" footer row.
  String get addChildLabel; String get addAnotherChildLabel; String get addChildSubtitle;// The footer row's two overlapping preview circles. Nullable entries —
 // null means "no image yet, render the local generic-person placeholder"
 // (a client-only rendering detail, not part of the contract).
@@ -53,7 +56,7 @@ abstract mixin class $KidsListContentEntityCopyWith<$Res>  {
   factory $KidsListContentEntityCopyWith(KidsListContentEntity value, $Res Function(KidsListContentEntity) _then) = _$KidsListContentEntityCopyWithImpl;
 @useResult
 $Res call({
- String emptyStateTitle, String emptyStateSubtitle, MessageBarEntity messageBar, String addChildLabel, String addAnotherChildLabel, String addChildSubtitle, List<String?> footerAvatars
+ String emptyStateTitle, String emptyStateSubtitle, MessageBarEntity? messageBar, String addChildLabel, String addAnotherChildLabel, String addChildSubtitle, List<String?> footerAvatars
 });
 
 
@@ -70,12 +73,12 @@ class _$KidsListContentEntityCopyWithImpl<$Res>
 
 /// Create a copy of KidsListContentEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? emptyStateTitle = null,Object? emptyStateSubtitle = null,Object? messageBar = null,Object? addChildLabel = null,Object? addAnotherChildLabel = null,Object? addChildSubtitle = null,Object? footerAvatars = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? emptyStateTitle = null,Object? emptyStateSubtitle = null,Object? messageBar = freezed,Object? addChildLabel = null,Object? addAnotherChildLabel = null,Object? addChildSubtitle = null,Object? footerAvatars = null,}) {
   return _then(_self.copyWith(
 emptyStateTitle: null == emptyStateTitle ? _self.emptyStateTitle : emptyStateTitle // ignore: cast_nullable_to_non_nullable
 as String,emptyStateSubtitle: null == emptyStateSubtitle ? _self.emptyStateSubtitle : emptyStateSubtitle // ignore: cast_nullable_to_non_nullable
-as String,messageBar: null == messageBar ? _self.messageBar : messageBar // ignore: cast_nullable_to_non_nullable
-as MessageBarEntity,addChildLabel: null == addChildLabel ? _self.addChildLabel : addChildLabel // ignore: cast_nullable_to_non_nullable
+as String,messageBar: freezed == messageBar ? _self.messageBar : messageBar // ignore: cast_nullable_to_non_nullable
+as MessageBarEntity?,addChildLabel: null == addChildLabel ? _self.addChildLabel : addChildLabel // ignore: cast_nullable_to_non_nullable
 as String,addAnotherChildLabel: null == addAnotherChildLabel ? _self.addAnotherChildLabel : addAnotherChildLabel // ignore: cast_nullable_to_non_nullable
 as String,addChildSubtitle: null == addChildSubtitle ? _self.addChildSubtitle : addChildSubtitle // ignore: cast_nullable_to_non_nullable
 as String,footerAvatars: null == footerAvatars ? _self.footerAvatars : footerAvatars // ignore: cast_nullable_to_non_nullable
@@ -164,7 +167,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String emptyStateTitle,  String emptyStateSubtitle,  MessageBarEntity messageBar,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String emptyStateTitle,  String emptyStateSubtitle,  MessageBarEntity? messageBar,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _KidsListContentEntity() when $default != null:
 return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.messageBar,_that.addChildLabel,_that.addAnotherChildLabel,_that.addChildSubtitle,_that.footerAvatars);case _:
@@ -185,7 +188,7 @@ return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.messageBar,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String emptyStateTitle,  String emptyStateSubtitle,  MessageBarEntity messageBar,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String emptyStateTitle,  String emptyStateSubtitle,  MessageBarEntity? messageBar,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)  $default,) {final _that = this;
 switch (_that) {
 case _KidsListContentEntity():
 return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.messageBar,_that.addChildLabel,_that.addAnotherChildLabel,_that.addChildSubtitle,_that.footerAvatars);case _:
@@ -205,7 +208,7 @@ return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.messageBar,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String emptyStateTitle,  String emptyStateSubtitle,  MessageBarEntity messageBar,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String emptyStateTitle,  String emptyStateSubtitle,  MessageBarEntity? messageBar,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)?  $default,) {final _that = this;
 switch (_that) {
 case _KidsListContentEntity() when $default != null:
 return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.messageBar,_that.addChildLabel,_that.addAnotherChildLabel,_that.addChildSubtitle,_that.footerAvatars);case _:
@@ -229,7 +232,10 @@ class _KidsListContentEntity implements KidsListContentEntity {
 // Info banner shown above a populated list — the backend sends this as
 // a full message-bar object (title/message/bgColor/...), the same shape
 // used everywhere else in the app, not separate title/subtitle strings.
-@override final  MessageBarEntity messageBar;
+// Null means "don't show a banner" — the fallback has no hardcoded copy
+// to show in its place (unlike every other field here), so the screen
+// renders with no banner at all until backend actually sends one.
+@override final  MessageBarEntity? messageBar;
 // Persistent "Add child" / "Add another child" footer row.
 @override final  String addChildLabel;
 @override final  String addAnotherChildLabel;
@@ -278,7 +284,7 @@ abstract mixin class _$KidsListContentEntityCopyWith<$Res> implements $KidsListC
   factory _$KidsListContentEntityCopyWith(_KidsListContentEntity value, $Res Function(_KidsListContentEntity) _then) = __$KidsListContentEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String emptyStateTitle, String emptyStateSubtitle, MessageBarEntity messageBar, String addChildLabel, String addAnotherChildLabel, String addChildSubtitle, List<String?> footerAvatars
+ String emptyStateTitle, String emptyStateSubtitle, MessageBarEntity? messageBar, String addChildLabel, String addAnotherChildLabel, String addChildSubtitle, List<String?> footerAvatars
 });
 
 
@@ -295,12 +301,12 @@ class __$KidsListContentEntityCopyWithImpl<$Res>
 
 /// Create a copy of KidsListContentEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? emptyStateTitle = null,Object? emptyStateSubtitle = null,Object? messageBar = null,Object? addChildLabel = null,Object? addAnotherChildLabel = null,Object? addChildSubtitle = null,Object? footerAvatars = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? emptyStateTitle = null,Object? emptyStateSubtitle = null,Object? messageBar = freezed,Object? addChildLabel = null,Object? addAnotherChildLabel = null,Object? addChildSubtitle = null,Object? footerAvatars = null,}) {
   return _then(_KidsListContentEntity(
 emptyStateTitle: null == emptyStateTitle ? _self.emptyStateTitle : emptyStateTitle // ignore: cast_nullable_to_non_nullable
 as String,emptyStateSubtitle: null == emptyStateSubtitle ? _self.emptyStateSubtitle : emptyStateSubtitle // ignore: cast_nullable_to_non_nullable
-as String,messageBar: null == messageBar ? _self.messageBar : messageBar // ignore: cast_nullable_to_non_nullable
-as MessageBarEntity,addChildLabel: null == addChildLabel ? _self.addChildLabel : addChildLabel // ignore: cast_nullable_to_non_nullable
+as String,messageBar: freezed == messageBar ? _self.messageBar : messageBar // ignore: cast_nullable_to_non_nullable
+as MessageBarEntity?,addChildLabel: null == addChildLabel ? _self.addChildLabel : addChildLabel // ignore: cast_nullable_to_non_nullable
 as String,addAnotherChildLabel: null == addAnotherChildLabel ? _self.addAnotherChildLabel : addAnotherChildLabel // ignore: cast_nullable_to_non_nullable
 as String,addChildSubtitle: null == addChildSubtitle ? _self.addChildSubtitle : addChildSubtitle // ignore: cast_nullable_to_non_nullable
 as String,footerAvatars: null == footerAvatars ? _self._footerAvatars : footerAvatars // ignore: cast_nullable_to_non_nullable

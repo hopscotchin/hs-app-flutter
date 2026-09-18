@@ -206,13 +206,6 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                             MessageBarsWidget(
                               keyPrefix: KidsTestStrings.formScreen,
                               cardStyle: true,
-                              contentPadding: const EdgeInsets.all(
-                                AppSpacing.sm,
-                              ),
-                              cardBorder: Border.all(
-                                color: AppColors.neutralGrey2,
-                                width: 0.5,
-                              ),
                               iconSize: (24, 24),
                               // Sized to match the design's subtitle
                               // (labelLarge) — MessageBarsWidget's own

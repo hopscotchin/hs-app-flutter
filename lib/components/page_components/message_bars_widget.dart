@@ -40,21 +40,7 @@ class MessageBarsWidget extends StatelessWidget {
   final String? keyPrefix;
   final (double, double)? iconSize;
   final TextStyle? textStyle;
-
-  /// Overrides the title's style entirely (size, weight and colour) — the
-  /// default is always `labelLarge.bold`, brand-purple unless the bar's own
-  /// `textColor` is set. Null (default) keeps that behavior.
-  final TextStyle? titleStyle;
   final EdgeInsetsGeometry? padding;
-
-  /// Overrides each card's own internal content padding (default
-  /// `_kContentPadding`). Distinct from [padding] above, which only spaces
-  /// bars apart from each other/siblings.
-  final EdgeInsetsGeometry? contentPadding;
-
-  /// Optional border drawn around each card — null (default) keeps cards
-  /// borderless, same as before this was added.
-  final BoxBorder? cardBorder;
 
   const MessageBarsWidget({
     super.key,
@@ -65,10 +51,7 @@ class MessageBarsWidget extends StatelessWidget {
     this.spaceBetweenMessageBars = 10,
     this.iconSize = (_kIconSize, _kIconSize),
     this.textStyle,
-    this.titleStyle,
     this.padding,
-    this.contentPadding,
-    this.cardBorder,
   });
 
   @override
@@ -95,9 +78,6 @@ class MessageBarsWidget extends StatelessWidget {
               keyPrefix: keyPrefix,
               iconSize: iconSize,
               textStyle: textStyle,
-              titleStyle: titleStyle,
-              contentPadding: contentPadding,
-              cardBorder: cardBorder,
             ),
           ),
       ],
@@ -155,9 +135,6 @@ class _MessageBarItem extends StatefulWidget {
   final String? keyPrefix;
   final (double, double)? iconSize;
   final TextStyle? textStyle;
-  final TextStyle? titleStyle;
-  final EdgeInsetsGeometry? contentPadding;
-  final BoxBorder? cardBorder;
 
   const _MessageBarItem({
     required this.bar,
@@ -167,9 +144,6 @@ class _MessageBarItem extends StatefulWidget {
     this.keyPrefix,
     this.iconSize,
     this.textStyle,
-    this.titleStyle,
-    this.contentPadding,
-    this.cardBorder,
   });
 
   @override
@@ -215,7 +189,7 @@ class _MessageBarItemState extends State<_MessageBarItem> {
         bar.actionText.isNotNullOrEmpty && bar.actionTextRight.isNotNullOrEmpty;
 
     final content = Padding(
-      padding: widget.contentPadding ?? _kContentPadding,
+      padding: _kContentPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -271,7 +245,6 @@ class _MessageBarItemState extends State<_MessageBarItem> {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(4),
-          border: widget.cardBorder,
         ),
         child: content,
       );
@@ -345,7 +318,7 @@ class _MessageBarItemState extends State<_MessageBarItem> {
     return Text.rich(
       TextSpan(children: HtmlText.spans(bar.title)),
       key: _key(MessageBarTestStrings.messageBarTitleTextField),
-      style: widget.titleStyle ?? _titleTextStyle(bar, textColor),
+      style: _titleTextStyle(bar, textColor),
     );
   }
 

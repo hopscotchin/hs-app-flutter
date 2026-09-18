@@ -48,7 +48,8 @@ extension KidsListContentModelX on KidsListContentModel {
     return KidsListContentEntity(
       emptyStateTitle: emptyStateTitle ?? fallback.emptyStateTitle,
       emptyStateSubtitle: emptyStateSubtitle ?? fallback.emptyStateSubtitle,
-      messageBar: messageBar ?? fallback.messageBar,
+      // No local fallback copy for this one — null means no banner at all.
+      messageBar: messageBar,
       addChildLabel: addChildLabel ?? fallback.addChildLabel,
       addAnotherChildLabel: addAnotherChildLabel ?? fallback.addAnotherChildLabel,
       addChildSubtitle: addChildSubtitle ?? fallback.addChildSubtitle,

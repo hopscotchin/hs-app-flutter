@@ -113,18 +113,11 @@ class KidsPage extends StatelessWidget {
                             child: MessageBarsWidget(
                               keyPrefix: KidsTestStrings.listScreen,
                               cardStyle: true,
-                              contentPadding: const EdgeInsets.all(
-                                AppSpacing.sm,
-                              ),
-                              cardBorder: Border.all(
-                                color: AppColors.baseDefault,
-                                width: 0.1,
-                              ),
-                              titleStyle: AppTypographyV1.bodyRegular.bold
-                                  .textPrimary(),
                               textStyle: AppTypographyV1.labelLarge.regular
                                   .neutralGrey6(),
-                              messageBars: [content.messageBar],
+                              messageBars: [
+                                if (content.messageBar != null) content.messageBar!,
+                              ],
                             ),
                           ),
                         ),

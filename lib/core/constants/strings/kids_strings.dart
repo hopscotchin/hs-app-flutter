@@ -2,8 +2,6 @@ class KidsStrings {
   KidsStrings._();
 
   static const String title = 'My Kids';
-  static const String bannerTitle = "We'll remember their details";
-  static const String bannerSubtitle = 'And show you the right sizes, styles & offers every time.';
   static const String emptyStateTitle = 'Tell Us About Your Li’l Ones';
   static const String emptyStateSubtitle = "We'll help you find their next fave styles.";
 

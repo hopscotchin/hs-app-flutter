@@ -25,7 +25,10 @@ abstract class KidsListContentEntity with _$KidsListContentEntity {
     // Info banner shown above a populated list — the backend sends this as
     // a full message-bar object (title/message/bgColor/...), the same shape
     // used everywhere else in the app, not separate title/subtitle strings.
-    required MessageBarEntity messageBar,
+    // Null means "don't show a banner" — the fallback has no hardcoded copy
+    // to show in its place (unlike every other field here), so the screen
+    // renders with no banner at all until backend actually sends one.
+    required MessageBarEntity? messageBar,
     // Persistent "Add child" / "Add another child" footer row.
     required String addChildLabel,
     required String addAnotherChildLabel,
@@ -39,12 +42,7 @@ abstract class KidsListContentEntity with _$KidsListContentEntity {
   factory KidsListContentEntity.fallback() => const KidsListContentEntity(
     emptyStateTitle: KidsStrings.emptyStateTitle,
     emptyStateSubtitle: KidsStrings.emptyStateSubtitle,
-    messageBar: MessageBarEntity(
-      messageType: 'custom',
-      bgColor: '#E5E5EA',
-      title: KidsStrings.bannerTitle,
-      message: KidsStrings.bannerSubtitle,
-    ),
+    messageBar: null,
     addChildLabel: KidsStrings.addChild,
     addAnotherChildLabel: KidsStrings.addAnotherChild,
     addChildSubtitle: KidsStrings.addChildSubtitle,
