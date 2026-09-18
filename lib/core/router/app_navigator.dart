@@ -13,7 +13,6 @@ import 'package:hs_app_flutter/features/checkout/domain/entities/payment_retry_e
 import 'package:hs_app_flutter/features/pdp/domain/entities/media_entity.dart';
 import 'package:hs_app_flutter/features/plp/domain/entities/page_type.dart';
 import 'package:hs_app_flutter/features/plp/domain/entities/plp_entry_args.dart';
-
 import '../../features/account/presentation/bloc/account_bloc.dart';
 import '../../features/auth/domain/entities/auth_entry_args.dart';
 import '../../features/auth/domain/entities/otp_config/otp_config_entity.dart';

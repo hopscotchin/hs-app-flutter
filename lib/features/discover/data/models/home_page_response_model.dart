@@ -23,7 +23,7 @@ class HomePageResponseModel {
   @JsonKey(fromJson: _parseMessageBars)
   final List<MessageBarEntity> messageBars;
 
-  @JsonKey(fromJson: _parsePageMeta)
+  @JsonKey(fromJson: parsePageMetaJson)
   final PageMeta? pageMeta;
 
   @JsonKey(fromJson: _parseSortingOptions)
@@ -52,7 +52,9 @@ List<MessageBarEntity> _parseMessageBars(Object? json) {
       .toList();
 }
 
-PageMeta? _parsePageMeta(Object? json) {
+/// Shared by [HomePageResponseModel] and Categories' `CategoriesPageResponseModel`
+/// — both endpoints return the same `pageMeta` shape.
+PageMeta? parsePageMetaJson(Object? json) {
   if (json is! Map<String, dynamic>) return null;
   return PageMeta(
     pageName: json['pageName'] as String?,

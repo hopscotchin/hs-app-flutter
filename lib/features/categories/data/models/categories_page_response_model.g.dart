@@ -1,23 +1,17 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'home_page_response_model.dart';
+part of 'categories_page_response_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-HomePageResponseModel _$HomePageResponseModelFromJson(
+CategoriesPageResponseModel _$CategoriesPageResponseModelFromJson(
   Map<String, dynamic> json,
-) => HomePageResponseModel(
+) => CategoriesPageResponseModel(
   action: json['action'] as String?,
-  popUpMessage: json['popUpMessage'] as String?,
-  messageBars: json['messageBars'] == null
-      ? const []
-      : _parseMessageBars(json['messageBars']),
   pageMeta: parsePageMetaJson(json['pageMeta']),
-  sortingOptions: json['sortingOptions'] == null
-      ? const []
-      : _parseSortingOptions(json['sortingOptions']),
+  searchPlaceHolder: json['searchPlaceHolder'] as String?,
   pageComponents: json['pageComponents'] == null
       ? const []
       : _parseComponents(json['pageComponents']),

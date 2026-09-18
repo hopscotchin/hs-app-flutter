@@ -34,7 +34,7 @@ class ApiConstants {
   static const String collections = '/collections/v2';
 
   // Categories/Departments
-  static const String loadDepartments = '/loadDepartments';
+  static const String categoriesPage = '/v2/loadDepartments';
 
   // Moments
   static const String momentsFeed = '/moments/photo';

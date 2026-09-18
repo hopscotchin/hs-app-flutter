@@ -71,7 +71,7 @@ const _configs = <EmptyStateType, _EmptyStateConfig>{
     title: 'No Matches Found',
     subtitle: 'Try a different keyword to uncover more styles.',
     buttonLabel: 'Search Again',
-    iconSize: (60, 40),
+    iconSize: (60, 60),
   ),
   EmptyStateType.orders: _EmptyStateConfig(
     icon: 'assets/icons/empty_states/empty_bag.svg',

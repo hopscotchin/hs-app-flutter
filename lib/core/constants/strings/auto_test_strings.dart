@@ -124,6 +124,36 @@ class DashboardTestStrings {
   static const String dashboardAccountNavItem = 'dashboard_account_nav_item';
 }
 
+class CategoriesTestStrings {
+  CategoriesTestStrings();
+
+  static const String screen = 'categories'; // page prefix passed to PageComponentRenderer
+  static const String searchBar = 'categories_search_bar';
+  static const String searchBarHint = 'categories_search_bar_hint';
+  static const String loadingShimmer = 'categories_loading_shimmer';
+  static const String errorRetryButton = 'categories_error_retry_button';
+
+  // Tapping the search bar navigates to the shared Search page (see
+  // SearchTestStrings) rather than swapping in inline search content here.
+}
+
+class SearchTestStrings {
+  SearchTestStrings();
+
+  static const String backButton = 'search_back_button';
+  static const String input = 'search_input';
+  static const String inputClearButton = 'search_input_clear_button';
+  static const String keepTypingText = 'search_keep_typing_text';
+  static const String errorText = 'search_error_text';
+  static const String emptyText = 'search_empty_text';
+  static const String suggestionItem = 'search_suggestion_item'; // → `search_suggestion_item_<i>`
+
+  // Recent searches (local-only) — rendered as RecentSearchChip pills, same
+  // as Categories' inline search.
+  static const String recentTitle = 'search_recent_title';
+  static const String recentItem = 'search_recent_item'; // → `search_recent_item_<i>`
+}
+
 /// Home/landing page components (server-driven, rendered via
 /// `PageComponentRenderer`). Keys follow:
 ///   `<page>_<component>_<compIndex>[_<element>[_<itemIndex>]]`
@@ -142,11 +172,17 @@ class HomeComponentTestStrings {
   static const String customTiles = 'ct';
   static const String productGrid = 'pg';
   static const String pageCarousel = 'pc';
+  static const String categoryAccordion = 'ca';
 
   // Element roles
   static const String title = 'title';
   static const String cta = 'cta';
   static const String tiles = 'tiles';
+
+  // CategoryAccordion sub-elements
+  static const String accordionRow = 'row'; // → `<prefix>_row`
+  static const String accordionSubCategory =
+      'sub'; // → `<prefix>_sub_<i>` (nested row expanded); composes recursively for deeper levels, e.g. `<prefix>_sub_<i>_sub_<j>`
 
   // Product-tile sub-elements (nest under a tile → `<prefix>_tiles_<i>_<suffix>`).
   static const String tileNameSuffix = 'name'; // → `<prefix>_tiles_<i>_name`

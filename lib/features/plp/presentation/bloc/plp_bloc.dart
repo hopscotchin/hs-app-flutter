@@ -323,6 +323,7 @@ class PlpBloc extends BaseBloc<PlpEvent, PlpState> {
               orderAttribution: data.orderAttribution,
             ),
           );
+          _fireListingAnalytics(data);
           return;
         }
 

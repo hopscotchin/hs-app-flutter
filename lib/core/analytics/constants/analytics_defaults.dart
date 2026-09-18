@@ -203,6 +203,10 @@ class FromScreens {
   static const String plp = 'PLP';
   static const String boutiqueLower = 'boutique';
   static const String searchResult = 'Search results';
+  /// `plp_name` value when a search returns zero results. Mirrors Android's
+  /// `PLPAnalytics.logListingViewed` (`plp_name = "No results"` when
+  /// `totalRecords == 0`) — a property value, not a separate event.
+  static const String noSearchResult = 'No results';
   static const String similarProducts = 'Similar products';
   static const String moreRecommendation = 'More Recommendations';
   static const String wishlist = 'Wishlist';
