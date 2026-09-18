@@ -169,6 +169,11 @@ class PrefManager {
   Future<void> setChildCohorts(String? value) =>
       _setStringOrRemove(StorageKeys.childCohorts, value);
 
+  String? get childCohortAssignments =>
+      _prefs.getString(StorageKeys.childCohortAssignments);
+  Future<void> setChildCohortAssignments(String? value) =>
+      _setStringOrRemove(StorageKeys.childCohortAssignments, value);
+
   String? get gender => _prefs.getString(StorageKeys.gender);
   Future<void> setGender(String? value) => _setStringOrRemove(StorageKeys.gender, value);
 

@@ -23,6 +23,8 @@ abstract final class RouteNames {
   static const String wishlist = '/wishlist';
   static const String addresses = '/addresses';
   static const String addAddress = 'add';
+  static const String kids = '/kids';
+  static const String addKid = 'add';
   static const String legal = '/legal';
   static const String promoDetails = '/promo-details/:promoId';
   static const String analyticsDebug = '/analytics-debug';
@@ -46,4 +48,6 @@ abstract final class RouteNames {
   static const String addressesName = 'addresses';
   static const String addAddressName = 'addAddress';
   static const String wishlistName = 'wishlist';
+  static const String kidsName = 'kids';
+  static const String addKidName = 'addKid';
 }

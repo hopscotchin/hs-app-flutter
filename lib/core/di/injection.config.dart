@@ -33,6 +33,7 @@ import 'package:hs_app_flutter/core/analytics/services/clarity_helper.dart'
     as _i903;
 import 'package:hs_app_flutter/core/analytics/services/clevertap_service.dart'
     as _i551;
+import 'package:hs_app_flutter/core/analytics/state/cart_timer.dart' as _i477;
 import 'package:hs_app_flutter/core/analytics/state/checkout_timer.dart'
     as _i516;
 import 'package:hs_app_flutter/core/analytics/state/device_probes.dart' as _i41;
@@ -194,6 +195,22 @@ import 'package:hs_app_flutter/features/discover/domain/usecases/get_home_page_u
     as _i325;
 import 'package:hs_app_flutter/features/discover/presentation/bloc/home_bloc.dart'
     as _i626;
+import 'package:hs_app_flutter/features/kids/data/datasources/remote/kids_remote_datasource.dart'
+    as _i359;
+import 'package:hs_app_flutter/features/kids/data/repositories/kids_repository_impl.dart'
+    as _i634;
+import 'package:hs_app_flutter/features/kids/domain/repositories/kids_repository.dart'
+    as _i970;
+import 'package:hs_app_flutter/features/kids/domain/usecases/delete_child_usecase.dart'
+    as _i465;
+import 'package:hs_app_flutter/features/kids/domain/usecases/get_children_usecase.dart'
+    as _i1052;
+import 'package:hs_app_flutter/features/kids/domain/usecases/save_child_usecase.dart'
+    as _i396;
+import 'package:hs_app_flutter/features/kids/presentation/bloc/kids_bloc.dart'
+    as _i17;
+import 'package:hs_app_flutter/features/kids/presentation/bloc/manage_kid_bloc.dart'
+    as _i512;
 import 'package:hs_app_flutter/features/landing_page/presentation/bloc/landing_page_bloc.dart'
     as _i206;
 import 'package:hs_app_flutter/features/orders/data/datasources/remote/orders_listing_api.dart'
@@ -345,6 +362,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i463.ProductAttributionHelper>(
       () => _i463.ProductAttributionHelper(),
     );
+    gh.lazySingleton<_i477.CartTimer>(() => _i477.CartTimer());
     gh.lazySingleton<_i516.CheckoutTimer>(() => _i516.CheckoutTimer());
     gh.lazySingleton<_i773.LaunchTimer>(() => _i773.LaunchTimer());
     gh.lazySingleton<_i833.DeviceInfoPlugin>(() => registerModule.deviceInfo);
@@ -368,16 +386,17 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       preResolve: true,
     );
+    gh.lazySingleton<_i818.PrefManager>(
+      () => _i818.PrefManager(gh<_i460.SharedPreferences>()),
+    );
     gh.lazySingleton<_i93.AppNavigationObserver>(
       () => _i93.AppNavigationObserver(
         gh<_i179.OrderAttributionHelper>(),
         gh<_i233.LpAttributionHelper>(),
         gh<_i463.ProductAttributionHelper>(),
         gh<_i773.LaunchTimer>(),
+        gh<_i477.CartTimer>(),
       ),
-    );
-    gh.lazySingleton<_i818.PrefManager>(
-      () => _i818.PrefManager(gh<_i460.SharedPreferences>()),
     );
     await gh.lazySingletonAsync<_i384.AnalyticsService>(
       () => registerModule.analyticsService(gh<_i818.PrefManager>()),
@@ -437,6 +456,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i184.HomeRemoteDataSource>(
       () => _i184.HomeRemoteDataSource(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i359.KidsRemoteDatasource>(
+      () => _i359.KidsRemoteDatasource(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i1005.OrdersListingApi>(
       () => _i1005.OrdersListingApi(gh<_i361.Dio>()),
@@ -588,6 +610,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i871.GetOrdersListingUseCase>(
       () => _i871.GetOrdersListingUseCase(gh<_i627.OrdersListingRepository>()),
     );
+    gh.lazySingleton<_i970.KidsRepository>(
+      () => _i634.KidsRepositoryImpl(
+        gh<_i359.KidsRemoteDatasource>(),
+        gh<_i351.NetworkInfo>(),
+      ),
+    );
     gh.lazySingleton<_i982.ApplyPromoUseCase>(
       () => _i982.ApplyPromoUseCase(gh<_i585.PromosOffersRepository>()),
     );
@@ -629,13 +657,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1067.DeviceRepositoryImpl(
         gh<_i76.DeviceRemoteDatasource>(),
         gh<_i351.NetworkInfo>(),
-      ),
-    );
-    gh.factory<_i487.PincodeSheetBloc>(
-      () => _i487.PincodeSheetBloc(
-        gh<_i297.CheckDeliveryPincodeUseCase>(),
-        gh<_i551.SelectAddressUseCase>(),
-        gh<_i1013.AddressCacheManager>(),
       ),
     );
     gh.lazySingleton<_i532.AccountRepository>(
@@ -755,6 +776,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i211.PdpAnalyticsTracker>(
       () => _i211.PdpAnalyticsTracker(gh<_i127.AnalyticsHelper>()),
     );
+    gh.lazySingleton<_i465.DeleteChildUseCase>(
+      () => _i465.DeleteChildUseCase(gh<_i970.KidsRepository>()),
+    );
+    gh.lazySingleton<_i1052.GetChildrenUseCase>(
+      () => _i1052.GetChildrenUseCase(gh<_i970.KidsRepository>()),
+    );
+    gh.lazySingleton<_i396.SaveChildUseCase>(
+      () => _i396.SaveChildUseCase(gh<_i970.KidsRepository>()),
+    );
     gh.factory<_i806.PromoDetailsBloc>(
       () => _i806.PromoDetailsBloc(gh<_i203.GetPromoDetailsUseCase>()),
     );
@@ -763,6 +793,28 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i505.GetCustomerInfoUseCase>(
       () => _i505.GetCustomerInfoUseCase(gh<_i68.SplashRepository>()),
+    );
+    gh.factory<_i17.KidsBloc>(
+      () => _i17.KidsBloc(
+        gh<_i1052.GetChildrenUseCase>(),
+        gh<_i465.DeleteChildUseCase>(),
+        gh<_i127.AnalyticsHelper>(),
+      ),
+    );
+    gh.factory<_i672.CartBloc>(
+      () => _i672.CartBloc(
+        getCartUseCase: gh<_i242.GetCartUseCase>(),
+        removeCartItemUseCase: gh<_i1036.RemoveCartItemUseCase>(),
+        updateCartItemUseCase: gh<_i231.UpdateCartItemUseCase>(),
+        moveToWishlistUseCase: gh<_i44.MoveToWishlistUseCase>(),
+        applyPromoUseCase: gh<_i982.ApplyPromoUseCase>(),
+        removePromoUseCase: gh<_i935.RemovePromoUseCase>(),
+        mergeCartUseCase: gh<_i576.MergeCartUseCase>(),
+        orderNowUseCase: gh<_i580.OrderNowUseCase>(),
+        getStaticMessageBarsUseCase: gh<_i168.GetStaticMessageBarsUseCase>(),
+        analytics: gh<_i127.AnalyticsHelper>(),
+        cartTimer: gh<_i477.CartTimer>(),
+      ),
     );
     gh.singleton<_i938.WishlistCubit>(
       () => _i938.WishlistCubit(
@@ -823,17 +875,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i179.OrderAttributionHelper>(),
       ),
     );
-    gh.factory<_i672.CartBloc>(
-      () => _i672.CartBloc(
-        getCartUseCase: gh<_i242.GetCartUseCase>(),
-        removeCartItemUseCase: gh<_i1036.RemoveCartItemUseCase>(),
-        updateCartItemUseCase: gh<_i231.UpdateCartItemUseCase>(),
-        moveToWishlistUseCase: gh<_i44.MoveToWishlistUseCase>(),
-        applyPromoUseCase: gh<_i982.ApplyPromoUseCase>(),
-        removePromoUseCase: gh<_i935.RemovePromoUseCase>(),
-        mergeCartUseCase: gh<_i576.MergeCartUseCase>(),
-        orderNowUseCase: gh<_i580.OrderNowUseCase>(),
-        getStaticMessageBarsUseCase: gh<_i168.GetStaticMessageBarsUseCase>(),
+    gh.factory<_i487.PincodeSheetBloc>(
+      () => _i487.PincodeSheetBloc(
+        gh<_i297.CheckDeliveryPincodeUseCase>(),
+        gh<_i551.SelectAddressUseCase>(),
+        gh<_i1013.AddressCacheManager>(),
+        gh<_i127.AnalyticsHelper>(),
       ),
     );
     gh.lazySingleton<_i1061.PushNotificationService>(
@@ -927,6 +974,12 @@ extension GetItInjectableX on _i174.GetIt {
         lpAttribution: gh<_i233.LpAttributionHelper>(),
         prefs: gh<_i818.PrefManager>(),
         journeyWorker: gh<_i473.JourneyWorker>(),
+      ),
+    );
+    gh.factory<_i512.ManageKidBloc>(
+      () => _i512.ManageKidBloc(
+        gh<_i396.SaveChildUseCase>(),
+        gh<_i127.AnalyticsHelper>(),
       ),
     );
     gh.factory<_i206.LandingPageBloc>(

@@ -44,6 +44,11 @@ class StorageKeys {
   static const String persistentTicket = 'hs_persistent_ticket';
   static const String uuid = 'hs_uuid';
   static const String childCohorts = 'hs_child_cohorts';
+  // Child id → the cohort bucket that was actually incremented for it, so a
+  // delete decrements that exact bucket instead of recomputing from the
+  // child's current age (which drifts as the child ages between add and
+  // delete — see AnalyticsHelper._adjustChildCohort).
+  static const String childCohortAssignments = 'hs_child_cohort_assignments';
   static const String continueBrowsingEligibleVisitor =
       'hs_continue_browsing_eligible_visitor';
   static const String productImageConfig = 'hs_product_image_config';

@@ -84,6 +84,21 @@ class PlpSliverAppBar extends StatelessWidget {
             ? FromScreens.searchBoutique
             : FromScreens.productListPage;
 
+        // `from_screen` for the cart icon — a different value set from the
+        // search icon's above, so it is computed separately rather than reused.
+        //
+        // Ports `ProductListActivity:735-747` exactly, including the boutique
+        // branch: Android sends `salePlanDetail.name ?: BOUTIQUE`, i.e. the
+        // **boutique's own name**, so a "Summer Sale" boutique reports
+        // "Summer Sale" and not a generic screen label. `screenName` is that
+        // field. This is why the value has to be threaded from here and cannot
+        // be reconstructed from the route.
+        final cartFromScreen = switch (pageType) {
+          PageType.boutique =>
+            (data.screenName?.isNotEmpty ?? false) ? data.screenName! : FromScreens.boutique,
+          PageType.search => FromScreens.searchResult,
+          PageType.plp => FromScreens.plp,
+        };
         // Wishlist icon `from_screen` — one label per listing type so the
         // dashboards can split Boutique / Search / Product listing traffic.
         final wishlistFromScreen = switch (pageType) {
@@ -98,6 +113,7 @@ class PlpSliverAppBar extends StatelessWidget {
             subtitle: pageSubtitle,
             banner: data.banner,
             searchFromScreen: searchFromScreen,
+            cartFromScreen: cartFromScreen,
             wishlistFromScreen: wishlistFromScreen,
             trackingMeta: data.trackingMeta,
           );
@@ -107,6 +123,7 @@ class PlpSliverAppBar extends StatelessWidget {
           title: pageTitle,
           subtitle: pageSubtitle,
           searchFromScreen: searchFromScreen,
+          cartFromScreen: cartFromScreen,
           wishlistFromScreen: wishlistFromScreen,
           trackingMeta: data.trackingMeta,
         );
@@ -127,6 +144,11 @@ class _StandardSliverAppBar extends StatelessWidget {
   /// than derived, because which app bar renders is decided by whether the page
   /// has a banner — not by its type — so neither variant can infer it.
   final String searchFromScreen;
+
+  /// `from_screen` for the cart icon. Separate from [searchFromScreen] because
+  /// Android draws the two from different value sets — see the computation in
+  /// [PlpSliverAppBar].
+  final String cartFromScreen;
   final String wishlistFromScreen;
   final Map<String, dynamic>? trackingMeta;
 
@@ -134,6 +156,7 @@ class _StandardSliverAppBar extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.searchFromScreen,
+    required this.cartFromScreen,
     required this.wishlistFromScreen,
     this.trackingMeta,
   });
@@ -202,10 +225,7 @@ class _StandardSliverAppBar extends StatelessWidget {
             iconSize: 18,
             icon: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
             count: 0,
-            onTap: () => AppNavigator.goToWishlistGated(
-              context,
-              fromScreen: wishlistFromScreen,
-            ),
+            onTap: () => AppNavigator.goToWishlistGated(context, fromScreen: wishlistFromScreen),
             iconColor: AppColors.textPrimary,
           ),
         ),
@@ -216,7 +236,13 @@ class _StandardSliverAppBar extends StatelessWidget {
             iconSize: 18,
             icon: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
             count: context.watch<CartCountCubit>().state,
-            onTap: () => AppNavigator.goToCart(context),
+            onTap: () => AppNavigator.goToCart(
+              context,
+              sourcePage: SourcePage(
+                fromScreen: cartFromScreen,
+                fromLocation: FromLocations.cartIconButton,
+              ),
+            ),
             iconColor: AppColors.textPrimary,
           ),
         ),
@@ -239,6 +265,9 @@ class PlpSliverHeader extends StatelessWidget {
   /// than derived, because which app bar renders is decided by whether the page
   /// has a banner — not by its type — so neither variant can infer it.
   final String searchFromScreen;
+
+  /// See [_StandardSliverAppBar.cartFromScreen].
+  final String cartFromScreen;
   final String wishlistFromScreen;
   final Map<String, dynamic>? trackingMeta;
 
@@ -248,6 +277,7 @@ class PlpSliverHeader extends StatelessWidget {
     required this.subtitle,
     required this.banner,
     required this.searchFromScreen,
+    required this.cartFromScreen,
     required this.wishlistFromScreen,
     this.trackingMeta,
   });
@@ -264,6 +294,7 @@ class PlpSliverHeader extends StatelessWidget {
         title: title,
         subtitle: subtitle,
         searchFromScreen: searchFromScreen,
+        cartFromScreen: cartFromScreen,
         wishlistFromScreen: wishlistFromScreen,
         banner: banner,
         topPadding: topPadding,
@@ -286,6 +317,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.banner,
     required this.topPadding,
     required this.searchFromScreen,
+    required this.cartFromScreen,
     required this.wishlistFromScreen,
     this.trackingMeta,
   });
@@ -293,6 +325,9 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
   /// See [PlpSliverHeader.searchFromScreen].
   final String searchFromScreen;
   final String wishlistFromScreen;
+
+  /// See [PlpSliverHeader.cartFromScreen].
+  final String cartFromScreen;
 
   static const double _toolbarHeight = kToolbarHeight;
   static const double _expandedHeight = 300;
@@ -502,10 +537,8 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
 
                   CircleIconButton(
                     key: const ValueKey(PlpTestStrings.appBarWishlistButton),
-                    onTap: () => AppNavigator.goToWishlistGated(
-                      context,
-                      fromScreen: wishlistFromScreen,
-                    ),
+                    onTap: () =>
+                        AppNavigator.goToWishlistGated(context, fromScreen: wishlistFromScreen),
                     child: const CustomImage(path: ImageConstants.heart, width: 20, height: 20),
                   ),
 
@@ -513,13 +546,25 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
 
                   CircleIconButton(
                     key: const ValueKey(PlpTestStrings.appBarCartButton),
-                    onTap: () => AppNavigator.goToCart(context),
+                    onTap: () => AppNavigator.goToCart(
+                      context,
+                      sourcePage: SourcePage(
+                        fromScreen: cartFromScreen,
+                        fromLocation: FromLocations.cartIconButton,
+                      ),
+                    ),
                     child: BadgeIcon(
                       padding: EdgeInsets.zero,
                       iconSize: 18,
                       icon: const CustomImage(path: ImageConstants.bag, width: 20, height: 20),
                       count: context.watch<CartCountCubit>().state,
-                      onTap: () => AppNavigator.goToCart(context),
+                      onTap: () => AppNavigator.goToCart(
+                        context,
+                        sourcePage: SourcePage(
+                          fromScreen: cartFromScreen,
+                          fromLocation: FromLocations.cartIconButton,
+                        ),
+                      ),
                       iconColor: AppColors.textPrimary,
                     ),
                   ),
@@ -556,10 +601,7 @@ class _PlpHeaderDelegate extends SliverPersistentHeaderDelegate {
 /// [FromScreens.searchBoutique].
 void _onSearchTap(BuildContext context, String fromScreen, Map<String, dynamic>? trackingMeta) {
   sl<AnalyticsHelper>().logSearchClicked(
-    source: SourcePage(
-      fromScreen: fromScreen,
-      fromLocation: FromLocations.searchIcon,
-    ),
+    source: SourcePage(fromScreen: fromScreen, fromLocation: FromLocations.searchIcon),
     trackingMeta: trackingMeta,
   );
   AppNavigator.goToSearch(context);

@@ -35,11 +35,7 @@ import 'promo_offer_card.dart';
 /// closes the sheet, removing keeps it open and reloads the list so `isApplied`
 /// flips in place.
 class PromoOffersBottomSheet extends StatelessWidget {
-  const PromoOffersBottomSheet({super.key, this.onCartChanged, this.onAction, this.onActionSheet});
-
-  /// Called the first time an apply/remove lands server-side, so [show] can
-  /// tell its caller the cart is stale.
-  final VoidCallback? onCartChanged;
+  const PromoOffersBottomSheet({super.key, this.onAction, this.onActionSheet});
 
   /// Called with a backend action sheet that has to outlive this route (a
   /// successful apply closes the sheet before it can be shown here).
@@ -51,11 +47,12 @@ class PromoOffersBottomSheet extends StatelessWidget {
   final ValueChanged<(String, String?)>? onAction;
 
   /// Returns true only if a promo was actually applied or removed — a plain
-  /// dismiss returns false, so the caller can skip reloading the cart.
-  ///
   /// A CTA deeplink tapped inside the sheet is followed here, after the sheet
   /// has closed, so the pushed route doesn't end up stacked under it.
-  static Future<bool> show(
+  ///
+  /// Returns nothing: each apply/remove is reported to `CartBloc` as it lands
+  /// and refreshes the cart there, so the caller has nothing to do on close.
+  static Future<void> show(
     BuildContext context, {
     bool isDismissible = true,
     bool enableDrag = true,
@@ -81,7 +78,6 @@ class PromoOffersBottomSheet extends StatelessWidget {
       builder: (_) => BlocProvider(
         create: (_) => sl<PromosOffersBloc>()..add(const PromosOffersEvent.load()),
         child: PromoOffersBottomSheet(
-          onCartChanged: () => outcome.cartChanged = true,
           onAction: (offer) {
             outcome.deeplink = offer.$1;
             outcome.savingsText = offer.$2;
@@ -113,8 +109,42 @@ class PromoOffersBottomSheet extends StatelessWidget {
             : null,
       );
     }
+  }
 
-    return outcome.cartChanged;
+  /// Hand this action's outcome to [CartBloc], which fires the promo event.
+  ///
+  /// Reported there, not here: the payload is bag state and this bloc holds an
+  /// offer list. [CartBloc] is app-root scoped and already read for the login
+  /// gate, so it is the instance the cart page is showing. Dispatching an
+  /// event keeps the emit inside a bloc.
+  ///
+  /// Runs under the listener's `actionNonce` guard — one event per action.
+  /// A failed *remove* reports nothing; see [OffersSheetPromoOutcome].
+  void _reportPromoOutcome(BuildContext context, PromosOffersState state) {
+    final kind = state.lastAction;
+    final code = state.lastActionCode;
+    if (kind == null || code.isEmpty) return;
+
+    final OffersSheetPromoOutcome outcome;
+    if (state.actionSucceeded) {
+      outcome = kind == PromoActionKind.apply
+          ? OffersSheetPromoOutcome.applied
+          : OffersSheetPromoOutcome.removed;
+    } else if (kind == PromoActionKind.apply) {
+      outcome = OffersSheetPromoOutcome.failed;
+    } else {
+      return;
+    }
+
+    context.read<CartBloc>().add(
+      OffersSheetPromoActionCompleted(
+        outcome: outcome,
+        promoCode: code,
+        // The server's own reason — never `actionError`, which falls back to
+        // the app's UI copy when the response carried no message.
+        error: outcome == OffersSheetPromoOutcome.failed ? state.lastActionServerError : null,
+      ),
+    );
   }
 
   @override
@@ -127,7 +157,7 @@ class PromoOffersBottomSheet extends StatelessWidget {
     return BlocListener<PromosOffersBloc, PromosOffersState>(
       listenWhen: (prev, curr) => prev.actionNonce != curr.actionNonce,
       listener: (context, state) {
-        if (state.cartChanged) onCartChanged?.call();
+        _reportPromoOutcome(context, state);
 
         // Only a *successful* apply is terminal for this sheet. A rejection is
         // an HTTP 200 with `success: false`, so success is read from
@@ -189,7 +219,6 @@ class PromoOffersBottomSheet extends StatelessWidget {
 /// Mutable carrier for the sheet's outcome, read by [PromoOffersBottomSheet.show]
 /// after the route is gone.
 class _SheetOutcome {
-  bool cartChanged = false;
   String? deeplink;
   BackendActionContentEntity? actionSheet;
   String? savingsText;

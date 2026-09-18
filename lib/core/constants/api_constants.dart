@@ -82,6 +82,11 @@ class ApiConstants {
   static const String logout = '/customer/logout';
   static const String forgetGuestUser = '/customer/flush-data/guestuser';
 
+  // My Kids (child profiles)
+  static const String kidsList = '/v2/questionnaire/list';
+  static const String kidsDelete = '/v2/questionnaire/{kidId}';
+  static const String kidsSave = '/v3/questionnaire/save-and-update';
+
   // Address Management
   static const String addresses = '/delivery/addresses/v3';
   static const String customerAddresses = '/customer/v2/addresses';

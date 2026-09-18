@@ -45,6 +45,10 @@ class PincodeBottomSheet extends StatelessWidget {
     BuildContext context, {
     PincodeSheetSource source = PincodeSheetSource.cart,
     Future<PincodeVerifyResult> Function(String pincode)? onPdpVerify,
+
+    /// The pincode already in effect — reported as `from_pincode` on
+    /// `pincode_checked`. Omit only when there genuinely is none.
+    String? currentPincode,
   }) {
     return showModalBottomSheet<String>(
       context: context,
@@ -55,7 +59,9 @@ class PincodeBottomSheet extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => BlocProvider(
-        create: (_) => sl<PincodeSheetBloc>()..add(PincodeSheetEvent.open(source: source)),
+        create: (_) =>
+            sl<PincodeSheetBloc>()
+              ..add(PincodeSheetEvent.open(source: source, currentPincode: currentPincode)),
         child: PincodeBottomSheet(onPdpVerify: onPdpVerify),
       ),
     );
@@ -184,9 +190,7 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
             if (state.toastMessage != null && state.toastMessage!.isNotEmpty) {
               context.showSnack(
                 state.toastMessage!,
-                key: ValueKey(
-                  '${state.source.keyPrefix}_${PincodeTestStrings.sheetToastSnackBar}',
-                ),
+                key: ValueKey('${state.source.keyPrefix}_${PincodeTestStrings.sheetToastSnackBar}'),
               );
             }
           },
@@ -280,8 +284,7 @@ class _PincodeSheetBodyState extends State<_PincodeSheetBody> {
 
 /// Same host slug as [_PincodeSheetBodyState._keyPrefix], for the private slot
 /// widgets that sit outside that State.
-String _prefix(BuildContext context) =>
-    context.read<PincodeSheetBloc>().state.source.keyPrefix;
+String _prefix(BuildContext context) => context.read<PincodeSheetBloc>().state.source.keyPrefix;
 
 class _AddressList extends StatelessWidget {
   const _AddressList({required this.onSelect});

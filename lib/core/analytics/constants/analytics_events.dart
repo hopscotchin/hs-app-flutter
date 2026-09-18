@@ -65,6 +65,7 @@ class AnalyticsEvents {
   static const String sizeChartViewed = 'size_chart_viewed';
   static const String sizeChartClicked = 'size_chart_clicked';
   static const String shippingInfoViewed = 'shipping_info_viewed';
+
   static const String pdpRecoLoaded = 'PDP_reco_loaded'; // uppercase PDP, preserve
   static const String pdpAttributesLoaded = 'pdp_attributes_loaded';
   static const String pdpImagesScrolled = 'pdp_images_scrolled';
