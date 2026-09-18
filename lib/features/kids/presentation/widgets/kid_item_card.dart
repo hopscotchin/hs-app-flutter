@@ -82,7 +82,7 @@ class KidItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  child.dobDisplay,
+                  child.dob ?? '',
                   style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
                 ),
               ],

@@ -9,5 +9,4 @@ sealed class ManageKidEvent with _$ManageKidEvent {
       GenderChanged;
   const factory ManageKidEvent.consentChanged(bool given) = ConsentChanged;
   const factory ManageKidEvent.submit() = SubmitKid;
-  const factory ManageKidEvent.clearApiError() = ClearApiError;
 }

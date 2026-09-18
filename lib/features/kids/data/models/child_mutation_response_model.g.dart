@@ -14,4 +14,5 @@ ChildMutationResponseModel _$ChildMutationResponseModelFromJson(
   child: json['child'] == null
       ? null
       : ChildModel.fromJson(json['child'] as Map<String, dynamic>),
+  errorType: json['errorType'] as String?,
 );

@@ -35,7 +35,17 @@ abstract class ChildEntity with _$ChildEntity {
     @Default(0) int id,
     @Default('') String name,
     @Default(ChildGender.boy) ChildGender gender,
-    DateTime? dob,
+    // Server-formatted `"D MMM YYYY"` (e.g. "15 May 2019") — carried
+    // straight through for the My Kids list row. Not the same field as
+    // [ManageKidState.dob] (a `DateTime`, the Add/Edit form's own live
+    // picker session value): this is read-only backend display copy, never
+    // parsed into a `DateTime` anywhere.
+    String? dob,
+    // Server-formatted `"DD - MM - YYYY"` — used to pre-fill the read-only
+    // dob field for an existing child. Also the source `ManageKidBloc`
+    // resolves the outgoing save request's `dob` from (spaces stripped)
+    // when the field wasn't re-picked; null for a not-yet-saved child.
+    String? displayDob,
     String? imageUrl,
     @Default(false) bool consent,
     // The three fields below arrive straight from the backend's `age` /
@@ -52,27 +62,19 @@ abstract class ChildEntity with _$ChildEntity {
 extension ChildEntityX on ChildEntity {
   bool get isNew => id == 0;
 
-  static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ]; // ignore: prefer_const_declarations
-
-  /// Ready-to-display date, e.g. "15 May 2019" — reformatted from the
-  /// parsed [dob] rather than carrying the backend's own display string
-  /// straight through, since [dob] is also needed as a real `DateTime` for
-  /// the edit-mode date picker and the outgoing save request.
-  String get dobDisplay {
-    final d = dob;
-    if (d == null) return '';
-    return '${d.day} ${_months[d.month - 1]} ${d.year}';
-  }
-
   /// Raw `"{year}-{month}-{day}"` (unpadded), matching what Android's
-  /// `ChildProfileAnalyticsHelper` sends as `child_profile_dob` — a plain
-  /// string concat of the year/month/day fields, not the display format.
+  /// `ChildProfileAnalyticsHelper` sends as `child_profile_dob`. Derived
+  /// from [displayDob]'s `"DD - MM - YYYY"` by reordering its three
+  /// dash-separated components — not date parsing in the sense of
+  /// interpreting a calendar format, just splitting and reordering a
+  /// string whose shape is fixed and confirmed live.
   String get dobWireValue {
-    final d = dob;
-    if (d == null) return '';
-    return '${d.year}-${d.month}-${d.day}';
+    final parts = displayDob?.split('-').map((p) => p.trim()).toList();
+    if (parts == null || parts.length != 3) return '';
+    final day = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final year = int.tryParse(parts[2]);
+    if (day == null || month == null || year == null) return '';
+    return '$year-$month-$day';
   }
 }

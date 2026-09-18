@@ -3,13 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../components/appbar/hs_appbar.dart';
 import '../../../../components/atoms/custom_image.dart';
-import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../components/atoms/outlined_text_field.dart';
 import '../../../../components/buttons/app_button_named.dart';
 import '../../../../components/buttons/button_enums.dart';
 import '../../../../components/form/app_checkbox.dart';
 import '../../../../components/form/app_radio.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
+import '../../../../core/config/environment.dart';
 import '../../../../core/constants/image_constants.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
@@ -66,15 +66,6 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
             prev.submitError != curr.submitError ||
             prev.apiError != curr.apiError,
         listener: (context, state) {
-          // Auto-dismisses like a toast — there's no SnackBar backing this
-          // one (it's a persistent inline banner), so the widget has to
-          // clear it itself after a few seconds.
-          if (state.apiError != null) {
-            final bloc = context.read<ManageKidBloc>();
-            Future.delayed(const Duration(seconds: 3), () {
-              if (mounted) bloc.add(const ManageKidEvent.clearApiError());
-            });
-          }
           if (state.submitError != null) {
             context.showSnack(state.submitError!, status: SnackStatus.error);
             return;
@@ -103,10 +94,6 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
             top: false,
             child: BlocBuilder<ManageKidBloc, ManageKidState>(
               builder: (context, state) {
-                if (state.config == null) {
-                  return const _FormShimmer();
-                }
-                final config = state.config!;
                 return Column(
                   children: [
                     Expanded(
@@ -117,137 +104,135 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                           AppSpacing.md,
                           0,
                         ),
-                        child: Stack(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Text(
+                              _isEdit
+                                  ? KidsStrings.editFormHeading
+                                  : KidsStrings.formHeading,
+                              style: AppTypographyV1.bodyLarge.bold
+                                  .textPrimary(),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              _isEdit
+                                  ? KidsStrings.editFormSubheading
+                                  : KidsStrings.formSubheading,
+                              style: AppTypographyV1.bodyRegular.regular
+                                  .neutralGrey6(),
+                            ),
+                            if (state.apiError != null) ...[
+                              AppSpacing.verticalGapLg,
+                              _ApiErrorBanner(
+                                title: KidsStrings.apiErrorBannerTitle,
+                                subtitle: state.apiError!,
+                              ),
+                            ],
+                            AppSpacing.verticalGapLg,
+                            OutlinedTextField(
+                              key: const ValueKey(
+                                KidsTestStrings.formNameInput,
+                              ),
+                              hintTextKey: const ValueKey(
+                                KidsTestStrings.formNameInputHint,
+                              ),
+                              controller: _nameController,
+                              labelText: KidsStrings.nameLabel,
+                              required: true,
+                              onChanged: (v) => context
+                                  .read<ManageKidBloc>()
+                                  .add(ManageKidEvent.nameChanged(v)),
+                            ),
+                            AppSpacing.verticalGapMd,
+                            _DobField(
+                              key: const ValueKey(KidsTestStrings.formDobInput),
+                              dob: state.dob,
+                              // Existing child: use the backend's own
+                              // server-formatted display string rather
+                              // than reformatting `dob` client-side —
+                              // there's no live user edit to reflect
+                              // since the field is locked below anyway.
+                              displayDobOverride: state.original?.displayDob,
+                              // DOB looks read-only once a child exists per the
+                              // current design (pending confirmation — see
+                              // PROFILE_KIDS_API_CONTRACT.md §1 on DOB immutability).
+                              enabled: !_isEdit,
+                              onPicked: (date) => context
+                                  .read<ManageKidBloc>()
+                                  .add(ManageKidEvent.dobChanged(date)),
+                            ),
+                            AppSpacing.verticalGapMd,
+                            Row(
                               children: [
-                                Text(
-                                  config.heading,
-                                  style: AppTypographyV1.bodyLarge.bold
-                                      .textPrimary(),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  config.subheading,
-                                  style: AppTypographyV1.bodyRegular.regular
-                                      .neutralGrey6(),
-                                ),
-                                AppSpacing.verticalGapLg,
-                                OutlinedTextField(
-                                  key: const ValueKey(
-                                    KidsTestStrings.formNameInput,
-                                  ),
-                                  hintTextKey: const ValueKey(
-                                    KidsTestStrings.formNameInputHint,
-                                  ),
-                                  controller: _nameController,
-                                  labelText: KidsStrings.nameLabel,
-                                  required: true,
-                                  onChanged: (v) => context
-                                      .read<ManageKidBloc>()
-                                      .add(ManageKidEvent.nameChanged(v)),
-                                ),
-                                AppSpacing.verticalGapMd,
-                                _DobField(
-                                  key: const ValueKey(
-                                    KidsTestStrings.formDobInput,
-                                  ),
-                                  dob: state.dob,
-                                  // DOB looks read-only once a child exists per the
-                                  // current design (pending confirmation — see
-                                  // PROFILE_KIDS_API_CONTRACT.md §1 on DOB immutability).
-                                  enabled: !_isEdit,
-                                  onPicked: (date) => context
-                                      .read<ManageKidBloc>()
-                                      .add(ManageKidEvent.dobChanged(date)),
-                                ),
-                                AppSpacing.verticalGapMd,
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _GenderOption(
-                                        radioKey: const ValueKey(
-                                          KidsTestStrings.formGenderGirlRadio,
+                                Expanded(
+                                  child: _GenderOption(
+                                    radioKey: const ValueKey(
+                                      KidsTestStrings.formGenderGirlRadio,
+                                    ),
+                                    isSelected:
+                                        state.gender == ChildGender.girl,
+                                    label: KidsStrings.genderGirl,
+                                    // Gender is fixed once a child exists, same as DOB above.
+                                    enabled: !_isEdit,
+                                    onTap: () =>
+                                        context.read<ManageKidBloc>().add(
+                                          const ManageKidEvent.genderChanged(
+                                            ChildGender.girl,
+                                          ),
                                         ),
-                                        isSelected:
-                                            state.gender == ChildGender.girl,
-                                        label: KidsStrings.genderGirl,
-                                        // Gender is fixed once a child exists, same as DOB above.
-                                        enabled: !_isEdit,
-                                        onTap: () =>
-                                            context.read<ManageKidBloc>().add(
-                                              const ManageKidEvent.genderChanged(
-                                                ChildGender.girl,
-                                              ),
-                                            ),
-                                      ),
+                                  ),
+                                ),
+                                AppSpacing.horizontalGapSm,
+                                Expanded(
+                                  child: _GenderOption(
+                                    radioKey: const ValueKey(
+                                      KidsTestStrings.formGenderBoyRadio,
                                     ),
-                                    AppSpacing.horizontalGapSm,
-                                    Expanded(
-                                      child: _GenderOption(
-                                        radioKey: const ValueKey(
-                                          KidsTestStrings.formGenderBoyRadio,
+                                    isSelected: state.gender == ChildGender.boy,
+                                    label: KidsStrings.genderBoy,
+                                    enabled: !_isEdit,
+                                    onTap: () =>
+                                        context.read<ManageKidBloc>().add(
+                                          const ManageKidEvent.genderChanged(
+                                            ChildGender.boy,
+                                          ),
                                         ),
-                                        isSelected:
-                                            state.gender == ChildGender.boy,
-                                        label: KidsStrings.genderBoy,
-                                        enabled: !_isEdit,
-                                        onTap: () =>
-                                            context.read<ManageKidBloc>().add(
-                                              const ManageKidEvent.genderChanged(
-                                                ChildGender.boy,
-                                              ),
-                                            ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                AppSpacing.verticalGapLg,
-                                MessageBarsWidget(
-                                  keyPrefix: KidsTestStrings.formScreen,
-                                  cardStyle: true,
-                                  contentPadding: const EdgeInsets.all(
-                                    AppSpacing.sm,
                                   ),
-                                  cardBorder: Border.all(
-                                    color: AppColors.neutralGrey2,
-                                    width: 0.5,
-                                  ),
-                                  iconSize: (24, 24),
-                                  // Sized to match the design's subtitle
-                                  // (labelLarge) — MessageBarsWidget's own
-                                  // default is labelMedium.
-                                  textStyle: AppTypographyV1.labelLarge.regular
-                                      .copyWith(color: AppColors.neutralGrey6),
-                                  messageBars: [
-                                    MessageBarEntity(
-                                      messageType: 'custom',
-                                      hasIcon: true,
-                                      icon: ImageConstants.shieldIcon,
-                                      bgColor: config.bannerBackgroundColor,
-                                      textColor: '#353535', // AppColors.neutralGrey6
-                                      title: config.bannerTitle,
-                                      text: config.bannerSubtitle,
-                                    ),
-                                  ],
                                 ),
-                                AppSpacing.verticalGapMd,
                               ],
                             ),
-                            // Overlays the heading rather than pushing it down —
-                            // matches Figma, where the banner floats on top of
-                            // the copy underneath instead of shifting the layout.
-                            if (state.apiError != null)
-                              Positioned(
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                child: _ApiErrorBanner(
-                                  title: KidsStrings.apiErrorBannerTitle,
-                                  subtitle: state.apiError!,
-                                ),
+                            AppSpacing.verticalGapLg,
+                            MessageBarsWidget(
+                              keyPrefix: KidsTestStrings.formScreen,
+                              cardStyle: true,
+                              contentPadding: const EdgeInsets.all(
+                                AppSpacing.sm,
                               ),
+                              cardBorder: Border.all(
+                                color: AppColors.neutralGrey2,
+                                width: 0.5,
+                              ),
+                              iconSize: (24, 24),
+                              // Sized to match the design's subtitle
+                              // (labelLarge) — MessageBarsWidget's own
+                              // default is labelMedium.
+                              textStyle: AppTypographyV1.labelLarge.regular
+                                  .copyWith(color: AppColors.neutralGrey6),
+                              messageBars: const [
+                                MessageBarEntity(
+                                  messageType: 'custom',
+                                  hasIcon: true,
+                                  icon: ImageConstants.shieldIcon,
+                                  bgColor: '#E5E5EA', // AppColors.neutralGrey2
+                                  textColor:
+                                      '#353535', // AppColors.neutralGrey6
+                                  title: KidsStrings.whyWeAskBannerTitle,
+                                  text: KidsStrings.whyWeAskBannerSubtitle,
+                                ),
+                              ],
+                            ),
+                            AppSpacing.verticalGapMd,
                           ],
                         ),
                       ),
@@ -269,9 +254,10 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                           _ConsentRow(
                             checked: state.consentGiven,
                             hasError: state.consentError,
-                            consentText: config.consentText,
-                            privacyPolicyLabel: config.viewPrivacyPolicyLabel,
-                            privacyPolicyUrl: config.viewPrivacyPolicyUrl,
+                            consentText: KidsStrings.consentText,
+                            privacyPolicyLabel: KidsStrings.viewPrivacyPolicy,
+                            privacyPolicyUrl:
+                                '${EnvironmentConfig.webBaseUrl}/${AuthStrings.privacyPath}${AuthStrings.legalUrlParams}',
                             onChanged: (v) => context.read<ManageKidBloc>().add(
                               ManageKidEvent.consentChanged(v),
                             ),
@@ -337,9 +323,10 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
 /// `MessageBarsWidget`: that component always renders its title and
 /// message as two separate blocks with a fixed gap between them, which
 /// can't produce this single-paragraph look without changing a widget
-/// several other screens also rely on. Auto-dismisses 3 seconds after it
-/// appears — see the `apiError`/`ClearApiError` handling in
-/// `_AddEditKidPageState`'s `BlocListener`.
+/// several other screens also rely on. Sits in the normal form layout
+/// (pushing the fields below it down), not an overlay — and stays visible
+/// until the next submit attempt clears `apiError` in `ManageKidBloc`,
+/// rather than auto-dismissing on a timer.
 class _ApiErrorBanner extends StatelessWidget {
   const _ApiErrorBanner({required this.title, required this.subtitle});
 
@@ -378,53 +365,6 @@ class _ApiErrorBanner extends StatelessWidget {
               key: const ValueKey(KidsTestStrings.formApiErrorBannerText),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Skeleton shown while `state.config` is loading — shaped to roughly
-/// mirror the real form below it, matching the shimmer convention used
-/// elsewhere in the app (e.g. KidsPage's list loading state) instead of a
-/// bare spinner.
-class _FormShimmer extends StatelessWidget {
-  const _FormShimmer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const LoadingShimmer(height: 20, width: 220),
-          const SizedBox(height: 10),
-          const LoadingShimmer(height: 16, width: 280),
-          AppSpacing.verticalGapLg,
-          const LoadingShimmer(height: 52),
-          AppSpacing.verticalGapMd,
-          const LoadingShimmer(height: 52),
-          AppSpacing.verticalGapMd,
-          Row(
-            children: [
-              Expanded(
-                child: LoadingShimmer(
-                  height: 48,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              AppSpacing.horizontalGapSm,
-              Expanded(
-                child: LoadingShimmer(
-                  height: 48,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ],
-          ),
-          AppSpacing.verticalGapLg,
-          const LoadingShimmer(height: 64),
         ],
       ),
     );
@@ -509,11 +449,18 @@ class _DobField extends StatefulWidget {
     required this.dob,
     required this.enabled,
     required this.onPicked,
+    this.displayDobOverride,
   });
 
   final DateTime? dob;
   final bool enabled;
   final ValueChanged<DateTime> onPicked;
+
+  /// Server-formatted `"DD - MM - YYYY"` for an existing child — used
+  /// verbatim instead of reformatting [dob] client-side. Only meaningful
+  /// while [enabled] is false (an existing, locked child); a live user pick
+  /// always falls back to [_displayFor].
+  final String? displayDobOverride;
 
   @override
   State<_DobField> createState() => _DobFieldState();
@@ -521,7 +468,7 @@ class _DobField extends StatefulWidget {
 
 class _DobFieldState extends State<_DobField> {
   late final TextEditingController _controller = TextEditingController(
-    text: _displayFor(widget.dob),
+    text: widget.displayDobOverride ?? _displayFor(widget.dob),
   );
 
   static String _displayFor(DateTime? dob) {
@@ -535,7 +482,7 @@ class _DobFieldState extends State<_DobField> {
   void didUpdateWidget(_DobField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.dob != widget.dob) {
-      _controller.text = _displayFor(widget.dob);
+      _controller.text = widget.displayDobOverride ?? _displayFor(widget.dob);
     }
   }
 
@@ -563,7 +510,8 @@ class _DobFieldState extends State<_DobField> {
               final now = DateTime.now();
               final picked = await showDatePicker(
                 context: context,
-                initialDate: widget.dob ?? DateTime(now.year - 1, now.month, now.day),
+                initialDate:
+                    widget.dob ?? DateTime(now.year - 1, now.month, now.day),
                 firstDate: DateTime(now.year - 25),
                 lastDate: now,
               );

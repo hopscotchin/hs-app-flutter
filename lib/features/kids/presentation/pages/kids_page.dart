@@ -10,7 +10,6 @@ import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/common_strings.dart';
 import '../../../../core/constants/strings/kids_strings.dart';
-import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -125,14 +124,7 @@ class KidsPage extends StatelessWidget {
                                   .textPrimary(),
                               textStyle: AppTypographyV1.labelLarge.regular
                                   .neutralGrey6(),
-                              messageBars: [
-                                MessageBarEntity(
-                                  messageType: 'custom',
-                                  bgColor: '#E5E5EA', // AppColors.neutralGrey2
-                                  title: content.bannerTitle,
-                                  text: content.bannerSubtitle,
-                                ),
-                              ],
+                              messageBars: [content.messageBar],
                             ),
                           ),
                         ),

@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/models/message_bar_model.dart';
 import '../../domain/entities/kids_list_content_entity.dart';
 
 part 'kids_list_content_model.g.dart';
@@ -14,8 +15,7 @@ class KidsListContentModel {
   const KidsListContentModel({
     this.emptyStateTitle,
     this.emptyStateSubtitle,
-    this.bannerTitle,
-    this.bannerSubtitle,
+    this.messageBar,
     this.addChildLabel,
     this.addAnotherChildLabel,
     this.addChildSubtitle,
@@ -24,8 +24,11 @@ class KidsListContentModel {
 
   final String? emptyStateTitle;
   final String? emptyStateSubtitle;
-  final String? bannerTitle;
-  final String? bannerSubtitle;
+
+  /// Full message-bar object for the info banner above a populated list —
+  /// same shape used everywhere else in the app, not separate title/
+  /// subtitle strings.
+  final MessageBarModel? messageBar;
   final String? addChildLabel;
   final String? addAnotherChildLabel;
   final String? addChildSubtitle;
@@ -45,8 +48,7 @@ extension KidsListContentModelX on KidsListContentModel {
     return KidsListContentEntity(
       emptyStateTitle: emptyStateTitle ?? fallback.emptyStateTitle,
       emptyStateSubtitle: emptyStateSubtitle ?? fallback.emptyStateSubtitle,
-      bannerTitle: bannerTitle ?? fallback.bannerTitle,
-      bannerSubtitle: bannerSubtitle ?? fallback.bannerSubtitle,
+      messageBar: messageBar ?? fallback.messageBar,
       addChildLabel: addChildLabel ?? fallback.addChildLabel,
       addAnotherChildLabel: addAnotherChildLabel ?? fallback.addAnotherChildLabel,
       addChildSubtitle: addChildSubtitle ?? fallback.addChildSubtitle,

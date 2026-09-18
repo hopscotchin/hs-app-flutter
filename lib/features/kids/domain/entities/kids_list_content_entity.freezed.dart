@@ -15,8 +15,10 @@ T _$identity<T>(T value) => value;
 mixin _$KidsListContentEntity {
 
 // Empty-state (no children yet) heading/subheading.
- String get emptyStateTitle; String get emptyStateSubtitle;// Info banner shown above a populated list.
- String get bannerTitle; String get bannerSubtitle;// Persistent "Add child" / "Add another child" footer row.
+ String get emptyStateTitle; String get emptyStateSubtitle;// Info banner shown above a populated list — the backend sends this as
+// a full message-bar object (title/message/bgColor/...), the same shape
+// used everywhere else in the app, not separate title/subtitle strings.
+ MessageBarEntity get messageBar;// Persistent "Add child" / "Add another child" footer row.
  String get addChildLabel; String get addAnotherChildLabel; String get addChildSubtitle;// The footer row's two overlapping preview circles. Nullable entries —
 // null means "no image yet, render the local generic-person placeholder"
 // (a client-only rendering detail, not part of the contract).
@@ -31,16 +33,16 @@ $KidsListContentEntityCopyWith<KidsListContentEntity> get copyWith => _$KidsList
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is KidsListContentEntity&&(identical(other.emptyStateTitle, emptyStateTitle) || other.emptyStateTitle == emptyStateTitle)&&(identical(other.emptyStateSubtitle, emptyStateSubtitle) || other.emptyStateSubtitle == emptyStateSubtitle)&&(identical(other.bannerTitle, bannerTitle) || other.bannerTitle == bannerTitle)&&(identical(other.bannerSubtitle, bannerSubtitle) || other.bannerSubtitle == bannerSubtitle)&&(identical(other.addChildLabel, addChildLabel) || other.addChildLabel == addChildLabel)&&(identical(other.addAnotherChildLabel, addAnotherChildLabel) || other.addAnotherChildLabel == addAnotherChildLabel)&&(identical(other.addChildSubtitle, addChildSubtitle) || other.addChildSubtitle == addChildSubtitle)&&const DeepCollectionEquality().equals(other.footerAvatars, footerAvatars));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is KidsListContentEntity&&(identical(other.emptyStateTitle, emptyStateTitle) || other.emptyStateTitle == emptyStateTitle)&&(identical(other.emptyStateSubtitle, emptyStateSubtitle) || other.emptyStateSubtitle == emptyStateSubtitle)&&(identical(other.messageBar, messageBar) || other.messageBar == messageBar)&&(identical(other.addChildLabel, addChildLabel) || other.addChildLabel == addChildLabel)&&(identical(other.addAnotherChildLabel, addAnotherChildLabel) || other.addAnotherChildLabel == addAnotherChildLabel)&&(identical(other.addChildSubtitle, addChildSubtitle) || other.addChildSubtitle == addChildSubtitle)&&const DeepCollectionEquality().equals(other.footerAvatars, footerAvatars));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,emptyStateTitle,emptyStateSubtitle,bannerTitle,bannerSubtitle,addChildLabel,addAnotherChildLabel,addChildSubtitle,const DeepCollectionEquality().hash(footerAvatars));
+int get hashCode => Object.hash(runtimeType,emptyStateTitle,emptyStateSubtitle,messageBar,addChildLabel,addAnotherChildLabel,addChildSubtitle,const DeepCollectionEquality().hash(footerAvatars));
 
 @override
 String toString() {
-  return 'KidsListContentEntity(emptyStateTitle: $emptyStateTitle, emptyStateSubtitle: $emptyStateSubtitle, bannerTitle: $bannerTitle, bannerSubtitle: $bannerSubtitle, addChildLabel: $addChildLabel, addAnotherChildLabel: $addAnotherChildLabel, addChildSubtitle: $addChildSubtitle, footerAvatars: $footerAvatars)';
+  return 'KidsListContentEntity(emptyStateTitle: $emptyStateTitle, emptyStateSubtitle: $emptyStateSubtitle, messageBar: $messageBar, addChildLabel: $addChildLabel, addAnotherChildLabel: $addAnotherChildLabel, addChildSubtitle: $addChildSubtitle, footerAvatars: $footerAvatars)';
 }
 
 
@@ -51,7 +53,7 @@ abstract mixin class $KidsListContentEntityCopyWith<$Res>  {
   factory $KidsListContentEntityCopyWith(KidsListContentEntity value, $Res Function(KidsListContentEntity) _then) = _$KidsListContentEntityCopyWithImpl;
 @useResult
 $Res call({
- String emptyStateTitle, String emptyStateSubtitle, String bannerTitle, String bannerSubtitle, String addChildLabel, String addAnotherChildLabel, String addChildSubtitle, List<String?> footerAvatars
+ String emptyStateTitle, String emptyStateSubtitle, MessageBarEntity messageBar, String addChildLabel, String addAnotherChildLabel, String addChildSubtitle, List<String?> footerAvatars
 });
 
 
@@ -68,13 +70,12 @@ class _$KidsListContentEntityCopyWithImpl<$Res>
 
 /// Create a copy of KidsListContentEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? emptyStateTitle = null,Object? emptyStateSubtitle = null,Object? bannerTitle = null,Object? bannerSubtitle = null,Object? addChildLabel = null,Object? addAnotherChildLabel = null,Object? addChildSubtitle = null,Object? footerAvatars = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? emptyStateTitle = null,Object? emptyStateSubtitle = null,Object? messageBar = null,Object? addChildLabel = null,Object? addAnotherChildLabel = null,Object? addChildSubtitle = null,Object? footerAvatars = null,}) {
   return _then(_self.copyWith(
 emptyStateTitle: null == emptyStateTitle ? _self.emptyStateTitle : emptyStateTitle // ignore: cast_nullable_to_non_nullable
 as String,emptyStateSubtitle: null == emptyStateSubtitle ? _self.emptyStateSubtitle : emptyStateSubtitle // ignore: cast_nullable_to_non_nullable
-as String,bannerTitle: null == bannerTitle ? _self.bannerTitle : bannerTitle // ignore: cast_nullable_to_non_nullable
-as String,bannerSubtitle: null == bannerSubtitle ? _self.bannerSubtitle : bannerSubtitle // ignore: cast_nullable_to_non_nullable
-as String,addChildLabel: null == addChildLabel ? _self.addChildLabel : addChildLabel // ignore: cast_nullable_to_non_nullable
+as String,messageBar: null == messageBar ? _self.messageBar : messageBar // ignore: cast_nullable_to_non_nullable
+as MessageBarEntity,addChildLabel: null == addChildLabel ? _self.addChildLabel : addChildLabel // ignore: cast_nullable_to_non_nullable
 as String,addAnotherChildLabel: null == addAnotherChildLabel ? _self.addAnotherChildLabel : addAnotherChildLabel // ignore: cast_nullable_to_non_nullable
 as String,addChildSubtitle: null == addChildSubtitle ? _self.addChildSubtitle : addChildSubtitle // ignore: cast_nullable_to_non_nullable
 as String,footerAvatars: null == footerAvatars ? _self.footerAvatars : footerAvatars // ignore: cast_nullable_to_non_nullable
@@ -163,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String emptyStateTitle,  String emptyStateSubtitle,  String bannerTitle,  String bannerSubtitle,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String emptyStateTitle,  String emptyStateSubtitle,  MessageBarEntity messageBar,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _KidsListContentEntity() when $default != null:
-return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.bannerTitle,_that.bannerSubtitle,_that.addChildLabel,_that.addAnotherChildLabel,_that.addChildSubtitle,_that.footerAvatars);case _:
+return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.messageBar,_that.addChildLabel,_that.addAnotherChildLabel,_that.addChildSubtitle,_that.footerAvatars);case _:
   return orElse();
 
 }
@@ -184,10 +185,10 @@ return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.bannerTitle
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String emptyStateTitle,  String emptyStateSubtitle,  String bannerTitle,  String bannerSubtitle,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String emptyStateTitle,  String emptyStateSubtitle,  MessageBarEntity messageBar,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)  $default,) {final _that = this;
 switch (_that) {
 case _KidsListContentEntity():
-return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.bannerTitle,_that.bannerSubtitle,_that.addChildLabel,_that.addAnotherChildLabel,_that.addChildSubtitle,_that.footerAvatars);case _:
+return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.messageBar,_that.addChildLabel,_that.addAnotherChildLabel,_that.addChildSubtitle,_that.footerAvatars);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +205,10 @@ return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.bannerTitle
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String emptyStateTitle,  String emptyStateSubtitle,  String bannerTitle,  String bannerSubtitle,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String emptyStateTitle,  String emptyStateSubtitle,  MessageBarEntity messageBar,  String addChildLabel,  String addAnotherChildLabel,  String addChildSubtitle,  List<String?> footerAvatars)?  $default,) {final _that = this;
 switch (_that) {
 case _KidsListContentEntity() when $default != null:
-return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.bannerTitle,_that.bannerSubtitle,_that.addChildLabel,_that.addAnotherChildLabel,_that.addChildSubtitle,_that.footerAvatars);case _:
+return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.messageBar,_that.addChildLabel,_that.addAnotherChildLabel,_that.addChildSubtitle,_that.footerAvatars);case _:
   return null;
 
 }
@@ -219,15 +220,16 @@ return $default(_that.emptyStateTitle,_that.emptyStateSubtitle,_that.bannerTitle
 
 
 class _KidsListContentEntity implements KidsListContentEntity {
-  const _KidsListContentEntity({required this.emptyStateTitle, required this.emptyStateSubtitle, required this.bannerTitle, required this.bannerSubtitle, required this.addChildLabel, required this.addAnotherChildLabel, required this.addChildSubtitle, required final  List<String?> footerAvatars}): _footerAvatars = footerAvatars;
+  const _KidsListContentEntity({required this.emptyStateTitle, required this.emptyStateSubtitle, required this.messageBar, required this.addChildLabel, required this.addAnotherChildLabel, required this.addChildSubtitle, required final  List<String?> footerAvatars}): _footerAvatars = footerAvatars;
   
 
 // Empty-state (no children yet) heading/subheading.
 @override final  String emptyStateTitle;
 @override final  String emptyStateSubtitle;
-// Info banner shown above a populated list.
-@override final  String bannerTitle;
-@override final  String bannerSubtitle;
+// Info banner shown above a populated list — the backend sends this as
+// a full message-bar object (title/message/bgColor/...), the same shape
+// used everywhere else in the app, not separate title/subtitle strings.
+@override final  MessageBarEntity messageBar;
 // Persistent "Add child" / "Add another child" footer row.
 @override final  String addChildLabel;
 @override final  String addAnotherChildLabel;
@@ -256,16 +258,16 @@ _$KidsListContentEntityCopyWith<_KidsListContentEntity> get copyWith => __$KidsL
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _KidsListContentEntity&&(identical(other.emptyStateTitle, emptyStateTitle) || other.emptyStateTitle == emptyStateTitle)&&(identical(other.emptyStateSubtitle, emptyStateSubtitle) || other.emptyStateSubtitle == emptyStateSubtitle)&&(identical(other.bannerTitle, bannerTitle) || other.bannerTitle == bannerTitle)&&(identical(other.bannerSubtitle, bannerSubtitle) || other.bannerSubtitle == bannerSubtitle)&&(identical(other.addChildLabel, addChildLabel) || other.addChildLabel == addChildLabel)&&(identical(other.addAnotherChildLabel, addAnotherChildLabel) || other.addAnotherChildLabel == addAnotherChildLabel)&&(identical(other.addChildSubtitle, addChildSubtitle) || other.addChildSubtitle == addChildSubtitle)&&const DeepCollectionEquality().equals(other._footerAvatars, _footerAvatars));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _KidsListContentEntity&&(identical(other.emptyStateTitle, emptyStateTitle) || other.emptyStateTitle == emptyStateTitle)&&(identical(other.emptyStateSubtitle, emptyStateSubtitle) || other.emptyStateSubtitle == emptyStateSubtitle)&&(identical(other.messageBar, messageBar) || other.messageBar == messageBar)&&(identical(other.addChildLabel, addChildLabel) || other.addChildLabel == addChildLabel)&&(identical(other.addAnotherChildLabel, addAnotherChildLabel) || other.addAnotherChildLabel == addAnotherChildLabel)&&(identical(other.addChildSubtitle, addChildSubtitle) || other.addChildSubtitle == addChildSubtitle)&&const DeepCollectionEquality().equals(other._footerAvatars, _footerAvatars));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,emptyStateTitle,emptyStateSubtitle,bannerTitle,bannerSubtitle,addChildLabel,addAnotherChildLabel,addChildSubtitle,const DeepCollectionEquality().hash(_footerAvatars));
+int get hashCode => Object.hash(runtimeType,emptyStateTitle,emptyStateSubtitle,messageBar,addChildLabel,addAnotherChildLabel,addChildSubtitle,const DeepCollectionEquality().hash(_footerAvatars));
 
 @override
 String toString() {
-  return 'KidsListContentEntity(emptyStateTitle: $emptyStateTitle, emptyStateSubtitle: $emptyStateSubtitle, bannerTitle: $bannerTitle, bannerSubtitle: $bannerSubtitle, addChildLabel: $addChildLabel, addAnotherChildLabel: $addAnotherChildLabel, addChildSubtitle: $addChildSubtitle, footerAvatars: $footerAvatars)';
+  return 'KidsListContentEntity(emptyStateTitle: $emptyStateTitle, emptyStateSubtitle: $emptyStateSubtitle, messageBar: $messageBar, addChildLabel: $addChildLabel, addAnotherChildLabel: $addAnotherChildLabel, addChildSubtitle: $addChildSubtitle, footerAvatars: $footerAvatars)';
 }
 
 
@@ -276,7 +278,7 @@ abstract mixin class _$KidsListContentEntityCopyWith<$Res> implements $KidsListC
   factory _$KidsListContentEntityCopyWith(_KidsListContentEntity value, $Res Function(_KidsListContentEntity) _then) = __$KidsListContentEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String emptyStateTitle, String emptyStateSubtitle, String bannerTitle, String bannerSubtitle, String addChildLabel, String addAnotherChildLabel, String addChildSubtitle, List<String?> footerAvatars
+ String emptyStateTitle, String emptyStateSubtitle, MessageBarEntity messageBar, String addChildLabel, String addAnotherChildLabel, String addChildSubtitle, List<String?> footerAvatars
 });
 
 
@@ -293,13 +295,12 @@ class __$KidsListContentEntityCopyWithImpl<$Res>
 
 /// Create a copy of KidsListContentEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? emptyStateTitle = null,Object? emptyStateSubtitle = null,Object? bannerTitle = null,Object? bannerSubtitle = null,Object? addChildLabel = null,Object? addAnotherChildLabel = null,Object? addChildSubtitle = null,Object? footerAvatars = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? emptyStateTitle = null,Object? emptyStateSubtitle = null,Object? messageBar = null,Object? addChildLabel = null,Object? addAnotherChildLabel = null,Object? addChildSubtitle = null,Object? footerAvatars = null,}) {
   return _then(_KidsListContentEntity(
 emptyStateTitle: null == emptyStateTitle ? _self.emptyStateTitle : emptyStateTitle // ignore: cast_nullable_to_non_nullable
 as String,emptyStateSubtitle: null == emptyStateSubtitle ? _self.emptyStateSubtitle : emptyStateSubtitle // ignore: cast_nullable_to_non_nullable
-as String,bannerTitle: null == bannerTitle ? _self.bannerTitle : bannerTitle // ignore: cast_nullable_to_non_nullable
-as String,bannerSubtitle: null == bannerSubtitle ? _self.bannerSubtitle : bannerSubtitle // ignore: cast_nullable_to_non_nullable
-as String,addChildLabel: null == addChildLabel ? _self.addChildLabel : addChildLabel // ignore: cast_nullable_to_non_nullable
+as String,messageBar: null == messageBar ? _self.messageBar : messageBar // ignore: cast_nullable_to_non_nullable
+as MessageBarEntity,addChildLabel: null == addChildLabel ? _self.addChildLabel : addChildLabel // ignore: cast_nullable_to_non_nullable
 as String,addAnotherChildLabel: null == addAnotherChildLabel ? _self.addAnotherChildLabel : addAnotherChildLabel // ignore: cast_nullable_to_non_nullable
 as String,addChildSubtitle: null == addChildSubtitle ? _self.addChildSubtitle : addChildSubtitle // ignore: cast_nullable_to_non_nullable
 as String,footerAvatars: null == footerAvatars ? _self._footerAvatars : footerAvatars // ignore: cast_nullable_to_non_nullable

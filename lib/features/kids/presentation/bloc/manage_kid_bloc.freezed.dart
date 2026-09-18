@@ -55,7 +55,7 @@ extension ManageKidEventPatterns on ManageKidEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( InitManageKid value)?  init,TResult Function( NameChanged value)?  nameChanged,TResult Function( DobChanged value)?  dobChanged,TResult Function( GenderChanged value)?  genderChanged,TResult Function( ConsentChanged value)?  consentChanged,TResult Function( SubmitKid value)?  submit,TResult Function( ClearApiError value)?  clearApiError,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( InitManageKid value)?  init,TResult Function( NameChanged value)?  nameChanged,TResult Function( DobChanged value)?  dobChanged,TResult Function( GenderChanged value)?  genderChanged,TResult Function( ConsentChanged value)?  consentChanged,TResult Function( SubmitKid value)?  submit,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case InitManageKid() when init != null:
@@ -64,8 +64,7 @@ return nameChanged(_that);case DobChanged() when dobChanged != null:
 return dobChanged(_that);case GenderChanged() when genderChanged != null:
 return genderChanged(_that);case ConsentChanged() when consentChanged != null:
 return consentChanged(_that);case SubmitKid() when submit != null:
-return submit(_that);case ClearApiError() when clearApiError != null:
-return clearApiError(_that);case _:
+return submit(_that);case _:
   return orElse();
 
 }
@@ -83,7 +82,7 @@ return clearApiError(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( InitManageKid value)  init,required TResult Function( NameChanged value)  nameChanged,required TResult Function( DobChanged value)  dobChanged,required TResult Function( GenderChanged value)  genderChanged,required TResult Function( ConsentChanged value)  consentChanged,required TResult Function( SubmitKid value)  submit,required TResult Function( ClearApiError value)  clearApiError,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( InitManageKid value)  init,required TResult Function( NameChanged value)  nameChanged,required TResult Function( DobChanged value)  dobChanged,required TResult Function( GenderChanged value)  genderChanged,required TResult Function( ConsentChanged value)  consentChanged,required TResult Function( SubmitKid value)  submit,}){
 final _that = this;
 switch (_that) {
 case InitManageKid():
@@ -92,8 +91,7 @@ return nameChanged(_that);case DobChanged():
 return dobChanged(_that);case GenderChanged():
 return genderChanged(_that);case ConsentChanged():
 return consentChanged(_that);case SubmitKid():
-return submit(_that);case ClearApiError():
-return clearApiError(_that);}
+return submit(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -107,7 +105,7 @@ return clearApiError(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( InitManageKid value)?  init,TResult? Function( NameChanged value)?  nameChanged,TResult? Function( DobChanged value)?  dobChanged,TResult? Function( GenderChanged value)?  genderChanged,TResult? Function( ConsentChanged value)?  consentChanged,TResult? Function( SubmitKid value)?  submit,TResult? Function( ClearApiError value)?  clearApiError,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( InitManageKid value)?  init,TResult? Function( NameChanged value)?  nameChanged,TResult? Function( DobChanged value)?  dobChanged,TResult? Function( GenderChanged value)?  genderChanged,TResult? Function( ConsentChanged value)?  consentChanged,TResult? Function( SubmitKid value)?  submit,}){
 final _that = this;
 switch (_that) {
 case InitManageKid() when init != null:
@@ -116,8 +114,7 @@ return nameChanged(_that);case DobChanged() when dobChanged != null:
 return dobChanged(_that);case GenderChanged() when genderChanged != null:
 return genderChanged(_that);case ConsentChanged() when consentChanged != null:
 return consentChanged(_that);case SubmitKid() when submit != null:
-return submit(_that);case ClearApiError() when clearApiError != null:
-return clearApiError(_that);case _:
+return submit(_that);case _:
   return null;
 
 }
@@ -134,7 +131,7 @@ return clearApiError(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( ChildEntity? existing)?  init,TResult Function( String name)?  nameChanged,TResult Function( DateTime dob)?  dobChanged,TResult Function( ChildGender gender)?  genderChanged,TResult Function( bool given)?  consentChanged,TResult Function()?  submit,TResult Function()?  clearApiError,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( ChildEntity? existing)?  init,TResult Function( String name)?  nameChanged,TResult Function( DateTime dob)?  dobChanged,TResult Function( ChildGender gender)?  genderChanged,TResult Function( bool given)?  consentChanged,TResult Function()?  submit,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case InitManageKid() when init != null:
 return init(_that.existing);case NameChanged() when nameChanged != null:
@@ -142,8 +139,7 @@ return nameChanged(_that.name);case DobChanged() when dobChanged != null:
 return dobChanged(_that.dob);case GenderChanged() when genderChanged != null:
 return genderChanged(_that.gender);case ConsentChanged() when consentChanged != null:
 return consentChanged(_that.given);case SubmitKid() when submit != null:
-return submit();case ClearApiError() when clearApiError != null:
-return clearApiError();case _:
+return submit();case _:
   return orElse();
 
 }
@@ -161,7 +157,7 @@ return clearApiError();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( ChildEntity? existing)  init,required TResult Function( String name)  nameChanged,required TResult Function( DateTime dob)  dobChanged,required TResult Function( ChildGender gender)  genderChanged,required TResult Function( bool given)  consentChanged,required TResult Function()  submit,required TResult Function()  clearApiError,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( ChildEntity? existing)  init,required TResult Function( String name)  nameChanged,required TResult Function( DateTime dob)  dobChanged,required TResult Function( ChildGender gender)  genderChanged,required TResult Function( bool given)  consentChanged,required TResult Function()  submit,}) {final _that = this;
 switch (_that) {
 case InitManageKid():
 return init(_that.existing);case NameChanged():
@@ -169,8 +165,7 @@ return nameChanged(_that.name);case DobChanged():
 return dobChanged(_that.dob);case GenderChanged():
 return genderChanged(_that.gender);case ConsentChanged():
 return consentChanged(_that.given);case SubmitKid():
-return submit();case ClearApiError():
-return clearApiError();}
+return submit();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -184,7 +179,7 @@ return clearApiError();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( ChildEntity? existing)?  init,TResult? Function( String name)?  nameChanged,TResult? Function( DateTime dob)?  dobChanged,TResult? Function( ChildGender gender)?  genderChanged,TResult? Function( bool given)?  consentChanged,TResult? Function()?  submit,TResult? Function()?  clearApiError,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( ChildEntity? existing)?  init,TResult? Function( String name)?  nameChanged,TResult? Function( DateTime dob)?  dobChanged,TResult? Function( ChildGender gender)?  genderChanged,TResult? Function( bool given)?  consentChanged,TResult? Function()?  submit,}) {final _that = this;
 switch (_that) {
 case InitManageKid() when init != null:
 return init(_that.existing);case NameChanged() when nameChanged != null:
@@ -192,8 +187,7 @@ return nameChanged(_that.name);case DobChanged() when dobChanged != null:
 return dobChanged(_that.dob);case GenderChanged() when genderChanged != null:
 return genderChanged(_that.gender);case ConsentChanged() when consentChanged != null:
 return consentChanged(_that.given);case SubmitKid() when submit != null:
-return submit();case ClearApiError() when clearApiError != null:
-return clearApiError();case _:
+return submit();case _:
   return null;
 
 }
@@ -576,44 +570,9 @@ String toString() {
 
 
 /// @nodoc
-
-
-class ClearApiError implements ManageKidEvent {
-  const ClearApiError();
-  
-
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ClearApiError);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'ManageKidEvent.clearApiError()';
-}
-
-
-}
-
-
-
-
-/// @nodoc
 mixin _$ManageKidState {
 
- ManageKidMode get mode; ChildEntity? get original;// Screen copy + avatar catalog — starts as the local fallback (set in
-// _onInit) so the page never blocks on the config network call; may be
-// swapped for backend-sourced content once the fetch resolves.
- KidFormConfigEntity? get config; String get name;// Nullable and unset by default — neither Boy nor Girl is pre-selected;
+ ManageKidMode get mode; ChildEntity? get original; String get name;// Nullable and unset by default — neither Boy nor Girl is pre-selected;
 // the user must actively choose one (checked in validation before submit).
  ChildGender? get gender; DateTime? get dob;// Unchecked by default on create — consent must be an explicit opt-in
 // action by the user, not a pre-ticked box. `_onInit` overrides this to
@@ -638,16 +597,16 @@ $ManageKidStateCopyWith<ManageKidState> get copyWith => _$ManageKidStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ManageKidState&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.original, original) || other.original == original)&&(identical(other.config, config) || other.config == config)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.consentGiven, consentGiven) || other.consentGiven == consentGiven)&&(identical(other.consentError, consentError) || other.consentError == consentError)&&(identical(other.isSubmitting, isSubmitting) || other.isSubmitting == isSubmitting)&&(identical(other.submitError, submitError) || other.submitError == submitError)&&(identical(other.apiError, apiError) || other.apiError == apiError)&&(identical(other.saved, saved) || other.saved == saved));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ManageKidState&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.original, original) || other.original == original)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.consentGiven, consentGiven) || other.consentGiven == consentGiven)&&(identical(other.consentError, consentError) || other.consentError == consentError)&&(identical(other.isSubmitting, isSubmitting) || other.isSubmitting == isSubmitting)&&(identical(other.submitError, submitError) || other.submitError == submitError)&&(identical(other.apiError, apiError) || other.apiError == apiError)&&(identical(other.saved, saved) || other.saved == saved));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,mode,original,config,name,gender,dob,consentGiven,consentError,isSubmitting,submitError,apiError,saved);
+int get hashCode => Object.hash(runtimeType,mode,original,name,gender,dob,consentGiven,consentError,isSubmitting,submitError,apiError,saved);
 
 @override
 String toString() {
-  return 'ManageKidState(mode: $mode, original: $original, config: $config, name: $name, gender: $gender, dob: $dob, consentGiven: $consentGiven, consentError: $consentError, isSubmitting: $isSubmitting, submitError: $submitError, apiError: $apiError, saved: $saved)';
+  return 'ManageKidState(mode: $mode, original: $original, name: $name, gender: $gender, dob: $dob, consentGiven: $consentGiven, consentError: $consentError, isSubmitting: $isSubmitting, submitError: $submitError, apiError: $apiError, saved: $saved)';
 }
 
 
@@ -658,11 +617,11 @@ abstract mixin class $ManageKidStateCopyWith<$Res>  {
   factory $ManageKidStateCopyWith(ManageKidState value, $Res Function(ManageKidState) _then) = _$ManageKidStateCopyWithImpl;
 @useResult
 $Res call({
- ManageKidMode mode, ChildEntity? original, KidFormConfigEntity? config, String name, ChildGender? gender, DateTime? dob, bool consentGiven, bool consentError, bool isSubmitting, String? submitError, String? apiError, ChildEntity? saved
+ ManageKidMode mode, ChildEntity? original, String name, ChildGender? gender, DateTime? dob, bool consentGiven, bool consentError, bool isSubmitting, String? submitError, String? apiError, ChildEntity? saved
 });
 
 
-$ChildEntityCopyWith<$Res>? get original;$KidFormConfigEntityCopyWith<$Res>? get config;$ChildEntityCopyWith<$Res>? get saved;
+$ChildEntityCopyWith<$Res>? get original;$ChildEntityCopyWith<$Res>? get saved;
 
 }
 /// @nodoc
@@ -675,12 +634,11 @@ class _$ManageKidStateCopyWithImpl<$Res>
 
 /// Create a copy of ManageKidState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? mode = null,Object? original = freezed,Object? config = freezed,Object? name = null,Object? gender = freezed,Object? dob = freezed,Object? consentGiven = null,Object? consentError = null,Object? isSubmitting = null,Object? submitError = freezed,Object? apiError = freezed,Object? saved = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? mode = null,Object? original = freezed,Object? name = null,Object? gender = freezed,Object? dob = freezed,Object? consentGiven = null,Object? consentError = null,Object? isSubmitting = null,Object? submitError = freezed,Object? apiError = freezed,Object? saved = freezed,}) {
   return _then(_self.copyWith(
 mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
 as ManageKidMode,original: freezed == original ? _self.original : original // ignore: cast_nullable_to_non_nullable
-as ChildEntity?,config: freezed == config ? _self.config : config // ignore: cast_nullable_to_non_nullable
-as KidFormConfigEntity?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as ChildEntity?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,gender: freezed == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
 as ChildGender?,dob: freezed == dob ? _self.dob : dob // ignore: cast_nullable_to_non_nullable
 as DateTime?,consentGiven: null == consentGiven ? _self.consentGiven : consentGiven // ignore: cast_nullable_to_non_nullable
@@ -703,18 +661,6 @@ $ChildEntityCopyWith<$Res>? get original {
 
   return $ChildEntityCopyWith<$Res>(_self.original!, (value) {
     return _then(_self.copyWith(original: value));
-  });
-}/// Create a copy of ManageKidState
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$KidFormConfigEntityCopyWith<$Res>? get config {
-    if (_self.config == null) {
-    return null;
-  }
-
-  return $KidFormConfigEntityCopyWith<$Res>(_self.config!, (value) {
-    return _then(_self.copyWith(config: value));
   });
 }/// Create a copy of ManageKidState
 /// with the given fields replaced by the non-null parameter values.
@@ -810,10 +756,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ManageKidMode mode,  ChildEntity? original,  KidFormConfigEntity? config,  String name,  ChildGender? gender,  DateTime? dob,  bool consentGiven,  bool consentError,  bool isSubmitting,  String? submitError,  String? apiError,  ChildEntity? saved)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ManageKidMode mode,  ChildEntity? original,  String name,  ChildGender? gender,  DateTime? dob,  bool consentGiven,  bool consentError,  bool isSubmitting,  String? submitError,  String? apiError,  ChildEntity? saved)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ManageKidState() when $default != null:
-return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_that.dob,_that.consentGiven,_that.consentError,_that.isSubmitting,_that.submitError,_that.apiError,_that.saved);case _:
+return $default(_that.mode,_that.original,_that.name,_that.gender,_that.dob,_that.consentGiven,_that.consentError,_that.isSubmitting,_that.submitError,_that.apiError,_that.saved);case _:
   return orElse();
 
 }
@@ -831,10 +777,10 @@ return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ManageKidMode mode,  ChildEntity? original,  KidFormConfigEntity? config,  String name,  ChildGender? gender,  DateTime? dob,  bool consentGiven,  bool consentError,  bool isSubmitting,  String? submitError,  String? apiError,  ChildEntity? saved)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ManageKidMode mode,  ChildEntity? original,  String name,  ChildGender? gender,  DateTime? dob,  bool consentGiven,  bool consentError,  bool isSubmitting,  String? submitError,  String? apiError,  ChildEntity? saved)  $default,) {final _that = this;
 switch (_that) {
 case _ManageKidState():
-return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_that.dob,_that.consentGiven,_that.consentError,_that.isSubmitting,_that.submitError,_that.apiError,_that.saved);case _:
+return $default(_that.mode,_that.original,_that.name,_that.gender,_that.dob,_that.consentGiven,_that.consentError,_that.isSubmitting,_that.submitError,_that.apiError,_that.saved);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -851,10 +797,10 @@ return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ManageKidMode mode,  ChildEntity? original,  KidFormConfigEntity? config,  String name,  ChildGender? gender,  DateTime? dob,  bool consentGiven,  bool consentError,  bool isSubmitting,  String? submitError,  String? apiError,  ChildEntity? saved)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ManageKidMode mode,  ChildEntity? original,  String name,  ChildGender? gender,  DateTime? dob,  bool consentGiven,  bool consentError,  bool isSubmitting,  String? submitError,  String? apiError,  ChildEntity? saved)?  $default,) {final _that = this;
 switch (_that) {
 case _ManageKidState() when $default != null:
-return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_that.dob,_that.consentGiven,_that.consentError,_that.isSubmitting,_that.submitError,_that.apiError,_that.saved);case _:
+return $default(_that.mode,_that.original,_that.name,_that.gender,_that.dob,_that.consentGiven,_that.consentError,_that.isSubmitting,_that.submitError,_that.apiError,_that.saved);case _:
   return null;
 
 }
@@ -866,15 +812,11 @@ return $default(_that.mode,_that.original,_that.config,_that.name,_that.gender,_
 
 
 class _ManageKidState implements ManageKidState {
-  const _ManageKidState({this.mode = ManageKidMode.create, this.original, this.config, this.name = '', this.gender, this.dob, this.consentGiven = false, this.consentError = false, this.isSubmitting = false, this.submitError, this.apiError, this.saved});
+  const _ManageKidState({this.mode = ManageKidMode.create, this.original, this.name = '', this.gender, this.dob, this.consentGiven = false, this.consentError = false, this.isSubmitting = false, this.submitError, this.apiError, this.saved});
   
 
 @override@JsonKey() final  ManageKidMode mode;
 @override final  ChildEntity? original;
-// Screen copy + avatar catalog — starts as the local fallback (set in
-// _onInit) so the page never blocks on the config network call; may be
-// swapped for backend-sourced content once the fetch resolves.
-@override final  KidFormConfigEntity? config;
 @override@JsonKey() final  String name;
 // Nullable and unset by default — neither Boy nor Girl is pre-selected;
 // the user must actively choose one (checked in validation before submit).
@@ -909,16 +851,16 @@ _$ManageKidStateCopyWith<_ManageKidState> get copyWith => __$ManageKidStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ManageKidState&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.original, original) || other.original == original)&&(identical(other.config, config) || other.config == config)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.consentGiven, consentGiven) || other.consentGiven == consentGiven)&&(identical(other.consentError, consentError) || other.consentError == consentError)&&(identical(other.isSubmitting, isSubmitting) || other.isSubmitting == isSubmitting)&&(identical(other.submitError, submitError) || other.submitError == submitError)&&(identical(other.apiError, apiError) || other.apiError == apiError)&&(identical(other.saved, saved) || other.saved == saved));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ManageKidState&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.original, original) || other.original == original)&&(identical(other.name, name) || other.name == name)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dob, dob) || other.dob == dob)&&(identical(other.consentGiven, consentGiven) || other.consentGiven == consentGiven)&&(identical(other.consentError, consentError) || other.consentError == consentError)&&(identical(other.isSubmitting, isSubmitting) || other.isSubmitting == isSubmitting)&&(identical(other.submitError, submitError) || other.submitError == submitError)&&(identical(other.apiError, apiError) || other.apiError == apiError)&&(identical(other.saved, saved) || other.saved == saved));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,mode,original,config,name,gender,dob,consentGiven,consentError,isSubmitting,submitError,apiError,saved);
+int get hashCode => Object.hash(runtimeType,mode,original,name,gender,dob,consentGiven,consentError,isSubmitting,submitError,apiError,saved);
 
 @override
 String toString() {
-  return 'ManageKidState(mode: $mode, original: $original, config: $config, name: $name, gender: $gender, dob: $dob, consentGiven: $consentGiven, consentError: $consentError, isSubmitting: $isSubmitting, submitError: $submitError, apiError: $apiError, saved: $saved)';
+  return 'ManageKidState(mode: $mode, original: $original, name: $name, gender: $gender, dob: $dob, consentGiven: $consentGiven, consentError: $consentError, isSubmitting: $isSubmitting, submitError: $submitError, apiError: $apiError, saved: $saved)';
 }
 
 
@@ -929,11 +871,11 @@ abstract mixin class _$ManageKidStateCopyWith<$Res> implements $ManageKidStateCo
   factory _$ManageKidStateCopyWith(_ManageKidState value, $Res Function(_ManageKidState) _then) = __$ManageKidStateCopyWithImpl;
 @override @useResult
 $Res call({
- ManageKidMode mode, ChildEntity? original, KidFormConfigEntity? config, String name, ChildGender? gender, DateTime? dob, bool consentGiven, bool consentError, bool isSubmitting, String? submitError, String? apiError, ChildEntity? saved
+ ManageKidMode mode, ChildEntity? original, String name, ChildGender? gender, DateTime? dob, bool consentGiven, bool consentError, bool isSubmitting, String? submitError, String? apiError, ChildEntity? saved
 });
 
 
-@override $ChildEntityCopyWith<$Res>? get original;@override $KidFormConfigEntityCopyWith<$Res>? get config;@override $ChildEntityCopyWith<$Res>? get saved;
+@override $ChildEntityCopyWith<$Res>? get original;@override $ChildEntityCopyWith<$Res>? get saved;
 
 }
 /// @nodoc
@@ -946,12 +888,11 @@ class __$ManageKidStateCopyWithImpl<$Res>
 
 /// Create a copy of ManageKidState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? mode = null,Object? original = freezed,Object? config = freezed,Object? name = null,Object? gender = freezed,Object? dob = freezed,Object? consentGiven = null,Object? consentError = null,Object? isSubmitting = null,Object? submitError = freezed,Object? apiError = freezed,Object? saved = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? mode = null,Object? original = freezed,Object? name = null,Object? gender = freezed,Object? dob = freezed,Object? consentGiven = null,Object? consentError = null,Object? isSubmitting = null,Object? submitError = freezed,Object? apiError = freezed,Object? saved = freezed,}) {
   return _then(_ManageKidState(
 mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
 as ManageKidMode,original: freezed == original ? _self.original : original // ignore: cast_nullable_to_non_nullable
-as ChildEntity?,config: freezed == config ? _self.config : config // ignore: cast_nullable_to_non_nullable
-as KidFormConfigEntity?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as ChildEntity?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,gender: freezed == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
 as ChildGender?,dob: freezed == dob ? _self.dob : dob // ignore: cast_nullable_to_non_nullable
 as DateTime?,consentGiven: null == consentGiven ? _self.consentGiven : consentGiven // ignore: cast_nullable_to_non_nullable
@@ -975,18 +916,6 @@ $ChildEntityCopyWith<$Res>? get original {
 
   return $ChildEntityCopyWith<$Res>(_self.original!, (value) {
     return _then(_self.copyWith(original: value));
-  });
-}/// Create a copy of ManageKidState
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$KidFormConfigEntityCopyWith<$Res>? get config {
-    if (_self.config == null) {
-    return null;
-  }
-
-  return $KidFormConfigEntityCopyWith<$Res>(_self.config!, (value) {
-    return _then(_self.copyWith(config: value));
   });
 }/// Create a copy of ManageKidState
 /// with the given fields replaced by the non-null parameter values.

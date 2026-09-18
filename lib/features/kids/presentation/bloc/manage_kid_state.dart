@@ -7,10 +7,6 @@ abstract class ManageKidState with _$ManageKidState {
   const factory ManageKidState({
     @Default(ManageKidMode.create) ManageKidMode mode,
     ChildEntity? original,
-    // Screen copy + avatar catalog — starts as the local fallback (set in
-    // _onInit) so the page never blocks on the config network call; may be
-    // swapped for backend-sourced content once the fetch resolves.
-    KidFormConfigEntity? config,
     @Default('') String name,
     // Nullable and unset by default — neither Boy nor Girl is pre-selected;
     // the user must actively choose one (checked in validation before submit).
@@ -44,7 +40,9 @@ extension ManageKidStateX on ManageKidState {
     }
     final o = original;
     if (o == null) return false;
-    return name != o.name || gender != o.gender || dob != o.dob;
+    // dob is excluded on edit — it's locked and never re-picked, so it can
+    // never itself be the reason the form is dirty.
+    return name != o.name || gender != o.gender;
   }
 
   /// Consent is intentionally excluded — the Save button stays enabled once
@@ -52,5 +50,8 @@ extension ManageKidStateX on ManageKidState {
   /// as its own inline error (see [consentError]) rather than disabling the
   /// button. Mirrors the non-consent checks in
   /// `ManageKidBloc._firstValidationError`.
-  bool get isFormComplete => name.trim().isNotEmpty && gender != null && dob != null;
+  bool get isFormComplete =>
+      name.trim().isNotEmpty &&
+      gender != null &&
+      (dob != null || original?.displayDob != null);
 }

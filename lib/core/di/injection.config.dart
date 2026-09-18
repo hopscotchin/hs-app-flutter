@@ -204,8 +204,6 @@ import 'package:hs_app_flutter/features/kids/domain/usecases/delete_child_usecas
     as _i465;
 import 'package:hs_app_flutter/features/kids/domain/usecases/get_children_usecase.dart'
     as _i1052;
-import 'package:hs_app_flutter/features/kids/domain/usecases/get_kid_form_config_usecase.dart'
-    as _i1004;
 import 'package:hs_app_flutter/features/kids/domain/usecases/save_child_usecase.dart'
     as _i396;
 import 'package:hs_app_flutter/features/kids/presentation/bloc/kids_bloc.dart'
@@ -786,9 +784,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1052.GetChildrenUseCase>(
       () => _i1052.GetChildrenUseCase(gh<_i970.KidsRepository>()),
     );
-    gh.lazySingleton<_i1004.GetKidFormConfigUseCase>(
-      () => _i1004.GetKidFormConfigUseCase(gh<_i970.KidsRepository>()),
-    );
     gh.lazySingleton<_i396.SaveChildUseCase>(
       () => _i396.SaveChildUseCase(gh<_i970.KidsRepository>()),
     );
@@ -973,7 +968,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i512.ManageKidBloc>(
       () => _i512.ManageKidBloc(
         gh<_i396.SaveChildUseCase>(),
-        gh<_i1004.GetKidFormConfigUseCase>(),
         gh<_i127.AnalyticsHelper>(),
       ),
     );

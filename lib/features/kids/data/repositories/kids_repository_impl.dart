@@ -6,16 +6,13 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/mixins/safe_api_call.dart';
 import '../../../../core/network/connectivity/network_info.dart';
-import '../../../../core/logger/my_logger.dart';
 import '../../domain/entities/child_entity.dart';
-import '../../domain/entities/kid_form_config_entity.dart';
 import '../../domain/entities/kids_list_content_entity.dart';
 import '../../domain/repositories/kids_repository.dart';
 import '../datasources/remote/kids_remote_datasource.dart';
 import '../models/child_model.dart';
 import '../models/child_mutation_response_model.dart';
 import '../models/children_response_model.dart';
-import '../models/kid_form_config_response_model.dart';
 import '../models/kids_list_content_model.dart';
 
 @LazySingleton(as: KidsRepository)
@@ -51,22 +48,6 @@ class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
       }
       return response.child!.toEntity();
     });
-  }
-
-  @override
-  Future<Either<Failure, KidFormConfigEntity>> getFormConfig({CancelToken? cancelToken}) async {
-    // Deliberately never returns Left — see KidsRepository.getFormConfig
-    // doc. Network failure, 404 (endpoint not shipped yet), and decode
-    // errors all fall back to local defaults instead of surfacing an error
-    // for what's purely presentational screen copy.
-    try {
-      final response = await _api.getFormConfig(cancelToken: cancelToken);
-      if (!response.isSuccess) return Right(KidFormConfigEntity.fallback());
-      return Right(response.toEntity());
-    } catch (e, s) {
-      logger.w('Kid form config fetch failed, using local fallback', error: e, stackTrace: s);
-      return Right(KidFormConfigEntity.fallback());
-    }
   }
 
   @override

@@ -10,8 +10,6 @@ import '../../../../core/base/base_bloc.dart';
 import '../../../../core/constants/strings/kids_strings.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/child_entity.dart';
-import '../../domain/entities/kid_form_config_entity.dart';
-import '../../domain/usecases/get_kid_form_config_usecase.dart';
 import '../../domain/usecases/save_child_usecase.dart';
 
 part 'manage_kid_bloc.freezed.dart';
@@ -20,38 +18,30 @@ part 'manage_kid_state.dart';
 
 @injectable
 class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
-  ManageKidBloc(this._saveChild, this._getFormConfig, this._analytics)
-    : super(const ManageKidState()) {
+  ManageKidBloc(this._saveChild, this._analytics) : super(const ManageKidState()) {
     on<InitManageKid>(_onInit);
     on<NameChanged>(_onNameChanged);
     on<DobChanged>(_onDobChanged);
     on<GenderChanged>(_onGenderChanged);
     on<ConsentChanged>(_onConsentChanged);
     on<SubmitKid>(_onSubmit);
-    on<ClearApiError>(_onClearApiError);
   }
 
   final SaveChildUseCase _saveChild;
-  final GetKidFormConfigUseCase _getFormConfig;
   final AnalyticsHelper _analytics;
 
-  Future<void> _onInit(
-    InitManageKid event,
-    Emitter<ManageKidState> emit,
-  ) async {
+  void _onInit(InitManageKid event, Emitter<ManageKidState> emit) {
     final existing = event.existing;
     emit(
       ManageKidState(
         mode: existing == null ? ManageKidMode.create : ManageKidMode.update,
         original: existing,
-        // Seeded with the local fallback so the form (which needs no network
-        // itself) renders immediately instead of blocking on the config
-        // fetch — swapped for the live backend content below once the fetch
-        // resolves, or left as-is if it fails.
-        config: KidFormConfigEntity.fallback(),
         name: existing?.name ?? '',
         gender: existing?.gender,
-        dob: existing?.dob,
+        // `dob` stays null for an existing child too — it's the live
+        // picker's own session value, and dob is locked/never re-picked on
+        // edit (the field's initial display comes straight from
+        // `existing.displayDob` instead — see `_DobField`).
         // Edit pre-fills from the stored value — consent was already given
         // when this child was created (submit requires it), so the box
         // starts checked. Create still starts unchecked: a new profile has
@@ -59,9 +49,6 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
         consentGiven: existing?.consent ?? false,
       ),
     );
-
-    final result = await _getFormConfig(const GetKidFormConfigParams());
-    result.fold((_) {}, (config) => emit(state.copyWith(config: config)));
   }
 
   void _onNameChanged(NameChanged event, Emitter<ManageKidState> emit) {
@@ -94,7 +81,12 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
   String? _firstValidationError() {
     if (state.name.trim().isEmpty) return KidsStrings.nameRequiredError;
     if (state.gender == null) return KidsStrings.genderRequiredError;
-    if (state.dob == null) return KidsStrings.dobRequiredError;
+    // A freshly-picked date (create, or a re-pick) satisfies this, as does
+    // an existing child's own locked dob (edit, never re-picked) — either
+    // way there's something to submit.
+    if (state.dob == null && state.original?.displayDob == null) {
+      return KidsStrings.dobRequiredError;
+    }
     return null;
   }
 
@@ -122,12 +114,20 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
       ),
     );
 
+    // Resolves the outgoing "DD-MM-YYYY" dob directly — from a freshly
+    // picked date when the user (re-)picked one, otherwise from the
+    // existing child's own `displayDob` with its spaces stripped (a plain
+    // text transform, not date parsing) when dob is locked and unchanged.
+    final pickedDob = state.dob;
+    final requestDob = pickedDob != null
+        ? '${_pad(pickedDob.day)}-${_pad(pickedDob.month)}-${pickedDob.year}'
+        : state.original?.displayDob?.replaceAll(' ', '');
+
     final child = ChildEntity(
       id: state.original?.id ?? 0,
       name: state.name.trim(),
       gender: state.gender!, // validated non-null above
-      dob: state.dob,
-      imageUrl: state.original?.imageUrl,
+      displayDob: requestDob,
       consent: state.consentGiven,
     );
 
@@ -155,8 +155,6 @@ class ManageKidBloc extends BaseBloc<ManageKidEvent, ManageKidState> {
       },
     );
   }
-
-  void _onClearApiError(ClearApiError event, Emitter<ManageKidState> emit) {
-    emit(state.copyWith(apiError: null));
-  }
 }
+
+String _pad(int value) => value.toString().padLeft(2, '0');

@@ -5,7 +5,6 @@ import 'package:retrofit/retrofit.dart';
 import '../../../../../core/constants/api_constants.dart';
 import '../../models/child_mutation_response_model.dart';
 import '../../models/children_response_model.dart';
-import '../../models/kid_form_config_response_model.dart';
 
 part 'kids_remote_datasource.g.dart';
 
@@ -27,11 +26,6 @@ abstract class KidsRemoteDatasource {
   @DELETE(ApiConstants.kidsDelete)
   Future<ChildMutationResponseModel> deleteChild({
     @Path('kidId') required int kidId,
-    @CancelRequest() CancelToken? cancelToken,
-  });
-
-  @GET(ApiConstants.kidsFormConfig)
-  Future<KidFormConfigResponseModel> getFormConfig({
     @CancelRequest() CancelToken? cancelToken,
   });
 }

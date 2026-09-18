@@ -86,11 +86,6 @@ class ApiConstants {
   static const String kidsList = '/v2/questionnaire/list';
   static const String kidsDelete = '/v2/questionnaire/{kidId}';
   static const String kidsSave = '/v3/questionnaire/save-and-update';
-  // NEW — no existing precedent for a screen-scoped content/config endpoint
-  // anywhere in either app (confirmed by audit). Confirmed live on QA;
-  // Add/Edit Kid screen still falls back to local defaults
-  // (KidFormConfigEntity.fallback()) on any network/decode failure.
-  static const String kidsFormConfig = '/v2/questionnaire/form-config';
 
   // Address Management
   static const String addresses = '/delivery/addresses/v3';

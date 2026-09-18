@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/child_entity.dart';
-import '../entities/kid_form_config_entity.dart';
 import '../entities/kids_list_content_entity.dart';
 
 abstract class KidsRepository {
@@ -13,14 +12,6 @@ abstract class KidsRepository {
   Future<Either<Failure, ChildrenListResult>> getChildren({
     CancelToken? cancelToken,
   });
-
-  /// Add/Edit-screen copy + avatar catalog. Unlike every other method here,
-  /// this NEVER returns `Left` — a network failure, a 404 (the endpoint
-  /// doesn't exist yet), or a decode error all resolve to
-  /// `Right(KidFormConfigEntity.fallback())` instead of propagating, so the
-  /// screen always has something to render. See KidsRepositoryImpl for
-  /// where that fallback actually happens.
-  Future<Either<Failure, KidFormConfigEntity>> getFormConfig({CancelToken? cancelToken});
 
   /// Creates a new child when [child.isNew], otherwise updates the existing
   /// one.

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/constants/strings/kids_strings.dart';
+import '../../../../core/entities/message_bar_entity.dart';
 import 'child_entity.dart';
 
 part 'kids_list_content_entity.freezed.dart';
@@ -21,9 +22,10 @@ abstract class KidsListContentEntity with _$KidsListContentEntity {
     // Empty-state (no children yet) heading/subheading.
     required String emptyStateTitle,
     required String emptyStateSubtitle,
-    // Info banner shown above a populated list.
-    required String bannerTitle,
-    required String bannerSubtitle,
+    // Info banner shown above a populated list — the backend sends this as
+    // a full message-bar object (title/message/bgColor/...), the same shape
+    // used everywhere else in the app, not separate title/subtitle strings.
+    required MessageBarEntity messageBar,
     // Persistent "Add child" / "Add another child" footer row.
     required String addChildLabel,
     required String addAnotherChildLabel,
@@ -37,8 +39,12 @@ abstract class KidsListContentEntity with _$KidsListContentEntity {
   factory KidsListContentEntity.fallback() => const KidsListContentEntity(
     emptyStateTitle: KidsStrings.emptyStateTitle,
     emptyStateSubtitle: KidsStrings.emptyStateSubtitle,
-    bannerTitle: KidsStrings.bannerTitle,
-    bannerSubtitle: KidsStrings.bannerSubtitle,
+    messageBar: MessageBarEntity(
+      messageType: 'custom',
+      bgColor: '#E5E5EA',
+      title: KidsStrings.bannerTitle,
+      message: KidsStrings.bannerSubtitle,
+    ),
     addChildLabel: KidsStrings.addChild,
     addAnotherChildLabel: KidsStrings.addAnotherChild,
     addChildSubtitle: KidsStrings.addChildSubtitle,

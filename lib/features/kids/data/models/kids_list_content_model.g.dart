@@ -11,8 +11,9 @@ KidsListContentModel _$KidsListContentModelFromJson(
 ) => KidsListContentModel(
   emptyStateTitle: json['emptyStateTitle'] as String?,
   emptyStateSubtitle: json['emptyStateSubtitle'] as String?,
-  bannerTitle: json['bannerTitle'] as String?,
-  bannerSubtitle: json['bannerSubtitle'] as String?,
+  messageBar: json['messageBar'] == null
+      ? null
+      : MessageBarModel.fromJson(json['messageBar'] as Map<String, dynamic>),
   addChildLabel: json['addChildLabel'] as String?,
   addAnotherChildLabel: json['addAnotherChildLabel'] as String?,
   addChildSubtitle: json['addChildSubtitle'] as String?,
