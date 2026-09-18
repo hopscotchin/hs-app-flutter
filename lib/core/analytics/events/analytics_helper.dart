@@ -238,10 +238,12 @@ class AnalyticsHelper {
     };
     final adId = _prefs.advertisingId;
     if (adId != null && adId.isNotEmpty) {
-      traits[AnalyticsProperties.advertisingId] = adId;
-      traits[AnalyticsProperties.advertisingIdType] = defaultTargetPlatform == TargetPlatform.iOS
-          ? 'IDFA'
-          : 'AAID';
+      traits
+        ..putAnalyticsKey(AnalyticsProperties.advertisingId, adId)
+        ..putAnalyticsKey(
+          AnalyticsProperties.advertisingIdType,
+          defaultTargetPlatform == TargetPlatform.iOS ? 'IDFA' : 'AAID',
+        );
     }
     return traits;
   }
@@ -312,14 +314,22 @@ class AnalyticsHelper {
   }) async {
     final traits = _getUserTraits();
     _identifyWithUserType(traits);
-    traits.putAnalyticsKey('email', email);
-    traits.putAnalyticsKey('name', userName);
-    traits.putAnalyticsKey(AnalyticsProperties.mobile, phone);
+    traits
+      ..putAnalyticsKey('email', email)
+      ..putAnalyticsKey('name', userName)
+      ..putAnalyticsKey(AnalyticsProperties.mobile, phone);
     if (isRegistered) {
-      traits['createdAt'] = DateTime.now().toUtc().toIso8601String();
+      traits.putAnalyticsKey(
+        'createdAt',
+        DateTime.now().toUtc().toIso8601String(),
+      );
     }
-    traits.putAnalyticsKey(AnalyticsProperties.mobileStatus, mobileStatus);
-    traits[AnalyticsProperties.continueBrowsingEligibleVisitor] = isEligibleForContinueBrowsing;
+    traits
+      ..putAnalyticsKey(AnalyticsProperties.mobileStatus, mobileStatus)
+      ..putAnalyticsKey(
+        AnalyticsProperties.continueBrowsingEligibleVisitor,
+        isEligibleForContinueBrowsing,
+      );
     await _callIdentify(traits);
   }
 
@@ -361,10 +371,10 @@ class AnalyticsHelper {
     var total = 0;
     for (final key in requiredKeys) {
       final value = cohorts?[key] ?? 0;
-      traits['$key$suffix'] = value;
+      traits.putAnalyticsKey('$key$suffix', value);
       total += value;
     }
-    traits[AnalyticsProperties.totalChildProfiles] = total;
+    traits.putAnalyticsKey(AnalyticsProperties.totalChildProfiles, total);
     await _callIdentify(traits);
   }
 
@@ -410,11 +420,14 @@ class AnalyticsHelper {
     traits.putAnalyticsKey(AnalyticsProperties.lastVisitDate, _prefs.lastVisitDate);
     final daysSince = _prefs.daysSinceLastVisit;
     if (daysSince != -1) {
-      traits[AnalyticsProperties.daysSinceLastVisit] = daysSince;
+      traits.putAnalyticsKey(AnalyticsProperties.daysSinceLastVisit, daysSince);
     }
-    traits[AnalyticsProperties.visitorType] = _prefs.isNewVisitor
-        ? AnalyticsDefaults.newVisitor
-        : AnalyticsDefaults.repeatVisitor;
+    traits.putAnalyticsKey(
+      AnalyticsProperties.visitorType,
+      _prefs.isNewVisitor
+          ? AnalyticsDefaults.newVisitor
+          : AnalyticsDefaults.repeatVisitor,
+    );
     if (_prefs.isNewVisitor) {
       // Flip after the first session-change identify fires.
       unawaited(_prefs.setIsNewVisitor(false));
@@ -422,20 +435,35 @@ class AnalyticsHelper {
   }
 
   Future<void> _identifyOnUtmChange(Map<String, Object?> traits) async {
-    traits[AnalyticsProperties.utmSource] =
-        _utm.utmSource ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmMedium] =
-        _utm.utmMedium ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmCampaign] =
-        _utm.utmCampaign ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmContent] =
-        _utm.utmContent ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmTerm] =
-        _utm.utmTerm ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.deeplink] =
-        _utm.deeplink ?? AnalyticsDefaults.none;
-    traits[AnalyticsProperties.utmGender] =
-        _utm.utmGender ?? AnalyticsDefaults.none;
+    traits
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmSource,
+        _utm.utmSource ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmMedium,
+        _utm.utmMedium ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmCampaign,
+        _utm.utmCampaign ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmContent,
+        _utm.utmContent ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmTerm,
+        _utm.utmTerm ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.deeplink,
+        _utm.deeplink ?? AnalyticsDefaults.none,
+      )
+      ..putAnalyticsKey(
+        AnalyticsProperties.utmGender,
+        _utm.utmGender ?? AnalyticsDefaults.none,
+      );
     if (traits.length > 2) {
       final now = DateTime.now();
       final stamp =
@@ -445,7 +473,7 @@ class AnalyticsHelper {
           '${(now.hour % 12 == 0 ? 12 : now.hour % 12).toString().padLeft(2, '0')}:'
           '${now.minute.toString().padLeft(2, '0')}:'
           '${now.second.toString().padLeft(2, '0')}';
-      traits[AnalyticsProperties.utmDate] = stamp;
+      traits.putAnalyticsKey(AnalyticsProperties.utmDate, stamp);
     }
   }
 
@@ -455,7 +483,7 @@ class AnalyticsHelper {
     if (list.length > 1 && list.first.toLowerCase() == AnalyticsDefaults.none) {
       list.removeAt(0);
     }
-    traits[AnalyticsProperties.experiments] = list;
+    traits.putAnalyticsKey(AnalyticsProperties.experiments, list);
   }
 
   /// Logout-time reset. Wipes Segment anonymous id + cached traits.
