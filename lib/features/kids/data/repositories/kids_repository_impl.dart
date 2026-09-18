@@ -13,6 +13,10 @@ import '../../domain/entities/kids_list_content_entity.dart';
 import '../../domain/repositories/kids_repository.dart';
 import '../datasources/remote/kids_remote_datasource.dart';
 import '../models/child_model.dart';
+import '../models/child_mutation_response_model.dart';
+import '../models/children_response_model.dart';
+import '../models/kid_form_config_response_model.dart';
+import '../models/kids_list_content_model.dart';
 
 @LazySingleton(as: KidsRepository)
 class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
@@ -25,12 +29,12 @@ class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
   Future<Either<Failure, ChildrenListResult>> getChildren({CancelToken? cancelToken}) {
     return safeApiCall(_networkInfo, () async {
       final response = await _api.getChildren(cancelToken: cancelToken);
-      if (!response.isSuccessful) {
+      if (!response.isSuccess) {
         throw ApiFailureException(message: response.message ?? 'Something went wrong');
       }
       return ChildrenListResult(
         children: response.children.map((m) => m.toEntity()).toList(),
-        content: response.content,
+        content: response.content?.toEntity() ?? KidsListContentEntity.fallback(),
       );
     });
   }
@@ -42,7 +46,7 @@ class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
   }) {
     return safeApiCall(_networkInfo, () async {
       final response = await _api.saveChild(body: child.toRequestJson(), cancelToken: cancelToken);
-      if (!response.isSuccessful || response.child == null) {
+      if (!response.isSuccess || response.child == null) {
         throw ApiFailureException(message: response.message ?? 'Something went wrong');
       }
       return response.child!.toEntity();
@@ -57,7 +61,7 @@ class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
     // for what's purely presentational screen copy.
     try {
       final response = await _api.getFormConfig(cancelToken: cancelToken);
-      if (!response.isSuccessful) return Right(KidFormConfigEntity.fallback());
+      if (!response.isSuccess) return Right(KidFormConfigEntity.fallback());
       return Right(response.toEntity());
     } catch (e, s) {
       logger.w('Kid form config fetch failed, using local fallback', error: e, stackTrace: s);
@@ -69,7 +73,7 @@ class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
   Future<Either<Failure, String>> deleteChild({required int childId, CancelToken? cancelToken}) {
     return safeApiCall(_networkInfo, () async {
       final response = await _api.deleteChild(kidId: childId, cancelToken: cancelToken);
-      if (!response.isSuccessful) {
+      if (!response.isSuccess) {
         throw ApiFailureException(message: response.message ?? 'Something went wrong');
       }
       return response.message ?? '';

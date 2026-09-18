@@ -1,29 +1,56 @@
+import 'package:json_annotation/json_annotation.dart';
+
 import '../../domain/entities/kids_list_content_entity.dart';
 
-/// Parses the `content` object inside `GET v2/questionnaire/list`'s response
-/// (a sibling of `children`, not a separate endpoint). Every field is read
-/// defensively (`as String? ?? fallback`) since this is a newly-proposed
-/// addition to an existing, not-yet-fully-implemented contract — a partial
-/// or missing `content` object should degrade field-by-field, not fail the
-/// whole parse.
-class KidsListContentModel {
-  static KidsListContentEntity fromJson(Map<String, dynamic>? json) {
-    final fallback = KidsListContentEntity.fallback();
-    if (json == null) return fallback;
-    return KidsListContentEntity(
-      emptyStateTitle: json['emptyStateTitle'] as String? ?? fallback.emptyStateTitle,
-      emptyStateSubtitle: json['emptyStateSubtitle'] as String? ?? fallback.emptyStateSubtitle,
-      bannerTitle: json['bannerTitle'] as String? ?? fallback.bannerTitle,
-      bannerSubtitle: json['bannerSubtitle'] as String? ?? fallback.bannerSubtitle,
-      addChildLabel: json['addChildLabel'] as String? ?? fallback.addChildLabel,
-      addAnotherChildLabel: json['addAnotherChildLabel'] as String? ?? fallback.addAnotherChildLabel,
-      addChildSubtitle: json['addChildSubtitle'] as String? ?? fallback.addChildSubtitle,
-      footerAvatars: _footerAvatarsFromJson(json['footerAvatars'] as List<dynamic>?) ?? fallback.footerAvatars,
-    );
-  }
+part 'kids_list_content_model.g.dart';
 
-  static List<String?>? _footerAvatarsFromJson(List<dynamic>? json) {
-    if (json == null) return null;
-    return json.map((e) => e as String?).toList();
+/// Parses the `content` object inside `GET v2/questionnaire/list`'s response
+/// (a sibling of `children`, not a separate endpoint). Every field is
+/// nullable and [toEntity] fills any missing one from
+/// [KidsListContentEntity.fallback], so a partial or missing `content`
+/// object degrades field-by-field instead of failing the whole parse.
+@JsonSerializable(createToJson: false)
+class KidsListContentModel {
+  const KidsListContentModel({
+    this.emptyStateTitle,
+    this.emptyStateSubtitle,
+    this.bannerTitle,
+    this.bannerSubtitle,
+    this.addChildLabel,
+    this.addAnotherChildLabel,
+    this.addChildSubtitle,
+    this.footerAvatars,
+  });
+
+  final String? emptyStateTitle;
+  final String? emptyStateSubtitle;
+  final String? bannerTitle;
+  final String? bannerSubtitle;
+  final String? addChildLabel;
+  final String? addAnotherChildLabel;
+  final String? addChildSubtitle;
+
+  /// The footer row's two overlapping preview circles. A `null` entry means
+  /// "no image yet, render the local generic-person placeholder" — see
+  /// [KidsListContentEntity.footerAvatars].
+  final List<String?>? footerAvatars;
+
+  factory KidsListContentModel.fromJson(Map<String, dynamic> json) =>
+      _$KidsListContentModelFromJson(json);
+}
+
+extension KidsListContentModelX on KidsListContentModel {
+  KidsListContentEntity toEntity() {
+    final fallback = KidsListContentEntity.fallback();
+    return KidsListContentEntity(
+      emptyStateTitle: emptyStateTitle ?? fallback.emptyStateTitle,
+      emptyStateSubtitle: emptyStateSubtitle ?? fallback.emptyStateSubtitle,
+      bannerTitle: bannerTitle ?? fallback.bannerTitle,
+      bannerSubtitle: bannerSubtitle ?? fallback.bannerSubtitle,
+      addChildLabel: addChildLabel ?? fallback.addChildLabel,
+      addAnotherChildLabel: addAnotherChildLabel ?? fallback.addAnotherChildLabel,
+      addChildSubtitle: addChildSubtitle ?? fallback.addChildSubtitle,
+      footerAvatars: footerAvatars ?? fallback.footerAvatars,
+    );
   }
 }

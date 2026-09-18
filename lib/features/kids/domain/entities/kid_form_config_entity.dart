@@ -1,10 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:flutter/material.dart';
 
 import '../../../../core/config/environment.dart';
 import '../../../../core/constants/strings/auth_strings.dart';
 import '../../../../core/constants/strings/kids_strings.dart';
-import '../../../../core/theme/colors.dart';
 
 part 'kid_form_config_entity.freezed.dart';
 
@@ -25,7 +23,12 @@ abstract class KidFormConfigEntity with _$KidFormConfigEntity {
     required String subheading,
     required String bannerTitle,
     required String bannerSubtitle,
-    required Color bannerBackgroundColor,
+    // Raw hex string, same convention as `MessageBarEntity.bgColor` —
+    // handed straight through to the message bar without ever becoming a
+    // `Color` on the way, matching how every other screen's backend-driven
+    // bar color works (parsed to a `Color` only by the widget that paints
+    // it, never round-tripped back to a string).
+    required String bannerBackgroundColor,
     required String consentText,
     required String viewPrivacyPolicyLabel,
     required String viewPrivacyPolicyUrl,
@@ -42,7 +45,7 @@ abstract class KidFormConfigEntity with _$KidFormConfigEntity {
     subheading: KidsStrings.formSubheading,
     bannerTitle: KidsStrings.whyWeAskBannerTitle,
     bannerSubtitle: KidsStrings.whyWeAskBannerSubtitle,
-    bannerBackgroundColor: AppColors.neutralGrey1,
+    bannerBackgroundColor: '#F6F6F6', // AppColors.neutralGrey1
     consentText: KidsStrings.consentText,
     viewPrivacyPolicyLabel: KidsStrings.viewPrivacyPolicy,
     viewPrivacyPolicyUrl:

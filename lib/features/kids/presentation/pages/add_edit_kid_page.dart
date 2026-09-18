@@ -220,14 +220,13 @@ class _AddEditKidPageState extends State<AddEditKidPage> {
                                   // default is labelMedium.
                                   textStyle: AppTypographyV1.labelLarge.regular
                                       .copyWith(color: AppColors.neutralGrey6),
-                                  titleStyle: AppTypographyV1.labelLarge.bold
-                                      .copyWith(color: AppColors.neutralGrey6),
-                                  background: config.bannerBackgroundColor,
                                   messageBars: [
                                     MessageBarEntity(
                                       messageType: 'custom',
                                       hasIcon: true,
                                       icon: ImageConstants.shieldIcon,
+                                      bgColor: config.bannerBackgroundColor,
+                                      textColor: '#353535', // AppColors.neutralGrey6
                                       title: config.bannerTitle,
                                       text: config.bannerSubtitle,
                                     ),

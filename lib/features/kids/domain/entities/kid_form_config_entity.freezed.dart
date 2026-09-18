@@ -14,7 +14,12 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$KidFormConfigEntity {
 
- String get heading; String get subheading; String get bannerTitle; String get bannerSubtitle; Color get bannerBackgroundColor; String get consentText; String get viewPrivacyPolicyLabel; String get viewPrivacyPolicyUrl;// Gender-specific "no photo yet" avatars. Nullable — null means "render
+ String get heading; String get subheading; String get bannerTitle; String get bannerSubtitle;// Raw hex string, same convention as `MessageBarEntity.bgColor` —
+// handed straight through to the message bar without ever becoming a
+// `Color` on the way, matching how every other screen's backend-driven
+// bar color works (parsed to a `Color` only by the widget that paints
+// it, never round-tripped back to a string).
+ String get bannerBackgroundColor; String get consentText; String get viewPrivacyPolicyLabel; String get viewPrivacyPolicyUrl;// Gender-specific "no photo yet" avatars. Nullable — null means "render
 // the local generic-person placeholder" (a client-only rendering detail,
 // not part of the contract), same convention as
 // `KidsListContentEntity.footerAvatars`.
@@ -49,7 +54,7 @@ abstract mixin class $KidFormConfigEntityCopyWith<$Res>  {
   factory $KidFormConfigEntityCopyWith(KidFormConfigEntity value, $Res Function(KidFormConfigEntity) _then) = _$KidFormConfigEntityCopyWithImpl;
 @useResult
 $Res call({
- String heading, String subheading, String bannerTitle, String bannerSubtitle, Color bannerBackgroundColor, String consentText, String viewPrivacyPolicyLabel, String viewPrivacyPolicyUrl, String? placeholderImageBoy, String? placeholderImageGirl
+ String heading, String subheading, String bannerTitle, String bannerSubtitle, String bannerBackgroundColor, String consentText, String viewPrivacyPolicyLabel, String viewPrivacyPolicyUrl, String? placeholderImageBoy, String? placeholderImageGirl
 });
 
 
@@ -73,7 +78,7 @@ as String,subheading: null == subheading ? _self.subheading : subheading // igno
 as String,bannerTitle: null == bannerTitle ? _self.bannerTitle : bannerTitle // ignore: cast_nullable_to_non_nullable
 as String,bannerSubtitle: null == bannerSubtitle ? _self.bannerSubtitle : bannerSubtitle // ignore: cast_nullable_to_non_nullable
 as String,bannerBackgroundColor: null == bannerBackgroundColor ? _self.bannerBackgroundColor : bannerBackgroundColor // ignore: cast_nullable_to_non_nullable
-as Color,consentText: null == consentText ? _self.consentText : consentText // ignore: cast_nullable_to_non_nullable
+as String,consentText: null == consentText ? _self.consentText : consentText // ignore: cast_nullable_to_non_nullable
 as String,viewPrivacyPolicyLabel: null == viewPrivacyPolicyLabel ? _self.viewPrivacyPolicyLabel : viewPrivacyPolicyLabel // ignore: cast_nullable_to_non_nullable
 as String,viewPrivacyPolicyUrl: null == viewPrivacyPolicyUrl ? _self.viewPrivacyPolicyUrl : viewPrivacyPolicyUrl // ignore: cast_nullable_to_non_nullable
 as String,placeholderImageBoy: freezed == placeholderImageBoy ? _self.placeholderImageBoy : placeholderImageBoy // ignore: cast_nullable_to_non_nullable
@@ -163,7 +168,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  Color bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl,  String? placeholderImageBoy,  String? placeholderImageGirl)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  String bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl,  String? placeholderImageBoy,  String? placeholderImageGirl)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _KidFormConfigEntity() when $default != null:
 return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSubtitle,_that.bannerBackgroundColor,_that.consentText,_that.viewPrivacyPolicyLabel,_that.viewPrivacyPolicyUrl,_that.placeholderImageBoy,_that.placeholderImageGirl);case _:
@@ -184,7 +189,7 @@ return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSub
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  Color bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl,  String? placeholderImageBoy,  String? placeholderImageGirl)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  String bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl,  String? placeholderImageBoy,  String? placeholderImageGirl)  $default,) {final _that = this;
 switch (_that) {
 case _KidFormConfigEntity():
 return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSubtitle,_that.bannerBackgroundColor,_that.consentText,_that.viewPrivacyPolicyLabel,_that.viewPrivacyPolicyUrl,_that.placeholderImageBoy,_that.placeholderImageGirl);case _:
@@ -204,7 +209,7 @@ return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSub
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  Color bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl,  String? placeholderImageBoy,  String? placeholderImageGirl)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String heading,  String subheading,  String bannerTitle,  String bannerSubtitle,  String bannerBackgroundColor,  String consentText,  String viewPrivacyPolicyLabel,  String viewPrivacyPolicyUrl,  String? placeholderImageBoy,  String? placeholderImageGirl)?  $default,) {final _that = this;
 switch (_that) {
 case _KidFormConfigEntity() when $default != null:
 return $default(_that.heading,_that.subheading,_that.bannerTitle,_that.bannerSubtitle,_that.bannerBackgroundColor,_that.consentText,_that.viewPrivacyPolicyLabel,_that.viewPrivacyPolicyUrl,_that.placeholderImageBoy,_that.placeholderImageGirl);case _:
@@ -226,7 +231,12 @@ class _KidFormConfigEntity implements KidFormConfigEntity {
 @override final  String subheading;
 @override final  String bannerTitle;
 @override final  String bannerSubtitle;
-@override final  Color bannerBackgroundColor;
+// Raw hex string, same convention as `MessageBarEntity.bgColor` —
+// handed straight through to the message bar without ever becoming a
+// `Color` on the way, matching how every other screen's backend-driven
+// bar color works (parsed to a `Color` only by the widget that paints
+// it, never round-tripped back to a string).
+@override final  String bannerBackgroundColor;
 @override final  String consentText;
 @override final  String viewPrivacyPolicyLabel;
 @override final  String viewPrivacyPolicyUrl;
@@ -267,7 +277,7 @@ abstract mixin class _$KidFormConfigEntityCopyWith<$Res> implements $KidFormConf
   factory _$KidFormConfigEntityCopyWith(_KidFormConfigEntity value, $Res Function(_KidFormConfigEntity) _then) = __$KidFormConfigEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String heading, String subheading, String bannerTitle, String bannerSubtitle, Color bannerBackgroundColor, String consentText, String viewPrivacyPolicyLabel, String viewPrivacyPolicyUrl, String? placeholderImageBoy, String? placeholderImageGirl
+ String heading, String subheading, String bannerTitle, String bannerSubtitle, String bannerBackgroundColor, String consentText, String viewPrivacyPolicyLabel, String viewPrivacyPolicyUrl, String? placeholderImageBoy, String? placeholderImageGirl
 });
 
 
@@ -291,7 +301,7 @@ as String,subheading: null == subheading ? _self.subheading : subheading // igno
 as String,bannerTitle: null == bannerTitle ? _self.bannerTitle : bannerTitle // ignore: cast_nullable_to_non_nullable
 as String,bannerSubtitle: null == bannerSubtitle ? _self.bannerSubtitle : bannerSubtitle // ignore: cast_nullable_to_non_nullable
 as String,bannerBackgroundColor: null == bannerBackgroundColor ? _self.bannerBackgroundColor : bannerBackgroundColor // ignore: cast_nullable_to_non_nullable
-as Color,consentText: null == consentText ? _self.consentText : consentText // ignore: cast_nullable_to_non_nullable
+as String,consentText: null == consentText ? _self.consentText : consentText // ignore: cast_nullable_to_non_nullable
 as String,viewPrivacyPolicyLabel: null == viewPrivacyPolicyLabel ? _self.viewPrivacyPolicyLabel : viewPrivacyPolicyLabel // ignore: cast_nullable_to_non_nullable
 as String,viewPrivacyPolicyUrl: null == viewPrivacyPolicyUrl ? _self.viewPrivacyPolicyUrl : viewPrivacyPolicyUrl // ignore: cast_nullable_to_non_nullable
 as String,placeholderImageBoy: freezed == placeholderImageBoy ? _self.placeholderImageBoy : placeholderImageBoy // ignore: cast_nullable_to_non_nullable

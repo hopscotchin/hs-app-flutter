@@ -56,13 +56,6 @@ class MessageBarsWidget extends StatelessWidget {
   /// borderless, same as before this was added.
   final BoxBorder? cardBorder;
 
-  /// Overrides the bar's background entirely — for a caller that already
-  /// has a real [Color] (a local constant, or a value from a typed model)
-  /// rather than one arriving as a hex string on [MessageBarEntity.bgColor].
-  /// Null (default) keeps the existing `bar.bgColor` / type-default
-  /// resolution.
-  final Color? background;
-
   const MessageBarsWidget({
     super.key,
     required this.messageBars,
@@ -76,7 +69,6 @@ class MessageBarsWidget extends StatelessWidget {
     this.padding,
     this.contentPadding,
     this.cardBorder,
-    this.background,
   });
 
   @override
@@ -106,7 +98,6 @@ class MessageBarsWidget extends StatelessWidget {
               titleStyle: titleStyle,
               contentPadding: contentPadding,
               cardBorder: cardBorder,
-              background: background,
             ),
           ),
       ],
@@ -167,7 +158,6 @@ class _MessageBarItem extends StatefulWidget {
   final TextStyle? titleStyle;
   final EdgeInsetsGeometry? contentPadding;
   final BoxBorder? cardBorder;
-  final Color? background;
 
   const _MessageBarItem({
     required this.bar,
@@ -180,7 +170,6 @@ class _MessageBarItem extends StatefulWidget {
     this.titleStyle,
     this.contentPadding,
     this.cardBorder,
-    this.background,
   });
 
   @override
@@ -212,9 +201,8 @@ class _MessageBarItemState extends State<_MessageBarItem> {
     final bar = widget.bar;
     final type = _resolveType(bar);
 
-    // Resolve colors — an explicit override wins, then the API-provided
-    // value, then the type default.
-    final bgColor = widget.background ?? bar.bgColor?.toColor ?? _defaultBgColor(type);
+    // Resolve colors — API-provided values override type defaults.
+    final bgColor = bar.bgColor?.toColor ?? _defaultBgColor(type);
     final textColor = bar.textColor.toColorOr(AppColors.neutralBlack);
 
     // Resolve icon visibility — typed bars always show their icon; custom bars

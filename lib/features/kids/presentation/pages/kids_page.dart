@@ -125,10 +125,10 @@ class KidsPage extends StatelessWidget {
                                   .textPrimary(),
                               textStyle: AppTypographyV1.labelLarge.regular
                                   .neutralGrey6(),
-                              background: AppColors.neutralGrey2,
                               messageBars: [
                                 MessageBarEntity(
                                   messageType: 'custom',
+                                  bgColor: '#E5E5EA', // AppColors.neutralGrey2
                                   title: content.bannerTitle,
                                   text: content.bannerSubtitle,
                                 ),
