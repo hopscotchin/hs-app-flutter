@@ -13,6 +13,7 @@ import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.d
 import 'package:hs_app_flutter/core/analytics/state/checkout_timer.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
+import 'package:hs_app_flutter/core/cubits/bottom_nav_visibility_cubit.dart';
 import 'package:hs_app_flutter/core/di/injection.dart';
 import 'package:hs_app_flutter/core/router/navigation_observer.dart';
 import 'package:hs_app_flutter/features/account/presentation/bloc/account_bloc.dart';
@@ -50,16 +51,34 @@ class _DashboardPageState extends State<DashboardPage>
   // Pre-built once: `BorderRadius.circular` allocates per call; the spring
   // animation pumps `tileDecoration` every frame. Hoisting to a const avoids
   // an allocation per nav-bar tile per frame.
-  static const BorderRadius _tileBorderRadius = BorderRadius.all(Radius.circular(_navTileRadius));
+  static const BorderRadius _tileBorderRadius = BorderRadius.all(
+    Radius.circular(_navTileRadius),
+  );
 
   // Nav-bar items never change after construction — build the list once
   // (lazy on first access) instead of allocating four NavBarItem + four
   // closure objects on every Scaffold rebuild.
   late final List<NavBarItem> _navItems = [
-    _navItem(ImageConstants.discover, 'Home', DashboardTestStrings.dashboardHomeNavItem),
-    _navItem(ImageConstants.categories, 'Categories', DashboardTestStrings.dashboardCategoriesNavItem),
-    _navItem(ImageConstants.search, 'Search', DashboardTestStrings.dashboardSearchNavItem),
-    _navItem(ImageConstants.profile, 'Account', DashboardTestStrings.dashboardAccountNavItem),
+    _navItem(
+      ImageConstants.discover,
+      'Home',
+      DashboardTestStrings.dashboardHomeNavItem,
+    ),
+    _navItem(
+      ImageConstants.categories,
+      'Categories',
+      DashboardTestStrings.dashboardCategoriesNavItem,
+    ),
+    _navItem(
+      ImageConstants.search,
+      'Search',
+      DashboardTestStrings.dashboardSearchNavItem,
+    ),
+    _navItem(
+      ImageConstants.profile,
+      'Account',
+      DashboardTestStrings.dashboardAccountNavItem,
+    ),
   ];
 
   late int _navIndex;
@@ -145,35 +164,43 @@ class _DashboardPageState extends State<DashboardPage>
           if (didPop) return;
           _handleBackPress();
         },
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          resizeToAvoidBottomInset: false,
-          extendBody: true,
-          bottomNavigationBar: ValueListenableBuilder<bool>(
-            valueListenable: _navVisible,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: bottomInset),
-              child: SpringBottomNavBar(
-                items: _navItems,
-                initialIndex: _navIndex,
-                height: _navHeight,
-                backgroundColor: Colors.transparent,
-                activeColor: AppColors.brandDefault,
-                inactiveColor: AppColors.secondaryInActive,
-                tileDecoration: _tileDecoration,
-                onTabSelected: _onTabSelected,
+        // Categories' inline search force-hides the nav bar for the full
+        // duration it's active — an override on top of the scroll-driven
+        // `_navVisible`, not a replacement for it, so scrolling elsewhere
+        // still works exactly as before once search closes and this fires
+        // `show()` again.
+        child: BlocListener<BottomNavVisibilityCubit, bool>(
+          listener: (_, visible) => _navVisible.value = visible,
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            resizeToAvoidBottomInset: false,
+            extendBody: true,
+            bottomNavigationBar: ValueListenableBuilder<bool>(
+              valueListenable: _navVisible,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: bottomInset),
+                child: SpringBottomNavBar(
+                  items: _navItems,
+                  initialIndex: _navIndex,
+                  height: _navHeight,
+                  backgroundColor: Colors.transparent,
+                  activeColor: AppColors.brandDefault,
+                  inactiveColor: AppColors.secondaryInActive,
+                  tileDecoration: _tileDecoration,
+                  onTabSelected: _onTabSelected,
+                ),
+              ),
+              builder: (_, visible, child) => AnimatedSlide(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeInOut,
+                offset: visible ? Offset.zero : _kHiddenOffset,
+                child: child,
               ),
             ),
-            builder: (_, visible, child) => AnimatedSlide(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeInOut,
-              offset: visible ? Offset.zero : _kHiddenOffset,
-              child: child,
+            body: NotificationListener<UserScrollNotification>(
+              onNotification: _onUserScroll,
+              child: widget.navigationShell,
             ),
-          ),
-          body: NotificationListener<UserScrollNotification>(
-            onNotification: _onUserScroll,
-            child: widget.navigationShell,
           ),
         ),
       ),
@@ -195,7 +222,8 @@ class _DashboardPageState extends State<DashboardPage>
 
   void _handleBackPress() {
     final now = DateTime.now();
-    if (_lastBackPressedAt != null && now.difference(_lastBackPressedAt!) > _kBackPressInterval) {
+    if (_lastBackPressedAt != null &&
+        now.difference(_lastBackPressedAt!) > _kBackPressInterval) {
       _backPressCount = 2;
     }
 

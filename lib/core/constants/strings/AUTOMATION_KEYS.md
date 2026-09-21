@@ -126,8 +126,16 @@ lists. **Examples** = concrete keys for dynamic patterns. **Widget file** = the
 |---|---|---|---|
 | Element | `categories_search_bar` | — | `combined_header_delegate.dart` |
 | Hint | `categories_search_bar_hint` | — | `combined_header_delegate.dart` |
-| Element | `categories_loading_shimmer` | — | `categories_page.dart` |
+| Loading | `categories_loading_shimmer` | — | `categories_page.dart` |
 | Button | `categories_error_retry_button` | — | `categories_page.dart` |
+| Text field | `categories_search_input` | — | `categories_page.dart` |
+| Button | `categories_search_back_button` | — | `categories_page.dart` |
+| Button | `categories_search_input_clear_button` | — | `categories_page.dart` |
+| Text | `categories_search_error_text` | — | `categories_page.dart` |
+| Text | `categories_search_empty_text` | — | `categories_page.dart` |
+| List item | `categories_search_suggestion_item_<i>` | `categories_search_suggestion_item_0`, `categories_search_suggestion_item_1` | `categories_page.dart` |
+| Title | `categories_search_recent_title` | — | `categories_page.dart` |
+| List item | `categories_search_recent_item_<i>` | `categories_search_recent_item_0`, `categories_search_recent_item_1` | `categories_page.dart` |
 
 ## Search
 
@@ -136,7 +144,6 @@ lists. **Examples** = concrete keys for dynamic patterns. **Widget file** = the
 | Button | `search_back_button` | — | `search_page.dart` |
 | Text field | `search_input` | — | `search_page.dart` |
 | Button | `search_input_clear_button` | — | `search_page.dart` |
-| Text | `search_keep_typing_text` | — | `search_page.dart` |
 | Text | `search_error_text` | — | `search_page.dart` |
 | Text | `search_empty_text` | — | `search_page.dart` |
 | List item | `search_suggestion_item_<i>` | `search_suggestion_item_0`, `search_suggestion_item_1` | `search_page.dart`, `search_suggestions_list.dart` |
@@ -417,7 +424,6 @@ feedback for one apply rather than a list a test walks.
 | Text | `cart_price_summary_row_<i>_value` | `cart_price_summary_row_0_value`, `cart_price_summary_row_1_value` | `cart_page.dart` |
 | Section | `cart_promo_section` | — | `cart_promo_section.dart` |
 | Image | `cart_promo_offer_icon` | — | `cart_promo_section.dart` |
-| Element | `cart_slg` | — | `cart_slg_widget.dart` |
 | Text field | `cart_promo_code_input` | — | `cart_promo_section.dart` |
 | Hint | `cart_promo_code_input_hint` | — | `cart_promo_section.dart` |
 | Button | `cart_promo_apply_button` | — | `cart_promo_section.dart` |
@@ -461,8 +467,8 @@ feedback for one apply rather than a list a test walks.
 | Tab | `pdp_detail_tab_<i>` | `pdp_detail_tab_0`, `pdp_detail_tab_1` | `pdp_product_details.dart` |
 | Snackbar | `pdp_snackbar` | — | `pdp_page.dart` |
 | Snackbar | `pdp_coupon_copied_snackbar` | — | `pdp_offers.dart` |
-| Button | `pdp_add_to_bag_button` | — | `auto_semantics.dart`, `pdp_add_to_bag_bar_sold_out_test.dart`, `pdp_content.dart` |
-| Button | `pdp_buy_now_button` | — | `pdp_add_to_bag_bar_sold_out_test.dart`, `pdp_content.dart` |
+| Button | `pdp_add_to_bag_button` | — | `auto_semantics.dart`, `pdp_content.dart` |
+| Button | `pdp_buy_now_button` | — | `pdp_content.dart` |
 | Button | `pdp_docked_add_to_bag_button` | — | `pdp_content.dart` |
 | Button | `pdp_docked_buy_now_button` | — | `pdp_content.dart` |
 | Button | `pdp_scroll_to_top_button` | — | `pdp_content.dart` |

@@ -9,6 +9,7 @@ import 'package:hs_app_flutter/features/talker_floating_button.dart';
 import 'components/atoms/auto_semantics.dart';
 import 'core/analytics/events/analytics_helper.dart';
 import 'core/constants/route_names.dart';
+import 'core/cubits/bottom_nav_visibility_cubit.dart';
 import 'core/cubits/cart_count_cubit.dart';
 import 'core/di/injection.dart';
 import 'core/router/app_router.dart';
@@ -19,6 +20,7 @@ import 'features/cart/presentation/bloc/cart_bloc.dart';
 import 'features/cart/presentation/cubit/cart_actions_cubit.dart';
 import 'features/categories/presentation/bloc/categories_bloc.dart';
 import 'features/discover/presentation/bloc/home_bloc.dart';
+import 'features/search/presentation/bloc/search_bloc.dart';
 import 'features/splash/presentation/bloc/splash_bloc.dart';
 import 'features/wishlist/presentation/cubit/wishlist_cubit.dart';
 
@@ -70,9 +72,16 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
     }
   }
 
-  static void _showActionSnack(BuildContext context, String? message, bool isError) {
+  static void _showActionSnack(
+    BuildContext context,
+    String? message,
+    bool isError,
+  ) {
     if (message == null || message.isEmpty) return;
-    context.showSnack(message, status: isError ? SnackStatus.error : SnackStatus.success);
+    context.showSnack(
+      message,
+      status: isError ? SnackStatus.error : SnackStatus.success,
+    );
   }
 
   @override
@@ -80,11 +89,18 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
     return MultiBlocProvider(
       providers: [
         BlocProvider<CartCountCubit>.value(value: sl<CartCountCubit>()),
+        BlocProvider<BottomNavVisibilityCubit>.value(
+          value: sl<BottomNavVisibilityCubit>(),
+        ),
         BlocProvider<WishlistCubit>.value(value: sl<WishlistCubit>()),
         BlocProvider<CartActionsCubit>.value(value: sl<CartActionsCubit>()),
         BlocProvider<SplashBloc>(create: (_) => sl<SplashBloc>()),
         BlocProvider<HomeBloc>(create: (_) => sl<HomeBloc>()),
         BlocProvider<CategoriesBloc>(create: (_) => sl<CategoriesBloc>()),
+        // Categories' inline search (see CategoriesPage) needs this alive for
+        // the lifetime of the shell tab, same as CategoriesBloc above — not
+        // route-scoped like the dedicated Search page's own instance.
+        BlocProvider<SearchBloc>(create: (_) => sl<SearchBloc>()),
         BlocProvider<AccountBloc>(create: (_) => sl<AccountBloc>()),
         BlocProvider<CartBloc>(create: (_) => sl<CartBloc>()),
       ],
@@ -124,13 +140,19 @@ class _HSAppState extends State<HSApp> with WidgetsBindingObserver {
               ),
               BlocListener<WishlistCubit, WishlistState>(
                 listenWhen: (a, b) => a.feedbackTick != b.feedbackTick,
-                listener: (context, state) =>
-                    _showActionSnack(context, state.feedbackMessage, state.feedbackIsError),
+                listener: (context, state) => _showActionSnack(
+                  context,
+                  state.feedbackMessage,
+                  state.feedbackIsError,
+                ),
               ),
               BlocListener<CartActionsCubit, CartActionsState>(
                 listenWhen: (a, b) => a.feedbackTick != b.feedbackTick,
-                listener: (context, state) =>
-                    _showActionSnack(context, state.feedbackMessage, state.feedbackIsError),
+                listener: (context, state) => _showActionSnack(
+                  context,
+                  state.feedbackMessage,
+                  state.feedbackIsError,
+                ),
               ),
             ],
             // `automation_build` is a marker, not a target: it proves to a

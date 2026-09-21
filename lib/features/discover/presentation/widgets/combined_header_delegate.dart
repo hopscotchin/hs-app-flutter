@@ -218,7 +218,7 @@ class _HeaderSearchBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xsm),
           decoration: BoxDecoration(
             color: AppColors.baseDefault,
-            border: Border.all(color: AppColors.dividerLight),
+            border: Border.all(color: AppColors.neutralGrey0),
             borderRadius: AppSpacing.borderRadiusSm,
           ),
           child: Row(
@@ -277,7 +277,7 @@ class _HeaderSearchInput extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
         decoration: BoxDecoration(
           color: AppColors.baseDefault,
-          border: Border.all(color: AppColors.dividerLight),
+          border: Border.all(color: AppColors.neutralGrey0),
           borderRadius: AppSpacing.borderRadiusSm,
         ),
         child: Row(

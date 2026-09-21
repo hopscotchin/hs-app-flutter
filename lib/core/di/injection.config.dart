@@ -40,6 +40,8 @@ import 'package:hs_app_flutter/core/analytics/state/device_probes.dart' as _i41;
 import 'package:hs_app_flutter/core/analytics/state/experiments_util.dart'
     as _i209;
 import 'package:hs_app_flutter/core/analytics/state/launch_timer.dart' as _i773;
+import 'package:hs_app_flutter/core/cubits/bottom_nav_visibility_cubit.dart'
+    as _i189;
 import 'package:hs_app_flutter/core/cubits/cart_count_cubit.dart' as _i884;
 import 'package:hs_app_flutter/core/di/register_module.dart' as _i186;
 import 'package:hs_app_flutter/core/network/api_client.dart' as _i930;
@@ -352,6 +354,9 @@ extension GetItInjectableX on _i174.GetIt {
     await gh.factoryAsync<_i655.PackageInfo>(
       () => registerModule.packageInfo,
       preResolve: true,
+    );
+    gh.singleton<_i189.BottomNavVisibilityCubit>(
+      () => _i189.BottomNavVisibilityCubit(),
     );
     gh.lazySingleton<_i233.LpAttributionHelper>(
       () => _i233.LpAttributionHelper(),

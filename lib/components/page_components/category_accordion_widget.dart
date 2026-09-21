@@ -44,7 +44,8 @@ class CategoryAccordionWidget extends StatelessWidget {
   /// Toggles [isExpanded] in the owning ancestor.
   final VoidCallback onToggleExpand;
 
-  /// Component-level automation key prefix, e.g. `categories_ca_2`. Null → unkeyed.
+  /// Component-level automation key prefix, e.g. `categories_ca_2`.
+  /// Null → unkeyed.
   final String? keyPrefix;
 
   /// Fires when a row, at any depth, is tapped and actually navigates.
@@ -52,10 +53,12 @@ class CategoryAccordionWidget extends StatelessWidget {
 
   void _logTap(CategoryAccordionTile tile) {
     final override = onTapLog;
+
     if (override != null) {
       override(tile);
       return;
     }
+
     sl<HomeTrackAnalyticManager>().onCategoryAccordionTapped(
       accordionData,
       tile,
@@ -65,9 +68,11 @@ class CategoryAccordionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tile = accordionData.tile;
+
     if (tile == null || (tile.title ?? '').isEmpty) {
       return const SizedBox.shrink();
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -113,12 +118,14 @@ class _AccordionNode extends StatefulWidget {
   final CategoryAccordionTile tile;
   final int depth;
 
-  /// Automation key for this node's own tappable row. Null → unkeyed.
+  /// Automation key for this node's own tappable row.
+  /// Null → unkeyed.
   final String? ownKey;
 
   /// Base automation-key prefix children compose their own `ownKey`/
   /// `childKeyBase` from, e.g. `hp_ca_8` at depth 0 → children key
-  /// `hp_ca_8_sub_0`, whose own children key `hp_ca_8_sub_0_sub_0`.
+  /// `hp_ca_8_sub_0`, whose own children key
+  /// `hp_ca_8_sub_0_sub_0`.
   final String? childKeyBase;
 
   final void Function(CategoryAccordionTile tile) onTap;
@@ -141,7 +148,9 @@ class _AccordionNodeState extends State<_AccordionNode> {
   // not of any one child.
   int? _expandedChildIndex;
 
-  Key? _valueKey(String? value) => value == null ? null : ValueKey(value);
+  Key? _valueKey(String? value) {
+    return value == null ? null : ValueKey(value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -162,38 +171,48 @@ class _AccordionNodeState extends State<_AccordionNode> {
 
     final header = _row(
       title: tile.title ?? '',
+
       // The asset points down natively (0 turns); collapsed rotates it -90°
       // (counter-clockwise) to point right instead, then back to 0 (down)
       // once expanded.
       trailingIcon: Icons.keyboard_arrow_down,
-      rotationTurns: expanded ? 0 : -0.25,
+      rotationTurns: expanded ? -0.75 : 0,
+
       // Slightly darker while expanded, the usual light tertiary tone
-      // otherwise — color carries the expanded/collapsed state, not just the
-      // glyph. Halfway between tertiary and secondary so it stays subtle
-      // rather than jumping straight to the darker secondary tone.
-      iconColor: expanded
-          ? AppColors.neutralGrey6
-          : AppColors.neutralGrey5,
+      // otherwise — color carries the expanded/collapsed state.
+      iconColor: expanded ? AppColors.neutralGrey6 : AppColors.neutralGrey5,
+
       onTap: widget.onToggleExpand,
       key: _valueKey(widget.ownKey),
     );
 
     // A parent wraps its own children — leaf or nested alike — in one shaded
-    // sub-panel, inset from the screen edges. The panel's shade is keyed off
-    // the children's depth (1 → light, 2+ → darker), so a 3-level branch
-    // (e.g. SETS → Skirt Sets → Skirt Sets 1/2/3) reads as two visually
-    // distinct tiers instead of the same shade repeating at every level; a
-    // 2-level branch (e.g. a single flat child) still gets the tier-1 shade
-    // instead of no shading at all.
+    // sub-panel, inset from the screen edges.
+    //
+    // The panel's shade is keyed off the children's depth:
+    //   depth 1 → light
+    //   depth 2+ → darker
+    //
+    // This makes a 3-level branch such as:
+    //
+    // SETS
+    //   └── Skirt Sets
+    //         ├── Skirt Sets 1
+    //         ├── Skirt Sets 2
+    //         └── Skirt Sets 3
+    //
+    // read as two visually distinct tiers.
     final childDepth = widget.depth + 1;
+
     // Built only while expanded — collapsing swaps this subtree out for the
     // zero-height box below, discarding descendant _AccordionNode state, so a
     // later re-expand starts each grandchild fresh rather than remembering
-    // which one was open. Both branches fix width to the full available
-    // width so AnimatedSize below only ever animates height (top-to-bottom
-    // reveal) instead of also animating width from the collapsed state's
-    // natural zero-width size.
+    // which one was open.
+    //
+    // Both branches fix width to the full available width so AnimatedSize
+    // below only ever animates height instead of also animating width.
     Widget panel = const SizedBox(width: double.infinity, height: 0);
+
     if (expanded) {
       final children = Column(
         children: [
@@ -202,7 +221,9 @@ class _AccordionNodeState extends State<_AccordionNode> {
               builder: (context) {
                 final childKey = widget.childKeyBase == null
                     ? null
-                    : '${widget.childKeyBase}_${HomeComponentTestStrings.accordionSubCategory}_$i';
+                    : '${widget.childKeyBase}_'
+                          '${HomeComponentTestStrings.accordionSubCategory}_$i';
+
                 return _AccordionNode(
                   tile: tile.subCategory[i],
                   depth: childDepth,
@@ -210,9 +231,11 @@ class _AccordionNodeState extends State<_AccordionNode> {
                   childKeyBase: childKey,
                   onTap: widget.onTap,
                   isExpanded: _expandedChildIndex == i,
-                  onToggleExpand: () => setState(() {
-                    _expandedChildIndex = _expandedChildIndex == i ? null : i;
-                  }),
+                  onToggleExpand: () {
+                    setState(() {
+                      _expandedChildIndex = _expandedChildIndex == i ? null : i;
+                    });
+                  },
                 );
               },
             ),
@@ -222,11 +245,14 @@ class _AccordionNodeState extends State<_AccordionNode> {
       panel = SizedBox(
         width: double.infinity,
         child: Container(
-          // Left-only inset — the right edge stays flush with the header's,
-          // so every level's trailing chevron lines up in the same column
-          // instead of creeping left as the panel's own margin compounds.
-          margin: EdgeInsets.only(left: childDepth == 1 ? AppSpacing.sm : AppSpacing.xs),
-          padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+          // Inset on both sides so each nested panel reads as a card sitting
+          // inside its parent's panel.
+          margin: EdgeInsets.only(
+            right: childDepth == 1 ? AppSpacing.xsm : AppSpacing.xxs,
+            left: childDepth == 1 ? AppSpacing.xsm : AppSpacing.xxs,
+            bottom: childDepth == 1 ? AppSpacing.xs : AppSpacing.xxs,
+          ),
+          padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: childDepth == 1
@@ -263,12 +289,19 @@ class _AccordionNodeState extends State<_AccordionNode> {
     Color iconColor = AppColors.textTertiary,
     double rotationTurns = 0,
   }) {
+    // `childDepth` was previously referenced here, but it only exists as a
+    // local variable inside `build()`. Use the current node's depth instead.
+    final horizontalPadding = widget.depth == 1
+        ? AppSpacing.xs
+        : widget.depth == 2
+        ? AppSpacing.xs
+        : AppSpacing.md;
     return InkWell(
       key: key,
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
           vertical: AppSpacing.xsm,
         ),
         child: Row(
@@ -282,14 +315,12 @@ class _AccordionNodeState extends State<_AccordionNode> {
                 turns: rotationTurns,
                 duration: _kAccordionAnimationDuration,
                 curve: _kAccordionAnimationCurve,
-                child: trailingIcon == Icons.keyboard_arrow_down
-                    ? CustomImage(
-                        path: ImageConstants.arrowDown,
-                        width: AppSpacing.iconMd,
-                        height: AppSpacing.iconMd,
-                        color: iconColor,
-                      )
-                    : Icon(trailingIcon, color: iconColor),
+                child: CustomImage(
+                  path: ImageConstants.arrowRight,
+                  width: AppSpacing.iconMd,
+                  height: AppSpacing.iconMd,
+                  color: iconColor,
+                ),
               ),
           ],
         ),

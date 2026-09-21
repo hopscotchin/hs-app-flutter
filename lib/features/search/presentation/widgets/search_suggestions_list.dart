@@ -33,7 +33,7 @@ class SearchSuggestionsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxxs),
       itemCount: suggestions.length,
       separatorBuilder: (_, _) => const Padding(
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.lgMd),
@@ -41,30 +41,25 @@ class SearchSuggestionsList extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final s = suggestions[index];
-        final raw = s.displayName?.isNotEmpty == true ? s.displayName! : (s.term ?? '');
+        final raw = s.displayName?.isNotEmpty == true
+            ? s.displayName!
+            : (s.term ?? '');
+
         if (raw.isEmpty) return const SizedBox.shrink();
+
         return ListTile(
           key: itemKey(index),
-          // Tighten the row's vertical footprint — default ListTile sizing
-          // (56px min height + 4px min vertical padding) reads too spaced
-          // out for a dense suggestions list.
           visualDensity: VisualDensity.compact,
-          minVerticalPadding: AppSpacing.xxxs,
+          minVerticalPadding: 0,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
-            vertical: AppSpacing.xxxs,
+            vertical: 0,
           ),
-          // Same down-pointing arrow asset as the category accordion's
-          // chevron (`ImageConstants.arrowDown`), rotated a quarter turn
-          // counter-clockwise to point right, instead of a Material glyph.
-          trailing: const RotatedBox(
-            quarterTurns: -1,
-            child: CustomImage(
-              path: ImageConstants.arrowDown,
-              width: AppSpacing.iconMd,
-              height: AppSpacing.iconMd,
-              color: AppColors.neutralGrey5,
-            ),
+          trailing: const CustomImage(
+            path: ImageConstants.arrowRight,
+            width: AppSpacing.iconMd,
+            height: AppSpacing.iconMd,
+            color: AppColors.neutralGrey5,
           ),
           title: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
@@ -89,7 +84,11 @@ class SearchSuggestionsList extends StatelessWidget {
     return spans;
   }
 
-  void _appendNodeSpans(List<dom.Node> nodes, List<TextSpan> out, {required bool isBold}) {
+  void _appendNodeSpans(
+    List<dom.Node> nodes,
+    List<TextSpan> out, {
+    required bool isBold,
+  }) {
     for (final node in nodes) {
       if (node is dom.Text) {
         if (node.text.isEmpty) continue;
