@@ -78,7 +78,7 @@ dependencies:
   webview_flutter_android: ^4.10.13
 
   #Juspay HyperSDK
-  hypersdkflutter: ^4.0.55
+  hypersdkflutter: ^4.0.58
 
   # SMS OTP autofill (Android: SMS User Consent API; iOS: native autofillHints)
   sms_autofill: ^2.3.3
@@ -118,7 +118,7 @@ dependencies:
   android_id: ^0.4.0
   # iOS: Keychain-backed persistence for hs_device_id so the UUID survives app
   # uninstall (matches Android `Settings.Secure.ANDROID_ID` stability and the
-  # iOS-native `DeviceUID.m` Keychain pattern).
+   # iOS-native `DeviceUID.m` Keychain pattern).
   flutter_secure_storage: ^10.3.1
   http: ^1.2.2
   device_preview: ^1.3.1
