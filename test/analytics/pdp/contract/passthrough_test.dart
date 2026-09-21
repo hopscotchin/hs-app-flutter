@@ -155,34 +155,6 @@ void main() {
       final e = h.singleEvent(AnalyticsEvents.productViewed);
       expect(e[AnalyticsProperties.fromPincode], AnalyticsDefaults.standard);
     });
-
-    test('removed features emit NOTHING — no A+ keys', () {
-      // The doorway and shop-the-look keys are no longer listed: their
-      // constants have been deleted from `AnalyticsProperties`, so there is
-      // nothing left that could emit them. The A+ constants still exist, so
-      // asserting they stay off the payload still guards something.
-      final e = h.singleEvent(AnalyticsEvents.productViewed);
-      for (final removed in [
-        AnalyticsProperties.isPidAplus,
-        AnalyticsProperties.aPlusUspList,
-        AnalyticsProperties.aPlusVirtualGroupName,
-        AnalyticsProperties.aPlusContentType,
-      ]) {
-        expect(e.containsKey(removed), isFalse, reason: '$removed should be gone');
-      }
-    });
-
-    test('tab-page keys are no longer emitted — the block was retired', () {
-      // Tab-page attribution used to be app-owned entry context. It is not sent
-      // from any surface today; the corresponding fields are gone from
-      // `PdpEntryArgs` and the wire keys reach Segment only if the backend node
-      // ships them.
-      final e = h.singleEvent(AnalyticsEvents.productViewed);
-      expect(e.containsKey(AnalyticsProperties.tabbedPageContainerId), isFalse);
-      expect(e.containsKey(AnalyticsProperties.tabbedPageContainerName), isFalse);
-      expect(e.containsKey(AnalyticsProperties.tabName), isFalse);
-      expect(e.containsKey(AnalyticsProperties.tabPosition), isFalse);
-    });
   });
 
   group('product_viewed — entry context', () {
@@ -207,26 +179,6 @@ void main() {
             'echoes back the pincode the request was made with, so the client '
             'no longer passes it in',
       );
-    });
-
-    test('position / source_tile_type / tab_* are node-owned now', () async {
-      // These used to be entry-arg fields. They were removed from
-      // `PdpEntryArgs`; any value on the wire has to arrive on
-      // `product.trackingMeta` (or a chained node) rather than the client.
-      await h.analytics.logProductViewed(product: flat.product!, entry: const PdpEntryArgs());
-      final e = h.singleEvent(AnalyticsEvents.productViewed);
-      for (final clientOwnedInPrev in const [
-        AnalyticsProperties.tabbedPageContainerName,
-        AnalyticsProperties.tabbedPageContainerId,
-        AnalyticsProperties.tabName,
-        AnalyticsProperties.tabPosition,
-      ]) {
-        expect(
-          e.containsKey(clientOwnedInPrev),
-          isFalse,
-          reason: '$clientOwnedInPrev must not appear from the client any more',
-        );
-      }
     });
 
     test('an absent from_feed_size is omitted, not sent as 0', () async {

@@ -213,16 +213,16 @@ import 'package:hs_app_flutter/features/kids/presentation/bloc/manage_kid_bloc.d
     as _i512;
 import 'package:hs_app_flutter/features/landing_page/presentation/bloc/landing_page_bloc.dart'
     as _i206;
-import 'package:hs_app_flutter/features/orders/data/datasources/remote/orders_api.dart'
-    as _i940;
-import 'package:hs_app_flutter/features/orders/data/repositories/orders_repository_impl.dart'
-    as _i92;
-import 'package:hs_app_flutter/features/orders/domain/repositories/orders_repository.dart'
-    as _i460;
-import 'package:hs_app_flutter/features/orders/domain/usecases/get_orders_page_usecase.dart'
-    as _i834;
-import 'package:hs_app_flutter/features/orders/presentation/bloc/orders_bloc.dart'
-    as _i500;
+import 'package:hs_app_flutter/features/orders/data/datasources/remote/orders_listing_api.dart'
+    as _i1005;
+import 'package:hs_app_flutter/features/orders/data/repositories/orders_listing_repository_impl.dart'
+    as _i826;
+import 'package:hs_app_flutter/features/orders/domain/repositories/orders_listing_repository.dart'
+    as _i627;
+import 'package:hs_app_flutter/features/orders/domain/usecases/listing/get_orders_listing_usecase.dart'
+    as _i871;
+import 'package:hs_app_flutter/features/orders/presentation/listing/bloc/orders_listing_bloc.dart'
+    as _i631;
 import 'package:hs_app_flutter/features/pdp/data/datasources/remote/pdp_remote_datasource.dart'
     as _i976;
 import 'package:hs_app_flutter/features/pdp/data/repositories/pdp_repository_impl.dart'
@@ -460,7 +460,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i359.KidsRemoteDatasource>(
       () => _i359.KidsRemoteDatasource(gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i940.OrdersApi>(() => _i940.OrdersApi(gh<_i361.Dio>()));
+    gh.lazySingleton<_i1005.OrdersListingApi>(
+      () => _i1005.OrdersListingApi(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i976.PdpRemoteDatasource>(
       () => _i976.PdpRemoteDatasource(gh<_i361.Dio>()),
     );
@@ -492,12 +494,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i351.NetworkInfo>(),
       ),
     );
-    gh.lazySingleton<_i460.OrdersRepository>(
-      () => _i92.OrdersRepositoryImpl(
-        gh<_i940.OrdersApi>(),
-        gh<_i351.NetworkInfo>(),
-      ),
-    );
     gh.lazySingleton<_i454.CartRemoteDataSource>(
       () => _i454.CartRemoteDataSourceImpl(apiClient: gh<_i930.ApiClient>()),
     );
@@ -516,6 +512,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i730.CategoriesRemoteDataSource>(
       () => _i730.CategoriesRemoteDataSourceImpl(
         apiClient: gh<_i930.ApiClient>(),
+      ),
+    );
+    gh.lazySingleton<_i627.OrdersListingRepository>(
+      () => _i826.OrdersListingRepositoryImpl(
+        gh<_i1005.OrdersListingApi>(),
+        gh<_i351.NetworkInfo>(),
       ),
     );
     gh.lazySingleton<_i901.CartRepository>(
@@ -605,6 +607,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i297.CheckDeliveryPincodeUseCase>(
       () => _i297.CheckDeliveryPincodeUseCase(gh<_i799.PincodeRepository>()),
     );
+    gh.lazySingleton<_i871.GetOrdersListingUseCase>(
+      () => _i871.GetOrdersListingUseCase(gh<_i627.OrdersListingRepository>()),
+    );
     gh.lazySingleton<_i970.KidsRepository>(
       () => _i634.KidsRepositoryImpl(
         gh<_i359.KidsRemoteDatasource>(),
@@ -671,9 +676,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i692.RemoveFromWishlistUseCase>(
       () => _i692.RemoveFromWishlistUseCase(gh<_i945.WishlistRepository>()),
-    );
-    gh.lazySingleton<_i834.GetOrdersPageUseCase>(
-      () => _i834.GetOrdersPageUseCase(gh<_i460.OrdersRepository>()),
     );
     gh.lazySingleton<_i283.SearchRepository>(
       () => _i525.SearchRepositoryImpl(
@@ -820,9 +822,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i692.RemoveFromWishlistUseCase>(),
       ),
     );
-    gh.factory<_i500.OrdersBloc>(
-      () => _i500.OrdersBloc(gh<_i834.GetOrdersPageUseCase>()),
-    );
     gh.factory<_i724.SearchBloc>(
       () => _i724.SearchBloc(gh<_i938.GetSearchSuggestionsUseCase>()),
     );
@@ -903,6 +902,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i521.CartActionsCubit(
         gh<_i163.AddToCartUseCase>(),
         gh<_i884.CartCountCubit>(),
+      ),
+    );
+    gh.factory<_i631.OrdersListingBloc>(
+      () => _i631.OrdersListingBloc(
+        gh<_i871.GetOrdersListingUseCase>(),
+        gh<_i127.AnalyticsHelper>(),
       ),
     );
     gh.factoryParam<_i309.PdpBloc, _i211.PdpAnalyticsTracker, dynamic>(

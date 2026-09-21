@@ -357,20 +357,6 @@ class AnalyticsProperties {
   static const String redirectedFromColorWidget = 'redirected_from_colour_widget';
   static const String newProductIdSelected = 'new_product_id_selected';
 
-  // ─── Tabbed-page block (PDP: product_viewed + product_added_to_cart) ─
-  static const String tabbedPageContainerName = 'tabbed_page_container_name';
-  static const String tabbedPageContainerId = 'tabbed_page_container_id';
-  static const String tabPosition = 'tab_position';
-  static const String totalSlicesInContinueBrowsingWidget =
-      'total_slices_in_continue_browsing_widget';
-
-  // ─── Doorways ───────────────────────────────────────────────────────
-  static const String doorwaysId = 'doorway_id';
-  static const String doorwaysName = 'doorway_name';
-  static const String doorwaysSlicesCount = 'doorway_slice_count';
-  static const String doorwaysScrollCount = 'doorway_scroll_count';
-  static const String doorwaysSliceId = 'doorway_slice_id';
-  static const String dominantPt = 'dominant_pt';
 
   // ─── Product attribute tabs ─────────────────────────────────────────
   static const String productAttributeAvailable = 'product_attribute_available';

@@ -127,4 +127,11 @@ class ApiConstants {
   static const String markOrderFail = '/checkout/order-fail';
   static const String orderConfirmation =
       '/v2/checkout'; // append /{orderId}/confirmation
+
+  // Orders — the redesigned listing contracts. Replace Android's `orders/v5`
+  // and `v1/gift-cards`; both return the same envelope and record shape.
+  // The versions differ because each follows its own predecessor.
+  // See docs/orders/be/.
+  static const String ordersListing = '/orders-listing/v6';
+  static const String giftCardsListing = '/gift-cards-listing/v2';
 }

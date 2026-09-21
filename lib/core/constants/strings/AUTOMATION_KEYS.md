@@ -476,6 +476,39 @@ feedback for one apply rather than a list a test walks.
 | Cell | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_bottom_sheet.dart`, `size_chart_bottom_sheet.dart` |
 | Loading | `pdp_recommended_loading` | — | `pdp_recommended_products.dart` |
 
+## Orders
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Title | `orders_app_bar_title` | — | `orders_listing_page.dart` |
+| Button | `orders_appbar_back_button` | — | `orders_listing_page.dart` |
+| Element | `orders_tab_orders` | — | `orders_listing_page.dart` |
+| Element | `orders_tab_gift_cards` | — | `orders_listing_page.dart` |
+| Element | `orders` | — | `orders_listing_page.dart`, `orders_tab_view.dart` |
+| Element | `gift_cards` | — | `orders_listing_page.dart`, `orders_tab_view.dart` |
+| Loading | `<tab>_shimmer_loading` | `<tab>_shimmer_loading` | `orders_tab_view.dart` |
+| Indicator | `<tab>_refresh_indicator` | `<tab>_refresh_indicator` | `orders_tab_view.dart` |
+| Button | `<tab>_error_retry_button` | `<tab>_error_retry_button` | `orders_tab_view.dart` |
+| Snackbar | `<tab>_pagination_error_snackbar` | `<tab>_pagination_error_snackbar` | `orders_listing_page.dart` |
+| Indicator | `<tab>_load_more_indicator` | `<tab>_load_more_indicator` | `orders_tab_view.dart` |
+| Title | `<tab>_empty_state_title` | `<tab>_empty_state_title` | `orders_tab_view.dart` |
+| Button | `<tab>_empty_state_button` | `<tab>_empty_state_button` | `orders_tab_view.dart` |
+| List item | `<tab>_item_<i>` | `<tab>_item_0`, `<tab>_item_1` | `order_listing_card.dart` |
+| Image | `<tab>_item_<i>_image` | `<tab>_item_0_image`, `<tab>_item_1_image` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_title_text_field` | `<tab>_item_0_title_text_field`, `<tab>_item_1_title_text_field` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_price_text_field` | `<tab>_item_0_price_text_field`, `<tab>_item_1_price_text_field` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_qty_text_field` | `<tab>_item_0_qty_text_field`, `<tab>_item_1_qty_text_field` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_size_text_field` | `<tab>_item_0_size_text_field`, `<tab>_item_1_size_text_field` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_status_title_text_field` | `<tab>_item_0_status_title_text_field`, `<tab>_item_1_status_title_text_field` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_status_subtitle_text_field` | `<tab>_item_0_status_subtitle_text_field`, `<tab>_item_1_status_subtitle_text_field` | `order_listing_card.dart` |
+| Element | `orders_nudge` | — | `notification_nudge_card.dart` |
+| Text | `orders_nudge_title_text_field` | — | `notification_nudge_card.dart` |
+| Button | `orders_nudge_positive_button` | — | `notification_nudge_card.dart` |
+| Button | `orders_nudge_negative_button` | — | `notification_nudge_card.dart` |
+| Text | `orders_support_title_text_field` | — | `orders_support_footer.dart` |
+| Button | `orders_support_call_button` | — | `orders_support_footer.dart` |
+| Button | `orders_support_help_button` | — | `orders_support_footer.dart` |
+
 ## Kids
 
 | Type | Key | Examples | Widget file |

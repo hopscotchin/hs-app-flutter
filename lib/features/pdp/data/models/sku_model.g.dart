@@ -14,6 +14,7 @@ SkuModel _$SkuModelFromJson(Map<String, dynamic> json) => SkuModel(
   enable: json['enable'] as bool?,
   eddInfo: _eddInfoFromJson(json['eddInfo']),
   info: _warningFromJson(json['info']),
+  isSelected: _boolOrNull(json['isSelected']),
   skuAttributes: json['skuAttributes'] as Map<String, dynamic>?,
   trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
 );

@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../core/utils/json_parsers.dart';
 import '../../../../features/plp/data/models/product_price_model.dart';
 import '../../domain/entities/sku_entity.dart';
 import 'edd_info_model.dart';
@@ -17,6 +18,7 @@ class SkuModel {
     this.enable,
     this.eddInfo,
     this.info,
+    this.isSelected,
     this.skuAttributes,
     this.trackingMeta,
   });
@@ -35,6 +37,19 @@ class SkuModel {
   final EddInfoModel? eddInfo;
   @JsonKey(defaultValue: null, fromJson: _warningFromJson)
   final WarningModel? info;
+
+  /// Which size arrives pre-selected, when the backend has an opinion.
+  ///
+  /// Optional and nullable: PDP sends nothing here — the customer has chosen
+  /// no size yet — so absent means "no opinion", not "not selected". The
+  /// orders flows do have one: the exchange nudge already sends
+  /// `chipItems[].isSelected`, and the exchange size screen echoes whichever
+  /// size the nudge chose.
+  ///
+  /// Read through [parseToBool] because that nudge sends it as a JSON bool
+  /// today and the orders wire has a history of sending bools as strings.
+  @JsonKey(defaultValue: null, fromJson: _boolOrNull)
+  final bool? isSelected;
 
   /// Flat key→value attributes (e.g. {"skuMrp": "₹1,149"}).
   @JsonKey(defaultValue: null)
@@ -58,6 +73,10 @@ EddInfoModel? _eddInfoFromJson(Object? json) =>
 WarningModel? _warningFromJson(Object? json) =>
     json is Map<String, dynamic> ? WarningModel.fromJson(json) : null;
 
+/// Null when the key is absent, so "no opinion" stays distinguishable from
+/// "not selected".
+bool? _boolOrNull(Object? json) => json == null ? null : parseToBool(json);
+
 extension SkuModelX on SkuModel {
   SkuEntity toEntity() => SkuEntity(
     skuId: skuId,
@@ -67,6 +86,7 @@ extension SkuModelX on SkuModel {
     enable: enable,
     eddInfo: eddInfo?.toEntity(),
     info: info?.toEntity(),
+    isSelected: isSelected ?? false,
     skuAttributes: skuAttributes,
     trackingMeta: trackingMeta,
   );

@@ -56,6 +56,16 @@ class EnvConfig {
   /// scaled viewport would move every widget away from the coordinates Maestro
   /// taps.
   static bool get enableDevicePreview => dotenv.env['ENABLE_DEVICE_PREVIEW'] == 'true';
+
+  /// Serves the Orders and Gift Cards listings from bundled Dart fixtures
+  /// instead of calling `orders-listing/v6` and `gift-cards-listing/v2`.
+  ///
+  /// A stopgap until those endpoints ship. The switch is a single early return
+  /// in `OrdersListingRepositoryImpl`; everything below it — the failure
+  /// envelope guard, `toEntity()`, `safeApiCall` — runs identically either way,
+  /// so the mock exercises the real parsing path. False or absent hits the API.
+  static bool get useOrderListingMock => dotenv.env['USE_ORDER_LISTING_MOCK'] == 'true';
+
   // static String get proxyHost => dotenv.env['PROXY_HOST'] ?? '127.0.0.1';
   // static int get proxyPort => int.parse(dotenv.env['PROXY_PORT'] ?? '8000');
 
