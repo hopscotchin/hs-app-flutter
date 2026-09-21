@@ -6,22 +6,28 @@ import 'child_entity.dart';
 
 part 'kids_list_content_entity.freezed.dart';
 
-/// My Kids **list** screen's backend-driven copy + footer avatar images —
-/// sourced from the existing `GET v2/questionnaire/list` response (a sibling
-/// `content` object alongside `children`, not a separate endpoint — see
-/// PROFILE_KIDS_API_CONTRACT.md §3). Everything else on this screen (the
-/// baby-illustration empty-state icon, delete-confirm dialog copy) stays
-/// local-only.
+/// My Kids **list** screen's backend-driven copy — sourced directly from the
+/// `GET v2/questionnaire/list` response's `emptyState`/`addChildContainer`/
+/// `messageBar` fields (siblings of `children`, not a separate endpoint —
+/// see PROFILE_KIDS_API_CONTRACT.md §3). The backend now pre-resolves the
+/// "Add child" vs "Add another child" copy itself (it already knows from
+/// the same response whether `children` is empty), so there's a single
+/// [addChildTitle] rather than two client-chosen variants.
 ///
 /// [fallback] carries today's hardcoded copy — used transparently whenever
-/// the response omits `content` or a field within it, so the screen keeps
-/// working exactly as it does today until backend ships this.
+/// the response omits a field, so the screen degrades gracefully instead of
+/// failing the whole parse.
 @freezed
 abstract class KidsListContentEntity with _$KidsListContentEntity {
   const factory KidsListContentEntity({
     // Empty-state (no children yet) heading/subheading.
     required String emptyStateTitle,
     required String emptyStateSubtitle,
+    // Backend-sent illustration for the empty state. Currently captured for
+    // completeness only — the empty state still renders its local default
+    // illustration; wiring this through needs `EmptyStateWidget`'s `icon`
+    // override to actually be read by `_resolvedIcon`, which it isn't today.
+    String? emptyStateIcon,
     // Info banner shown above a populated list — the backend sends this as
     // a full message-bar object (title/message/bgColor/...), the same shape
     // used everywhere else in the app, not separate title/subtitle strings.
@@ -29,24 +35,21 @@ abstract class KidsListContentEntity with _$KidsListContentEntity {
     // to show in its place (unlike every other field here), so the screen
     // renders with no banner at all until backend actually sends one.
     required MessageBarEntity? messageBar,
-    // Persistent "Add child" / "Add another child" footer row.
-    required String addChildLabel,
-    required String addAnotherChildLabel,
+    // Persistent "Add child" footer row. Backend-resolved single title.
+    required String addChildTitle,
     required String addChildSubtitle,
-    // The footer row's two overlapping preview circles. Nullable entries —
-    // null means "no image yet, render the local generic-person placeholder"
-    // (a client-only rendering detail, not part of the contract).
-    required List<String?> footerAvatars,
+    // Single leading/trailing icons, replacing the old two-avatar preview
+    // stack and hardcoded "+" glyph. Null renders the local placeholder.
+    String? addChildLeadingIcon,
+    String? addChildTrailingIcon,
   }) = _KidsListContentEntity;
 
   factory KidsListContentEntity.fallback() => const KidsListContentEntity(
     emptyStateTitle: KidsStrings.emptyStateTitle,
     emptyStateSubtitle: KidsStrings.emptyStateSubtitle,
     messageBar: null,
-    addChildLabel: KidsStrings.addChild,
-    addAnotherChildLabel: KidsStrings.addAnotherChild,
+    addChildTitle: KidsStrings.addChild,
     addChildSubtitle: KidsStrings.addChildSubtitle,
-    footerAvatars: [null, null],
   );
 }
 

@@ -788,7 +788,8 @@ class KidsTestStrings {
   static const String listItemEditSuffix = 'edit'; // → `kids_list_item_<i>_edit`
   static const String listItemRemoveSuffix = 'remove'; // → `kids_list_item_<i>_remove`
   static const String listAddButton = 'kids_list_add_button';
-  static const String listFooterAvatarImage = 'kids_list_footer_avatar_image'; // + `_<i>`
+  static const String listFooterAvatarImage = 'kids_list_footer_avatar_image';
+  static const String listAddButtonIcon = 'kids_list_add_button_icon';
   static const String listEmptyTitle = 'kids_list_empty_title';
   static const String listEmptySubtitle = 'kids_list_empty_subtitle';
 

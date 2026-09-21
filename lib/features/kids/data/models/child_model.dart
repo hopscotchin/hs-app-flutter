@@ -32,13 +32,16 @@ class ChildModel {
   @JsonKey(fromJson: ChildGenderX.fromWire) final ChildGender gender;
 
   /// `"D MMM YYYY"` (e.g. `"10 Sep 2025"`) — server-formatted, ready to
-  /// display verbatim on the My Kids list row.
-  final String? dob;
+  /// display verbatim on the My Kids list row. `v2/questionnaire/list` sends
+  /// this as `dobReadable`; read via [_readDob] with a fallback to the older
+  /// `dob` key in case `v3/save-and-update` hasn't picked up the rename yet.
+  @JsonKey(readValue: _readDob) final String? dob;
 
   /// `"DD - MM - YYYY"` (spaced dashes) — server-formatted specifically for
   /// the Add/Edit screen's read-only dob field, a different shape from
-  /// [dob]'s display string.
-  final String? displayDob;
+  /// [dob]'s display string. `v2/questionnaire/list` sends this as
+  /// `dobForDate`; read via [_readDisplayDob] with the same old-key fallback.
+  @JsonKey(readValue: _readDisplayDob) final String? displayDob;
   final String? imageUrl;
   @JsonKey(defaultValue: false) final bool consent;
   final String? age;
@@ -50,6 +53,10 @@ class ChildModel {
 
   factory ChildModel.fromJson(Map<String, dynamic> json) => _$ChildModelFromJson(json);
 }
+
+Object? _readDob(Map json, String key) => json['dobReadable'] ?? json['dob'];
+
+Object? _readDisplayDob(Map json, String key) => json['dobForDate'] ?? json['displayDob'];
 
 extension ChildModelX on ChildModel {
   ChildEntity toEntity() => ChildEntity(

@@ -18,6 +18,8 @@ class MessageBarModel extends MessageBarEntity {
     super.hasIcon,
     super.icon,
     super.redirectLink,
+    super.messageUIType,
+    super.messageDisplayTime,
   });
 
   factory MessageBarModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,8 @@ class MessageBarModel extends MessageBarEntity {
       hasIcon: json['hasIcon'] as bool? ?? false,
       icon: json['icon'] as String?,
       redirectLink: json['redirectLink'] as String?,
+      messageUIType: json['messageUIType'] as String?,
+      messageDisplayTime: json['messageDisplayTime'] as String?,
     );
   }
 

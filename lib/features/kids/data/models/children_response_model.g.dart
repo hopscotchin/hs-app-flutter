@@ -16,7 +16,15 @@ ChildrenResponseModel _$ChildrenResponseModelFromJson(
           ?.map((e) => ChildModel.fromJson(e as Map<String, dynamic>))
           .toList() ??
       [],
-  content: json['content'] == null
+  emptyState: json['emptyState'] == null
       ? null
-      : KidsListContentModel.fromJson(json['content'] as Map<String, dynamic>),
+      : EmptyStateModel.fromJson(json['emptyState'] as Map<String, dynamic>),
+  addChildContainer: json['addChildContainer'] == null
+      ? null
+      : AddChildContainerModel.fromJson(
+          json['addChildContainer'] as Map<String, dynamic>,
+        ),
+  messageBar: json['messageBar'] == null
+      ? null
+      : MessageBarModel.fromJson(json['messageBar'] as Map<String, dynamic>),
 );

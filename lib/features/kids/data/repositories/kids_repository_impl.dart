@@ -13,7 +13,6 @@ import '../datasources/remote/kids_remote_datasource.dart';
 import '../models/child_model.dart';
 import '../models/child_mutation_response_model.dart';
 import '../models/children_response_model.dart';
-import '../models/kids_list_content_model.dart';
 
 @LazySingleton(as: KidsRepository)
 class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
@@ -31,7 +30,7 @@ class KidsRepositoryImpl with SafeApiCall implements KidsRepository {
       }
       return ChildrenListResult(
         children: response.children.map((m) => m.toEntity()).toList(),
-        content: response.content?.toEntity() ?? KidsListContentEntity.fallback(),
+        content: response.toContentEntity(),
       );
     });
   }

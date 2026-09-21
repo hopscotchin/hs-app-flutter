@@ -25,6 +25,15 @@ class MessageBarEntity extends Equatable {
   final String? icon;
   final String? redirectLink;
 
+  /// A distinct rendering-mode marker from [messageType] — governs the bar's
+  /// container style rather than its color/severity. E.g. `"custom"`.
+  final String? messageUIType;
+
+  /// When to surface the bar, e.g. `"IMMEDIATE"`. Not yet acted on by
+  /// [MessageBarsWidget] — captured for forward compatibility until a
+  /// non-immediate value shows up and needs handling.
+  final String? messageDisplayTime;
+
   const MessageBarEntity({
     this.text,
     this.bgColor,
@@ -42,6 +51,8 @@ class MessageBarEntity extends Equatable {
     this.hasIcon = false,
     this.icon,
     this.redirectLink,
+    this.messageUIType,
+    this.messageDisplayTime,
   });
 
   /// Returns the display text, preferring [text] over [message] over [alertMessage].
@@ -65,5 +76,7 @@ class MessageBarEntity extends Equatable {
     hasIcon,
     icon,
     redirectLink,
+    messageUIType,
+    messageDisplayTime,
   ];
 }

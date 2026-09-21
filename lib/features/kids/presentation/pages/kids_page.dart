@@ -168,11 +168,13 @@ class KidsPage extends StatelessWidget {
                   // (see PROFILE_KIDS_API_CONTRACT.md history); always enabled.
                   final content = state.effectiveContent;
                   return _AddChildFooter(
-                    label: state.children.isEmpty
-                        ? content.addChildLabel
-                        : content.addAnotherChildLabel,
+                    // Backend already knows from this same response whether
+                    // `children` is empty, so it pre-resolves "Add child" vs
+                    // "Add another child" itself — no client-side ternary.
+                    label: content.addChildTitle,
                     subtitle: content.addChildSubtitle,
-                    avatars: content.footerAvatars,
+                    leadingIcon: content.addChildLeadingIcon,
+                    trailingIcon: content.addChildTrailingIcon,
                     enabled: true,
                     onTap: () => _onAddKid(context),
                   );
@@ -226,7 +228,8 @@ class _AddChildFooter extends StatelessWidget {
   const _AddChildFooter({
     required this.label,
     required this.subtitle,
-    required this.avatars,
+    required this.leadingIcon,
+    required this.trailingIcon,
     required this.enabled,
     required this.onTap,
   });
@@ -234,9 +237,11 @@ class _AddChildFooter extends StatelessWidget {
   final String label;
   final String subtitle;
 
-  /// The two overlapping preview circles' image URLs (backend-driven);
-  /// a null entry renders the local generic-person placeholder instead.
-  final List<String?> avatars;
+  /// Backend-driven single leading/trailing icon URLs, replacing the old
+  /// two-avatar preview stack and hardcoded "+" glyph. A null or non-URL
+  /// value renders the local placeholder instead.
+  final String? leadingIcon;
+  final String? trailingIcon;
   final bool enabled;
   final VoidCallback onTap;
 
@@ -257,22 +262,14 @@ class _AddChildFooter extends StatelessWidget {
             ),
             child: Row(
               children: [
-                SizedBox(
-                  width: 44,
-                  height: 32,
-                  child: Stack(
-                    children: [
-                      _previewAvatar(
-                        left: 0,
-                        index: 1,
-                        imageUrl: avatars.elementAtOrNull(0),
-                      ),
-                      _previewAvatar(
-                        left: 16,
-                        index: 0,
-                        imageUrl: avatars.elementAtOrNull(1),
-                      ),
-                    ],
+                _iconCircle(
+                  key: const ValueKey(KidsTestStrings.listFooterAvatarImage),
+                  imageUrl: leadingIcon,
+                  size: 32,
+                  placeholder: const Icon(
+                    Icons.person,
+                    size: 16,
+                    color: AppColors.neutralGrey5,
                   ),
                 ),
                 AppSpacing.horizontalGapSm,
@@ -287,19 +284,21 @@ class _AddChildFooter extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: AppTypographyV1.labelLarge.medium.neutralGrey6(),
+                        style: AppTypographyV1.labelLarge.medium.neutralGrey5(),
                       ),
                     ],
                   ),
                 ),
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
+                _iconCircle(
+                  key: const ValueKey(KidsTestStrings.listAddButtonIcon),
+                  imageUrl: trailingIcon,
+                  size: 32,
+                  backgroundColor: AppColors.primary,
+                  placeholder: const Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size: 20,
                   ),
-                  child: const Icon(Icons.add, color: Colors.white, size: 20),
                 ),
               ],
             ),
@@ -309,43 +308,33 @@ class _AddChildFooter extends StatelessWidget {
     );
   }
 
-  Widget _previewAvatar({
-    required double left,
-    required int index,
-    String? imageUrl,
+  Widget _iconCircle({
+    required Key key,
+    required String? imageUrl,
+    required double size,
+    required Widget placeholder,
+    Color backgroundColor = AppColors.neutralGrey3,
   }) {
     final uri = imageUrl != null ? Uri.tryParse(imageUrl) : null;
     final hasImage =
         uri != null && (uri.isScheme('HTTP') || uri.isScheme('HTTPS'));
-    const placeholder = Icon(
-      Icons.person,
-      size: 16,
-      color: AppColors.neutralGrey5,
-    );
-    return Positioned(
-      left: left,
-      child: Container(
-        key: ValueKey('${KidsTestStrings.listFooterAvatarImage}_$index'),
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          color: AppColors.neutralGrey3,
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.baseDefault, width: 1.5),
-        ),
-        child: hasImage
-            ? ClipOval(
-                child: CustomImage(
-                  path: imageUrl!,
-                  width: 28,
-                  height: 28,
-                  fit: BoxFit.cover,
-                  placeholder: placeholder,
-                  errorWidget: placeholder,
-                ),
-              )
-            : placeholder,
-      ),
+    return Container(
+      key: key,
+      width: size,
+      height: size,
+      decoration: BoxDecoration(color: backgroundColor, shape: BoxShape.circle),
+      child: hasImage
+          ? ClipOval(
+              child: CustomImage(
+                path: imageUrl!,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                placeholder: placeholder,
+                errorWidget: placeholder,
+              ),
+            )
+          : placeholder,
     );
   }
 }
