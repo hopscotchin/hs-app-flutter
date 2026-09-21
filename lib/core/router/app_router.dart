@@ -53,7 +53,7 @@ class AppRouter {
       PdpFullscreenGalleryRoute.getRoute(_rootNavigatorKey),
       WebViewRoute.getRoute(_rootNavigatorKey),
       LandingPageRoute.getRoute(_rootNavigatorKey),
-      // ...OrdersRoute.getRoutes(_rootNavigatorKey),
+      ...OrdersRoute.getRoutes(_rootNavigatorKey),
       WishlistRoute.getRoute(_rootNavigatorKey),
       AddressRoute.getRoute(_rootNavigatorKey),
       KidsRoute.getRoute(_rootNavigatorKey),
