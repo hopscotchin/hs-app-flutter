@@ -75,10 +75,10 @@ class CombinedHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Key? searchBackButtonKey;
   final Key? searchClearButtonKey;
 
-  static const double _searchBarHeight = 56;
+  static const double searchBarHeight = 56;
 
   double get _tabsSlotHeight => showFilters ? tabsHeight : 0;
-  double get _searchSlotHeight => showSearchBar ? _searchBarHeight : 0;
+  double get _searchSlotHeight => showSearchBar ? searchBarHeight : 0;
 
   @override
   double get minExtent => _searchSlotHeight + _tabsSlotHeight;
@@ -87,7 +87,11 @@ class CombinedHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => toolbarHeight + _searchSlotHeight + _tabsSlotHeight;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     final t = (shrinkOffset / toolbarHeight).clamp(0.0, 1.0);
 
     return ClipRect(
@@ -102,7 +106,9 @@ class CombinedHeaderDelegate extends SliverPersistentHeaderDelegate {
               child: CachedImageWidget(imageUrl: bgImageUrl!),
             )
           else
-            const Positioned.fill(child: ColoredBox(color: AppColors.baseDefault)),
+            const Positioned.fill(
+              child: ColoredBox(color: AppColors.baseDefault),
+            ),
           // Skip the app-bar layer once it's fully collapsed — at t == 1.0 the
           // Opacity would otherwise allocate an offscreen buffer to render a
           // fully-transparent subtree every scroll frame.
@@ -125,7 +131,7 @@ class CombinedHeaderDelegate extends SliverPersistentHeaderDelegate {
               bottom: _tabsSlotHeight,
               left: 0,
               right: 0,
-              height: _searchBarHeight,
+              height: searchBarHeight,
               child: searchActive
                   ? _HeaderSearchInput(
                       controller: searchController!,
@@ -206,16 +212,24 @@ class _HeaderSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hint = (placeholder ?? '').isNotEmpty ? placeholder! : SearchStrings.searchHintText;
+    final hint = (placeholder ?? '').isNotEmpty
+        ? placeholder!
+        : SearchStrings.searchHintText;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lgMd, vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lgMd,
+        vertical: AppSpacing.xs,
+      ),
       child: InkWell(
         key: const ValueKey(CategoriesTestStrings.searchBar),
         borderRadius: AppSpacing.borderRadiusXs,
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xsm),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xsm,
+          ),
           decoration: BoxDecoration(
             color: AppColors.baseDefault,
             border: Border.all(color: AppColors.neutralGrey0),
@@ -223,7 +237,11 @@ class _HeaderSearchBar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              SvgPicture.asset(ImageConstants.searchIcon, width: 20, height: 20),
+              SvgPicture.asset(
+                ImageConstants.searchIcon,
+                width: 20,
+                height: 20,
+              ),
               AppSpacing.horizontalGapXs,
               Expanded(
                 child: Text(
@@ -272,7 +290,10 @@ class _HeaderSearchInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs, horizontal: AppSpacing.lgMd),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.xs,
+        horizontal: AppSpacing.lgMd,
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
         decoration: BoxDecoration(
@@ -306,7 +327,9 @@ class _HeaderSearchInput extends StatelessWidget {
   }
 
   Widget _textField({required bool hideHint}) {
-    final hintText = (hint ?? '').isNotEmpty ? hint! : 'Search for products, brands and more';
+    final hintText = (hint ?? '').isNotEmpty
+        ? hint!
+        : 'Search for products, brands and more';
     return TextField(
       key: inputKey,
       controller: controller,
@@ -367,16 +390,26 @@ class _TabsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeFg = isImageDark ? AppColors.brandDefault : AppColors.textPrimary;
-    final inactiveFg = isImageDark ? AppColors.secondaryExtra : AppColors.neutralGrey5;
-    final activeBg = isImageDark ? AppColors.baseDefault : AppColors.secondaryExtra;
+    final activeFg = isImageDark
+        ? AppColors.brandDefault
+        : AppColors.textPrimary;
+    final inactiveFg = isImageDark
+        ? AppColors.secondaryExtra
+        : AppColors.neutralGrey5;
+    final activeBg = isImageDark
+        ? AppColors.baseDefault
+        : AppColors.secondaryExtra;
 
     final clamped = selectedIndex.clamp(0, labels.length - 1);
 
     // Hoist per-build invariants out of the generate loop so we allocate
     // each style/decoration once instead of per segment.
-    final activeStyle = AppTypographyV1.bodyLarge.bold.copyWith(color: activeFg);
-    final inactiveStyle = AppTypographyV1.bodyLarge.regular.copyWith(color: inactiveFg);
+    final activeStyle = AppTypographyV1.bodyLarge.bold.copyWith(
+      color: activeFg,
+    );
+    final inactiveStyle = AppTypographyV1.bodyLarge.regular.copyWith(
+      color: inactiveFg,
+    );
     final activePillDecoration = BoxDecoration(
       color: activeBg,
       borderRadius: const BorderRadius.all(Radius.circular(2)),
@@ -401,16 +434,25 @@ class _TabsRow extends StatelessWidget {
                 key: ValueKey(
                   '${HomeComponentTestStrings.homePage}_${HomeComponentTestStrings.tab}_$i',
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: isSelected ? activePillDecoration : null,
-                child: Text(labels[i], style: isSelected ? activeStyle : inactiveStyle),
+                child: Text(
+                  labels[i],
+                  style: isSelected ? activeStyle : inactiveStyle,
+                ),
               ),
             ),
           );
         }),
         selected: <int>{clamped},
         showSelectedIcon: false,
-        expandedInsets: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        expandedInsets: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 10,
+        ),
         onSelectionChanged: (Set<int> selection) {
           if (selection.isNotEmpty) onTabSelected(selection.first);
         },
@@ -438,8 +480,18 @@ class _AppBarContent extends StatelessWidget {
         ? const ColorFilter.mode(AppColors.baseDefault, BlendMode.srcIn)
         : null;
 
+    // Wishlist/cart icons are visually 20x20 but each gets AppSpacing.xs of
+    // invisible tap padding on every side (36x36 hit box) — the surrounding
+    // gap and right inset are shrunk by the same amount so the icons stay
+    // pixel-exactly where they were; only the dead space between/around them
+    // becomes tappable.
+    const iconTapPadding = AppSpacing.xs;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      padding: const EdgeInsets.only(
+        left: AppSpacing.sm,
+        right: AppSpacing.sm - iconTapPadding,
+      ),
       child: Row(
         children: [
           RepaintBoundary(
@@ -454,25 +506,31 @@ class _AppBarContent extends StatelessWidget {
             key: const ValueKey(
               '${HomeComponentTestStrings.homePage}_${HomeComponentTestStrings.wishlistButton}',
             ),
+            behavior: HitTestBehavior.opaque,
             onTap: () => AppNavigator.goToWishlistGated(
               context,
               fromScreen: FromScreens.discover,
             ),
-            child: RepaintBoundary(
-              child: SvgPicture.asset(
-                ImageConstants.heart,
-                height: 20,
-                width: 20,
-                colorFilter: svgFilter,
-                placeholderBuilder: (_) => const SizedBox(height: 20, width: 20),
+            child: Padding(
+              padding: const EdgeInsets.all(iconTapPadding),
+              child: RepaintBoundary(
+                child: SvgPicture.asset(
+                  ImageConstants.heart,
+                  height: 20,
+                  width: 20,
+                  colorFilter: svgFilter,
+                  placeholderBuilder: (_) =>
+                      const SizedBox(height: 20, width: 20),
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 18),
+          const SizedBox(width: 18 - 2 * iconTapPadding),
           GestureDetector(
             key: const ValueKey(
               '${HomeComponentTestStrings.homePage}_${HomeComponentTestStrings.cartButton}',
             ),
+            behavior: HitTestBehavior.opaque,
             onTap: () => AppNavigator.goToCart(
               context,
               sourcePage: const SourcePage(
@@ -480,14 +538,18 @@ class _AppBarContent extends StatelessWidget {
                 fromLocation: FromLocations.cartIconButton,
               ),
             ),
-            child: BadgeIcon(
-              count: context.watch<CartCountCubit>().state,
-              icon: SvgPicture.asset(
-                ImageConstants.bag,
-                height: 20,
-                width: 20,
-                colorFilter: svgFilter,
-                placeholderBuilder: (_) => const SizedBox(height: 20, width: 20),
+            child: Padding(
+              padding: const EdgeInsets.all(iconTapPadding),
+              child: BadgeIcon(
+                count: context.watch<CartCountCubit>().state,
+                icon: SvgPicture.asset(
+                  ImageConstants.bag,
+                  height: 20,
+                  width: 20,
+                  colorFilter: svgFilter,
+                  placeholderBuilder: (_) =>
+                      const SizedBox(height: 20, width: 20),
+                ),
               ),
             ),
           ),

@@ -24,6 +24,10 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  static const double _headerExtent =
+      CombinedHeaderDelegate.defaultToolbarHeight +
+      CombinedHeaderDelegate.searchBarHeight;
+
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
@@ -45,12 +49,13 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
-  void _onSuggestionTap(SearchSuggestionEntity suggestion, {int? index}) => commitSearch(
-    context,
-    searchBloc: context.read<SearchBloc>(),
-    suggestion: suggestion,
-    index: index,
-  );
+  void _onSuggestionTap(SearchSuggestionEntity suggestion, {int? index}) =>
+      commitSearch(
+        context,
+        searchBloc: context.read<SearchBloc>(),
+        suggestion: suggestion,
+        index: index,
+      );
 
   void _onSubmit(String value) {
     final query = value.trim();
@@ -92,13 +97,19 @@ class _SearchPageState extends State<SearchPage> {
                     searchActive: true,
                     searchController: _controller,
                     searchFocusNode: _focusNode,
-                    onSearchChanged: (value) => context.read<SearchBloc>().add(QueryChanged(value)),
+                    onSearchChanged: (value) =>
+                        context.read<SearchBloc>().add(QueryChanged(value)),
                     onSearchSubmitted: _onSubmit,
                     onSearchBack: () => Navigator.of(context).pop(),
-                    onSearchClear: () => context.read<SearchBloc>().add(const ClearQuery()),
+                    onSearchClear: () =>
+                        context.read<SearchBloc>().add(const ClearQuery()),
                     searchInputKey: const ValueKey(SearchTestStrings.input),
-                    searchBackButtonKey: const ValueKey(SearchTestStrings.backButton),
-                    searchClearButtonKey: const ValueKey(SearchTestStrings.inputClearButton),
+                    searchBackButtonKey: const ValueKey(
+                      SearchTestStrings.backButton,
+                    ),
+                    searchClearButtonKey: const ValueKey(
+                      SearchTestStrings.inputClearButton,
+                    ),
                   ),
                 ),
                 ..._buildBody(context, state),
@@ -118,7 +129,11 @@ class _SearchPageState extends State<SearchPage> {
         return const [
           SliverFillRemaining(
             child: Center(
-              child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
             ),
           ),
         ];
@@ -132,7 +147,9 @@ class _SearchPageState extends State<SearchPage> {
                   state.errorMessage ?? CommonStrings.somethingWentWrong,
                   key: const ValueKey(SearchTestStrings.errorText),
                   textAlign: TextAlign.center,
-                  style: AppTypographyV1.bodyRegular.regular.copyWith(color: AppColors.textSecondary),
+                  style: AppTypographyV1.bodyRegular.regular.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ),
@@ -143,12 +160,10 @@ class _SearchPageState extends State<SearchPage> {
           return _buildEmpty();
         }
         return [
-          SliverFillRemaining(
-            child: SearchSuggestionsList(
-              suggestions: state.suggestions,
-              onTap: _onSuggestionTap,
-              itemKey: (i) => ValueKey('${SearchTestStrings.suggestionItem}_$i'),
-            ),
+          SearchSuggestionsList(
+            suggestions: state.suggestions,
+            onTap: _onSuggestionTap,
+            itemKey: (i) => ValueKey('${SearchTestStrings.suggestionItem}_$i'),
           ),
         ];
     }
@@ -168,10 +183,17 @@ class _SearchPageState extends State<SearchPage> {
   List<Widget> _buildEmpty() {
     return [
       const SliverFillRemaining(
-        child: EmptyStateWidget(
-          type: EmptyStateType.search,
-          titleKey: ValueKey(SearchTestStrings.emptyText),
-          buttonLabel: '', // no CTA here — the keyboard/search bar is already open
+        // SliverFillRemaining only spans the area below the pinned header, so
+        // reserving the header's height at the bottom re-centres the content
+        // against the full screen instead of that leftover area.
+        child: Padding(
+          padding: EdgeInsets.only(bottom: _headerExtent),
+          child: EmptyStateWidget(
+            type: EmptyStateType.search,
+            titleKey: ValueKey(SearchTestStrings.emptyText),
+            buttonLabel:
+                '', // no CTA here — the keyboard/search bar is already open
+          ),
         ),
       ),
     ];

@@ -13,6 +13,15 @@ import '../../domain/entities/search_suggestion_entity.dart';
 /// Autosuggest results list — reused by the Search page and Categories'
 /// inline search. `<b>` tags in `displayName` (server-highlighted match)
 /// render bold; everything else in the default regular weight.
+///
+/// A sliver, not a `ListView` — it goes straight into the host's
+/// `CustomScrollView.slivers` (no `SliverFillRemaining` wrapper). Wrapping a
+/// `ListView` (its own separate `Scrollable`) inside a sliver instead meant a
+/// drag over the list scrolled that inner `ListView` only — the outer
+/// `CustomScrollView`, and therefore the pinned header's collapse, never saw
+/// it. As a native sliver there is only one `Scrollable` for the whole page,
+/// so scrolling the suggestions collapses the header exactly like scrolling
+/// the category list already did.
 class SearchSuggestionsList extends StatelessWidget {
   const SearchSuggestionsList({
     super.key,
@@ -32,47 +41,49 @@ class SearchSuggestionsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
+    return SliverPadding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxxs),
-      itemCount: suggestions.length,
-      separatorBuilder: (_, _) => const Padding(
-        padding: EdgeInsets.symmetric(horizontal: AppSpacing.lgMd),
-        child: Divider(height: 1, thickness: 0.8, color: AppColors.border),
-      ),
-      itemBuilder: (context, index) {
-        final s = suggestions[index];
-        final raw = s.displayName?.isNotEmpty == true
-            ? s.displayName!
-            : (s.term ?? '');
+      sliver: SliverList.separated(
+        itemCount: suggestions.length,
+        separatorBuilder: (_, _) => const Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.lgMd),
+          child: Divider(height: 1, thickness: 0.8, color: AppColors.border),
+        ),
+        itemBuilder: (context, index) {
+          final s = suggestions[index];
+          final raw = s.displayName?.isNotEmpty == true
+              ? s.displayName!
+              : (s.term ?? '');
 
-        if (raw.isEmpty) return const SizedBox.shrink();
+          if (raw.isEmpty) return const SizedBox.shrink();
 
-        return ListTile(
-          key: itemKey(index),
-          visualDensity: VisualDensity.compact,
-          minVerticalPadding: 0,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: 0,
-          ),
-          trailing: const CustomImage(
-            path: ImageConstants.arrowRight,
-            width: AppSpacing.iconMd,
-            height: AppSpacing.iconMd,
-            color: AppColors.neutralGrey5,
-          ),
-          title: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-            child: Text.rich(
-              TextSpan(
-                style: AppTypographyV1.bodyRegular.regular.textPrimary(),
-                children: _highlightedSpans(raw),
+          return ListTile(
+            key: itemKey(index),
+            visualDensity: VisualDensity.compact,
+            minVerticalPadding: 0,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: 0,
+            ),
+            trailing: const CustomImage(
+              path: ImageConstants.arrowRight,
+              width: AppSpacing.iconMd,
+              height: AppSpacing.iconMd,
+              color: AppColors.neutralGrey5,
+            ),
+            title: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+              child: Text.rich(
+                TextSpan(
+                  style: AppTypographyV1.bodyRegular.regular.textPrimary(),
+                  children: _highlightedSpans(raw),
+                ),
               ),
             ),
-          ),
-          onTap: () => onTap(s),
-        );
-      },
+            onTap: () => onTap(s),
+          );
+        },
+      ),
     );
   }
 

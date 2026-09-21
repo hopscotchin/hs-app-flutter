@@ -35,6 +35,10 @@ class CategoriesPage extends StatefulWidget {
 }
 
 class _CategoriesPageState extends State<CategoriesPage> {
+  static const double _headerExtent =
+      CombinedHeaderDelegate.defaultToolbarHeight +
+      CombinedHeaderDelegate.searchBarHeight;
+
   // Index (into the sorted page-components list) of the one top-level
   // accordion section currently expanded, so opening a new section
   // collapses whichever one was open before. Null → all collapsed.
@@ -211,13 +215,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
           return _buildSearchEmpty();
         }
         return [
-          SliverFillRemaining(
-            child: SearchSuggestionsList(
-              suggestions: state.suggestions,
-              onTap: _onSuggestionTap,
-              itemKey: (i) =>
-                  ValueKey('${CategoriesTestStrings.searchSuggestionItem}_$i'),
-            ),
+          SearchSuggestionsList(
+            suggestions: state.suggestions,
+            onTap: _onSuggestionTap,
+            itemKey: (i) =>
+                ValueKey('${CategoriesTestStrings.searchSuggestionItem}_$i'),
           ),
         ];
     }
@@ -237,11 +239,17 @@ class _CategoriesPageState extends State<CategoriesPage> {
   List<Widget> _buildSearchEmpty() {
     return [
       const SliverFillRemaining(
-        child: EmptyStateWidget(
-          type: EmptyStateType.search,
-          titleKey: ValueKey(CategoriesTestStrings.searchEmptyText),
-          buttonLabel:
-              '', // no CTA here — the keyboard/search bar is already open
+        // SliverFillRemaining only spans the area below the pinned header, so
+        // reserving the header's height at the bottom re-centres the content
+        // against the full screen instead of that leftover area.
+        child: Padding(
+          padding: EdgeInsets.only(bottom: _headerExtent),
+          child: EmptyStateWidget(
+            type: EmptyStateType.search,
+            titleKey: ValueKey(CategoriesTestStrings.searchEmptyText),
+            buttonLabel:
+                '', // no CTA here — the keyboard/search bar is already open
+          ),
         ),
       ),
     ];
@@ -303,10 +311,20 @@ class _CategoriesPageState extends State<CategoriesPage> {
     if (state is CategoriesError) {
       return [
         SliverFillRemaining(
-          child: ErrorRetryWidget(
-            key: const ValueKey(CategoriesTestStrings.errorRetryButton),
-            message: state.message,
-            onRetry: () => context.read<CategoriesBloc>().add(LoadCategories()),
+          // `Center` fills the whole remaining sliver extent, which — thanks
+          // to the shell Scaffold's `extendBody: true` — runs behind the
+          // (still visible here, only search hides it) bottom nav bar. Inset
+          // the bottom by its height so the midpoint used for centering
+          // matches the area actually visible above the opaque bar, instead
+          // of reading low against what the user can see.
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.bottomNavHeight),
+            child: ErrorRetryWidget(
+              key: const ValueKey(CategoriesTestStrings.errorRetryButton),
+              message: state.message,
+              onRetry: () =>
+                  context.read<CategoriesBloc>().add(LoadCategories()),
+            ),
           ),
         ),
       ];
@@ -319,7 +337,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
       if (components.isEmpty) {
         return const [
           SliverFillRemaining(
-            child: Center(child: Text(CategoriesStrings.noCategoriesAvailable)),
+            child: Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.bottomNavHeight),
+              child: Center(
+                child: Text(CategoriesStrings.noCategoriesAvailable),
+              ),
+            ),
           ),
         ];
       }
