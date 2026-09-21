@@ -8,6 +8,7 @@ abstract class SearchState with _$SearchState {
     @Default(SearchStatus.idle) SearchStatus status,
     @Default('') String query,
     @Default(<SearchSuggestionEntity>[]) List<SearchSuggestionEntity> suggestions,
+    @Default(<String>[]) List<String> recentSearches,
     String? errorMessage,
   }) = _SearchState;
 }

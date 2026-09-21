@@ -10,12 +10,17 @@ import '../../../../core/navigation/nav_destination.dart';
 import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../components/atoms/badge_icon.dart';
 import '../../../../components/atoms/cached_image_widget.dart';
-import '../../../../core/analytics/constants/analytics_defaults.dart';
+import '../../../../core/constants/strings/search_strings.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
 
 class CombinedHeaderDelegate extends SliverPersistentHeaderDelegate {
+  /// Toolbar slot height shared by every host (Home, Categories, Search) so
+  /// the logo/wishlist/bag row renders identically across all three.
+  static const double defaultToolbarHeight = 80.0;
+
   const CombinedHeaderDelegate({
     required this.labels,
     required this.selectedIndex,
@@ -25,6 +30,26 @@ class CombinedHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.tabsHeight,
     this.bgImageUrl,
     this.isImageDark = false,
+    // Categories/Search reuse this same header for the logo/icon row but
+    // don't want the gender filter strip — set false to collapse it
+    // entirely (not just render it empty, which would still reserve space).
+    this.showFilters = true,
+    this.showSearchBar = false,
+    this.searchPlaceholder,
+    this.onSearchTap,
+    // Inline "search mode" — swaps the static placeholder bar for a real,
+    // editable text field with a back arrow. Off by default so Home (which
+    // always navigates to a separate Search page on tap) is unaffected.
+    this.searchActive = false,
+    this.searchController,
+    this.searchFocusNode,
+    this.onSearchChanged,
+    this.onSearchSubmitted,
+    this.onSearchBack,
+    this.onSearchClear,
+    this.searchInputKey,
+    this.searchBackButtonKey,
+    this.searchClearButtonKey,
   });
 
   final List<String> labels;
@@ -35,12 +60,31 @@ class CombinedHeaderDelegate extends SliverPersistentHeaderDelegate {
   final double tabsHeight;
   final String? bgImageUrl;
   final bool isImageDark;
+  final bool showFilters;
+  final bool showSearchBar;
+  final String? searchPlaceholder;
+  final VoidCallback? onSearchTap;
+  final bool searchActive;
+  final TextEditingController? searchController;
+  final FocusNode? searchFocusNode;
+  final ValueChanged<String>? onSearchChanged;
+  final ValueChanged<String>? onSearchSubmitted;
+  final VoidCallback? onSearchBack;
+  final VoidCallback? onSearchClear;
+  final Key? searchInputKey;
+  final Key? searchBackButtonKey;
+  final Key? searchClearButtonKey;
+
+  static const double _searchBarHeight = 56;
+
+  double get _tabsSlotHeight => showFilters ? tabsHeight : 0;
+  double get _searchSlotHeight => showSearchBar ? _searchBarHeight : 0;
 
   @override
-  double get minExtent => tabsHeight;
+  double get minExtent => _searchSlotHeight + _tabsSlotHeight;
 
   @override
-  double get maxExtent => toolbarHeight + tabsHeight;
+  double get maxExtent => toolbarHeight + _searchSlotHeight + _tabsSlotHeight;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
@@ -76,35 +120,62 @@ class CombinedHeaderDelegate extends SliverPersistentHeaderDelegate {
                 ),
               ),
             ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: tabsHeight,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.neutralBlack.withValues(alpha: 0.03)),
-                ),
-              ),
-              // Reserve the strip height before sortingOptions arrive so the
-              // tabs slot doesn't pop into existence and shove content down.
-              // RepaintBoundary so the tab strip's paint layer isn't redrawn
-              // on every scroll frame (the persistent header rebuilds for the
-              // app-bar fade — the tabs themselves don't change with scroll).
-              child: labels.isEmpty
-                  ? const SizedBox.shrink()
-                  : RepaintBoundary(
-                      child: _TabsRow(
-                        labels: labels,
-                        selectedIndex: selectedIndex,
-                        onTabSelected: onTabSelected,
-                        onTabTapped: onTabTapped,
-                        isImageDark: isImageDark,
-                      ),
+          if (showSearchBar)
+            Positioned(
+              bottom: _tabsSlotHeight,
+              left: 0,
+              right: 0,
+              height: _searchBarHeight,
+              child: searchActive
+                  ? _HeaderSearchInput(
+                      controller: searchController!,
+                      focusNode: searchFocusNode,
+                      hint: searchPlaceholder,
+                      onBack: onSearchBack,
+                      onChanged: onSearchChanged,
+                      onSubmitted: onSearchSubmitted,
+                      onClear: onSearchClear,
+                      inputKey: searchInputKey,
+                      backButtonKey: searchBackButtonKey,
+                      clearButtonKey: searchClearButtonKey,
+                    )
+                  : _HeaderSearchBar(
+                      placeholder: searchPlaceholder,
+                      onTap: onSearchTap,
                     ),
             ),
-          ),
+          if (showFilters)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: tabsHeight,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: AppColors.neutralBlack.withValues(alpha: 0.03),
+                    ),
+                  ),
+                ),
+                // Reserve the strip height before sortingOptions arrive so the
+                // tabs slot doesn't pop into existence and shove content down.
+                // RepaintBoundary so the tab strip's paint layer isn't redrawn
+                // on every scroll frame (the persistent header rebuilds for the
+                // app-bar fade — the tabs themselves don't change with scroll).
+                child: labels.isEmpty
+                    ? const SizedBox.shrink()
+                    : RepaintBoundary(
+                        child: _TabsRow(
+                          labels: labels,
+                          selectedIndex: selectedIndex,
+                          onTabSelected: onTabSelected,
+                          onTabTapped: onTabTapped,
+                          isImageDark: isImageDark,
+                        ),
+                      ),
+              ),
+            ),
         ],
       ),
     );
@@ -115,11 +186,164 @@ class CombinedHeaderDelegate extends SliverPersistentHeaderDelegate {
     if (old.bgImageUrl != bgImageUrl) return true;
     if (old.isImageDark != isImageDark) return true;
     if (old.selectedIndex != selectedIndex) return true;
+    if (old.showFilters != showFilters) return true;
+    if (old.showSearchBar != showSearchBar) return true;
+    if (old.searchPlaceholder != searchPlaceholder) return true;
+    if (old.searchActive != searchActive) return true;
     if (old.labels.length != labels.length) return true;
     for (int i = 0; i < labels.length; i++) {
       if (old.labels[i] != labels[i]) return true;
     }
     return false;
+  }
+}
+
+class _HeaderSearchBar extends StatelessWidget {
+  const _HeaderSearchBar({this.placeholder, this.onTap});
+
+  final String? placeholder;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final hint = (placeholder ?? '').isNotEmpty ? placeholder! : SearchStrings.searchHintText;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+      child: InkWell(
+        key: const ValueKey(CategoriesTestStrings.searchBar),
+        borderRadius: AppSpacing.borderRadiusSm,
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xsm),
+          decoration: BoxDecoration(
+            color: AppColors.baseDefault,
+            border: Border.all(color: AppColors.dividerLight),
+            borderRadius: AppSpacing.borderRadiusSm,
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.search, color: AppColors.textTertiary),
+              AppSpacing.horizontalGapXs,
+              Expanded(
+                child: Text(
+                  hint,
+                  key: const ValueKey(CategoriesTestStrings.searchBarHint),
+                  style: AppTypographyV1.bodyRegular.regular.copyWith(color: AppColors.textTertiary),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderSearchInput extends StatelessWidget {
+  const _HeaderSearchInput({
+    required this.controller,
+    this.focusNode,
+    this.hint,
+    this.onBack,
+    this.onChanged,
+    this.onSubmitted,
+    this.onClear,
+    this.inputKey,
+    this.backButtonKey,
+    this.clearButtonKey,
+  });
+
+  final TextEditingController controller;
+  final FocusNode? focusNode;
+  final String? hint;
+  final VoidCallback? onBack;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+
+  /// Fires after the clear button empties [controller] — dispatch a
+  /// bloc `ClearQuery` (or equivalent) here.
+  final VoidCallback? onClear;
+  final Key? inputKey;
+  final Key? backButtonKey;
+  final Key? clearButtonKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.xs),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+        decoration: BoxDecoration(
+          color: AppColors.baseDefault,
+          border: Border.all(color: AppColors.dividerLight),
+          borderRadius: AppSpacing.borderRadiusSm,
+        ),
+        child: Row(
+          children: [
+            IconButton(
+              key: backButtonKey,
+              icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+              onPressed: onBack,
+            ),
+            Expanded(child: _field()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _field() {
+    final node = focusNode;
+    if (node == null) return _textField(hideHint: false);
+    return ListenableBuilder(
+      listenable: node,
+      builder: (context, _) => _textField(hideHint: node.hasFocus),
+    );
+  }
+
+  Widget _textField({required bool hideHint}) {
+    final hintText = (hint ?? '').isNotEmpty ? hint! : 'Search for products, brands and more';
+    return TextField(
+      key: inputKey,
+      controller: controller,
+      focusNode: focusNode,
+      autofocus: true,
+      textInputAction: TextInputAction.search,
+      style: AppTypographyV1.bodyRegular.regular,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      decoration: InputDecoration(
+        // Hidden while focused (even with no text yet) so the hint never
+        // overlaps the caret — the outer Container's grey border is the only
+        // visible border in every state; the theme's purple `focusedBorder`
+        // is explicitly overridden below so it never shows here.
+        hintText: hideHint ? null : hintText,
+        hintStyle: AppTypographyV1.bodyRegular.regular.copyWith(color: AppColors.textTertiary),
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
+        errorBorder: InputBorder.none,
+        focusedErrorBorder: InputBorder.none,
+        isDense: true,
+        suffixIcon: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: controller,
+          builder: (_, value, _) {
+            if (value.text.isEmpty) return const SizedBox.shrink();
+            return IconButton(
+              key: clearButtonKey,
+              icon: const Icon(Icons.close, size: 20, color: AppColors.primary),
+              onPressed: () {
+                controller.clear();
+                onClear?.call();
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -212,7 +436,7 @@ class _AppBarContent extends StatelessWidget {
         : null;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       child: Row(
         children: [
           RepaintBoundary(

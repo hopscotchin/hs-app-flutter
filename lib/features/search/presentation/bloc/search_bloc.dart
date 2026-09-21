@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/base/base_bloc.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/services/pref_manager.dart';
 import '../../domain/entities/search_suggestion_entity.dart';
 import '../../domain/usecases/get_search_suggestions_usecase.dart';
 
@@ -16,16 +17,21 @@ part 'search_state.dart';
 @injectable
 class SearchBloc extends BaseBloc<SearchEvent, SearchState> {
   final GetSearchSuggestionsUseCase _getSuggestions;
+  final PrefManager _prefs;
 
   static const int _minQueryLength = 3;
   static const Duration _debounce = Duration(milliseconds: 300);
 
   Timer? _debounceTimer;
 
-  SearchBloc(this._getSuggestions) : super(const SearchState()) {
+  SearchBloc(this._getSuggestions, this._prefs) : super(const SearchState()) {
     on<QueryChanged>(_onQueryChanged);
     on<_FetchSuggestions>(_onFetchSuggestions);
     on<ClearQuery>(_onClearQuery);
+    on<LoadRecentSearches>(_onLoadRecentSearches);
+    on<RecordRecentSearch>(_onRecordRecentSearch);
+    on<RemoveRecentSearch>(_onRemoveRecentSearch);
+    on<ClearRecentSearches>(_onClearRecentSearches);
   }
 
   /// User typed in the search box. We update the query immediately so the
@@ -84,7 +90,35 @@ class SearchBloc extends BaseBloc<SearchEvent, SearchState> {
 
   void _onClearQuery(ClearQuery event, Emitter<SearchState> emit) {
     _debounceTimer?.cancel();
-    emit(const SearchState());
+    emit(SearchState(recentSearches: state.recentSearches));
+  }
+
+  void _onLoadRecentSearches(LoadRecentSearches event, Emitter<SearchState> emit) {
+    emit(state.copyWith(recentSearches: _prefs.recentSearches));
+  }
+
+  Future<void> _onRecordRecentSearch(
+    RecordRecentSearch event,
+    Emitter<SearchState> emit,
+  ) async {
+    await _prefs.addRecentSearch(event.term);
+    emit(state.copyWith(recentSearches: _prefs.recentSearches));
+  }
+
+  Future<void> _onRemoveRecentSearch(
+    RemoveRecentSearch event,
+    Emitter<SearchState> emit,
+  ) async {
+    await _prefs.removeRecentSearch(event.term);
+    emit(state.copyWith(recentSearches: _prefs.recentSearches));
+  }
+
+  Future<void> _onClearRecentSearches(
+    ClearRecentSearches event,
+    Emitter<SearchState> emit,
+  ) async {
+    await _prefs.clearRecentSearches();
+    emit(state.copyWith(recentSearches: const []));
   }
 
   @override

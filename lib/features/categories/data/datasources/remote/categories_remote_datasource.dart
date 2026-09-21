@@ -1,10 +1,10 @@
 import '../../../../../core/network/api_client.dart';
 import '../../../../../core/constants/api_constants.dart';
-import '../../models/department_response_model.dart';
+import '../../models/categories_page_response_model.dart';
 import 'package:injectable/injectable.dart';
 
 abstract class CategoriesRemoteDataSource {
-  Future<DepartmentResponseModel> getDepartments();
+  Future<CategoriesPageResponseModel> getCategoriesPage();
 }
 
 @LazySingleton(as: CategoriesRemoteDataSource)
@@ -14,9 +14,9 @@ class CategoriesRemoteDataSourceImpl implements CategoriesRemoteDataSource {
   CategoriesRemoteDataSourceImpl({required this.apiClient});
 
   @override
-  Future<DepartmentResponseModel> getDepartments() async {
-    final response = await apiClient.get(ApiConstants.loadDepartments);
-    return DepartmentResponseModel.fromJson(
+  Future<CategoriesPageResponseModel> getCategoriesPage() async {
+    final response = await apiClient.get(ApiConstants.categoriesPage);
+    return CategoriesPageResponseModel.fromJson(
       response.data as Map<String, dynamic>,
     );
   }
