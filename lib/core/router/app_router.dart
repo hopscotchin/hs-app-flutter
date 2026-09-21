@@ -56,7 +56,7 @@ class AppRouter {
       ...OrdersRoute.getRoutes(_rootNavigatorKey),
       WishlistRoute.getRoute(_rootNavigatorKey),
       AddressRoute.getRoute(_rootNavigatorKey),
-      KidsRoute.getRoute(_rootNavigatorKey),
+      // KidsRoute.getRoute(_rootNavigatorKey),
       LegalRoute.getRoute(_rootNavigatorKey),
       PromoDetailsRoute.getRoute(_rootNavigatorKey),
       // ...CheckoutRoute.getRoutes(_rootNavigatorKey),
