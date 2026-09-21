@@ -162,18 +162,7 @@ class _SearchPageState extends State<SearchPage> {
       }
       return _buildRecentSearches(state.recentSearches);
     }
-    return [
-      SliverFillRemaining(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Text(
-            SearchStrings.keepTypingTheSuggestions,
-            key: const ValueKey(SearchTestStrings.keepTypingText),
-            style: AppTypographyV1.labelLarge.regular.copyWith(color: AppColors.textTertiary),
-          ),
-        ),
-      ),
-    ];
+    return const [SliverToBoxAdapter(child: SizedBox.shrink())];
   }
 
   List<Widget> _buildEmpty() {
@@ -201,7 +190,7 @@ class _SearchPageState extends State<SearchPage> {
               Text(
                 SearchStrings.recentSearchesTitle,
                 key: const ValueKey(SearchTestStrings.recentTitle),
-                style: AppTypographyV1.bodyLarge.bold,
+                style: AppTypographyV1.bodyMedium.medium.textPrimary(),
               ),
               const SizedBox(height: AppSpacing.sm),
               Wrap(

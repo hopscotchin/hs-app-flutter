@@ -209,10 +209,10 @@ class _HeaderSearchBar extends StatelessWidget {
     final hint = (placeholder ?? '').isNotEmpty ? placeholder! : SearchStrings.searchHintText;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lgMd, vertical: AppSpacing.xs),
       child: InkWell(
         key: const ValueKey(CategoriesTestStrings.searchBar),
-        borderRadius: AppSpacing.borderRadiusSm,
+        borderRadius: AppSpacing.borderRadiusXs,
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xsm),
@@ -223,13 +223,13 @@ class _HeaderSearchBar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.search, color: AppColors.textTertiary),
+              SvgPicture.asset(ImageConstants.searchIcon, width: 20, height: 20),
               AppSpacing.horizontalGapXs,
               Expanded(
                 child: Text(
                   hint,
                   key: const ValueKey(CategoriesTestStrings.searchBarHint),
-                  style: AppTypographyV1.bodyRegular.regular.copyWith(color: AppColors.textTertiary),
+                  style: AppTypographyV1.bodyRegular.regular.disabled(),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -272,7 +272,7 @@ class _HeaderSearchInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs, horizontal: AppSpacing.lgMd),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
         decoration: BoxDecoration(
@@ -286,6 +286,8 @@ class _HeaderSearchInput extends StatelessWidget {
               key: backButtonKey,
               icon: const Icon(Icons.arrow_back, color: AppColors.primary),
               onPressed: onBack,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             ),
             Expanded(child: _field()),
           ],
@@ -311,7 +313,7 @@ class _HeaderSearchInput extends StatelessWidget {
       focusNode: focusNode,
       autofocus: true,
       textInputAction: TextInputAction.search,
-      style: AppTypographyV1.bodyRegular.regular,
+      style: AppTypographyV1.bodyRegular.regular.textPrimary(),
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
@@ -320,7 +322,7 @@ class _HeaderSearchInput extends StatelessWidget {
         // visible border in every state; the theme's purple `focusedBorder`
         // is explicitly overridden below so it never shows here.
         hintText: hideHint ? null : hintText,
-        hintStyle: AppTypographyV1.bodyRegular.regular.copyWith(color: AppColors.textTertiary),
+        hintStyle: AppTypographyV1.bodyRegular.regular.disabled(),
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
@@ -328,6 +330,7 @@ class _HeaderSearchInput extends StatelessWidget {
         errorBorder: InputBorder.none,
         focusedErrorBorder: InputBorder.none,
         isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.xsm),
         suffixIcon: ValueListenableBuilder<TextEditingValue>(
           valueListenable: controller,
           builder: (_, value, _) {

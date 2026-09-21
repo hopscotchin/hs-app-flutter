@@ -7,8 +7,6 @@ class SearchStrings {
   /// Categories — Categories otherwise prefers the live
   /// `searchPlaceHolder` from its own page response.
   static const String defaultSearchPlaceholder = 'SEARCH "BDAY DRESSES"';
-  static const String keepTypingTheSuggestions =
-      'Keep typing to see suggestions…';
   static const String recentSearchesTitle = 'Recent Searches';
   static const String clearAll = 'Clear All';
 }

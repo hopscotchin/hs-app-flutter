@@ -7,15 +7,11 @@ import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
-import '../../../../core/constants/strings/search_strings.dart';
 import '../../../../core/navigation/nav_destination.dart';
 import '../../../../core/analytics/constants/funnel.dart';
-import '../../../../core/analytics/events/analytics_helper.dart';
 import '../../../../core/analytics/events/modules/home_events.dart';
-import '../../../../core/analytics/events/modules/plp_events.dart';
 import '../../../../core/analytics/home/home_track_analytic_manager.dart';
 import '../../../../core/di/injection.dart';
-import '../../../../core/router/app_navigator.dart';
 import '../../../../core/router/navigation_observer.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/home_page_entity.dart';
@@ -218,18 +214,6 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
                         isImageDark: state.homePage?.isDarkHeader ?? false,
                         toolbarHeight: _kToolbarHeight,
                         tabsHeight: _kTabsHeight,
-                        showSearchBar: true,
-                        // Same hint text as Categories' search bar.
-                        searchPlaceholder: SearchStrings.defaultSearchPlaceholder,
-                        onSearchTap: () {
-                          sl<AnalyticsHelper>().logSearchClicked(
-                            source: const SourcePage(
-                              fromScreen: FromScreens.discover,
-                              fromLocation: FromLocations.searchBox,
-                            ),
-                          );
-                          AppNavigator.goToSearch(context);
-                        },
                       ),
                     ),
                     _buildContentSliver(context, state),

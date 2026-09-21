@@ -25,7 +25,7 @@ class RecentSearchChip extends StatelessWidget {
           border: Border.all(color: AppColors.dividerLight),
           borderRadius: AppSpacing.borderRadiusXxs,
         ),
-        child: Text(label, style: AppTypographyV1.bodyRegular.medium),
+        child: Text(label, style: AppTypographyV1.bodyRegular.bold.textPrimary()),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/analytics/home/home_component_click_handlers.dart';
 import '../../core/analytics/home/home_track_analytic_manager.dart';
+import '../../core/constants/image_constants.dart';
 import '../../core/constants/strings/auto_test_strings.dart';
 import '../../core/di/injection.dart';
 import '../../core/navigation/action_url_handler.dart';
@@ -10,6 +11,7 @@ import '../../core/theme/spacing.dart';
 import '../../core/theme/typography/text_style_extensions.dart';
 import '../../core/theme/typography/typography_v1.dart';
 import '../../features/discover/domain/entities/home_page_entity.dart';
+import '../atoms/custom_image.dart';
 
 /// Shared timing for the chevron flip and the expand/collapse panel size, so
 /// the icon and the panel it controls move in lockstep.
@@ -80,7 +82,6 @@ class CategoryAccordionWidget extends StatelessWidget {
           isExpanded: isExpanded,
           onToggleExpand: onToggleExpand,
         ),
-        AppSpacing.verticalGapXs,
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           child: Divider(
@@ -161,10 +162,11 @@ class _AccordionNodeState extends State<_AccordionNode> {
 
     final header = _row(
       title: tile.title ?? '',
-      // A single glyph flipped 180° reads as the same chevron opening and
-      // closing, rather than swapping to a visually distinct "up" glyph.
+      // The asset points down natively (0 turns); collapsed rotates it -90°
+      // (counter-clockwise) to point right instead, then back to 0 (down)
+      // once expanded.
       trailingIcon: Icons.keyboard_arrow_down,
-      rotationTurns: expanded ? 0.5 : 0,
+      rotationTurns: expanded ? 0 : -0.25,
       // Slightly darker while expanded, the usual light tertiary tone
       // otherwise — color carries the expanded/collapsed state, not just the
       // glyph. Halfway between tertiary and secondary so it stays subtle
@@ -267,9 +269,10 @@ class _AccordionNodeState extends State<_AccordionNode> {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
-          vertical: AppSpacing.sm,
+          vertical: AppSpacing.xsm,
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Text(title, style: AppTypographyV1.bodyRegular.regular),
@@ -279,7 +282,14 @@ class _AccordionNodeState extends State<_AccordionNode> {
                 turns: rotationTurns,
                 duration: _kAccordionAnimationDuration,
                 curve: _kAccordionAnimationCurve,
-                child: Icon(trailingIcon, color: iconColor),
+                child: trailingIcon == Icons.keyboard_arrow_down
+                    ? CustomImage(
+                        path: ImageConstants.arrowDown,
+                        width: AppSpacing.iconMd,
+                        height: AppSpacing.iconMd,
+                        color: iconColor,
+                      )
+                    : Icon(trailingIcon, color: iconColor),
               ),
           ],
         ),

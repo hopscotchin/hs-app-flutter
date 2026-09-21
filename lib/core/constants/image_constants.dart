@@ -17,6 +17,7 @@ class ImageConstants {
   static const String deleteIcon = 'assets/icons/icon_delete.svg';
   static const String accountMobileIcon = 'assets/icons/account_mobile.svg';
   static const String locationIcon = 'assets/icons/location.svg';
+  static const String searchIcon = 'assets/icons/search_icon.svg';
 
   //Dashboard Icons
   static const String discover = 'assets/icons/dashboard/discover.svg';

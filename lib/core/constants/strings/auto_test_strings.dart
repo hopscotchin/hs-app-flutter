@@ -143,7 +143,6 @@ class SearchTestStrings {
   static const String backButton = 'search_back_button';
   static const String input = 'search_input';
   static const String inputClearButton = 'search_input_clear_button';
-  static const String keepTypingText = 'search_keep_typing_text';
   static const String errorText = 'search_error_text';
   static const String emptyText = 'search_empty_text';
   static const String suggestionItem = 'search_suggestion_item'; // → `search_suggestion_item_<i>`
