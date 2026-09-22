@@ -11,6 +11,8 @@ import '../../../../components/atoms/selection_checkbox.dart';
 import '../../../../components/atoms/selection_radio.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/image_constants.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
+import '../../../../core/constants/strings/checkout_strings.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/extensions/string_extensions.dart';
 import '../../../../core/theme/colors.dart';
@@ -178,12 +180,12 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
   bool get _useCompactCta => !_hasPaymentModes && !_fullCreditsApplied;
 
   String get _proceedLabel {
-    if (_fullCreditsApplied) return 'Place Order';
+    if (_fullCreditsApplied) return CheckoutStrings.placeOrder;
     // Ignore backend `ctaText` — Android sends it in all-caps
     // ("PROCEED TO PAY"). Design calls for mixed case; hardcode it here
     // and let the backend override only when it starts sending cased
     // strings that match the design system.
-    return 'Proceed To Pay';
+    return CheckoutStrings.proceedToPay;
   }
 
   // ─── Build ──────────────────────────────────────────────────────────────────
@@ -210,7 +212,10 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.xxs,
                   ),
-                  child: MessageBarsWidget(messageBars: data.messageBars),
+                  child: MessageBarsWidget(
+                    messageBars: data.messageBars,
+                    keyPrefix: CheckoutTestStrings.screen,
+                  ),
                 ),
               if (_hasCredits) _buildCreditsRow(),
               _buildAddressRow(showDivider: _hasPaymentModes),
@@ -342,7 +347,10 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
             AppSpacing.md,
             i == visible.length - 1 ? AppSpacing.md : AppSpacing.xs,
           ),
-          child: LoadingShimmer(height: heights[visible[i]]!),
+          child: LoadingShimmer(
+            key: ValueKey('${CheckoutTestStrings.refreshingShimmer}_$i'),
+            height: heights[visible[i]]!,
+          ),
         ),
     ];
   }
@@ -358,7 +366,8 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
-          'Checkout',
+          CheckoutStrings.checkout,
+          key: const ValueKey(CheckoutTestStrings.title),
           style: AppTypographyV1.titleMedium.bold.textPrimary(),
         ),
       ),
@@ -378,19 +387,22 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
     // taps; Flutter's gesture arena resolves the inner-wins-outer conflict
     // so we don't double-toggle.
     return GestureDetector(
+      key: const ValueKey(CheckoutTestStrings.creditsRow),
       onTap: () => setState(() => _creditsApplied = !_creditsApplied),
       behavior: HitTestBehavior.opaque,
       child: _RowSection(
-        label: 'Credits:',
+        label: CheckoutStrings.creditsLabel,
         child: Row(
           children: [
             Expanded(
               child: Text(
                 displayAmount,
+                key: const ValueKey(CheckoutTestStrings.creditsAmountText),
                 style: AppTypographyV1.bodyRegular.regular.textPrimary(),
               ),
             ),
             SelectionCheckbox(
+              key: const ValueKey(CheckoutTestStrings.creditsCheckbox),
               value: _creditsApplied,
               onChanged: (v) => setState(() => _creditsApplied = v),
               size: 18,
@@ -407,9 +419,10 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
     final address = data.address;
 
     return _RowSection(
-      label: 'Ship to:',
+      label: CheckoutStrings.shipToLabel,
       showDivider: showDivider,
       child: GestureDetector(
+        key: const ValueKey(CheckoutTestStrings.addressRow),
         onTap: () async {
           // Address change can move totals / EDD server-side — re-fetch
           // the buy-now payload after the user picks a new one. The
@@ -429,13 +442,15 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
               child: address != null
                   ? Text(
                       _buildAddressDisplay(address),
+                      key: const ValueKey(CheckoutTestStrings.addressText),
                       style: AppTypographyV1.bodyRegular.regular.textPrimary(),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     )
                   : Text(
-                      'Add Delivery Address',
-                      style: AppTypographyV1.bodyRegular.semiBold.brand(),
+                      CheckoutStrings.addDeliveryAddress,
+                      key: const ValueKey(CheckoutTestStrings.addressText),
+                      style: AppTypographyV1.bodyRegular.semiBold.textSecondary(),
                     ),
             ),
             AppSpacing.horizontalGapXs,
@@ -481,7 +496,7 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
         disabled ? AppColors.neutralGrey4 : AppColors.neutralBlack;
 
     return _RowSection(
-      label: 'Pay:',
+      label: CheckoutStrings.payLabel,
       showDivider: false,
       child: IntrinsicHeight(
         child: Row(
@@ -494,9 +509,11 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
             final subtitleColor =
                 (isSelected ? mode.activeColor : mode.inActiveColor)
                     .toColorOrNull;
+            final optionKey = '${CheckoutTestStrings.paymentOption}_$index';
 
             return Expanded(
               child: GestureDetector(
+                key: ValueKey(optionKey),
                 onTap: disabled
                     ? null
                     : () => setState(() => _selectedPaymentIndex = index),
@@ -524,6 +541,9 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           SelectionRadio(
+                            key: ValueKey(
+                              '${optionKey}_${CheckoutTestStrings.paymentOptionRadioSuffix}',
+                            ),
                             selected: isSelected,
                             isDisabled: disabled,
                           ),
@@ -531,6 +551,9 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
                           Expanded(
                             child: Text(
                               mode.label ?? mode.type ?? '',
+                              key: ValueKey(
+                                '${optionKey}_${CheckoutTestStrings.paymentOptionLabelSuffix}',
+                              ),
                               style: AppTypographyV1.bodyRegular.regular
                                   .copyWith(color: labelColor),
                             ),
@@ -541,6 +564,9 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
                         const SizedBox(height: 2),
                         Text(
                           subtitle,
+                          key: ValueKey(
+                            '${optionKey}_${CheckoutTestStrings.paymentOptionSubtitleSuffix}',
+                          ),
                           style: AppTypographyV1.labelLarge.regular.copyWith(
                             color: disabled
                                 ? AppColors.neutralGrey4
@@ -567,6 +593,7 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
   /// hint → supported-methods strip + double-chevron.
   Widget _buildPayPill() {
     return _PurpleCta(
+      key: const ValueKey(CheckoutTestStrings.placeOrderButton),
       loading: _isPlacingOrder,
       onTap: _canSubmit ? _dispatchPlaceOrder : null,
       horizontalPadding: AppSpacing.md,
@@ -574,7 +601,8 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Pay ₹$_effectivePayable',
+            '${CheckoutStrings.pay} ₹$_effectivePayable',
+            key: const ValueKey(CheckoutTestStrings.payAmountText),
             style: AppTypographyV1.bodyLarge.bold
                 .copyWith(color: AppColors.whiteColor),
           ),
@@ -582,6 +610,7 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
             mainAxisSize: MainAxisSize.min,
             children: [
               CustomImage(
+                key: ValueKey(CheckoutTestStrings.paymentModesImage),
                 path: ImageConstants.paymentModes,
                 height: 30,
                 fit: BoxFit.contain,
@@ -606,10 +635,12 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
   /// live payable — credits, adjustments, and mode surcharges applied.
   Widget _buildProceedButton() {
     return _PurpleCta(
+      key: const ValueKey(CheckoutTestStrings.placeOrderButton),
       loading: _isPlacingOrder,
       onTap: _canSubmit ? _dispatchPlaceOrder : null,
       child: Text(
         '$_proceedLabel  •  $_ctaAmountLabel',
+        key: const ValueKey(CheckoutTestStrings.proceedLabelText),
         style: AppTypographyV1.bodyLarge.bold
             .copyWith(color: AppColors.whiteColor),
       ),
@@ -709,6 +740,7 @@ class _PurpleCta extends StatelessWidget {
   final double horizontalPadding;
 
   const _PurpleCta({
+    super.key,
     required this.child,
     this.onTap,
     this.loading = false,

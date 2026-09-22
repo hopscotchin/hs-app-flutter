@@ -5,6 +5,7 @@ import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
 import '../../../../core/navigation/nav_destination.dart';
 import '../../../../core/analytics/constants/analytics_defaults.dart';
+import '../../../../core/constants/strings/checkout_strings.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../../domain/entities/order_confirmation_entry_args.dart';
@@ -87,7 +88,7 @@ class PaymentRetryPage extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppColors.container,
         appBar: AppBar(
-          title: const Text('Payment'),
+          title: const Text(CheckoutStrings.payment),
           backgroundColor: AppColors.container,
           foregroundColor: AppColors.textPrimary,
           elevation: 0,
@@ -178,7 +179,8 @@ class PaymentRetryPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        paymentRetryEntity.amountSummary!.label ?? 'Amount',
+                        paymentRetryEntity.amountSummary!.label ??
+                            CheckoutStrings.amount,
                         style: AppTypography.bodyMedium.copyWith(
                           fontWeight: AppTypography.semiBold,
                         ),
@@ -227,7 +229,7 @@ class PaymentRetryPage extends StatelessWidget {
                 elevation: 0,
               ),
               child: Text(
-                actions.primary!.label ?? 'Retry',
+                actions.primary!.label ?? CheckoutStrings.retry,
                 style: AppTypography.buttonMedium,
               ),
             ),
@@ -250,7 +252,7 @@ class PaymentRetryPage extends StatelessWidget {
                 ),
               ),
               child: Text(
-                actions.secondary!.label ?? 'Other option',
+                actions.secondary!.label ?? CheckoutStrings.otherOption,
                 style: AppTypography.buttonMedium,
               ),
             ),
@@ -263,7 +265,7 @@ class PaymentRetryPage extends StatelessWidget {
           TextButton(
             onPressed: () => _handleAction(context, actions.tertiary!),
             child: Text(
-              actions.tertiary!.label ?? 'Cancel',
+              actions.tertiary!.label ?? CheckoutStrings.cancel,
               style: AppTypography.buttonMedium.copyWith(
                 color: AppColors.textSecondary,
               ),

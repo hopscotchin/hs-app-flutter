@@ -776,6 +776,49 @@ class OrdersTestStrings {
   static const String supportHelpButton = 'orders_support_help_button';
 }
 
+/// Checkout bottom sheet (`CheckoutBottomSheet`). Single-instance surface, no
+/// host prefix needed. Payment options are a dynamic list; sub-elements
+/// (radio, label, subtitle) nest under the option index.
+class CheckoutTestStrings {
+  CheckoutTestStrings();
+
+  /// Screen prefix for shared components (message bars →
+  /// `checkout_message_bar_message_text_field_<i>`).
+  static const String screen = 'checkout';
+
+  static const String title = 'checkout_title';
+
+  // Refresh shimmer rows shown while the buy-now payload is re-fetched.
+  static const String refreshingShimmer = 'checkout_refreshing_shimmer'; // + `_<i>`
+
+  // Credits row (row itself is the tap target).
+  static const String creditsRow = 'checkout_credits_row';
+  static const String creditsAmountText = 'checkout_credits_amount_text';
+  static const String creditsCheckbox = 'checkout_credits_checkbox';
+
+  // Address row — a rendered address OR the "Add Delivery Address" placeholder
+  // occupy the same slot; they share `addressText`.
+  static const String addressRow = 'checkout_address_row';
+  static const String addressText = 'checkout_address_text';
+
+  // Payment mode options (dynamic; sub-elements nest under the option index).
+  static const String paymentOption = 'checkout_payment_option'; // + `_<i>`
+  static const String paymentOptionRadioSuffix =
+      'radio'; // → `checkout_payment_option_<i>_radio`
+  static const String paymentOptionLabelSuffix =
+      'label'; // → `checkout_payment_option_<i>_label`
+  static const String paymentOptionSubtitleSuffix =
+      'subtitle'; // → `checkout_payment_option_<i>_subtitle`
+
+  // Primary CTA — the pay pill and the proceed button are mutually exclusive,
+  // both trigger place-order; they share the root button key. Inner text /
+  // image variants are keyed separately.
+  static const String placeOrderButton = 'checkout_place_order_button';
+  static const String payAmountText = 'checkout_pay_amount_text';
+  static const String proceedLabelText = 'checkout_proceed_label_text';
+  static const String paymentModesImage = 'checkout_payment_modes_image';
+}
+
 class KidsTestStrings {
   KidsTestStrings();
 

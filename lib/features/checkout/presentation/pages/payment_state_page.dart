@@ -9,6 +9,7 @@ import '../../../../components/atoms/custom_image.dart';
 import '../../../../components/atoms/dots_loader.dart';
 import '../../../../components/buttons/app_button_named.dart';
 import '../../../../core/constants/image_constants.dart';
+import '../../../../core/constants/strings/checkout_strings.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -70,7 +71,7 @@ class _PaymentStatePageState extends State<PaymentStatePage> {
     final sdkPayload = widget.initJusPayEntity.sdkPayload;
     if (sdkPayload == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Payment initialization failed')),
+        const SnackBar(content: Text(CheckoutStrings.paymentInitFailed)),
       );
       Navigator.pop(context);
       return;
@@ -247,12 +248,12 @@ class _PaymentStateBody extends StatelessWidget {
           ),
           AppSpacing.verticalGapMd,
           Text(
-            'Processing your payment',
+            CheckoutStrings.processingYourPayment,
             style: AppTypographyV1.titleSmall.bold.textPrimary(),
           ),
           AppSpacing.verticalGapXs,
           Text(
-            'Please wait, this may take a while',
+            CheckoutStrings.processingPaymentSubtitle,
             style: AppTypographyV1.bodyRegular.regular.textSecondary(),
           ),
           AppSpacing.verticalGapLg,
@@ -301,7 +302,7 @@ class _PaymentExitConfirmSheet extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Payment Processing',
+                    CheckoutStrings.paymentProcessingTitle,
                     style: AppTypographyV1.titleSmall.bold.textPrimary(),
                   ),
                 ),
@@ -309,7 +310,7 @@ class _PaymentExitConfirmSheet extends StatelessWidget {
             ),
             AppSpacing.verticalGapMd,
             Text(
-              'Transaction is pending. Do you want to go back?',
+              CheckoutStrings.paymentPendingConfirm,
               style: AppTypographyV1.bodyRegular.regular
                   .textPrimary()
                   .copyWith(height: 1.5),
@@ -319,14 +320,14 @@ class _PaymentExitConfirmSheet extends StatelessWidget {
               children: [
                 Expanded(
                   child: TertiaryButton.defaultType(
-                    text: 'YES, GO BACK',
+                    text: CheckoutStrings.yesGoBack,
                     onTap: () => Navigator.pop(context, true),
                   ),
                 ),
                 AppSpacing.horizontalGapXs,
                 Expanded(
                   child: PrimaryButton.defaultType(
-                    text: 'NO',
+                    text: CheckoutStrings.no,
                     onTap: () => Navigator.pop(context, false),
                   ),
                 ),
