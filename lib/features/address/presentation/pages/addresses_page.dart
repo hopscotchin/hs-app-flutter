@@ -10,6 +10,7 @@ import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 
 import '../../../../components/appbar/hs_appbar.dart';
+import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/error_retry_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/constants/strings/account_strings.dart';
@@ -132,12 +133,13 @@ class _AddressesPageState extends State<AddressesPage> {
 
                     if (state.status == AddressStatus.success) {
                       if (state.items.isEmpty) {
-                        return Center(
-                          child: Text(
-                            AddressStrings.noSavedAddresses,
-                            key: const ValueKey(AddressTestStrings.listEmptyText),
-                            style: AppTypographyV1.bodyLarge.regular.textSecondary(),
-                          ),
+                        // ponytail: hide built-in CTA; the page's own bottom
+                        // `_AddNewAddressButton` / checkout bar already handles add.
+                        return const EmptyStateWidget(
+                          type: EmptyStateType.addAddresss,
+                          buttonLabel: AddressStrings.addNewAddress,
+                          buttonKey: const ValueKey(AddressTestStrings.listAddNewButton),
+                          titleKey: ValueKey(AddressTestStrings.listEmptyText),
                         );
                       }
 
