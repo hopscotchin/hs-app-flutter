@@ -133,13 +133,12 @@ class _AddressesPageState extends State<AddressesPage> {
 
                     if (state.status == AddressStatus.success) {
                       if (state.items.isEmpty) {
-                        // ponytail: hide built-in CTA; the page's own bottom
-                        // `_AddNewAddressButton` / checkout bar already handles add.
-                        return const EmptyStateWidget(
+                        return EmptyStateWidget(
                           type: EmptyStateType.addAddresss,
                           buttonLabel: AddressStrings.addNewAddress,
                           buttonKey: const ValueKey(AddressTestStrings.listAddNewButton),
-                          titleKey: ValueKey(AddressTestStrings.listEmptyText),
+                          titleKey: const ValueKey(AddressTestStrings.listEmptyText),
+                          onButtonTap: _onAddNewAddress,
                         );
                       }
 
@@ -228,17 +227,22 @@ class _AddressesPageState extends State<AddressesPage> {
                   },
                 ),
               ),
-              if (_isCheckout)
-                BlocBuilder<AddressBloc, AddressState>(
-                  buildWhen: (prev, curr) => prev.selectingId != curr.selectingId,
-                  builder: (context, state) => _CheckoutBottomBar(
-                    onAddNewAddress: _onAddNewAddress,
-                    onContinue: state.selectingId != null ? null : _onContinue,
-                    isSubmitting: state.selectingId != null,
-                  ),
-                )
-              else
-                _AddNewAddressButton(onPressed: _onAddNewAddress),
+              BlocBuilder<AddressBloc, AddressState>(
+                buildWhen: (prev, curr) =>
+                    prev.selectingId != curr.selectingId ||
+                    prev.items.isEmpty != curr.items.isEmpty,
+                builder: (context, state) {
+                  if (state.items.isEmpty) return const SizedBox.shrink();
+                  if (_isCheckout) {
+                    return _CheckoutBottomBar(
+                      onAddNewAddress: _onAddNewAddress,
+                      onContinue: state.selectingId != null ? null : _onContinue,
+                      isSubmitting: state.selectingId != null,
+                    );
+                  }
+                  return _AddNewAddressButton(onPressed: _onAddNewAddress);
+                },
+              ),
             ],
           ),
         ),

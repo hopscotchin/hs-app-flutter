@@ -76,8 +76,7 @@ class PaymentRetryPage extends StatelessWidget {
           // Pop back to the existing Cart, unwinding retry (and any
           // retry-pushed payment-state) rather than pushing a new Cart.
           AppNavigator.backToCart(
-            context,
-            sourcePage: const SourcePage(fromScreen: FromScreens.paymentRetry),
+            context
           );
         } else if (state is CheckoutError) {
           ScaffoldMessenger.of(

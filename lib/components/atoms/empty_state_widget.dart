@@ -57,7 +57,7 @@ const _configs = <EmptyStateType, _EmptyStateConfig>{
     title: 'Your Wishlist Is Empty!',
     subtitle: 'Heart your fave styles to save them for later!',
     buttonLabel: 'Wishlist NOW',
-    iconSize: (60, 40),
+    iconSize: (64, 58),
   ),
   EmptyStateType.cart: _EmptyStateConfig(
     icon: 'assets/icons/empty_states/empty_bag.svg',
@@ -112,7 +112,7 @@ const _configs = <EmptyStateType, _EmptyStateConfig>{
     title: 'Help Us Find You',
     subtitle: 'Your next order is waiting for an address.',
     buttonLabel: 'Add Address',
-    iconSize: (60, 40),
+    iconSize: (60, 82),
   ),
   EmptyStateType.kidsProfile: _EmptyStateConfig(
     icon: 'assets/icons/empty_states/kids_profile.svg',

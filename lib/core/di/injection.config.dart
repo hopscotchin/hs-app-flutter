@@ -9,6 +9,7 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'package:device_info_plus/device_info_plus.dart' as _i833;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
@@ -393,6 +394,9 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       preResolve: true,
     );
+    gh.lazySingleton<_i630.PaymentPollingService>(
+      () => _i630.PaymentPollingService(gh<_i666.PaymentNotificationService>()),
+    );
     gh.lazySingleton<_i818.PrefManager>(
       () => _i818.PrefManager(gh<_i460.SharedPreferences>()),
     );
@@ -404,12 +408,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i773.LaunchTimer>(),
         gh<_i477.CartTimer>(),
       ),
-    );
-    gh.lazySingleton<_i630.PaymentPollingService>(
-      () => _i630.PaymentPollingService(gh<_i666.PaymentNotificationService>()),
-    );
-    gh.lazySingleton<_i818.PrefManager>(
-      () => _i818.PrefManager(gh<_i460.SharedPreferences>()),
     );
     await gh.lazySingletonAsync<_i384.AnalyticsService>(
       () => registerModule.analyticsService(gh<_i818.PrefManager>()),
