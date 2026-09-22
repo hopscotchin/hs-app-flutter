@@ -76,6 +76,7 @@ class SplashRepositoryImpl with SafeApiCall implements SplashRepository {
     await _prefManager.setVideoAspectRatios(config.videoTransformationsJson);
     await _prefManager.setCartMessageBars(config.cartMessageBarsJson);
     await _prefManager.setCustomerCareContact(config.firstContact);
+    await _prefManager.setCustomerCareTiming(config.customerCareTiming);
 
     final n7 = config.n7Config;
     if (n7 != null) {

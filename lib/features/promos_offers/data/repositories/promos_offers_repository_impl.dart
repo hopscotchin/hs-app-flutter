@@ -21,9 +21,7 @@ import '../models/promos_offers_response_model.dart';
 /// All error translation (Dio + AppException → Failure) happens inside
 /// [safeApiCall]. There is no try/catch in this file.
 @LazySingleton(as: PromosOffersRepository)
-class PromosOffersRepositoryImpl
-    with SafeApiCall
-    implements PromosOffersRepository {
+class PromosOffersRepositoryImpl with SafeApiCall implements PromosOffersRepository {
   final PromosOffersApi _api;
   final NetworkInfo _networkInfo;
 
@@ -51,10 +49,7 @@ class PromosOffersRepositoryImpl
     CancelToken? cancelToken,
   }) {
     return safeApiCall(_networkInfo, () async {
-      final response = await _api.getPromoDetails(
-        promoId: promoId,
-        cancelToken: cancelToken,
-      );
+      final response = await _api.getPromoDetails(promoId: promoId, cancelToken: cancelToken);
       return response.toEntity();
     });
   }
@@ -70,6 +65,7 @@ class PromosOffersRepositoryImpl
       // text field already blocks whitespace, but apply is also driven by the
       // offers sheet and by the post-login resume, and a stray space would
       // make the backend reject an otherwise valid code.
+
       final response = await _api.applyPromoFrom(
         request: PromoApplyRequestModel(promoCode: promoCode.trim()),
         fromLocation: fromLocation,

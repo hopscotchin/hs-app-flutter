@@ -10,6 +10,14 @@ abstract class PincodeSheetState with _$PincodeSheetState {
     @Default(<AddressEntity>[]) List<AddressEntity> addresses,
     int? selectedAddressId,
     @Default('') String enteredPincode,
+
+    /// The pincode in effect when the sheet opened, reported as `from_pincode`.
+    ///
+    /// Fixed for the sheet's lifetime — it is the value being replaced, so it
+    /// must not follow [lastCheckedValidPincode], which moves with each check
+    /// and would make the second check in one session report the first as its
+    /// "from".
+    String? initialPincode,
     String? lastCheckedValidPincode,
     @Default(false) bool isChecking,
     @Default(<MessageBarEntity>[]) List<MessageBarEntity> messageBars,

@@ -355,7 +355,7 @@ feedback for one apply rather than a list a test walks.
 | Overlay | `cart_updating_overlay` | — | `cart_page.dart` |
 | Indicator | `cart_refresh_indicator` | — | `cart_page.dart` |
 | Snackbar | `cart_toast_snackbar` | — | `cart_page.dart` |
-| Snackbar | `cart_login_required_snackbar` | — | `cart_page.dart` |
+| Snackbar | `cart_login_required_snackbar` | — | *(defined, not yet wired)* |
 | Button | `cart_appbar_back_button` | — | `cart_page.dart` |
 | Title | `cart_app_bar_title` | — | `cart_page.dart` |
 | Button | `cart_appbar_wishlist_button` | — | `cart_page.dart` |
@@ -445,19 +445,19 @@ feedback for one apply rather than a list a test walks.
 | Title | `pdp_recommended_title` | — | `pdp_recommended_products.dart` |
 | Element | `pdp_recommended_row_<r>_tiles_<i>` | `pdp_recommended_row_<r>_tiles_0`, `pdp_recommended_row_<r>_tiles_1` | `pdp_recommended_products.dart` |
 | Element | `pdp_recently_viewed_tiles_<i>` | `pdp_recently_viewed_tiles_0`, `pdp_recently_viewed_tiles_1` | `pdp_recently_viewed.dart` |
-| Title | `pdp_size_sheet_title` | — | `pdp_size_selection_bottom_sheet.dart` |
-| Button | `pdp_size_sheet_size_chart_button` | — | `pdp_size_selection_bottom_sheet.dart` |
-| Chip | `pdp_size_sheet_chip_<i>` | `pdp_size_sheet_chip_0`, `pdp_size_sheet_chip_1` | `pdp_size_selection_bottom_sheet.dart` |
-| Button | `pdp_size_sheet_confirm_button` | — | `pdp_size_selection_bottom_sheet.dart` |
-| Title | `pdp_size_chart_sheet_title` | — | `pdp_size_chart_bottom_sheet.dart` |
-| Button | `pdp_size_chart_sheet_close_button` | — | `pdp_size_chart_bottom_sheet.dart` |
+| Title | `pdp_size_sheet_title` | — | `pdp_size_selection_bottom_sheet.dart`, `size_selection_bottom_sheet.dart` |
+| Button | `pdp_size_sheet_size_chart_button` | — | `pdp_size_selection_bottom_sheet.dart`, `size_selection_bottom_sheet.dart` |
+| Chip | `pdp_size_sheet_chip_<i>` | `pdp_size_sheet_chip_0`, `pdp_size_sheet_chip_1` | `pdp_size_selection_bottom_sheet.dart`, `size_selection_bottom_sheet.dart` |
+| Button | `pdp_size_sheet_confirm_button` | — | `pdp_size_selection_bottom_sheet.dart`, `size_selection_bottom_sheet.dart` |
+| Title | `pdp_size_chart_sheet_title` | — | `pdp_size_chart_bottom_sheet.dart`, `size_chart_bottom_sheet.dart` |
+| Button | `pdp_size_chart_sheet_close_button` | — | `pdp_size_chart_bottom_sheet.dart`, `size_chart_bottom_sheet.dart` |
 | Button | `pdp_gallery_back_button` | — | `pdp_fullscreen_gallery_page.dart` |
 | View | `pdp_error_view` | — | `pdp_error_view.dart` |
 | Button | `pdp_error_explore_button` | — | `pdp_error_view.dart` |
 | Indicator | `pdp_carousel_dot_indicator` | — | `pdp_image_carousel.dart` |
 | Indicator | `pdp_gallery_dot_indicator` | — | `pdp_fullscreen_gallery_page.dart` |
 | Indicator | `pdp_offers_indicator` | — | `pdp_offers.dart` |
-| Indicator | `pdp_size_chart_table_indicator_<chart>` | `pdp_size_chart_table_indicator_<chart>` | `pdp_size_chart_bottom_sheet.dart` |
+| Indicator | `pdp_size_chart_table_indicator_<chart>` | `pdp_size_chart_table_indicator_<chart>` | `pdp_size_chart_bottom_sheet.dart`, `size_chart_bottom_sheet.dart` |
 | Decoration | `pdp_sheet_lip` | — | `pdp_content.dart` |
 | Divider | `pdp_delivery_divider` | — | `pdp_delivery_info.dart` |
 | Divider | `pdp_detail_tab_<i>_divider` | `pdp_detail_tab_0_divider`, `pdp_detail_tab_1_divider` | `pdp_product_details.dart` |
@@ -468,10 +468,81 @@ feedback for one apply rather than a list a test walks.
 | Text | `pdp_mrp_text` | — | `pdp_brand_price.dart` |
 | Text | `pdp_discount_text` | — | `pdp_brand_price.dart` |
 | Text | `pdp_price_callout_text` | — | `pdp_brand_price.dart` |
-| Text | `pdp_size_sheet_selling_price_text` | — | `pdp_size_selection_bottom_sheet.dart` |
-| Text | `pdp_size_sheet_mrp_text` | — | `pdp_size_selection_bottom_sheet.dart` |
-| Text | `pdp_size_sheet_discount_text` | — | `pdp_size_selection_bottom_sheet.dart` |
-| Button | `pdp_size_chart_unit_button_<chart>_<unit>` | `pdp_size_chart_unit_button_<chart>_<unit>` | `pdp_size_chart_bottom_sheet.dart` |
-| Header | `pdp_size_chart_header_<chart>_<col>` | `pdp_size_chart_header_<chart>_<col>` | `pdp_size_chart_bottom_sheet.dart` |
-| Cell | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_bottom_sheet.dart` |
+| Text | `pdp_size_sheet_selling_price_text` | — | `pdp_size_selection_bottom_sheet.dart`, `size_selection_bottom_sheet.dart` |
+| Text | `pdp_size_sheet_mrp_text` | — | `pdp_size_selection_bottom_sheet.dart`, `size_selection_bottom_sheet.dart` |
+| Text | `pdp_size_sheet_discount_text` | — | `pdp_size_selection_bottom_sheet.dart`, `size_selection_bottom_sheet.dart` |
+| Button | `pdp_size_chart_unit_button_<chart>_<unit>` | `pdp_size_chart_unit_button_<chart>_<unit>` | `pdp_size_chart_bottom_sheet.dart`, `size_chart_bottom_sheet.dart` |
+| Header | `pdp_size_chart_header_<chart>_<col>` | `pdp_size_chart_header_<chart>_<col>` | `pdp_size_chart_bottom_sheet.dart`, `size_chart_bottom_sheet.dart` |
+| Cell | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_cell_<chart>_<row>_<col>` | `pdp_size_chart_bottom_sheet.dart`, `size_chart_bottom_sheet.dart` |
 | Loading | `pdp_recommended_loading` | — | `pdp_recommended_products.dart` |
+
+## Orders
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Title | `orders_app_bar_title` | — | `orders_listing_page.dart` |
+| Button | `orders_appbar_back_button` | — | `orders_listing_page.dart` |
+| Element | `orders_tab_orders` | — | `orders_listing_page.dart` |
+| Element | `orders_tab_gift_cards` | — | `orders_listing_page.dart` |
+| Element | `orders` | — | `orders_listing_page.dart`, `orders_tab_view.dart` |
+| Element | `gift_cards` | — | `orders_listing_page.dart`, `orders_tab_view.dart` |
+| Loading | `<tab>_shimmer_loading` | `<tab>_shimmer_loading` | `orders_tab_view.dart` |
+| Indicator | `<tab>_refresh_indicator` | `<tab>_refresh_indicator` | `orders_tab_view.dart` |
+| Button | `<tab>_error_retry_button` | `<tab>_error_retry_button` | `orders_tab_view.dart` |
+| Snackbar | `<tab>_pagination_error_snackbar` | `<tab>_pagination_error_snackbar` | `orders_listing_page.dart` |
+| Indicator | `<tab>_load_more_indicator` | `<tab>_load_more_indicator` | `orders_tab_view.dart` |
+| Title | `<tab>_empty_state_title` | `<tab>_empty_state_title` | `orders_tab_view.dart` |
+| Button | `<tab>_empty_state_button` | `<tab>_empty_state_button` | `orders_tab_view.dart` |
+| List item | `<tab>_item_<i>` | `<tab>_item_0`, `<tab>_item_1` | `order_listing_card.dart` |
+| Image | `<tab>_item_<i>_image` | `<tab>_item_0_image`, `<tab>_item_1_image` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_title_text_field` | `<tab>_item_0_title_text_field`, `<tab>_item_1_title_text_field` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_price_text_field` | `<tab>_item_0_price_text_field`, `<tab>_item_1_price_text_field` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_qty_text_field` | `<tab>_item_0_qty_text_field`, `<tab>_item_1_qty_text_field` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_size_text_field` | `<tab>_item_0_size_text_field`, `<tab>_item_1_size_text_field` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_status_title_text_field` | `<tab>_item_0_status_title_text_field`, `<tab>_item_1_status_title_text_field` | `order_listing_card.dart` |
+| Text | `<tab>_item_<i>_status_subtitle_text_field` | `<tab>_item_0_status_subtitle_text_field`, `<tab>_item_1_status_subtitle_text_field` | `order_listing_card.dart` |
+| Element | `orders_nudge` | — | `notification_nudge_card.dart` |
+| Text | `orders_nudge_title_text_field` | — | `notification_nudge_card.dart` |
+| Button | `orders_nudge_positive_button` | — | `notification_nudge_card.dart` |
+| Button | `orders_nudge_negative_button` | — | `notification_nudge_card.dart` |
+| Text | `orders_support_title_text_field` | — | `orders_support_footer.dart` |
+| Button | `orders_support_call_button` | — | `orders_support_footer.dart` |
+| Button | `orders_support_help_button` | — | `orders_support_footer.dart` |
+
+## Kids
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| List | `kids_list` | — | `kids_page.dart` |
+| Title | `kids_list_app_bar_title` | — | `kids_page.dart` |
+| Button | `kids_list_back_button` | — | `kids_page.dart` |
+| List item | `kids_list_item_<i>` | `kids_list_item_0`, `kids_list_item_1` | `kids_page.dart` |
+| Text | `kids_list_item_<i>_name` | `kids_list_item_0_name`, `kids_list_item_1_name` | `kids_page.dart` |
+| Button | `kids_list_item_<i>_edit` | `kids_list_item_0_edit`, `kids_list_item_1_edit` | `kids_page.dart` |
+| Button | `kids_list_item_<i>_remove` | `kids_list_item_0_remove`, `kids_list_item_1_remove` | `kids_page.dart` |
+| Button | `kids_list_add_button` | — | `kids_page.dart` |
+| Image | `kids_list_footer_avatar_image_<i>` | `kids_list_footer_avatar_image_0`, `kids_list_footer_avatar_image_1` | `kids_page.dart` |
+| Title | `kids_list_empty_title` | — | `kids_page.dart` |
+| Text | `kids_list_empty_subtitle` | — | `kids_page.dart` |
+| Title | `kids_list_delete_bottomsheet_title` | — | `kids_page.dart` |
+| Text | `kids_list_delete_bottomsheet_description` | — | `kids_page.dart` |
+| Button | `kids_list_delete_bottomsheet_cancel_button` | — | `kids_page.dart` |
+| Button | `kids_list_delete_bottomsheet_confirm_button` | — | `kids_page.dart` |
+| Title | `kids_form_app_bar_title` | — | `add_edit_kid_page.dart` |
+| Button | `kids_form_back_button` | — | `add_edit_kid_page.dart` |
+| Text field | `kids_form_name_input` | — | `add_edit_kid_page.dart` |
+| Hint | `kids_form_name_input_hint` | — | `add_edit_kid_page.dart` |
+| Text field | `kids_form_dob_input` | — | `add_edit_kid_page.dart` |
+| Hint | `kids_form_dob_input_hint` | — | `add_edit_kid_page.dart` |
+| Radio | `kids_form_gender_boy_radio` | — | `add_edit_kid_page.dart` |
+| Radio | `kids_form_gender_girl_radio` | — | `add_edit_kid_page.dart` |
+| Row | `kids_form_consent_row` | — | `add_edit_kid_page.dart` |
+| Checkbox | `kids_form_consent_checkbox` | — | `add_edit_kid_page.dart` |
+| Element | `kids_form_consent_privacy_link` | — | `add_edit_kid_page.dart` |
+| Text | `kids_form_consent_error_text` | — | `add_edit_kid_page.dart` |
+| Text | `kids_form_api_error_banner_text` | — | `add_edit_kid_page.dart` |
+| Button | `kids_form_save_button` | — | `add_edit_kid_page.dart` |
+| Title | `kids_form_discard_bottomsheet_title` | — | `add_edit_kid_page.dart` |
+| Text | `kids_form_discard_bottomsheet_description` | — | `add_edit_kid_page.dart` |
+| Button | `kids_form_discard_bottomsheet_confirm_button` | — | `add_edit_kid_page.dart` |
+| Button | `kids_form_discard_bottomsheet_cancel_button` | — | `add_edit_kid_page.dart` |

@@ -29,8 +29,13 @@ void main() {
       expect(cart.orderDetails?.payAmount, 4898.0);
       expect(cart.orderDetails?.discountPercentage, 12);
       expect(cart.items.length, 8);
-      // Analytics-only, never parsed into an entity.
-      expect(cart.trackingMeta?['orderDetails'], isA<Map<String, dynamic>>());
+      // The analytics copy nested in `trackingMeta` is now parsed too — it is
+      // the promo events' price source, and leaving it raw put a nested map on
+      // the wire. Both copies carry the same figure, from different nodes.
+      expect(cart.trackingMeta?.orderDetails?.itemCount, 11);
+      // The flat block keeps only its own keys; the nested object is lifted out
+      // so it cannot be forwarded to Segment by accident.
+      expect(cart.trackingMeta?.analyticsProps, {'atcUser': 'NB'});
     });
 
     test('whole-number amounts decode as int without throwing', () {

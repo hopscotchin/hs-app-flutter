@@ -8,10 +8,10 @@ import 'package:hs_app_flutter/features/address/presentation/address_route.dart'
 import 'package:hs_app_flutter/features/analytics/presentation/analytics_debug_route.dart';
 import 'package:hs_app_flutter/features/auth/presentation/auth_route.dart';
 import 'package:hs_app_flutter/features/cart/presentation/cart_route.dart';
+import 'package:hs_app_flutter/features/kids/presentation/kids_route.dart';
 import 'package:hs_app_flutter/features/checkout/presentation/checkout_route.dart';
 import 'package:hs_app_flutter/features/landing_page/presentation/landing_page_route.dart';
 import 'package:hs_app_flutter/features/legal/presentation/legal_route.dart';
-import 'package:hs_app_flutter/features/orders/presentation/orders_route.dart';
 import 'package:hs_app_flutter/features/pdp/presentation/pdp_fullscreen_gallery_route.dart';
 import 'package:hs_app_flutter/features/pdp/presentation/pdp_route.dart';
 import 'package:hs_app_flutter/features/plp/presentation/plp_route.dart';
@@ -20,6 +20,7 @@ import 'package:hs_app_flutter/features/search/presentation/search_route.dart';
 import 'package:hs_app_flutter/features/splash/presentation/splash_route.dart';
 import 'package:hs_app_flutter/features/wishlist/presentation/wishlist_route.dart';
 
+import '../../features/orders/presentation/orders_route.dart';
 import '../constants/route_names.dart';
 import 'webview_route.dart';
 
@@ -52,9 +53,10 @@ class AppRouter {
       PdpFullscreenGalleryRoute.getRoute(_rootNavigatorKey),
       WebViewRoute.getRoute(_rootNavigatorKey),
       LandingPageRoute.getRoute(_rootNavigatorKey),
-      OrdersRoute.getRoute(_rootNavigatorKey),
+      ...OrdersRoute.getRoutes(_rootNavigatorKey),
       WishlistRoute.getRoute(_rootNavigatorKey),
       AddressRoute.getRoute(_rootNavigatorKey),
+      KidsRoute.getRoute(_rootNavigatorKey),
       LegalRoute.getRoute(_rootNavigatorKey),
       PromoDetailsRoute.getRoute(_rootNavigatorKey),
       ...CheckoutRoute.getRoutes(_rootNavigatorKey),

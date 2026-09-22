@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
+import '../../../../core/navigation/nav_destination.dart';
+import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../../domain/entities/order_confirmation_entry_args.dart';
@@ -73,7 +75,10 @@ class PaymentRetryPage extends StatelessWidget {
         } else if (state is OrderMarkedFailed) {
           // Pop back to the existing Cart, unwinding retry (and any
           // retry-pushed payment-state) rather than pushing a new Cart.
-          AppNavigator.backToCart(context);
+          AppNavigator.backToCart(
+            context,
+            sourcePage: const SourcePage(fromScreen: FromScreens.paymentRetry),
+          );
         } else if (state is CheckoutError) {
           ScaffoldMessenger.of(
             context,

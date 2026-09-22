@@ -11,6 +11,7 @@ import 'package:hs_app_flutter/features/address/domain/entities/manage_address_a
 import 'package:hs_app_flutter/features/address/presentation/bloc/address_bloc.dart';
 import 'package:hs_app_flutter/features/address/presentation/pages/addresses_page.dart';
 import 'package:hs_app_flutter/features/address/presentation/widgets/address_item_card.dart';
+import 'package:hs_app_flutter/features/kids/domain/entities/child_entity.dart';
 import 'package:hs_app_flutter/features/checkout/domain/entities/order_confirmation_entry_args.dart';
 import 'package:hs_app_flutter/features/checkout/domain/entities/payment_retry_entry_args.dart';
 import 'package:hs_app_flutter/features/checkout/domain/entities/payment_state_entry_args.dart';
@@ -49,10 +50,33 @@ abstract final class AppNavigator {
   /// checkout on its own as soon as the cart loads, instead of waiting for the
   /// checkout button — the Flutter equivalent of Android's
   /// `Util.createBuyNowShoppingCartIntent` passing `IS_FROM_BUYNOW`.
-  static void goToCart(BuildContext context, {bool fromBuyNow = false}) => context.pushNamed(
-    RouteNames.cartName,
-    queryParameters: fromBuyNow ? const {'fromBuyNow': 'true'} : const {},
-  );
+  /// Opens the cart.
+  ///
+  /// [sourcePage] is **required** and names where the user came from — its
+  /// `fromScreen` becomes `from_screen` on every `cart_viewed` of the visit,
+  /// and its `fromLocation` names the control that opened the cart. Android
+  /// passes both at each call site the same way
+  /// (`CommonEvents.navigateToCart(fromScreen, fromLocation)`), and they are
+  /// required here for the same reason: neither can be derived. The PLP's
+  /// `fromScreen` is the *boutique's name* (`ProductListActivity:745`), which
+  /// no router or navigation observer knows.
+  ///
+  /// [SourcePage] rather than two loose strings so the cart matches the
+  /// Discover → PLP → PDP journeys, which already travel this way — one type,
+  /// one place where the field-to-wire-name mapping lives.
+  static void goToCart(
+    BuildContext context, {
+    required SourcePage sourcePage,
+    bool fromBuyNow = false,
+  }) {
+    context.pushNamed(
+      RouteNames.cartName,
+      queryParameters: fromBuyNow ? const {'fromBuyNow': 'true'} : const {},
+      // Passed as `extra` rather than a query parameter: it is a value object,
+      // and `PlpRoute` already carries its entry args this way.
+      extra: sourcePage,
+    );
+  }
 
   /// Pops the current route / dismisses the top-most sheet or dialog.
   static void goBack(BuildContext context) => context.pop();
@@ -162,6 +186,7 @@ abstract final class AppNavigator {
     LoginRedirects.typeOrders: goToOrders,
     LoginRedirects.typeAddresses: (ctx) =>
         goToAddresses(ctx, fromScreen: FromScreens.account),
+    LoginRedirects.typeKids: goToKids,
     LoginRedirects.typeWishlistScreenFromAccount: goToWishlist,
     LoginRedirects.typeWishlistScreen: goToWishlist,
     LoginRedirects.typeGoToWishlist: goToWishlist,
@@ -378,6 +403,17 @@ abstract final class AppNavigator {
       );
 
   static void goToSearch(BuildContext context) => context.pushNamed('search');
+
+  static void goToKids(BuildContext context) => context.pushNamed(RouteNames.kidsName);
+
+  /// Push the add/edit child screen. Pass [existing] to enter edit mode.
+  /// Returns the saved [ChildEntity] on success, or `null` on cancel.
+  static Future<ChildEntity?> goToAddKid(BuildContext context, {ChildEntity? existing}) {
+    return context.pushNamed<ChildEntity>(
+      RouteNames.addKidName,
+      extra: <String, dynamic>{'existing': existing},
+    );
+  }
 
   static void goToAddresses(
     BuildContext context, {

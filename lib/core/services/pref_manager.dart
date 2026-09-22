@@ -81,6 +81,11 @@ class PrefManager {
   Future<void> setCustomerCareContact(String? value) =>
       _setStringOrRemove(StorageKeys.customerCareContact, value);
 
+  String? get customerCareTiming =>
+      _prefs.getString(StorageKeys.customerCareTiming);
+  Future<void> setCustomerCareTiming(String? value) =>
+      _setStringOrRemove(StorageKeys.customerCareTiming, value);
+
   // ─── AppConfig: Feature Flags ─────────────────────────────────────
 
   bool get featureFlagClarity => _prefs.getBool(StorageKeys.featureFlagClarity) ?? true;
@@ -168,6 +173,11 @@ class PrefManager {
   String? get childCohorts => _prefs.getString(StorageKeys.childCohorts);
   Future<void> setChildCohorts(String? value) =>
       _setStringOrRemove(StorageKeys.childCohorts, value);
+
+  String? get childCohortAssignments =>
+      _prefs.getString(StorageKeys.childCohortAssignments);
+  Future<void> setChildCohortAssignments(String? value) =>
+      _setStringOrRemove(StorageKeys.childCohortAssignments, value);
 
   String? get gender => _prefs.getString(StorageKeys.gender);
   Future<void> setGender(String? value) => _setStringOrRemove(StorageKeys.gender, value);

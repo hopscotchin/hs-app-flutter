@@ -5,7 +5,10 @@ import 'package:hs_app_flutter/components/atoms/custom_image.dart';
 import 'package:hs_app_flutter/components/atoms/empty_state_widget.dart';
 import 'package:hs_app_flutter/components/atoms/price_summary_widget.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
+import 'package:hs_app_flutter/core/analytics/events/analytics_helper.dart';
+import 'package:hs_app_flutter/core/analytics/events/modules/cart_events.dart';
 import 'package:hs_app_flutter/core/constants/image_constants.dart';
+import 'package:hs_app_flutter/core/di/injection.dart';
 import 'package:hs_app_flutter/core/extensions/context_extension.dart';
 import 'package:hs_app_flutter/core/extensions/string_extensions.dart';
 import 'package:hs_app_flutter/core/theme/colors.dart';
@@ -24,6 +27,7 @@ import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/cart_strings.dart';
 import '../../../../core/constants/strings/login_redirects.dart';
+import '../../../../core/navigation/nav_destination.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../../account/presentation/bloc/account_bloc.dart';
@@ -39,7 +43,13 @@ import '../widgets/cart_shimmer_loading.dart';
 import '../widgets/remove_cart_item_sheet.dart';
 
 class CartPage extends StatefulWidget {
-  const CartPage({super.key, this.fromBuyNow = false});
+  const CartPage({super.key, this.fromBuyNow = false, this.sourcePage});
+
+  /// Where the user came from — `from_screen` and `from_location` for this
+  /// visit's cart events. Supplied by [AppNavigator.goToCart] and handed to the
+  /// bloc on entry, the same shape as Android's `CartFragment.fromScreen` /
+  /// `fromLocation`, which it reads off the launching intent.
+  final SourcePage? sourcePage;
 
   /// Set when the cart was opened by PDP's Buy Now. The cart then drives itself
   /// to checkout as soon as the first load lands, rather than waiting for the
@@ -71,6 +81,8 @@ class _CartPageState extends State<CartPage> {
     // page: set on entry, cleared in dispose. Leaving it set would keep every
     // later cart fetch — from anywhere — showing the buy-now item alone.
     _cartBloc.instantCheckout = widget.fromBuyNow;
+    // Set before the first fetch — `_onLoadCart` reports it.
+    _cartBloc.sourcePage = widget.sourcePage;
     _cartBloc.add(const LoadCart());
   }
 
@@ -91,9 +103,18 @@ class _CartPageState extends State<CartPage> {
   }
 
   Future<void> _onEddPincodeTap(BuildContext context) async {
-    final result = await PincodeBottomSheet.show(context);
+    final cartBloc = context.read<CartBloc>();
+    cartBloc.add(const PincodeCheckClicked());
+    final result = await PincodeBottomSheet.show(
+      context,
+      // The pincode being replaced — `from_pincode`. Same source
+      // `pincode_check_clicked` reads, so the tap and the check agree.
+      currentPincode: cartBloc.state.cart?.deliveryPincode?.pincode,
+    );
     if (result != null && context.mounted) {
-      context.read<CartBloc>().add(const RefreshCart());
+      // `from_location: Pincode selection` is what separates this reload from
+      // a pull-to-refresh on the `cart_viewed` it fires.
+      context.read<CartBloc>().add(const RefreshCart(reloadReason: FromLocations.pincodeSelection));
     }
   }
 
@@ -305,10 +326,8 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
               count: 0,
-              onTap: () => AppNavigator.goToWishlistGated(
-                context,
-                fromScreen: FromScreens.shoppingCart,
-              ),
+              onTap: () =>
+                  AppNavigator.goToWishlistGated(context, fromScreen: FromScreens.shoppingCart),
               iconColor: AppColors.textPrimary,
             );
           },
@@ -646,18 +665,48 @@ class _CartContent extends StatelessWidget {
                 hasMessageBars: cart.messageBars.isNotEmpty,
                 isLoading: state.isItemBusy(item.sku),
                 isMovingToWishlist: state.isMovingToWishlist(item.sku),
-                onQuantityChanged: (qty) => context.read<CartBloc>().add(
-                  UpdateCartItemQuantity(sku: item.sku ?? '', quantity: qty, itemIndex: index),
-                ),
-                onRemove: () => showRemoveCartItemSheet(context, item.sku ?? ''),
-                onMoveToWishlist: () => _moveToWishlist(
-                  context,
-                  MoveToWishlist(
-                    sku: item.sku ?? '',
-                    productId: item.productId,
-                    price: item.priceInfo?.absoluteValue,
-                  ),
-                ),
+                onQuantityChanged: (qty) {
+                  final bloc = context.read<CartBloc>();
+                  // Intent first, then the mutation — `product_update_clicked`
+                  // counts the tap, `product_updated` counts the success, and
+                  // the gap between them is the drop-off.
+                  bloc.add(
+                    CartItemControlTapped(
+                      sku: item.sku ?? '',
+                      fromLocation: FromLocations.updateCart,
+                    ),
+                  );
+                  bloc.add(
+                    UpdateCartItemQuantity(sku: item.sku ?? '', quantity: qty, itemIndex: index),
+                  );
+                },
+                onRemove: () {
+                  // Reported on the tap, not on confirm: the sheet that opens
+                  // here can be dismissed, and the abandonment is the signal.
+                  context.read<CartBloc>().add(
+                    CartItemControlTapped(
+                      sku: item.sku ?? '',
+                      fromLocation: FromLocations.removeCartItem,
+                    ),
+                  );
+                  showRemoveCartItemSheet(context, item.sku ?? '');
+                },
+                onMoveToWishlist: () {
+                  context.read<CartBloc>().add(
+                    CartItemControlTapped(
+                      sku: item.sku ?? '',
+                      fromLocation: FromLocations.moveToWishlist,
+                    ),
+                  );
+                  _moveToWishlist(
+                    context,
+                    MoveToWishlist(
+                      sku: item.sku ?? '',
+                      productId: item.productId,
+                      price: item.priceInfo?.absoluteValue,
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -672,10 +721,8 @@ class _CartContent extends StatelessWidget {
               onRemove: () => context.read<CartBloc>().add(
                 RemovePromoCode(promoCode: cart.promotionData?.promoCode ?? ''),
               ),
-              onSeeAllOffers: () async {
-                final cartBloc = context.read<CartBloc>();
-                final cartChanged = await PromoOffersBottomSheet.show(context);
-                if (cartChanged) cartBloc.add(const LoadCart());
+              onSeeAllOffers: () {
+                PromoOffersBottomSheet.show(context);
               },
             ),
           },
@@ -689,6 +736,18 @@ class _CartContent extends StatelessWidget {
               child: PriceSummaryWidget(
                 summary: cart.orderSummary!,
                 keyPrefix: CartTestStrings.priceSummary,
+                // `shipping_info_viewed` belongs to *this* control — the ⓘ on a
+                // price row opening its bottom sheet (Shipping fee, Platform
+                // fee). It used to fire from "See all offers" instead, which
+                // put every promo-sheet open into the shipping-info bucket and
+                // left the real shipping sheet unreported.
+                // Which fee was opened decides the event name; the bloc owns
+                // that map.
+                onRowActionOpened: (row) => {
+                  sl<AnalyticsHelper>().logShippingInfoViewed(
+                    fromLocation: FromLocations.orderSummary,
+                  ),
+                },
               ),
             ),
           ],

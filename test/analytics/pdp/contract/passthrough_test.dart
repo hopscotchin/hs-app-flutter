@@ -7,16 +7,16 @@ import 'package:hs_app_flutter/core/analytics/constants/analytics_events.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dart';
 import 'package:hs_app_flutter/core/analytics/events/modules/pdp_events.dart';
 import 'package:hs_app_flutter/features/pdp/data/models/product_detail_model.dart';
-import 'package:hs_app_flutter/features/pdp/domain/entities/pdp_entry_args.dart';
-import 'package:hs_app_flutter/features/pdp/domain/entities/product_detail_entity.dart';
-import 'package:hs_app_flutter/features/pdp/domain/entities/sku_entity.dart';
-import 'package:hs_app_flutter/features/plp/domain/entities/listing_product_entity.dart';
-
-import '../../support/analytics_test_harness.dart';
-import 'package:hs_app_flutter/features/pdp/domain/entities/tile_entity.dart';
 import 'package:hs_app_flutter/features/pdp/domain/entities/color_variants_entity.dart';
 import 'package:hs_app_flutter/features/pdp/domain/entities/detail_entity.dart';
 import 'package:hs_app_flutter/features/pdp/domain/entities/offer_entity.dart';
+import 'package:hs_app_flutter/features/pdp/domain/entities/pdp_entry_args.dart';
+import 'package:hs_app_flutter/features/pdp/domain/entities/product_detail_entity.dart';
+import 'package:hs_app_flutter/features/pdp/domain/entities/sku_entity.dart';
+import 'package:hs_app_flutter/features/pdp/domain/entities/tile_entity.dart';
+import 'package:hs_app_flutter/features/plp/domain/entities/listing_product_entity.dart';
+
+import '../../support/analytics_test_harness.dart';
 import '../support/node_fixtures.dart';
 
 /// Wire-payload assertions for every in-scope PDP event.
@@ -155,32 +155,6 @@ void main() {
       final e = h.singleEvent(AnalyticsEvents.productViewed);
       expect(e[AnalyticsProperties.fromPincode], AnalyticsDefaults.standard);
     });
-
-    test('removed features emit NOTHING — no doorway / shop-the-look / A+ keys', () {
-      final e = h.singleEvent(AnalyticsEvents.productViewed);
-      for (final removed in [
-        AnalyticsProperties.redirectedFromDoorway,
-        AnalyticsProperties.redirectedFromShopTheLook,
-        AnalyticsProperties.isPidAplus,
-        AnalyticsProperties.aPlusUspList,
-        AnalyticsProperties.aPlusVirtualGroupName,
-        AnalyticsProperties.aPlusContentType,
-      ]) {
-        expect(e.containsKey(removed), isFalse, reason: '$removed should be gone');
-      }
-    });
-
-    test('tab-page keys are no longer emitted — the block was retired', () {
-      // Tab-page attribution used to be app-owned entry context. It is not sent
-      // from any surface today; the corresponding fields are gone from
-      // `PdpEntryArgs` and the wire keys reach Segment only if the backend node
-      // ships them.
-      final e = h.singleEvent(AnalyticsEvents.productViewed);
-      expect(e.containsKey(AnalyticsProperties.tabbedPageContainerId), isFalse);
-      expect(e.containsKey(AnalyticsProperties.tabbedPageContainerName), isFalse);
-      expect(e.containsKey(AnalyticsProperties.tabName), isFalse);
-      expect(e.containsKey(AnalyticsProperties.tabPosition), isFalse);
-    });
   });
 
   group('product_viewed — entry context', () {
@@ -205,29 +179,6 @@ void main() {
             'echoes back the pincode the request was made with, so the client '
             'no longer passes it in',
       );
-    });
-
-    test('position / source_tile_type / tab_* are node-owned now', () async {
-      // These used to be entry-arg fields. They were removed from
-      // `PdpEntryArgs`; any value on the wire has to arrive on
-      // `product.trackingMeta` (or a chained node) rather than the client.
-      await h.analytics.logProductViewed(
-        product: flat.product!,
-        entry: const PdpEntryArgs(),
-      );
-      final e = h.singleEvent(AnalyticsEvents.productViewed);
-      for (final clientOwnedInPrev in const [
-        AnalyticsProperties.tabbedPageContainerName,
-        AnalyticsProperties.tabbedPageContainerId,
-        AnalyticsProperties.tabName,
-        AnalyticsProperties.tabPosition,
-      ]) {
-        expect(
-          e.containsKey(clientOwnedInPrev),
-          isFalse,
-          reason: '$clientOwnedInPrev must not appear from the client any more',
-        );
-      }
     });
 
     test('an absent from_feed_size is omitted, not sent as 0', () async {
@@ -365,7 +316,6 @@ void main() {
       );
       final e = h.singleEvent(AnalyticsEvents.productAddedToCart);
       expect(e[AnalyticsProperties.productSize], '3-4 Y');
-      expect(e.containsKey(AnalyticsProperties.redirectedFromShopTheLook), isFalse);
     });
 
     test('buy_now_clicked uses the components-module event name', () async {

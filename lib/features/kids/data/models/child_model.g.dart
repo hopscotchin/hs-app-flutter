@@ -1,0 +1,19 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'child_model.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+ChildModel _$ChildModelFromJson(Map<String, dynamic> json) => ChildModel(
+  id: parseToInt(json['id']),
+  name: json['name'] as String? ?? '',
+  gender: ChildGenderX.fromWire(json['gender'] as String?),
+  dob: json['dob'] as String?,
+  displayDob: json['displayDob'] as String?,
+  imageUrl: json['imageUrl'] as String?,
+  consent: json['consent'] as bool? ?? false,
+  age: json['age'] as String?,
+  trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
+);

@@ -19,6 +19,7 @@ class AppConfigResponse extends ActionResponse {
   final FeatureFlags? featureFlags;
   final RemoteConfigFlags? remoteConfigFlags;
   final List<String>? customerCareContacts;
+  final String? customerCareTiming;
   final String? videoTransformationsJson;
   final String? cartMessageBarsJson;
   final N7Config? n7Config;
@@ -34,6 +35,7 @@ class AppConfigResponse extends ActionResponse {
     this.featureFlags,
     this.remoteConfigFlags,
     this.customerCareContacts,
+    this.customerCareTiming,
     this.videoTransformationsJson,
     this.cartMessageBarsJson,
     this.n7Config,
@@ -60,9 +62,19 @@ class AppConfigResponse extends ActionResponse {
               json['remoteConfigFlags'] as Map<String, dynamic>,
             )
           : null,
-      customerCareContacts = (json['contacts'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList(),
+      // The numbers moved under `ccConfig`; `contacts` is kept as a fallback
+      // because nothing guarantees every environment has moved with them.
+      // Reading only the old key is why customerCareContact was null and the
+      // Call Us button did nothing.
+      customerCareContacts =
+          ((json['ccConfig'] as Map<String, dynamic>?)?['contactNumber']
+                  as List<dynamic>? ??
+              json['contacts'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList(),
+      customerCareTiming =
+          (json['ccConfig'] as Map<String, dynamic>?)?['contactTiming']
+              as String?,
       videoTransformationsJson = _encodeList(json['videoTransformations']),
       cartMessageBarsJson = _encodeList(json['cartMessageBars']),
       n7Config = json['n7Config'] != null
@@ -90,6 +102,7 @@ class AppConfigResponse extends ActionResponse {
     featureFlags,
     remoteConfigFlags,
     customerCareContacts,
+    customerCareTiming,
     videoTransformationsJson,
     cartMessageBarsJson,
     n7Config,

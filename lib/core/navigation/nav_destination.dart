@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/core/analytics/analytics_map.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../analytics/constants/analytics_defaults.dart';
 import '../../core/entities/message_bar_entity.dart';
 import '../../features/auth/domain/entities/auth_entry_args.dart';
 import '../../features/pdp/domain/entities/pdp_entry_args.dart';
@@ -250,7 +253,20 @@ class CartDestination extends NavDestination {
 
   @override
   void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
-    AppNavigator.goToCart(context);
+    AppNavigator.goToCart(
+      context,
+      // A deeplink has no originating screen inside the app, so `from_screen`
+      // is the `none` sentinel — Android's own fallback for an unknown one
+      // (`logRecoClickedEvent`, and every other `!isEmpty(x) ? x : NONE`).
+      // It was `FromLocations.deeplink`, which is a `from_location` value:
+      // there is no `FromScreens.deeplink`, and Android has no deeplink
+      // caller of `navigateToCart` to mirror. `from_location` already says
+      // the entry was a deeplink, so nothing is lost.
+      sourcePage: const SourcePage(
+        fromScreen: AnalyticsDefaults.none,
+        fromLocation: FromLocations.deeplink,
+      ),
+    );
   }
 }
 
@@ -279,7 +295,27 @@ class ExternalDestination extends NavDestination {
 
   @override
   void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
-    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    unawaited(_launch());
+  }
+
+  /// `launchUrl` reports failure by returning false, and throws when the
+  /// platform rejects the intent. Both were dropped, so a `tel:` the device
+  /// could not resolve looked identical to a tap that worked — which is how
+  /// Call Us failed silently before `tel` was declared in the manifest's
+  /// `<queries>`.
+  Future<void> _launch() async {
+    final uri = Uri.parse(url);
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        debugPrint('ExternalDestination: no handler for $uri');
+      }
+    } catch (e) {
+      debugPrint('ExternalDestination: could not launch $uri — $e');
+    }
   }
 }
 

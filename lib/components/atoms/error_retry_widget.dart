@@ -8,7 +8,19 @@ class ErrorRetryWidget extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
 
-  const ErrorRetryWidget({super.key, required this.message, required this.onRetry});
+  /// Optional automation keys. Screens that assert their error state need a
+  /// handle on the message and the button; screens that do not can leave both
+  /// null, which is why they are not required.
+  final Key? messageKey;
+  final Key? retryButtonKey;
+
+  const ErrorRetryWidget({
+    super.key,
+    required this.message,
+    required this.onRetry,
+    this.messageKey,
+    this.retryButtonKey,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,15 +30,23 @@ class ErrorRetryWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: AppSpacing.iconXl, color: AppColors.textTertiary),
+            const Icon(
+              Icons.error_outline,
+              size: AppSpacing.iconXl,
+              color: AppColors.textTertiary,
+            ),
             AppSpacing.verticalGapMd,
             Text(
               message,
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+              key: messageKey,
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             AppSpacing.verticalGapLg,
             ElevatedButton.icon(
+              key: retryButtonKey,
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),

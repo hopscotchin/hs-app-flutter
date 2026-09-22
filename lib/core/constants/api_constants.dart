@@ -82,6 +82,11 @@ class ApiConstants {
   static const String logout = '/customer/logout';
   static const String forgetGuestUser = '/customer/flush-data/guestuser';
 
+  // My Kids (child profiles)
+  static const String kidsList = '/v2/questionnaire/list';
+  static const String kidsDelete = '/v2/questionnaire/{kidId}';
+  static const String kidsSave = '/v3/questionnaire/save-and-update';
+
   // Address Management
   static const String addresses = '/delivery/addresses/v3';
   static const String customerAddresses = '/customer/v2/addresses';
@@ -122,4 +127,11 @@ class ApiConstants {
   static const String markOrderFail = '/checkout/order-fail';
   static const String orderConfirmation =
       '/v2/checkout'; // append /{orderId}/confirmation
+
+  // Orders — the redesigned listing contracts. Replace Android's `orders/v5`
+  // and `v1/gift-cards`; both return the same envelope and record shape.
+  // The versions differ because each follows its own predecessor.
+  // See docs/orders/be/.
+  static const String ordersListing = '/orders-listing/v6';
+  static const String giftCardsListing = '/gift-cards-listing/v2';
 }
