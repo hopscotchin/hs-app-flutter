@@ -7,27 +7,26 @@ part 'search_suggestion_model.g.dart';
 @JsonSerializable(createToJson: false)
 class SearchSuggestionModel {
   const SearchSuggestionModel({
-    this.id,
-    this.type,
     this.term,
     this.displayName,
-    this.actionURI,
+    this.actionUri,
+    this.actionUriWeb,
     this.searchParams,
-    this.trackingData,
+    this.trackingMeta,
   });
 
-  final String? id;
-  final String? type;
   final String? term;
   final String? displayName;
-  final String? actionURI;
+  final String? actionUri;
+  final String? actionUriWeb;
 
   @JsonKey(name: 'search_params')
   final String? searchParams;
 
-  /// Server-driven map of analytics keys/values. Schema is owned by the
-  /// backend; we treat it as an opaque payload to forward to segment.
-  final Map<String, dynamic>? trackingData;
+  /// Server-driven map of analytics keys/values (`id`/`type`/`section`).
+  /// Schema is owned by the backend; we treat it as an opaque payload to
+  /// forward to segment.
+  final Map<String, dynamic>? trackingMeta;
 
   factory SearchSuggestionModel.fromJson(Map<String, dynamic> json) =>
       _$SearchSuggestionModelFromJson(json);
@@ -35,12 +34,11 @@ class SearchSuggestionModel {
 
 extension SearchSuggestionModelX on SearchSuggestionModel {
   SearchSuggestionEntity toEntity() => SearchSuggestionEntity(
-        id: id,
-        type: type,
         term: term,
         displayName: displayName,
-        actionUri: actionURI,
+        actionUri: actionUri,
+        actionUriWeb: actionUriWeb,
         searchParams: searchParams,
-        trackingData: trackingData,
+        trackingMeta: trackingMeta,
       );
 }

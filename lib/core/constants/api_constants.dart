@@ -34,7 +34,7 @@ class ApiConstants {
   static const String collections = '/collections/v2';
 
   // Categories/Departments
-  static const String loadDepartments = '/loadDepartments';
+  static const String categoriesPage = '/v2/loadDepartments';
 
   // Moments
   static const String momentsFeed = '/moments/photo';
@@ -115,7 +115,7 @@ class ApiConstants {
   static const String pincodeCheck = '/products/pincode';
 
   // Search
-  static const String searchAutoSuggest = '/search/autoSuggest';
+  static const String searchAutoSuggest = '/v2/search/autoSuggest';
 
   // Checkout / Payment
   static const String placeOrder = '/checkout/v4/place-order';

@@ -13,6 +13,7 @@ import '../../../../core/analytics/events/modules/home_events.dart';
 import '../../../../core/analytics/home/home_track_analytic_manager.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/navigation_observer.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/home_page_entity.dart';
 import '../bloc/home_bloc.dart';
 import '../widgets/combined_header_delegate.dart';
@@ -27,7 +28,7 @@ class DiscoverPage extends StatefulWidget {
 }
 
 class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClientMixin {
-  static const _kToolbarHeight = 80.0;
+  static const _kToolbarHeight = CombinedHeaderDelegate.defaultToolbarHeight;
   static const _kTabsHeight = 60.0;
 
   static const _kPaginationTrigger = 0.8;
@@ -217,7 +218,9 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
                     ),
                     _buildContentSliver(context, state),
                     const LoadingMoreSliver(),
-                    const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
+                    const SliverPadding(
+                      padding: EdgeInsets.only(bottom: AppSpacing.bottomNavHeight + AppSpacing.md),
+                    ),
                   ],
                 ),
               ),

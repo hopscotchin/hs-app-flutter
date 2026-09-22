@@ -120,6 +120,36 @@ lists. **Examples** = concrete keys for dynamic patterns. **Widget file** = the
 | Nav item | `dashboard_search_nav_item` | — | `dashboard.dart` |
 | Nav item | `dashboard_account_nav_item` | — | `dashboard.dart` |
 
+## Categories
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Element | `categories_search_bar` | — | `combined_header_delegate.dart` |
+| Hint | `categories_search_bar_hint` | — | `combined_header_delegate.dart` |
+| Loading | `categories_loading_shimmer` | — | `categories_page.dart` |
+| Button | `categories_error_retry_button` | — | `categories_page.dart` |
+| Text field | `categories_search_input` | — | `categories_page.dart` |
+| Button | `categories_search_back_button` | — | `categories_page.dart` |
+| Button | `categories_search_input_clear_button` | — | `categories_page.dart` |
+| Text | `categories_search_error_text` | — | `categories_page.dart` |
+| Text | `categories_search_empty_text` | — | `categories_page.dart` |
+| List item | `categories_search_suggestion_item_<i>` | `categories_search_suggestion_item_0`, `categories_search_suggestion_item_1` | `categories_page.dart` |
+| Title | `categories_search_recent_title` | — | `categories_page.dart` |
+| List item | `categories_search_recent_item_<i>` | `categories_search_recent_item_0`, `categories_search_recent_item_1` | `categories_page.dart` |
+
+## Search
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Button | `search_back_button` | — | `search_page.dart` |
+| Text field | `search_input` | — | `search_page.dart` |
+| Button | `search_input_clear_button` | — | `search_page.dart` |
+| Text | `search_error_text` | — | `search_page.dart` |
+| Text | `search_empty_text` | — | `search_page.dart` |
+| List item | `search_suggestion_item_<i>` | `search_suggestion_item_0`, `search_suggestion_item_1` | `search_page.dart`, `search_suggestions_list.dart` |
+| Title | `search_recent_title` | — | `search_page.dart` |
+| List item | `search_recent_item_<i>` | `search_recent_item_0`, `search_recent_item_1` | `search_page.dart` |
+
 ## Home Component
 
 Server-driven. Composed at runtime as

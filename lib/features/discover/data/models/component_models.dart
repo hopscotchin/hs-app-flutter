@@ -205,6 +205,7 @@ class ComponentDataParser {
             id: (t['id'] as num?)?.toInt(),
             imageUrl: t['imageUrl'] as String?,
             actionUri: t['actionUri'] as String? ?? t['actionUrl'] as String?,
+            actionUriWeb: t['actionUriWeb'] as String?,
             mimeType: t['mimeType'] as String?,
             sort: t['sort'] as String?,
             product: _parseHomepageProduct(t['product']),
@@ -258,6 +259,41 @@ class ComponentDataParser {
     );
   }
 
+  // ─── CategoryAccordion ───
+
+  static CategoryAccordionTile _parseCategoryAccordionTile(
+    Map<String, dynamic> json, {
+    String? actionType,
+  }) {
+    final rawSections = json['sections'] as List<dynamic>? ?? const [];
+    return CategoryAccordionTile(
+      title: json['title'] as String?,
+      actionType: actionType,
+      actionUri: json['actionUri'] as String?,
+      actionUriWeb: json['actionUriWeb'] as String?,
+      subCategory: rawSections.whereType<Map<String, dynamic>>().map((section) {
+        final sectionTrackingMeta = section['trackingMeta'] as Map<String, dynamic>?;
+        return _parseCategoryAccordionTile(
+          section,
+          actionType: sectionTrackingMeta?['actionType'] as String?,
+        );
+      }).toList(),
+    );
+  }
+
+  static CategoryAccordionData parseCategoryAccordion(Map<String, dynamic> json) {
+    final rawTile = json['tile'];
+    final trackingMeta = _readTrackingMeta(json);
+    final tile = rawTile is Map<String, dynamic>
+        ? _parseCategoryAccordionTile(rawTile, actionType: trackingMeta?['actionType'] as String?)
+        : null;
+
+    return CategoryAccordionData(
+      tile: tile,
+      trackingMeta: trackingMeta,
+    );
+  }
+
   /// Extracts the raw `trackingMeta` map from a component's JSON payload
   /// verbatim. Every key/value goes straight through to impression / click
   /// analytics payloads — the backend owns the analytics contract, the
@@ -276,6 +312,7 @@ class ComponentDataParser {
       PageComponentType.customTiles => parseCustomTiles(data),
       PageComponentType.productGrid => parseProductGrid(data),
       PageComponentType.pageCarousel => parsePageCarousel(data),
+      PageComponentType.categoryAccordion => parseCategoryAccordion(data),
       _ => null,
     };
   }

@@ -377,6 +377,36 @@ class PrefManager {
   Future<void> setHasStoreButtonClicked(bool? value) =>
       _setBoolOrRemove(StorageKeys.isFirstLogin, value);
 
+  // ─── Search: Recent Searches ──────────────────────────────────────
+  //
+  // Local-only — there's no "recent searches" backend endpoint, so this is
+  // the sole source of truth. Most-recent first, deduped case-insensitively,
+  // capped at [_maxRecentSearches].
+
+  static const int _maxRecentSearches = 10;
+
+  List<String> get recentSearches =>
+      _prefs.getStringList(StorageKeys.recentSearches) ?? const [];
+
+  Future<void> addRecentSearch(String term) {
+    final trimmed = term.trim();
+    if (trimmed.isEmpty) return Future.value();
+    final updated = List<String>.of(recentSearches)
+      ..removeWhere((e) => e.toLowerCase() == trimmed.toLowerCase())
+      ..insert(0, trimmed);
+    if (updated.length > _maxRecentSearches) {
+      updated.removeRange(_maxRecentSearches, updated.length);
+    }
+    return _prefs.setStringList(StorageKeys.recentSearches, updated);
+  }
+
+  Future<void> removeRecentSearch(String term) {
+    final updated = List<String>.of(recentSearches)..remove(term);
+    return _prefs.setStringList(StorageKeys.recentSearches, updated);
+  }
+
+  Future<void> clearRecentSearches() => _prefs.remove(StorageKeys.recentSearches);
+
   // ─── Helpers ──────────────────────────────────────────────────────
 
   Future<void> _setStringOrRemove(String key, String? value) {

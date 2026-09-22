@@ -9,11 +9,10 @@ part of 'search_suggestion_model.dart';
 SearchSuggestionModel _$SearchSuggestionModelFromJson(
   Map<String, dynamic> json,
 ) => SearchSuggestionModel(
-  id: json['id'] as String?,
-  type: json['type'] as String?,
   term: json['term'] as String?,
   displayName: json['displayName'] as String?,
-  actionURI: json['actionURI'] as String?,
+  actionUri: json['actionUri'] as String?,
+  actionUriWeb: json['actionUriWeb'] as String?,
   searchParams: json['search_params'] as String?,
-  trackingData: json['trackingData'] as Map<String, dynamic>?,
+  trackingMeta: json['trackingMeta'] as Map<String, dynamic>?,
 );

@@ -5,7 +5,6 @@ import '../../../../core/navigation/nav_destination.dart';
 import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../components/atoms/badge_icon.dart';
 import '../../../../components/atoms/custom_image.dart';
-import '../../../../core/analytics/constants/analytics_defaults.dart';
 import '../../../../core/constants/image_constants.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/pdp_strings.dart';

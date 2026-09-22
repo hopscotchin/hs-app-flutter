@@ -56,6 +56,9 @@ class StorageKeys {
   static const String addressesJson = 'hs_addresses_json';
   static const String lastSelectedPincodeAddressId = 'hs_last_selected_pincode_address_id';
 
+  // Search — recent searches (local-only, no backend endpoint)
+  static const String recentSearches = 'hs_recent_searches';
+
   // Device / Push
   static const String pushToken = 'hs_push_token';
   static const String isDeviceTokenSent = 'hs_is_device_token_sent';

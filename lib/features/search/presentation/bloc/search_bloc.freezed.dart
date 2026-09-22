@@ -55,13 +55,17 @@ extension SearchEventPatterns on SearchEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( QueryChanged value)?  queryChanged,TResult Function( _FetchSuggestions value)?  fetchSuggestions,TResult Function( ClearQuery value)?  clearQuery,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( QueryChanged value)?  queryChanged,TResult Function( _FetchSuggestions value)?  fetchSuggestions,TResult Function( ClearQuery value)?  clearQuery,TResult Function( LoadRecentSearches value)?  loadRecentSearches,TResult Function( RecordRecentSearch value)?  recordRecentSearch,TResult Function( RemoveRecentSearch value)?  removeRecentSearch,TResult Function( ClearRecentSearches value)?  clearRecentSearches,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case QueryChanged() when queryChanged != null:
 return queryChanged(_that);case _FetchSuggestions() when fetchSuggestions != null:
 return fetchSuggestions(_that);case ClearQuery() when clearQuery != null:
-return clearQuery(_that);case _:
+return clearQuery(_that);case LoadRecentSearches() when loadRecentSearches != null:
+return loadRecentSearches(_that);case RecordRecentSearch() when recordRecentSearch != null:
+return recordRecentSearch(_that);case RemoveRecentSearch() when removeRecentSearch != null:
+return removeRecentSearch(_that);case ClearRecentSearches() when clearRecentSearches != null:
+return clearRecentSearches(_that);case _:
   return orElse();
 
 }
@@ -79,13 +83,17 @@ return clearQuery(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( QueryChanged value)  queryChanged,required TResult Function( _FetchSuggestions value)  fetchSuggestions,required TResult Function( ClearQuery value)  clearQuery,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( QueryChanged value)  queryChanged,required TResult Function( _FetchSuggestions value)  fetchSuggestions,required TResult Function( ClearQuery value)  clearQuery,required TResult Function( LoadRecentSearches value)  loadRecentSearches,required TResult Function( RecordRecentSearch value)  recordRecentSearch,required TResult Function( RemoveRecentSearch value)  removeRecentSearch,required TResult Function( ClearRecentSearches value)  clearRecentSearches,}){
 final _that = this;
 switch (_that) {
 case QueryChanged():
 return queryChanged(_that);case _FetchSuggestions():
 return fetchSuggestions(_that);case ClearQuery():
-return clearQuery(_that);}
+return clearQuery(_that);case LoadRecentSearches():
+return loadRecentSearches(_that);case RecordRecentSearch():
+return recordRecentSearch(_that);case RemoveRecentSearch():
+return removeRecentSearch(_that);case ClearRecentSearches():
+return clearRecentSearches(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -99,13 +107,17 @@ return clearQuery(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( QueryChanged value)?  queryChanged,TResult? Function( _FetchSuggestions value)?  fetchSuggestions,TResult? Function( ClearQuery value)?  clearQuery,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( QueryChanged value)?  queryChanged,TResult? Function( _FetchSuggestions value)?  fetchSuggestions,TResult? Function( ClearQuery value)?  clearQuery,TResult? Function( LoadRecentSearches value)?  loadRecentSearches,TResult? Function( RecordRecentSearch value)?  recordRecentSearch,TResult? Function( RemoveRecentSearch value)?  removeRecentSearch,TResult? Function( ClearRecentSearches value)?  clearRecentSearches,}){
 final _that = this;
 switch (_that) {
 case QueryChanged() when queryChanged != null:
 return queryChanged(_that);case _FetchSuggestions() when fetchSuggestions != null:
 return fetchSuggestions(_that);case ClearQuery() when clearQuery != null:
-return clearQuery(_that);case _:
+return clearQuery(_that);case LoadRecentSearches() when loadRecentSearches != null:
+return loadRecentSearches(_that);case RecordRecentSearch() when recordRecentSearch != null:
+return recordRecentSearch(_that);case RemoveRecentSearch() when removeRecentSearch != null:
+return removeRecentSearch(_that);case ClearRecentSearches() when clearRecentSearches != null:
+return clearRecentSearches(_that);case _:
   return null;
 
 }
@@ -122,12 +134,16 @@ return clearQuery(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String query)?  queryChanged,TResult Function( String query)?  fetchSuggestions,TResult Function()?  clearQuery,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String query)?  queryChanged,TResult Function( String query)?  fetchSuggestions,TResult Function()?  clearQuery,TResult Function()?  loadRecentSearches,TResult Function( String term)?  recordRecentSearch,TResult Function( String term)?  removeRecentSearch,TResult Function()?  clearRecentSearches,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case QueryChanged() when queryChanged != null:
 return queryChanged(_that.query);case _FetchSuggestions() when fetchSuggestions != null:
 return fetchSuggestions(_that.query);case ClearQuery() when clearQuery != null:
-return clearQuery();case _:
+return clearQuery();case LoadRecentSearches() when loadRecentSearches != null:
+return loadRecentSearches();case RecordRecentSearch() when recordRecentSearch != null:
+return recordRecentSearch(_that.term);case RemoveRecentSearch() when removeRecentSearch != null:
+return removeRecentSearch(_that.term);case ClearRecentSearches() when clearRecentSearches != null:
+return clearRecentSearches();case _:
   return orElse();
 
 }
@@ -145,12 +161,16 @@ return clearQuery();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String query)  queryChanged,required TResult Function( String query)  fetchSuggestions,required TResult Function()  clearQuery,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String query)  queryChanged,required TResult Function( String query)  fetchSuggestions,required TResult Function()  clearQuery,required TResult Function()  loadRecentSearches,required TResult Function( String term)  recordRecentSearch,required TResult Function( String term)  removeRecentSearch,required TResult Function()  clearRecentSearches,}) {final _that = this;
 switch (_that) {
 case QueryChanged():
 return queryChanged(_that.query);case _FetchSuggestions():
 return fetchSuggestions(_that.query);case ClearQuery():
-return clearQuery();}
+return clearQuery();case LoadRecentSearches():
+return loadRecentSearches();case RecordRecentSearch():
+return recordRecentSearch(_that.term);case RemoveRecentSearch():
+return removeRecentSearch(_that.term);case ClearRecentSearches():
+return clearRecentSearches();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -164,12 +184,16 @@ return clearQuery();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String query)?  queryChanged,TResult? Function( String query)?  fetchSuggestions,TResult? Function()?  clearQuery,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String query)?  queryChanged,TResult? Function( String query)?  fetchSuggestions,TResult? Function()?  clearQuery,TResult? Function()?  loadRecentSearches,TResult? Function( String term)?  recordRecentSearch,TResult? Function( String term)?  removeRecentSearch,TResult? Function()?  clearRecentSearches,}) {final _that = this;
 switch (_that) {
 case QueryChanged() when queryChanged != null:
 return queryChanged(_that.query);case _FetchSuggestions() when fetchSuggestions != null:
 return fetchSuggestions(_that.query);case ClearQuery() when clearQuery != null:
-return clearQuery();case _:
+return clearQuery();case LoadRecentSearches() when loadRecentSearches != null:
+return loadRecentSearches();case RecordRecentSearch() when recordRecentSearch != null:
+return recordRecentSearch(_that.term);case RemoveRecentSearch() when removeRecentSearch != null:
+return removeRecentSearch(_that.term);case ClearRecentSearches() when clearRecentSearches != null:
+return clearRecentSearches();case _:
   return null;
 
 }
@@ -342,9 +366,205 @@ String toString() {
 
 
 /// @nodoc
+
+
+class LoadRecentSearches implements SearchEvent {
+  const LoadRecentSearches();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadRecentSearches);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'SearchEvent.loadRecentSearches()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class RecordRecentSearch implements SearchEvent {
+  const RecordRecentSearch(this.term);
+  
+
+ final  String term;
+
+/// Create a copy of SearchEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RecordRecentSearchCopyWith<RecordRecentSearch> get copyWith => _$RecordRecentSearchCopyWithImpl<RecordRecentSearch>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecordRecentSearch&&(identical(other.term, term) || other.term == term));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,term);
+
+@override
+String toString() {
+  return 'SearchEvent.recordRecentSearch(term: $term)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RecordRecentSearchCopyWith<$Res> implements $SearchEventCopyWith<$Res> {
+  factory $RecordRecentSearchCopyWith(RecordRecentSearch value, $Res Function(RecordRecentSearch) _then) = _$RecordRecentSearchCopyWithImpl;
+@useResult
+$Res call({
+ String term
+});
+
+
+
+
+}
+/// @nodoc
+class _$RecordRecentSearchCopyWithImpl<$Res>
+    implements $RecordRecentSearchCopyWith<$Res> {
+  _$RecordRecentSearchCopyWithImpl(this._self, this._then);
+
+  final RecordRecentSearch _self;
+  final $Res Function(RecordRecentSearch) _then;
+
+/// Create a copy of SearchEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? term = null,}) {
+  return _then(RecordRecentSearch(
+null == term ? _self.term : term // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class RemoveRecentSearch implements SearchEvent {
+  const RemoveRecentSearch(this.term);
+  
+
+ final  String term;
+
+/// Create a copy of SearchEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RemoveRecentSearchCopyWith<RemoveRecentSearch> get copyWith => _$RemoveRecentSearchCopyWithImpl<RemoveRecentSearch>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RemoveRecentSearch&&(identical(other.term, term) || other.term == term));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,term);
+
+@override
+String toString() {
+  return 'SearchEvent.removeRecentSearch(term: $term)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RemoveRecentSearchCopyWith<$Res> implements $SearchEventCopyWith<$Res> {
+  factory $RemoveRecentSearchCopyWith(RemoveRecentSearch value, $Res Function(RemoveRecentSearch) _then) = _$RemoveRecentSearchCopyWithImpl;
+@useResult
+$Res call({
+ String term
+});
+
+
+
+
+}
+/// @nodoc
+class _$RemoveRecentSearchCopyWithImpl<$Res>
+    implements $RemoveRecentSearchCopyWith<$Res> {
+  _$RemoveRecentSearchCopyWithImpl(this._self, this._then);
+
+  final RemoveRecentSearch _self;
+  final $Res Function(RemoveRecentSearch) _then;
+
+/// Create a copy of SearchEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? term = null,}) {
+  return _then(RemoveRecentSearch(
+null == term ? _self.term : term // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class ClearRecentSearches implements SearchEvent {
+  const ClearRecentSearches();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ClearRecentSearches);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'SearchEvent.clearRecentSearches()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
 mixin _$SearchState {
 
- SearchStatus get status; String get query; List<SearchSuggestionEntity> get suggestions; String? get errorMessage;
+ SearchStatus get status; String get query; List<SearchSuggestionEntity> get suggestions; List<String> get recentSearches; String? get errorMessage;
 /// Create a copy of SearchState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -355,16 +575,16 @@ $SearchStateCopyWith<SearchState> get copyWith => _$SearchStateCopyWithImpl<Sear
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other.suggestions, suggestions)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other.suggestions, suggestions)&&const DeepCollectionEquality().equals(other.recentSearches, recentSearches)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,query,const DeepCollectionEquality().hash(suggestions),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,query,const DeepCollectionEquality().hash(suggestions),const DeepCollectionEquality().hash(recentSearches),errorMessage);
 
 @override
 String toString() {
-  return 'SearchState(status: $status, query: $query, suggestions: $suggestions, errorMessage: $errorMessage)';
+  return 'SearchState(status: $status, query: $query, suggestions: $suggestions, recentSearches: $recentSearches, errorMessage: $errorMessage)';
 }
 
 
@@ -375,7 +595,7 @@ abstract mixin class $SearchStateCopyWith<$Res>  {
   factory $SearchStateCopyWith(SearchState value, $Res Function(SearchState) _then) = _$SearchStateCopyWithImpl;
 @useResult
 $Res call({
- SearchStatus status, String query, List<SearchSuggestionEntity> suggestions, String? errorMessage
+ SearchStatus status, String query, List<SearchSuggestionEntity> suggestions, List<String> recentSearches, String? errorMessage
 });
 
 
@@ -392,12 +612,13 @@ class _$SearchStateCopyWithImpl<$Res>
 
 /// Create a copy of SearchState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? query = null,Object? suggestions = null,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? query = null,Object? suggestions = null,Object? recentSearches = null,Object? errorMessage = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as SearchStatus,query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
 as String,suggestions: null == suggestions ? _self.suggestions : suggestions // ignore: cast_nullable_to_non_nullable
-as List<SearchSuggestionEntity>,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as List<SearchSuggestionEntity>,recentSearches: null == recentSearches ? _self.recentSearches : recentSearches // ignore: cast_nullable_to_non_nullable
+as List<String>,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -483,10 +704,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SearchStatus status,  String query,  List<SearchSuggestionEntity> suggestions,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SearchStatus status,  String query,  List<SearchSuggestionEntity> suggestions,  List<String> recentSearches,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SearchState() when $default != null:
-return $default(_that.status,_that.query,_that.suggestions,_that.errorMessage);case _:
+return $default(_that.status,_that.query,_that.suggestions,_that.recentSearches,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -504,10 +725,10 @@ return $default(_that.status,_that.query,_that.suggestions,_that.errorMessage);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SearchStatus status,  String query,  List<SearchSuggestionEntity> suggestions,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SearchStatus status,  String query,  List<SearchSuggestionEntity> suggestions,  List<String> recentSearches,  String? errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _SearchState():
-return $default(_that.status,_that.query,_that.suggestions,_that.errorMessage);case _:
+return $default(_that.status,_that.query,_that.suggestions,_that.recentSearches,_that.errorMessage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -524,10 +745,10 @@ return $default(_that.status,_that.query,_that.suggestions,_that.errorMessage);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SearchStatus status,  String query,  List<SearchSuggestionEntity> suggestions,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SearchStatus status,  String query,  List<SearchSuggestionEntity> suggestions,  List<String> recentSearches,  String? errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _SearchState() when $default != null:
-return $default(_that.status,_that.query,_that.suggestions,_that.errorMessage);case _:
+return $default(_that.status,_that.query,_that.suggestions,_that.recentSearches,_that.errorMessage);case _:
   return null;
 
 }
@@ -539,7 +760,7 @@ return $default(_that.status,_that.query,_that.suggestions,_that.errorMessage);c
 
 
 class _SearchState implements SearchState {
-  const _SearchState({this.status = SearchStatus.idle, this.query = '', final  List<SearchSuggestionEntity> suggestions = const <SearchSuggestionEntity>[], this.errorMessage}): _suggestions = suggestions;
+  const _SearchState({this.status = SearchStatus.idle, this.query = '', final  List<SearchSuggestionEntity> suggestions = const <SearchSuggestionEntity>[], final  List<String> recentSearches = const <String>[], this.errorMessage}): _suggestions = suggestions,_recentSearches = recentSearches;
   
 
 @override@JsonKey() final  SearchStatus status;
@@ -549,6 +770,13 @@ class _SearchState implements SearchState {
   if (_suggestions is EqualUnmodifiableListView) return _suggestions;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_suggestions);
+}
+
+ final  List<String> _recentSearches;
+@override@JsonKey() List<String> get recentSearches {
+  if (_recentSearches is EqualUnmodifiableListView) return _recentSearches;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_recentSearches);
 }
 
 @override final  String? errorMessage;
@@ -563,16 +791,16 @@ _$SearchStateCopyWith<_SearchState> get copyWith => __$SearchStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other._suggestions, _suggestions)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.query, query) || other.query == query)&&const DeepCollectionEquality().equals(other._suggestions, _suggestions)&&const DeepCollectionEquality().equals(other._recentSearches, _recentSearches)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,query,const DeepCollectionEquality().hash(_suggestions),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,query,const DeepCollectionEquality().hash(_suggestions),const DeepCollectionEquality().hash(_recentSearches),errorMessage);
 
 @override
 String toString() {
-  return 'SearchState(status: $status, query: $query, suggestions: $suggestions, errorMessage: $errorMessage)';
+  return 'SearchState(status: $status, query: $query, suggestions: $suggestions, recentSearches: $recentSearches, errorMessage: $errorMessage)';
 }
 
 
@@ -583,7 +811,7 @@ abstract mixin class _$SearchStateCopyWith<$Res> implements $SearchStateCopyWith
   factory _$SearchStateCopyWith(_SearchState value, $Res Function(_SearchState) _then) = __$SearchStateCopyWithImpl;
 @override @useResult
 $Res call({
- SearchStatus status, String query, List<SearchSuggestionEntity> suggestions, String? errorMessage
+ SearchStatus status, String query, List<SearchSuggestionEntity> suggestions, List<String> recentSearches, String? errorMessage
 });
 
 
@@ -600,12 +828,13 @@ class __$SearchStateCopyWithImpl<$Res>
 
 /// Create a copy of SearchState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? query = null,Object? suggestions = null,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? query = null,Object? suggestions = null,Object? recentSearches = null,Object? errorMessage = freezed,}) {
   return _then(_SearchState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as SearchStatus,query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
 as String,suggestions: null == suggestions ? _self._suggestions : suggestions // ignore: cast_nullable_to_non_nullable
-as List<SearchSuggestionEntity>,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as List<SearchSuggestionEntity>,recentSearches: null == recentSearches ? _self._recentSearches : recentSearches // ignore: cast_nullable_to_non_nullable
+as List<String>,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

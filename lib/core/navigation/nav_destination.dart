@@ -10,7 +10,6 @@ import '../analytics/constants/analytics_defaults.dart';
 import '../../core/entities/message_bar_entity.dart';
 import '../../features/auth/domain/entities/auth_entry_args.dart';
 import '../../features/pdp/domain/entities/pdp_entry_args.dart';
-import '../analytics/constants/analytics_defaults.dart';
 import '../../features/plp/domain/entities/page_type.dart';
 import '../../features/plp/domain/entities/plp_entry_args.dart';
 

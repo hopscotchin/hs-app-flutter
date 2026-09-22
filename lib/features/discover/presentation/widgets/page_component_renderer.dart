@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../../../components/page_components/category_accordion_widget.dart';
 import '../../../../components/page_components/custom_tiles_widget.dart';
 import '../../../../components/page_components/hero_carousel_widget.dart';
 import '../../../../components/page_components/page_carousel_widget.dart';
@@ -40,6 +41,16 @@ class PageComponentRenderer extends StatefulWidget {
   /// a landing page. Null disables keying (component renders without keys).
   final String? pagePrefix;
 
+  /// For [PageComponentType.categoryAccordion] only: whether this
+  /// component's section is the one currently expanded among its siblings.
+  /// The host page owns which single index is expanded so only one section
+  /// opens at a time; ignored by every other component type.
+  final bool isAccordionExpanded;
+
+  /// For [PageComponentType.categoryAccordion] only: toggles
+  /// [isAccordionExpanded] in the host page's state.
+  final VoidCallback? onAccordionToggle;
+
   /// The page these components belong to. Supplied by the host — it is the
   /// thing that knows — rather than read from screen-scoped global state at tap
   /// time. Null for a host whose taps report no origin.
@@ -54,6 +65,8 @@ class PageComponentRenderer extends StatefulWidget {
     required this.component,
     this.index = 0,
     this.pagePrefix,
+    this.isAccordionExpanded = false,
+    this.onAccordionToggle,
     this.sourcePage,
   });
 
@@ -67,6 +80,7 @@ class PageComponentRenderer extends StatefulWidget {
       PageComponentType.customTiles => HomeComponentTestStrings.customTiles,
       PageComponentType.productGrid => HomeComponentTestStrings.productGrid,
       PageComponentType.pageCarousel => HomeComponentTestStrings.pageCarousel,
+      PageComponentType.categoryAccordion => HomeComponentTestStrings.categoryAccordion,
       _ => null,
     };
     if (abbrev == null) return null;
@@ -168,6 +182,12 @@ class _PageComponentRendererState extends State<PageComponentRenderer> {
       PageComponentType.customTiles => _buildCustomTiles(parsed, margins, keyPrefix),
       PageComponentType.productGrid => _buildProductGrid(parsed, margins, keyPrefix),
       PageComponentType.pageCarousel => _buildPageCarousel(parsed, margins, keyPrefix),
+      PageComponentType.categoryAccordion => _buildCategoryAccordion(
+          parsed,
+          keyPrefix,
+          widget.isAccordionExpanded,
+          widget.onAccordionToggle,
+        ),
       _ => const SizedBox.shrink(),
     };
 
@@ -246,6 +266,26 @@ class _PageComponentRendererState extends State<PageComponentRenderer> {
       margins: margins,
       keyPrefix: keyPrefix,
       tapAnalytics: widget._tapAnalytics,
+    );
+  }
+
+  Widget _buildCategoryAccordion(
+    Object? parsed,
+    String? keyPrefix,
+    bool isExpanded,
+    VoidCallback? onToggleExpand,
+  ) {
+    final data = parsed is CategoryAccordionData
+        ? parsed
+        : widget.component.data != null
+        ? ComponentDataParser.parseCategoryAccordion(widget.component.data!)
+        : null;
+    if (data == null) return const SizedBox.shrink();
+    return CategoryAccordionWidget(
+      accordionData: data,
+      keyPrefix: keyPrefix,
+      isExpanded: isExpanded,
+      onToggleExpand: onToggleExpand ?? () {},
     );
   }
 }

@@ -33,7 +33,7 @@ class _SearchApi implements SearchApi {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/search/autoSuggest',
+            '/v2/search/autoSuggest',
             queryParameters: queryParameters,
             data: _data,
             cancelToken: cancelToken,

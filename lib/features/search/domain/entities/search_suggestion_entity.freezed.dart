@@ -14,12 +14,13 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SearchSuggestionEntity {
 
- String? get id; String? get type; String? get term;/// May contain simple HTML — `<p><b>hel</b>met</p>` — where `<b>` marks
+ String? get term;/// May contain simple HTML — `<p><b>hel</b>met</p>` — where `<b>` marks
 /// the substring matching the user's typed query. See the search page
 /// for how this is rendered.
- String? get displayName; String? get actionUri; String? get searchParams;/// Analytics payload from the autocomplete API. Forwarded to the
-/// segment event when a suggestion is tapped. Shape is server-defined.
- Map<String, dynamic>? get trackingData;
+ String? get displayName; String? get actionUri; String? get actionUriWeb; String? get searchParams;/// Analytics payload from the autocomplete API — `id`/`type`/`section`.
+/// Forwarded to the segment event when a suggestion is tapped. Shape is
+/// server-defined.
+ Map<String, dynamic>? get trackingMeta;
 /// Create a copy of SearchSuggestionEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,16 +31,16 @@ $SearchSuggestionEntityCopyWith<SearchSuggestionEntity> get copyWith => _$Search
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchSuggestionEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.term, term) || other.term == term)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.actionUri, actionUri) || other.actionUri == actionUri)&&(identical(other.searchParams, searchParams) || other.searchParams == searchParams)&&const DeepCollectionEquality().equals(other.trackingData, trackingData));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchSuggestionEntity&&(identical(other.term, term) || other.term == term)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.actionUri, actionUri) || other.actionUri == actionUri)&&(identical(other.actionUriWeb, actionUriWeb) || other.actionUriWeb == actionUriWeb)&&(identical(other.searchParams, searchParams) || other.searchParams == searchParams)&&const DeepCollectionEquality().equals(other.trackingMeta, trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,type,term,displayName,actionUri,searchParams,const DeepCollectionEquality().hash(trackingData));
+int get hashCode => Object.hash(runtimeType,term,displayName,actionUri,actionUriWeb,searchParams,const DeepCollectionEquality().hash(trackingMeta));
 
 @override
 String toString() {
-  return 'SearchSuggestionEntity(id: $id, type: $type, term: $term, displayName: $displayName, actionUri: $actionUri, searchParams: $searchParams, trackingData: $trackingData)';
+  return 'SearchSuggestionEntity(term: $term, displayName: $displayName, actionUri: $actionUri, actionUriWeb: $actionUriWeb, searchParams: $searchParams, trackingMeta: $trackingMeta)';
 }
 
 
@@ -50,7 +51,7 @@ abstract mixin class $SearchSuggestionEntityCopyWith<$Res>  {
   factory $SearchSuggestionEntityCopyWith(SearchSuggestionEntity value, $Res Function(SearchSuggestionEntity) _then) = _$SearchSuggestionEntityCopyWithImpl;
 @useResult
 $Res call({
- String? id, String? type, String? term, String? displayName, String? actionUri, String? searchParams, Map<String, dynamic>? trackingData
+ String? term, String? displayName, String? actionUri, String? actionUriWeb, String? searchParams, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -67,15 +68,14 @@ class _$SearchSuggestionEntityCopyWithImpl<$Res>
 
 /// Create a copy of SearchSuggestionEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? type = freezed,Object? term = freezed,Object? displayName = freezed,Object? actionUri = freezed,Object? searchParams = freezed,Object? trackingData = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? term = freezed,Object? displayName = freezed,Object? actionUri = freezed,Object? actionUriWeb = freezed,Object? searchParams = freezed,Object? trackingMeta = freezed,}) {
   return _then(_self.copyWith(
-id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String?,term: freezed == term ? _self.term : term // ignore: cast_nullable_to_non_nullable
+term: freezed == term ? _self.term : term // ignore: cast_nullable_to_non_nullable
 as String?,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String?,actionUri: freezed == actionUri ? _self.actionUri : actionUri // ignore: cast_nullable_to_non_nullable
+as String?,actionUriWeb: freezed == actionUriWeb ? _self.actionUriWeb : actionUriWeb // ignore: cast_nullable_to_non_nullable
 as String?,searchParams: freezed == searchParams ? _self.searchParams : searchParams // ignore: cast_nullable_to_non_nullable
-as String?,trackingData: freezed == trackingData ? _self.trackingData : trackingData // ignore: cast_nullable_to_non_nullable
+as String?,trackingMeta: freezed == trackingMeta ? _self.trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>?,
   ));
 }
@@ -161,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String? type,  String? term,  String? displayName,  String? actionUri,  String? searchParams,  Map<String, dynamic>? trackingData)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? term,  String? displayName,  String? actionUri,  String? actionUriWeb,  String? searchParams,  Map<String, dynamic>? trackingMeta)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SearchSuggestionEntity() when $default != null:
-return $default(_that.id,_that.type,_that.term,_that.displayName,_that.actionUri,_that.searchParams,_that.trackingData);case _:
+return $default(_that.term,_that.displayName,_that.actionUri,_that.actionUriWeb,_that.searchParams,_that.trackingMeta);case _:
   return orElse();
 
 }
@@ -182,10 +182,10 @@ return $default(_that.id,_that.type,_that.term,_that.displayName,_that.actionUri
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String? type,  String? term,  String? displayName,  String? actionUri,  String? searchParams,  Map<String, dynamic>? trackingData)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? term,  String? displayName,  String? actionUri,  String? actionUriWeb,  String? searchParams,  Map<String, dynamic>? trackingMeta)  $default,) {final _that = this;
 switch (_that) {
 case _SearchSuggestionEntity():
-return $default(_that.id,_that.type,_that.term,_that.displayName,_that.actionUri,_that.searchParams,_that.trackingData);case _:
+return $default(_that.term,_that.displayName,_that.actionUri,_that.actionUriWeb,_that.searchParams,_that.trackingMeta);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +202,10 @@ return $default(_that.id,_that.type,_that.term,_that.displayName,_that.actionUri
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String? type,  String? term,  String? displayName,  String? actionUri,  String? searchParams,  Map<String, dynamic>? trackingData)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? term,  String? displayName,  String? actionUri,  String? actionUriWeb,  String? searchParams,  Map<String, dynamic>? trackingMeta)?  $default,) {final _that = this;
 switch (_that) {
 case _SearchSuggestionEntity() when $default != null:
-return $default(_that.id,_that.type,_that.term,_that.displayName,_that.actionUri,_that.searchParams,_that.trackingData);case _:
+return $default(_that.term,_that.displayName,_that.actionUri,_that.actionUriWeb,_that.searchParams,_that.trackingMeta);case _:
   return null;
 
 }
@@ -217,27 +217,28 @@ return $default(_that.id,_that.type,_that.term,_that.displayName,_that.actionUri
 
 
 class _SearchSuggestionEntity implements SearchSuggestionEntity {
-  const _SearchSuggestionEntity({this.id, this.type, this.term, this.displayName, this.actionUri, this.searchParams, final  Map<String, dynamic>? trackingData}): _trackingData = trackingData;
+  const _SearchSuggestionEntity({this.term, this.displayName, this.actionUri, this.actionUriWeb, this.searchParams, final  Map<String, dynamic>? trackingMeta}): _trackingMeta = trackingMeta;
   
 
-@override final  String? id;
-@override final  String? type;
 @override final  String? term;
 /// May contain simple HTML — `<p><b>hel</b>met</p>` — where `<b>` marks
 /// the substring matching the user's typed query. See the search page
 /// for how this is rendered.
 @override final  String? displayName;
 @override final  String? actionUri;
+@override final  String? actionUriWeb;
 @override final  String? searchParams;
-/// Analytics payload from the autocomplete API. Forwarded to the
-/// segment event when a suggestion is tapped. Shape is server-defined.
- final  Map<String, dynamic>? _trackingData;
-/// Analytics payload from the autocomplete API. Forwarded to the
-/// segment event when a suggestion is tapped. Shape is server-defined.
-@override Map<String, dynamic>? get trackingData {
-  final value = _trackingData;
+/// Analytics payload from the autocomplete API — `id`/`type`/`section`.
+/// Forwarded to the segment event when a suggestion is tapped. Shape is
+/// server-defined.
+ final  Map<String, dynamic>? _trackingMeta;
+/// Analytics payload from the autocomplete API — `id`/`type`/`section`.
+/// Forwarded to the segment event when a suggestion is tapped. Shape is
+/// server-defined.
+@override Map<String, dynamic>? get trackingMeta {
+  final value = _trackingMeta;
   if (value == null) return null;
-  if (_trackingData is EqualUnmodifiableMapView) return _trackingData;
+  if (_trackingMeta is EqualUnmodifiableMapView) return _trackingMeta;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(value);
 }
@@ -253,16 +254,16 @@ _$SearchSuggestionEntityCopyWith<_SearchSuggestionEntity> get copyWith => __$Sea
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SearchSuggestionEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.term, term) || other.term == term)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.actionUri, actionUri) || other.actionUri == actionUri)&&(identical(other.searchParams, searchParams) || other.searchParams == searchParams)&&const DeepCollectionEquality().equals(other._trackingData, _trackingData));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SearchSuggestionEntity&&(identical(other.term, term) || other.term == term)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.actionUri, actionUri) || other.actionUri == actionUri)&&(identical(other.actionUriWeb, actionUriWeb) || other.actionUriWeb == actionUriWeb)&&(identical(other.searchParams, searchParams) || other.searchParams == searchParams)&&const DeepCollectionEquality().equals(other._trackingMeta, _trackingMeta));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,type,term,displayName,actionUri,searchParams,const DeepCollectionEquality().hash(_trackingData));
+int get hashCode => Object.hash(runtimeType,term,displayName,actionUri,actionUriWeb,searchParams,const DeepCollectionEquality().hash(_trackingMeta));
 
 @override
 String toString() {
-  return 'SearchSuggestionEntity(id: $id, type: $type, term: $term, displayName: $displayName, actionUri: $actionUri, searchParams: $searchParams, trackingData: $trackingData)';
+  return 'SearchSuggestionEntity(term: $term, displayName: $displayName, actionUri: $actionUri, actionUriWeb: $actionUriWeb, searchParams: $searchParams, trackingMeta: $trackingMeta)';
 }
 
 
@@ -273,7 +274,7 @@ abstract mixin class _$SearchSuggestionEntityCopyWith<$Res> implements $SearchSu
   factory _$SearchSuggestionEntityCopyWith(_SearchSuggestionEntity value, $Res Function(_SearchSuggestionEntity) _then) = __$SearchSuggestionEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String? id, String? type, String? term, String? displayName, String? actionUri, String? searchParams, Map<String, dynamic>? trackingData
+ String? term, String? displayName, String? actionUri, String? actionUriWeb, String? searchParams, Map<String, dynamic>? trackingMeta
 });
 
 
@@ -290,15 +291,14 @@ class __$SearchSuggestionEntityCopyWithImpl<$Res>
 
 /// Create a copy of SearchSuggestionEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? type = freezed,Object? term = freezed,Object? displayName = freezed,Object? actionUri = freezed,Object? searchParams = freezed,Object? trackingData = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? term = freezed,Object? displayName = freezed,Object? actionUri = freezed,Object? actionUriWeb = freezed,Object? searchParams = freezed,Object? trackingMeta = freezed,}) {
   return _then(_SearchSuggestionEntity(
-id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String?,term: freezed == term ? _self.term : term // ignore: cast_nullable_to_non_nullable
+term: freezed == term ? _self.term : term // ignore: cast_nullable_to_non_nullable
 as String?,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String?,actionUri: freezed == actionUri ? _self.actionUri : actionUri // ignore: cast_nullable_to_non_nullable
+as String?,actionUriWeb: freezed == actionUriWeb ? _self.actionUriWeb : actionUriWeb // ignore: cast_nullable_to_non_nullable
 as String?,searchParams: freezed == searchParams ? _self.searchParams : searchParams // ignore: cast_nullable_to_non_nullable
-as String?,trackingData: freezed == trackingData ? _self._trackingData : trackingData // ignore: cast_nullable_to_non_nullable
+as String?,trackingMeta: freezed == trackingMeta ? _self._trackingMeta : trackingMeta // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>?,
   ));
 }
