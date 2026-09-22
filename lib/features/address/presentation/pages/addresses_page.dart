@@ -258,7 +258,10 @@ class _AddressesPageState extends State<AddressesPage> {
     );
     if (result == null || !mounted) return;
     if (_isCheckout && result.address != null) {
-      Navigator.of(context).pop();
+      // Signal a real selection to the checkout sheet (matches the select
+      // flow at line ~110) so it re-fetches buy-now; a bare pop() returns
+      // null and the sheet stays on stale totals.
+      Navigator.of(context).pop(true);
       return;
     }
     _showResultSnack(result.popUpMessage);

@@ -19,6 +19,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
+import '../../../address/domain/entities/manage_address_args.dart';
 import '../../../cart/domain/usecases/order_now_usecase.dart';
 import '../../domain/entities/buy_now_entity.dart';
 import '../../domain/entities/order_confirmation_entry_args.dart';
@@ -122,6 +123,25 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
     if (_selectedPaymentIndex < 0 && data.paymentModeMessages.isNotEmpty) {
       _selectedPaymentIndex = 0;
     }
+    // No saved address at open time → jump straight to add-address (skip
+    // the empty address-list sheet in between). Post-frame so the sheet
+    // is fully attached before we push over it.
+    if (data.hasAddress == false) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _openAddAddress();
+      });
+    }
+  }
+
+  Future<void> _openAddAddress() async {
+    final result = await AppNavigator.goToAddAddress(
+      context,
+      flow: ManageAddressFlow.cart,
+      fromScreen: FromScreens.checkout,
+    );
+    if (!mounted || result?.address == null) return;
+    await _refreshBuyNow();
   }
 
   Future<void> _refreshBuyNow() async {
