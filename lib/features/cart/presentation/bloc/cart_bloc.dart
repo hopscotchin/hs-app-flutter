@@ -686,6 +686,16 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     await result.fold(
       (failure) {
         if (failure is RequestCancelledFailure) return;
+        // Server sent an `action != "success"` with a structured
+        // `content` (buy-now's "All sold out" pattern) — thread it through
+        // as checkoutData so the sheet renders it instead of a toast.
+        if (failure is ApiFailure && failure.content != null && current.isLoaded) {
+          emit(current.copyWith(
+            isCheckoutLoading: false,
+            checkoutData: BuyNowEntity(content: failure.content),
+          ));
+          return;
+        }
         if (current.isLoaded) {
           emit(current.copyWith(isCheckoutLoading: false, toastMessage: failure.message));
         } else {

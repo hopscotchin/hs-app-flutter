@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
@@ -690,10 +691,10 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(
-              Icons.credit_card_off,
-              color: AppColors.dangerDefault,
-              size: 22,
+            SvgPicture.asset(
+              ImageConstants.paymentFailed,
+              width: AppSpacing.iconMd,
+              height: AppSpacing.iconMd,
             ),
             AppSpacing.horizontalGapSm,
             Expanded(

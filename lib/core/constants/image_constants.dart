@@ -69,4 +69,5 @@ class ImageConstants {
 
   static const String paymentModes = 'assets/icons/payment_modes.svg';
   static const String paymentPending = 'assets/icons/payment_pending.svg';
+  static const String paymentFailed = 'assets/icons/payment_failed.svg';
 }
