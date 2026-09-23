@@ -64,7 +64,7 @@ const _configs = <EmptyStateType, _EmptyStateConfig>{
     title: 'Your Empty Bag Needs Some Love',
     subtitle: 'Time to start your next style haul.',
     buttonLabel: 'Start Shopping',
-    iconSize: (60, 40),
+    iconSize: (64, 69),
   ),
   EmptyStateType.search: _EmptyStateConfig(
     icon: 'assets/icons/empty_states/search.svg',
