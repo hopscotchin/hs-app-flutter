@@ -60,7 +60,6 @@ class CustomTilesWidget extends StatelessWidget {
     }
 
     final double horizontalMargin = margins?.horizontal ?? 16;
-    final double innerHorizontalMargin = margins?.innerHorizontalMargin ?? 8;
     final double innerVerticalMargin = margins?.innerVerticalMargin ?? 0;
     final double titleHMargin = hasTitle
         ? (margins?.titleHorizontalMargin ?? 16)
@@ -96,7 +95,6 @@ class CustomTilesWidget extends StatelessWidget {
                   _buildRow(
                     context,
                     contentRows[i],
-                    innerHorizontalMargin,
                     imageCornerRadius,
                     // Flat tile index across all preceding content rows.
                     contentRows
@@ -208,7 +206,6 @@ class CustomTilesWidget extends StatelessWidget {
   Widget _buildRow(
     BuildContext context,
     CustomTilesTile row,
-    double innerHorizontalMargin,
     double imageCornerRadius,
     int startIndex,
   ) {
@@ -218,12 +215,10 @@ class CustomTilesWidget extends StatelessWidget {
     }
     return Row(
       children: [
-        for (int i = 0; i < tiles.length; i++) ...[
-          if (i > 0) SizedBox(width: innerHorizontalMargin),
+        for (int i = 0; i < tiles.length; i++)
           Expanded(
             child: _buildTile(context, row, tiles[i], imageCornerRadius, startIndex + i),
           ),
-        ],
       ],
     );
   }
