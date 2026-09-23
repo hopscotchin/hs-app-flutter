@@ -92,7 +92,15 @@ abstract class ActionResponse extends Equatable {
         rawBars.addAll(json['messageBars'] as List);
       }
 
-      throw ApiFailureException(message: message, rawMessageBars: rawBars);
+      final rawContent = json['dialog'] is Map<String, dynamic>
+          ? json['dialog'] as Map<String, dynamic>
+          : null;
+
+      throw ApiFailureException(
+        message: message,
+        rawMessageBars: rawBars,
+        rawContent: rawContent,
+      );
     }
     return json;
   }

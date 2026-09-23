@@ -1,11 +1,28 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
+import '../../../../components/app_bottom_sheet.dart';
+import '../../../../components/appbar/hs_appbar.dart';
+import '../../../../components/atoms/custom_image.dart';
+import '../../../../components/atoms/dots_loader.dart';
+import '../../../../components/buttons/app_button_named.dart';
+import '../../../../core/constants/image_constants.dart';
+import '../../../../core/constants/strings/checkout_strings.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/typography.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography/text_style_extensions.dart';
+import '../../../../core/theme/typography/typography_v1.dart';
+import '../../../../core/utils/json_parsers.dart';
 import '../../data/services/juspay_service.dart';
 import '../../domain/entities/init_juspay_entity.dart';
+import '../../domain/entities/order_confirmation_entry_args.dart';
+import '../../domain/entities/payment_retry_entry_args.dart';
+import '../../domain/entities/payment_state_result.dart';
 import '../../domain/entities/payment_status_entity.dart';
 import '../bloc/checkout_bloc.dart';
 
@@ -15,12 +32,25 @@ class PaymentStatePage extends StatefulWidget {
   final bool creditsApplied;
   final bool quickPayEnabled;
 
+  /// Analytics attribution for the payment flow — read from route extra by
+  /// [AppNavigator.goToPaymentState]. Passed through to the retry / confirm
+  /// pages so the whole chain reports one origin.
+  final String? fromScreen;
+
+  /// Payment mode chosen at the checkout sheet (POL / COD / OWP / etc.).
+  /// Threaded into the retry page as `previousPaymentMode` — mirrors
+  /// Android's `PaymentStateActivity.launchPaymentRetry(orderId,
+  /// previousPaymentMode)` (`PaymentStateActivity.kt:104`).
+  final String? paymentMode;
+
   const PaymentStatePage({
     super.key,
     required this.initJusPayEntity,
     required this.orderId,
     required this.creditsApplied,
     this.quickPayEnabled = false,
+    this.fromScreen,
+    this.paymentMode,
   });
 
   @override
@@ -29,7 +59,6 @@ class PaymentStatePage extends StatefulWidget {
 
 class _PaymentStatePageState extends State<PaymentStatePage> {
   late final JuspayService _juspayService;
-  bool _paymentStarted = false;
 
   @override
   void initState() {
@@ -44,23 +73,50 @@ class _PaymentStatePageState extends State<PaymentStatePage> {
 
     final sdkPayload = widget.initJusPayEntity.sdkPayload;
     if (sdkPayload == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Payment initialization failed')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(CheckoutStrings.paymentInitFailed)),
+      );
       Navigator.pop(context);
       return;
     }
 
-    setState(() => _paymentStarted = true);
-
     _juspayService.processPayment(sdkPayload, (eventData) {
       if (!mounted) return;
+      // Any process_result callback means Juspay has closed its native
+      // Activity — flip the overlay back to the app default *now*.
+      // `AnnotatedRegion` is declarative and won't re-fire without a
+      // widget-tree change, so an imperative call is what actually lands
+      // the reset.
+      SystemChrome.setSystemUIOverlayStyle(AppTheme.systemUiLight);
 
-      final event = eventData['event']?.toString() ?? 'unknown';
-      final orderId = eventData['orderId'] as int? ?? widget.orderId;
+      // hypersdkflutter delivers Juspay's raw JSON as `{event: "process_result",
+      // error, payload: {status, orderId, ...}}` — see
+      // `HyperSdkFlutterPlugin.kt:186`, which invokes `channel.invokeMethod(
+      // event, data.toString())`, so `eventData['event']` is always the
+      // envelope name ("process_result") and never a routable status.
+      //
+      // Mirror Android `PaymentStateActivity.onEvent`
+      // (`PaymentStateActivity.kt:244-266`) which reads `payload.status`
+      // and routes on that — "backpressed" / "user_aborted" → exit;
+      // everything else → checkOrderStatus.
+      final envelope = eventData['event']?.toString();
+      final payload = (eventData['payload'] is Map)
+          ? Map<String, dynamic>.from(eventData['payload'] as Map)
+          : const <String, dynamic>{};
+      final status =
+          payload['status']?.toString() ?? envelope ?? 'unknown';
+      // Juspay delivers `orderId` as a STRING (e.g. "26719663") even
+      // though the JSON literal looks numeric — parse either form.
+      final orderId =
+          parseToIntOrNull(payload['orderId']) ??
+          parseToIntOrNull(eventData['orderId']) ??
+          widget.orderId;
 
       context.read<CheckoutBloc>().add(
-        JuspayCallbackReceived(event: event, payload: {...eventData, 'orderId': orderId}),
+        JuspayCallbackReceived(
+          event: status,
+          payload: {...eventData, ...payload, 'orderId': orderId},
+        ),
       );
     });
   }
@@ -68,63 +124,112 @@ class _PaymentStatePageState extends State<PaymentStatePage> {
   @override
   void dispose() {
     _juspayService.terminate();
+    // Belt-and-suspenders — if we leave via the bloc navigating away
+    // (order confirmation / retry / cart) before Juspay's callback
+    // has fired the reset above, we still restore the overlay so the
+    // next screen doesn't inherit brand+white icons.
+    SystemChrome.setSystemUIOverlayStyle(AppTheme.systemUiLight);
     super.dispose();
+  }
+
+  /// Launch the retry page. If it pops back with a
+  /// [PaymentStateResult] — e.g. a checkout-scope API failure inside
+  /// retry — forward it via our own pop so the sheet renders the
+  /// messageBars at its top strip.
+  Future<void> _openRetry(PaymentRetryLoaded state) async {
+    final result = await AppNavigator.goToPaymentRetry(
+      context,
+      PaymentRetryEntryArgs(
+        paymentRetryEntity: state.paymentRetryEntity,
+        orderId: state.orderId,
+        fromScreen: widget.fromScreen,
+        previousPaymentMode: widget.paymentMode,
+      ),
+    );
+    if (!mounted || result == null) return;
+    Navigator.of(context, rootNavigator: true)
+        .pop<PaymentStateResult>(result);
+  }
+
+  /// Mirrors Android's `PaymentProcessingFragment` — on back press we open
+  /// a confirmation sheet ("Transaction is pending. Do you want to go
+  /// back?"). "YES, GO BACK" pops back to Cart WITHOUT marking the order
+  /// failed.
+  ///
+  /// The order is only marked failed when Juspay itself reports abort
+  /// (`backpressed` / `user_aborted`) — that runs inline in the Juspay
+  /// callback, before this sheet is ever reachable. By the time
+  /// `_confirmExit` opens, we're on the payment-state page polling a
+  /// live server-side order — killing it here would race the polling.
+  Future<void> _confirmExit() async {
+    final shouldExit = await _PaymentExitConfirmSheet.show(context);
+    if (!mounted || shouldExit != true) return;
+    AppNavigator.backToCart(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) async {
-        if (didPop) return;
-        final consumed = await _juspayService.onBackPress();
-        if (!consumed && context.mounted) {
-          Navigator.pop(context);
-        }
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.container,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // Restore the app's dark-icons-on-white overlay whenever this page
+      // is on top. Juspay's native activity flips the system overlay to
+      // light icons for its dark chrome; when it closes and Flutter
+      // comes back, the overlay stays flipped until something (this
+      // region, or HsAppbar's inner AnnotatedRegion) resets it.
+      value: AppTheme.systemUiLight,
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _confirmExit();
+        },
+        child: Scaffold(
+        backgroundColor: AppColors.baseDefault,
+        appBar: HsAppbar(
+          // Empty title — design shows just the back arrow at the top left.
+          title: '',
+          showBottomBorder: true,
+          onLeadingTap: _confirmExit,
+        ),
         body: BlocListener<CheckoutBloc, CheckoutState>(
           listener: (context, state) {
             if (state is PaymentStatusReceived) {
               _handlePaymentStatus(state.paymentStatusEntity);
             } else if (state is PaymentRetryLoaded) {
-              AppNavigator.goToPaymentRetry(
-                context,
-                paymentRetryEntity: state.paymentRetryEntity,
-                orderId: state.orderId,
-              );
+              unawaited(_openRetry(state));
             } else if (state is OrderConfirmationLoaded) {
-              AppNavigator.goToOrderConfirmation(
+              AppNavigator.goToPaymentSuccess(
                 context,
-                orderConfirmationEntity: state.orderConfirmationEntity,
+                OrderConfirmationEntryArgs(
+                  orderConfirmationEntity: state.orderConfirmationEntity,
+                  fromScreen: widget.fromScreen,
+                ),
+              );
+            } else if (state is PaymentFailedInCheckout) {
+              // Pop back to the sheet with the FAILURE error — sheet
+              // renders the banner above the CTA.
+              Navigator.of(context, rootNavigator: true)
+                  .pop<PaymentStateResult>(
+                PaymentStateResult.paymentFailed(state.error),
+              );
+            } else if (state is CheckoutError) {
+              // Any checkout-scope API failure — pop back to the sheet
+              // with the messageBars for the top strip.
+              Navigator.of(context, rootNavigator: true)
+                  .pop<PaymentStateResult>(
+                PaymentStateResult.apiError(state.messageBars),
               );
             } else if (state is OrderMarkedFailed) {
-              // Go back to cart
-              Navigator.pop(context);
-            } else if (state is CheckoutError) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
-              Navigator.pop(context);
+              // Back-press / user-aborted / any explicit failure: pop
+              // back to the ORIGINAL Cart route already on the stack.
+              // Pushing a fresh Cart with `goToCart` would leave the
+              // payment-state page beneath it, and system-back from
+              // there would drop the user back into the aborted flow.
+              AppNavigator.backToCart(context);
             }
           },
-          child: _buildBody(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBody() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const CircularProgressIndicator(color: AppColors.primary),
-          const SizedBox(height: 24),
-          Text(
-            _paymentStarted ? 'Processing payment...' : 'Initiating payment...',
-            style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+            child: const _PaymentStateBody(),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -132,11 +237,116 @@ class _PaymentStatePageState extends State<PaymentStatePage> {
   void _handlePaymentStatus(PaymentStatusEntity status) {
     final actionState = status.actionStatus;
 
-    if (actionState == ActionState.success || status.paymentStatusEnum == PaymentState.success) {
-      // Navigate to order confirmation
+    if (actionState == ActionState.success ||
+        status.paymentStatusEnum == PaymentState.success) {
       final orderId = status.orderId ?? widget.orderId;
       context.read<CheckoutBloc>().add(LoadOrderConfirmation(orderId: orderId));
     }
     // Other states handled by BlocListener via CheckoutBloc events
+  }
+}
+
+/// Static "Processing your payment" body — hero icon + title + subtitle +
+/// dot bounce. Kept as a widget so the parent's build stays small.
+class _PaymentStateBody extends StatelessWidget {
+  const _PaymentStateBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CustomImage(
+            path: ImageConstants.paymentPending,
+            width: 180,
+            height: 180,
+            fit: BoxFit.contain,
+          ),
+          AppSpacing.verticalGapMd,
+          Text(
+            CheckoutStrings.processingYourPayment,
+            style: AppTypographyV1.titleSmall.bold.textPrimary(),
+          ),
+          AppSpacing.verticalGapXs,
+          Text(
+            CheckoutStrings.processingPaymentSubtitle,
+            style: AppTypographyV1.bodyRegular.regular.textSecondary(),
+          ),
+          AppSpacing.verticalGapLg,
+          const DotsLoader(
+            dotSize: 8,
+            color: AppColors.neutralGrey4,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bottom sheet shown when the user tries to leave mid-payment. Mirrors
+/// Android's `PaymentProcessingFragment` — a title row with a `CANCEL`
+/// dismiss, a "transaction is pending" body, and two buttons where "YES,
+/// GO BACK" resolves to `true` (caller marks the order failed) and "NO"
+/// resolves to `false` (stay on the processing page).
+class _PaymentExitConfirmSheet extends StatelessWidget {
+  const _PaymentExitConfirmSheet();
+
+  static Future<bool?> show(BuildContext context) {
+    return AppBottomSheet.showCustom<bool>(
+      context,
+      showDragHandle: true,
+      builder: (_) => const _PaymentExitConfirmSheet(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          0,
+          AppSpacing.md,
+          AppSpacing.md,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              CheckoutStrings.paymentProcessingTitle,
+              style: AppTypographyV1.titleSmall.bold.textPrimary(),
+            ),
+            AppSpacing.verticalGapMd,
+            Text(
+              CheckoutStrings.paymentPendingConfirm,
+              style: AppTypographyV1.bodyRegular.regular
+                  .textPrimary()
+                  .copyWith(height: 1.5),
+            ),
+            const SizedBox(height: 28),
+            Row(
+              children: [
+                Expanded(
+                  child: TertiaryButton.defaultType(
+                    text: CheckoutStrings.yesGoBack,
+                    onTap: () => Navigator.pop(context, true),
+                  ),
+                ),
+                AppSpacing.horizontalGapXs,
+                Expanded(
+                  child: PrimaryButton.defaultType(
+                    text: CheckoutStrings.no,
+                    onTap: () => Navigator.pop(context, false),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

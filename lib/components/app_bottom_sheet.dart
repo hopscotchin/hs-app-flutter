@@ -52,6 +52,7 @@ class AppBottomSheet extends StatelessWidget {
     required WidgetBuilder builder,
     bool isDismissible = true,
     bool enableDrag = true,
+    bool? showDragHandle,
   }) {
     return showModalBottomSheet<T>(
       context: context,
@@ -60,6 +61,12 @@ class AppBottomSheet extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.white,
       useRootNavigator: true,
+      // `null` defers to the app-wide BottomSheetTheme (default: true).
+      // Pass `false` when the sheet needs to draw a tighter custom handle
+      // — Material's built-in handle ships inside a ~48px interactive
+      // area, which adds unwanted top space to designs that want compact
+      // spacing between the handle and the title.
+      showDragHandle: showDragHandle,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

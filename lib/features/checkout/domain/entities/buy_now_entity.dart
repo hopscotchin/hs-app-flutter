@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/entities/backend_action_entity.dart';
 import '../../../../core/network/models/action_response.dart';
 
 /// Response from `GET /checkout/buy-now/v4`.
@@ -20,6 +21,11 @@ class BuyNowEntity extends ActionResponse {
   final int? removedItemCount;
   final String? redirectPath;
 
+  /// Present when the server returns `action: "failure"` with a structured
+  /// next step — e.g. "All sold out → Review bag". Rendered as an
+  /// [AppBottomSheet] (dialog today, may be inline content next).
+  final BackendActionContentEntity? content;
+
   const BuyNowEntity({
     super.action,
     super.message,
@@ -39,6 +45,7 @@ class BuyNowEntity extends ActionResponse {
     this.refreshCartForRemovedItem,
     this.removedItemCount,
     this.redirectPath,
+    this.content,
   });
 
   BuyNowEntity.fromJson(
@@ -57,6 +64,7 @@ class BuyNowEntity extends ActionResponse {
     this.refreshCartForRemovedItem,
     this.removedItemCount,
     this.redirectPath,
+    this.content,
   }) : super.fromJson();
 
   @override
@@ -72,6 +80,7 @@ class BuyNowEntity extends ActionResponse {
     refreshCartForRemovedItem,
     removedItemCount,
     messageBars,
+    content,
   ];
 }
 

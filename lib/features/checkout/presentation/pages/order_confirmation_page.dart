@@ -4,6 +4,7 @@ import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
 import '../../../../components/atoms/price_summary_widget.dart';
 import '../../../../components/atoms/product_card.dart';
+import '../../../../core/constants/strings/checkout_strings.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
 import '../../../../core/entities/order_summary_entity.dart';
 import '../../../../core/theme/colors.dart';
@@ -14,7 +15,15 @@ import '../../domain/entities/order_confirmation_item_entity.dart';
 class OrderConfirmationPage extends StatefulWidget {
   final OrderConfirmationEntity orderConfirmationEntity;
 
-  const OrderConfirmationPage({super.key, required this.orderConfirmationEntity});
+  /// Attribution stamped on any analytics fired from this screen (e.g. the
+  /// terminal `order_placed` event mirrors Android's `logOrderPlaced`).
+  final String? fromScreen;
+
+  const OrderConfirmationPage({
+    super.key,
+    required this.orderConfirmationEntity,
+    this.fromScreen,
+  });
 
   @override
   State<OrderConfirmationPage> createState() => _OrderConfirmationPageState();
@@ -39,7 +48,7 @@ class _OrderConfirmationPageState extends State<OrderConfirmationPage> {
       child: Scaffold(
         backgroundColor: AppColors.container,
         appBar: AppBar(
-          title: Text(data.header?.title ?? 'All done'),
+          title: Text(data.header?.title ?? CheckoutStrings.allDone),
           backgroundColor: AppColors.container,
           foregroundColor: AppColors.textPrimary,
           elevation: 0,
@@ -80,8 +89,13 @@ class _OrderConfirmationPageState extends State<OrderConfirmationPage> {
 
   Widget _buildOrderInfo() {
     final details = data.orderDetails;
-    final title = details?.title ?? (details?.orderId != null ? 'Order ${details!.orderId}' : null);
-    final subtitle = details?.subtitle ?? data.header?.subtitle ?? 'Your order has been confirmed';
+    final title = details?.title ??
+        (details?.orderId != null
+            ? '${CheckoutStrings.orderPrefix} ${details!.orderId}'
+            : null);
+    final subtitle = details?.subtitle ??
+        data.header?.subtitle ??
+        CheckoutStrings.orderConfirmed;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -184,7 +198,8 @@ class _OrderConfirmationPageState extends State<OrderConfirmationPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(address.sectionTitle ?? 'Shipping Address', style: AppTypography.titleSmall),
+          Text(address.sectionTitle ?? CheckoutStrings.shippingAddress,
+              style: AppTypography.titleSmall),
           const SizedBox(height: 12),
           if (address.name != null && address.name!.isNotEmpty)
             Text(
@@ -239,7 +254,7 @@ class _OrderConfirmationPageState extends State<OrderConfirmationPage> {
               elevation: 0,
             ),
             child: Text(
-              'CONTINUE SHOPPING',
+              CheckoutStrings.continueShopping,
               style: AppTypography.buttonMedium.copyWith(color: AppColors.onPrimary),
             ),
           ),

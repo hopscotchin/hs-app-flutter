@@ -1,3 +1,4 @@
+import '../../../../core/models/backend_action_model.dart';
 import '../../domain/entities/buy_now_entity.dart';
 
 class BuyNowModel extends BuyNowEntity {
@@ -20,6 +21,7 @@ class BuyNowModel extends BuyNowEntity {
     super.refreshCartForRemovedItem,
     super.removedItemCount,
     super.redirectPath,
+    super.content,
   });
 
   BuyNowModel.fromJson(super.json)
@@ -40,7 +42,15 @@ class BuyNowModel extends BuyNowEntity {
         refreshCartForRemovedItem: json['refreshCartForRemovedItem'] as bool?,
         removedItemCount: json['removedItemCount'] as int?,
         redirectPath: json['redirectPath'] as String?,
+        content: _parseContent(json),
       );
+
+  /// The wire still calls it `dialog` — same shape today, may broaden
+  /// to inline content later.
+  static BackendActionContentModel? _parseContent(Map<String, dynamic> json) {
+    final data = json['dialog'] as Map<String, dynamic>?;
+    return data != null ? BackendActionContentModel.fromJson(data) : null;
+  }
 
   // ─── Parsers ──────────────────────────────────────────────────────────────
 

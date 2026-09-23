@@ -9,6 +9,7 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'package:device_info_plus/device_info_plus.dart' as _i833;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
@@ -159,6 +160,10 @@ import 'package:hs_app_flutter/features/checkout/data/repositories/checkout_repo
     as _i1069;
 import 'package:hs_app_flutter/features/checkout/data/services/juspay_service.dart'
     as _i526;
+import 'package:hs_app_flutter/features/checkout/data/services/payment_notification_service.dart'
+    as _i666;
+import 'package:hs_app_flutter/features/checkout/data/services/payment_polling_service.dart'
+    as _i630;
 import 'package:hs_app_flutter/features/checkout/domain/repositories/checkout_repository.dart'
     as _i262;
 import 'package:hs_app_flutter/features/checkout/domain/usecases/get_order_confirmation_usecase.dart'
@@ -370,6 +375,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.connectivityService(),
     );
     gh.lazySingleton<_i526.JuspayService>(() => _i526.JuspayService());
+    gh.lazySingleton<_i666.PaymentNotificationService>(
+      () => _i666.PaymentNotificationService(),
+    );
     gh.lazySingleton<_i806.HandleDeeplinkUseCase>(
       () => _i806.HandleDeeplinkUseCase(),
     );
@@ -385,6 +393,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i655.PackageInfo>(),
       ),
       preResolve: true,
+    );
+    gh.lazySingleton<_i630.PaymentPollingService>(
+      () => _i630.PaymentPollingService(gh<_i666.PaymentNotificationService>()),
     );
     gh.lazySingleton<_i818.PrefManager>(
       () => _i818.PrefManager(gh<_i460.SharedPreferences>()),
@@ -759,6 +770,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i765.GetDepartmentsUseCase>(
       () => _i765.GetDepartmentsUseCase(gh<_i816.CategoriesRepository>()),
     );
+    gh.lazySingleton<_i473.JourneyWorker>(
+      () => _i473.JourneyWorker(gh<_i127.AnalyticsHelper>()),
+    );
+    gh.factory<_i211.PdpAnalyticsTracker>(
+      () => _i211.PdpAnalyticsTracker(gh<_i127.AnalyticsHelper>()),
+    );
     gh.factory<_i140.CheckoutBloc>(
       () => _i140.CheckoutBloc(
         placeOrderUseCase: gh<_i39.PlaceOrderUseCase>(),
@@ -768,13 +785,9 @@ extension GetItInjectableX on _i174.GetIt {
         retryPlaceOrderUseCase: gh<_i1030.RetryPlaceOrderUseCase>(),
         markOrderFailUseCase: gh<_i148.MarkOrderFailUseCase>(),
         getOrderConfirmationUseCase: gh<_i833.GetOrderConfirmationUseCase>(),
+        notificationService: gh<_i666.PaymentNotificationService>(),
+        pollingService: gh<_i630.PaymentPollingService>(),
       ),
-    );
-    gh.lazySingleton<_i473.JourneyWorker>(
-      () => _i473.JourneyWorker(gh<_i127.AnalyticsHelper>()),
-    );
-    gh.factory<_i211.PdpAnalyticsTracker>(
-      () => _i211.PdpAnalyticsTracker(gh<_i127.AnalyticsHelper>()),
     );
     gh.lazySingleton<_i465.DeleteChildUseCase>(
       () => _i465.DeleteChildUseCase(gh<_i970.KidsRepository>()),

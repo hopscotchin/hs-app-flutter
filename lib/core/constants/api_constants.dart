@@ -53,7 +53,7 @@ class ApiConstants {
   static const String promoApply = '/v3/promotion/apply';
   static const String promoRemove = '/v3/promotion/remove';
   static const String buyNow = '/shopping-cart/instant-checkout';
-  static const String orderNow = '/checkout/buy-now/v4';
+  static const String orderNow = '/checkout/buy-now/v5';
 
   // Wishlist
   static const String wishlist = '/wishlist';

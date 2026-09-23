@@ -105,23 +105,6 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 
-  Widget _buildErrorView(SplashState state) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(state.errorMessage, style: AppTypography.bodyMedium, textAlign: TextAlign.center),
-          const SizedBox(height: 12),
-          TextButton(
-            onPressed: () => context.read<SplashBloc>().add(const InitializeApp()),
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _showEnvironmentSelector(
     BuildContext context,
     Environment currentEnvironment,

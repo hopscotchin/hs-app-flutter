@@ -23,11 +23,12 @@ import 'package:hs_app_flutter/features/cart/presentation/widgets/gift_card_bann
 import 'package:hs_app_flutter/features/pincode/presentation/widgets/pincode_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../components/app_bottom_sheet.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/cart_strings.dart';
 import '../../../../core/constants/strings/login_redirects.dart';
-import '../../../../core/navigation/nav_destination.dart';
+import '../../../../core/navigation/action_url_handler.dart';
 import '../../../../core/router/app_navigator.dart';
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../../account/presentation/bloc/account_bloc.dart';
@@ -155,20 +156,16 @@ class _CartPageState extends State<CartPage> with WidgetsBindingObserver {
   /// here. Android does the same: `CartFragment.proceedToCheckout` calls the API
   /// first and only consults the login status once it comes back successful, in
   /// `checkLoginAndCheckout`. See [_openCheckoutOrLogin], which is that gate.
-  void _startCheckout() {
-    // context.showSnack(
-    //   'Thansk for testing this but checkout is not for this release',
-    //   status: SnackStatus.error,
-    // );
-    // final isLoggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
-    // if (!isLoggedIn) {
+  void _startCheckout() async {
+    final isLoggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
+    if (!isLoggedIn) {
 
-    // final loggedIn = await AppNavigator.showMobileLoginFlow(context);
-    // if (!loggedIn || !mounted) return;
-    // _startCheckout();
-    // return;
-    // }
-    // context.read<CartBloc>().add(const ProceedToCheckout());
+    final loggedIn = await AppNavigator.showMobileLoginFlow(context);
+    if (!loggedIn || !mounted) return;
+    _startCheckout();
+    return;
+    }
+    context.read<CartBloc>().add(const ProceedToCheckout());
   }
 
   /// Android's `checkLoginAndCheckout`: with a successful `orderNow` in hand,
@@ -192,13 +189,61 @@ class _CartPageState extends State<CartPage> with WidgetsBindingObserver {
       _startCheckout();
       return;
     }
-    await showCheckoutBottomSheet(context, buyNowData: data);
+    // Soft-failure path — server returned structured `content` (e.g.
+    // "All sold out → Review bag") instead of a proceed-to-checkout
+    // payload. Render it as an AppBottomSheet and skip the full sheet.
+    final content = data.content;
+    if (content != null) {
+      await AppBottomSheet.show(
+        context,
+        title: content.title,
+        description: content.description ?? '',
+        primaryAction: AppBottomSheetAction(
+          label: content.rightAction?.label ?? 'OK',
+          style: AppBottomSheetButtonStyle.filled,
+          onPressed: () => _runContentAction(content.rightAction?.actionUrl),
+        ),
+        secondaryAction:
+            (content.leftAction?.label?.isNotEmpty ?? false)
+            ? AppBottomSheetAction(
+                label: content.leftAction!.label!,
+                onPressed: () =>
+                    _runContentAction(content.leftAction?.actionUrl),
+              )
+            : null,
+      );
+      return;
+    }
+
+    // fromScreen: shoppingCart today; when PDP's Buy Now bypasses the cart
+    // to open this sheet directly, it should pass `FromScreens.product`.
+    await showCheckoutBottomSheet(
+      context,
+      buyNowData: data,
+      fromScreen: FromScreens.shoppingCart,
+    );
     if (!mounted) return;
-    // Dismissing the sheet is leaving the buy-now flow, so drop back to the
-    // full bag before refreshing — Android does the same in
-    // `CartFragment.onResume`, guarded by `exitedBuyNowFlow`.
-    _cartBloc.exitBuyNowMode();
+    // Refresh in the current scope — instant-checkout stays on so the bag
+    // re-fetches the buy-now line alone, matching Android's `CartFragment
+    // .onResume` (`exitedBuyNowFlow` guard clears `isFromBuyNow` but leaves
+    // `isInstantCheckout` untouched). The `_buyNowCheckoutStarted` latch
+    // above prevents the sheet from re-opening on this refresh.
     _cartBloc.add(const RefreshCart());
+  }
+
+  /// Run a content-action button. A cart deeplink short-circuits into a
+  /// local RefreshCart — no point pushing a fresh cart route on top of the
+  /// one we're already on.
+  void _runContentAction(String? url) {
+    Navigator.of(context).pop();
+    //TODO: Remove after moving from dialog to content
+    _cartBloc.add(const RefreshCart());
+    // if (url == null || url.isEmpty) return;
+    // if (url.toLowerCase().contains('cart')) {
+    //   _cartBloc.add(const RefreshCart());
+    //   return;
+    // }
+    // ActionUrlHandler.navigate(context, url);
   }
 
   /// Buy Now hand-off from PDP: start checkout once the cart is loaded and

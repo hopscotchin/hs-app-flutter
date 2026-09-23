@@ -6,6 +6,7 @@ import '../entities/message_bar_entity.dart';
 import '../error/exceptions.dart';
 import '../error/failures.dart';
 import '../logger/my_logger.dart';
+import '../models/backend_action_model.dart';
 import '../models/message_bar_model.dart';
 import '../network/connectivity/network_info.dart';
 
@@ -56,7 +57,14 @@ mixin SafeApiCall {
           .whereType<Map<String, dynamic>>()
           .map(MessageBarModel.fromJson)
           .toList();
-      return Left(ApiFailure(message: e.message, messageBars: bars));
+      final content = e.rawContent != null
+          ? BackendActionContentModel.fromJson(e.rawContent!)
+          : null;
+      return Left(ApiFailure(
+        message: e.message,
+        messageBars: bars,
+        content: content,
+      ));
     } on ServerException catch (e, s) {
       logger.e('Server error', error: e, stackTrace: s);
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/utils/json_parsers.dart';
 import '../../domain/entities/init_juspay_entity.dart';
 import '../../domain/entities/order_confirmation_entity.dart';
 import '../../domain/entities/payment_retry_entity.dart';
@@ -18,6 +19,8 @@ import '../../domain/usecases/init_payment_usecase.dart';
 import '../../domain/usecases/mark_order_fail_usecase.dart';
 import '../../domain/usecases/place_order_usecase.dart';
 import '../../domain/usecases/retry_place_order_usecase.dart';
+import '../../data/services/payment_notification_service.dart';
+import '../../data/services/payment_polling_service.dart';
 
 part 'checkout_event.dart';
 part 'checkout_state.dart';
@@ -31,9 +34,16 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
   final RetryPlaceOrderUseCase retryPlaceOrderUseCase;
   final MarkOrderFailUseCase markOrderFailUseCase;
   final GetOrderConfirmationUseCase getOrderConfirmationUseCase;
+  final PaymentNotificationService _notifications;
+  final PaymentPollingService _polling;
 
   Timer? _pollingTimer;
   int _polledDuration = 0;
+  bool _processingNotified = false;
+  /// Latched once the flow aborts (backpress / user-abort / mark-failed).
+  /// Blocks any late Juspay stragglers from restarting polling on a bloc
+  /// that has already emitted [OrderMarkedFailed] and navigated away.
+  bool _aborted = false;
 
   CheckoutBloc({
     required this.placeOrderUseCase,
@@ -43,7 +53,11 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     required this.retryPlaceOrderUseCase,
     required this.markOrderFailUseCase,
     required this.getOrderConfirmationUseCase,
-  }) : super(const CheckoutInitial()) {
+    required PaymentNotificationService notificationService,
+    required PaymentPollingService pollingService,
+  })  : _notifications = notificationService,
+        _polling = pollingService,
+        super(const CheckoutInitial()) {
     on<PlaceOrder>(_onPlaceOrder);
     on<InitiatePayment>(_onInitiatePayment);
     on<JuspayCallbackReceived>(_onJuspayCallback);
@@ -68,20 +82,10 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
 
     result.fold(
-      (failure) => emit(
-        CheckoutError(
-          message: failure.message,
-          messageBars: failure is ApiFailure ? failure.messageBars : const [],
-        ),
-      ),
+      (failure) => emit(CheckoutError(messageBars: _errorBars(failure))),
       (data) {
         if (!data.isSuccessful) {
-          emit(
-            CheckoutError(
-              message: data.message ?? 'Order placement failed',
-              messageBars: data.messageBars,
-            ),
-          );
+          emit(CheckoutError(messageBars: _errorBars(null, data.messageBars)));
           return;
         }
 
@@ -105,6 +109,24 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
   }
 
+  /// Server-returned bars if present; otherwise a single INFO fallback so
+  /// the sheet always has something to render on a checkout-scope failure.
+  static const MessageBarEntity _fallbackErrorBar = MessageBarEntity(
+    type: 'error',
+    message: 'Uh-oh! Something went wrong. Please try again.',
+  );
+
+  List<MessageBarEntity> _errorBars(
+    Failure? failure, [
+    List<MessageBarEntity> dataBars = const [],
+  ]) {
+    if (dataBars.isNotEmpty) return dataBars;
+    if (failure is ApiFailure && failure.messageBars.isNotEmpty) {
+      return failure.messageBars;
+    }
+    return const [_fallbackErrorBar];
+  }
+
   Future<void> _onInitiatePayment(
     InitiatePayment event,
     Emitter<CheckoutState> emit,
@@ -120,12 +142,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
 
     result.fold(
-      (failure) => emit(
-        CheckoutError(
-          message: failure.message,
-          messageBars: failure is ApiFailure ? failure.messageBars : const [],
-        ),
-      ),
+      (failure) => emit(CheckoutError(messageBars: _errorBars(failure))),
       (data) {
         emit(JuspayReady(initJusPayEntity: data));
       },
@@ -136,25 +153,43 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     JuspayCallbackReceived event,
     Emitter<CheckoutState> emit,
   ) async {
+    // Late Juspay stragglers after an abort — Juspay can fire secondary
+    // events (e.g. loader hide / SDK cleanup) after the user backs out.
+    // Nothing to do; the flow already navigated away.
+    if (_aborted) return;
+
     final eventType = event.event.toLowerCase();
 
-    // User pressed back or aborted — mark order as failed and go back
+    // User pressed back or aborted — exit the payment flow immediately.
+    // Mirrors Android `PaymentStateActivity.exitPaymentState`, which sets
+    // RESULT_CANCELED and finishes without waiting on the mark-fail API.
+    //
+    // Emit synchronously so the state page's listener navigates now: adding
+    // MarkOrderAsFailed via `add()` would sit at the tail of the event
+    // queue behind any queued CheckPaymentStatus events (each of which
+    // restarts polling), keeping the user pinned on the "Processing…" UI.
     if (eventType == 'backpressed' || eventType == 'user_aborted') {
-      final orderId = event.payload['orderId'] as int?;
+      _aborted = true;
+      _stopPolling();
+      _stopProcessingUi();
+      unawaited(_notifications.cancelAll());
+      final orderId = parseToIntOrNull(event.payload['orderId']);
       if (orderId != null) {
-        add(MarkOrderAsFailed(orderId: orderId));
-      } else {
-        emit(const OrderMarkedFailed());
+        // Fire-and-forget — the UI doesn't wait on the server. Same pattern
+        // Android uses (`PaymentStateActivity.kt` calls the API off the
+        // exit path).
+        unawaited(markOrderFailUseCase(MarkOrderFailParams(orderId: orderId)));
       }
+      emit(const OrderMarkedFailed());
       return;
     }
 
     // Payment completed (charged, cod_initiated, or other) — check status
-    final orderId = event.payload['orderId'] as int?;
+    final orderId = parseToIntOrNull(event.payload['orderId']);
     if (orderId != null) {
       add(CheckPaymentStatus(orderId: orderId));
     } else {
-      emit(const CheckoutError(message: 'Missing order ID from payment'));
+      emit(CheckoutError(messageBars: _errorBars(null)));
     }
   }
 
@@ -168,32 +203,63 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
       PaymentStatusParams(orderId: event.orderId),
     );
 
-    result.fold((failure) => emit(CheckoutError(message: failure.message)), (
+    result.fold((failure) => emit(CheckoutError(messageBars: _errorBars(failure))), (
       data,
     ) {
       final actionState = data.actionStatus;
 
       switch (actionState) {
         case ActionState.success:
+          _stopProcessingUi();
+          unawaited(_notifications.showSuccess(event.orderId));
           emit(PaymentStatusReceived(paymentStatusEntity: data));
           break;
         case ActionState.pending:
-          // Start polling
-          _startPolling(event.orderId, data.retryTime, data.totalTime, emit);
+          _stopProcessingUi();
+          unawaited(_notifications.showSuccess(event.orderId));
+          emit(PaymentStatusReceived(paymentStatusEntity: data));
+          // Start polling — foreground-service notification kicks in on the
+          // first pending tick so the user sees continuous progress even
+          // if they leave the app.
+          // _startPolling(event.orderId, data.retryTime, data.totalTime, emit);
           break;
         case ActionState.retryPayment:
-          add(LoadPaymentRetry(orderId: event.orderId));
+          _stopProcessingUi();
+          unawaited(_notifications.showSuccess(event.orderId));
+          emit(PaymentStatusReceived(paymentStatusEntity: data));
+          // _stopPolling();
+          // _stopProcessingUi();
+          // unawaited(_notifications.showRetry(event.orderId));
+          // add(LoadPaymentRetry(orderId: event.orderId));
           break;
         case ActionState.failure:
-          add(LoadPaymentRetry(orderId: event.orderId));
+          _stopProcessingUi();
+          unawaited(_notifications.showSuccess(event.orderId));
+          emit(PaymentStatusReceived(paymentStatusEntity: data));
+          // Mirrors Android PaymentStateActivity.listenForPaymentStatus →
+          // processResponse: FAILURE hands the raw `error` back to the
+          // sheet (Android sets RESULT with ERROR_DATA + finish). No
+          // fallback synthesis — if the server didn't send an error, the
+          // banner just doesn't render.
+          // _stopPolling();
+          // _stopProcessingUi();
+          // unawaited(
+          //   _notifications.showFailure(event.orderId, message: data.message),
+          // );
+          // emit(PaymentFailedInCheckout(
+          //   orderId: event.orderId,
+          //   error: data.error,
+          // ));
           break;
         case null:
-          // If paymentStatus is success, treat it as success
-          if (data.paymentStatusEnum == PaymentState.success) {
-            emit(PaymentStatusReceived(paymentStatusEntity: data));
-          } else {
-            emit(PaymentStatusReceived(paymentStatusEntity: data));
-          }
+          _stopProcessingUi();
+          unawaited(_notifications.showSuccess(event.orderId));
+          emit(PaymentStatusReceived(paymentStatusEntity: data));
+          // _stopProcessingUi();
+          // if (data.paymentStatusEnum == PaymentState.success) {
+          //   unawaited(_notifications.showSuccess(event.orderId));
+          // }
+          // emit(PaymentStatusReceived(paymentStatusEntity: data));
           break;
       }
     });
@@ -210,10 +276,20 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     final interval = retryTimeMs ?? 3000;
     final maxDuration = totalTimeMs ?? 30000;
 
+    // Foreground-service + "Processing payment…" notification. Idempotent —
+    // this arm may re-fire on every pending tick, but startProcessing self-
+    // guards on service.isRunning.
+    if (!_processingNotified) {
+      _processingNotified = true;
+      unawaited(_polling.startProcessing(orderId));
+    }
+
     _pollingTimer = Timer.periodic(Duration(milliseconds: interval), (_) {
       _polledDuration += interval;
       if (_polledDuration >= maxDuration) {
         _stopPolling();
+        _stopProcessingUi();
+        unawaited(_notifications.showRetry(orderId));
         // Timeout — load retry page
         add(LoadPaymentRetry(orderId: orderId));
       } else {
@@ -225,6 +301,15 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
   void _stopPolling() {
     _pollingTimer?.cancel();
     _pollingTimer = null;
+  }
+
+  /// Cancels the ongoing "Processing payment…" foreground notification.
+  /// Result notifications (success/retry/failure) are the caller's job — the
+  /// call sites in [_onCheckPaymentStatus] fire them alongside this cleanup.
+  void _stopProcessingUi() {
+    if (!_processingNotified) return;
+    _processingNotified = false;
+    unawaited(_polling.stopProcessing());
   }
 
   Future<void> _onLoadPaymentRetry(
@@ -239,7 +324,13 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
 
     result.fold(
-      (failure) => emit(CheckoutError(message: failure.message)),
+      // Retry-detail API failure — mirrors Android
+      // PaymentRetryActivity.handleFailure(null, bars): always render the
+      // retry page, isSuccessful=false triggers the REVIEW CART branch.
+      (failure) => emit(PaymentRetryLoaded(
+        paymentRetryEntity: const PaymentRetryEntity(),
+        orderId: event.orderId,
+      )),
       (data) => emit(
         PaymentRetryLoaded(paymentRetryEntity: data, orderId: event.orderId),
       ),
@@ -261,20 +352,10 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
 
     result.fold(
-      (failure) => emit(
-        CheckoutError(
-          message: failure.message,
-          messageBars: failure is ApiFailure ? failure.messageBars : const [],
-        ),
-      ),
+      (failure) => emit(CheckoutError(messageBars: _errorBars(failure))),
       (data) {
         if (!data.isSuccessful) {
-          emit(
-            CheckoutError(
-              message: data.message ?? 'Retry failed',
-              messageBars: data.messageBars,
-            ),
-          );
+          emit(CheckoutError(messageBars: _errorBars(null, data.messageBars)));
           return;
         }
 
@@ -299,7 +380,14 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     MarkOrderAsFailed event,
     Emitter<CheckoutState> emit,
   ) async {
-    await markOrderFailUseCase(MarkOrderFailParams(orderId: event.orderId));
+    _aborted = true;
+    _stopPolling();
+    _stopProcessingUi();
+    unawaited(_notifications.cancelAll());
+    // Fire the API in the background — UI navigates now (Android does the
+    // same in PaymentStateActivity's exit path). Waiting on the server
+    // would pin the user on "Processing payment…" while the request runs.
+    unawaited(markOrderFailUseCase(MarkOrderFailParams(orderId: event.orderId)));
     emit(const OrderMarkedFailed());
   }
 
@@ -314,7 +402,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
 
     result.fold(
-      (failure) => emit(CheckoutError(message: failure.message)),
+      (failure) => emit(CheckoutError(messageBars: _errorBars(failure))),
       (data) => emit(OrderConfirmationLoaded(orderConfirmationEntity: data)),
     );
   }
@@ -322,6 +410,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
   @override
   Future<void> close() {
     _stopPolling();
+    _stopProcessingUi();
     return super.close();
   }
 }

@@ -80,12 +80,29 @@ class OrderMarkedFailed extends CheckoutState {
   const OrderMarkedFailed();
 }
 
-class CheckoutError extends CheckoutState {
-  final String message;
-  final List<MessageBarEntity> messageBars;
+/// Payment-status returned `actionStatus = FAILURE`. Instead of navigating
+/// to the retry page, the payment-state page pops back to the checkout
+/// bottom sheet (still mounted underneath) so the sheet can render the
+/// server's `error` block as a banner above the purple CTA.
+class PaymentFailedInCheckout extends CheckoutState {
+  final int orderId;
+  final PaymentErrorEntity? error;
 
-  const CheckoutError({required this.message, this.messageBars = const []});
+  const PaymentFailedInCheckout({required this.orderId, this.error});
 
   @override
-  List<Object?> get props => [message, messageBars];
+  List<Object?> get props => [orderId, error];
+}
+
+/// Emitted on any checkout-scoped API failure (place-order, init-payment,
+/// payment-status, retry-place-order, order-confirmation). The checkout
+/// bottom sheet renders [messageBars] at the top — no snackbars. If the
+/// server didn't return any, the bloc synthesises a single INFO fallback.
+class CheckoutError extends CheckoutState {
+  final List<MessageBarEntity> messageBars;
+
+  const CheckoutError({required this.messageBars});
+
+  @override
+  List<Object?> get props => [messageBars];
 }

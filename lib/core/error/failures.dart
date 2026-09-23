@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../constants/default_error_messages.dart';
+import '../entities/backend_action_entity.dart';
 import '../entities/message_bar_entity.dart';
 
 sealed class Failure extends Equatable {
@@ -92,14 +93,19 @@ class ServiceUnavailableFailure extends Failure {
 class ApiFailure extends Failure {
   final List<MessageBarEntity> messageBars;
 
+  /// Structured next-step surface — e.g. buy-now's "All sold out → Review
+  /// bag" bottom sheet. Callers render it in place of the generic error.
+  final BackendActionContentEntity? content;
+
   const ApiFailure({
     super.message = DefaultErrorMessages.api,
     super.statusCode,
     this.messageBars = const [],
+    this.content,
   });
 
   @override
-  List<Object?> get props => [message, statusCode, messageBars];
+  List<Object?> get props => [message, statusCode, messageBars, content];
 }
 
 // ─── Other failures ─────────────────────────────────────────────────

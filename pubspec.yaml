@@ -123,6 +123,18 @@ dependencies:
   http: ^1.2.2
   device_preview: ^1.3.1
 
+  # Payment polling — foreground-service notification during /checkOrderStatus
+  # polling (mirrors Android's PaymentProcessingNotificationService). The
+  # background_service runs its own Dart isolate on Android so polling
+  # survives app-backgrounding; iOS's background window is short so the
+  # main-isolate poll in CheckoutBloc remains the primary source of truth
+  # on iOS. The notifications plugin surfaces "Processing payment…" /
+  # success / retry / failure notifications on both platforms.
+  flutter_local_notifications: ^17.2.3
+  flutter_background_service: ^5.0.10
+
+  lottie: ^3.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -91,10 +91,16 @@ class ServiceUnavailableException extends AppException {
 class ApiFailureException extends AppException {
   final List<dynamic> rawMessageBars;
 
+  /// Raw structured next-step from the response (the server calls it
+  /// `dialog` today, may broaden to inline content next) — e.g. buy-now's
+  /// "All sold out → Review bag" bottom sheet.
+  final Map<String, dynamic>? rawContent;
+
   const ApiFailureException({
     super.message = 'Uh-oh! Our systems are acting up. Please try again later.',
     super.statusCode,
     this.rawMessageBars = const [],
+    this.rawContent,
   });
 }
 

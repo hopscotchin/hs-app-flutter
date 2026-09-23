@@ -3,21 +3,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
 
-import '../../../../core/navigation/nav_destination.dart';
-import '../../../../core/analytics/constants/analytics_defaults.dart';
+import '../../../../components/buttons/app_button_named.dart';
+import '../../../../components/page_components/message_bars_widget.dart';
+import '../../../../core/constants/strings/checkout_strings.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../domain/entities/order_confirmation_entry_args.dart';
 import '../../domain/entities/payment_retry_entity.dart';
+import '../../domain/entities/payment_state_entry_args.dart';
+import '../../domain/entities/payment_state_result.dart';
 import '../bloc/checkout_bloc.dart';
 
 class PaymentRetryPage extends StatelessWidget {
   final PaymentRetryEntity paymentRetryEntity;
   final int orderId;
 
+  /// Analytics attribution carried from the payment-state page — kept on
+  /// every downstream event fired here (retry click, order confirmation).
+  final String? fromScreen;
+
+  /// Payment mode of the failed attempt. When non-null, Android auto-retries
+  /// with this mode instead of showing the retry sheet; used as the fallback
+  /// when a retry action's own paymentMode is absent.
+  final String? previousPaymentMode;
+
   const PaymentRetryPage({
     super.key,
     required this.paymentRetryEntity,
     required this.orderId,
+    this.fromScreen,
+    this.previousPaymentMode,
   });
 
   @override
@@ -43,30 +59,41 @@ class PaymentRetryPage extends StatelessWidget {
         } else if (state is JuspayReady) {
           AppNavigator.goToPaymentState(
             context,
-            initJusPayEntity: state.initJusPayEntity,
-            orderId: orderId,
-            creditsApplied: false,
+            PaymentStateEntryArgs(
+              initJusPayEntity: state.initJusPayEntity,
+              orderId: orderId,
+              creditsApplied: false,
+              fromScreen: fromScreen,
+              paymentMode: previousPaymentMode,
+            ),
           );
         } else if (state is OrderConfirmationLoaded) {
-          AppNavigator.goToOrderConfirmation(
+          AppNavigator.goToPaymentSuccess(
             context,
-            orderConfirmationEntity: state.orderConfirmationEntity,
+            OrderConfirmationEntryArgs(
+              orderConfirmationEntity: state.orderConfirmationEntity,
+              fromScreen: fromScreen,
+            ),
           );
         } else if (state is OrderMarkedFailed) {
-          AppNavigator.goToCart(
-            context,
-            sourcePage: const SourcePage(fromScreen: FromScreens.paymentRetry),
+          // Pop back to the existing Cart, unwinding retry (and any
+          // retry-pushed payment-state) rather than pushing a new Cart.
+          AppNavigator.backToCart(
+            context
           );
         } else if (state is CheckoutError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          // Retry-scope API failure — pop back to the sheet (payment-state
+          // forwards our result) with the messageBars for the top strip.
+          Navigator.of(context, rootNavigator: true)
+              .pop<PaymentStateResult>(
+            PaymentStateResult.apiError(state.messageBars),
+          );
         }
       },
       child: Scaffold(
         backgroundColor: AppColors.container,
         appBar: AppBar(
-          title: const Text('Payment'),
+          title: const Text(CheckoutStrings.payment),
           backgroundColor: AppColors.container,
           foregroundColor: AppColors.textPrimary,
           elevation: 0,
@@ -131,8 +158,10 @@ class PaymentRetryPage extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Instruction
-              if (paymentRetryEntity.instruction != null)
+              // Instruction — hidden on the failure path (Android mirrors
+              // this in handleFailure by binding.instruction.gone()).
+              if (paymentRetryEntity.isSuccessful &&
+                  paymentRetryEntity.instruction != null)
                 Text(
                   paymentRetryEntity.instruction!,
                   style: AppTypography.bodySmall.copyWith(
@@ -140,6 +169,26 @@ class PaymentRetryPage extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
+
+              // Message bar on the failure path — surfaces the server's
+              // `messageBars.first` (or singular `messageBar`) so the user
+              // sees why the re-attempt itself couldn't be offered.
+              if (!paymentRetryEntity.isSuccessful) ...[
+                if (paymentRetryEntity.messageBars.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: MessageBarsWidget(
+                      messageBars: [paymentRetryEntity.messageBars.first],
+                    ),
+                  )
+                else if (paymentRetryEntity.messageBar != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: MessageBarsWidget(
+                      messageBars: [paymentRetryEntity.messageBar!],
+                    ),
+                  ),
+              ],
 
               // Amount Summary
               if (paymentRetryEntity.amountSummary != null) ...[
@@ -157,7 +206,8 @@ class PaymentRetryPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        paymentRetryEntity.amountSummary!.label ?? 'Amount',
+                        paymentRetryEntity.amountSummary!.label ??
+                            CheckoutStrings.amount,
                         style: AppTypography.bodyMedium.copyWith(
                           fontWeight: AppTypography.semiBold,
                         ),
@@ -185,69 +235,84 @@ class PaymentRetryPage extends StatelessWidget {
   }
 
   Widget _buildActions(BuildContext context) {
+    // Non-success re-attempt: server can't offer a retry — full-width
+    // REVIEW CART + Cancel text below. Mirrors Android's
+    // PaymentRetryActivity.handleFailure (reviewCart + cancelReview).
+    if (!paymentRetryEntity.isSuccessful) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PrimaryButton.defaultType(
+            text: CheckoutStrings.reviewCart,
+            isFullWidth: true,
+            onTap: () => AppNavigator.backToCart(context),
+          ),
+          AppSpacing.verticalGapSm,
+          Center(
+            child: TextButton(
+              onPressed: () => AppNavigator.backToCart(context),
+              child: Text(
+                paymentRetryEntity.actions?.tertiary?.label ??
+                    CheckoutStrings.cancel,
+                style: AppTypography.buttonMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     final actions = paymentRetryEntity.actions;
     if (actions == null) return const SizedBox.shrink();
 
+    // Row layout matches activity_payment_retry.xml: secondary (outlined)
+    // on the left, primary (solid) on the right, both equal-width.
+    final primary = actions.primary;
+    final secondary = actions.secondary;
+    final tertiary = actions.tertiary;
+
     return Column(
       children: [
-        // Primary action
-        if (actions.primary != null)
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: () => _handleAction(context, actions.primary!),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+        if (primary != null || secondary != null)
+          Row(
+            children: [
+              if (secondary != null) ...[
+                Expanded(
+                  child: SecondaryButton.defaultType(
+                    text: secondary.label ?? CheckoutStrings.otherOption,
+                    isFullWidth: true,
+                    onTap: () => _handleAction(context, secondary),
+                  ),
                 ),
-                elevation: 0,
-              ),
-              child: Text(
-                actions.primary!.label ?? 'Retry',
-                style: AppTypography.buttonMedium,
-              ),
-            ),
-          ),
-
-        const SizedBox(height: 12),
-
-        // Secondary action
-        if (actions.secondary != null)
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: OutlinedButton(
-              onPressed: () => _handleAction(context, actions.secondary!),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                if (primary != null) AppSpacing.horizontalGapXs,
+              ],
+              if (primary != null)
+                Expanded(
+                  child: PrimaryButton.defaultType(
+                    text: primary.label ?? CheckoutStrings.retry,
+                    isFullWidth: true,
+                    onTap: () => _handleAction(context, primary),
+                  ),
                 ),
-              ),
-              child: Text(
-                actions.secondary!.label ?? 'Other option',
-                style: AppTypography.buttonMedium,
-              ),
-            ),
+            ],
           ),
-
-        const SizedBox(height: 12),
-
-        // Tertiary action
-        if (actions.tertiary != null)
+        // Tertiary: text-only Cancel, always pops back to cart. Android's
+        // XML wires the button to onBackPressedCallback (RESULT_CANCELED),
+        // not the action.type — REDIRECT/whatever, same outcome.
+        if (tertiary != null) ...[
+          AppSpacing.verticalGapSm,
           TextButton(
-            onPressed: () => _handleAction(context, actions.tertiary!),
+            onPressed: () => AppNavigator.backToCart(context),
             child: Text(
-              actions.tertiary!.label ?? 'Cancel',
+              tertiary.label ?? CheckoutStrings.cancel,
               style: AppTypography.buttonMedium.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
           ),
+        ],
       ],
     );
   }
@@ -256,32 +321,24 @@ class PaymentRetryPage extends StatelessWidget {
     final paymentAction = action.action;
     if (paymentAction == null) return;
 
-    final type = paymentAction.type?.toLowerCase();
-    final paymentMode = paymentAction.paymentMode ?? 'POL';
-
-    switch (type) {
-      case 'retry':
-        context.read<CheckoutBloc>().add(
-          RetryPayment(
-            paymentCode: paymentMode,
-            creditsApplied: false,
-            failedOrderId: orderId,
-          ),
-        );
-        break;
-      case 'cancel':
-        context.read<CheckoutBloc>().add(MarkOrderAsFailed(orderId: orderId));
-        break;
-      default:
-        // Default behavior — retry with given payment mode
-        context.read<CheckoutBloc>().add(
-          RetryPayment(
-            paymentCode: paymentMode,
-            creditsApplied: false,
-            failedOrderId: orderId,
-          ),
-        );
-        break;
+    // Both PAYMENT_FALLBACK (COD) and PAYMENT_RETRY (POL) route to
+    // retry-place-order — mirrors Android's processOrder(paymentMode).
+    // REDIRECT / anything else pops back to cart (Android's tertiary
+    // wiring). No MarkOrderAsFailed — the transaction already exists,
+    // per spec.
+    final type = paymentAction.type?.toUpperCase();
+    if (type == 'REDIRECT') {
+      AppNavigator.backToCart(context);
+      return;
     }
+    final paymentMode =
+        paymentAction.paymentMode ?? previousPaymentMode ?? 'POL';
+    context.read<CheckoutBloc>().add(
+      RetryPayment(
+        paymentCode: paymentMode,
+        creditsApplied: false,
+        failedOrderId: orderId,
+      ),
+    );
   }
 }

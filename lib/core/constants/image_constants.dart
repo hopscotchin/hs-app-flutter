@@ -2,6 +2,7 @@ class ImageConstants {
   ImageConstants._();
 
   static const String splashAnimation = 'assets/animations/splash_animation.gif';
+  static const String orderConfirmationAnimation = 'assets/animations/payment_success.json';
   static const String hsLogo = 'assets/images/hslogo.svg';
   //PLP
   static const String arrowBack = 'assets/icons/arrow_back.svg';
@@ -66,4 +67,8 @@ class ImageConstants {
   static const String editIcon = 'assets/icons/edit.svg';
   static const String kidsDeleteIcon = 'assets/icons/delete.svg';
   static const String shieldIcon = 'assets/icons/shield.svg';
+
+  static const String paymentModes = 'assets/icons/payment_modes.svg';
+  static const String paymentPending = 'assets/icons/payment_pending.svg';
+  static const String paymentFailed = 'assets/icons/payment_failed.svg';
 }

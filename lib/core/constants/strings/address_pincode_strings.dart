@@ -4,7 +4,7 @@ class AddressStrings {
   static const String noSavedAddresses = 'No saved addresses yet';
   static const String defaultAddressHeading = 'DEFAULT ADDRESS';
   static const String otherAddressHeading = 'OTHER ADDRESS';
-  static const String addNewAddress = 'Add A New Address';
+  static const String addNewAddress = 'Add a new address';
 
   static const String edit = 'EDIT';
   static const String remove = 'REMOVE';

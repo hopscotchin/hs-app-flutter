@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../components/atoms/dots_loader.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/typography/text_style_extensions.dart';
 import '../../../../core/theme/typography/typography_v1.dart';
@@ -32,13 +33,9 @@ class AuthPrimaryButton extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
         child: isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.onPrimary,
-                ),
+            ? const DotsLoader(
+                dotSize: 8,
+                color: AppColors.onPrimary,
               )
             : Text(
                 label,

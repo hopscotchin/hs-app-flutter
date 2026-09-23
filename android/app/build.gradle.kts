@@ -13,12 +13,17 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_18
-        targetCompatibility = JavaVersion.VERSION_18
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        // Required by flutter_local_notifications 17+ which uses Java 8+
+        // desugarable APIs (java.time). Without this, AAR metadata check
+        // fails at build. See
+        // https://developer.android.com/studio/write/java8-support.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_18.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
@@ -68,4 +73,11 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Pairs with `isCoreLibraryDesugaringEnabled` above — provides the
+    // backported java.time / java.util classes flutter_local_notifications
+    // depends on for scheduling.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

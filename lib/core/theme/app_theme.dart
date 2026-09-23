@@ -23,6 +23,17 @@ class AppTheme {
     systemNavigationBarIconBrightness: Brightness.dark,
   );
 
+  /// Brand-purple status/nav bars with white icons — used behind the
+  /// Juspay overlay so the strip above Juspay's dark chrome reads as an
+  /// extension of it rather than a stark white gap.
+  static const SystemUiOverlayStyle systemUiBrand = SystemUiOverlayStyle(
+    statusBarColor: AppColors.brandDefault,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+    systemNavigationBarColor: AppColors.brandDefault,
+    systemNavigationBarIconBrightness: Brightness.light,
+  );
+
   /// Light theme
   static ThemeData get lightTheme {
     return ThemeData(

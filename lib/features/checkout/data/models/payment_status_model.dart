@@ -26,7 +26,17 @@ class PaymentStatusModel extends PaymentStatusEntity {
         orderId: (json['orderId'] as num?)?.toInt(),
         paymentMethod: json['paymentMethod'] as String?,
         paymentNotification: _parseNotification(json['paymentNotification']),
+        error: _parseError(json['error']),
       );
+
+  static PaymentErrorEntity? _parseError(dynamic data) {
+    if (data is! Map<String, dynamic>) return null;
+    return PaymentErrorEntity(
+      amount: (data['amount'] as num?)?.toDouble(),
+      errorTitle: data['errorTitle'] as String?,
+      errorMessage: data['errorMessage'] as String?,
+    );
+  }
 
   static PaymentState? _parsePaymentState(dynamic value) {
     if (value == null) return null;
@@ -75,7 +85,9 @@ class PaymentNotificationModel extends PaymentNotificationEntity {
   factory PaymentNotificationModel.fromJson(Map<String, dynamic> json) {
     return PaymentNotificationModel(
       title: json['title'] as String?,
-      subtitle: json['subtitle'] as String?,
+      // Server sends `subTitle` (capital T) — the lowercase key was
+      // never populated, and the fallback banner relied on this.
+      subtitle: (json['subTitle'] ?? json['subtitle']) as String?,
     );
   }
 }

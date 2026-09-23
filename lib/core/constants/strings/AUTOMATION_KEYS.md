@@ -509,6 +509,26 @@ feedback for one apply rather than a list a test walks.
 | Button | `orders_support_call_button` | — | `orders_support_footer.dart` |
 | Button | `orders_support_help_button` | — | `orders_support_footer.dart` |
 
+## Checkout
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Title | `checkout_title` | — | `checkout_bottom_sheet.dart` |
+| Loading | `checkout_refreshing_shimmer_<i>` | `checkout_refreshing_shimmer_0`, `checkout_refreshing_shimmer_1` | `checkout_bottom_sheet.dart` |
+| Row | `checkout_credits_row` | — | `checkout_bottom_sheet.dart` |
+| Text | `checkout_credits_amount_text` | — | `checkout_bottom_sheet.dart` |
+| Checkbox | `checkout_credits_checkbox` | — | `checkout_bottom_sheet.dart` |
+| Row | `checkout_address_row` | — | `checkout_bottom_sheet.dart` |
+| Text | `checkout_address_text` | — | `checkout_bottom_sheet.dart` |
+| Option | `checkout_payment_option_<i>` | `checkout_payment_option_0`, `checkout_payment_option_1` | `checkout_bottom_sheet.dart` |
+| Radio | `checkout_payment_option_<i>_radio` | `checkout_payment_option_0_radio`, `checkout_payment_option_1_radio` | `checkout_bottom_sheet.dart` |
+| Text | `checkout_payment_option_<i>_label` | `checkout_payment_option_0_label`, `checkout_payment_option_1_label` | `checkout_bottom_sheet.dart` |
+| Text | `checkout_payment_option_<i>_subtitle` | `checkout_payment_option_0_subtitle`, `checkout_payment_option_1_subtitle` | `checkout_bottom_sheet.dart` |
+| Button | `checkout_place_order_button` | — | `checkout_bottom_sheet.dart` |
+| Text | `checkout_pay_amount_text` | — | `checkout_bottom_sheet.dart` |
+| Text | `checkout_proceed_label_text` | — | `checkout_bottom_sheet.dart` |
+| Image | `checkout_payment_modes_image` | — | `checkout_bottom_sheet.dart` |
+
 ## Kids
 
 | Type | Key | Examples | Widget file |

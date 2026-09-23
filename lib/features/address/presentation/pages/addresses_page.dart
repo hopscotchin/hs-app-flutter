@@ -10,6 +10,7 @@ import 'package:hs_app_flutter/core/constants/strings/common_strings.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 
 import '../../../../components/appbar/hs_appbar.dart';
+import '../../../../components/atoms/empty_state_widget.dart';
 import '../../../../components/atoms/error_retry_widget.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
 import '../../../../core/constants/strings/account_strings.dart';
@@ -55,14 +56,21 @@ class _AddressesPageState extends State<AddressesPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Checkout renders this page inside a bottom sheet (see
+    // `AppNavigator.showAddressesSheet`), which supplies its own drag
+    // handle and needs no back button / bottom border on the app bar —
+    // the sheet is dismissed via drag or an on-list action.
+    final isCheckout = widget.mode == AddressListMode.checkout;
     return Scaffold(
       backgroundColor: AppColors.baseDefault,
       appBar: HsAppbar(
-        title: widget.mode == AddressListMode.normal
-            ? AccountStrings.savedAddresses
-            : AddressStrings.shipToTitle,
+        title: isCheckout
+            ? AddressStrings.shipToTitle
+            : AccountStrings.savedAddresses,
         titleKey: const ValueKey(AddressTestStrings.listAppBarTitle),
         backButtonKey: const ValueKey(AddressTestStrings.listBackButton),
+        showBackButton: !isCheckout,
+        showBottomBorder: !isCheckout,
       ),
       body: SafeArea(
         top: false,
@@ -96,7 +104,10 @@ class _AddressesPageState extends State<AddressesPage> {
                 if (state.selectSucceeded) {
                   context.read<AddressBloc>().add(const ClearSelectFeedback());
                   if (_isCheckout) {
-                    Navigator.of(context).pop();
+                    // Return `true` so the checkout sheet knows a
+                    // selection actually happened and can re-fetch its
+                    // buy-now data. Swipe-to-dismiss returns null instead.
+                    Navigator.of(context).pop(true);
                   } else {
                     context.read<AddressBloc>().add(const RefreshAddresses());
                   }
@@ -122,12 +133,12 @@ class _AddressesPageState extends State<AddressesPage> {
 
                     if (state.status == AddressStatus.success) {
                       if (state.items.isEmpty) {
-                        return Center(
-                          child: Text(
-                            AddressStrings.noSavedAddresses,
-                            key: const ValueKey(AddressTestStrings.listEmptyText),
-                            style: AppTypographyV1.bodyLarge.regular.textSecondary(),
-                          ),
+                        return EmptyStateWidget(
+                          type: EmptyStateType.addAddresss,
+                          buttonLabel: AddressStrings.addNewAddress,
+                          buttonKey: const ValueKey(AddressTestStrings.listAddNewButton),
+                          titleKey: const ValueKey(AddressTestStrings.listEmptyText),
+                          onButtonTap: _onAddNewAddress,
                         );
                       }
 
@@ -216,17 +227,22 @@ class _AddressesPageState extends State<AddressesPage> {
                   },
                 ),
               ),
-              if (_isCheckout)
-                BlocBuilder<AddressBloc, AddressState>(
-                  buildWhen: (prev, curr) => prev.selectingId != curr.selectingId,
-                  builder: (context, state) => _CheckoutBottomBar(
-                    onAddNewAddress: _onAddNewAddress,
-                    onContinue: state.selectingId != null ? null : _onContinue,
-                    isSubmitting: state.selectingId != null,
-                  ),
-                )
-              else
-                _AddNewAddressButton(onPressed: _onAddNewAddress),
+              BlocBuilder<AddressBloc, AddressState>(
+                buildWhen: (prev, curr) =>
+                    prev.selectingId != curr.selectingId ||
+                    prev.items.isEmpty != curr.items.isEmpty,
+                builder: (context, state) {
+                  if (state.items.isEmpty) return const SizedBox.shrink();
+                  if (_isCheckout) {
+                    return _CheckoutBottomBar(
+                      onAddNewAddress: _onAddNewAddress,
+                      onContinue: state.selectingId != null ? null : _onContinue,
+                      isSubmitting: state.selectingId != null,
+                    );
+                  }
+                  return _AddNewAddressButton(onPressed: _onAddNewAddress);
+                },
+              ),
             ],
           ),
         ),
@@ -242,7 +258,10 @@ class _AddressesPageState extends State<AddressesPage> {
     );
     if (result == null || !mounted) return;
     if (_isCheckout && result.address != null) {
-      Navigator.of(context).pop();
+      // Signal a real selection to the checkout sheet (matches the select
+      // flow at line ~110) so it re-fetches buy-now; a bare pop() returns
+      // null and the sheet stays on stale totals.
+      Navigator.of(context).pop(true);
       return;
     }
     _showResultSnack(result.popUpMessage);
@@ -371,7 +390,7 @@ class _CheckoutBottomBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SecondaryButton.defaultType(
+            child: TertiaryButton.defaultType(
               key: const ValueKey(AddressTestStrings.listAddNewButton),
               text: AddressStrings.addNewAddress,
               onTap: isSubmitting ? null : onAddNewAddress),

@@ -16,6 +16,7 @@ class PaymentStatusEntity extends ActionResponse {
   final int? orderId;
   final String? paymentMethod;
   final PaymentNotificationEntity? paymentNotification;
+  final PaymentErrorEntity? error;
 
   const PaymentStatusEntity({
     super.action,
@@ -30,6 +31,7 @@ class PaymentStatusEntity extends ActionResponse {
     this.orderId,
     this.paymentMethod,
     this.paymentNotification,
+    this.error,
   });
 
   PaymentStatusEntity.fromJson(
@@ -42,6 +44,7 @@ class PaymentStatusEntity extends ActionResponse {
     this.orderId,
     this.paymentMethod,
     this.paymentNotification,
+    this.error,
   }) : super.fromJson();
 
   @override
@@ -53,7 +56,21 @@ class PaymentStatusEntity extends ActionResponse {
     paymentMethod,
     retryTime,
     totalTime,
+    error,
   ];
+}
+
+/// The `error` object attached to a payment-status FAILURE response.
+/// Surfaced by the checkout bottom sheet as a banner above the purple CTA.
+class PaymentErrorEntity extends Equatable {
+  final double? amount;
+  final String? errorTitle;
+  final String? errorMessage;
+
+  const PaymentErrorEntity({this.amount, this.errorTitle, this.errorMessage});
+
+  @override
+  List<Object?> get props => [amount, errorTitle, errorMessage];
 }
 
 class PaymentNotificationEntity extends Equatable {
