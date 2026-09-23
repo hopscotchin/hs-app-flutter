@@ -43,7 +43,7 @@ import '../widgets/cart_shimmer_loading.dart';
 import '../widgets/remove_cart_item_sheet.dart';
 
 class CartPage extends StatefulWidget {
-  const CartPage({super.key, this.fromBuyNow = false, this.sourcePage});
+  const CartPage({super.key, this.fromBuyNow = false, this.mergeCart = false, this.sourcePage});
 
   /// Where the user came from — `from_screen` and `from_location` for this
   /// visit's cart events. Supplied by [AppNavigator.goToCart] and handed to the
@@ -58,11 +58,16 @@ class CartPage extends StatefulWidget {
   /// `handleCartResponse`.
   final bool fromBuyNow;
 
+  /// Set when the cart was opened by the `cart-merge` deeplink: a signed-in
+  /// user's first fetch is a merge instead of a plain load — Android's
+  /// `IS_CART_MERGE` extra, read in `CartFragment.getData`.
+  final bool mergeCart;
+
   @override
   State<CartPage> createState() => _CartPageState();
 }
 
-class _CartPageState extends State<CartPage> {
+class _CartPageState extends State<CartPage> with WidgetsBindingObserver {
   final _priceSummaryKey = GlobalKey();
 
   /// One-shot latch for the buy-now auto-checkout. Android clears its
@@ -83,13 +88,29 @@ class _CartPageState extends State<CartPage> {
     _cartBloc.instantCheckout = widget.fromBuyNow;
     // Set before the first fetch — `_onLoadCart` reports it.
     _cartBloc.sourcePage = widget.sourcePage;
-    _cartBloc.add(const LoadCart());
+    final isLoggedIn = context.read<AccountBloc>().state.account.isLoggedIn;
+    _cartBloc.add(
+      widget.mergeCart && isLoggedIn ? const MergeCart(showLoading: true) : const LoadCart(),
+    );
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _cartBloc.exitBuyNowMode();
     super.dispose();
+  }
+
+  /// Back from the background: the bag may have changed meanwhile (another
+  /// device, stock or price updates), so re-read it silently. Only while the
+  /// cart is the top route — with the checkout sheet or another page over it,
+  /// that screen owns the refresh.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
+    _cartBloc.add(const RefreshCart());
   }
 
   void _scrollToPriceSummary() {
@@ -641,8 +662,16 @@ class _CartContent extends StatelessWidget {
                 messageBars: cart.messageBars,
                 keyPrefix: CartTestStrings.screen,
                 onAction: (actionLink, _) {
+                  final cartBloc = context.read<CartBloc>();
+                  // The bar hides itself; the flag makes every later fetch
+                  // carry `dismiss=true` so the backend stops sending it
+                  // (Android's `handleActionLink` → `isCartDismissible`).
+                  if (actionLink?.toLowerCase() == 'dismiss') {
+                    cartBloc.cartDismissible = true;
+                    return;
+                  }
                   if (actionLink != null && actionLink.toLowerCase().contains('merge')) {
-                    context.read<CartBloc>().add(const MergeCart());
+                    cartBloc.add(const MergeCart());
                   }
                 },
               ),

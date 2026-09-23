@@ -18,6 +18,7 @@ class GetCartUseCase implements UseCase<CartEntity, GetCartParams> {
     return repository.getCart(
       isMergeCall: params.isMergeCall,
       instantCheckout: params.instantCheckout,
+      dismiss: params.dismiss,
       cancelToken: params.cancelToken,
     );
   }
@@ -28,11 +29,19 @@ class GetCartParams extends Equatable {
 
   /// Scopes the fetch to the buy-now item alone — see [CartRepository.getCart].
   final bool instantCheckout;
+
+  /// The user closed a dismissible cart message bar — see [CartRepository.getCart].
+  final bool dismiss;
   final CancelToken? cancelToken;
 
-  const GetCartParams({this.isMergeCall = false, this.instantCheckout = false, this.cancelToken});
+  const GetCartParams({
+    this.isMergeCall = false,
+    this.instantCheckout = false,
+    this.dismiss = false,
+    this.cancelToken,
+  });
 
   @override
-  List<Object?> get props => [isMergeCall];
+  List<Object?> get props => [isMergeCall, instantCheckout, dismiss];
   // cancelToken intentionally excluded — not a semantic field
 }

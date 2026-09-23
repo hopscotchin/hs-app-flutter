@@ -61,10 +61,14 @@ abstract final class AppNavigator {
     BuildContext context, {
     required SourcePage sourcePage,
     bool fromBuyNow = false,
+    bool mergeCart = false,
   }) {
     context.pushNamed(
       RouteNames.cartName,
-      queryParameters: fromBuyNow ? const {'fromBuyNow': 'true'} : const {},
+      queryParameters: {
+        if (fromBuyNow) 'fromBuyNow': 'true',
+        if (mergeCart) 'mergeCart': 'true',
+      },
       // Passed as `extra` rather than a query parameter: it is a value object,
       // and `PlpRoute` already carries its entry args this way.
       extra: sourcePage,

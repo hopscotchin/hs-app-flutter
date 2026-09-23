@@ -119,8 +119,10 @@ class ActionUrlHandler {
             : const HomeDestination();
 
       // ── Cart ──
-      case _Route.cart || DeeplinkHost.shoppingCart || DeeplinkHost.cartMerge:
+      case _Route.cart || DeeplinkHost.shoppingCart:
         return const CartDestination();
+      case _Route.cartMerge || DeeplinkHost.cartMerge:
+        return const CartDestination(mergeCart: true);
 
       // ── Categories ──
       case _Route.categories:
@@ -357,6 +359,10 @@ abstract final class _Route {
   static const boutique = 'boutique';
   static const search = 'search';
   static const cart = 'cart';
+
+  /// Android's `deeplinkCartMerge` value — lowercase-hyphenated so it can
+  /// match the lowercased `Uri.host` (see [promoDetails]).
+  static const cartMerge = 'cart-merge';
   static const categories = 'categories';
   static const account = 'account';
 

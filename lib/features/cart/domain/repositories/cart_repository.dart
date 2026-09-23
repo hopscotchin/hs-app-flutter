@@ -15,9 +15,13 @@ abstract class CartRepository {
   /// [instantCheckout] scopes every cart call to the single buy-now item: the
   /// backend answers with just that line rather than the whole bag. Android
   /// sends the same flag from `CartViewModel.isFromBuyNow`.
+  ///
+  /// [dismiss] — the user closed a dismissible cart message bar; see
+  /// `CartRemoteDataSource.getCart`.
   Future<Either<Failure, CartEntity>> getCart({
     bool isMergeCall = false,
     bool instantCheckout = false,
+    bool dismiss = false,
     CancelToken? cancelToken,
   });
   Future<Either<Failure, CartEntity>> removeCartItem(

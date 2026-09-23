@@ -247,12 +247,16 @@ class HomeDestination extends NavDestination {
 }
 
 class CartDestination extends NavDestination {
-  const CartDestination();
+  const CartDestination({this.mergeCart = false});
+
+  /// Opened by the `cart-merge` deeplink — see `CartPage.mergeCart`.
+  final bool mergeCart;
 
   @override
   void navigate(BuildContext context, {String? title, Map<String, dynamic>? extra}) {
     AppNavigator.goToCart(
       context,
+      mergeCart: mergeCart,
       // A deeplink has no originating screen inside the app, so `from_screen`
       // is the `none` sentinel — Android's own fallback for an unknown one
       // (`logRecoClickedEvent`, and every other `!isEmpty(x) ? x : NONE`).
