@@ -37,7 +37,9 @@ class CartCheckoutBar extends StatelessWidget {
     final message = orderSummary?.savingsMessage;
     if (message != null) return message;
     final savings = orderSummary?.totalSavings ?? 0;
-    return savings > 0 ? '${CartStrings.youSaved} ₹$savings ${CartStrings.onThisOrder}' : null;
+    return savings > 0
+        ? '${CartStrings.youSaved} ₹$savings ${CartStrings.onThisOrder}'
+        : null;
   }
 
   @override
@@ -74,10 +76,14 @@ class CartCheckoutBar extends StatelessWidget {
                   Expanded(
                     flex: 4,
                     child: PrimaryButton.defaultType(
-                      key: const ValueKey(CartTestStrings.checkoutBarProceedButton),
-                      text: CartStrings.proceedToCheckout,
+                      key: const ValueKey(
+                        CartTestStrings.checkoutBarProceedButton,
+                      ),
+                      text: '${CartStrings.proceedToCheckout}checkoiut',
                       size: ButtonSize.large,
-                      state: isLoading ? ButtonState.loading : ButtonState.enabled,
+                      state: isLoading
+                          ? ButtonState.loading
+                          : ButtonState.enabled,
                       onTap: onCheckout,
                     ),
                   ),
@@ -112,7 +118,8 @@ class CartCheckoutBar extends StatelessWidget {
     final itemCountText =
         totalSummary?.itemCountText ??
         '$itemCount ${itemCount == 1 ? CartStrings.item : CartStrings.items}';
-    final totalAmountText = totalSummary?.totalPrice ?? orderSummary?.totalOrderAmount?.value ?? '';
+    final totalAmountText =
+        totalSummary?.totalPrice ?? orderSummary?.totalOrderAmount?.value ?? '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

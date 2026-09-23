@@ -19,6 +19,7 @@ class CartRoute {
       final extra = state.extra;
       return CartPage(
         fromBuyNow: state.uri.queryParameters['fromBuyNow'] == 'true',
+        mergeCart: state.uri.queryParameters['mergeCart'] == 'true',
         sourcePage: extra is SourcePage ? extra : null,
       );
     },

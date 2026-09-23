@@ -93,7 +93,15 @@ class RemovePromoCode extends CartEvent {
 }
 
 class MergeCart extends CartEvent {
-  const MergeCart();
+  /// Replace the page with the loading shimmer while merging — used when the
+  /// cart is opened straight into a merge (the `cart-merge` deeplink), where
+  /// there is no loaded bag to keep on screen. Android's `mergeCart(loading = true)`.
+  final bool showLoading;
+
+  const MergeCart({this.showLoading = false});
+
+  @override
+  List<Object?> get props => [showLoading];
 }
 
 class ProceedToCheckout extends CartEvent {
