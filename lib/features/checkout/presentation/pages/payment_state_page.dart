@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +22,7 @@ import '../../data/services/juspay_service.dart';
 import '../../domain/entities/init_juspay_entity.dart';
 import '../../domain/entities/order_confirmation_entry_args.dart';
 import '../../domain/entities/payment_retry_entry_args.dart';
+import '../../domain/entities/payment_state_result.dart';
 import '../../domain/entities/payment_status_entity.dart';
 import '../bloc/checkout_bloc.dart';
 
@@ -77,12 +80,6 @@ class _PaymentStatePageState extends State<PaymentStatePage> {
       return;
     }
 
-    // Paint the strip above Juspay's dark chrome as an extension of it.
-    // Juspay's own Activity may or may not set an overlay of its own; by
-    // pushing brand+white here we guarantee the icons are visible on top
-    // of a dark bar whether or not the SDK touches SystemUi.
-    SystemChrome.setSystemUIOverlayStyle(AppTheme.systemUiBrand);
-
     _juspayService.processPayment(sdkPayload, (eventData) {
       if (!mounted) return;
       // Any process_result callback means Juspay has closed its native
@@ -135,6 +132,25 @@ class _PaymentStatePageState extends State<PaymentStatePage> {
     super.dispose();
   }
 
+  /// Launch the retry page. If it pops back with a
+  /// [PaymentStateResult] — e.g. a checkout-scope API failure inside
+  /// retry — forward it via our own pop so the sheet renders the
+  /// messageBars at its top strip.
+  Future<void> _openRetry(PaymentRetryLoaded state) async {
+    final result = await AppNavigator.goToPaymentRetry(
+      context,
+      PaymentRetryEntryArgs(
+        paymentRetryEntity: state.paymentRetryEntity,
+        orderId: state.orderId,
+        fromScreen: widget.fromScreen,
+        previousPaymentMode: widget.paymentMode,
+      ),
+    );
+    if (!mounted || result == null) return;
+    Navigator.of(context, rootNavigator: true)
+        .pop<PaymentStateResult>(result);
+  }
+
   /// Mirrors Android's `PaymentProcessingFragment` — on back press we open
   /// a confirmation sheet ("Transaction is pending. Do you want to go
   /// back?"). "YES, GO BACK" pops back to Cart WITHOUT marking the order
@@ -179,15 +195,7 @@ class _PaymentStatePageState extends State<PaymentStatePage> {
             if (state is PaymentStatusReceived) {
               _handlePaymentStatus(state.paymentStatusEntity);
             } else if (state is PaymentRetryLoaded) {
-              AppNavigator.goToPaymentRetry(
-                context,
-                PaymentRetryEntryArgs(
-                  paymentRetryEntity: state.paymentRetryEntity,
-                  orderId: state.orderId,
-                  fromScreen: widget.fromScreen,
-                  previousPaymentMode: widget.paymentMode,
-                ),
-              );
+              unawaited(_openRetry(state));
             } else if (state is OrderConfirmationLoaded) {
               AppNavigator.goToOrderConfirmation(
                 context,
@@ -196,6 +204,20 @@ class _PaymentStatePageState extends State<PaymentStatePage> {
                   fromScreen: widget.fromScreen,
                 ),
               );
+            } else if (state is PaymentFailedInCheckout) {
+              // Pop back to the sheet with the FAILURE error — sheet
+              // renders the banner above the CTA.
+              Navigator.of(context, rootNavigator: true)
+                  .pop<PaymentStateResult>(
+                PaymentStateResult.paymentFailed(state.error),
+              );
+            } else if (state is CheckoutError) {
+              // Any checkout-scope API failure — pop back to the sheet
+              // with the messageBars for the top strip.
+              Navigator.of(context, rootNavigator: true)
+                  .pop<PaymentStateResult>(
+                PaymentStateResult.apiError(state.messageBars),
+              );
             } else if (state is OrderMarkedFailed) {
               // Back-press / user-aborted / any explicit failure: pop
               // back to the ORIGINAL Cart route already on the stack.
@@ -203,11 +225,6 @@ class _PaymentStatePageState extends State<PaymentStatePage> {
               // payment-state page beneath it, and system-back from
               // there would drop the user back into the aborted flow.
               AppNavigator.backToCart(context);
-            } else if (state is CheckoutError) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-              Navigator.pop(context);
             }
           },
             child: const _PaymentStateBody(),

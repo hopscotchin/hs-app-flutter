@@ -15,6 +15,7 @@ import 'package:hs_app_flutter/features/kids/domain/entities/child_entity.dart';
 import 'package:hs_app_flutter/features/checkout/domain/entities/order_confirmation_entry_args.dart';
 import 'package:hs_app_flutter/features/checkout/domain/entities/payment_retry_entry_args.dart';
 import 'package:hs_app_flutter/features/checkout/domain/entities/payment_state_entry_args.dart';
+import 'package:hs_app_flutter/features/checkout/domain/entities/payment_state_result.dart';
 import 'package:hs_app_flutter/features/pdp/domain/entities/media_entity.dart';
 import 'package:hs_app_flutter/features/plp/domain/entities/page_type.dart';
 import 'package:hs_app_flutter/features/plp/domain/entities/plp_entry_args.dart';
@@ -334,16 +335,33 @@ abstract final class AppNavigator {
   /// `IS_CREDITS_APPLIED`, `QUICK_PAY_ENABLED`, `FROM_SCREEN`,
   /// `PAYMENT_MODE`). Passed through GoRouter's typed `extra` slot rather
   /// than a raw Map, following the PDP / PLP / Auth entry-args pattern.
-  static void goToPaymentState(BuildContext context, PaymentStateEntryArgs args) {
-    context.pushNamed('paymentState', extra: args);
+  /// Push the payment-state page. Resolves with a [PaymentStateResult]
+  /// on any error path (payment-status FAILURE or checkout-scope API
+  /// failure); success / abort paths navigate elsewhere and complete
+  /// with `null`.
+  static Future<PaymentStateResult?> goToPaymentState(
+    BuildContext context,
+    PaymentStateEntryArgs args,
+  ) {
+    return context.pushNamed<PaymentStateResult>(
+      'paymentState',
+      extra: <String, dynamic>{'args': args},
+    );
   }
 
-  /// The [args] bundle carries the retry response + the analytics attribution
-  /// forwarded from the payment-state page. `previousPaymentMode` is the mode
-  /// of the failed attempt (Android: `IntentConstants.PAYMENT_MODE`), reused
-  /// as the fallback when the server-driven retry action omits its own mode.
-  static void goToPaymentRetry(BuildContext context, PaymentRetryEntryArgs args) {
-    context.pushReplacementNamed('paymentRetry', extra: args);
+  /// Push the payment-retry page ON TOP of payment-state (matches
+  /// Android's `paymentRetryLauncher.launch(intent)` — a stacked
+  /// activity, not a replace). Resolves with a [PaymentStateResult] on
+  /// any checkout-scope API failure inside retry — the payment-state
+  /// page then forwards that result to the sheet.
+  static Future<PaymentStateResult?> goToPaymentRetry(
+    BuildContext context,
+    PaymentRetryEntryArgs args,
+  ) {
+    return context.pushNamed<PaymentStateResult>(
+      'paymentRetry',
+      extra: args,
+    );
   }
 
   static void goToOrderConfirmation(

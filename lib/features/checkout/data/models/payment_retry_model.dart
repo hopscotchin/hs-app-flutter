@@ -16,13 +16,24 @@ class PaymentRetryModel extends PaymentRetryEntity {
 
   PaymentRetryModel.fromJson(super.json)
     : super.fromJson(
-        imageUrl: json['imageUrl'] as String?,
+        imageUrl: _parseImageUrl(json),
         title: json['title'] as String?,
         subtitle: json['subtitle'] as String?,
         instruction: json['instruction'] as String?,
         amountSummary: _parseAmountSummary(json['amountSummary']),
         actions: _parseActions(json['actions']),
       );
+
+  /// Server sends the retry hero image as `media.url`; older/CDN paths
+  /// used a flat `imageUrl`. Read both.
+  static String? _parseImageUrl(Map<String, dynamic> json) {
+    final media = json['media'];
+    if (media is Map<String, dynamic>) {
+      final url = media['url'];
+      if (url is String) return url;
+    }
+    return json['imageUrl'] as String?;
+  }
 
   static AmountSummaryModel? _parseAmountSummary(dynamic data) {
     if (data is Map<String, dynamic>) {
@@ -43,9 +54,23 @@ class AmountSummaryModel extends AmountSummaryEntity {
   const AmountSummaryModel({super.label, super.value});
 
   factory AmountSummaryModel.fromJson(Map<String, dynamic> json) {
+    // Server sends `value` as a nested object
+    // `{amount, currency, displayValue}` — the raw String cast this used
+    // to do threw and aborted the whole retry-detail parse. Read the
+    // display string; fall back to the raw value if the server ever
+    // reverts to a flat string.
+    final raw = json['value'];
+    final String? display;
+    if (raw is Map<String, dynamic>) {
+      display = raw['displayValue'] as String?;
+    } else if (raw is String) {
+      display = raw;
+    } else {
+      display = null;
+    }
     return AmountSummaryModel(
       label: json['label'] as String?,
-      value: json['value'] as String?,
+      value: display,
     );
   }
 }

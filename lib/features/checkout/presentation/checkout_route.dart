@@ -19,7 +19,12 @@ class CheckoutRoute {
       name: 'paymentState',
       parentNavigatorKey: rootKey,
       builder: (context, state) {
-        final args = state.extra as PaymentStateEntryArgs;
+        // `extra` is a map with an `args` key — mirrors the address-flow
+        // pattern (address_route.dart:36) and the payment-retry route
+        // below. Wrapping keeps room for future keys without changing
+        // callers.
+        final extra = state.extra as Map<String, dynamic>;
+        final args = extra['args'] as PaymentStateEntryArgs;
         return BlocProvider(
           create: (_) => sl<CheckoutBloc>(),
           child: PaymentStatePage(

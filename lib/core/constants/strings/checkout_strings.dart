@@ -24,6 +24,7 @@ class CheckoutStrings {
   static const String retry = 'Retry';
   static const String otherOption = 'Other option';
   static const String cancel = 'Cancel';
+  static const String reviewCart = 'Review Cart';
   static const String amount = 'Amount';
   static const String creditsLabel = 'Credits:';
   static const String shipToLabel = 'Ship to:';

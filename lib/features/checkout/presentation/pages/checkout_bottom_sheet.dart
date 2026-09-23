@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_defaults.dart';
@@ -11,6 +13,7 @@ import '../../../../components/atoms/selection_checkbox.dart';
 import '../../../../components/atoms/selection_radio.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/image_constants.dart';
+import '../../../../core/entities/message_bar_entity.dart';
 import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/checkout_strings.dart';
 import '../../../../core/di/injection.dart';
@@ -24,6 +27,7 @@ import '../../../cart/domain/usecases/order_now_usecase.dart';
 import '../../domain/entities/buy_now_entity.dart';
 import '../../domain/entities/order_confirmation_entry_args.dart';
 import '../../domain/entities/payment_state_entry_args.dart';
+import '../../domain/entities/payment_status_entity.dart';
 import '../bloc/checkout_bloc.dart';
 
 /// Launches the checkout bottom sheet, matching Android's HSCheckoutFragment.
@@ -103,6 +107,16 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
   /// pick and the fresh response.
   bool _isRefreshing = false;
 
+  /// Populated when the payment-state page pops back with a FAILURE
+  /// error block — rendered as a banner above the purple CTA so the
+  /// user sees the reason without leaving checkout.
+  PaymentErrorEntity? _paymentError;
+
+  /// Populated on any checkout-scope API failure — the bloc emits
+  /// `CheckoutError` with server messageBars (or an INFO fallback);
+  /// we render them at the top of the sheet.
+  List<MessageBarEntity> _errorMessageBars = const [];
+
   BuyNowEntity get data => _data;
 
   bool get _hasCredits => data.userCredits != null && (data.userCredits!.amount ?? 0) > 0;
@@ -142,6 +156,23 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
     );
     if (!mounted || result?.address == null) return;
     await _refreshBuyNow();
+  }
+
+  Future<void> _openPaymentState(PaymentStateEntryArgs args) async {
+    final result = await AppNavigator.goToPaymentState(context, args);
+    if (!mounted) return;
+    setState(() {
+      _isPlacingOrder = false;
+      if (result != null) {
+        // Only one branch of the result is populated per PaymentStateResult
+        // by construction, but assign both fields so we replace stale UI.
+        _paymentError = result.paymentError;
+        if (result.messageBars.isNotEmpty) {
+          _errorMessageBars = result.messageBars;
+        }
+      }
+    });
+    if (result != null) await _refreshBuyNow();
   }
 
   Future<void> _refreshBuyNow() async {
@@ -225,6 +256,20 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
             // leaves the sheet with two handles.
             if (widget.useCustomHandle) _buildDragHandle(),
             _buildTitle(),
+            // Error bars sit above BuyNow's own top bars — they are the
+            // most recent signal (a failed API call the user just fired)
+            // so they get the topmost slot.
+            if (_errorMessageBars.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xxs,
+                ),
+                child: MessageBarsWidget(
+                  messageBars: _errorMessageBars,
+                  keyPrefix: '${CheckoutTestStrings.screen}_error',
+                ),
+              ),
             if (_isRefreshing) ..._buildRefreshingRows() else ...[
               if (data.messageBars.isNotEmpty)
                 Padding(
@@ -244,6 +289,7 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
               // → row re-enables.
               if (_hasPaymentModes) _buildPaymentRow(),
             ],
+            if (_paymentError != null) _buildPaymentErrorBanner(_paymentError!),
             AppSpacing.verticalGapSm,
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -290,10 +336,11 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
         }
       }
     } else if (state is JuspayReady) {
-      Navigator.pop(context); // Close bottom sheet before navigating
+      // Keep the sheet mounted — payment-state pushes on top. Only the
+      // FAILURE path pops back with an error; success / retry / abort
+      // navigate elsewhere and never resolve the awaited future.
       final orderId = int.tryParse(state.initJusPayEntity.orderId ?? '') ?? 0;
-      AppNavigator.goToPaymentState(
-        context,
+      unawaited(_openPaymentState(
         PaymentStateEntryArgs(
           initJusPayEntity: state.initJusPayEntity,
           orderId: orderId,
@@ -301,7 +348,7 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
           fromScreen: widget.fromScreen,
           paymentMode: _selectedPaymentCode,
         ),
-      );
+      ));
     } else if (state is OrderConfirmationLoaded) {
       Navigator.pop(context); // Close bottom sheet before navigating
       AppNavigator.goToOrderConfirmation(
@@ -312,8 +359,12 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
         ),
       );
     } else if (state is CheckoutError) {
-      setState(() => _isPlacingOrder = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+      // Any checkout-scope API failure → render server messageBars (or
+      // the bloc's INFO fallback) at the top of the sheet. No snackbars.
+      setState(() {
+        _errorMessageBars = state.messageBars;
+        _isPlacingOrder = false;
+      });
     }
   }
 
@@ -600,6 +651,79 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
               ),
             );
           }).toList(),
+        ),
+      ),
+    );
+  }
+
+  // ─── Payment failure banner ────────────────────────────────────────────────
+
+  /// Renders the payment-status `error` block returned on a FAILURE
+  /// actionStatus — card-off icon, title (bold) + message (regular), and
+  /// `Total: ₹amount` on the trailing edge — inside a soft-red card.
+  /// Sits between the payment row and the purple CTA.
+  Widget _buildPaymentErrorBanner(PaymentErrorEntity error) {
+    final title = error.errorTitle;
+    final message = error.errorMessage;
+    final amount = error.amount;
+    if ((title == null || title.isEmpty) &&
+        (message == null || message.isEmpty) &&
+        amount == null) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.xs,
+        AppSpacing.md,
+        0,
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xsm,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.dangerSecondary,
+          borderRadius: BorderRadius.circular(AppSpacing.xxs),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.credit_card_off,
+              color: AppColors.dangerDefault,
+              size: 22,
+            ),
+            AppSpacing.horizontalGapSm,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (title != null && title.isNotEmpty)
+                    Text(
+                      title,
+                      style: AppTypographyV1.bodyRegular.bold.textPrimary(),
+                    ),
+                  if (message != null && message.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      message,
+                      style: AppTypographyV1.bodySmall.regular.textPrimary(),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (amount != null) ...[
+              AppSpacing.horizontalGapSm,
+              Text(
+                'Total: ₹$amount',
+                style: AppTypographyV1.bodySmall.bold.textPrimary(),
+              ),
+            ],
+          ],
         ),
       ),
     );

@@ -82,20 +82,10 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
 
     result.fold(
-      (failure) => emit(
-        CheckoutError(
-          message: failure.message,
-          messageBars: failure is ApiFailure ? failure.messageBars : const [],
-        ),
-      ),
+      (failure) => emit(CheckoutError(messageBars: _errorBars(failure))),
       (data) {
         if (!data.isSuccessful) {
-          emit(
-            CheckoutError(
-              message: data.message ?? 'Order placement failed',
-              messageBars: data.messageBars,
-            ),
-          );
+          emit(CheckoutError(messageBars: _errorBars(null, data.messageBars)));
           return;
         }
 
@@ -119,6 +109,24 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
   }
 
+  /// Server-returned bars if present; otherwise a single INFO fallback so
+  /// the sheet always has something to render on a checkout-scope failure.
+  static const MessageBarEntity _fallbackErrorBar = MessageBarEntity(
+    type: 'error',
+    message: 'Uh-oh! Something went wrong. Please try again.',
+  );
+
+  List<MessageBarEntity> _errorBars(
+    Failure? failure, [
+    List<MessageBarEntity> dataBars = const [],
+  ]) {
+    if (dataBars.isNotEmpty) return dataBars;
+    if (failure is ApiFailure && failure.messageBars.isNotEmpty) {
+      return failure.messageBars;
+    }
+    return const [_fallbackErrorBar];
+  }
+
   Future<void> _onInitiatePayment(
     InitiatePayment event,
     Emitter<CheckoutState> emit,
@@ -134,12 +142,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
 
     result.fold(
-      (failure) => emit(
-        CheckoutError(
-          message: failure.message,
-          messageBars: failure is ApiFailure ? failure.messageBars : const [],
-        ),
-      ),
+      (failure) => emit(CheckoutError(messageBars: _errorBars(failure))),
       (data) {
         emit(JuspayReady(initJusPayEntity: data));
       },
@@ -186,7 +189,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     if (orderId != null) {
       add(CheckPaymentStatus(orderId: orderId));
     } else {
-      emit(const CheckoutError(message: 'Missing order ID from payment'));
+      emit(CheckoutError(messageBars: _errorBars(null)));
     }
   }
 
@@ -200,7 +203,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
       PaymentStatusParams(orderId: event.orderId),
     );
 
-    result.fold((failure) => emit(CheckoutError(message: failure.message)), (
+    result.fold((failure) => emit(CheckoutError(messageBars: _errorBars(failure))), (
       data,
     ) {
       final actionState = data.actionStatus;
@@ -218,16 +221,26 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
           _startPolling(event.orderId, data.retryTime, data.totalTime, emit);
           break;
         case ActionState.retryPayment:
+          _stopPolling();
           _stopProcessingUi();
           unawaited(_notifications.showRetry(event.orderId));
           add(LoadPaymentRetry(orderId: event.orderId));
           break;
         case ActionState.failure:
+          // Mirrors Android PaymentStateActivity.listenForPaymentStatus →
+          // processResponse: FAILURE hands the raw `error` back to the
+          // sheet (Android sets RESULT with ERROR_DATA + finish). No
+          // fallback synthesis — if the server didn't send an error, the
+          // banner just doesn't render.
+          _stopPolling();
           _stopProcessingUi();
           unawaited(
             _notifications.showFailure(event.orderId, message: data.message),
           );
-          add(LoadPaymentRetry(orderId: event.orderId));
+          emit(PaymentFailedInCheckout(
+            orderId: event.orderId,
+            error: data.error,
+          ));
           break;
         case null:
           _stopProcessingUi();
@@ -299,7 +312,13 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
 
     result.fold(
-      (failure) => emit(CheckoutError(message: failure.message)),
+      // Retry-detail API failure — mirrors Android
+      // PaymentRetryActivity.handleFailure(null, bars): always render the
+      // retry page, isSuccessful=false triggers the REVIEW CART branch.
+      (failure) => emit(PaymentRetryLoaded(
+        paymentRetryEntity: const PaymentRetryEntity(),
+        orderId: event.orderId,
+      )),
       (data) => emit(
         PaymentRetryLoaded(paymentRetryEntity: data, orderId: event.orderId),
       ),
@@ -321,20 +340,10 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
 
     result.fold(
-      (failure) => emit(
-        CheckoutError(
-          message: failure.message,
-          messageBars: failure is ApiFailure ? failure.messageBars : const [],
-        ),
-      ),
+      (failure) => emit(CheckoutError(messageBars: _errorBars(failure))),
       (data) {
         if (!data.isSuccessful) {
-          emit(
-            CheckoutError(
-              message: data.message ?? 'Retry failed',
-              messageBars: data.messageBars,
-            ),
-          );
+          emit(CheckoutError(messageBars: _errorBars(null, data.messageBars)));
           return;
         }
 
@@ -381,7 +390,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     );
 
     result.fold(
-      (failure) => emit(CheckoutError(message: failure.message)),
+      (failure) => emit(CheckoutError(messageBars: _errorBars(failure))),
       (data) => emit(OrderConfirmationLoaded(orderConfirmationEntity: data)),
     );
   }
