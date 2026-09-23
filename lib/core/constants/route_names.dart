@@ -18,6 +18,7 @@ abstract final class RouteNames {
   static const String paymentState = '/payment-state';
   static const String paymentRetry = '/payment-retry';
   static const String landingPage = '/landing-page';
+  static const String paymentSuccess = '/payment-success';
   static const String orderConfirmation = '/order-confirmation';
   static const String orders = '/orders';
   static const String wishlist = '/wishlist';

@@ -352,7 +352,7 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
       ));
     } else if (state is OrderConfirmationLoaded) {
       Navigator.pop(context); // Close bottom sheet before navigating
-      AppNavigator.goToOrderConfirmation(
+      AppNavigator.goToPaymentSuccess(
         context,
         OrderConfirmationEntryArgs(
           orderConfirmationEntity: state.orderConfirmationEntity,

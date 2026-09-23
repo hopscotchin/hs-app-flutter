@@ -38,6 +38,12 @@ class CheckoutStrings {
   static const String yesGoBack = 'YES, GO BACK';
   static const String no = 'NO';
 
+  // Payment success (post-payment lottie screen, ports Android
+  // `PaymentSuccessActivity` — strings match `thank_you` and
+  // `order_placed_successfully`).
+  static const String thankYou = 'Thank you';
+  static const String orderPlacedSuccessfully = 'Order placed successfully';
+
   // Order confirmation
   static const String allDone = 'All done';
   static const String orderPrefix = 'Order'; // composed as `Order <id>`

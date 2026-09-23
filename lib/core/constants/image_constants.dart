@@ -2,6 +2,7 @@ class ImageConstants {
   ImageConstants._();
 
   static const String splashAnimation = 'assets/animations/splash_animation.gif';
+  static const String orderConfirmationAnimation = 'assets/animations/payment_success.json';
   static const String hsLogo = 'assets/images/hslogo.svg';
   //PLP
   static const String arrowBack = 'assets/icons/arrow_back.svg';

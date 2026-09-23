@@ -364,6 +364,17 @@ abstract final class AppNavigator {
     );
   }
 
+  /// Post-payment success beat — plays the "Thank you" Lottie, then
+  /// replaces itself with the order confirmation. Ports Android's
+  /// `PaymentSuccessActivity`, which sits between payment success and
+  /// `OrderConfirmationActivityNew`.
+  static void goToPaymentSuccess(
+    BuildContext context,
+    OrderConfirmationEntryArgs args,
+  ) {
+    context.pushReplacementNamed('paymentSuccess', extra: args);
+  }
+
   static void goToOrderConfirmation(
     BuildContext context,
     OrderConfirmationEntryArgs args,

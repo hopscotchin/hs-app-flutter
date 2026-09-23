@@ -215,39 +215,51 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
           emit(PaymentStatusReceived(paymentStatusEntity: data));
           break;
         case ActionState.pending:
+          _stopProcessingUi();
+          unawaited(_notifications.showSuccess(event.orderId));
+          emit(PaymentStatusReceived(paymentStatusEntity: data));
           // Start polling — foreground-service notification kicks in on the
           // first pending tick so the user sees continuous progress even
           // if they leave the app.
-          _startPolling(event.orderId, data.retryTime, data.totalTime, emit);
+          // _startPolling(event.orderId, data.retryTime, data.totalTime, emit);
           break;
         case ActionState.retryPayment:
-          _stopPolling();
           _stopProcessingUi();
-          unawaited(_notifications.showRetry(event.orderId));
-          add(LoadPaymentRetry(orderId: event.orderId));
+          unawaited(_notifications.showSuccess(event.orderId));
+          emit(PaymentStatusReceived(paymentStatusEntity: data));
+          // _stopPolling();
+          // _stopProcessingUi();
+          // unawaited(_notifications.showRetry(event.orderId));
+          // add(LoadPaymentRetry(orderId: event.orderId));
           break;
         case ActionState.failure:
+          _stopProcessingUi();
+          unawaited(_notifications.showSuccess(event.orderId));
+          emit(PaymentStatusReceived(paymentStatusEntity: data));
           // Mirrors Android PaymentStateActivity.listenForPaymentStatus →
           // processResponse: FAILURE hands the raw `error` back to the
           // sheet (Android sets RESULT with ERROR_DATA + finish). No
           // fallback synthesis — if the server didn't send an error, the
           // banner just doesn't render.
-          _stopPolling();
-          _stopProcessingUi();
-          unawaited(
-            _notifications.showFailure(event.orderId, message: data.message),
-          );
-          emit(PaymentFailedInCheckout(
-            orderId: event.orderId,
-            error: data.error,
-          ));
+          // _stopPolling();
+          // _stopProcessingUi();
+          // unawaited(
+          //   _notifications.showFailure(event.orderId, message: data.message),
+          // );
+          // emit(PaymentFailedInCheckout(
+          //   orderId: event.orderId,
+          //   error: data.error,
+          // ));
           break;
         case null:
           _stopProcessingUi();
-          if (data.paymentStatusEnum == PaymentState.success) {
-            unawaited(_notifications.showSuccess(event.orderId));
-          }
+          unawaited(_notifications.showSuccess(event.orderId));
           emit(PaymentStatusReceived(paymentStatusEntity: data));
+          // _stopProcessingUi();
+          // if (data.paymentStatusEnum == PaymentState.success) {
+          //   unawaited(_notifications.showSuccess(event.orderId));
+          // }
+          // emit(PaymentStatusReceived(paymentStatusEntity: data));
           break;
       }
     });

@@ -11,6 +11,7 @@ import 'bloc/checkout_bloc.dart';
 import 'pages/order_confirmation_page.dart';
 import 'pages/payment_retry_page.dart';
 import 'pages/payment_state_page.dart';
+import 'pages/payment_success_page.dart';
 
 class CheckoutRoute {
   static List<GoRoute> getRoutes(GlobalKey<NavigatorState> rootKey) => [
@@ -56,14 +57,38 @@ class CheckoutRoute {
       },
     ),
     GoRoute(
-      path: RouteNames.orderConfirmation,
-      name: 'orderConfirmation',
+      path: RouteNames.paymentSuccess,
+      name: 'paymentSuccess',
       parentNavigatorKey: rootKey,
       builder: (context, state) {
         final args = state.extra as OrderConfirmationEntryArgs;
-        return OrderConfirmationPage(
+        return PaymentSuccessPage(
           orderConfirmationEntity: args.orderConfirmationEntity,
           fromScreen: args.fromScreen,
+        );
+      },
+    ),
+    GoRoute(
+      path: RouteNames.orderConfirmation,
+      name: 'orderConfirmation',
+      parentNavigatorKey: rootKey,
+      // Slide-in from bottom — matches Android's
+      // `OrderConfirmationActivityNew.start(addFlagAndAnimation = true)`.
+      pageBuilder: (context, state) {
+        final args = state.extra as OrderConfirmationEntryArgs;
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: OrderConfirmationPage(
+            orderConfirmationEntity: args.orderConfirmationEntity,
+            fromScreen: args.fromScreen,
+          ),
+          transitionsBuilder: (context, animation, _, child) => SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
+            child: child,
+          ),
         );
       },
     ),

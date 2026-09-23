@@ -68,7 +68,7 @@ class PaymentRetryPage extends StatelessWidget {
             ),
           );
         } else if (state is OrderConfirmationLoaded) {
-          AppNavigator.goToOrderConfirmation(
+          AppNavigator.goToPaymentSuccess(
             context,
             OrderConfirmationEntryArgs(
               orderConfirmationEntity: state.orderConfirmationEntity,

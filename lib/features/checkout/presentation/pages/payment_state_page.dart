@@ -197,7 +197,7 @@ class _PaymentStatePageState extends State<PaymentStatePage> {
             } else if (state is PaymentRetryLoaded) {
               unawaited(_openRetry(state));
             } else if (state is OrderConfirmationLoaded) {
-              AppNavigator.goToOrderConfirmation(
+              AppNavigator.goToPaymentSuccess(
                 context,
                 OrderConfirmationEntryArgs(
                   orderConfirmationEntity: state.orderConfirmationEntity,
