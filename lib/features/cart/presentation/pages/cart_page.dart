@@ -202,10 +202,11 @@ class _CartPageState extends State<CartPage> {
       fromScreen: FromScreens.shoppingCart,
     );
     if (!mounted) return;
-    // Dismissing the sheet is leaving the buy-now flow, so drop back to the
-    // full bag before refreshing — Android does the same in
-    // `CartFragment.onResume`, guarded by `exitedBuyNowFlow`.
-    _cartBloc.exitBuyNowMode();
+    // Refresh in the current scope — instant-checkout stays on so the bag
+    // re-fetches the buy-now line alone, matching Android's `CartFragment
+    // .onResume` (`exitedBuyNowFlow` guard clears `isFromBuyNow` but leaves
+    // `isInstantCheckout` untouched). The `_buyNowCheckoutStarted` latch
+    // above prevents the sheet from re-opening on this refresh.
     _cartBloc.add(const RefreshCart());
   }
 

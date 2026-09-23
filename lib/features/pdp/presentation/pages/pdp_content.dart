@@ -348,13 +348,13 @@ class _PdpContentState extends State<PdpContent> with WidgetsBindingObserver {
           // Fires on tap, BEFORE any network call, and even when this only opens
           // the size sheet — matching Android, where `sendEventBuyNowClicked`
           // runs before `addToCart` (`ProductDetailActivity.kt:205`).
-          // context.read<PdpAnalyticsTracker>().onBuyNowTapped();
-          // final skuId = state.selectedSku?.skuId;
-          // if (skuId != null) {
-          //   context.read<PdpBloc>().add(PdpEvent.buyNow(skuId: skuId));
-          // } else {
-          //   showPdpSizeSelectionBottomSheet(context, fromBuyNow: true);
-          // }
+          context.read<PdpAnalyticsTracker>().onBuyNowTapped();
+          final skuId = state.selectedSku?.skuId;
+          if (skuId != null) {
+            context.read<PdpBloc>().add(PdpEvent.buyNow(skuId: skuId));
+          } else {
+            showPdpSizeSelectionBottomSheet(context, fromBuyNow: true);
+          }
         },
       ),
     );
