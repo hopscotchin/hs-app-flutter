@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -7,8 +10,13 @@ plugins {
     id("com.google.firebase.crashlytics")
 }
 
+val keystoreProperties = Properties().apply {
+    val f = rootProject.file("keystore/keystore.properties")
+    if (f.exists()) load(FileInputStream(f))
+}
+
 android {
-    namespace = "in.hopscotch.android.flutter"
+    namespace = "in.hopscotch.android"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,25 +30,33 @@ android {
     }
 
     defaultConfig {
-        applicationId = "in.hopscotch.android.flutter"
+        applicationId = "in.hopscotch.android"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (keystoreProperties.containsKey("storeFile")) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
+        }
+    }
+
     buildTypes {
         debug {
-//            applicationIdSuffix = ".debug"
             // CleverTap TEST workspace — mirrors native Android's `debug` /
             // `staging` / `qa` / `uat` buildTypes which all ship the test creds.
             manifestPlaceholders["CLEVERTAP_ACCOUNT_ID"] = "TEST-ZW4-64W-955Z"
             manifestPlaceholders["CLEVERTAP_TOKEN"] = "TEST-046-401"
         }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release")
             // CleverTap production workspace — mirrors native Android's
             // `release` / `beta` buildTypes.
             manifestPlaceholders["CLEVERTAP_ACCOUNT_ID"] = "WW4-64W-955Z"
