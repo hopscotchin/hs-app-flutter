@@ -10,8 +10,8 @@ import '../../../../components/app_bottom_sheet.dart';
 import '../../../../components/atoms/custom_image.dart';
 import '../../../../components/atoms/dots_loader.dart';
 import '../../../../components/atoms/loading_shimmer.dart';
-import '../../../../components/atoms/selection_checkbox.dart';
-import '../../../../components/atoms/selection_radio.dart';
+import '../../../../components/form/app_checkbox.dart';
+import '../../../../components/form/app_radio.dart';
 import '../../../../components/page_components/message_bars_widget.dart';
 import '../../../../core/constants/image_constants.dart';
 import '../../../../core/entities/message_bar_entity.dart';
@@ -473,11 +473,10 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
                 style: AppTypographyV1.bodyRegular.regular.textPrimary(),
               ),
             ),
-            SelectionCheckbox(
+            AppCheckbox(
               key: const ValueKey(CheckoutTestStrings.creditsCheckbox),
-              value: _creditsApplied,
+              isSelected: _creditsApplied,
               onChanged: (v) => setState(() => _creditsApplied = v),
-              size: 18,
             ),
           ],
         ),
@@ -612,11 +611,11 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SelectionRadio(
+                          AppRadio(
                             key: ValueKey(
                               '${optionKey}_${CheckoutTestStrings.paymentOptionRadioSuffix}',
                             ),
-                            selected: isSelected,
+                            isSelected: isSelected,
                             isDisabled: disabled,
                           ),
                           AppSpacing.horizontalGapXs,

@@ -59,7 +59,7 @@ class AppRouter {
       // KidsRoute.getRoute(_rootNavigatorKey),
       LegalRoute.getRoute(_rootNavigatorKey),
       PromoDetailsRoute.getRoute(_rootNavigatorKey),
-      // ...CheckoutRoute.getRoutes(_rootNavigatorKey),
+      ...CheckoutRoute.getRoutes(_rootNavigatorKey),
       if (kDebugMode) AnalyticsDebugRoute.getRoute(_rootNavigatorKey),
     ],
     errorBuilder: (context, state) =>

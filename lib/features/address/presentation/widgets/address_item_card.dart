@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 // import 'package:hs_app_flutter/components/atoms/app_toggle_switch.dart';
-import 'package:hs_app_flutter/components/atoms/selection_radio.dart';
+import 'package:hs_app_flutter/components/form/app_radio.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 
 import '../../../../core/constants/strings/address_pincode_strings.dart';
@@ -106,7 +106,7 @@ class AddressItemCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SelectionRadio(selected: isSelected, isDisabled: isDisabled),
+            AppRadio(isSelected: isSelected, isDisabled: isDisabled),
             AppSpacing.horizontalGapSm,
             Expanded(child: content),
           ],
