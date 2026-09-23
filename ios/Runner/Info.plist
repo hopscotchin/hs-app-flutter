@@ -4,21 +4,6 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-	<!-- CleverTap — populated by xcconfig variables at build time.
-	     `flutter run --flavor staging` selects `Debug-staging.xcconfig`
-	     → TEST workspace; `--flavor prod` → production workspace.
-	     Mirrors Android's `${CLEVERTAP_ACCOUNT_ID}` manifestPlaceholder.
-	     Build configs and schemes must be registered in Xcode — see the
-	     project README. -->
-	<key>CleverTapAccountID</key>
-	<string>$(CLEVERTAP_ACCOUNT_ID)</string>
-	<key>CleverTapToken</key>
-	<string>$(CLEVERTAP_TOKEN)</string>
-	<!-- App Tracking Transparency — copy shown in the ATT system dialog.
-	     Apple requires this string for any app that calls
-	     requestTrackingAuthorization. -->
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Hopscotch uses this identifier to personalise recommendations and measure marketing campaign performance.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -50,9 +35,32 @@
 				<string>paytm-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>in.hopscotch.deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>hopscotch</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>juspay-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+				<string>amzn-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+				<string>$(PRODUCT_BUNDLE_IDENTIFIER).cred</string>
+				<string>paytm-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>CleverTapAccountID</key>
+	<string>$(CLEVERTAP_ACCOUNT_ID)</string>
+	<key>CleverTapToken</key>
+	<string>$(CLEVERTAP_TOKEN)</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>credpay</string>
@@ -89,9 +97,15 @@
 		<string>scapia</string>
 		<string>salaryse</string>
 		<string>bajajpayupi</string>
+		<string>payzapp</string>
+		<string>imobileapp</string>
+		<string>curieapp</string>
+		<string>aufmobile</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Hopscotch uses this identifier to personalise recommendations and measure marketing campaign performance.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

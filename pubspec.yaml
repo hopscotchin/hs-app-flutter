@@ -78,7 +78,7 @@ dependencies:
   webview_flutter_android: ^4.10.13
 
   #Juspay HyperSDK
-  hypersdkflutter: ^4.0.55
+  hypersdkflutter: ^4.0.58
 
   # SMS OTP autofill (Android: SMS User Consent API; iOS: native autofillHints)
   sms_autofill: ^2.3.3
@@ -101,16 +101,19 @@ dependencies:
   # http is pulled in directly (also transitive via segment_analytics) — we
   # use it to build a custom requestFactory that rewrites the SDK's `/b` path
   # to the Hopscotch proxy's expected wire format with Basic Auth.
-  segment_analytics: ^1.1.11
+  segment_analytics: ^1.1.12
   appsflyer_sdk: ^6.16.2
-  clevertap_plugin: ^3.4.0
+  clevertap_plugin: ^4.2.0
+  # Deep link capture: custom `hopscotch://` scheme + Universal/App Links,
+  # cold start and warm/background. Feeds ActionUrlHandler via DeepLinkService.
+  app_links: ^7.2.1
   # Microsoft Clarity — session replays + custom tags for user_type / utm /
   # PID / PLP / boutiqueId + user id. Mirrors Android
   # `common/helper/ClarityHelper.kt`. Feature-flag gated via
   # `PrefManager.featureFlagClarity`.
   clarity_flutter: ^1.9.0
   app_tracking_transparency: ^2.0.6+1
-  advertising_id: ^2.4.0
+  advertising_id: ^2.7.1
   # Android: `Settings.Secure.ANDROID_ID` reader. `device_info_plus.androidInfo.id`
   # returns `Build.ID` (OS build fingerprint), NOT ANDROID_ID — confirmed in
   # device_info_plus 13.1.0/MethodCallHandlerImpl.kt:38. Using it for hs_device_id

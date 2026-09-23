@@ -36,6 +36,22 @@ target 'Runner' do
   end
 end
 
+# CleverTap push templates (rating, carousel, …): a Notification Service
+# Extension enriches the push with rich media, a Notification Content
+# Extension renders the template UI. See ios/CleverTapNotificationService
+# and ios/CleverTapNotificationContent.
+target 'CleverTapNotificationService' do
+  use_frameworks!
+  pod 'CTNotificationService'
+end
+
+target 'CleverTapNotificationContent' do
+  use_frameworks!
+  # CTNotificationContent pulls in SDWebImage, which clevertap_plugin also
+  # vendors through Swift Package Manager. See the post_install hook below.
+  pod 'CTNotificationContent'
+end
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
@@ -47,5 +63,37 @@ post_install do |installer|
   if File.exist?(fuse_path)
     if system("ruby", fuse_path.to_s, clean_assets.to_s)
     end
+  end
+end
+
+# Swift Package Manager already embeds SDWebImage.framework into
+# Runner.app/Frameworks (clevertap-ios-sdk vendors it as the SDWebImageCT
+# binary target). CocoaPods wants to embed it there too, because the CleverTap
+# notification extensions link it, and Xcode then fails the build with
+# "Multiple commands produce .../Runner.app/Frameworks/SDWebImage.framework".
+# Drop it from the host app's embed phase and let the SPM copy serve both the
+# app and the extensions, which resolve it via @executable_path/../../Frameworks.
+#
+# This runs in post_integrate, not post_install: CocoaPods rewrites the
+# .xcfilelist files while integrating the user project, which is after
+# post_install hooks have run.
+post_integrate do |installer|
+  strip_duplicate_spm_frameworks(installer, ['SDWebImage'])
+end
+
+# Removes frameworks from the Pods-Runner embed phase that Swift Package Manager
+# already embeds, so only one command produces each framework in Runner.app.
+def strip_duplicate_spm_frameworks(installer, names)
+  support_files = File.join(installer.sandbox.root, 'Target Support Files', 'Pods-Runner')
+  targets = Dir[File.join(support_files, 'Pods-Runner-frameworks.sh')] +
+            Dir[File.join(support_files, 'Pods-Runner-frameworks-*-files.xcfilelist')]
+
+  targets.each do |path|
+    lines = File.readlines(path)
+    kept = lines.reject { |line| names.any? { |n| line.include?("/#{n}.framework") } }
+    next if kept.length == lines.length
+
+    File.write(path, kept.join)
+    puts "[Podfile] stripped #{lines.length - kept.length} duplicate framework line(s) from #{File.basename(path)}"
   end
 end

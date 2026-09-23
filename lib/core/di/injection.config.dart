@@ -48,6 +48,11 @@ import 'package:hs_app_flutter/core/network/connectivity/network_info.dart'
 import 'package:hs_app_flutter/core/network/network_client.dart' as _i81;
 import 'package:hs_app_flutter/core/router/navigation_observer.dart' as _i93;
 import 'package:hs_app_flutter/core/services/connectivity_service.dart' as _i93;
+import 'package:hs_app_flutter/core/services/deep_link_service.dart' as _i782;
+import 'package:hs_app_flutter/core/services/notification_nudge_helper.dart'
+    as _i811;
+import 'package:hs_app_flutter/core/services/notification_permission_service.dart'
+    as _i546;
 import 'package:hs_app_flutter/core/services/pref_manager.dart' as _i818;
 import 'package:hs_app_flutter/core/services/push_notification_service.dart'
     as _i1061;
@@ -369,6 +374,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i93.ConnectivityService>(
       () => registerModule.connectivityService(),
     );
+    gh.lazySingleton<_i782.DeepLinkService>(() => _i782.DeepLinkService());
+    gh.lazySingleton<_i811.NotificationNudgeHelper>(
+      () => _i811.NotificationNudgeHelper(),
+    );
     gh.lazySingleton<_i526.JuspayService>(() => _i526.JuspayService());
     gh.lazySingleton<_i806.HandleDeeplinkUseCase>(
       () => _i806.HandleDeeplinkUseCase(),
@@ -520,6 +529,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i351.NetworkInfo>(),
       ),
     );
+    gh.lazySingleton<_i68.SplashRepository>(
+      () => _i558.SplashRepositoryImpl(
+        gh<_i748.SplashRemoteDatasource>(),
+        gh<_i351.NetworkInfo>(),
+        gh<_i818.PrefManager>(),
+        gh<_i81.NetworkClient>(),
+        gh<_i811.NotificationNudgeHelper>(),
+      ),
+    );
     gh.lazySingleton<_i901.CartRepository>(
       () => _i77.CartRepositoryImpl(
         remoteDataSource: gh<_i454.CartRemoteDataSource>(),
@@ -543,14 +561,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i259.CategoriesRepositoryImpl(
         remoteDataSource: gh<_i730.CategoriesRemoteDataSource>(),
         networkInfo: gh<_i351.NetworkInfo>(),
-      ),
-    );
-    gh.lazySingleton<_i68.SplashRepository>(
-      () => _i558.SplashRepositoryImpl(
-        gh<_i748.SplashRemoteDatasource>(),
-        gh<_i351.NetworkInfo>(),
-        gh<_i818.PrefManager>(),
-        gh<_i81.NetworkClient>(),
       ),
     );
     gh.lazySingleton<_i550.ClearSessionUseCase>(
@@ -883,12 +893,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i127.AnalyticsHelper>(),
       ),
     );
-    gh.lazySingleton<_i1061.PushNotificationService>(
-      () => _i1061.PushNotificationService(
-        gh<_i407.RegisterDeviceUseCase>(),
-        gh<_i818.PrefManager>(),
-      ),
-    );
     gh.factory<_i833.AddressBloc>(
       () => _i833.AddressBloc(
         gh<_i637.GetAddressesUseCase>(),
@@ -944,18 +948,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1013.AddressCacheManager>(),
       ),
     );
-    gh.factory<_i419.AuthBloc>(
-      () => _i419.AuthBloc(
-        gh<_i766.CheckMobileUseCase>(),
-        gh<_i788.SendOtpUseCase>(),
-        gh<_i410.VerifyOtpUseCase>(),
-        gh<_i903.RegisterUseCase>(),
-        gh<_i842.PersistSessionUseCase>(),
-        gh<_i550.ClearSessionUseCase>(),
-        gh<_i387.LogoutUseCase>(),
-        gh<_i1061.PushNotificationService>(),
-        gh<_i18.AccountBloc>(),
-        gh<_i600.AuthAnalyticsTracker>(),
+    gh.lazySingleton<_i546.NotificationPermissionService>(
+      () => _i546.NotificationPermissionService(
+        gh<_i818.PrefManager>(),
+        gh<_i811.NotificationNudgeHelper>(),
+        gh<_i127.AnalyticsHelper>(),
       ),
     );
     gh.lazySingleton<_i283.CheckPincodeUseCase>(
@@ -1001,6 +998,27 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i325.GetHomePageUseCase>(),
         gh<_i127.AnalyticsHelper>(),
         gh<_i66.HomeTrackAnalyticManager>(),
+      ),
+    );
+    gh.lazySingleton<_i1061.PushNotificationService>(
+      () => _i1061.PushNotificationService(
+        gh<_i407.RegisterDeviceUseCase>(),
+        gh<_i818.PrefManager>(),
+        gh<_i546.NotificationPermissionService>(),
+      ),
+    );
+    gh.factory<_i419.AuthBloc>(
+      () => _i419.AuthBloc(
+        gh<_i766.CheckMobileUseCase>(),
+        gh<_i788.SendOtpUseCase>(),
+        gh<_i410.VerifyOtpUseCase>(),
+        gh<_i903.RegisterUseCase>(),
+        gh<_i842.PersistSessionUseCase>(),
+        gh<_i550.ClearSessionUseCase>(),
+        gh<_i387.LogoutUseCase>(),
+        gh<_i1061.PushNotificationService>(),
+        gh<_i18.AccountBloc>(),
+        gh<_i600.AuthAnalyticsTracker>(),
       ),
     );
     return this;

@@ -25,6 +25,7 @@ import 'core/di/injection.dart';
 import 'core/network/cookies/cookies_based_events_util.dart';
 import 'core/network/cookies/hs_cookie_store.dart';
 import 'core/network/network_client.dart';
+import 'core/services/deep_link_service.dart';
 import 'core/services/pref_manager.dart';
 import 'core/services/push_notification_service.dart';
 import 'core/theme/app_theme.dart';
@@ -159,6 +160,7 @@ Future<void> _runPostInitBootstrapping() async {
   networkClient.bindPrefManager(prefManager);
 
   await sl<PushNotificationService>().initialize();
+  unawaited(sl<DeepLinkService>().initialize());
   // HTTP Inspector — debug builds only. Opened via the floating button overlay.
   if (kDebugMode || kProfileMode) {
     final talker = TalkerFlutter.init();

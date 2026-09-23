@@ -4,6 +4,7 @@ import 'package:hs_app_flutter/core/constants/image_constants.dart';
 import 'package:hs_app_flutter/core/constants/strings/auto_test_strings.dart';
 import 'package:hs_app_flutter/core/di/injection.dart';
 import 'package:hs_app_flutter/core/router/app_navigator.dart';
+import 'package:hs_app_flutter/core/services/deep_link_service.dart';
 import 'package:hs_app_flutter/core/services/pref_manager.dart';
 
 import '../../../../core/config/environment.dart';
@@ -55,8 +56,18 @@ class _SplashPageState extends State<SplashPage> {
       _showEnvironmentSelector(context, state.pendingEnvironment!);
       return;
     }
+
+    // A deep link (custom scheme/App Link, or a push tap that cold-started
+    // the app) is about to navigate — or already has — to its own
+    // destination. Splash's default auto-navigation would otherwise fire
+    // straight after (this listener reacts to SplashBloc's async init,
+    // which finishes well after DeepLinkService's near-instant post-frame
+    // navigation) and silently clobber it back to Home. Only the navigation
+    // itself is skipped — cart count and other state updates still apply.
+    final hasPendingDeepLink = sl<DeepLinkService>().hasPendingColdStartDeepLink;
+
     if (state.isError) {
-      AppNavigator.goToHome(context);
+      if (!hasPendingDeepLink) AppNavigator.goToHome(context);
     }
 
     if (!state.isLoaded) return;
@@ -66,7 +77,7 @@ class _SplashPageState extends State<SplashPage> {
 
     final isLoggedIn = state.customerInfo?.isLoggedIn ?? prefs.isLoggedIn;
     final hasSeenEnterStore = prefs.isStoreButtonClicked ?? false;
-    if (isLoggedIn || hasSeenEnterStore) {
+    if ((isLoggedIn || hasSeenEnterStore) && !hasPendingDeepLink) {
       AppNavigator.goToHome(context);
     }
   }

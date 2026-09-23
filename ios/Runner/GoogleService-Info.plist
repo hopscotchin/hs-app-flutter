@@ -4,27 +4,27 @@
 <dict>
 	<key>API_KEY</key>
 	<string>AIzaSyB7agsqzsCoyr5hruHqIoO95Xp3nJJePS8</string>
-	<key>GCM_SENDER_ID</key>
-	<string>645600819281</string>
-	<key>PLIST_VERSION</key>
-	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>in.hopscotch.hopscotch.new</string>
+	<key>GCM_SENDER_ID</key>
+	<string>645600819281</string>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:645600819281:ios:c1c6acb94446b90249a070</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
 	<key>PROJECT_ID</key>
 	<string>hs-app-flutter</string>
 	<key>STORAGE_BUCKET</key>
 	<string>hs-app-flutter.firebasestorage.app</string>
-	<key>IS_ADS_ENABLED</key>
-	<false></false>
-	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
-	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
-	<key>IS_GCM_ENABLED</key>
-	<true></true>
-	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
-	<key>GOOGLE_APP_ID</key>
-	<string>1:645600819281:ios:c1c6acb94446b90249a070</string>
 </dict>
 </plist>
