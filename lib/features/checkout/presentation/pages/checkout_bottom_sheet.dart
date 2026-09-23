@@ -537,22 +537,27 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
   }
 
   String _buildAddressDisplay(CheckoutAddressEntity addr) {
-    // Match the two-line design: line 1 = address name, line 2 = "City - PIN".
-    final line1 = addr.name;
-    final cityPin = [addr.city, addr.zipCode]
-        .whereType<String>()
-        .where((s) => s.isNotEmpty)
-        .join(' - ');
-    if (line1 != null && line1.isNotEmpty && cityPin.isNotEmpty) {
-      return '$line1\n$cityPin';
+    // Mirrors Android's `address_text_placeholder` — `%s, %s %s %s %s %s`
+    // fed with (formattedName, streetAddress, landmark, state, city,
+    // formattedZip). First name only when the full name has a space;
+    // zip split as `XXX YYY` when it's 6 digits.
+    // See `CheckoutViewHolder.kt:47-54`.
+    final name = addr.name ?? '';
+    final firstName = name.contains(' ') ? name.split(' ').first : name;
+    final zip = addr.zipCode ?? '';
+    final formattedZip = zip.length >= 6
+        ? '${zip.substring(0, 3)} ${zip.substring(3)}'
+        : zip;
+    final line =
+        '$firstName, ${addr.streetAddress ?? ''} ${addr.landmark ?? ''} '
+        '${addr.state ?? ''} ${addr.city ?? ''} $formattedZip';
+    // Guard against a fully-empty entity — fall back to displayAddress
+    // so the row never renders as just a stray comma.
+    final trimmed = line.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (trimmed == ',' || trimmed.isEmpty) {
+      return addr.displayAddress ?? '';
     }
-    if (addr.displayAddress != null && addr.displayAddress!.isNotEmpty) {
-      return addr.displayAddress!;
-    }
-    return [line1, addr.city, addr.state, addr.zipCode]
-        .whereType<String>()
-        .where((s) => s.isNotEmpty)
-        .join('  ');
+    return line;
   }
 
   // ─── Payment Row ────────────────────────────────────────────────────────────
