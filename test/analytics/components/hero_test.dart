@@ -5,6 +5,7 @@ import 'package:hs_app_flutter/core/analytics/constants/analytics_events.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dart';
 import 'package:hs_app_flutter/core/analytics/home/home_component_click_handlers.dart';
 import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.dart';
+import 'package:hs_app_flutter/core/analytics/home/journey_worker.dart';
 import 'package:hs_app_flutter/features/discover/data/models/component_models.dart';
 import 'package:hs_app_flutter/features/discover/domain/entities/home_page_entity.dart';
 
@@ -37,6 +38,7 @@ void main() {
       analytics: h.analytics,
       orderAttribution: h.orderAttribution,
       lpAttribution: h.lpAttribution,
+      journeyWorker: JourneyWorker(h.analytics),
     );
     tracker.extraData = const ExtraData(fromHomePage: true);
     tracker.sortBarName = AnalyticsDefaults.sortBarAll;
@@ -57,7 +59,8 @@ void main() {
 
   group('banner_impression', () {
     test('fires once with client keys + full root trackingMeta (no nulls)', () async {
-      await tracker.notifyVisible(heroIndex);
+      tracker.notifyVisible(heroIndex);
+      await tracker.flushJourney();
 
       final payload = h.singleEvent(AnalyticsEvents.bannerImpression);
       expectTimeBuckets(payload);
@@ -78,7 +81,8 @@ void main() {
 
     test('required keys are all present, non-null, non-empty (home context)',
         () async {
-      await tracker.notifyVisible(heroIndex);
+      tracker.notifyVisible(heroIndex);
+      await tracker.flushJourney();
       final payload = h.singleEvent(AnalyticsEvents.bannerImpression);
       expectRequiredNonEmpty(payload, requiredKeysBannerImpressionHome);
     }, skip: skipIfMissing);
@@ -88,7 +92,8 @@ void main() {
 
   group('tile_impression', () {
     test('fires one tile_impression per Hero tile (no null fields)', () async {
-      await tracker.notifyVisible(heroIndex);
+      tracker.notifyVisible(heroIndex);
+      await tracker.flushJourney();
 
       final events = h.eventsNamed(AnalyticsEvents.tileImpression);
       final tileCount = (hero.data!['tiles'] as List).length;
@@ -102,7 +107,8 @@ void main() {
     }, skip: skipIfMissing);
 
     test('funnel_tile values are unique per tile', () async {
-      await tracker.notifyVisible(heroIndex);
+      tracker.notifyVisible(heroIndex);
+      await tracker.flushJourney();
       final funnelTiles = h
           .eventsNamed(AnalyticsEvents.tileImpression)
           .map((e) => e['funnel_tile'])
@@ -112,7 +118,8 @@ void main() {
     }, skip: skipIfMissing);
 
     test('required keys on every tile_impression (home context)', () async {
-      await tracker.notifyVisible(heroIndex);
+      tracker.notifyVisible(heroIndex);
+      await tracker.flushJourney();
       for (final e in h.eventsNamed(AnalyticsEvents.tileImpression)) {
         expectRequiredNonEmpty(e, requiredKeysTileImpressionHome);
       }

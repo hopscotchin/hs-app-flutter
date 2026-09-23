@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/core/analytics/constants/analytics_properties.dart';
@@ -456,11 +458,9 @@ class _PageCarouselWidgetState extends State<PageCarouselWidget>
             imageUrl: tile.imageUrl ?? product.displayImage,
             imageAspectRatio: tileHeight > 0 ? tileWidth / tileHeight : null,
             isWishlisted: wished,
-            onTap: () async {
-              await logClick();
-              if (context.mounted) {
-                ActionUrlHandler.navigate(context, tapUri);
-              }
+            onTap: () {
+              unawaited(logClick());
+              ActionUrlHandler.navigate(context, tapUri);
             },
             onWishlistTap: () => WishlistActions.toggle(
               context,

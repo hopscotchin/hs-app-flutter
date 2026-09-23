@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/analytics/home/home_component_click_handlers.dart';
@@ -115,12 +117,10 @@ class ProductGridWidget extends StatelessWidget {
             _tileSubKey(index, '${HomeComponentTestStrings.tileVisualCueSuffix}_$j'),
         showProductInfo: showInfo,
         isWishlisted: wished,
-        onTap: () async {
-          await sl<HomeTrackAnalyticManager>()
-              .onProductGridTileTapped(gridData, item);
-          if (context.mounted) {
-            ActionUrlHandler.navigate(context, item.actionUri, title: item.name);
-          }
+        onTap: () {
+          unawaited(sl<HomeTrackAnalyticManager>()
+              .onProductGridTileTapped(gridData, item));
+          ActionUrlHandler.navigate(context, item.actionUri, title: item.name);
         },
         onWishlistTap: () => WishlistActions.toggle(
           context,

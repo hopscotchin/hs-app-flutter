@@ -115,12 +115,26 @@ class CookiesBasedEventsUtil {
         case 'segment_user_type':
           _segmentUserType = cookie.value;
         case 'experiments':
-          // Mirror Android CookiesBasedEventsUtil.java:68-74 — empty value
+          // Same okhttp3-vs-Flutter parity quirk as `othersessioninfo` above:
+          // some responses ship the cookie DQUOTE-wrapped (RFC 6265 §4.1.1)
+          // and/or URL-encoded. Android strips both; Flutter's cookie parser
+          // preserves them literally. Left as-is, the surrounding `"`
+          // characters leak into `_experimentCookies` and the downstream
+          // `experimentsList` split-on-`,` attaches `\"` to the first + last
+          // elements of the identify trait.
+          //
+          // Strip only the RFC-6265 surrounding DQUOTE pair — not every `"`
+          // in the value — so a hypothetical experiment name containing an
+          // internal quote survives.
+          //
+          // Mirror Android `CookiesBasedEventsUtil.java:68-74` — empty value
           // falls back to the sentinel `AnalyticsDefaults.NONE` so the trait
           // wire format still includes something the dashboards can key on.
-          _experimentCookies = cookie.value.isNotEmpty
-              ? cookie.value
-              : AnalyticsDefaults.none;
+          var raw = Uri.decodeComponent(cookie.value).trim();
+          if (raw.length >= 2 && raw.startsWith('"') && raw.endsWith('"')) {
+            raw = raw.substring(1, raw.length - 1).trim();
+          }
+          _experimentCookies = raw.isNotEmpty ? raw : AnalyticsDefaults.none;
       }
     }
 

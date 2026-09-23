@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 
@@ -9,61 +8,106 @@ import '../attribution/lp_attribution_helper.dart';
 import '../attribution/order_attribution_helper.dart';
 import '../constants/analytics_defaults.dart';
 import '../constants/analytics_events.dart';
-import '../constants/analytics_properties.dart';
 import '../events/analytics_helper.dart';
+import 'journey_worker.dart';
 
 /// Per-screen impression / scroll / click tracker for Discover + LP.
-/// Fires `tile_impression` / `banner_impression` / `carousel_scrolled` /
-/// `tile_clicked` (or their `lp_*` variants when [ExtraData.fromHomePage] is
-/// false). Call [destroy] on bloc close.
+///
+/// **Responsibility split.** This class stays on the main isolate and
+/// does only cheap, sub-millisecond work:
+///
+/// - Scroll bookkeeping — `_currentlyVisible`, direction-change
+///   snapshot, and the journey (`_journey`) of indices that entered
+///   the viewport since the last flush.
+/// - Click events — merged synchronously, attribution updated,
+///   `analytics.logEvent(tile_clicked)` fired.
+/// - Carousel scroll flush — a handful of events, main-isolate direct.
+///
+/// The heavy work — walking nested tile JSON, allocating one enriched
+/// map per innermost leaf, calling `_segment.track` hundreds of times
+/// — is delegated to a [JourneyWorker]. The production worker
+/// (`IsolateJourneyWorker`) runs on a dedicated isolate that
+/// initialises `BackgroundIsolateBinaryMessenger` and owns its own
+/// Segment client, so a `flushJourney` on nav / tab / pause becomes a
+/// single `SendPort.send` on the main thread. Tests inject
+/// `InlineJourneyWorker` which routes through the mocked
+/// `AnalyticsHelper`.
+///
+/// **Contract with the widget layer.** `notifyVisible` / `notifyInvisible`
+/// are cheap synchronous calls safe from any `VisibilityDetector`
+/// callback. `flushJourney` (and its alias `flushCarouselScrolls`) is
+/// the only method that dispatches to Segment; call it on screen leave
+/// — bloc close, nav push/pop, tab switch, `paused` / `hidden`
+/// lifecycle. `HomeBloc.close` should also call [destroyFromHomeBloc]
+/// to release per-screen buffers; LP blocs must not.
 @lazySingleton
-class HomeTrackAnalyticManager {
+class HomeTrackAnalyticManager with WidgetsBindingObserver {
   HomeTrackAnalyticManager({
     required this.analytics,
     required this.orderAttribution,
     required this.lpAttribution,
-  });
+    required JourneyWorker journeyWorker,
+  }) : _worker = journeyWorker {
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   final AnalyticsHelper analytics;
   final OrderAttributionHelper orderAttribution;
   final LpAttributionHelper lpAttribution;
+  final JourneyWorker _worker;
 
-  // ─── State (per screen instance) ────────────────────────────────────
-
-  /// Per-carousel key → captured `trackingMeta` for `carousel_scrolled`.
-  /// Key is any stable per-widget identifier (e.g. identityHashCode) —
-  /// used only for dedup; `carousel_id` on the wire comes from the value blob.
-  final Map<Object, Map<String, dynamic>> _carouselScrollDepth =
-      <Object, Map<String, dynamic>>{};
+  // ─── Per-screen state (all main-isolate) ───────────────────────────
 
   final Set<int> _currentlyVisible = <int>{};
 
-  /// Items already visible at the last direction change — excluded from
-  /// re-fire on the new leg (matches Android per-direction segment start
-  /// at `firstVisible - 1` / `lastVisible + 1`).
+  /// Items visible at the last direction change — excluded from re-add
+  /// on the new leg (matches Android per-direction segment start).
   Set<int> _snapshotAtDirectionChange = <int>{};
+
+  /// Indices that crossed the visibility threshold since the last
+  /// flush. Bookkeeping-only on the scroll frame; the worker drains it.
+  final Set<int> _journey = <int>{};
+
+  /// Per-carousel key → captured `trackingMeta`. Last-write-wins per
+  /// key; events fire on [flushJourney] via [_fireCarouselScrolls].
+  final Map<Object, Map<String, dynamic>> _carouselScrollDepth =
+      <Object, Map<String, dynamic>>{};
 
   double _lastScrollPixels = 0;
   _ScrollDir _lastDirection = _ScrollDir.none;
   ScrollPosition? _scrollPosition;
-
-  List<PageComponent> _pageComponents = <PageComponent>[];
-  set pageComponents(List<PageComponent> value) {
-    _pageComponents = List<PageComponent>.of(value);
-  }
-
-  List<PageComponent> get pageComponents =>
-      List<PageComponent>.unmodifiable(_pageComponents);
 
   ExtraData? extraData;
   String sortBarName = AnalyticsDefaults.sortBarAll;
 
   bool get _fromHomePage => extraData?.fromHomePage ?? true;
 
-  // ─── Impression emission ────────────────────────────────────────────
+  /// Ships the raw component list to the worker, which flattens it into
+  /// the compact snapshot the impression walk needs. The tracker itself
+  /// doesn't retain a copy — nothing on the tracker reads them; the
+  /// walk lives entirely inside the worker. Called at data-load /
+  /// pagination / refresh time.
+  set pageComponents(List<PageComponent> value) {
+    unawaited(_worker.setComponents(value));
+  }
 
-  /// Idempotent — subscribes the manager to the scrollable's position so
-  /// it can pivot the direction-change snapshot.
+  // ─── App lifecycle ─────────────────────────────────────────────────
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Background / iOS-hidden: flush whatever's queued. Nav callbacks
+    // don't fire when the app is backgrounded, so without this the
+    // journey would sit in memory until return.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      unawaited(flushJourney());
+    }
+  }
+
+  // ─── Scroll bookkeeping ────────────────────────────────────────────
+
+  /// Idempotent — subscribes to the scrollable so we can pivot the
+  /// direction-change snapshot when the user reverses direction.
   void attachScrollPosition(ScrollPosition position) {
     if (identical(_scrollPosition, position)) return;
     _scrollPosition?.removeListener(_onScrollDelta);
@@ -82,88 +126,82 @@ class HomeTrackAnalyticManager {
     if (delta.abs() < 1) return; // ignore sub-pixel jitter
     final newDir = delta > 0 ? _ScrollDir.down : _ScrollDir.up;
     if (newDir == _lastDirection) return;
-    // Direction changed → snapshot current visible items as "already
-    // covered" for the new leg. New impressions on this leg only fire for
-    // items NOT in this snapshot (i.e. items that enter the viewport
-    // AFTER the direction change).
+    // Direction changed → items still in viewport are "already covered"
+    // for the new leg. New impressions on this leg only add indices
+    // that enter the viewport AFTER the change.
     _snapshotAtDirectionChange = Set<int>.of(_currentlyVisible);
     _lastDirection = newDir;
   }
 
-  /// Fires an impression when a component enters the viewport, unless it
-  /// was already visible at the last direction change.
+  /// Records [index] into the pending journey. **Does not emit** — the
+  /// worker dispatches on [flushJourney]. Safe to call from any
+  /// `VisibilityDetector` callback.
   ///
-  /// Scenario: user scrolls 1→5 forward (fires 1..5), then reverses. Items
-  /// 4 and 5 are still in the viewport at the direction change → snapshot
-  /// contains {4, 5}. As the user scrolls up, item 5 exits then re-enters
-  /// — but 5 is in the snapshot, so no re-fire. Same for 4. Items 3, 2, 1
-  /// enter fresh (not in snapshot) → fire. Result: 3, 2, 1 on reverse.
-  Future<void> notifyVisible(int index) async {
-    if (_currentlyVisible.add(index) == false) return; // already tracked
+  /// Scenario: 1→5 forward (journey: {1..5}), then reverse. Items 4
+  /// and 5 are in the direction snapshot → not re-added. 3, 2, 1
+  /// re-enter fresh and land in the journey.
+  void notifyVisible(int index) {
+    if (_currentlyVisible.add(index) == false) return;
     if (_snapshotAtDirectionChange.contains(index)) return;
-    await _emitImpression(index);
+    _journey.add(index);
   }
 
-  /// Called when a component drops below the visibility threshold. Later
-  /// re-entry (after a direction change) can fire another impression.
+  /// Called when a component drops below the visibility threshold.
+  /// Re-entry after a direction change can add a fresh journey entry.
   void notifyInvisible(int index) {
     _currentlyVisible.remove(index);
   }
 
-  Future<void> _emitImpression(int index) async {
-    if (index < 0 || index >= _pageComponents.length) return;
-    final tileEvent = _fromHomePage
-        ? AnalyticsEvents.tileImpression
-        : AnalyticsEvents.lpTileImpression;
-    try {
-      final propertyList = _identifyPageComponents(index);
-      for (final props in propertyList) {
-        await analytics.logEvent(tileEvent, props);
-      }
-    } catch (e, st) {
-      if (kDebugMode) {
-        debugPrint('[HomeTrack] impression emit failed at $index: $e\n$st');
-      }
-    }
-  }
+  // ─── Click tracking ────────────────────────────────────────────────
 
-  /// Prefix for LP-variant attribution keys (`lp_funnel_row`, …).
-  static const String _lpPrefix = 'lp_';
-
-  // ─── Click tracking ─────────────────────────────────────────────────
-
-  /// Fires `tile_clicked` / `lp_tile_clicked` AND writes attribution to
-  /// the appropriate store.
+  /// Fires `tile_clicked` / `lp_tile_clicked` AND writes attribution.
   ///
-  /// **HP click** (`_fromHomePage=true`): the tile's merged trackingMeta
-  /// merges into `OrderAttributionHelper.trackingMeta` (unprefixed keys
-  /// accumulate; last click wins on same-name key).
+  /// HP click: merged meta lands in `OrderAttributionHelper` — unprefixed
+  /// keys accumulate; last click wins on same-name key.
   ///
-  /// **LP click**: the tile's merged trackingMeta gets pushed onto the
-  /// `LpAttributionHelper` deque (raw meta preserved; `_pickLp` at emit
-  /// time coalesces `lp_<key>` → `<key>` for LP-variant components).
-  /// SOURCE LP's identity (`extraData.landingPageName` / `.landingPageId`)
-  /// is stamped on the entry. Downstream events pick up the deque via
-  /// `_lpAttribution.segmentParams` → `lp1_*` (newest), `lp2_*`, … up to
-  /// `lp5_*`. OrderAttribution is untouched, so HP attribution keeps
-  /// flowing until a next HP click writes fresh keys.
+  /// LP click: merged meta pushes onto `LpAttributionHelper`'s deque
+  /// (raw meta preserved; source LP identity stamped on the entry).
+  /// Bare `lp_*` keys are stripped from the click payload — they'll
+  /// re-emit as `lp1_*` from the deque; leaving them here would
+  /// double-count.
   Future<void> logTileClick({
     List<Map<String, dynamic>?> trackingMetaChain = const [],
     String? sortBar,
   }) async {
+    // Snapshot source-page context BEFORE any await. The widget's
+    // `ActionUrlHandler.navigate(...)` runs right after
+    // `unawaited(logTileClick(...))` and synchronously drives
+    // `AppNavigationObserver.didPush`, which flips `extraData` to
+    // the destination screen's context (LP if opening a landing
+    // page). Reading `_fromHomePage` / `extraData` after any of the
+    // awaits below would emit `lp_tile_clicked` for a click that
+    // actually happened on the homepage.
+    final fromHomePage = _fromHomePage;
+    final lpName = extraData?.landingPageName;
+    final lpId = extraData?.landingPageId;
+
+    // Ship every pending impression BEFORE the click event fires so
+    // the wire order reads "user saw X, saw Y, then clicked Z".
+    // Impressions carry attribution as it stands right now (pre-click);
+    // the merge below updates attribution so the click + every event on
+    // the next screen get the new state. This also means the nav
+    // observer's own `flushCarouselScrolls` on `didPush` sees an empty
+    // journey and no-ops — no double emission.
+    await flushJourney();
+
     final merged = <String, dynamic>{};
     for (final meta in trackingMetaChain) {
       if (meta == null || meta.isEmpty) continue;
       merged.addAll(meta);
     }
 
-    if (_fromHomePage) {
+    if (fromHomePage) {
       await orderAttribution.mergeTrackingMeta(merged);
     } else {
       await lpAttribution.pushTileMeta(
         meta: merged,
-        landingPageName: extraData?.landingPageName,
-        landingPageId: extraData?.landingPageId,
+        landingPageName: lpName,
+        landingPageId: lpId,
       );
     }
 
@@ -172,14 +210,14 @@ class HomeTrackAnalyticManager {
       await orderAttribution.setSortBar(sortBar);
     }
 
-    // Click event payload: on LP, strip bare `lp_*` from the click's own
-    // spread — those keys are LP-variant aliases the deque reads via
-    // `_pickLp` and re-emits as `lp1_*`. Keeping bare `lp_*` on the wire
-    // too would double-emit alongside `lp1_*`. HP components ship no
-    // `lp_*` keys, so strip is a no-op there.
-    final clickMeta = _fromHomePage ? merged : _stripLpPrefixed(merged);
-    final props = _baseSeed()..addAll(clickMeta);
-    final event = _fromHomePage
+    final clickMeta = fromHomePage ? merged : stripLpPrefixed(merged);
+    final props = buildBaseSeed(
+      fromHomePage: fromHomePage,
+      sortBarName: sortBarName,
+      landingPageId: lpId,
+      landingPageName: lpName,
+    )..addAll(clickMeta);
+    final event = fromHomePage
         ? AnalyticsEvents.tileClicked
         : AnalyticsEvents.lpTileClicked;
     await analytics.logEvent(event, props, attribution: true);
@@ -189,229 +227,101 @@ class HomeTrackAnalyticManager {
   /// again (cold start, tab-tap-to-Discover, back-nav from LP depth N).
   Future<void> clearLpAttribution() => lpAttribution.clear();
 
-  // ─── Carousel scroll ────────────────────────────────────────────────
+  // ─── Carousel scroll ───────────────────────────────────────────────
 
-  /// Records the most-recent horizontal scroll state for a carousel. Last-
-  /// write-wins per [carouselKey] — subsequent ticks overwrite. Batched;
-  /// events flush on [flushCarouselScrolls].
-  ///
-  /// [carouselKey] is any stable per-carousel identifier for dedup within
-  /// the screen session (e.g. `identityHashCode(carouselData)`). The wire
-  /// `carousel_id` comes from the [trackingMeta] blob, not from this key.
+  /// Records the most-recent horizontal scroll state for a carousel.
+  /// Last-write-wins per [carouselKey]. Events fire on [flushJourney].
   void logCarouselScrolled(Object carouselKey, Map<String, dynamic> trackingMeta) {
     _carouselScrollDepth[carouselKey] = trackingMeta;
   }
 
-  /// Drain the carousel-scroll buffer into `carousel_scrolled` /
-  /// `lp_carousel_scrolled` events. Called on bloc close.
-  Future<void> flushCarouselScrolls() async {
+  Future<void> _fireCarouselScrolls(JourneySeed seed) async {
     if (_carouselScrollDepth.isEmpty) return;
-    final carouselEvent = _fromHomePage
+    final carouselEvent = seed.fromHomePage
         ? AnalyticsEvents.carouselScrolled
         : AnalyticsEvents.lpCarouselScrolled;
-    for (final entry in _carouselScrollDepth.entries) {
-      final props = _baseSeed();
-      _mergeTrackingMeta(props, entry.value);
-      await analytics.logEvent(carouselEvent, props);
-    }
+    final entries = _carouselScrollDepth.entries.toList(growable: false);
     _carouselScrollDepth.clear();
+    final futures = <Future<void>>[];
+    for (final entry in entries) {
+      final props = buildBaseSeed(
+        fromHomePage: seed.fromHomePage,
+        sortBarName: seed.sortBarName,
+        landingPageId: seed.landingPageId,
+        landingPageName: seed.landingPageName,
+      );
+      if (entry.value.isNotEmpty) props.addAll(entry.value);
+      futures.add(analytics.logEvent(carouselEvent, props));
+    }
+    await Future.wait(futures);
   }
 
-  /// Fires the single `banner_impression` (once per component) and returns
-  /// the list of `tile_impression` payloads for each innermost leaf.
+  // ─── Flush ─────────────────────────────────────────────────────────
+
+  /// Drains carousel scrolls on main + impression journey on the worker.
+  /// Call on screen leave: bloc close, nav observer push/pop, tab
+  /// switch, or app paused / hidden.
+  Future<void> flushJourney() async {
+    // Snapshot & clear the journey SYNCHRONOUSLY before any await. The
+    // nav observer's `didPush` fires synchronously right after
+    // `unawaited(logTileClick(...))` returns, and its LP-route branch
+    // calls `resetVisibilityState()` which wipes `_journey`. If we
+    // read `_journey` AFTER the first yield below, that wipe would
+    // beat us to it and the source-page impressions would silently
+    // drop. Snapshot the seed here too so a mid-flush `extraData`
+    // flip can't misclassify impressions as `lp_*` from a different
+    // LP than the one they were journey'd on.
+    final indices = _journey.toList(growable: false);
+    _journey.clear();
+    final seed = _seed();
+    await _fireCarouselScrolls(seed);
+    if (indices.isEmpty) return;
+    await _worker.flushImpressions(indices: indices, seed: seed);
+  }
+
+  /// Alias so existing call sites (bloc close, nav observer, tab
+  /// switch) don't need to change. Delegates to [flushJourney].
+  Future<void> flushCarouselScrolls() => flushJourney();
+
+  JourneySeed _seed() => (
+    fromHomePage: _fromHomePage,
+    sortBarName: sortBarName,
+    landingPageId: extraData?.landingPageId,
+    landingPageName: extraData?.landingPageName,
+  );
+
+  // ─── Cleanup ───────────────────────────────────────────────────────
+
+  /// Clear per-screen visibility/scroll bookkeeping WITHOUT dropping
+  /// [pageComponents], attribution, or sortbar. Called by
+  /// `AppNavigationObserver` on funnel switch. Callers must
+  /// [flushJourney] first if the pending journey should ship.
+  void resetVisibilityState() => _resetScrollState();
+
+  /// Release per-screen buffers. Only Home bloc calls this; LP blocs
+  /// share the singleton and must not wipe Home's state.
   ///
-  /// - Banner: seed + root `trackingMeta`.
-  /// - Tile: seed + every `trackingMeta` on the root→leaf chain (deepest wins),
-  ///   one impression per innermost tile.
-  ///
-  /// Client owns only the seed (`funnel`, `type`, `position`); everything else
-  /// is verbatim from `trackingMeta`.
-  List<Map<String, Object?>> _identifyPageComponents(int index) {
-    if (index < 0 || index >= _pageComponents.length) return const [];
-    final component = _pageComponents[index];
-    if (component.type.isEmpty) return const [];
-    final data = component.data;
-    if (data == null) return const [];
-    final tilePath = _tilePaths[component.type];
-    if (tilePath == null) return const [];
-
-    final rootMeta = data['trackingMeta'];
-    final rootMetaMap = rootMeta is Map<String, dynamic>
-        ? rootMeta
-        : const <String, dynamic>{};
-
-    // Banner impression (once per component): seed + root trackingMeta.
-    final banner = _seedProps(component);
-    _mergeTrackingMeta(banner, rootMetaMap);
-    final bannerEvent = _fromHomePage
-        ? AnalyticsEvents.bannerImpression
-        : AnalyticsEvents.lpBannerImpression;
-    unawaited(analytics.logEvent(bannerEvent, banner));
-
-    // Tile impressions (one per leaf): seed + full trackingMeta chain.
-    final result = <Map<String, Object?>>[];
-    for (final chain in _walkTileChains(data, tilePath)) {
-      final props = _seedProps(component);
-      for (final meta in chain) {
-        _mergeTrackingMeta(props, meta);
-      }
-      result.add(props);
-    }
-    return result;
-  }
-
-  /// Per-impression seed: `type` + `position` + [_baseSeed].
-  Map<String, Object?> _seedProps(PageComponent component) {
-    final seed = _baseSeed();
-    seed[AnalyticsProperties.type] = component.type;
-    seed[AnalyticsProperties.position] = component.position;
-    return seed;
-  }
-
-  /// Shared base: `sortbar` always; `funnel = Discover` on home;
-  /// `lp_id` / `lp_name` + captured attribution snapshot on LP.
-  Map<String, Object?> _baseSeed() {
-    final seed = <String, Object?>{
-      AnalyticsProperties.sortbar: sortBarName,
-    };
-    if (_fromHomePage) {
-      seed[AnalyticsProperties.funnel] = AnalyticsDefaults.discover;
-      return seed;
-    }
-    seed['$_lpPrefix${AnalyticsProperties.id}'] = extraData?.landingPageId;
-    seed['$_lpPrefix${AnalyticsProperties.name}'] = extraData?.landingPageName;
-    return seed;
-  }
-
-  /// Per-type path descriptor for [_walkTileChains]. Each step is a list of
-  /// alternate JSON keys (accept both camelCase + snake_case). The last
-  /// entry is the innermost tile level. Deeper `trackingMeta` wins.
-  static const Map<String, List<List<String>>> _tilePaths = {
-    PageComponentType.hero: [
-      ['tiles'],
-      ['tile_details', 'tileDetails'],
-      ['tileGrid'],
-    ],
-    PageComponentType.customTiles: [
-      ['tiles', 'tile_details', 'tileDetails'],
-      ['tileGrid'],
-    ],
-    PageComponentType.pageCarousel: [
-      ['tiles'],
-    ],
-    PageComponentType.productGrid: [
-      ['tiles'],
-    ],
-  };
-
-  /// Yields root-first chains of `trackingMeta` per innermost leaf. At the
-  /// leaf, absorbs `trackingMeta` from immediate Map children too (e.g.
-  /// `tile.product.trackingMeta`) but not from intermediate-level peers
-  /// like `ctaButton` / `title` (those own their own analytics).
-  Iterable<List<Map<String, dynamic>>> _walkTileChains(
-    Map<String, dynamic> data,
-    List<List<String>> path,
-  ) sync* {
-    final chain = <Map<String, dynamic>>[];
-    final selfMeta = data['trackingMeta'];
-    if (selfMeta is Map<String, dynamic>) chain.add(selfMeta);
-
-    if (path.isEmpty) {
-      for (final entry in data.entries) {
-        if (entry.key == 'trackingMeta') continue;
-        final v = entry.value;
-        if (v is Map<String, dynamic>) {
-          final childMeta = v['trackingMeta'];
-          if (childMeta is Map<String, dynamic>) chain.add(childMeta);
-        }
-      }
-      yield chain;
-      return;
-    }
-
-    final keys = path.first;
-    final rest = path.sublist(1);
-    List<dynamic>? list;
-    for (final k in keys) {
-      final v = data[k];
-      if (v is List) {
-        list = v;
-        break;
-      }
-    }
-    if (list == null) return;
-    for (final item in list) {
-      if (item is! Map<String, dynamic>) continue;
-      for (final subChain in _walkTileChains(item, rest)) {
-        yield <Map<String, dynamic>>[...chain, ...subChain];
-      }
-    }
-  }
-
-  /// Verbatim merge — backend keys win over anything already in `target`.
-  /// Used by impression + scroll paths: LP-variant components ship keys like
-  /// `lp_banner_name` as their per-tile trackingMeta, which are the wire
-  /// keys for `lp_tile_impression` / `lp_banner_impression`. Stripping them
-  /// here would zero out the impression payload.
-  void _mergeTrackingMeta(
-    Map<String, Object?> target,
-    Map<String, dynamic>? trackingMeta,
-  ) {
-    if (trackingMeta == null || trackingMeta.isEmpty) return;
-    target.addAll(trackingMeta);
-  }
-
-  /// Returns a copy of `meta` without any `lp_*`-prefixed keys. Used only in
-  /// the CLICK path — once a tile is tapped in an LP, its `lp_*` keys have
-  /// been "promoted" onto the LP-attribution deque and will emit as
-  /// `lp1_*` / `lp2_*` on subsequent events. Leaving the bare `lp_*` on
-  /// the click event too would double-count them on the wire. This also
-  /// gets stored in `OrderAttributionHelper.trackingMeta` so downstream
-  /// events (PDP / ATC / checkout) inherit the clean shape.
-  static Map<String, dynamic> _stripLpPrefixed(Map<String, dynamic> meta) {
-    final out = <String, dynamic>{};
-    for (final entry in meta.entries) {
-      if (entry.key.startsWith(_lpPrefix)) continue;
-      out[entry.key] = entry.value;
-    }
-    return out;
-  }
-
-  // ─── Cleanup ────────────────────────────────────────────────────────
-
-  /// Clear the per-screen visibility/scroll bookkeeping (visible set,
-  /// direction-change snapshot, carousel scroll depth) without touching
-  /// [pageComponents], [extraData], attribution snapshots, or sortbar name.
-  ///
-  /// Called by `AppNavigationObserver` on funnel switch so the incoming
-  /// screen starts with a fresh impression-tracking slate. `pageComponents`
-  /// is intentionally preserved — the incoming screen re-sets it before
-  /// its widgets fire `notifyVisible`.
-  void resetVisibilityState() {
-    _scrollPosition?.removeListener(_onScrollDelta);
-    _scrollPosition = null;
-    _currentlyVisible.clear();
-    _snapshotAtDirectionChange = <int>{};
-    _lastScrollPixels = 0;
-    _lastDirection = _ScrollDir.none;
-    _carouselScrollDepth.clear();
-  }
-
-  /// Release per-screen buffers. Call from the bloc's `close` **when the
-  /// owning screen actually goes away** — i.e. `HomeBloc.close`. Landing
-  /// pages must NOT call this: the tracker is a shared singleton and LP's
-  /// destroy would wipe Home's state (`pageComponents`, `sortBarName`),
-  /// silencing Home's impressions on back-nav.
+  /// The worker's cached components aren't cleared here — the next
+  /// screen's `pageComponents = ...` overwrites them, and clearing
+  /// them prematurely would drop a legitimate flush if one is still
+  /// draining.
   void destroyFromHomeBloc() {
+    _resetScrollState();
+    sortBarName = AnalyticsDefaults.sortBarAll;
+  }
+
+  /// Shared teardown for [resetVisibilityState] + [destroyFromHomeBloc].
+  /// Everything wiped here is per-screen scroll state; [pageComponents],
+  /// [sortBarName], and attribution snapshots are the caller's problem.
+  void _resetScrollState() {
     _scrollPosition?.removeListener(_onScrollDelta);
     _scrollPosition = null;
     _currentlyVisible.clear();
     _snapshotAtDirectionChange = <int>{};
     _lastScrollPixels = 0;
     _lastDirection = _ScrollDir.none;
-    _pageComponents = <PageComponent>[];
     _carouselScrollDepth.clear();
-    sortBarName = AnalyticsDefaults.sortBarAll;
+    _journey.clear();
   }
 }
 
@@ -422,15 +332,11 @@ class ExtraData {
     this.fromHomePage = true,
     this.landingPageName,
     this.landingPageId,
-    this.funnelSection,
   });
 
   final bool fromHomePage;
   final String? landingPageName;
   final String? landingPageId;
-  final String? funnelSection;
 }
 
-/// Vertical scroll direction. First non-`none` transition triggers a
-/// direction-change snapshot.
 enum _ScrollDir { none, up, down }

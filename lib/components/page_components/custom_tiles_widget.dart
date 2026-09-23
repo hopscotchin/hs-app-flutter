@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hs_app_flutter/core/theme/spacing.dart';
 
@@ -223,12 +225,10 @@ class CustomTilesWidget extends StatelessWidget {
     );
     return GestureDetector(
       key: _key('${HomeComponentTestStrings.tiles}_$index'),
-      onTap: () async {
-        await sl<HomeTrackAnalyticManager>()
-            .onCustomTileTapped(tilesData, row, tile);
-        if (context.mounted) {
-          ActionUrlHandler.navigate(context, tile.actionUri);
-        }
+      onTap: () {
+        unawaited(sl<HomeTrackAnalyticManager>()
+            .onCustomTileTapped(tilesData, row, tile));
+        ActionUrlHandler.navigate(context, tile.actionUri);
       },
       child: imageCornerRadius > 0
           ? ClipRRect(

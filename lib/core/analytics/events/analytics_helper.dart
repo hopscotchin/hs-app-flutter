@@ -668,6 +668,24 @@ class AnalyticsHelper {
     }
   }
 
+  /// Fires on EVERY background→ foreground transition, regardless
+  /// of duration.
+  Future<void> identifyFromBackground() => identifyOnCookieChange(
+    sessionChange: true,
+    utmChange: true,
+    userTypeChange: true,
+    experimentChange: true,
+  );
+
+  /// Foreground-return re-arms LaunchTimer,
+  /// then fires `app_launched` with `from_screen = "Background"`. Caller
+  /// is responsible for firing [identifyFromBackground] first (Android
+  /// runs both unconditionally on the same resume).
+  Future<void> logAppLaunchedFromBackground() async {
+    _launchTimer.recordProcessStart();
+    await logAppLaunched(AnalyticsDefaults.background);
+  }
+
   /// `atc_user` + `checkout_user` + step_duration + total_duration +
   /// background_time merge for the checkout chain. Mirrors Android
   /// `addUserTypeAndDuration(reset)`.

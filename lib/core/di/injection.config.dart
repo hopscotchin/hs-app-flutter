@@ -23,6 +23,8 @@ import 'package:hs_app_flutter/core/analytics/events/analytics_helper.dart'
     as _i127;
 import 'package:hs_app_flutter/core/analytics/home/home_track_analytic_manager.dart'
     as _i66;
+import 'package:hs_app_flutter/core/analytics/home/journey_worker.dart'
+    as _i473;
 import 'package:hs_app_flutter/core/analytics/services/clarity_helper.dart'
     as _i903;
 import 'package:hs_app_flutter/core/analytics/services/clevertap_service.dart'
@@ -586,12 +588,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i765.GetDepartmentsUseCase>(
       () => _i765.GetDepartmentsUseCase(gh<_i816.CategoriesRepository>()),
     );
-    gh.lazySingleton<_i66.HomeTrackAnalyticManager>(
-      () => _i66.HomeTrackAnalyticManager(
-        analytics: gh<_i127.AnalyticsHelper>(),
-        orderAttribution: gh<_i179.OrderAttributionHelper>(),
-        lpAttribution: gh<_i233.LpAttributionHelper>(),
-      ),
+    gh.lazySingleton<_i473.JourneyWorker>(
+      () => _i473.JourneyWorker(gh<_i127.AnalyticsHelper>()),
     );
     gh.lazySingleton<_i705.GetAppConfigUseCase>(
       () => _i705.GetAppConfigUseCase(gh<_i68.SplashRepository>()),
@@ -626,14 +624,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i938.WishlistCubit(
         gh<_i363.AddToWishlistUseCase>(),
         gh<_i692.RemoveFromWishlistUseCase>(),
-      ),
-    );
-    gh.factory<_i206.LandingPageBloc>(
-      () => _i206.LandingPageBloc(
-        gh<_i325.GetHomePageUseCase>(),
-        gh<_i66.HomeTrackAnalyticManager>(),
-        gh<_i127.AnalyticsHelper>(),
-        gh<_i93.AppNavigationObserver>(),
       ),
     );
     gh.factory<_i724.SearchBloc>(
@@ -688,11 +678,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i884.CartCountCubit>(),
       ),
     );
-    gh.factory<_i626.HomeBloc>(
-      () => _i626.HomeBloc(
-        gh<_i325.GetHomePageUseCase>(),
-        gh<_i127.AnalyticsHelper>(),
-        gh<_i66.HomeTrackAnalyticManager>(),
+    gh.lazySingleton<_i66.HomeTrackAnalyticManager>(
+      () => _i66.HomeTrackAnalyticManager(
+        analytics: gh<_i127.AnalyticsHelper>(),
+        orderAttribution: gh<_i179.OrderAttributionHelper>(),
+        lpAttribution: gh<_i233.LpAttributionHelper>(),
+        journeyWorker: gh<_i473.JourneyWorker>(),
       ),
     );
     gh.factory<_i620.CategoriesBloc>(
@@ -712,6 +703,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i283.CheckPincodeUseCase>(
       () => _i283.CheckPincodeUseCase(gh<_i760.PlpRepository>()),
     );
+    gh.factory<_i206.LandingPageBloc>(
+      () => _i206.LandingPageBloc(
+        gh<_i325.GetHomePageUseCase>(),
+        gh<_i66.HomeTrackAnalyticManager>(),
+        gh<_i127.AnalyticsHelper>(),
+        gh<_i93.AppNavigationObserver>(),
+      ),
+    );
     gh.factory<_i419.AuthBloc>(
       () => _i419.AuthBloc(
         gh<_i766.CheckMobileUseCase>(),
@@ -729,6 +728,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i113.FilterBloc(
         getFilterDataUseCase: gh<_i804.GetFilterDataUseCase>(),
         checkPincodeUseCase: gh<_i283.CheckPincodeUseCase>(),
+      ),
+    );
+    gh.factory<_i626.HomeBloc>(
+      () => _i626.HomeBloc(
+        gh<_i325.GetHomePageUseCase>(),
+        gh<_i127.AnalyticsHelper>(),
+        gh<_i66.HomeTrackAnalyticManager>(),
       ),
     );
     return this;
