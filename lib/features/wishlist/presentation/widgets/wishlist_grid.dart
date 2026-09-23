@@ -37,11 +37,11 @@ class WishlistGrid extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: _tile(context, items[leftIndex])),
+                  Expanded(child: _tile(context, items[leftIndex], leftIndex)),
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: rightIndex < items.length
-                        ? _tile(context, items[rightIndex])
+                        ? _tile(context, items[rightIndex], rightIndex)
                         : const SizedBox.shrink(),
                   ),
                 ],
@@ -53,8 +53,9 @@ class WishlistGrid extends StatelessWidget {
     );
   }
 
-  Widget _tile(BuildContext context, WishlistProductEntity item) {
+  Widget _tile(BuildContext context, WishlistProductEntity item, int index) {
     return WishlistProductTile(
+      index: index,
       item: item,
       onTap: () => AppNavigator.goToPdp(context, item.id.toString()),
       onDelete: () => onDelete(item),

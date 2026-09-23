@@ -566,3 +566,19 @@ feedback for one apply rather than a list a test walks.
 | Text | `kids_form_discard_bottomsheet_description` | — | `add_edit_kid_page.dart` |
 | Button | `kids_form_discard_bottomsheet_confirm_button` | — | `add_edit_kid_page.dart` |
 | Button | `kids_form_discard_bottomsheet_cancel_button` | — | `add_edit_kid_page.dart` |
+
+## Wishlist
+
+| Type | Key | Examples | Widget file |
+|---|---|---|---|
+| Title | `wishlist_app_bar_title` | — | `wishlist_page.dart` |
+| Button | `wishlist_appbar_cart_button` | — | `wishlist_page.dart` |
+| List item | `wishlist_tile_<i>` | `wishlist_tile_0`, `wishlist_tile_1` | `wishlist_product_tile.dart` |
+| Element | `wishlist_tile_<i>_delete` | `wishlist_tile_0_delete`, `wishlist_tile_1_delete` | `wishlist_product_tile.dart` |
+| Element | `wishlist_tile_<i>_move_to_bag` | `wishlist_tile_0_move_to_bag`, `wishlist_tile_1_move_to_bag` | `wishlist_product_tile.dart` |
+| Title | `wishlist_empty_state_title` | — | `wishlist_page.dart` |
+| Text | `wishlist_empty_state_subtitle` | — | `wishlist_page.dart` |
+| Button | `wishlist_empty_state_button` | — | `wishlist_page.dart` |
+| Title | `wishlist_error_state_title` | — | `wishlist_page.dart` |
+| Text | `wishlist_error_state_subtitle` | — | `wishlist_page.dart` |
+| Button | `wishlist_error_state_button` | — | `wishlist_page.dart` |

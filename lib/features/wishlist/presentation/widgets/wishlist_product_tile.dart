@@ -6,6 +6,7 @@ import '../../../../components/atoms/product_tile.dart';
 import '../../../../components/buttons/app_button.dart';
 import '../../../../components/buttons/button_enums.dart';
 import '../../../../core/constants/image_constants.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/wishlist_strings.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/wishlist_product_entity.dart';
@@ -15,6 +16,7 @@ import '../bloc/wishlist_listing_bloc.dart';
 /// sold-out scrim) with a delete action overlaid top-right of the image and a
 /// full-width "Move to Bag" secondary CTA below it.
 class WishlistProductTile extends StatelessWidget {
+  final int index;
   final WishlistProductEntity item;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
@@ -22,6 +24,7 @@ class WishlistProductTile extends StatelessWidget {
 
   const WishlistProductTile({
     super.key,
+    required this.index,
     required this.item,
     this.onTap,
     this.onDelete,
@@ -37,6 +40,7 @@ class WishlistProductTile extends StatelessWidget {
     final isProcessing = context.select<WishlistListingBloc, bool>(
       (b) => b.state.processingIds.contains(item.id),
     );
+    final tileBase = '${WishlistTestStrings.tile}_$index';
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -45,16 +49,24 @@ class WishlistProductTile extends StatelessWidget {
           children: [
             // canWishlist is false on the mapped entity, so ProductTile does
             // not render its own heart icon here — we overlay delete instead.
-            ProductTile.fromProduct(item.product, onTap: onTap),
+            ProductTile.fromProduct(
+              item.product,
+              tileKey: ValueKey(tileBase),
+              onTap: onTap,
+            ),
             Positioned(
               top: AppSpacing.xxs,
               right: AppSpacing.xxs,
-              child: _DeleteButton(onTap: isProcessing ? null : onDelete),
+              child: _DeleteButton(
+                key: ValueKey('${tileBase}_${WishlistTestStrings.tileDeleteSuffix}'),
+                onTap: isProcessing ? null : onDelete,
+              ),
             ),
           ],
         ),
         AppSpacing.verticalGapXs,
         AppButton(
+          key: ValueKey('${tileBase}_${WishlistTestStrings.tileMoveToBagSuffix}'),
           text: WishlistStrings.moveToBag,
           variant: ButtonVariant.secondary,
           size: ButtonSize.small,
@@ -72,7 +84,7 @@ class WishlistProductTile extends StatelessWidget {
 class _DeleteButton extends StatelessWidget {
   final VoidCallback? onTap;
 
-  const _DeleteButton({this.onTap});
+  const _DeleteButton({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {

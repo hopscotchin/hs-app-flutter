@@ -864,3 +864,29 @@ class KidsTestStrings {
   static const String discardBottomSheetConfirmButton = 'kids_form_discard_bottomsheet_confirm_button';
   static const String discardBottomSheetCancelButton = 'kids_form_discard_bottomsheet_cancel_button';
 }
+
+/// Wishlist listing page. Keys are `wishlist_<element>[_<index>]`. Tiles carry
+/// a flat product index and sub-CTAs nest under the tile, e.g. `wishlist_tile_3`,
+/// `wishlist_tile_3_delete`, `wishlist_tile_3_move_to_bag`.
+class WishlistTestStrings {
+  WishlistTestStrings();
+
+  // App bar
+  static const String appBarTitle = 'wishlist_app_bar_title';
+  static const String appBarCartButton = 'wishlist_appbar_cart_button';
+
+  // Product tiles (flat product index; sub-CTAs nest under the tile)
+  static const String tile = 'wishlist_tile'; // main tap → `wishlist_tile_<i>`
+  static const String tileDeleteSuffix = 'delete'; // → `wishlist_tile_<i>_delete`
+  static const String tileMoveToBagSuffix = 'move_to_bag'; // → `wishlist_tile_<i>_move_to_bag`
+
+  // Empty state
+  static const String emptyStateTitle = 'wishlist_empty_state_title';
+  static const String emptyStateSubtitle = 'wishlist_empty_state_subtitle';
+  static const String emptyStateButton = 'wishlist_empty_state_button';
+
+  // Error state
+  static const String errorStateTitle = 'wishlist_error_state_title';
+  static const String errorStateSubtitle = 'wishlist_error_state_subtitle';
+  static const String errorStateButton = 'wishlist_error_state_button';
+}

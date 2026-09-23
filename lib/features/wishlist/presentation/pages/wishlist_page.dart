@@ -11,6 +11,7 @@ import '../../../../components/atoms/product_grid_shimmer.dart';
 import '../../../../components/page_components/size_chart_bottom_sheet.dart';
 import '../../../../components/page_components/size_selection_bottom_sheet.dart';
 import '../../../../core/constants/image_constants.dart';
+import '../../../../core/constants/strings/auto_test_strings.dart';
 import '../../../../core/constants/strings/wishlist_strings.dart';
 import '../../../../core/cubits/cart_count_cubit.dart';
 import '../../../../core/router/app_navigator.dart';
@@ -65,7 +66,11 @@ class _WishlistPageState extends State<WishlistPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.baseDefault,
-      appBar: HsAppbar(title: WishlistStrings.title, actions: const [_CartAction()]),
+      appBar: HsAppbar(
+        title: WishlistStrings.title,
+        titleKey: const ValueKey(WishlistTestStrings.appBarTitle),
+        actions: const [_CartAction()],
+      ),
       body: SafeArea(
         top: false,
         child: BlocListener<WishlistListingBloc, WishlistListingState>(
@@ -96,6 +101,9 @@ class _WishlistPageState extends State<WishlistPage> {
                 case WishlistStatus.error:
                   return EmptyStateWidget(
                     type: EmptyStateType.serverError,
+                    titleKey: const ValueKey(WishlistTestStrings.errorStateTitle),
+                    subtitleKey: const ValueKey(WishlistTestStrings.errorStateSubtitle),
+                    buttonKey: const ValueKey(WishlistTestStrings.errorStateButton),
                     onButtonTap: () =>
                         context.read<WishlistListingBloc>().add(const LoadWishlist()),
                   );
@@ -104,6 +112,9 @@ class _WishlistPageState extends State<WishlistPage> {
                   if (state.items.isEmpty) {
                     return EmptyStateWidget(
                       type: EmptyStateType.wishlist,
+                      titleKey: const ValueKey(WishlistTestStrings.emptyStateTitle),
+                      subtitleKey: const ValueKey(WishlistTestStrings.emptyStateSubtitle),
+                      buttonKey: const ValueKey(WishlistTestStrings.emptyStateButton),
                       onButtonTap: () => AppNavigator.goToHome(context),
                     );
                   }
@@ -124,6 +135,7 @@ class _CartAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BadgeIcon(
+      key: const ValueKey(WishlistTestStrings.appBarCartButton),
       iconSize: AppSpacing.iconSm,
       icon: const CustomImage(
         path: ImageConstants.bag,

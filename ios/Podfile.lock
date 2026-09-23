@@ -1,6 +1,7 @@
 PODS:
   - advertising_id (0.0.1):
     - Flutter
+  - Airborne (0.37.0)
   - CleverTap-iOS-SDK (7.5.0):
     - SDWebImage (~> 5.11)
   - clevertap_plugin (3.8.1):
@@ -13,14 +14,15 @@ PODS:
     - Flutter
   - flutter_local_notifications (0.0.1):
     - Flutter
-  - HyperCore (0.0.10)
-  - HyperSDK (2.2.4):
-    - HyperCore (= 0.0.10)
-    - JuspaySafeBrowser (= 0.1.88)
-  - hypersdkflutter (4.0.55):
+  - HyperCore (1.0.6)
+  - HyperSDK (2.2.8.3):
+    - Airborne (= 0.37.0)
+    - HyperCore (= 1.0.6)
+    - JuspaySafeBrowser (= 0.1.94)
+  - hypersdkflutter (4.0.58):
     - Flutter
-    - HyperSDK (= 2.2.4)
-  - JuspaySafeBrowser (0.1.88)
+    - HyperSDK (= 2.2.8.3)
+  - JuspaySafeBrowser (0.1.94)
   - SDWebImage (5.21.7):
     - SDWebImage/Core (= 5.21.7)
   - SDWebImage/Core (5.21.7)
@@ -39,6 +41,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - Airborne
     - CleverTap-iOS-SDK
     - HyperCore
     - HyperSDK
@@ -65,17 +68,18 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   advertising_id: d5de9e659986092d7ca50977dc50f4f4fcd4c30a
+  Airborne: 118490096542972c3f208cc2d711a44b2b637bad
   CleverTap-iOS-SDK: 000af11abfaa0e5ba779563a9a2e56555c0e07aa
   clevertap_plugin: a1e518d90c823856bd27cb3477cebfb6d0ccdc5b
-  Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_fgbg: d3da78df78454b1808f0829a5da9cd17dfe16444
-  HyperCore: c4bd7222c69e3d68db8bb1ca2e40c43fd5f4127f
-  HyperSDK: 891cfc69cf3befad4fd0951297a93801c4a6627d
-  hypersdkflutter: cd0dab8752650c09458e5436ef83f653f6108d13
-  JuspaySafeBrowser: 04ad004fa85e9db766d4e2af45f60ac6b5eeba61
+  HyperCore: f26ac9df295588350b9e9e0b38fac90ee1780b49
+  HyperSDK: 6b07731b0921b23854ba0478195f81f7fae86e8f
+  hypersdkflutter: bac9e7a555fe6a17015ef29beb6fbdca92f13a07
+  JuspaySafeBrowser: 8141eb92fe4d77da997907a0c5eadc0616bce2fa
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   segment_analytics: 74650ab14e31db0a16a1599dbc11aabd644192a6
 
 PODFILE CHECKSUM: 5d756f17ad2f0445d3b44517f147ac3e9ab8bc23
 
-COCOAPODS: 1.17.0
+COCOAPODS: 1.16.2
