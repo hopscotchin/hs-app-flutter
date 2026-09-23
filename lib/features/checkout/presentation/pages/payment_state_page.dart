@@ -315,15 +315,9 @@ class _PaymentExitConfirmSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    CheckoutStrings.paymentProcessingTitle,
-                    style: AppTypographyV1.titleSmall.bold.textPrimary(),
-                  ),
-                ),
-              ],
+            Text(
+              CheckoutStrings.paymentProcessingTitle,
+              style: AppTypographyV1.titleSmall.bold.textPrimary(),
             ),
             AppSpacing.verticalGapMd,
             Text(

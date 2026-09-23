@@ -31,19 +31,25 @@ class PaymentSuccessPage extends StatefulWidget {
 
 class _PaymentSuccessPageState extends State<PaymentSuccessPage>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(vsync: this)
-    ..addStatusListener((status) {
-      if (status == AnimationStatus.completed && mounted) {
-        AppNavigator.goToHome(context);
-        // AppNavigator.goToOrderConfirmation(
-        //   context,
-        //   OrderConfirmationEntryArgs(
-        //     orderConfirmationEntity: widget.orderConfirmationEntity,
-        //     fromScreen: widget.fromScreen,
-        //   ),
-        // );
-      }
-    });
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted) {
+          AppNavigator.goToHome(context);
+          // AppNavigator.goToOrderConfirmation(
+          //   context,
+          //   OrderConfirmationEntryArgs(
+          //     orderConfirmationEntity: widget.orderConfirmationEntity,
+          //     fromScreen: widget.fromScreen,
+          //   ),
+          // );
+        }
+      });
+  }
 
   @override
   void dispose() {
