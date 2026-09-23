@@ -50,6 +50,7 @@ class CartRepositoryImpl with SafeApiCall implements CartRepository {
   Future<Either<Failure, CartEntity>> getCart({
     bool isMergeCall = false,
     bool instantCheckout = false,
+    bool dismiss = false,
     CancelToken? cancelToken,
   }) {
     return safeApiCall(
@@ -57,6 +58,7 @@ class CartRepositoryImpl with SafeApiCall implements CartRepository {
       () => remoteDataSource.getCart(
         isMergeCall: isMergeCall,
         instantCheckout: instantCheckout,
+        dismiss: dismiss,
         cancelToken: cancelToken,
       ),
     );

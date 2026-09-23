@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -97,6 +98,30 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   /// (`CartFragment.onResume`, guarded by `exitedBuyNowFlow`).
   bool instantCheckout = false;
 
+  /// Set once the user closes a message bar whose action is `dismiss`; every
+  /// later cart fetch then carries `dismiss=true` so the backend stops sending
+  /// that bar. Mirrors Android's `CartViewModel.isCartDismissible`, set in
+  /// `CartFragment.handleActionLink` and never cleared for the cart's lifetime.
+  bool cartDismissible = false;
+
+  /// Query flags shared by every cart fetch — Android builds the same map in
+  /// `CartViewModel.getCartData`.
+  GetCartParams _getCartParams(CancelToken token, {bool isMergeCall = false}) => GetCartParams(
+    isMergeCall: isMergeCall,
+    instantCheckout: instantCheckout,
+    dismiss: cartDismissible,
+    cancelToken: token,
+  );
+
+  /// Android's `CartViewModel.getCartData` merges on its own when the fetched
+  /// bag is empty but the server still holds items in the temp (guest) cart.
+  /// Skipped for the fetch that follows a merge, so a merge that leaves the
+  /// temp flag set cannot loop.
+  void _autoMergeIfNeeded(CartEntity cart, {bool afterMerge = false}) {
+    if (afterMerge) return;
+    if (cart.items.isEmpty && cart.isCartItemExistInTemp) add(const MergeCart());
+  }
+
   /// Where the user came from — `from_screen` for every cart event of this
   /// visit, and `from_location` for the `cart_viewed` of a fresh entry.
   /// Written by `CartPage.initState` from the route's `extra`.
@@ -191,7 +216,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     final token = swapCancelToken();
     final staticBars = await _staticMessageBars();
     final result = await getCartUseCase(
-      GetCartParams(instantCheckout: instantCheckout, cancelToken: token),
+      _getCartParams(token),
     );
     result.fold(
       (failure) {
@@ -201,6 +226,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       (cart) {
         emit(CartState(status: CartStatus.loaded, cart: cart, staticMessageBars: staticBars));
         _trackCartViewed(cart, cartViewState: CartViewStates.cartLoad);
+        _autoMergeIfNeeded(cart);
       },
     );
   }
@@ -217,7 +243,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     final token = swapCancelToken();
     final staticBars = await _staticMessageBars();
     final result = await getCartUseCase(
-      GetCartParams(instantCheckout: instantCheckout, cancelToken: token),
+      _getCartParams(token),
     );
     result.fold(
       // Silently ignore the failure — keep current cart data visible — but
@@ -247,6 +273,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
           cartViewState: CartViewStates.cartReload,
           reloadReason: event.reloadReason,
         );
+        _autoMergeIfNeeded(cart);
       },
     );
   }
@@ -642,7 +669,12 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     );
   }
 
+  /// Android's `CartViewModel.mergeCart`: the cart is re-read whatever the
+  /// merge outcome — with `isMergeCall=true` when it succeeded and `false`
+  /// when it did not, so the backend knows whether the bag it returns is the
+  /// merged one.
   Future<void> _onMergeCart(MergeCart event, Emitter<CartState> emit) async {
+    if (event.showLoading) emit(const CartState(status: CartStatus.loading));
     final current = state;
     if (current.isLoaded) {
       emit(current.copyWith(isMerging: true, isCartUpdating: true));
@@ -650,24 +682,21 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     final token = swapCancelToken();
     final result = await mergeCartUseCase(MergeCartParams(cancelToken: token));
     await result.fold(
-      (failure) {
+      (failure) async {
         if (failure is RequestCancelledFailure) return;
-        if (current.isLoaded) {
-          emit(
-            current.copyWith(
-              isMerging: false,
-              isCartUpdating: false,
-              toastMessage: failure.message,
-            ),
-          );
-        } else {
-          emit(current.copyWith(status: CartStatus.error, errorMessage: failure.message));
-        }
+        await _refreshAfterMutation(
+          emit,
+          current,
+          afterMerge: true,
+          reloadReason: FromLocations.mergeCart,
+          toastMessage: failure.message,
+        );
       },
       (_) async => _refreshAfterMutation(
         emit,
         current,
         isMergeCall: true,
+        afterMerge: true,
         reloadReason: FromLocations.mergeCart,
       ),
     );
@@ -768,7 +797,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
   Future<CartState> _reloadCartBeforeMutation(Emitter<CartState> emit) async {
     final token = swapCancelToken();
     final result = await getCartUseCase(
-      GetCartParams(instantCheckout: instantCheckout, cancelToken: token),
+      _getCartParams(token),
     );
     return result.fold((_) => state, (cart) {
       final reloaded = CartState(
@@ -778,6 +807,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
       );
       emit(reloaded);
       _trackCartViewed(cart, cartViewState: CartViewStates.cartReload);
+      _autoMergeIfNeeded(cart);
       return reloaded;
     });
   }
@@ -786,13 +816,14 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
     Emitter<CartState> emit,
     CartState previousState, {
     bool isMergeCall = false,
+    bool afterMerge = false,
     String? reloadReason,
     String? toastMessage,
     BackendActionContentEntity? promoActionSheet,
   }) async {
     final token = swapCancelToken();
     final result = await getCartUseCase(
-      GetCartParams(isMergeCall: isMergeCall, instantCheckout: instantCheckout, cancelToken: token),
+      _getCartParams(token, isMergeCall: isMergeCall),
     );
     result.fold(
       (failure) {
@@ -827,6 +858,7 @@ class CartBloc extends BaseBloc<CartEvent, CartState> {
           cartViewState: CartViewStates.cartReload,
           reloadReason: reloadReason,
         );
+        _autoMergeIfNeeded(cart, afterMerge: afterMerge);
       },
     );
   }

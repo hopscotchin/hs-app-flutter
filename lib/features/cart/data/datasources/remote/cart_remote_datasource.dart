@@ -14,9 +14,13 @@ abstract class CartRemoteDataSource {
   /// [instantCheckout] scopes every cart call to the single buy-now item: the
   /// backend answers with just that line rather than the whole bag. Android
   /// sends the same `instantCheckout` flag from `CartViewModel.isFromBuyNow`.
+  ///
+  /// [dismiss] tells the backend the user closed a dismissible cart message
+  /// bar, so it stops sending it — Android's `CartViewModel.isCartDismissible`.
   Future<CartModel> getCart({
     bool isMergeCall = false,
     bool instantCheckout = false,
+    bool dismiss = false,
     CancelToken? cancelToken,
   });
   Future<CartModel> removeCartItem(
@@ -63,11 +67,16 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   Future<CartModel> getCart({
     bool isMergeCall = false,
     bool instantCheckout = false,
+    bool dismiss = false,
     CancelToken? cancelToken,
   }) async {
     final response = await apiClient.get(
       ApiConstants.shoppingCart,
-      queryParameters: {'isMergeCall': isMergeCall, 'instantCheckout': instantCheckout},
+      queryParameters: {
+        'isMergeCall': isMergeCall,
+        'instantCheckout': instantCheckout,
+        'dismiss': dismiss,
+      },
       cancelToken: cancelToken,
     );
     // v6 returns the response in the app's native shape already.
